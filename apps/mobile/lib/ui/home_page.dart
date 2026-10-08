@@ -30,6 +30,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   /// Shown instead of an endless spinner when the photo library can't be read.
   String? _error;
+
+  /// Diagnostic line under the permission message (state + how we got it).
+  String _diag = '';
   AssetPathEntity? _all;
   final List<AssetEntity> _assets = [];
   int _nextPage = 0;
@@ -64,11 +67,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     try {
       // Ask for photos first and only then start LAN discovery: two system
       // permission prompts at once can leave one callback never firing on iOS.
+      final before = await PhotoManager.getPermissionState(requestOption: const PermissionRequestOption())
+          .timeout(const Duration(seconds: 5));
+      final sw = Stopwatch()..start();
       ps = await PhotoManager.requestPermissionExtend().timeout(const Duration(seconds: 20));
+      _diag = 'before=${before.name} after=${ps.name} ${sw.elapsedMilliseconds}ms';
     } on TimeoutException {
       // The prompt never answered; read the current state instead of hanging.
       try {
         ps = await PhotoManager.getPermissionState(requestOption: const PermissionRequestOption());
+        _diag = 'request timed out, state=${ps.name}';
       } catch (e) {
         _fail(e);
         return;
@@ -239,6 +247,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(tr('home.need_photos'), textAlign: TextAlign.center),
+              if (_diag.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(_diag, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
+              ],
               if (_error != null) ...[
                 const SizedBox(height: 8),
                 Text(tr('home.permission_error', {'error': _error}),
