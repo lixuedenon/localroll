@@ -1,6 +1,8 @@
 // apps/mobile/lib/main.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'l10n/l10n.dart';
 import 'services/discovery.dart';
 import 'services/mobile_settings.dart';
 import 'ui/home_page.dart';
@@ -21,15 +23,31 @@ class LocalRollMobileApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const seed = Color(0xFF2F6B5E);
-    return MaterialApp(
-      title: 'LocalRoll',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: seed), useMaterial3: true),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: seed, brightness: Brightness.dark),
-        useMaterial3: true,
-      ),
-      home: HomePage(settings: settings, discovery: discovery),
+    return ListenableBuilder(
+      listenable: settings,
+      builder: (context, _) {
+        final lang = settings.language;
+        return MaterialApp(
+          title: 'LocalRoll',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: seed), useMaterial3: true),
+          darkTheme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: seed, brightness: Brightness.dark),
+            useMaterial3: true,
+          ),
+          // null = follow the phone's language.
+          locale: lang == null ? null : localeForLanguage(lang),
+          supportedLocales: appSupportedLocales,
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
+          localeListResolutionCallback: (preferred, _) => resolveAppLocale(preferred),
+          builder: (context, child) {
+            applyLocale(Localizations.localeOf(context));
+            // Rebuild every page when the language changes.
+            return KeyedSubtree(key: ValueKey(translator.language), child: child!);
+          },
+          home: HomePage(settings: settings, discovery: discovery),
+        );
+      },
     );
   }
 }

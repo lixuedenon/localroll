@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:localroll_core/localroll_core.dart';
 import 'package:nsd/nsd.dart' as nsd;
 
+import '../l10n/l10n.dart';
 import 'desktop_client.dart';
 import 'mobile_settings.dart';
 
@@ -113,8 +114,7 @@ Future<PairedDesktop> pairWithDesktop({
       client.close();
     }
   }
-  throw Exception('连不上电脑（${lastError ?? '没有可用地址'}）。请确认手机和电脑在同一个 Wi-Fi，'
-      '并在电脑「接收」页点「允许防火墙」。');
+  throw Exception(tr('err.cannot_reach', {'error': lastError ?? tr('err.no_address')}));
 }
 
 /// Finds a working address for a paired PC and returns an authenticated client.
@@ -150,5 +150,5 @@ Future<DesktopClient> connectToDesktop(
       client.close();
     }
   }
-  throw Exception('找不到「${d.name}」。请确认电脑上的 LocalRoll 已打开，并且和手机在同一个 Wi-Fi。');
+  throw Exception(tr('err.pc_not_found', {'name': d.name}));
 }

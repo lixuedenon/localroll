@@ -7,6 +7,7 @@ import 'package:localroll_core/localroll_core.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
+import '../l10n/l10n.dart';
 import 'desktop_client.dart';
 import 'mobile_settings.dart';
 
@@ -106,7 +107,7 @@ class Uploader extends ChangeNotifier {
 
       // Original bytes, no transcoding. Downloads from iCloud if needed.
       final file = await a.originFile;
-      if (file == null) throw Exception('无法读取原片（可能存放在 iCloud 且当前无法下载）');
+      if (file == null) throw Exception(tr('err.no_original'));
       it.total = await file.length();
       await _upload(session.sessionId, offer, file, result.offset, it);
       await settings.markSent(desktop.id, a.id);
@@ -130,7 +131,7 @@ class Uploader extends ChangeNotifier {
 
       var retries = 0;
       while (offset < total) {
-        if (_cancelled) throw Exception('已取消');
+        if (_cancelled) throw Exception(tr('err.cancelled'));
         await raf.setPosition(offset);
         final chunk = await raf.read(min(LrProtocol.chunkSize, total - offset));
         try {
@@ -168,7 +169,7 @@ class Uploader extends ChangeNotifier {
         offer.id,
         CompleteRequest(size: total, sha256: hasher.finish()),
       );
-      if (!res.saved) throw Exception(res.error ?? '电脑保存失败');
+      if (!res.saved) throw Exception(res.error != null ? serverErrorText(res.error!) : tr('err.save_failed'));
       it.state = UploadState.done;
     } finally {
       await raf.close();

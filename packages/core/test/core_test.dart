@@ -62,4 +62,23 @@ void main() {
     expect(h.finish(), await sha256OfFile(f));
     await dir.delete(recursive: true);
   });
+
+  test('language matching', () {
+    expect(matchLanguage('zh', countryCode: 'CN'), 'zh');
+    expect(matchLanguage('zh', countryCode: 'TW'), 'zh_Hant');
+    expect(matchLanguage('zh', scriptCode: 'Hant', countryCode: 'US'), 'zh_Hant');
+    expect(matchLanguage('zh', scriptCode: 'Hans', countryCode: 'HK'), 'zh');
+    expect(matchLanguage('in'), 'id');
+    expect(matchLanguage('pl'), isNull);
+  });
+
+  test('translator falls back to English and fills placeholders', () {
+    final t = Translator({
+      'en': {'hi': 'Hello {name}', 'only_en': 'English only'},
+      'ja': {'hi': 'こんにちは {name}'},
+    })..language = 'ja';
+    expect(t.tr('hi', {'name': 'Xue'}), 'こんにちは Xue');
+    expect(t.tr('only_en'), 'English only');
+    expect(t.tr('missing.key'), 'missing.key');
+  });
 }

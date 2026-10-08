@@ -29,15 +29,27 @@ ANDROID_PERMISSIONS = [
     "android.permission.WAKE_LOCK",
 ]
 
+# English is the base text for the iOS permission prompts.
 IOS_PLIST_KEYS = {
     "CFBundleDisplayName": "<string>LocalRoll</string>",
-    "NSPhotoLibraryUsageDescription": "<string>LocalRoll 需要读取照片和视频，才能把原片发送到你的电脑。</string>",
-    "NSCameraUsageDescription": "<string>扫描电脑上显示的配对二维码。</string>",
-    "NSLocalNetworkUsageDescription": "<string>在局域网中查找并连接运行 LocalRoll 的电脑，文件不经过云端。</string>",
+    "NSPhotoLibraryUsageDescription": "<string>LocalRoll reads your photos and videos so it can send the originals to your computer.</string>",
+    "NSCameraUsageDescription": "<string>Scan the pairing QR code shown on your computer.</string>",
+    "NSLocalNetworkUsageDescription": "<string>Find and connect to computers running LocalRoll on your local network. Files never go through the cloud.</string>",
     "NSBonjourServices": "<array>\n\t\t<string>_localroll._tcp</string>\n\t</array>",
     "NSAppTransportSecurity": "<dict>\n\t\t<key>NSAllowsLocalNetworking</key>\n\t\t<true/>\n\t</dict>",
     "PHPhotoLibraryPreventAutomaticLimitedAccessAlert": "<true/>",
+    # Tells iOS which UI languages the app supports (Flutter needs this to
+    # receive the user's real language instead of always English).
+    "CFBundleLocalizations": "<array>\n" + "".join(
+        f"\t\t<string>{c}</string>\n"
+        for c in ["en", "zh-Hans", "zh-Hant", "ja", "ko", "es", "fr", "de", "pt", "ru",
+                  "it", "ar", "hi", "id", "vi", "th", "tr"]
+    ) + "\t</array>",
 }
+
+# Keys whose value is rewritten even if already present.
+IOS_OVERRIDE = {"CFBundleDisplayName", "NSPhotoLibraryUsageDescription", "NSCameraUsageDescription",
+                "NSLocalNetworkUsageDescription", "CFBundleLocalizations"}
 
 
 def patch(path: pathlib.Path, fn) -> None:
@@ -79,18 +91,20 @@ def android_gradle(text: str) -> str:
 
 def ios_plist(text: str) -> str:
     for key, value in IOS_PLIST_KEYS.items():
-        if f"<key>{key}</key>" in text:
-            if key == "CFBundleDisplayName":
+        marker = f"<key>{key}</key>"
+        if marker in text:
+            if key in IOS_OVERRIDE:
                 text = re.sub(
-                    r"(<key>CFBundleDisplayName</key>\s*)<string>[^<]*</string>",
-                    r"\1<string>LocalRoll</string>",
+                    re.escape(marker) + r"\s*(<string>[^<]*</string>|<array>.*?</array>)",
+                    lambda _m, k=marker, v=value: f"{k}\n\t{v}",
                     text,
+                    count=1,
+                    flags=re.S,
                 )
             continue
         idx = text.rfind("</dict>")
-        text = text[:idx] + f"\t<key>{key}</key>\n\t{value}\n" + text[idx:]
+        text = text[:idx] + f"\t{marker}\n\t{value}\n" + text[idx:]
     return text
-
 
 def windows_main(text: str) -> str:
     return text.replace('L"localroll_desktop"', 'L"LocalRoll"')

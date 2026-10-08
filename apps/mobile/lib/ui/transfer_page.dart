@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../l10n/l10n.dart';
 import '../services/desktop_client.dart';
 import '../services/discovery.dart';
 import '../services/mobile_settings.dart';
@@ -70,14 +71,14 @@ class _TransferPageState extends State<TransferPage> {
   Widget build(BuildContext context) {
     final up = _uploader;
     return Scaffold(
-      appBar: AppBar(title: Text('发送到 ${widget.desktop.name}')),
+      appBar: AppBar(title: Text(tr('transfer.title', {'name': widget.desktop.name}))),
       body: _error != null
           ? _errorView()
           : up == null
-              ? const Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 12),
-                  Text('正在连接电脑…'),
+              ? Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 12),
+                  Text(tr('transfer.connecting')),
                 ]))
               : ListenableBuilder(listenable: up, builder: (context, _) => _progressView(up)),
     );
@@ -93,7 +94,7 @@ class _TransferPageState extends State<TransferPage> {
               const SizedBox(height: 12),
               Text(_error!, textAlign: TextAlign.center),
               const SizedBox(height: 16),
-              FilledButton(onPressed: () => _start(widget.assets), child: const Text('重试')),
+              FilledButton(onPressed: () => _start(widget.assets), child: Text(tr('common.retry'))),
             ],
           ),
         ),
@@ -102,9 +103,9 @@ class _TransferPageState extends State<TransferPage> {
   Widget _progressView(Uploader up) {
     final theme = Theme.of(context);
     final summary = up.finished
-        ? '完成：成功 ${up.doneCount}，已存在跳过 ${up.skippedCount}'
-            '${up.failedCount > 0 ? '，失败 ${up.failedCount}' : ''}'
-        : '正在发送…请保持 App 在前台，屏幕会保持常亮';
+        ? tr('transfer.summary', {'done': up.doneCount, 'skipped': up.skippedCount}) +
+            (up.failedCount > 0 ? tr('transfer.summary_failed', {'failed': up.failedCount}) : '')
+        : tr('transfer.sending');
     return Column(
       children: [
         Padding(
@@ -128,12 +129,12 @@ class _TransferPageState extends State<TransferPage> {
                       onPressed: () => _start(
                         up.items.where((i) => i.state == UploadState.failed).map((i) => i.asset).toList(),
                       ),
-                      child: const Text('重试失败项'),
+                      child: Text(tr('transfer.retry_failed')),
                     ),
                   const Spacer(),
                   FilledButton(
                     onPressed: () => Navigator.of(context).pop(up.failedCount == 0),
-                    child: const Text('完成'),
+                    child: Text(tr('transfer.done')),
                   ),
                 ],
               ),
@@ -152,13 +153,13 @@ class _ItemTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (icon, label) = switch (item.state) {
-      UploadState.waiting => (Icons.schedule, '等待'),
-      UploadState.preparing => (Icons.hourglass_top, '读取原片'),
+      UploadState.waiting => (Icons.schedule, tr('state.waiting')),
+      UploadState.preparing => (Icons.hourglass_top, tr('state.preparing')),
       UploadState.uploading => (Icons.upload, '${((item.fraction ?? 0) * 100).toStringAsFixed(0)}%'),
-      UploadState.verifying => (Icons.verified_outlined, '电脑校验中'),
-      UploadState.done => (Icons.check_circle, '已保存'),
-      UploadState.skipped => (Icons.check_circle_outline, '电脑上已有'),
-      UploadState.failed => (Icons.error_outline, item.error ?? '失败'),
+      UploadState.verifying => (Icons.verified_outlined, tr('state.verifying')),
+      UploadState.done => (Icons.check_circle, tr('state.saved')),
+      UploadState.skipped => (Icons.check_circle_outline, tr('state.skipped')),
+      UploadState.failed => (Icons.error_outline, item.error ?? tr('state.failed')),
     };
     return ListTile(
       dense: true,

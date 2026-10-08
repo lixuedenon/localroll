@@ -2,8 +2,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:localroll_core/localroll_core.dart';
 
 import '../app_services.dart';
+import '../l10n/l10n.dart';
 import '../services/network.dart';
 import 'format.dart';
 
@@ -44,11 +46,25 @@ class _SettingsPageState extends State<SettingsPage> {
     return ListenableBuilder(
       listenable: Listenable.merge([s.settings, s.ffmpeg]),
       builder: (context, _) => Scaffold(
-        appBar: AppBar(title: const Text('设置')),
+        appBar: AppBar(title: Text(tr('nav.settings'))),
         body: ListView(
           padding: const EdgeInsets.all(24),
           children: [
-            _section(theme, '电脑名称（手机上显示）'),
+            _section(theme, tr('settings.language')),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: DropdownButton<String?>(
+                value: s.settings.language,
+                onChanged: (v) => s.settings.update((x) => x.language = v),
+                items: [
+                  DropdownMenuItem<String?>(value: null, child: Text(tr('settings.language_system'))),
+                  for (final l in supportedLanguages)
+                    DropdownMenuItem<String?>(value: l.code, child: Text(l.nativeName)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 28),
+            _section(theme, tr('settings.pc_name')),
             Row(children: [
               Expanded(child: TextField(controller: _name)),
               const SizedBox(width: 12),
@@ -58,13 +74,13 @@ class _SettingsPageState extends State<SettingsPage> {
                   if (v.isEmpty) return;
                   await s.settings.update((x) => x.deviceName = v);
                   await s.startNetworking();
-                  _toast('已保存');
+                  _toast(tr('common.saved'));
                 },
-                child: const Text('保存'),
+                child: Text(tr('common.save')),
               ),
             ]),
             const SizedBox(height: 28),
-            _section(theme, '媒体库文件夹'),
+            _section(theme, tr('settings.library_folder')),
             Row(children: [
               Expanded(child: TextField(controller: _library)),
               const SizedBox(width: 12),
@@ -75,25 +91,27 @@ class _SettingsPageState extends State<SettingsPage> {
                   try {
                     await Directory(v).create(recursive: true);
                     await s.changeLibrary(v);
-                    _toast('媒体库已切换');
+                    _toast(tr('settings.library_switched'));
                   } catch (e) {
-                    _toast('无法使用这个文件夹：$e');
+                    _toast(tr('settings.folder_error', {'error': e}));
                   }
                 },
-                child: const Text('切换'),
+                child: Text(tr('settings.switch')),
               ),
               const SizedBox(width: 8),
               OutlinedButton(
                 onPressed: () => revealInExplorer(s.library.rootPath),
-                child: const Text('打开'),
+                child: Text(tr('common.open')),
               ),
             ]),
             const SizedBox(height: 4),
-            Text('收到的原片按「年/月」存放，转换结果在 _converted 子文件夹。', style: theme.textTheme.bodySmall),
+            Text(tr('settings.library_hint'), style: theme.textTheme.bodySmall),
             const SizedBox(height: 28),
-            _section(theme, 'ffmpeg（HEIC 显示、缩略图、转换需要）'),
+            _section(theme, tr('settings.ffmpeg_title')),
             Text(
-              s.ffmpeg.available ? '✓ ${s.ffmpeg.version ?? s.ffmpeg.ffmpeg}\n${s.ffmpeg.ffmpeg}' : '✗ 未找到 ffmpeg',
+              s.ffmpeg.available
+                  ? '✓ ${s.ffmpeg.version ?? s.ffmpeg.ffmpeg}\n${s.ffmpeg.ffmpeg}'
+                  : tr('settings.ffmpeg_missing'),
               style: TextStyle(color: s.ffmpeg.available ? null : theme.colorScheme.error),
             ),
             const SizedBox(height: 8),
@@ -101,7 +119,7 @@ class _SettingsPageState extends State<SettingsPage> {
               Expanded(
                 child: TextField(
                   controller: _ffmpeg,
-                  decoration: const InputDecoration(hintText: r'例如 C:\ffmpeg\bin\ffmpeg.exe（留空自动查找）'),
+                  decoration: InputDecoration(hintText: tr('settings.ffmpeg_field_hint')),
                 ),
               ),
               const SizedBox(width: 12),
@@ -110,41 +128,43 @@ class _SettingsPageState extends State<SettingsPage> {
                   final v = _ffmpeg.text.trim();
                   await s.settings.update((x) => x.ffmpegPath = v.isEmpty ? null : v);
                   await s.ffmpeg.locate();
-                  _toast(s.ffmpeg.available ? '已找到 ffmpeg' : '这个路径下没有可用的 ffmpeg');
+                  _toast(s.ffmpeg.available ? tr('settings.ffmpeg_found') : tr('settings.ffmpeg_not_here'));
                 },
-                child: const Text('检测'),
+                child: Text(tr('settings.detect')),
               ),
             ]),
             const SizedBox(height: 4),
-            Text('自动查找顺序：上面填的路径 → 程序目录下的 ffmpeg\\ffmpeg.exe → 系统 PATH。需要 ffmpeg 7.1 或更新版本才能正确解码 iPhone 的 HEIC。',
-                style: theme.textTheme.bodySmall),
+            Text(tr('settings.ffmpeg_order'), style: theme.textTheme.bodySmall),
             const SizedBox(height: 28),
-            _section(theme, '网络'),
-            Text('接收端口：${s.server.port}'),
+            _section(theme, tr('settings.network')),
+            Text(tr('settings.port', {'port': s.server.port})),
             const SizedBox(height: 8),
             Align(
-              alignment: Alignment.centerLeft,
+              alignment: AlignmentDirectional.centerStart,
               child: OutlinedButton.icon(
-                onPressed: () async => _toast(await addFirewallRules(s.server.port) ? '防火墙规则已添加' : '没有添加'),
+                onPressed: () async => _toast(await addFirewallRules(s.server.port)
+                    ? tr('receive.firewall_ok')
+                    : tr('settings.firewall_not_added')),
                 icon: const Icon(Icons.shield_outlined),
-                label: const Text('允许 LocalRoll 通过 Windows 防火墙'),
+                label: Text(tr('settings.firewall')),
               ),
             ),
             const SizedBox(height: 28),
-            _section(theme, '已配对的手机'),
-            if (s.settings.trusted.isEmpty) const Text('还没有配对的手机'),
+            _section(theme, tr('settings.paired_phones')),
+            if (s.settings.trusted.isEmpty) Text(tr('settings.no_phones')),
             for (final d in s.settings.trusted.values)
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: Icon(d.platform == 'ios' ? Icons.phone_iphone : Icons.phone_android),
                 title: Text(d.name),
-                subtitle: Text('配对于 ${formatDate(DateTime.fromMillisecondsSinceEpoch(d.pairedMs))}'),
+                subtitle: Text(tr('settings.paired_on',
+                    {'date': formatDate(DateTime.fromMillisecondsSinceEpoch(d.pairedMs))})),
                 trailing: TextButton(
                   onPressed: () async {
                     await s.settings.update((x) => x.trusted.remove(d.id));
-                    _toast('已取消配对：${d.name}');
+                    _toast(tr('settings.unpaired', {'name': d.name}));
                   },
-                  child: const Text('取消配对'),
+                  child: Text(tr('settings.unpair')),
                 ),
               ),
           ],

@@ -8,6 +8,7 @@ import 'package:localroll_core/localroll_core.dart';
 import '../services/library_index.dart';
 import '../services/receive_hub.dart';
 import '../services/settings.dart';
+import '../l10n/l10n.dart';
 
 class _UploadSession {
   _UploadSession(this.id, this.device, this.offers);
@@ -77,12 +78,11 @@ class TransferServer extends ChangeNotifier {
         break;
       } on SocketException catch (e) {
         final code = e.osError?.errorCode;
-        failures.add('$p${code != null ? ' (错误 $code)' : ''}');
+        failures.add('$p${code != null ? ' (${tr('receive.port_error', {'code': code})})' : ''}');
       }
     }
     if (_server == null) {
-      error = '没有可用的端口（已尝试 ${failures.join('、')}）。'
-          '请检查是否有安全软件阻止 LocalRoll 联网。';
+      error = tr('receive.no_port', {'ports': failures.join(', ')});
     }
     notifyListeners();
   }
@@ -139,7 +139,7 @@ class TransferServer extends ChangeNotifier {
         final offer = session?.offers[segs[5]];
         if (session == null || offer == null || session.device.id != device.id) {
           await req.drain<void>();
-          return _json(res, 404, {'error': 'unknown session or file'});
+          return _json(res, 404, {'error': 'unknown_session'});
         }
         session.lastSeen = DateTime.now();
         if (segs.length == 6 && req.method == 'GET') return await _status(req, device, offer);
@@ -150,7 +150,7 @@ class TransferServer extends ChangeNotifier {
       }
 
       await req.drain<void>();
-      return _json(res, 404, {'error': 'not found'});
+      return _json(res, 404, {'error': 'not_found'});
     } catch (e, st) {
       debugPrint('request failed: $e\n$st');
       try {
@@ -176,11 +176,11 @@ class TransferServer extends ChangeNotifier {
     if (_failedPinAttempts >= 5) {
       // Too many wrong guesses: invalidate the PIN on screen.
       rotatePin();
-      return _json(req.response, 429, {'error': '尝试次数过多，请使用电脑上新显示的配对码'});
+      return _json(req.response, 429, {'error': 'too_many_attempts'});
     }
     if (body.pin.trim() != pin.value) {
       _failedPinAttempts++;
-      return _json(req.response, 403, {'error': '配对码不正确'});
+      return _json(req.response, 403, {'error': 'wrong_pin'});
     }
     final token = randomId(40);
     await settings.update((s) {
@@ -266,21 +266,21 @@ class TransferServer extends ChangeNotifier {
       if (existing != null) {
         return _json(req.response, 200, CompleteResponse(saved: true, path: existing.relPath).toJson());
       }
-      return _json(req.response, 404, const CompleteResponse(saved: false, error: 'no data received').toJson());
+      return _json(req.response, 404, const CompleteResponse(saved: false, error: 'no_data').toJson());
     }
 
     final t = hub.track(_hubKey(device, offer), device.name, offer.name, body.size);
     final length = await part.length();
     if (length != body.size) {
-      return _json(req.response, 409, {'offset': length, 'error': 'size mismatch'});
+      return _json(req.response, 409, {'offset': length, 'error': 'size_mismatch'});
     }
 
     hub.setState(t, TransferState.verifying);
     final hash = await sha256OfFile(part);
     if (hash != body.sha256.toLowerCase()) {
       await part.delete();
-      hub.setState(t, TransferState.failed, error: '校验失败，请重新发送');
-      return _json(req.response, 422, const CompleteResponse(saved: false, error: 'sha256 mismatch').toJson());
+      hub.setState(t, TransferState.failed, error: tr('transfer.verify_failed'));
+      return _json(req.response, 422, const CompleteResponse(saved: false, error: 'sha256_mismatch').toJson());
     }
 
     final captured = DateTime.fromMillisecondsSinceEpoch(offer.createdMs);

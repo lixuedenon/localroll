@@ -53,6 +53,9 @@ class AppSettings extends ChangeNotifier {
 
   /// Optional explicit path to ffmpeg.exe (otherwise auto-detected).
   String? ffmpegPath;
+
+  /// UI language code (see supportedLanguages); null = follow Windows.
+  String? language;
   final Map<String, TrustedDevice> trusted = {};
 
   static Future<AppSettings> load() async {
@@ -72,6 +75,7 @@ class AppSettings extends ChangeNotifier {
     s.libraryPath = j['libraryPath'] as String? ?? _defaultLibraryPath();
     s.port = (j['port'] as num?)?.toInt() ?? LrProtocol.defaultPort;
     s.ffmpegPath = j['ffmpegPath'] as String?;
+    s.language = j['language'] as String?;
     for (final t in (j['trusted'] as List? ?? const [])) {
       final d = TrustedDevice.fromJson(t as Map<String, dynamic>);
       s.trusted[d.id] = d;
@@ -95,6 +99,7 @@ class AppSettings extends ChangeNotifier {
       'libraryPath': libraryPath,
       'port': port,
       'ffmpegPath': ffmpegPath,
+      'language': language,
       'trusted': trusted.values.map((t) => t.toJson()).toList(),
     }));
     await tmp.rename(_file.path);

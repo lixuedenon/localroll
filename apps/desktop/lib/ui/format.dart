@@ -1,4 +1,5 @@
 // apps/desktop/lib/ui/format.dart
+import '../l10n/l10n.dart';
 
 String formatBytes(int bytes) {
   if (bytes < 1024) return '$bytes B';
@@ -15,6 +16,6 @@ String formatBytes(int bytes) {
 String formatDate(DateTime t) =>
     '${t.year}-${_2(t.month)}-${_2(t.day)} ${_2(t.hour)}:${_2(t.minute)}';
 
-String formatMonth(DateTime t) => '${t.year} 年 ${t.month} 月';
+String formatMonth(DateTime t) => formatMonthYear(t);
 
 String _2(int n) => n.toString().padLeft(2, '0');

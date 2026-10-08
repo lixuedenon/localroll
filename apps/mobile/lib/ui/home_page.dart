@@ -2,8 +2,10 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:localroll_core/localroll_core.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../l10n/l10n.dart';
 import '../services/discovery.dart';
 import '../services/mobile_settings.dart';
 import 'connect_page.dart';
@@ -124,14 +126,32 @@ class _HomePageState extends State<HomePage> {
               children: [
                 const Text('LocalRoll'),
                 Text(
-                  desktop == null ? '未连接电脑' : '发送到：${desktop.name}',
+                  desktop == null ? tr('home.not_connected') : tr('home.send_to', {'name': desktop.name}),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
             ),
             actions: [
+              PopupMenuButton<String>(
+                tooltip: tr('home.language'),
+                icon: const Icon(Icons.translate),
+                onSelected: (code) => widget.settings.setLanguage(code.isEmpty ? null : code),
+                itemBuilder: (_) => [
+                  CheckedPopupMenuItem(
+                    value: '',
+                    checked: widget.settings.language == null,
+                    child: Text(tr('home.language_system')),
+                  ),
+                  for (final l in supportedLanguages)
+                    CheckedPopupMenuItem(
+                      value: l.code,
+                      checked: widget.settings.language == l.code,
+                      child: Text(l.nativeName),
+                    ),
+                ],
+              ),
               IconButton(
-                tooltip: '连接电脑',
+                tooltip: tr('home.connect_pc'),
                 onPressed: _openConnect,
                 icon: Icon(desktop == null ? Icons.add_link : Icons.computer),
               ),
@@ -154,15 +174,15 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('需要访问照片才能发送原片到电脑', textAlign: TextAlign.center),
+              Text(tr('home.need_photos'), textAlign: TextAlign.center),
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: () async {
                   await PhotoManager.openSetting();
                 },
-                child: const Text('去设置里允许'),
+                child: Text(tr('home.open_settings')),
               ),
-              TextButton(onPressed: _reload, child: const Text('我已允许，重新加载')),
+              TextButton(onPressed: _reload, child: Text(tr('home.reload'))),
             ],
           ),
         ),
@@ -172,14 +192,14 @@ class _HomePageState extends State<HomePage> {
       children: [
         if (ps == PermissionState.limited)
           MaterialBanner(
-            content: const Text('只允许了部分照片，只能看到和发送这些照片。'),
+            content: Text(tr('home.limited')),
             actions: [
               TextButton(
                 onPressed: () async {
                   await PhotoManager.presentLimited();
                   await _reload();
                 },
-                child: const Text('选择更多'),
+                child: Text(tr('home.select_more')),
               ),
             ],
           ),
@@ -188,7 +208,7 @@ class _HomePageState extends State<HomePage> {
           child: Row(
             children: [
               FilterChip(
-                label: const Text('只看没传过的'),
+                label: Text(tr('home.only_unsent')),
                 selected: _onlyUnsent,
                 onSelected: (v) => setState(() => _onlyUnsent = v),
               ),
@@ -197,7 +217,7 @@ class _HomePageState extends State<HomePage> {
                 onPressed: () => setState(() {
                   _selected.addAll(_assets.where((a) => !sent.contains(a.id)).map((a) => a.id));
                 }),
-                child: const Text('选中所有没传过的'),
+                child: Text(tr('home.select_unsent')),
               ),
             ],
           ),
@@ -275,12 +295,12 @@ class _HomePageState extends State<HomePage> {
         child: Row(
           children: [
             if (_selected.isNotEmpty)
-              TextButton(onPressed: () => setState(_selected.clear), child: const Text('取消选择')),
+              TextButton(onPressed: () => setState(_selected.clear), child: Text(tr('home.clear_selection'))),
             const Spacer(),
             FilledButton.icon(
               onPressed: _selected.isEmpty ? null : _send,
               icon: const Icon(Icons.send),
-              label: Text(_selected.isEmpty ? '选择照片或视频' : '发送 ${_selected.length} 项'),
+              label: Text(_selected.isEmpty ? tr('home.pick') : tr('home.send_n', {'count': _selected.length})),
             ),
           ],
         ),

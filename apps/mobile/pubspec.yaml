@@ -11,6 +11,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  # Version is pinned by flutter_localizations.
+  intl: any
   localroll_core:
     path: ../../packages/core
 

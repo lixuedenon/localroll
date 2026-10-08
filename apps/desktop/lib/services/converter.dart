@@ -7,19 +7,22 @@ import 'package:localroll_core/localroll_core.dart';
 
 import 'ffmpeg.dart';
 import 'library_index.dart';
+import '../l10n/l10n.dart';
 
 /// What the converted copy is for. Originals are never modified.
 enum ConvertPreset {
   /// Plays/opens anywhere on Windows without extensions, near-lossless.
-  compatible('通用高质量', 'compatible'),
+  compatible('compatible'),
 
   /// Small files for WeChat / email: ≤1080p video, ≤2048px photos.
-  share('分享小体积', 'share');
+  share('share');
 
-  const ConvertPreset(this.label, this.folder);
+  const ConvertPreset(this.folder);
 
-  final String label;
+  /// Output subfolder name (also the translation key suffix).
   final String folder;
+
+  String get label => tr('preset.$folder');
 }
 
 enum JobState { queued, running, done, failed }
@@ -84,7 +87,7 @@ class ConverterService extends ChangeNotifier {
     job.state = JobState.running;
     notifyListeners();
     try {
-      if (!ffmpeg.available) throw Exception('未找到 ffmpeg，请在设置中配置');
+      if (!ffmpeg.available) throw Exception(tr('convert.no_ffmpeg'));
       final src = library.absPath(job.item);
       final out = await _outputPath(job);
       job.outputPath = out;

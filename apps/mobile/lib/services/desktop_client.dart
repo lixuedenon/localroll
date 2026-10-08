@@ -4,13 +4,16 @@ import 'dart:io';
 
 import 'package:localroll_core/localroll_core.dart';
 
+import '../l10n/l10n.dart';
+
 class LrHttpException implements Exception {
   LrHttpException(this.status, this.body);
 
   final int status;
   final Map<String, dynamic> body;
 
-  String get message => body['error'] as String? ?? 'HTTP $status';
+  /// Localized text for the server's error code ('wrong_pin', …).
+  String get message => serverErrorText(body['error'] as String? ?? 'HTTP $status');
 
   @override
   String toString() => message;
@@ -99,3 +102,6 @@ class DesktopClient {
         timeout: const Duration(minutes: 5),
       ));
 }
+
+/// The PC answers with stable error codes; show them in the phone's language.
+String serverErrorText(String code) => translator.has('err.$code') ? tr('err.$code') : code;

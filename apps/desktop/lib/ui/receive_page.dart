@@ -6,6 +6,7 @@ import 'package:localroll_core/localroll_core.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../app_services.dart';
+import '../l10n/l10n.dart';
 import '../services/network.dart';
 import '../services/receive_hub.dart';
 import 'format.dart';
@@ -20,7 +21,7 @@ class ReceivePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = services;
     return Scaffold(
-      appBar: AppBar(title: const Text('接收手机文件')),
+      appBar: AppBar(title: Text(tr('receive.title'))),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
@@ -57,11 +58,11 @@ class _PairingCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('接收服务没有启动', style: theme.textTheme.titleMedium),
+              Text(tr('receive.not_running'), style: theme.textTheme.titleMedium),
               const SizedBox(height: 8),
-              Text(s.server.error ?? '未知错误'),
+              Text(s.server.error ?? tr('common.unknown_error')),
               const SizedBox(height: 12),
-              FilledButton(onPressed: s.startNetworking, child: const Text('重试')),
+              FilledButton(onPressed: s.startNetworking, child: Text(tr('common.retry'))),
             ],
           ),
         ),
@@ -95,11 +96,11 @@ class _PairingCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('用手机上的 LocalRoll 扫码配对', style: theme.textTheme.titleLarge),
+                  Text(tr('receive.scan_title'), style: theme.textTheme.titleLarge),
                   const SizedBox(height: 8),
-                  const Text('手机和电脑连同一个 Wi-Fi。配对一次后，以后打开手机 App 会自动找到这台电脑。'),
+                  Text(tr('receive.scan_body')),
                   const SizedBox(height: 20),
-                  Text('或在手机上输入配对码', style: theme.textTheme.labelLarge),
+                  Text(tr('receive.or_pin'), style: theme.textTheme.labelLarge),
                   const SizedBox(height: 4),
                   Row(
                     children: [
@@ -113,7 +114,7 @@ class _PairingCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       IconButton(
-                        tooltip: '换一个配对码',
+                        tooltip: tr('receive.new_pin'),
                         onPressed: s.server.rotatePin,
                         icon: const Icon(Icons.refresh),
                       ),
@@ -122,8 +123,8 @@ class _PairingCard extends StatelessWidget {
                   const SizedBox(height: 12),
                   Text(
                     hosts.isEmpty
-                        ? '没有检测到局域网地址，请检查网络连接'
-                        : '本机地址：${hosts.map((h) => '$h:${s.server.port}').join('   ')}',
+                        ? tr('receive.no_address')
+                        : tr('receive.address', {'addresses': hosts.map((h) => '$h:${s.server.port}').join('   ')}),
                     style: theme.textTheme.bodySmall,
                   ),
                   const SizedBox(height: 16),
@@ -134,18 +135,18 @@ class _PairingCard extends StatelessWidget {
                       OutlinedButton.icon(
                         onPressed: s.refreshAddresses,
                         icon: const Icon(Icons.wifi_find),
-                        label: const Text('刷新地址'),
+                        label: Text(tr('receive.refresh')),
                       ),
                       OutlinedButton.icon(
                         onPressed: () async {
                           final ok = await addFirewallRules(s.server.port);
                           if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(ok ? '防火墙规则已添加' : '没有添加（可能取消了管理员授权）'),
+                            content: Text(ok ? tr('receive.firewall_ok') : tr('receive.firewall_fail')),
                           ));
                         },
                         icon: const Icon(Icons.shield_outlined),
-                        label: const Text('手机连不上？允许防火墙'),
+                        label: Text(tr('receive.firewall_button')),
                       ),
                     ],
                   ),
@@ -176,16 +177,16 @@ class _TransfersCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text('传输记录', style: theme.textTheme.titleMedium),
+                Text(tr('receive.history'), style: theme.textTheme.titleMedium),
                 const Spacer(),
                 if (list.isNotEmpty)
-                  TextButton(onPressed: hub.clearFinished, child: const Text('清除已完成')),
+                  TextButton(onPressed: hub.clearFinished, child: Text(tr('common.clear_finished'))),
               ],
             ),
             if (list.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 24),
-                child: Text('还没有收到文件'),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Text(tr('receive.none')),
               ),
             for (final t in list) _TransferTile(t: t),
           ],
@@ -203,10 +204,10 @@ class _TransferTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (icon, label) = switch (t.state) {
-      TransferState.receiving => (Icons.downloading, '接收中'),
-      TransferState.verifying => (Icons.verified_outlined, '校验中'),
-      TransferState.saved => (Icons.check_circle, '已保存'),
-      TransferState.failed => (Icons.error_outline, t.error ?? '失败'),
+      TransferState.receiving => (Icons.downloading, tr('transfer.receiving')),
+      TransferState.verifying => (Icons.verified_outlined, tr('transfer.verifying')),
+      TransferState.saved => (Icons.check_circle, tr('common.saved')),
+      TransferState.failed => (Icons.error_outline, t.error ?? tr('common.failed')),
     };
     return ListTile(
       contentPadding: EdgeInsets.zero,

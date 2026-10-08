@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:localroll_core/localroll_core.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
+import '../l10n/l10n.dart';
+
 /// Scans the pairing QR code shown in the desktop app's 「接收」 page.
 class ScanPage extends StatefulWidget {
   const ScanPage({super.key});
@@ -25,13 +27,13 @@ class _ScanPageState extends State<ScanPage> {
         return;
       }
     }
-    setState(() => _hint = '这不是 LocalRoll 的配对二维码');
+    setState(() => _hint = tr('scan.not_ours'));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('扫描配对二维码')),
+      appBar: AppBar(title: Text(tr('scan.title'))),
       body: Stack(
         children: [
           MobileScanner(onDetect: _onDetect),
@@ -42,7 +44,7 @@ class _ScanPageState extends State<ScanPage> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(8)),
               child: Text(
-                _hint ?? '对准电脑上 LocalRoll「接收」页的二维码',
+                _hint ?? tr('scan.hint'),
                 style: const TextStyle(color: Colors.white),
               ),
             ),

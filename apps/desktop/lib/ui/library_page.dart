@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:localroll_core/localroll_core.dart';
 
 import '../app_services.dart';
+import '../l10n/l10n.dart';
 import '../services/converter.dart';
 import '../services/library_index.dart';
 import '../services/network.dart';
@@ -44,39 +45,39 @@ class _LibraryPageState extends State<LibraryPage> {
         _selected.removeWhere((p) => !items.any((i) => i.relPath == p));
         return Scaffold(
           appBar: AppBar(
-            title: Text(_selecting ? '已选 ${_selected.length} 项' : '媒体库'),
+            title: Text(_selecting ? tr('library.selected', {'count': _selected.length}) : tr('nav.library')),
             leading: _selecting
                 ? IconButton(icon: const Icon(Icons.close), onPressed: () => setState(_selected.clear))
                 : null,
             actions: [
               if (_selecting)
                 PopupMenuButton<ConvertPreset>(
-                  tooltip: '转换选中项',
+                  tooltip: tr('convert.selected_tooltip'),
                   icon: const Icon(Icons.auto_fix_high),
                   onSelected: (p) {
                     s.converter.enqueue(items.where((i) => _selected.contains(i.relPath)), p);
                     setState(_selected.clear);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('已加入转换队列（${p.label}）')),
+                      SnackBar(content: Text(tr('convert.queued', {'preset': p.label}))),
                     );
                   },
                   itemBuilder: (_) => [
-                    for (final p in ConvertPreset.values) PopupMenuItem(value: p, child: Text('转换为：${p.label}')),
+                    for (final p in ConvertPreset.values) PopupMenuItem(value: p, child: Text(tr('convert.to', {'preset': p.label}))),
                   ],
                 )
               else ...[
                 SegmentedButton<_Filter>(
-                  segments: const [
-                    ButtonSegment(value: _Filter.all, label: Text('全部')),
-                    ButtonSegment(value: _Filter.photos, label: Text('照片')),
-                    ButtonSegment(value: _Filter.videos, label: Text('视频')),
+                  segments: [
+                    ButtonSegment(value: _Filter.all, label: Text(tr('library.filter_all'))),
+                    ButtonSegment(value: _Filter.photos, label: Text(tr('library.filter_photos'))),
+                    ButtonSegment(value: _Filter.videos, label: Text(tr('library.filter_videos'))),
                   ],
                   selected: {_filter},
                   onSelectionChanged: (v) => setState(() => _filter = v.first),
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  tooltip: '打开媒体库文件夹',
+                  tooltip: tr('library.open_folder'),
                   onPressed: () => revealInExplorer(s.library.rootPath),
                   icon: const Icon(Icons.folder_open),
                 ),
@@ -96,9 +97,9 @@ class _LibraryPageState extends State<LibraryPage> {
           children: [
             Icon(Icons.photo_library_outlined, size: 64, color: Theme.of(context).colorScheme.outline),
             const SizedBox(height: 12),
-            const Text('还没有照片或视频'),
+            Text(tr('library.empty')),
             const SizedBox(height: 4),
-            const Text('到「接收」页用手机扫码配对后发送'),
+            Text(tr('library.empty_hint'), textAlign: TextAlign.center),
           ],
         ),
       );
@@ -121,7 +122,7 @@ class _LibraryPageState extends State<LibraryPage> {
         ..add(SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-            child: Text('${formatMonth(t)}  ·  $count 项', style: Theme.of(context).textTheme.titleSmall),
+            child: Text(tr('library.month_count', {'month': formatMonth(t), 'count': count}), style: Theme.of(context).textTheme.titleSmall),
           ),
         ))
         ..add(SliverPadding(

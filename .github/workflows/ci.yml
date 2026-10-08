@@ -72,6 +72,8 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
+      - name: translations are complete and generated
+        run: python3 scripts/gen_l10n.py --check
       - name: core — analyze & test
         working-directory: packages/core
         run: |

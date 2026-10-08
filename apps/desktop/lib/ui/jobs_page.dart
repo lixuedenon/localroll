@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 import '../app_services.dart';
+import '../l10n/l10n.dart';
 import '../services/converter.dart';
 import '../services/network.dart';
 
@@ -17,21 +18,17 @@ class JobsPage extends StatelessWidget {
       listenable: c,
       builder: (context, _) => Scaffold(
         appBar: AppBar(
-          title: const Text('转换任务'),
+          title: Text(tr('jobs.title')),
           actions: [
-            if (c.jobs.isNotEmpty) TextButton(onPressed: c.clearFinished, child: const Text('清除已完成')),
+            if (c.jobs.isNotEmpty) TextButton(onPressed: c.clearFinished, child: Text(tr('common.clear_finished'))),
             const SizedBox(width: 8),
           ],
         ),
         body: c.jobs.isEmpty
-            ? const Center(
+            ? Center(
                 child: Padding(
-                  padding: EdgeInsets.all(32),
-                  child: Text(
-                    '在媒体库或查看器里点「转换」按钮。\n'
-                    '原片永远保留，转换结果放在媒体库的 _converted 文件夹里。',
-                    textAlign: TextAlign.center,
-                  ),
+                  padding: const EdgeInsets.all(32),
+                  child: Text(tr('jobs.empty'), textAlign: TextAlign.center),
                 ),
               )
             : ListView.separated(
@@ -54,10 +51,10 @@ class _JobTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final status = switch (job.state) {
-      JobState.queued => '排队中',
-      JobState.running => '转换中 ${(job.progress * 100).toStringAsFixed(0)}%',
-      JobState.done => job.hdrTonemapped ? '完成（已做 HDR→SDR 色调映射）' : '完成',
-      JobState.failed => '失败',
+      JobState.queued => tr('jobs.queued'),
+      JobState.running => tr('jobs.running', {'percent': (job.progress * 100).toStringAsFixed(0)}),
+      JobState.done => job.hdrTonemapped ? tr('jobs.done_hdr') : tr('jobs.done'),
+      JobState.failed => tr('common.failed'),
     };
     return ListTile(
       leading: Icon(switch (job.state) {
@@ -83,7 +80,7 @@ class _JobTile extends StatelessWidget {
       ),
       trailing: job.state == JobState.done && job.outputPath != null
           ? IconButton(
-              tooltip: '在文件夹中显示',
+              tooltip: tr('common.show_in_folder'),
               onPressed: () => revealInExplorer(job.outputPath!),
               icon: const Icon(Icons.folder_open),
             )

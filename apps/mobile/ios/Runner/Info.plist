@@ -46,11 +46,11 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>LocalRoll 需要读取照片和视频，才能把原片发送到你的电脑。</string>
+	<string>LocalRoll reads your photos and videos so it can send the originals to your computer.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>扫描电脑上显示的配对二维码。</string>
+	<string>Scan the pairing QR code shown on your computer.</string>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>在局域网中查找并连接运行 LocalRoll 的电脑，文件不经过云端。</string>
+	<string>Find and connect to computers running LocalRoll on your local network. Files never go through the cloud.</string>
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_localroll._tcp</string>
@@ -62,5 +62,25 @@
 	</dict>
 	<key>PHPhotoLibraryPreventAutomaticLimitedAccessAlert</key>
 	<true/>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>zh-Hans</string>
+		<string>zh-Hant</string>
+		<string>ja</string>
+		<string>ko</string>
+		<string>es</string>
+		<string>fr</string>
+		<string>de</string>
+		<string>pt</string>
+		<string>ru</string>
+		<string>it</string>
+		<string>ar</string>
+		<string>hi</string>
+		<string>id</string>
+		<string>vi</string>
+		<string>th</string>
+		<string>tr</string>
+	</array>
 </dict>
 </plist>

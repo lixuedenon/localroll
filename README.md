@@ -70,12 +70,22 @@ Windows 测试包：下载 `LocalRoll-Windows`，解压后运行 `LocalRoll.exe`
 
 收到的原片按 `年/月` 存在 `图片\LocalRoll`（可在设置里改），转换结果在 `_converted` 子文件夹。
 
+## 多语言
+
+界面支持 17 种语言：English、简体中文、繁體中文、日本語、한국어、Español、Français、Deutsch、Português、Русский、Italiano、العربية、हिन्दी、Bahasa Indonesia、Tiếng Việt、ไทย、Türkçe。默认跟随系统语言，也可以在电脑端「设置」或手机端右上角的 🌐 按钮里手动切换。
+
+- 翻译文件：`apps/desktop/l10n/<语言>.json`、`apps/mobile/l10n/<语言>.json`（`en.json` 是基准）。
+- 改完翻译后运行 `python scripts/gen_l10n.py` 重新生成 `lib/l10n/translations.g.dart`。
+- CI 会检查每种语言是否缺词、`{占位符}` 是否一致。
+- 加新语言：在 `packages/core/lib/src/i18n.dart` 的 `supportedLanguages` 里加一行，再给两个应用各加一个 JSON 文件。
+
 ## 当前限制（v0.1）
 
 - Live Photo 只传静态 HEIC，还没带上配对的 MOV。
 - 转换后的 JPEG 还没写回 EXIF（拍摄时间已写到文件修改时间）；计划接入 exiftool。
 - 手机端只在前台传输（会保持屏幕常亮）；后台传输在计划中。
 - 还没有「传完后清理手机空间」功能。
+- iOS 系统权限弹窗（访问照片、本地网络、相机）的说明文字目前只有英文。
 
 ## 许可
 

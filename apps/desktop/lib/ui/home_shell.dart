@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 import '../app_services.dart';
+import '../l10n/l10n.dart';
 import 'jobs_page.dart';
 import 'library_page.dart';
 import 'receive_page.dart';
@@ -49,10 +50,10 @@ class _HomeShellState extends State<HomeShell> {
                 child: Text('LocalRoll', style: Theme.of(context).textTheme.titleMedium),
               ),
               destinations: [
-                const NavigationRailDestination(
-                  icon: Icon(Icons.photo_library_outlined),
-                  selectedIcon: Icon(Icons.photo_library),
-                  label: Text('媒体库'),
+                NavigationRailDestination(
+                  icon: const Icon(Icons.photo_library_outlined),
+                  selectedIcon: const Icon(Icons.photo_library),
+                  label: Text(tr('nav.library')),
                 ),
                 NavigationRailDestination(
                   icon: Badge(
@@ -60,7 +61,7 @@ class _HomeShellState extends State<HomeShell> {
                     child: const Icon(Icons.phone_iphone_outlined),
                   ),
                   selectedIcon: const Icon(Icons.phone_iphone),
-                  label: const Text('接收'),
+                  label: Text(tr('nav.receive')),
                 ),
                 NavigationRailDestination(
                   icon: Badge(
@@ -69,12 +70,12 @@ class _HomeShellState extends State<HomeShell> {
                     child: const Icon(Icons.auto_fix_high_outlined),
                   ),
                   selectedIcon: const Icon(Icons.auto_fix_high),
-                  label: const Text('转换'),
+                  label: Text(tr('nav.convert')),
                 ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.settings_outlined),
-                  selectedIcon: Icon(Icons.settings),
-                  label: Text('设置'),
+                NavigationRailDestination(
+                  icon: const Icon(Icons.settings_outlined),
+                  selectedIcon: const Icon(Icons.settings),
+                  label: Text(tr('nav.settings')),
                 ),
               ],
             ),

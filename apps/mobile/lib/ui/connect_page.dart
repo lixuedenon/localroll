@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:localroll_core/localroll_core.dart';
 
+import '../l10n/l10n.dart';
 import '../services/discovery.dart';
 import '../services/mobile_settings.dart';
 import 'scan_page.dart';
@@ -25,7 +26,7 @@ class _ConnectPageState extends State<ConnectPage> {
     try {
       final d = await pairWithDesktop(settings: widget.settings, hosts: hosts, port: port, pin: pin);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('已配对：${d.name}')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('connect.paired_ok', {'name': d.name}))));
       Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
@@ -45,13 +46,13 @@ class _ConnectPageState extends State<ConnectPage> {
   }
 
   Future<void> _pinFor(FoundDesktop f) async {
-    final pin = await _ask(context, title: '输入「${f.name}」上显示的配对码', fields: const ['6 位配对码']);
+    final pin = await _ask(context, title: tr('connect.pin_title', {'name': f.name}), fields: [tr('connect.pin_field')]);
     if (pin != null) await _pair(f.hosts, f.port, pin.first);
   }
 
   Future<void> _manual() async {
     final v = await _ask(context,
-        title: '手动连接', fields: const ['电脑地址（电脑「接收」页显示的 IP:端口）', '6 位配对码']);
+        title: tr('connect.manual_title'), fields: [tr('connect.address_field'), tr('connect.pin_field')]);
     if (v == null) return;
     // Accept "192.168.1.68" or "192.168.1.68:41530".
     final parts = v[0].split(':');
@@ -63,7 +64,7 @@ class _ConnectPageState extends State<ConnectPage> {
   Widget build(BuildContext context) {
     final s = widget.settings;
     return Scaffold(
-      appBar: AppBar(title: const Text('连接电脑')),
+      appBar: AppBar(title: Text(tr('connect.title'))),
       body: AbsorbPointer(
         absorbing: _busy,
         child: ListenableBuilder(
@@ -78,46 +79,46 @@ class _ConnectPageState extends State<ConnectPage> {
                 FilledButton.icon(
                   onPressed: _scan,
                   icon: const Icon(Icons.qr_code_scanner),
-                  label: const Text('扫描电脑上的二维码'),
+                  label: Text(tr('connect.scan')),
                 ),
                 const SizedBox(height: 24),
                 if (s.desktops.isNotEmpty) ...[
-                  Text('已配对的电脑', style: Theme.of(context).textTheme.titleSmall),
+                  Text(tr('connect.paired'), style: Theme.of(context).textTheme.titleSmall),
                   for (final d in s.desktops)
                     ListTile(
                       leading: Icon(d.id == s.currentDesktopId ? Icons.radio_button_checked : Icons.radio_button_off),
                       title: Text(d.name),
-                      subtitle: Text(found.any((f) => f.id == d.id) ? '在线' : (d.lastHost ?? '')),
+                      subtitle: Text(found.any((f) => f.id == d.id) ? tr('connect.online') : (d.lastHost ?? '')),
                       onTap: () async {
                         await s.selectDesktop(d.id);
                         if (context.mounted) Navigator.of(context).pop();
                       },
                       trailing: IconButton(
-                        tooltip: '删除',
+                        tooltip: tr('connect.delete'),
                         icon: const Icon(Icons.delete_outline),
                         onPressed: () => s.removeDesktop(d.id),
                       ),
                     ),
                   const SizedBox(height: 16),
                 ],
-                Text('附近的电脑', style: Theme.of(context).textTheme.titleSmall),
+                Text(tr('connect.nearby'), style: Theme.of(context).textTheme.titleSmall),
                 if (unpaired.isEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     child: Text(widget.discovery.error != null
-                        ? '自动查找不可用：${widget.discovery.error}'
-                        : '正在查找…（电脑上要先打开 LocalRoll）'),
+                        ? tr('connect.discovery_unavailable', {'error': widget.discovery.error})
+                        : tr('connect.searching')),
                   ),
                 for (final f in unpaired)
                   ListTile(
                     leading: const Icon(Icons.computer),
                     title: Text(f.name),
                     subtitle: Text(f.hosts.join(', ')),
-                    trailing: const Text('输入配对码'),
+                    trailing: Text(tr('connect.enter_pin')),
                     onTap: () => _pinFor(f),
                   ),
                 const SizedBox(height: 16),
-                TextButton(onPressed: _manual, child: const Text('找不到？手动输入 IP 地址')),
+                TextButton(onPressed: _manual, child: Text(tr('connect.manual'))),
               ],
             );
           },
@@ -141,20 +142,20 @@ Future<List<String>?> _ask(BuildContext context, {required String title, require
             TextField(
               controller: controllers[i],
               autofocus: i == 0,
-              keyboardType: fields[i].contains('配对码') ? TextInputType.number : TextInputType.url,
+              keyboardType: i == fields.length - 1 ? TextInputType.number : TextInputType.url,
               decoration: InputDecoration(labelText: fields[i]),
             ),
         ],
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+        TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('common.cancel'))),
         FilledButton(
           onPressed: () {
             final v = controllers.map((c) => c.text.trim()).toList();
             if (v.any((x) => x.isEmpty)) return;
             Navigator.pop(ctx, v);
           },
-          child: const Text('连接'),
+          child: Text(tr('connect.connect')),
         ),
       ],
     ),

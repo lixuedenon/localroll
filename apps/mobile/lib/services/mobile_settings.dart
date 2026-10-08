@@ -55,13 +55,17 @@ class MobileSettings extends ChangeNotifier {
   late String deviceName;
   final List<PairedDesktop> desktops = [];
   String? currentDesktopId;
+
+  /// UI language code (see supportedLanguages); null = follow the phone.
+  String? language;
   final Map<String, Set<String>> _sent = {};
 
   static Future<MobileSettings> load() async {
     final prefs = await SharedPreferences.getInstance();
     final s = MobileSettings._(prefs);
     s.deviceId = prefs.getString('deviceId') ?? _randomId(16);
-    s.deviceName = prefs.getString('deviceName') ?? (Platform.isIOS ? 'iPhone' : 'Android 手机');
+    s.deviceName = prefs.getString('deviceName') ?? (Platform.isIOS ? 'iPhone' : 'Android');
+    s.language = prefs.getString('language');
     final raw = prefs.getString('desktops');
     if (raw != null) {
       try {
@@ -120,6 +124,12 @@ class MobileSettings extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> setLanguage(String? code) async {
+    language = code;
+    await _save();
+    notifyListeners();
+  }
+
   Future<void> rememberHost(PairedDesktop d, String host) async {
     d.lastHost = host;
     await _save();
@@ -141,6 +151,11 @@ class MobileSettings extends ChangeNotifier {
     await _prefs.setString('deviceId', deviceId);
     await _prefs.setString('deviceName', deviceName);
     await _prefs.setString('desktops', jsonEncode(desktops.map((d) => d.toJson()).toList()));
+    if (language == null) {
+      await _prefs.remove('language');
+    } else {
+      await _prefs.setString('language', language!);
+    }
     if (currentDesktopId == null) {
       await _prefs.remove('currentDesktopId');
     } else {

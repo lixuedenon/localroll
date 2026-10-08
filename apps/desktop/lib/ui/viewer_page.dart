@@ -8,6 +8,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
 import '../app_services.dart';
+import '../l10n/l10n.dart';
 import '../services/converter.dart';
 import '../services/library_index.dart';
 import '../services/network.dart';
@@ -75,27 +76,27 @@ class _ViewerPageState extends State<ViewerPage> {
               Text(item.name, style: const TextStyle(fontSize: 16)),
               Text(
                 '${formatDate(item.captureTime)} · ${formatBytes(item.size)}'
-                '${item.deviceName != null ? ' · 来自 ${item.deviceName}' : ''}',
+                '${item.deviceName != null ? ' · ${tr('viewer.from', {'name': item.deviceName})}' : ''}',
                 style: const TextStyle(fontSize: 12, color: Colors.white70),
               ),
             ],
           ),
           actions: [
             PopupMenuButton<ConvertPreset>(
-              tooltip: '转换（原片保留）',
+              tooltip: tr('convert.keep_original_tooltip'),
               icon: const Icon(Icons.auto_fix_high),
               onSelected: (p) {
                 s.converter.enqueue([item], p);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('已加入转换队列（${p.label}），可在「转换」页查看')),
+                  SnackBar(content: Text(tr('convert.queued_hint', {'preset': p.label}))),
                 );
               },
               itemBuilder: (_) => [
-                for (final p in ConvertPreset.values) PopupMenuItem(value: p, child: Text('转换为：${p.label}')),
+                for (final p in ConvertPreset.values) PopupMenuItem(value: p, child: Text(tr('convert.to', {'preset': p.label}))),
               ],
             ),
             IconButton(
-              tooltip: '在文件夹中显示',
+              tooltip: tr('common.show_in_folder'),
               onPressed: () => revealInExplorer(s.library.absPath(item)),
               icon: const Icon(Icons.folder_open),
             ),
@@ -178,8 +179,8 @@ class _ImageViewState extends State<_ImageView> {
           return Center(
             child: Text(
               widget.services.ffmpeg.available
-                  ? '无法解码这张图片'
-                  : '显示 ${widget.item.extension.toUpperCase()} 需要 ffmpeg，请到「设置」配置',
+                  ? tr('viewer.cannot_decode')
+                  : tr('viewer.needs_ffmpeg', {'ext': widget.item.extension.toUpperCase()}),
               style: const TextStyle(color: Colors.white70),
             ),
           );
