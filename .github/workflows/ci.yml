@@ -18,6 +18,7 @@ concurrency:
 
 env:
   FLUTTER_VERSION: '3.35.4'
+  IOS_FLUTTER_VERSION: '3.47.6'
 
 jobs:
   # Generates the windows/ android/ ios/ folders with `flutter create` the first
@@ -171,9 +172,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event_name == 'pull_request' && github.sha || github.ref }}
+      # iOS needs Flutter >= 3.38 for the UIScene lifecycle (iOS 26 permission prompts).
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
+          flutter-version: ${{ env.IOS_FLUTTER_VERSION }}
           channel: stable
           cache: true
       - name: Build (no code signing)

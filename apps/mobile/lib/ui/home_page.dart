@@ -67,6 +67,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     try {
       // Ask for photos first and only then start LAN discovery: two system
       // permission prompts at once can leave one callback never firing on iOS.
+      await _waitUntilForeground();
       final before = await PhotoManager.getPermissionState(requestOption: const PermissionRequestOption())
           .timeout(const Duration(seconds: 5));
       final sw = Stopwatch()..start();
@@ -107,6 +108,18 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     } catch (e) {
       _fail(e);
     }
+  }
+
+  /// iOS drops permission prompts requested before the scene is active, so
+  /// wait (up to 5 s) until the app is really in the foreground.
+  Future<void> _waitUntilForeground() async {
+    final sw = Stopwatch()..start();
+    while (WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed &&
+        sw.elapsed < const Duration(seconds: 5)) {
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    }
+    // One more frame so the first screen is on display before the alert.
+    await WidgetsBinding.instance.endOfFrame;
   }
 
   void _fail(Object e) {

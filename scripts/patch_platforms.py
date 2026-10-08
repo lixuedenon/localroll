@@ -38,6 +38,19 @@ IOS_PLIST_KEYS = {
     "NSBonjourServices": "<array>\n\t\t<string>_localroll._tcp</string>\n\t</array>",
     "NSAppTransportSecurity": "<dict>\n\t\t<key>NSAllowsLocalNetworking</key>\n\t\t<true/>\n\t</dict>",
     "PHPhotoLibraryPreventAutomaticLimitedAccessAlert": "<true/>",
+    # UIScene lifecycle: on iOS 26 apps without it can silently lose permission
+    # prompts (photos/camera never appear). Requires Flutter >= 3.38.
+    "UIApplicationSceneManifest": (
+        "<dict>\n"
+        "\t\t<key>UIApplicationSupportsMultipleScenes</key>\n\t\t<false/>\n"
+        "\t\t<key>UISceneConfigurations</key>\n\t\t<dict>\n"
+        "\t\t\t<key>UIWindowSceneSessionRoleApplication</key>\n\t\t\t<array>\n\t\t\t\t<dict>\n"
+        "\t\t\t\t\t<key>UISceneClassName</key>\n\t\t\t\t\t<string>UIWindowScene</string>\n"
+        "\t\t\t\t\t<key>UISceneDelegateClassName</key>\n\t\t\t\t\t<string>FlutterSceneDelegate</string>\n"
+        "\t\t\t\t\t<key>UISceneConfigurationName</key>\n\t\t\t\t\t<string>flutter</string>\n"
+        "\t\t\t\t\t<key>UISceneStoryboardFile</key>\n\t\t\t\t\t<string>Main</string>\n"
+        "\t\t\t\t</dict>\n\t\t\t</array>\n\t\t</dict>\n\t</dict>"
+    ),
     # Tells iOS which UI languages the app supports (Flutter needs this to
     # receive the user's real language instead of always English).
     "CFBundleLocalizations": "<array>\n" + "".join(
