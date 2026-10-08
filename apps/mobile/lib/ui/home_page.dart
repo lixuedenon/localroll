@@ -1,4 +1,5 @@
 // apps/mobile/lib/ui/home_page.dart
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -22,10 +23,13 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   static const int _pageSize = 120;
 
   PermissionState? _permission;
+
+  /// Shown instead of an endless spinner when the photo library can't be read.
+  String? _error;
   AssetPathEntity? _all;
   final List<AssetEntity> _assets = [];
   int _nextPage = 0;
@@ -38,26 +42,72 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _init();
   }
 
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  /// Coming back from the Settings app: re-check photo access.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && !(_permission?.hasAccess ?? false)) _reload();
+  }
+
   Future<void> _init() async {
-    final ps = await PhotoManager.requestPermissionExtend();
+    if (mounted) setState(() => _error = null);
+    PermissionState ps;
+    try {
+      // Ask for photos first and only then start LAN discovery: two system
+      // permission prompts at once can leave one callback never firing on iOS.
+      ps = await PhotoManager.requestPermissionExtend().timeout(const Duration(seconds: 20));
+    } on TimeoutException {
+      // The prompt never answered; read the current state instead of hanging.
+      try {
+        ps = await PhotoManager.getPermissionState(requestOption: const PermissionRequestOption());
+      } catch (e) {
+        _fail(e);
+        return;
+      }
+    } catch (e) {
+      _fail(e);
+      return;
+    } finally {
+      widget.discovery.start();
+    }
+    if (!mounted) return;
     setState(() => _permission = ps);
     if (!ps.hasAccess) return;
-    final paths = await PhotoManager.getAssetPathList(
-      type: RequestType.common,
-      onlyAll: true,
-      filterOption: FilterOptionGroup(
-        orders: [const OrderOption(type: OrderOptionType.createDate, asc: false)],
-      ),
-    );
-    if (paths.isEmpty) {
-      setState(() => _hasMore = false);
-      return;
+    try {
+      final paths = await PhotoManager.getAssetPathList(
+        type: RequestType.common,
+        onlyAll: true,
+        filterOption: FilterOptionGroup(
+          orders: [const OrderOption(type: OrderOptionType.createDate, asc: false)],
+        ),
+      );
+      if (paths.isEmpty) {
+        if (mounted) setState(() => _hasMore = false);
+        return;
+      }
+      _all = paths.first;
+      await _loadMore();
+    } catch (e) {
+      _fail(e);
     }
-    _all = paths.first;
-    await _loadMore();
+  }
+
+  void _fail(Object e) {
+    if (!mounted) return;
+    setState(() {
+      _error = e.toString();
+      _loading = false;
+      _permission ??= PermissionState.notDetermined;
+    });
   }
 
   Future<void> _reload() async {
@@ -72,7 +122,13 @@ class _HomePageState extends State<HomePage> {
     final all = _all;
     if (_loading || !_hasMore || all == null) return;
     _loading = true;
-    final page = await all.getAssetListPaged(page: _nextPage, size: _pageSize);
+    final List<AssetEntity> page;
+    try {
+      page = await all.getAssetListPaged(page: _nextPage, size: _pageSize);
+    } catch (e) {
+      _fail(e);
+      return;
+    }
     _nextPage++;
     if (!mounted) return;
     setState(() {
@@ -166,8 +222,16 @@ class _HomePageState extends State<HomePage> {
 
   Widget _body(BuildContext context, List<AssetEntity> visible, Set<String> sent) {
     final ps = _permission;
-    if (ps == null) return const Center(child: CircularProgressIndicator());
-    if (!ps.hasAccess) {
+    if (_error == null && ps == null) {
+      return Center(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const CircularProgressIndicator(),
+          const SizedBox(height: 16),
+          Text(tr('home.waiting_permission')),
+        ]),
+      );
+    }
+    if (_error != null || !ps!.hasAccess) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -175,6 +239,12 @@ class _HomePageState extends State<HomePage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(tr('home.need_photos'), textAlign: TextAlign.center),
+              if (_error != null) ...[
+                const SizedBox(height: 8),
+                Text(tr('home.permission_error', {'error': _error}),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12)),
+              ],
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: () async {

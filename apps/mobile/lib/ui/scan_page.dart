@@ -36,7 +36,20 @@ class _ScanPageState extends State<ScanPage> {
       appBar: AppBar(title: Text(tr('scan.title'))),
       body: Stack(
         children: [
-          MobileScanner(onDetect: _onDetect),
+          MobileScanner(
+            onDetect: _onDetect,
+            // Show why the camera is unavailable instead of a black screen.
+            errorBuilder: (context, error) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Text(
+                  tr('scan.camera_error', {'error': error.errorCode.name}),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+          ),
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(

@@ -61,5 +61,8 @@
   "err.not_found": "電腦上找不到",
   "err.size_mismatch": "檔案大小不一致，正在重新傳送",
   "err.sha256_mismatch": "校驗失敗，請重新傳送",
-  "err.no_data": "電腦沒有收到資料，請重新傳送"
+  "err.no_data": "電腦沒有收到資料，請重新傳送",
+  "home.waiting_permission": "正在請求存取照片…",
+  "home.permission_error": "無法讀取相簿：{error}",
+  "scan.camera_error": "無法使用相機（{error}）。請在「設定」中允許 LocalRoll 使用相機，或改用「手動輸入 IP 位址」。"
 }

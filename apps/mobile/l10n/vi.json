@@ -61,5 +61,8 @@
   "err.not_found": "Không tìm thấy trên máy tính",
   "err.size_mismatch": "Kích thước tệp không khớp, đang gửi lại",
   "err.sha256_mismatch": "Kiểm tra thất bại, hãy gửi lại",
-  "err.no_data": "Máy tính chưa nhận được dữ liệu, hãy gửi lại"
+  "err.no_data": "Máy tính chưa nhận được dữ liệu, hãy gửi lại",
+  "home.waiting_permission": "Đang chờ quyền truy cập ảnh…",
+  "home.permission_error": "Không đọc được thư viện ảnh: {error}",
+  "scan.camera_error": "Không dùng được camera ({error}). Hãy cho phép LocalRoll dùng camera trong Cài đặt, hoặc nhập địa chỉ IP."
 }

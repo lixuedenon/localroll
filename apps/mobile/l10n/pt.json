@@ -61,5 +61,8 @@
   "err.not_found": "Não encontrado no PC",
   "err.size_mismatch": "Tamanho do arquivo diferente; reenviando",
   "err.sha256_mismatch": "A verificação falhou; envie novamente",
-  "err.no_data": "O PC não recebeu dados; envie novamente"
+  "err.no_data": "O PC não recebeu dados; envie novamente",
+  "home.waiting_permission": "Aguardando acesso às fotos…",
+  "home.permission_error": "Não foi possível ler a fototeca: {error}",
+  "scan.camera_error": "Câmera indisponível ({error}). Permita o acesso à câmera para o LocalRoll nos Ajustes ou digite o endereço IP."
 }

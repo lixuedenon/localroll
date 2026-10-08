@@ -67,6 +67,9 @@ const Map<String, Map<String, String>> translations = {
     'err.size_mismatch': 'File size mismatch, resending',
     'err.sha256_mismatch': 'Checksum mismatch, please send again',
     'err.no_data': 'The PC received no data, please send again',
+    'home.waiting_permission': 'Waiting for photo access…',
+    'home.permission_error': 'Couldn\'t read your photo library: {error}',
+    'scan.camera_error': 'Camera unavailable ({error}). Allow camera access for LocalRoll in Settings, or use "Enter the IP address" instead.',
   },
   'ar': {
     'common.cancel': 'إلغاء',
@@ -132,6 +135,9 @@ const Map<String, Map<String, String>> translations = {
     'err.size_mismatch': 'حجم الملف غير مطابق، جارٍ إعادة الإرسال',
     'err.sha256_mismatch': 'فشل التحقق، يُرجى الإرسال مرة أخرى',
     'err.no_data': 'لم يستلم الكمبيوتر أي بيانات، يُرجى الإرسال مرة أخرى',
+    'home.waiting_permission': 'في انتظار الوصول إلى الصور…',
+    'home.permission_error': 'تعذّرت قراءة مكتبة الصور: {error}',
+    'scan.camera_error': 'الكاميرا غير متاحة ({error}). اسمح لـ LocalRoll باستخدام الكاميرا من الإعدادات، أو أدخل عنوان IP يدويًا.',
   },
   'de': {
     'common.cancel': 'Abbrechen',
@@ -197,6 +203,9 @@ const Map<String, Map<String, String>> translations = {
     'err.size_mismatch': 'Dateigröße stimmt nicht, wird erneut gesendet',
     'err.sha256_mismatch': 'Prüfsumme stimmt nicht, bitte erneut senden',
     'err.no_data': 'Der PC hat keine Daten erhalten, bitte erneut senden',
+    'home.waiting_permission': 'Warte auf Zugriff auf Fotos …',
+    'home.permission_error': 'Fotomediathek konnte nicht gelesen werden: {error}',
+    'scan.camera_error': 'Kamera nicht verfügbar ({error}). Erlauben Sie LocalRoll den Kamerazugriff in den Einstellungen oder geben Sie die IP-Adresse ein.',
   },
   'es': {
     'common.cancel': 'Cancelar',
@@ -262,6 +271,9 @@ const Map<String, Map<String, String>> translations = {
     'err.size_mismatch': 'El tamaño no coincide; reenviando',
     'err.sha256_mismatch': 'La verificación falló; vuelve a enviarlo',
     'err.no_data': 'El PC no recibió datos; vuelve a enviarlo',
+    'home.waiting_permission': 'Esperando acceso a las fotos…',
+    'home.permission_error': 'No se pudo leer la fototeca: {error}',
+    'scan.camera_error': 'Cámara no disponible ({error}). Permite el acceso a la cámara de LocalRoll en Ajustes o usa «Introducir la dirección IP».',
   },
   'fr': {
     'common.cancel': 'Annuler',
@@ -327,6 +339,9 @@ const Map<String, Map<String, String>> translations = {
     'err.size_mismatch': 'Taille de fichier différente, renvoi en cours',
     'err.sha256_mismatch': 'Échec de la vérification, renvoyez le fichier',
     'err.no_data': 'Le PC n\'a reçu aucune donnée, renvoyez le fichier',
+    'home.waiting_permission': 'En attente de l\'accès aux photos…',
+    'home.permission_error': 'Impossible de lire la photothèque : {error}',
+    'scan.camera_error': 'Caméra indisponible ({error}). Autorisez l\'accès à la caméra pour LocalRoll dans Réglages, ou saisissez l\'adresse IP.',
   },
   'hi': {
     'common.cancel': 'रद्द करें',
@@ -392,6 +407,9 @@ const Map<String, Map<String, String>> translations = {
     'err.size_mismatch': 'फ़ाइल का आकार मेल नहीं खाता, फिर से भेजा जा रहा है',
     'err.sha256_mismatch': 'जाँच विफल, कृपया फिर से भेजें',
     'err.no_data': 'पीसी को कोई डेटा नहीं मिला, कृपया फिर से भेजें',
+    'home.waiting_permission': 'फ़ोटो की अनुमति का इंतज़ार…',
+    'home.permission_error': 'फ़ोटो लाइब्रेरी नहीं पढ़ी जा सकी: {error}',
+    'scan.camera_error': 'कैमरा उपलब्ध नहीं ({error})। सेटिंग्स में LocalRoll को कैमरे की अनुमति दें, या IP पता डालें।',
   },
   'id': {
     'common.cancel': 'Batal',
@@ -457,6 +475,9 @@ const Map<String, Map<String, String>> translations = {
     'err.size_mismatch': 'Ukuran file tidak cocok, mengirim ulang',
     'err.sha256_mismatch': 'Verifikasi gagal, kirim ulang',
     'err.no_data': 'PC tidak menerima data, kirim ulang',
+    'home.waiting_permission': 'Menunggu akses foto…',
+    'home.permission_error': 'Tidak bisa membaca galeri foto: {error}',
+    'scan.camera_error': 'Kamera tidak tersedia ({error}). Izinkan akses kamera untuk LocalRoll di Pengaturan, atau masukkan alamat IP.',
   },
   'it': {
     'common.cancel': 'Annulla',
@@ -522,6 +543,9 @@ const Map<String, Map<String, String>> translations = {
     'err.size_mismatch': 'Dimensione del file diversa, nuovo invio',
     'err.sha256_mismatch': 'Verifica non riuscita, invia di nuovo',
     'err.no_data': 'Il PC non ha ricevuto dati, invia di nuovo',
+    'home.waiting_permission': 'In attesa dell\'accesso alle foto…',
+    'home.permission_error': 'Impossibile leggere la libreria foto: {error}',
+    'scan.camera_error': 'Fotocamera non disponibile ({error}). Consenti l\'accesso alla fotocamera per LocalRoll nelle Impostazioni o inserisci l\'indirizzo IP.',
   },
   'ja': {
     'common.cancel': 'キャンセル',
@@ -587,6 +611,9 @@ const Map<String, Map<String, String>> translations = {
     'err.size_mismatch': 'ファイルサイズが一致しません。再送信します',
     'err.sha256_mismatch': '検証に失敗しました。もう一度送信してください',
     'err.no_data': 'PC がデータを受信していません。もう一度送信してください',
+    'home.waiting_permission': '写真へのアクセスを待っています…',
+    'home.permission_error': '写真ライブラリを読み込めません：{error}',
+    'scan.camera_error': 'カメラを使用できません（{error}）。設定で LocalRoll のカメラを許可するか、「IP アドレスを入力」を使ってください。',
   },
   'ko': {
     'common.cancel': '취소',
@@ -652,6 +679,9 @@ const Map<String, Map<String, String>> translations = {
     'err.size_mismatch': '파일 크기가 일치하지 않아 다시 보냅니다',
     'err.sha256_mismatch': '검증에 실패했습니다. 다시 보내 주세요',
     'err.no_data': 'PC가 데이터를 받지 못했습니다. 다시 보내 주세요',
+    'home.waiting_permission': '사진 접근 권한을 기다리는 중…',
+    'home.permission_error': '사진 보관함을 읽을 수 없습니다: {error}',
+    'scan.camera_error': '카메라를 사용할 수 없습니다({error}). 설정에서 LocalRoll의 카메라 접근을 허용하거나 \'IP 주소 입력\'을 사용하세요.',
   },
   'pt': {
     'common.cancel': 'Cancelar',
@@ -717,6 +747,9 @@ const Map<String, Map<String, String>> translations = {
     'err.size_mismatch': 'Tamanho do arquivo diferente; reenviando',
     'err.sha256_mismatch': 'A verificação falhou; envie novamente',
     'err.no_data': 'O PC não recebeu dados; envie novamente',
+    'home.waiting_permission': 'Aguardando acesso às fotos…',
+    'home.permission_error': 'Não foi possível ler a fototeca: {error}',
+    'scan.camera_error': 'Câmera indisponível ({error}). Permita o acesso à câmera para o LocalRoll nos Ajustes ou digite o endereço IP.',
   },
   'ru': {
     'common.cancel': 'Отмена',
@@ -782,6 +815,9 @@ const Map<String, Map<String, String>> translations = {
     'err.size_mismatch': 'Размер файла не совпадает, повторная отправка',
     'err.sha256_mismatch': 'Контрольная сумма не совпала, отправьте снова',
     'err.no_data': 'ПК не получил данных, отправьте снова',
+    'home.waiting_permission': 'Ожидание доступа к фото…',
+    'home.permission_error': 'Не удалось прочитать медиатеку: {error}',
+    'scan.camera_error': 'Камера недоступна ({error}). Разрешите LocalRoll доступ к камере в настройках или введите IP-адрес вручную.',
   },
   'th': {
     'common.cancel': 'ยกเลิก',
@@ -847,6 +883,9 @@ const Map<String, Map<String, String>> translations = {
     'err.size_mismatch': 'ขนาดไฟล์ไม่ตรงกัน กำลังส่งใหม่',
     'err.sha256_mismatch': 'ตรวจสอบไม่ผ่าน โปรดส่งอีกครั้ง',
     'err.no_data': 'คอมพิวเตอร์ไม่ได้รับข้อมูล โปรดส่งอีกครั้ง',
+    'home.waiting_permission': 'กำลังรอสิทธิ์เข้าถึงรูปภาพ…',
+    'home.permission_error': 'อ่านคลังรูปภาพไม่ได้: {error}',
+    'scan.camera_error': 'ใช้กล้องไม่ได้ ({error}) โปรดอนุญาตให้ LocalRoll ใช้กล้องในการตั้งค่า หรือป้อนที่อยู่ IP แทน',
   },
   'tr': {
     'common.cancel': 'İptal',
@@ -912,6 +951,9 @@ const Map<String, Map<String, String>> translations = {
     'err.size_mismatch': 'Dosya boyutu uyuşmuyor, yeniden gönderiliyor',
     'err.sha256_mismatch': 'Doğrulama başarısız, lütfen yeniden gönderin',
     'err.no_data': 'Bilgisayar veri almadı, lütfen yeniden gönderin',
+    'home.waiting_permission': 'Fotoğraf erişimi bekleniyor…',
+    'home.permission_error': 'Fotoğraf arşivi okunamadı: {error}',
+    'scan.camera_error': 'Kamera kullanılamıyor ({error}). Ayarlar\'dan LocalRoll\'a kamera izni verin veya IP adresini girin.',
   },
   'vi': {
     'common.cancel': 'Hủy',
@@ -977,6 +1019,9 @@ const Map<String, Map<String, String>> translations = {
     'err.size_mismatch': 'Kích thước tệp không khớp, đang gửi lại',
     'err.sha256_mismatch': 'Kiểm tra thất bại, hãy gửi lại',
     'err.no_data': 'Máy tính chưa nhận được dữ liệu, hãy gửi lại',
+    'home.waiting_permission': 'Đang chờ quyền truy cập ảnh…',
+    'home.permission_error': 'Không đọc được thư viện ảnh: {error}',
+    'scan.camera_error': 'Không dùng được camera ({error}). Hãy cho phép LocalRoll dùng camera trong Cài đặt, hoặc nhập địa chỉ IP.',
   },
   'zh': {
     'common.cancel': '取消',
@@ -1042,6 +1087,9 @@ const Map<String, Map<String, String>> translations = {
     'err.size_mismatch': '文件大小不一致，正在重新发送',
     'err.sha256_mismatch': '校验失败，请重新发送',
     'err.no_data': '电脑没有收到数据，请重新发送',
+    'home.waiting_permission': '正在请求访问照片…',
+    'home.permission_error': '无法读取相册：{error}',
+    'scan.camera_error': '无法使用相机（{error}）。请在「设置」里允许 LocalRoll 使用相机，或改用「手动输入 IP 地址」。',
   },
   'zh_Hant': {
     'common.cancel': '取消',
@@ -1107,5 +1155,8 @@ const Map<String, Map<String, String>> translations = {
     'err.size_mismatch': '檔案大小不一致，正在重新傳送',
     'err.sha256_mismatch': '校驗失敗，請重新傳送',
     'err.no_data': '電腦沒有收到資料，請重新傳送',
+    'home.waiting_permission': '正在請求存取照片…',
+    'home.permission_error': '無法讀取相簿：{error}',
+    'scan.camera_error': '無法使用相機（{error}）。請在「設定」中允許 LocalRoll 使用相機，或改用「手動輸入 IP 位址」。',
   },
 };

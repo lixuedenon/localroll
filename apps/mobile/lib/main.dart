@@ -10,7 +10,8 @@ import 'ui/home_page.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final settings = await MobileSettings.load();
-  final discovery = DesktopDiscovery()..start();
+  // Discovery starts after the photo permission prompt (see HomePage).
+  final discovery = DesktopDiscovery();
   runApp(LocalRollMobileApp(settings: settings, discovery: discovery));
 }
 

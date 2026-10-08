@@ -61,5 +61,8 @@
   "err.not_found": "Introuvable sur le PC",
   "err.size_mismatch": "Taille de fichier différente, renvoi en cours",
   "err.sha256_mismatch": "Échec de la vérification, renvoyez le fichier",
-  "err.no_data": "Le PC n'a reçu aucune donnée, renvoyez le fichier"
+  "err.no_data": "Le PC n'a reçu aucune donnée, renvoyez le fichier",
+  "home.waiting_permission": "En attente de l'accès aux photos…",
+  "home.permission_error": "Impossible de lire la photothèque : {error}",
+  "scan.camera_error": "Caméra indisponible ({error}). Autorisez l'accès à la caméra pour LocalRoll dans Réglages, ou saisissez l'adresse IP."
 }

@@ -61,5 +61,8 @@
   "err.not_found": "Not found on the PC",
   "err.size_mismatch": "File size mismatch, resending",
   "err.sha256_mismatch": "Checksum mismatch, please send again",
-  "err.no_data": "The PC received no data, please send again"
+  "err.no_data": "The PC received no data, please send again",
+  "home.waiting_permission": "Waiting for photo access…",
+  "home.permission_error": "Couldn't read your photo library: {error}",
+  "scan.camera_error": "Camera unavailable ({error}). Allow camera access for LocalRoll in Settings, or use \"Enter the IP address\" instead."
 }

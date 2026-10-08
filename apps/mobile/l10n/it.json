@@ -61,5 +61,8 @@
   "err.not_found": "Non trovato sul PC",
   "err.size_mismatch": "Dimensione del file diversa, nuovo invio",
   "err.sha256_mismatch": "Verifica non riuscita, invia di nuovo",
-  "err.no_data": "Il PC non ha ricevuto dati, invia di nuovo"
+  "err.no_data": "Il PC non ha ricevuto dati, invia di nuovo",
+  "home.waiting_permission": "In attesa dell'accesso alle foto…",
+  "home.permission_error": "Impossibile leggere la libreria foto: {error}",
+  "scan.camera_error": "Fotocamera non disponibile ({error}). Consenti l'accesso alla fotocamera per LocalRoll nelle Impostazioni o inserisci l'indirizzo IP."
 }

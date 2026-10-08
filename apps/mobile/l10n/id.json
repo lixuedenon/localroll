@@ -61,5 +61,8 @@
   "err.not_found": "Tidak ditemukan di PC",
   "err.size_mismatch": "Ukuran file tidak cocok, mengirim ulang",
   "err.sha256_mismatch": "Verifikasi gagal, kirim ulang",
-  "err.no_data": "PC tidak menerima data, kirim ulang"
+  "err.no_data": "PC tidak menerima data, kirim ulang",
+  "home.waiting_permission": "Menunggu akses foto…",
+  "home.permission_error": "Tidak bisa membaca galeri foto: {error}",
+  "scan.camera_error": "Kamera tidak tersedia ({error}). Izinkan akses kamera untuk LocalRoll di Pengaturan, atau masukkan alamat IP."
 }

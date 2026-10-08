@@ -61,5 +61,8 @@
   "err.not_found": "Bilgisayarda bulunamadı",
   "err.size_mismatch": "Dosya boyutu uyuşmuyor, yeniden gönderiliyor",
   "err.sha256_mismatch": "Doğrulama başarısız, lütfen yeniden gönderin",
-  "err.no_data": "Bilgisayar veri almadı, lütfen yeniden gönderin"
+  "err.no_data": "Bilgisayar veri almadı, lütfen yeniden gönderin",
+  "home.waiting_permission": "Fotoğraf erişimi bekleniyor…",
+  "home.permission_error": "Fotoğraf arşivi okunamadı: {error}",
+  "scan.camera_error": "Kamera kullanılamıyor ({error}). Ayarlar'dan LocalRoll'a kamera izni verin veya IP adresini girin."
 }
