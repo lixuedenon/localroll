@@ -191,6 +191,10 @@ jobs:
           mkdir -p Payload
           cp -R Runner.app Payload/
           zip -qr LocalRoll-unsigned.ipa Payload
+          # Diagnostics (visible as annotations): bundle size and embedded plugin frameworks.
+          echo "::notice::ipa $(du -h LocalRoll-unsigned.ipa | cut -f1), Runner.app $(du -sh Runner.app | cut -f1)"
+          echo "::notice::Frameworks: $(ls Runner.app/Frameworks | tr '\n' ' ')"
+          echo "::notice::Plist keys: $(/usr/libexec/PlistBuddy -c Print Runner.app/Info.plist | grep -oE 'NS[A-Za-z]+UsageDescription' | sort -u | tr '\n' ' ')"
       - uses: actions/upload-artifact@v4
         with:
           name: LocalRoll-iOS-unsigned
