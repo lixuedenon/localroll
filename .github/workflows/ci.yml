@@ -82,7 +82,7 @@ jobs:
         working-directory: apps/desktop
         run: |
           flutter pub get
-          flutter analyze --no-fatal-infos
+          flutter analyze --no-fatal-infos | tee analyze.log
           flutter test
       - name: mobile — analyze & test
         working-directory: apps/mobile
@@ -105,7 +105,16 @@ jobs:
           cache: true
       - name: Build
         working-directory: apps/desktop
-        run: flutter build windows --release
+        shell: bash
+        run: |
+          set -o pipefail
+          flutter build windows --release -v 2>&1 | tee build.log
+      - name: Report build errors
+        if: failure()
+        working-directory: apps/desktop
+        shell: bash
+        run: |
+          grep -iE "error|fatal|exception|failed" build.log | grep -viE "warning|0 error" | tail -40 | while IFS= read -r l; do echo "::error::${l:0:900}"; done
       - name: Bundle ffmpeg
         shell: pwsh
         run: |
@@ -140,7 +149,13 @@ jobs:
           cache: true
       - name: Build APK
         working-directory: apps/mobile
-        run: flutter build apk --release
+        run: |
+          set -o pipefail
+          flutter build apk --release 2>&1 | tee build.log
+      - name: Report build errors
+        if: failure()
+        working-directory: apps/mobile
+        run: grep -iE "error|exception|failed" build.log | tail -40 | while IFS= read -r l; do echo "::error::${l:0:900}"; done
       - uses: actions/upload-artifact@v4
         with:
           name: LocalRoll-Android
@@ -160,7 +175,13 @@ jobs:
           cache: true
       - name: Build (no code signing)
         working-directory: apps/mobile
-        run: flutter build ios --release --no-codesign
+        run: |
+          set -o pipefail
+          flutter build ios --release --no-codesign 2>&1 | tee build.log
+      - name: Report build errors
+        if: failure()
+        working-directory: apps/mobile
+        run: grep -iE "error|exception|failed" build.log | tail -40 | while IFS= read -r l; do echo "::error::${l:0:900}"; done
       - name: Package unsigned IPA
         working-directory: apps/mobile/build/ios/iphoneos
         run: |
