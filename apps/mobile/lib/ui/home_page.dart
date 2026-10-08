@@ -1,8 +1,10 @@
 // apps/mobile/lib/ui/home_page.dart
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:localroll_core/localroll_core.dart';
 import 'package:photo_manager/photo_manager.dart';
 
@@ -120,6 +122,29 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     }
     // One more frame so the first screen is on display before the alert.
     await WidgetsBinding.instance.endOfFrame;
+  }
+
+  static const _diagChannel = MethodChannel('localroll/diag');
+
+  /// iOS only: asks Apple's APIs directly, bypassing the plugins.
+  Future<void> _nativeDiag() async {
+    final out = StringBuffer();
+    Future<void> step(String method) async {
+      try {
+        final r = await _diagChannel.invokeMethod<String>(method).timeout(const Duration(seconds: 15));
+        out.writeln(r);
+      } on TimeoutException {
+        out.writeln('$method: no answer after 15 s');
+      } catch (e) {
+        out.writeln('$method: $e');
+      }
+      if (mounted) setState(() => _diag = out.toString().trim());
+    }
+
+    await step('info');
+    await step('photos');
+    await step('camera');
+    await step('info');
   }
 
   void _fail(Object e) {
@@ -262,7 +287,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               Text(tr('home.need_photos'), textAlign: TextAlign.center),
               if (_diag.isNotEmpty) ...[
                 const SizedBox(height: 8),
-                Text(_diag, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
+                SelectableText(_diag, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
               ],
               if (_error != null) ...[
                 const SizedBox(height: 8),
@@ -278,6 +303,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 child: Text(tr('home.open_settings')),
               ),
               TextButton(onPressed: _reload, child: Text(tr('home.reload'))),
+              // Debug aid while the iOS permission prompt issue is open.
+              if (Platform.isIOS) TextButton(onPressed: _nativeDiag, child: const Text('Diagnostics')),
             ],
           ),
         ),
