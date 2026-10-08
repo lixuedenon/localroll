@@ -50,9 +50,13 @@ class _ConnectPageState extends State<ConnectPage> {
   }
 
   Future<void> _manual() async {
-    final v = await _ask(context, title: '手动连接', fields: const ['电脑 IP 地址（如 192.168.1.68）', '6 位配对码']);
+    final v = await _ask(context,
+        title: '手动连接', fields: const ['电脑地址（电脑「接收」页显示的 IP:端口）', '6 位配对码']);
     if (v == null) return;
-    await _pair([v[0]], LrProtocol.defaultPort, v[1]);
+    // Accept "192.168.1.68" or "192.168.1.68:41530".
+    final parts = v[0].split(':');
+    final port = parts.length > 1 ? int.tryParse(parts[1]) ?? LrProtocol.defaultPort : LrProtocol.defaultPort;
+    await _pair([parts[0]], port, v[1]);
   }
 
   @override
@@ -137,7 +141,7 @@ Future<List<String>?> _ask(BuildContext context, {required String title, require
             TextField(
               controller: controllers[i],
               autofocus: i == 0,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: fields[i].contains('配对码') ? TextInputType.number : TextInputType.url,
               decoration: InputDecoration(labelText: fields[i]),
             ),
         ],

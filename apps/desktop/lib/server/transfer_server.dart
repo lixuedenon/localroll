@@ -46,15 +46,43 @@ class TransferServer extends ChangeNotifier {
   bool get running => _server != null;
   int get port => _server?.port ?? settings.port;
 
+  /// Ports tried in order. Windows reserves whole blocks of ports for
+  /// Hyper-V / WSL / Docker ("excluded port ranges", usually inside
+  /// 49152–65535), so fall back to ports outside that range and finally to
+  /// any free port. Phones learn the actual port from the QR code / mDNS.
+  List<int> get _candidatePorts => {
+        settings.port,
+        LrProtocol.defaultPort,
+        41530,
+        31530,
+        21530,
+        8530,
+        0, // let the OS pick
+      }.toList();
+
   Future<void> start() async {
     await stop();
-    try {
-      _server = await HttpServer.bind(InternetAddress.anyIPv4, settings.port);
-      _server!.idleTimeout = const Duration(minutes: 2);
-      _server!.listen(_handle, onError: (Object e) => debugPrint('server error: $e'));
-      error = null;
-    } on SocketException catch (e) {
-      error = '端口 ${settings.port} 无法使用（可能已被其他程序占用）：${e.message}';
+    final failures = <String>[];
+    for (final p in _candidatePorts) {
+      try {
+        final server = await HttpServer.bind(InternetAddress.anyIPv4, p);
+        server.idleTimeout = const Duration(minutes: 2);
+        server.listen(_handle, onError: (Object e) => debugPrint('server error: $e'));
+        _server = server;
+        error = null;
+        if (server.port != settings.port) {
+          // Remember the working port so it stays stable across restarts.
+          await settings.update((s) => s.port = server.port);
+        }
+        break;
+      } on SocketException catch (e) {
+        final code = e.osError?.errorCode;
+        failures.add('$p${code != null ? ' (错误 $code)' : ''}');
+      }
+    }
+    if (_server == null) {
+      error = '没有可用的端口（已尝试 ${failures.join('、')}）。'
+          '请检查是否有安全软件阻止 LocalRoll 联网。';
     }
     notifyListeners();
   }
