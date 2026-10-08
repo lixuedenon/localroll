@@ -1,0 +1,173 @@
+// apps/mobile/lib/ui/transfer_page.dart
+import 'package:flutter/material.dart';
+import 'package:photo_manager/photo_manager.dart';
+
+import '../services/desktop_client.dart';
+import '../services/discovery.dart';
+import '../services/mobile_settings.dart';
+import '../services/uploader.dart';
+
+/// Connects to the PC, sends the selected assets and shows per-file progress.
+/// Pops with `true` when everything finished so the selection can be cleared.
+class TransferPage extends StatefulWidget {
+  const TransferPage({
+    super.key,
+    required this.settings,
+    required this.discovery,
+    required this.desktop,
+    required this.assets,
+  });
+
+  final MobileSettings settings;
+  final DesktopDiscovery discovery;
+  final PairedDesktop desktop;
+  final List<AssetEntity> assets;
+
+  @override
+  State<TransferPage> createState() => _TransferPageState();
+}
+
+class _TransferPageState extends State<TransferPage> {
+  DesktopClient? _client;
+  Uploader? _uploader;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _start(widget.assets);
+  }
+
+  Future<void> _start(List<AssetEntity> assets) async {
+    setState(() => _error = null);
+    try {
+      _client ??= await connectToDesktop(
+        widget.settings,
+        widget.desktop,
+        discovered: widget.discovery.found,
+      );
+      final up = Uploader(
+        client: _client!,
+        settings: widget.settings,
+        desktop: widget.desktop,
+        assets: assets,
+      );
+      setState(() => _uploader = up);
+      await up.run();
+    } catch (e) {
+      if (mounted) setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+    }
+  }
+
+  @override
+  void dispose() {
+    _uploader?.cancel();
+    _client?.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final up = _uploader;
+    return Scaffold(
+      appBar: AppBar(title: Text('发送到 ${widget.desktop.name}')),
+      body: _error != null
+          ? _errorView()
+          : up == null
+              ? const Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 12),
+                  Text('正在连接电脑…'),
+                ]))
+              : ListenableBuilder(listenable: up, builder: (context, _) => _progressView(up)),
+    );
+  }
+
+  Widget _errorView() => Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.wifi_off, size: 48),
+              const SizedBox(height: 12),
+              Text(_error!, textAlign: TextAlign.center),
+              const SizedBox(height: 16),
+              FilledButton(onPressed: () => _start(widget.assets), child: const Text('重试')),
+            ],
+          ),
+        ),
+      );
+
+  Widget _progressView(Uploader up) {
+    final theme = Theme.of(context);
+    final summary = up.finished
+        ? '完成：成功 ${up.doneCount}，已存在跳过 ${up.skippedCount}'
+            '${up.failedCount > 0 ? '，失败 ${up.failedCount}' : ''}'
+        : '正在发送…请保持 App 在前台，屏幕会保持常亮';
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(summary, style: theme.textTheme.titleSmall),
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: up.items.length,
+            itemBuilder: (context, i) => _ItemTile(item: up.items[i]),
+          ),
+        ),
+        if (up.finished)
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  if (up.failedCount > 0)
+                    OutlinedButton(
+                      onPressed: () => _start(
+                        up.items.where((i) => i.state == UploadState.failed).map((i) => i.asset).toList(),
+                      ),
+                      child: const Text('重试失败项'),
+                    ),
+                  const Spacer(),
+                  FilledButton(
+                    onPressed: () => Navigator.of(context).pop(up.failedCount == 0),
+                    child: const Text('完成'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _ItemTile extends StatelessWidget {
+  const _ItemTile({required this.item});
+
+  final UploadItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final (icon, label) = switch (item.state) {
+      UploadState.waiting => (Icons.schedule, '等待'),
+      UploadState.preparing => (Icons.hourglass_top, '读取原片'),
+      UploadState.uploading => (Icons.upload, '${((item.fraction ?? 0) * 100).toStringAsFixed(0)}%'),
+      UploadState.verifying => (Icons.verified_outlined, '电脑校验中'),
+      UploadState.done => (Icons.check_circle, '已保存'),
+      UploadState.skipped => (Icons.check_circle_outline, '电脑上已有'),
+      UploadState.failed => (Icons.error_outline, item.error ?? '失败'),
+    };
+    return ListTile(
+      dense: true,
+      leading: Icon(icon, color: item.state == UploadState.failed ? Theme.of(context).colorScheme.error : null),
+      title: Text(item.name.isEmpty ? '…' : item.name, overflow: TextOverflow.ellipsis),
+      subtitle: item.state == UploadState.uploading
+          ? LinearProgressIndicator(value: item.fraction)
+          : Text(label, maxLines: 2, overflow: TextOverflow.ellipsis),
+      trailing: item.state == UploadState.uploading ? Text(label) : null,
+    );
+  }
+}

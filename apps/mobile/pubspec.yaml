@@ -1,0 +1,37 @@
+# apps/mobile/pubspec.yaml
+name: localroll_mobile
+description: LocalRoll for iPhone and Android — send original photos and videos to your PC over Wi-Fi.
+version: 0.1.0+1
+publish_to: none
+
+environment:
+  sdk: '>=3.8.0 <4.0.0'
+  flutter: '>=3.32.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  localroll_core:
+    path: ../../packages/core
+
+  # Reads ORIGINAL files straight from the photo library (no transcoding,
+  # no waiting like Safari's file picker).
+  photo_manager: '>=3.6.0 <4.0.0'
+
+  # Finds the PC on the LAN via Bonjour/mDNS. 5.x needs Flutter 3.41+.
+  nsd: '>=4.0.0 <5.0.0'
+
+  # QR pairing (Apple Vision on iOS, ML Kit on Android).
+  mobile_scanner: '>=7.0.0 <8.0.0'
+
+  # Keep the screen on during long transfers.
+  wakelock_plus: '>=1.2.0 <2.0.0'
+  shared_preferences: ^2.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: '>=5.0.0 <7.0.0'
+
+flutter:
+  uses-material-design: true

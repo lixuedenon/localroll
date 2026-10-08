@@ -1,0 +1,2 @@
+# packages/core/analysis_options.yaml
+include: package:lints/recommended.yaml

@@ -1,0 +1,173 @@
+# .github/workflows/ci.yml
+# Analyze + test on every push, then build all three apps:
+#   LocalRoll-Windows      zip with LocalRoll.exe and ffmpeg bundled
+#   LocalRoll-Android      release APK (debug-signed, for testing)
+#   LocalRoll-iOS-unsigned .ipa — sign & install with Sideloadly from Windows
+# No Mac needed: the iOS build runs on GitHub's macOS runners.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: '3.35.4'
+
+jobs:
+  # Generates the windows/ android/ ios/ folders with `flutter create` the first
+  # time (they need a real Flutter SDK), patches permissions, commits them.
+  bootstrap:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      created: ${{ steps.gen.outputs.created }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - id: gen
+        name: Generate missing platform folders
+        run: |
+          created=false
+          if [ ! -d apps/desktop/windows ]; then
+            (cd apps/desktop && flutter create --no-pub --platforms=windows --org io.github.lixuedenon --project-name localroll_desktop .)
+            created=true
+          fi
+          if [ ! -d apps/mobile/android ] || [ ! -d apps/mobile/ios ]; then
+            (cd apps/mobile && flutter create --no-pub --platforms=android,ios --org io.github.lixuedenon --project-name localroll_mobile .)
+            created=true
+          fi
+          python3 scripts/patch_platforms.py
+          echo "created=$created" >> "$GITHUB_OUTPUT"
+      - name: Commit platform folders
+        if: github.event_name != 'pull_request'
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "chore: generate/patch platform folders (flutter create)"
+            git push
+          fi
+
+  analyze:
+    needs: bootstrap
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.sha || github.ref }}
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: core — analyze & test
+        working-directory: packages/core
+        run: |
+          dart pub get
+          dart analyze --fatal-warnings
+          dart test
+      - name: desktop — analyze & test
+        working-directory: apps/desktop
+        run: |
+          flutter pub get
+          flutter analyze --no-fatal-infos
+          flutter test
+      - name: mobile — analyze & test
+        working-directory: apps/mobile
+        run: |
+          flutter pub get
+          flutter analyze --no-fatal-infos
+          flutter test
+
+  build-windows:
+    needs: analyze
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.sha || github.ref }}
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Build
+        working-directory: apps/desktop
+        run: flutter build windows --release
+      - name: Bundle ffmpeg
+        shell: pwsh
+        run: |
+          $release = "apps/desktop/build/windows/x64/runner/Release"
+          Invoke-WebRequest -Uri "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip" -OutFile ffmpeg.zip
+          Expand-Archive ffmpeg.zip -DestinationPath ffmpeg-dl
+          $bin = Get-ChildItem -Path ffmpeg-dl -Recurse -Filter ffmpeg.exe | Select-Object -First 1
+          New-Item -ItemType Directory -Force -Path "$release/ffmpeg" | Out-Null
+          Copy-Item $bin.FullName "$release/ffmpeg/"
+          Copy-Item (Join-Path $bin.DirectoryName "ffprobe.exe") "$release/ffmpeg/"
+          Rename-Item "$release/localroll_desktop.exe" "LocalRoll.exe" -ErrorAction SilentlyContinue
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LocalRoll-Windows
+          path: apps/desktop/build/windows/x64/runner/Release
+
+  build-android:
+    needs: analyze
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.sha || github.ref }}
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Build APK
+        working-directory: apps/mobile
+        run: flutter build apk --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LocalRoll-Android
+          path: apps/mobile/build/app/outputs/flutter-apk/app-release.apk
+
+  build-ios:
+    needs: analyze
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.sha || github.ref }}
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Build (no code signing)
+        working-directory: apps/mobile
+        run: flutter build ios --release --no-codesign
+      - name: Package unsigned IPA
+        working-directory: apps/mobile/build/ios/iphoneos
+        run: |
+          mkdir -p Payload
+          cp -R Runner.app Payload/
+          zip -qr LocalRoll-unsigned.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LocalRoll-iOS-unsigned
+          path: apps/mobile/build/ios/iphoneos/LocalRoll-unsigned.ipa

@@ -1,0 +1,108 @@
+# scripts/patch_platforms.py
+"""Applies LocalRoll's settings to the platform folders `flutter create` generates.
+
+Idempotent: safe to run again after regenerating or upgrading Flutter.
+Run from the repository root:  python scripts/patch_platforms.py
+"""
+from __future__ import annotations
+
+import pathlib
+import re
+import sys
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+MOBILE = ROOT / "apps" / "mobile"
+DESKTOP = ROOT / "apps" / "desktop"
+
+ANDROID_PERMISSIONS = [
+    "android.permission.INTERNET",
+    "android.permission.ACCESS_NETWORK_STATE",
+    "android.permission.ACCESS_WIFI_STATE",
+    "android.permission.CHANGE_WIFI_MULTICAST_STATE",
+    "android.permission.CAMERA",
+    # Photo library (Android 13+ granular, 14+ partial access, ≤12 legacy).
+    "android.permission.READ_MEDIA_IMAGES",
+    "android.permission.READ_MEDIA_VIDEO",
+    "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+    # Without this Android strips GPS from originals handed to apps.
+    "android.permission.ACCESS_MEDIA_LOCATION",
+    "android.permission.WAKE_LOCK",
+]
+
+IOS_PLIST_KEYS = {
+    "CFBundleDisplayName": "<string>LocalRoll</string>",
+    "NSPhotoLibraryUsageDescription": "<string>LocalRoll 需要读取照片和视频，才能把原片发送到你的电脑。</string>",
+    "NSCameraUsageDescription": "<string>扫描电脑上显示的配对二维码。</string>",
+    "NSLocalNetworkUsageDescription": "<string>在局域网中查找并连接运行 LocalRoll 的电脑，文件不经过云端。</string>",
+    "NSBonjourServices": "<array>\n\t\t<string>_localroll._tcp</string>\n\t</array>",
+    "NSAppTransportSecurity": "<dict>\n\t\t<key>NSAllowsLocalNetworking</key>\n\t\t<true/>\n\t</dict>",
+    "PHPhotoLibraryPreventAutomaticLimitedAccessAlert": "<true/>",
+}
+
+
+def patch(path: pathlib.Path, fn) -> None:
+    if not path.exists():
+        print(f"skip (missing): {path.relative_to(ROOT)}")
+        return
+    old = path.read_text(encoding="utf-8")
+    new = fn(old)
+    if new != old:
+        path.write_text(new, encoding="utf-8")
+        print(f"patched: {path.relative_to(ROOT)}")
+    else:
+        print(f"ok: {path.relative_to(ROOT)}")
+
+
+def android_manifest(text: str) -> str:
+    missing = [p for p in ANDROID_PERMISSIONS if f'android:name="{p}"' not in text]
+    lines = ""
+    for p in missing:
+        lines += f'<uses-permission android:name="{p}" />\n    '
+    legacy = 'android.permission.READ_EXTERNAL_STORAGE'
+    if legacy not in text:
+        lines += f'<uses-permission android:name="{legacy}" android:maxSdkVersion="32" />\n    '
+    if lines:
+        text = text.replace("<application", lines + "\n    <application", 1)
+    # Plain HTTP to the PC on the LAN; nothing ever goes to the internet.
+    if "usesCleartextTraffic" not in text:
+        text = text.replace("<application", '<application\n        android:usesCleartextTraffic="true"', 1)
+    if "requestLegacyExternalStorage" not in text:
+        text = text.replace("<application", '<application\n        android:requestLegacyExternalStorage="true"', 1)
+    text = re.sub(r'android:label="[^"]*"', 'android:label="LocalRoll"', text, count=1)
+    return text
+
+
+def android_gradle(text: str) -> str:
+    # mobile_scanner needs API 23+; use 24 (Android 7) as the floor.
+    return re.sub(r"minSdk\s*=\s*flutter\.minSdkVersion", "minSdk = 24", text)
+
+
+def ios_plist(text: str) -> str:
+    for key, value in IOS_PLIST_KEYS.items():
+        if f"<key>{key}</key>" in text:
+            if key == "CFBundleDisplayName":
+                text = re.sub(
+                    r"(<key>CFBundleDisplayName</key>\s*)<string>[^<]*</string>",
+                    r"\1<string>LocalRoll</string>",
+                    text,
+                )
+            continue
+        idx = text.rfind("</dict>")
+        text = text[:idx] + f"\t<key>{key}</key>\n\t{value}\n" + text[idx:]
+    return text
+
+
+def windows_main(text: str) -> str:
+    return text.replace('L"localroll_desktop"', 'L"LocalRoll"')
+
+
+def main() -> int:
+    patch(MOBILE / "android" / "app" / "src" / "main" / "AndroidManifest.xml", android_manifest)
+    patch(MOBILE / "android" / "app" / "build.gradle.kts", android_gradle)
+    patch(MOBILE / "ios" / "Runner" / "Info.plist", ios_plist)
+    patch(DESKTOP / "windows" / "runner" / "main.cpp", windows_main)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
