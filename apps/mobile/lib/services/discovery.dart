@@ -118,25 +118,36 @@ Future<PairedDesktop> pairWithDesktop({
 }
 
 /// Finds a working address for a paired PC and returns an authenticated client.
+///
+/// Tries the last working host:port first, then every known host with every
+/// known port. mDNS can report a stale port (e.g. from a copy of the desktop
+/// app that was closed), so it never replaces the port we paired with.
 Future<DesktopClient> connectToDesktop(
   MobileSettings settings,
   PairedDesktop d, {
   List<FoundDesktop> discovered = const [],
 }) async {
-  final candidates = <String>{
+  final mine = discovered.where((f) => f.id == d.id).toList();
+  final hosts = <String>{
     if (d.lastHost != null) d.lastHost!,
-    for (final f in discovered.where((f) => f.id == d.id)) ...f.hosts,
     ...d.hosts,
+    for (final f in mine) ...f.hosts,
   };
-  var port = d.port;
-  for (final f in discovered.where((f) => f.id == d.id)) {
-    port = f.port;
-  }
-  for (final host in candidates) {
+  final ports = <int>{d.port, for (final f in mine) f.port};
+  final endpoints = <(String, int)>[
+    if (d.lastHost != null) (d.lastHost!, d.port),
+    for (final p in ports)
+      for (final h in hosts) (h, p),
+  ];
+  final tried = <String>[];
+  final seen = <String>{};
+  for (final (host, port) in endpoints) {
+    if (!seen.add('$host:$port')) continue;
     final client = DesktopClient(host: host, port: port, deviceId: settings.deviceId, token: d.token);
     try {
-      final info = await client.info(timeout: const Duration(seconds: 2));
+      final info = await client.info(timeout: const Duration(seconds: 3));
       if (info.id != d.id) {
+        tried.add('$host:$port other PC');
         client.close();
         continue;
       }
@@ -146,9 +157,20 @@ Future<DesktopClient> connectToDesktop(
         await settings.rememberHost(d, host);
       }
       return client;
-    } catch (_) {
+    } catch (e) {
+      tried.add('$host:$port ${_short(e)}');
       client.close();
     }
   }
-  throw Exception(tr('err.pc_not_found', {'name': d.name}));
+  throw Exception('${tr('err.pc_not_found', {'name': d.name})}\n\n${tried.join('\n')}');
+}
+
+String _short(Object e) {
+  final s = e.toString();
+  if (s.contains('TimeoutException')) return 'timeout';
+  if (s.contains('Connection refused')) return 'refused';
+  if (s.contains('No route to host')) return 'no route';
+  final m = RegExp(r'errno = (\d+)').firstMatch(s);
+  if (m != null) return 'errno ${m.group(1)}';
+  return s.length > 60 ? s.substring(0, 60) : s;
 }
