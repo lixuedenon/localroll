@@ -91,5 +91,7 @@
   "connect.offline": "지금 이 Wi-Fi에 없음",
   "connect.other_ways": "다른 연결 방법",
   "err.pair_denied": "PC에서 연결을 거부했습니다.",
-  "err.pair_expired": "PC에서 응답이 없습니다. 다시 시도하세요."
+  "err.pair_expired": "PC에서 응답이 없습니다. 다시 시도하세요.",
+  "connect.all_paired": "이 Wi-Fi의 PC는 모두 이미 연결되어 있습니다(아래 목록).",
+  "connect.none_found": "다른 PC를 찾지 못했습니다. PC에서 LocalRoll을 열고 같은 Wi-Fi인지 확인하세요."
 }

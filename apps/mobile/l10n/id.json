@@ -91,5 +91,7 @@
   "connect.offline": "Tidak di Wi-Fi ini sekarang",
   "connect.other_ways": "Cara lain untuk terhubung",
   "err.pair_denied": "PC menolak koneksi.",
-  "err.pair_expired": "Tidak ada yang merespons di PC. Coba lagi."
+  "err.pair_expired": "Tidak ada yang merespons di PC. Coba lagi.",
+  "connect.all_paired": "Semua PC di Wi-Fi ini sudah dipasangkan — tercantum di bawah.",
+  "connect.none_found": "Tidak ada PC lain. Buka LocalRoll di PC dan pastikan keduanya di Wi-Fi yang sama."
 }

@@ -91,5 +91,7 @@
   "connect.offline": "Hiện không ở Wi-Fi này",
   "connect.other_ways": "Cách kết nối khác",
   "err.pair_denied": "Máy tính đã từ chối kết nối.",
-  "err.pair_expired": "Không ai trả lời trên máy tính. Hãy thử lại."
+  "err.pair_expired": "Không ai trả lời trên máy tính. Hãy thử lại.",
+  "connect.all_paired": "Mọi máy tính trong Wi-Fi này đều đã ghép nối — có ở danh sách bên dưới.",
+  "connect.none_found": "Không tìm thấy máy tính khác. Hãy mở LocalRoll trên máy tính và kiểm tra hai thiết bị cùng Wi-Fi."
 }

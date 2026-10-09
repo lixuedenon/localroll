@@ -91,5 +91,7 @@
   "connect.offline": "Pas sur ce Wi-Fi pour l’instant",
   "connect.other_ways": "Autres façons de se connecter",
   "err.pair_denied": "Le PC a refusé la connexion.",
-  "err.pair_expired": "Personne n’a répondu sur le PC. Réessayez."
+  "err.pair_expired": "Personne n’a répondu sur le PC. Réessayez.",
+  "connect.all_paired": "Tous les PC de ce Wi-Fi sont déjà associés ; ils sont listés ci-dessous.",
+  "connect.none_found": "Aucun autre PC trouvé. Ouvrez LocalRoll sur le PC et vérifiez que les deux sont sur le même Wi-Fi."
 }

@@ -97,6 +97,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.other_ways': 'Other ways to connect',
     'err.pair_denied': 'The PC declined the connection.',
     'err.pair_expired': 'Nobody answered on the PC. Try again.',
+    'connect.all_paired': 'All PCs on this Wi-Fi are already paired — they’re listed below.',
+    'connect.none_found': 'No other PC found. Open LocalRoll on the PC and make sure both are on the same Wi-Fi.',
   },
   'ar': {
     'common.cancel': 'إلغاء',
@@ -192,6 +194,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.other_ways': 'طرق أخرى للاتصال',
     'err.pair_denied': 'رفض الكمبيوتر الاتصال.',
     'err.pair_expired': 'لم يرد أحد على الكمبيوتر. حاول مرة أخرى.',
+    'connect.all_paired': 'جميع أجهزة الكمبيوتر على شبكة Wi-Fi هذه مقترنة بالفعل، وتظهر أدناه.',
+    'connect.none_found': 'لم يتم العثور على كمبيوتر آخر. افتح LocalRoll على الكمبيوتر وتأكد أن الجهازين على نفس شبكة Wi-Fi.',
   },
   'de': {
     'common.cancel': 'Abbrechen',
@@ -287,6 +291,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.other_ways': 'Andere Verbindungswege',
     'err.pair_denied': 'Der PC hat die Verbindung abgelehnt.',
     'err.pair_expired': 'Am PC hat niemand reagiert. Versuche es erneut.',
+    'connect.all_paired': 'Alle PCs in diesem WLAN sind schon gekoppelt – sie stehen unten.',
+    'connect.none_found': 'Kein weiterer PC gefunden. Öffne LocalRoll auf dem PC und prüfe, ob beide im selben WLAN sind.',
   },
   'es': {
     'common.cancel': 'Cancelar',
@@ -382,6 +388,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.other_ways': 'Otras formas de conectar',
     'err.pair_denied': 'El PC rechazó la conexión.',
     'err.pair_expired': 'Nadie respondió en el PC. Inténtalo de nuevo.',
+    'connect.all_paired': 'Todos los PC de esta Wi-Fi ya están emparejados; aparecen abajo.',
+    'connect.none_found': 'No se encontró otro PC. Abre LocalRoll en el PC y comprueba que ambos estén en la misma Wi-Fi.',
   },
   'fr': {
     'common.cancel': 'Annuler',
@@ -477,6 +485,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.other_ways': 'Autres façons de se connecter',
     'err.pair_denied': 'Le PC a refusé la connexion.',
     'err.pair_expired': 'Personne n’a répondu sur le PC. Réessayez.',
+    'connect.all_paired': 'Tous les PC de ce Wi-Fi sont déjà associés ; ils sont listés ci-dessous.',
+    'connect.none_found': 'Aucun autre PC trouvé. Ouvrez LocalRoll sur le PC et vérifiez que les deux sont sur le même Wi-Fi.',
   },
   'hi': {
     'common.cancel': 'रद्द करें',
@@ -572,6 +582,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.other_ways': 'कनेक्ट करने के दूसरे तरीके',
     'err.pair_denied': 'PC ने कनेक्शन अस्वीकार कर दिया।',
     'err.pair_expired': 'PC पर किसी ने जवाब नहीं दिया। फिर से कोशिश करें।',
+    'connect.all_paired': 'इस Wi-Fi के सभी PC पहले से जुड़े हैं — वे नीचे दिखे हैं।',
+    'connect.none_found': 'कोई और PC नहीं मिला। PC पर LocalRoll खोलें और देखें कि दोनों एक ही Wi-Fi पर हैं।',
   },
   'id': {
     'common.cancel': 'Batal',
@@ -667,6 +679,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.other_ways': 'Cara lain untuk terhubung',
     'err.pair_denied': 'PC menolak koneksi.',
     'err.pair_expired': 'Tidak ada yang merespons di PC. Coba lagi.',
+    'connect.all_paired': 'Semua PC di Wi-Fi ini sudah dipasangkan — tercantum di bawah.',
+    'connect.none_found': 'Tidak ada PC lain. Buka LocalRoll di PC dan pastikan keduanya di Wi-Fi yang sama.',
   },
   'it': {
     'common.cancel': 'Annulla',
@@ -762,6 +776,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.other_ways': 'Altri modi per connettersi',
     'err.pair_denied': 'Il PC ha rifiutato la connessione.',
     'err.pair_expired': 'Nessuno ha risposto sul PC. Riprova.',
+    'connect.all_paired': 'Tutti i PC su questa Wi-Fi sono già associati: li trovi qui sotto.',
+    'connect.none_found': 'Nessun altro PC trovato. Apri LocalRoll sul PC e controlla che siano sulla stessa Wi-Fi.',
   },
   'ja': {
     'common.cancel': 'キャンセル',
@@ -857,6 +873,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.other_ways': 'その他の接続方法',
     'err.pair_denied': 'PC が接続を拒否しました。',
     'err.pair_expired': 'PC で応答がありませんでした。もう一度お試しください。',
+    'connect.all_paired': 'この Wi-Fi の PC はすべてペアリング済みです（下に表示されています）。',
+    'connect.none_found': '他の PC が見つかりません。PC で LocalRoll を開き、同じ Wi-Fi に接続しているか確認してください。',
   },
   'ko': {
     'common.cancel': '취소',
@@ -952,6 +970,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.other_ways': '다른 연결 방법',
     'err.pair_denied': 'PC에서 연결을 거부했습니다.',
     'err.pair_expired': 'PC에서 응답이 없습니다. 다시 시도하세요.',
+    'connect.all_paired': '이 Wi-Fi의 PC는 모두 이미 연결되어 있습니다(아래 목록).',
+    'connect.none_found': '다른 PC를 찾지 못했습니다. PC에서 LocalRoll을 열고 같은 Wi-Fi인지 확인하세요.',
   },
   'pt': {
     'common.cancel': 'Cancelar',
@@ -1047,6 +1067,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.other_ways': 'Outras formas de conectar',
     'err.pair_denied': 'O PC recusou a conexão.',
     'err.pair_expired': 'Ninguém respondeu no PC. Tente de novo.',
+    'connect.all_paired': 'Todos os PCs desta Wi-Fi já estão pareados; eles aparecem abaixo.',
+    'connect.none_found': 'Nenhum outro PC encontrado. Abra o LocalRoll no PC e confira se os dois estão na mesma Wi-Fi.',
   },
   'ru': {
     'common.cancel': 'Отмена',
@@ -1142,6 +1164,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.other_ways': 'Другие способы подключения',
     'err.pair_denied': 'ПК отклонил подключение.',
     'err.pair_expired': 'На ПК никто не ответил. Попробуйте ещё раз.',
+    'connect.all_paired': 'Все ПК в этой сети Wi-Fi уже сопряжены — они ниже.',
+    'connect.none_found': 'Других ПК не найдено. Откройте LocalRoll на ПК и проверьте, что оба в одной сети Wi-Fi.',
   },
   'th': {
     'common.cancel': 'ยกเลิก',
@@ -1237,6 +1261,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.other_ways': 'วิธีเชื่อมต่ออื่น',
     'err.pair_denied': 'คอมพิวเตอร์ปฏิเสธการเชื่อมต่อ',
     'err.pair_expired': 'ไม่มีใครตอบที่คอมพิวเตอร์ ลองอีกครั้ง',
+    'connect.all_paired': 'คอมพิวเตอร์ทุกเครื่องใน Wi-Fi นี้จับคู่แล้ว อยู่ในรายการด้านล่าง',
+    'connect.none_found': 'ไม่พบคอมพิวเตอร์อื่น เปิด LocalRoll บนคอมพิวเตอร์ และตรวจว่าอยู่ใน Wi-Fi เดียวกัน',
   },
   'tr': {
     'common.cancel': 'İptal',
@@ -1332,6 +1358,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.other_ways': 'Diğer bağlanma yolları',
     'err.pair_denied': 'Bilgisayar bağlantıyı reddetti.',
     'err.pair_expired': 'Bilgisayarda kimse yanıt vermedi. Tekrar deneyin.',
+    'connect.all_paired': 'Bu Wi-Fi’deki tüm bilgisayarlar zaten eşleşmiş; aşağıda listeleniyor.',
+    'connect.none_found': 'Başka bilgisayar bulunamadı. Bilgisayarda LocalRoll’u açın ve ikisinin aynı Wi-Fi’de olduğundan emin olun.',
   },
   'vi': {
     'common.cancel': 'Hủy',
@@ -1427,6 +1455,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.other_ways': 'Cách kết nối khác',
     'err.pair_denied': 'Máy tính đã từ chối kết nối.',
     'err.pair_expired': 'Không ai trả lời trên máy tính. Hãy thử lại.',
+    'connect.all_paired': 'Mọi máy tính trong Wi-Fi này đều đã ghép nối — có ở danh sách bên dưới.',
+    'connect.none_found': 'Không tìm thấy máy tính khác. Hãy mở LocalRoll trên máy tính và kiểm tra hai thiết bị cùng Wi-Fi.',
   },
   'zh': {
     'common.cancel': '取消',
@@ -1522,6 +1552,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.other_ways': '其他连接方式',
     'err.pair_denied': '电脑拒绝了连接。',
     'err.pair_expired': '电脑上没有人回应，请再试一次。',
+    'connect.all_paired': '这个 Wi-Fi 里的电脑都已经配对过了，在下面的「已配对的电脑」里。',
+    'connect.none_found': '没有找到其他电脑。请确认电脑上的 LocalRoll 已打开，并且和手机连的是同一个 Wi-Fi。',
   },
   'zh_Hant': {
     'common.cancel': '取消',
@@ -1617,5 +1649,7 @@ const Map<String, Map<String, String>> translations = {
     'connect.other_ways': '其他連線方式',
     'err.pair_denied': '電腦拒絕了連線。',
     'err.pair_expired': '電腦上沒有人回應，請再試一次。',
+    'connect.all_paired': '這個 Wi-Fi 裡的電腦都已經配對過了，在下面的「已配對的電腦」裡。',
+    'connect.none_found': '沒有找到其他電腦。請確認電腦上的 LocalRoll 已開啟，並且和手機連的是同一個 Wi-Fi。',
   },
 };

@@ -91,5 +91,7 @@
   "connect.offline": "अभी इस Wi-Fi पर नहीं है",
   "connect.other_ways": "कनेक्ट करने के दूसरे तरीके",
   "err.pair_denied": "PC ने कनेक्शन अस्वीकार कर दिया।",
-  "err.pair_expired": "PC पर किसी ने जवाब नहीं दिया। फिर से कोशिश करें।"
+  "err.pair_expired": "PC पर किसी ने जवाब नहीं दिया। फिर से कोशिश करें।",
+  "connect.all_paired": "इस Wi-Fi के सभी PC पहले से जुड़े हैं — वे नीचे दिखे हैं।",
+  "connect.none_found": "कोई और PC नहीं मिला। PC पर LocalRoll खोलें और देखें कि दोनों एक ही Wi-Fi पर हैं।"
 }

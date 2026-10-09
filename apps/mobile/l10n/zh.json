@@ -91,5 +91,7 @@
   "connect.offline": "目前不在这个 Wi-Fi 上",
   "connect.other_ways": "其他连接方式",
   "err.pair_denied": "电脑拒绝了连接。",
-  "err.pair_expired": "电脑上没有人回应，请再试一次。"
+  "err.pair_expired": "电脑上没有人回应，请再试一次。",
+  "connect.all_paired": "这个 Wi-Fi 里的电脑都已经配对过了，在下面的「已配对的电脑」里。",
+  "connect.none_found": "没有找到其他电脑。请确认电脑上的 LocalRoll 已打开，并且和手机连的是同一个 Wi-Fi。"
 }

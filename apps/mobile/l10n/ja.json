@@ -91,5 +91,7 @@
   "connect.offline": "現在この Wi-Fi にいません",
   "connect.other_ways": "その他の接続方法",
   "err.pair_denied": "PC が接続を拒否しました。",
-  "err.pair_expired": "PC で応答がありませんでした。もう一度お試しください。"
+  "err.pair_expired": "PC で応答がありませんでした。もう一度お試しください。",
+  "connect.all_paired": "この Wi-Fi の PC はすべてペアリング済みです（下に表示されています）。",
+  "connect.none_found": "他の PC が見つかりません。PC で LocalRoll を開き、同じ Wi-Fi に接続しているか確認してください。"
 }

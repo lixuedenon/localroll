@@ -1,4 +1,6 @@
 // apps/mobile/lib/ui/connect_page.dart
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:localroll_core/localroll_core.dart';
 
@@ -24,6 +26,24 @@ class ConnectPage extends StatefulWidget {
 
 class _ConnectPageState extends State<ConnectPage> {
   bool _busy = false;
+
+  /// Stop the "searching" spinner after a while so it never spins forever.
+  bool _searchedLong = false;
+  Timer? _searchTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchTimer = Timer(const Duration(seconds: 8), () {
+      if (mounted) setState(() => _searchedLong = true);
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchTimer?.cancel();
+    super.dispose();
+  }
 
   /// Name / icon / picture of PCs found on the Wi-Fi (read from /info).
   final Map<String, Future<DeviceInfo?>> _looks = {};
@@ -180,12 +200,22 @@ class _ConnectPageState extends State<ConnectPage> {
                 if (unpaired.isEmpty)
                   _Card(
                     child: Row(children: [
-                      const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2)),
+                      if (found.isNotEmpty)
+                        // Every PC on this Wi-Fi is already paired — nothing to do here.
+                        const Icon(Icons.check_circle_rounded, color: LrColors.verified)
+                      else if (!_searchedLong && widget.discovery.error == null)
+                        const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2))
+                      else
+                        const Icon(Icons.wifi_find_rounded, color: LrColors.muted),
                       const SizedBox(width: 14),
                       Expanded(
                         child: Text(widget.discovery.error != null
                             ? tr('connect.discovery_unavailable', {'error': widget.discovery.error})
-                            : tr('connect.searching')),
+                            : found.isNotEmpty
+                                ? tr('connect.all_paired')
+                                : _searchedLong
+                                    ? tr('connect.none_found')
+                                    : tr('connect.searching')),
                       ),
                     ]),
                   ),

@@ -91,5 +91,7 @@
   "connect.offline": "Şu an bu Wi-Fi’de değil",
   "connect.other_ways": "Diğer bağlanma yolları",
   "err.pair_denied": "Bilgisayar bağlantıyı reddetti.",
-  "err.pair_expired": "Bilgisayarda kimse yanıt vermedi. Tekrar deneyin."
+  "err.pair_expired": "Bilgisayarda kimse yanıt vermedi. Tekrar deneyin.",
+  "connect.all_paired": "Bu Wi-Fi’deki tüm bilgisayarlar zaten eşleşmiş; aşağıda listeleniyor.",
+  "connect.none_found": "Başka bilgisayar bulunamadı. Bilgisayarda LocalRoll’u açın ve ikisinin aynı Wi-Fi’de olduğundan emin olun."
 }
