@@ -23,7 +23,7 @@ docs/             架构与协议说明
 需要：Flutter 3.35+、Visual Studio（含「使用 C++ 的桌面开发」）、Android Studio。
 
 ```powershell
-cd C:\Users\lixue\StudioProjects
+cd C:\Users\lixue\Projects
 git clone https://github.com/lixuedenon/localroll.git
 cd localroll
 
