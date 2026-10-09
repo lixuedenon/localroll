@@ -15,9 +15,11 @@ param(
 $ErrorActionPreference = 'Stop'
 
 # The install folder is wiped on every update — never let that be a source tree.
-$repoRoot = Split-Path $PSScriptRoot -Parent
+# (Compare with a trailing '\' so "...\LocalRoll-app" is not taken as inside "...\localroll".)
+$repoRoot = [IO.Path]::GetFullPath((Split-Path $PSScriptRoot -Parent)).TrimEnd('\') + '\'
 $full = [IO.Path]::GetFullPath($InstallDir).TrimEnd('\')
-if ((Test-Path (Join-Path $full '.git')) -or ($repoRoot.StartsWith($full, [StringComparison]::OrdinalIgnoreCase)) -or ($full.StartsWith($repoRoot, [StringComparison]::OrdinalIgnoreCase))) {
+$ic = [StringComparison]::OrdinalIgnoreCase
+if ((Test-Path (Join-Path $full '.git')) -or $repoRoot.StartsWith($full + '\', $ic) -or ($full + '\').StartsWith($repoRoot, $ic)) {
   throw "InstallDir $full is (inside) the source folder; pick a separate folder."
 }
 $repo = 'lixuedenon/localroll'
