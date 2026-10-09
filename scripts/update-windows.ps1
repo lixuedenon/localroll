@@ -4,12 +4,22 @@
 # One-time setup:   winget install GitHub.cli    then    gh auth login
 # Every update:     powershell -ExecutionPolicy Bypass -File update-windows.ps1
 #
-# Always installs into the same folder, so Windows Firewall keeps remembering
-# the app and does not ask again.
+# Installs the app next to the source folder, e.g.
+#   source:  C:\Users\lixue\Projects\localroll
+#   app:     C:\Users\lixue\Projects\LocalRoll-app
+# Always the same folder, so Windows Firewall remembers it and does not ask again.
+# Another folder:  ... -File update-windows.ps1 -InstallDir D:\Apps\LocalRoll
 param(
-  [string]$InstallDir = "$env:LOCALAPPDATA\LocalRoll"
+  [string]$InstallDir = (Join-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) 'LocalRoll-app')
 )
 $ErrorActionPreference = 'Stop'
+
+# The install folder is wiped on every update — never let that be a source tree.
+$repoRoot = Split-Path $PSScriptRoot -Parent
+$full = [IO.Path]::GetFullPath($InstallDir).TrimEnd('\')
+if ((Test-Path (Join-Path $full '.git')) -or ($repoRoot.StartsWith($full, [StringComparison]::OrdinalIgnoreCase)) -or ($full.StartsWith($repoRoot, [StringComparison]::OrdinalIgnoreCase))) {
+  throw "InstallDir $full is (inside) the source folder; pick a separate folder."
+}
 $repo = 'lixuedenon/localroll'
 
 Write-Host 'Looking for the latest successful build...'
