@@ -104,5 +104,14 @@
   "auto.waiting": "{count} item baru menunggu dikirim ke {pc}",
   "auto.waiting_hint": "PC mati atau tidak di Wi-Fi ini. Akan dikirim otomatis saat tersambung.",
   "auto.sending": "Mengirim item baru ke {pc}… {done}/{total}",
-  "auto.done": "{count} item baru terkirim ke {pc}"
+  "auto.done": "{count} item baru terkirim ke {pc}",
+  "settings.title": "Pengaturan",
+  "settings.auto_send": "Kirim foto baru otomatis",
+  "settings.auto_send_hint": "Foto dan video baru otomatis dikirim ke {pc} saat terjangkau.",
+  "settings.pc": "PC",
+  "settings.manage_pcs": "Pasangkan, ganti, atau hapus PC",
+  "lost.title": "{count} item dihapus di {pc}",
+  "lost.body": "Masih ada di ponsel ini, tapi sudah tidak dicadangkan.",
+  "lost.rebackup": "Cadangkan lagi",
+  "lost.ignore": "Abaikan"
 }

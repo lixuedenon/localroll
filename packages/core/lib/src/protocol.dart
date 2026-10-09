@@ -28,6 +28,10 @@ class LrProtocol {
   /// clicks Allow / Deny on the PC.
   static const String pathPairRequest = '/api/v1/pair-request';
 
+  /// What changed on the PC since `?since=<ms>` for the asking phone (files
+  /// deleted there), so the phone can warn that they are no longer backed up.
+  static const String pathChanges = '/api/v1/changes';
+
   /// The PC's custom picture (PNG), if it has one. No auth (like /info).
   static const String pathAvatar = '/api/v1/avatar';
 

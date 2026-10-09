@@ -104,5 +104,14 @@
   "auto.waiting": "{count} nouveaux éléments en attente pour {pc}",
   "auto.waiting_hint": "Le PC est éteint ou pas sur ce Wi-Fi. Ils partiront automatiquement dès qu’il le sera.",
   "auto.sending": "Envoi des nouveaux éléments vers {pc}… {done}/{total}",
-  "auto.done": "{count} nouveaux éléments envoyés vers {pc}"
+  "auto.done": "{count} nouveaux éléments envoyés vers {pc}",
+  "settings.title": "Réglages",
+  "settings.auto_send": "Envoyer les nouvelles photos automatiquement",
+  "settings.auto_send_hint": "Les nouvelles photos et vidéos partent seules vers {pc} dès qu’il est joignable.",
+  "settings.pc": "PC",
+  "settings.manage_pcs": "Associer, changer ou retirer un PC",
+  "lost.title": "{count} éléments supprimés sur {pc}",
+  "lost.body": "Ils sont encore sur ce téléphone, mais ne sont plus sauvegardés.",
+  "lost.rebackup": "Resauvegarder",
+  "lost.ignore": "Ignorer"
 }

@@ -329,3 +329,20 @@ class PairApprovalState {
         desktop: j['desktop'] == null ? null : DeviceInfo.fromJson(j['desktop'] as Map<String, dynamic>),
       );
 }
+
+/// PC → phone: assets of this phone that were deleted on the PC since `since`.
+class ChangesResponse {
+  const ChangesResponse({required this.deleted, required this.now});
+
+  final List<String> deleted;
+
+  /// Pass back as `since` next time.
+  final int now;
+
+  Map<String, dynamic> toJson() => {'deleted': deleted, 'now': now};
+
+  factory ChangesResponse.fromJson(Map<String, dynamic> j) => ChangesResponse(
+        deleted: (j['deleted'] as List? ?? const []).cast<String>(),
+        now: (j['now'] as num?)?.toInt() ?? 0,
+      );
+}

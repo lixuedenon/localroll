@@ -104,5 +104,14 @@
   "auto.waiting": "{count} mục mới đang chờ gửi tới {pc}",
   "auto.waiting_hint": "Máy tính đang tắt hoặc không ở Wi-Fi này. Sẽ tự gửi khi kết nối lại.",
   "auto.sending": "Đang gửi mục mới tới {pc}… {done}/{total}",
-  "auto.done": "Đã gửi {count} mục mới tới {pc}"
+  "auto.done": "Đã gửi {count} mục mới tới {pc}",
+  "settings.title": "Cài đặt",
+  "settings.auto_send": "Tự gửi ảnh mới",
+  "settings.auto_send_hint": "Ảnh và video mới sẽ tự gửi tới {pc} khi kết nối được.",
+  "settings.pc": "Máy tính",
+  "settings.manage_pcs": "Ghép nối, chuyển hoặc xóa máy tính",
+  "lost.title": "{pc} đã xóa {count} mục",
+  "lost.body": "Chúng vẫn còn trên điện thoại này nhưng không còn bản sao lưu.",
+  "lost.rebackup": "Sao lưu lại",
+  "lost.ignore": "Bỏ qua"
 }

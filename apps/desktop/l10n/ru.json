@@ -112,5 +112,15 @@
   "library.n_videos": "Видео: {count}",
   "settings.startup": "Запуск",
   "settings.autostart": "Запускать LocalRoll вместе с Windows",
-  "settings.autostart_hint": "Открывается свёрнутым, чтобы телефоны всегда могли отправлять на этот ПК."
+  "settings.autostart_hint": "Открывается свёрнутым, чтобы телефоны всегда могли отправлять на этот ПК.",
+  "lib.export": "Экспорт в папку…",
+  "lib.delete": "Удалить",
+  "lib.delete_n": "Удалить объекты: {count}",
+  "lib.delete_title": "Удалить объекты ({count})?",
+  "lib.delete_body": "Они попадут в корзину Windows, их можно восстановить. Телефоны узнают при следующем подключении, что этих файлов больше нет на ПК.",
+  "lib.deleted": "Перемещено в корзину: {count}",
+  "lib.exported": "Скопировано: {count}",
+  "lib.open": "Открыть",
+  "lib.select": "Выбрать",
+  "lib.unselect": "Снять выбор"
 }

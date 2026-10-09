@@ -112,5 +112,15 @@
   "library.n_videos": "{count} vidéos",
   "settings.startup": "Démarrage",
   "settings.autostart": "Lancer LocalRoll avec Windows",
-  "settings.autostart_hint": "S’ouvre réduit : les téléphones peuvent toujours envoyer vers ce PC."
+  "settings.autostart_hint": "S’ouvre réduit : les téléphones peuvent toujours envoyer vers ce PC.",
+  "lib.export": "Exporter vers un dossier…",
+  "lib.delete": "Supprimer",
+  "lib.delete_n": "Supprimer {count} éléments",
+  "lib.delete_title": "Supprimer {count} élément(s) ?",
+  "lib.delete_body": "Ils vont dans la Corbeille de Windows et restent récupérables. Les téléphones seront prévenus à leur prochaine connexion qu’ils ne sont plus sur ce PC.",
+  "lib.deleted": "{count} déplacés dans la Corbeille",
+  "lib.exported": "{count} copiés",
+  "lib.open": "Ouvrir",
+  "lib.select": "Sélectionner",
+  "lib.unselect": "Désélectionner"
 }

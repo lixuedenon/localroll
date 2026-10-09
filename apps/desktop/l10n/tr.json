@@ -112,5 +112,15 @@
   "library.n_videos": "{count} video",
   "settings.startup": "Başlangıç",
   "settings.autostart": "LocalRoll’u Windows ile başlat",
-  "settings.autostart_hint": "Simge durumunda açılır; telefonlar bu bilgisayara her zaman gönderebilir."
+  "settings.autostart_hint": "Simge durumunda açılır; telefonlar bu bilgisayara her zaman gönderebilir.",
+  "lib.export": "Klasöre aktar…",
+  "lib.delete": "Sil",
+  "lib.delete_n": "{count} öğeyi sil",
+  "lib.delete_title": "{count} öğe silinsin mi?",
+  "lib.delete_body": "Windows Geri Dönüşüm Kutusu’na gider, geri yüklenebilir. Telefonlar bir sonraki bağlantıda bunların artık bu bilgisayarda olmadığını öğrenir.",
+  "lib.deleted": "{count} öğe Geri Dönüşüm Kutusu’na taşındı",
+  "lib.exported": "{count} öğe kopyalandı",
+  "lib.open": "Aç",
+  "lib.select": "Seç",
+  "lib.unselect": "Seçimi kaldır"
 }

@@ -112,5 +112,15 @@
   "library.n_videos": "{count} vídeos",
   "settings.startup": "Inicialização",
   "settings.autostart": "Iniciar o LocalRoll com o Windows",
-  "settings.autostart_hint": "Abre minimizado, para os celulares sempre poderem enviar a este PC."
+  "settings.autostart_hint": "Abre minimizado, para os celulares sempre poderem enviar a este PC.",
+  "lib.export": "Exportar para pasta…",
+  "lib.delete": "Apagar",
+  "lib.delete_n": "Apagar {count} itens",
+  "lib.delete_title": "Apagar {count} item(ns)?",
+  "lib.delete_body": "Eles vão para a Lixeira do Windows e ainda podem ser restaurados. Os celulares serão avisados na próxima conexão de que não estão mais neste PC.",
+  "lib.deleted": "{count} movidos para a Lixeira",
+  "lib.exported": "{count} copiados",
+  "lib.open": "Abrir",
+  "lib.select": "Selecionar",
+  "lib.unselect": "Desmarcar"
 }

@@ -112,5 +112,15 @@
   "library.n_videos": "{count} videos",
   "settings.startup": "Startup",
   "settings.autostart": "Start LocalRoll with Windows",
-  "settings.autostart_hint": "Opens minimised, so phones can always send to this PC."
+  "settings.autostart_hint": "Opens minimised, so phones can always send to this PC.",
+  "lib.export": "Export to folder…",
+  "lib.delete": "Delete",
+  "lib.delete_n": "Delete {count} items",
+  "lib.delete_title": "Delete {count} item(s)?",
+  "lib.delete_body": "They go to the Windows Recycle Bin, so you can still restore them. Phones will be told next time they connect that these are no longer on this PC.",
+  "lib.deleted": "{count} moved to the Recycle Bin",
+  "lib.exported": "{count} copied",
+  "lib.open": "Open",
+  "lib.select": "Select",
+  "lib.unselect": "Unselect"
 }

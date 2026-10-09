@@ -104,5 +104,14 @@
   "auto.waiting": "{count} itens novos aguardando {pc}",
   "auto.waiting_hint": "O PC está desligado ou fora desta Wi-Fi. Serão enviados sozinhos quando ele estiver.",
   "auto.sending": "Enviando itens novos para {pc}… {done}/{total}",
-  "auto.done": "{count} itens novos enviados para {pc}"
+  "auto.done": "{count} itens novos enviados para {pc}",
+  "settings.title": "Configurações",
+  "settings.auto_send": "Enviar fotos novas automaticamente",
+  "settings.auto_send_hint": "Fotos e vídeos novos vão sozinhos para {pc} quando ele estiver disponível.",
+  "settings.pc": "PC",
+  "settings.manage_pcs": "Parear, trocar ou remover PCs",
+  "lost.title": "{count} itens foram apagados em {pc}",
+  "lost.body": "Ainda estão neste celular, mas não têm mais cópia.",
+  "lost.rebackup": "Salvar de novo",
+  "lost.ignore": "Ignorar"
 }

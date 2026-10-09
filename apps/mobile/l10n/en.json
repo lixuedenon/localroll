@@ -104,5 +104,14 @@
   "auto.waiting": "{count} new items waiting for {pc}",
   "auto.waiting_hint": "The PC is off or not on this Wi-Fi. They’ll be sent automatically when it is.",
   "auto.sending": "Sending new items to {pc}… {done}/{total}",
-  "auto.done": "{count} new items sent to {pc}"
+  "auto.done": "{count} new items sent to {pc}",
+  "settings.title": "Settings",
+  "settings.auto_send": "Send new photos automatically",
+  "settings.auto_send_hint": "New photos and videos go to {pc} on their own whenever it is reachable.",
+  "settings.pc": "PC",
+  "settings.manage_pcs": "Pair, switch or remove PCs",
+  "lost.title": "{count} items were deleted on {pc}",
+  "lost.body": "They are still on this phone, but no longer backed up.",
+  "lost.rebackup": "Back up again",
+  "lost.ignore": "Ignore"
 }

@@ -112,5 +112,15 @@
   "library.n_videos": "{count} 段视频",
   "settings.startup": "启动",
   "settings.autostart": "开机时自动启动 LocalRoll",
-  "settings.autostart_hint": "启动后最小化到任务栏，手机随时都能发送到这台电脑。"
+  "settings.autostart_hint": "启动后最小化到任务栏，手机随时都能发送到这台电脑。",
+  "lib.export": "导出到文件夹…",
+  "lib.delete": "删除",
+  "lib.delete_n": "删除 {count} 项",
+  "lib.delete_title": "删除 {count} 项？",
+  "lib.delete_body": "文件会移到 Windows 回收站，还可以恢复。手机下次连接时会提示这些照片已不在这台电脑上。",
+  "lib.deleted": "已把 {count} 项移到回收站",
+  "lib.exported": "已复制 {count} 项",
+  "lib.open": "打开",
+  "lib.select": "选择",
+  "lib.unselect": "取消选择"
 }

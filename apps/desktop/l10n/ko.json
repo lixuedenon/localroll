@@ -112,5 +112,15 @@
   "library.n_videos": "동영상 {count}개",
   "settings.startup": "시작",
   "settings.autostart": "Windows 시작 시 LocalRoll 실행",
-  "settings.autostart_hint": "최소화된 상태로 실행되어 휴대폰에서 언제든 이 PC로 보낼 수 있습니다."
+  "settings.autostart_hint": "최소화된 상태로 실행되어 휴대폰에서 언제든 이 PC로 보낼 수 있습니다.",
+  "lib.export": "폴더로 내보내기…",
+  "lib.delete": "삭제",
+  "lib.delete_n": "{count}개 삭제",
+  "lib.delete_title": "{count}개를 삭제할까요?",
+  "lib.delete_body": "Windows 휴지통으로 이동하므로 복원할 수 있습니다. 다음에 휴대폰이 연결되면 이 PC에서 사라졌다고 알려 줍니다.",
+  "lib.deleted": "{count}개를 휴지통으로 옮겼습니다",
+  "lib.exported": "{count}개를 복사했습니다",
+  "lib.open": "열기",
+  "lib.select": "선택",
+  "lib.unselect": "선택 해제"
 }

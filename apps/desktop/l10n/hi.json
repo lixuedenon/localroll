@@ -112,5 +112,15 @@
   "library.n_videos": "{count} वीडियो",
   "settings.startup": "स्टार्टअप",
   "settings.autostart": "Windows के साथ LocalRoll शुरू करें",
-  "settings.autostart_hint": "छोटा करके खुलता है, ताकि फ़ोन कभी भी इस PC पर भेज सकें।"
+  "settings.autostart_hint": "छोटा करके खुलता है, ताकि फ़ोन कभी भी इस PC पर भेज सकें।",
+  "lib.export": "फ़ोल्डर में एक्सपोर्ट करें…",
+  "lib.delete": "हटाएँ",
+  "lib.delete_n": "{count} आइटम हटाएँ",
+  "lib.delete_title": "{count} आइटम हटाएँ?",
+  "lib.delete_body": "ये Windows रीसायकल बिन में जाएँगे, इसलिए वापस लाए जा सकते हैं। अगली बार जुड़ने पर फ़ोन को बताया जाएगा कि ये अब इस PC पर नहीं हैं।",
+  "lib.deleted": "{count} रीसायकल बिन में भेजे गए",
+  "lib.exported": "{count} कॉपी किए गए",
+  "lib.open": "खोलें",
+  "lib.select": "चुनें",
+  "lib.unselect": "चुनाव हटाएँ"
 }

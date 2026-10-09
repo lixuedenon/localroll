@@ -104,5 +104,14 @@
   "auto.waiting": "有 {count} 项新内容等待发送到 {pc}",
   "auto.waiting_hint": "电脑没开，或者不在这个 Wi-Fi 上。等它在线时会自动发送。",
   "auto.sending": "正在把新内容发送到 {pc}… {done}/{total}",
-  "auto.done": "已把 {count} 项新内容发送到 {pc}"
+  "auto.done": "已把 {count} 项新内容发送到 {pc}",
+  "settings.title": "设置",
+  "settings.auto_send": "自动发送新照片",
+  "settings.auto_send_hint": "新拍的照片和视频会在 {pc} 可连接时自动发过去。",
+  "settings.pc": "电脑",
+  "settings.manage_pcs": "配对、切换或删除电脑",
+  "lost.title": "{pc} 上删除了 {count} 项",
+  "lost.body": "它们还在这部手机上，但已经没有备份了。",
+  "lost.rebackup": "重新备份",
+  "lost.ignore": "忽略"
 }

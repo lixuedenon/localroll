@@ -10,6 +10,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/converter.dart';
+import '../services/file_actions.dart';
 import '../services/library_index.dart';
 import '../services/network.dart';
 import 'format.dart';
@@ -44,6 +45,30 @@ class _ViewerPageState extends State<ViewerPage> {
     _pages.dispose();
     _focus.dispose();
     super.dispose();
+  }
+
+  /// Delete (to the Recycle Bin) and close the viewer.
+  Future<void> _deleteCurrent(MediaItem item) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr('lib.delete_title', {'count': 1})),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Text(tr('lib.delete_body')),
+        ),
+        actions: [
+          OutlinedButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('exit.stay'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('lib.delete'))),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    final n = await deleteItems(widget.services.library, [item]);
+    if (!mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    Navigator.of(context).pop();
+    messenger.showSnackBar(SnackBar(content: Text(tr('lib.deleted', {'count': n}))));
   }
 
   void _go(int delta) {
@@ -99,6 +124,11 @@ class _ViewerPageState extends State<ViewerPage> {
               tooltip: tr('common.show_in_folder'),
               onPressed: () => revealInExplorer(s.library.absPath(item)),
               icon: const Icon(Icons.folder_open),
+            ),
+            IconButton(
+              tooltip: tr('lib.delete'),
+              onPressed: () => _deleteCurrent(item),
+              icon: const Icon(Icons.delete_outline_rounded),
             ),
             const SizedBox(width: 8),
           ],

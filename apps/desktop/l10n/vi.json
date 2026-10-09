@@ -112,5 +112,15 @@
   "library.n_videos": "{count} video",
   "settings.startup": "Khởi động",
   "settings.autostart": "Mở LocalRoll cùng Windows",
-  "settings.autostart_hint": "Mở ở dạng thu nhỏ để điện thoại luôn gửi được tới máy tính này."
+  "settings.autostart_hint": "Mở ở dạng thu nhỏ để điện thoại luôn gửi được tới máy tính này.",
+  "lib.export": "Xuất ra thư mục…",
+  "lib.delete": "Xóa",
+  "lib.delete_n": "Xóa {count} mục",
+  "lib.delete_title": "Xóa {count} mục?",
+  "lib.delete_body": "Chúng sẽ vào Thùng rác của Windows nên vẫn khôi phục được. Lần kết nối tới, điện thoại sẽ được báo rằng chúng không còn trên máy tính này.",
+  "lib.deleted": "Đã chuyển {count} mục vào Thùng rác",
+  "lib.exported": "Đã sao chép {count} mục",
+  "lib.open": "Mở",
+  "lib.select": "Chọn",
+  "lib.unselect": "Bỏ chọn"
 }

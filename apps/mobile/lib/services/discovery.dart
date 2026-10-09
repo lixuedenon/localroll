@@ -139,12 +139,36 @@ Future<void> refreshPairedLooks(MobileSettings settings, List<FoundDesktop> foun
           await settings.rememberHost(d, h);
         }
         await settings.updateLook(d, info);
+        await _pullDeletions(settings, d, h, f.port);
         break;
       } catch (_) {
       } finally {
         c.close();
       }
     }
+  }
+}
+
+/// Reverse signal: photos deleted on the PC that are still on this phone lose
+/// their ✓ and are listed as "not backed up any more".
+Future<void> _pullDeletions(MobileSettings settings, PairedDesktop d, String host, int port) async {
+  final c = DesktopClient(host: host, port: port, deviceId: settings.deviceId, token: d.token);
+  try {
+    final r = await c.changes(d.changesSinceMs);
+    if (r.deleted.isNotEmpty) {
+      final sent = settings.sentTo(d.id);
+      final ours = r.deleted.where(sent.contains).toList();
+      if (ours.isNotEmpty) {
+        await settings.unmarkSent(d.id, ours);
+        await settings.addLost(d.id, ours);
+      }
+    }
+    d.changesSinceMs = r.now;
+    await settings.saveDesktop();
+  } catch (_) {
+    // Older PC version or not paired any more: nothing to do.
+  } finally {
+    c.close();
   }
 }
 

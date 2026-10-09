@@ -112,5 +112,15 @@
   "library.n_videos": "動画 {count} 本",
   "settings.startup": "起動",
   "settings.autostart": "Windows の起動時に LocalRoll を開く",
-  "settings.autostart_hint": "最小化で起動するので、スマホからいつでもこの PC に送れます。"
+  "settings.autostart_hint": "最小化で起動するので、スマホからいつでもこの PC に送れます。",
+  "lib.export": "フォルダーに書き出す…",
+  "lib.delete": "削除",
+  "lib.delete_n": "{count} 件を削除",
+  "lib.delete_title": "{count} 件を削除しますか？",
+  "lib.delete_body": "Windows のごみ箱に移動するので、元に戻せます。次にスマホが接続したとき、この PC から消えたことが通知されます。",
+  "lib.deleted": "{count} 件をごみ箱に移動しました",
+  "lib.exported": "{count} 件をコピーしました",
+  "lib.open": "開く",
+  "lib.select": "選択",
+  "lib.unselect": "選択解除"
 }

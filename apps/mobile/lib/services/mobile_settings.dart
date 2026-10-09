@@ -19,6 +19,7 @@ class PairedDesktop {
     this.icon,
     this.color,
     this.avatar = 0,
+    this.changesSinceMs = 0,
   });
 
   final String id;
@@ -34,6 +35,9 @@ class PairedDesktop {
   String? icon;
   int? color;
   int avatar;
+
+  /// Last time we asked the PC what was deleted there.
+  int changesSinceMs;
 
   /// URL of the PC's own picture, or null.
   String? get avatarUrl {
@@ -52,6 +56,7 @@ class PairedDesktop {
         if (icon != null) 'icon': icon,
         if (color != null) 'color': color,
         'avatar': avatar,
+        'changesSinceMs': changesSinceMs,
       };
 
   factory PairedDesktop.fromJson(Map<String, dynamic> j) => PairedDesktop(
@@ -64,6 +69,7 @@ class PairedDesktop {
         icon: j['icon'] as String?,
         color: (j['color'] as num?)?.toInt(),
         avatar: (j['avatar'] as num?)?.toInt() ?? 0,
+        changesSinceMs: (j['changesSinceMs'] as num?)?.toInt() ?? 0,
       );
 }
 
@@ -184,6 +190,27 @@ class MobileSettings extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Items deleted on the PC that are still on this phone: no backup any
+  /// more. Shown as a warning on the home screen until re-sent or dismissed.
+  Set<String> lostOn(String desktopId) =>
+      _lost.putIfAbsent(desktopId, () => (_prefs.getStringList('lost_$desktopId') ?? const []).toSet());
+  final Map<String, Set<String>> _lost = {};
+
+  Future<void> addLost(String desktopId, Iterable<String> ids) async {
+    final set = lostOn(desktopId)..addAll(ids);
+    await _prefs.setStringList('lost_$desktopId', set.toList());
+    notifyListeners();
+  }
+
+  Future<void> clearLost(String desktopId, [Iterable<String>? ids]) async {
+    final set = lostOn(desktopId);
+    ids == null ? set.clear() : set.removeAll(ids);
+    await _prefs.setStringList('lost_$desktopId', set.toList());
+    notifyListeners();
+  }
+
+  Future<void> saveDesktop() async => _save();
+
   /// The PC no longer has these (deleted or changed there): drop the ✓ so
   /// they count as not backed up again.
   Future<void> unmarkSent(String desktopId, Iterable<String> assetIds) async {
@@ -201,6 +228,8 @@ class MobileSettings extends ChangeNotifier {
       _sent.putIfAbsent(desktopId, () => (_prefs.getStringList('sent_$desktopId') ?? const []).toSet());
 
   Future<void> markSent(String desktopId, String assetId) async {
+    final lost = lostOn(desktopId);
+    if (lost.remove(assetId)) await _prefs.setStringList('lost_$desktopId', lost.toList());
     final set = sentTo(desktopId);
     if (set.add(assetId)) {
       await _prefs.setStringList('sent_$desktopId', set.toList());

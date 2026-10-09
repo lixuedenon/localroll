@@ -104,5 +104,14 @@
   "auto.waiting": "새 항목 {count}개가 {pc}로 보내기를 기다리는 중",
   "auto.waiting_hint": "PC가 꺼져 있거나 이 Wi-Fi에 없습니다. 연결되면 자동으로 보냅니다.",
   "auto.sending": "새 항목을 {pc}로 보내는 중… {done}/{total}",
-  "auto.done": "새 항목 {count}개를 {pc}로 보냈습니다"
+  "auto.done": "새 항목 {count}개를 {pc}로 보냈습니다",
+  "settings.title": "설정",
+  "settings.auto_send": "새 사진 자동 보내기",
+  "settings.auto_send_hint": "새 사진과 동영상은 {pc}에 연결될 때 자동으로 보내집니다.",
+  "settings.pc": "PC",
+  "settings.manage_pcs": "PC 연결, 전환, 삭제",
+  "lost.title": "{pc}에서 {count}개가 삭제되었습니다",
+  "lost.body": "이 휴대폰에는 남아 있지만 더 이상 백업되어 있지 않습니다.",
+  "lost.rebackup": "다시 백업",
+  "lost.ignore": "무시"
 }

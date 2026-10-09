@@ -104,5 +104,14 @@
   "auto.waiting": "{count} neue Elemente warten auf {pc}",
   "auto.waiting_hint": "Der PC ist aus oder nicht in diesem WLAN. Sie werden automatisch gesendet, sobald er erreichbar ist.",
   "auto.sending": "Neue Elemente werden an {pc} gesendet… {done}/{total}",
-  "auto.done": "{count} neue Elemente an {pc} gesendet"
+  "auto.done": "{count} neue Elemente an {pc} gesendet",
+  "settings.title": "Einstellungen",
+  "settings.auto_send": "Neue Fotos automatisch senden",
+  "settings.auto_send_hint": "Neue Fotos und Videos gehen von selbst an {pc}, sobald er erreichbar ist.",
+  "settings.pc": "PC",
+  "settings.manage_pcs": "PCs koppeln, wechseln oder entfernen",
+  "lost.title": "{count} Elemente wurden auf {pc} gelöscht",
+  "lost.body": "Sie sind noch auf diesem Handy, aber nicht mehr gesichert.",
+  "lost.rebackup": "Erneut sichern",
+  "lost.ignore": "Ignorieren"
 }

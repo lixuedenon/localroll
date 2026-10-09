@@ -104,5 +104,14 @@
   "auto.waiting": "{count} yeni öğe {pc} için bekliyor",
   "auto.waiting_hint": "Bilgisayar kapalı ya da bu Wi-Fi’de değil. Bağlanınca otomatik gönderilecek.",
   "auto.sending": "Yeni öğeler {pc} bilgisayarına gönderiliyor… {done}/{total}",
-  "auto.done": "{count} yeni öğe {pc} bilgisayarına gönderildi"
+  "auto.done": "{count} yeni öğe {pc} bilgisayarına gönderildi",
+  "settings.title": "Ayarlar",
+  "settings.auto_send": "Yeni fotoğrafları otomatik gönder",
+  "settings.auto_send_hint": "Yeni fotoğraf ve videolar {pc} bilgisayarına ulaşılabildiğinde kendiliğinden gider.",
+  "settings.pc": "Bilgisayar",
+  "settings.manage_pcs": "Bilgisayar eşle, değiştir veya kaldır",
+  "lost.title": "{pc} üzerinde {count} öğe silindi",
+  "lost.body": "Hâlâ bu telefonda, ama artık yedekleri yok.",
+  "lost.rebackup": "Yeniden yedekle",
+  "lost.ignore": "Yok say"
 }

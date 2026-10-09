@@ -112,5 +112,15 @@
   "library.n_videos": "{count} فيديو",
   "settings.startup": "بدء التشغيل",
   "settings.autostart": "تشغيل LocalRoll مع Windows",
-  "settings.autostart_hint": "يفتح مصغّرًا حتى تتمكن الهواتف دائمًا من الإرسال إلى هذا الكمبيوتر."
+  "settings.autostart_hint": "يفتح مصغّرًا حتى تتمكن الهواتف دائمًا من الإرسال إلى هذا الكمبيوتر.",
+  "lib.export": "تصدير إلى مجلد…",
+  "lib.delete": "حذف",
+  "lib.delete_n": "حذف {count} عنصرًا",
+  "lib.delete_title": "حذف {count} عنصر؟",
+  "lib.delete_body": "ستنتقل إلى سلة محذوفات Windows ويمكن استعادتها. ستُبلَّغ الهواتف عند اتصالها التالي بأنها لم تعد على هذا الكمبيوتر.",
+  "lib.deleted": "نُقل {count} إلى سلة المحذوفات",
+  "lib.exported": "نُسخ {count}",
+  "lib.open": "فتح",
+  "lib.select": "تحديد",
+  "lib.unselect": "إلغاء التحديد"
 }

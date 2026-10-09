@@ -76,6 +76,10 @@ class LibraryIndex extends ChangeNotifier {
 
   String rootPath;
   final List<MediaItem> _items = [];
+
+  /// Phone items that were in the library and are gone now (deleted in
+  /// LocalRoll or in Explorer). Phones ask for these to warn the user.
+  final List<_Tombstone> _deleted = [];
   Timer? _saveTimer;
 
   List<MediaItem> get items => List.unmodifiable(_items);
@@ -93,18 +97,27 @@ class LibraryIndex extends ChangeNotifier {
     await Directory(incomingDir).create(recursive: true);
     await Directory(cacheDir).create(recursive: true);
     _items.clear();
+    _deleted.clear();
     if (await _indexFile.exists()) {
       try {
         final j = jsonDecode(await _indexFile.readAsString()) as Map<String, dynamic>;
         for (final e in (j['items'] as List? ?? const [])) {
           _items.add(MediaItem.fromJson(e as Map<String, dynamic>));
         }
+        for (final e in (j['deleted'] as List? ?? const [])) {
+          _deleted.add(_Tombstone.fromJson(e as Map<String, dynamic>));
+        }
       } catch (e) {
         debugPrint('index.json unreadable, starting empty: $e');
       }
     }
-    // Drop entries whose file was deleted outside the app.
-    _items.removeWhere((i) => !File(absPath(i)).existsSync());
+    // Files deleted outside the app (Explorer…): drop and remember them.
+    final gone = _items.where((i) => !File(absPath(i)).existsSync()).toList();
+    if (gone.isNotEmpty) {
+      _remember(gone);
+      _items.removeWhere(gone.contains);
+      _scheduleSave();
+    }
     _sort();
     notifyListeners();
   }
@@ -131,6 +144,35 @@ class LibraryIndex extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Removes items from the index (the caller already deleted the files).
+  void removeItems(Iterable<MediaItem> items) {
+    final set = items.toSet();
+    _remember(set);
+    _items.removeWhere(set.contains);
+    _scheduleSave();
+    notifyListeners();
+  }
+
+  void _remember(Iterable<MediaItem> items) {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    for (final i in items) {
+      if (i.deviceId != null && i.assetId != null) {
+        _deleted.add(_Tombstone(i.deviceId!, i.assetId!, now));
+      }
+    }
+    // Keep the list bounded (a year, at most 20 000 entries).
+    final cutoff = now - const Duration(days: 365).inMilliseconds;
+    _deleted.removeWhere((t) => t.ms < cutoff);
+    if (_deleted.length > 20000) _deleted.removeRange(0, _deleted.length - 20000);
+  }
+
+  /// Asset ids of [deviceId] deleted here after [sinceMs] — unless the same
+  /// asset was received again since.
+  List<String> deletedSince(String deviceId, int sinceMs) => [
+        for (final t in _deleted)
+          if (t.deviceId == deviceId && t.ms > sinceMs && findByAsset(deviceId, t.assetId) == null) t.assetId,
+      ];
+
   void _sort() => _items.sort((a, b) => b.captureMs.compareTo(a.captureMs));
 
   void _scheduleSave() {
@@ -146,6 +188,7 @@ class LibraryIndex extends ChangeNotifier {
     await tmp.writeAsString(jsonEncode({
       'version': 1,
       'items': _items.map((i) => i.toJson()).toList(),
+      'deleted': _deleted.map((t) => t.toJson()).toList(),
     }));
     await tmp.rename(_indexFile.path);
   }
@@ -163,4 +206,17 @@ class LibraryIndex extends ChangeNotifier {
       if (!File(candidate).existsSync()) return candidate;
     }
   }
+}
+
+class _Tombstone {
+  const _Tombstone(this.deviceId, this.assetId, this.ms);
+
+  final String deviceId;
+  final String assetId;
+  final int ms;
+
+  Map<String, dynamic> toJson() => {'d': deviceId, 'a': assetId, 't': ms};
+
+  factory _Tombstone.fromJson(Map<String, dynamic> j) =>
+      _Tombstone(j['d'] as String, j['a'] as String, (j['t'] as num).toInt());
 }

@@ -112,5 +112,15 @@
   "library.n_videos": "{count} Videos",
   "settings.startup": "Start",
   "settings.autostart": "LocalRoll mit Windows starten",
-  "settings.autostart_hint": "Startet minimiert, damit Handys jederzeit an diesen PC senden können."
+  "settings.autostart_hint": "Startet minimiert, damit Handys jederzeit an diesen PC senden können.",
+  "lib.export": "In Ordner exportieren…",
+  "lib.delete": "Löschen",
+  "lib.delete_n": "{count} Elemente löschen",
+  "lib.delete_title": "{count} Element(e) löschen?",
+  "lib.delete_body": "Sie kommen in den Windows-Papierkorb und lassen sich wiederherstellen. Handys erfahren bei der nächsten Verbindung, dass sie nicht mehr auf diesem PC sind.",
+  "lib.deleted": "{count} in den Papierkorb verschoben",
+  "lib.exported": "{count} kopiert",
+  "lib.open": "Öffnen",
+  "lib.select": "Auswählen",
+  "lib.unselect": "Auswahl aufheben"
 }

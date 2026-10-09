@@ -112,5 +112,15 @@
   "library.n_videos": "{count} 段影片",
   "settings.startup": "啟動",
   "settings.autostart": "開機時自動啟動 LocalRoll",
-  "settings.autostart_hint": "啟動後最小化到工作列，手機隨時都能傳送到這台電腦。"
+  "settings.autostart_hint": "啟動後最小化到工作列，手機隨時都能傳送到這台電腦。",
+  "lib.export": "匯出到資料夾…",
+  "lib.delete": "刪除",
+  "lib.delete_n": "刪除 {count} 項",
+  "lib.delete_title": "刪除 {count} 項？",
+  "lib.delete_body": "檔案會移到 Windows 資源回收筒，還可以還原。手機下次連線時會提示這些照片已不在這台電腦上。",
+  "lib.deleted": "已把 {count} 項移到資源回收筒",
+  "lib.exported": "已複製 {count} 項",
+  "lib.open": "開啟",
+  "lib.select": "選取",
+  "lib.unselect": "取消選取"
 }

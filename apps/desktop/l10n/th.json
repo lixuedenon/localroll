@@ -112,5 +112,15 @@
   "library.n_videos": "วิดีโอ {count} คลิป",
   "settings.startup": "การเริ่มต้น",
   "settings.autostart": "เปิด LocalRoll พร้อม Windows",
-  "settings.autostart_hint": "เปิดแบบย่อไว้ โทรศัพท์จึงส่งมาที่คอมพิวเตอร์นี้ได้ตลอด"
+  "settings.autostart_hint": "เปิดแบบย่อไว้ โทรศัพท์จึงส่งมาที่คอมพิวเตอร์นี้ได้ตลอด",
+  "lib.export": "ส่งออกไปยังโฟลเดอร์…",
+  "lib.delete": "ลบ",
+  "lib.delete_n": "ลบ {count} รายการ",
+  "lib.delete_title": "ลบ {count} รายการไหม",
+  "lib.delete_body": "ไฟล์จะไปอยู่ในถังรีไซเคิลของ Windows จึงยังกู้คืนได้ ครั้งต่อไปที่โทรศัพท์เชื่อมต่อจะได้รับแจ้งว่าไม่มีอยู่ในคอมพิวเตอร์นี้แล้ว",
+  "lib.deleted": "ย้าย {count} รายการไปถังรีไซเคิลแล้ว",
+  "lib.exported": "คัดลอก {count} รายการแล้ว",
+  "lib.open": "เปิด",
+  "lib.select": "เลือก",
+  "lib.unselect": "ยกเลิกการเลือก"
 }

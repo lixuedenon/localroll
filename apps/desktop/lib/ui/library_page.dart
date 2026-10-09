@@ -1,10 +1,12 @@
 // apps/desktop/lib/ui/library_page.dart
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:localroll_core/localroll_core.dart';
 
 import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/converter.dart';
+import '../services/file_actions.dart';
 import '../services/library_index.dart';
 import '../services/network.dart';
 import 'media_thumb.dart';
@@ -49,7 +51,17 @@ class _LibraryPageState extends State<LibraryPage> {
                 ? IconButton(icon: const Icon(Icons.close), onPressed: () => setState(_selected.clear))
                 : null,
             actions: [
-              if (_selecting)
+              if (_selecting) ...[
+                IconButton(
+                  tooltip: tr('lib.export'),
+                  icon: const Icon(Icons.drive_file_move_rounded),
+                  onPressed: () => _export(items.where((i) => _selected.contains(i.relPath)).toList()),
+                ),
+                IconButton(
+                  tooltip: tr('lib.delete'),
+                  icon: const Icon(Icons.delete_outline_rounded),
+                  onPressed: () => _delete(items.where((i) => _selected.contains(i.relPath)).toList()),
+                ),
                 PopupMenuButton<ConvertPreset>(
                   tooltip: tr('convert.selected_tooltip'),
                   icon: const Icon(Icons.auto_fix_high),
@@ -63,8 +75,8 @@ class _LibraryPageState extends State<LibraryPage> {
                   itemBuilder: (_) => [
                     for (final p in ConvertPreset.values) PopupMenuItem(value: p, child: Text(tr('convert.to', {'preset': p.label}))),
                   ],
-                )
-              else ...[
+                ),
+              ] else ...[
                 SegmentedButton<_Filter>(
                   segments: [
                     ButtonSegment(value: _Filter.all, label: Text(tr('library.filter_all'))),
@@ -88,6 +100,113 @@ class _LibraryPageState extends State<LibraryPage> {
         );
       },
     );
+  }
+
+  /// Delete = move to the Windows Recycle Bin. Phones are told next time.
+  Future<void> _delete(List<MediaItem> items) async {
+    if (items.isEmpty) return;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.delete_outline_rounded, size: 32),
+        title: Text(tr('lib.delete_title', {'count': items.length})),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Text(tr('lib.delete_body')),
+        ),
+        actions: [
+          OutlinedButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('exit.stay'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('lib.delete'))),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    final n = await deleteItems(widget.services.library, items);
+    if (!mounted) return;
+    setState(_selected.clear);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('lib.deleted', {'count': n}))));
+  }
+
+  /// Copy the originals into a folder of your choice.
+  Future<void> _export(List<MediaItem> items) async {
+    if (items.isEmpty) return;
+    final folder = await getDirectoryPath(confirmButtonText: tr('lib.export'));
+    if (folder == null) return;
+    final n = await exportItems(widget.services.library, items, folder);
+    if (!mounted) return;
+    setState(_selected.clear);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(tr('lib.exported', {'count': n})),
+      action: SnackBarAction(label: tr('common.open'), onPressed: () => revealInExplorer(folder)),
+    ));
+  }
+
+  /// Right-click menu: acts on the selection if the item is part of it.
+  Future<void> _contextMenu(BuildContext context, List<MediaItem> items, int index, Offset at) async {
+    final item = items[index];
+    final targets = _selected.contains(item.relPath)
+        ? items.where((i) => _selected.contains(i.relPath)).toList()
+        : [item];
+    final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final choice = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromRect(at & const Size(1, 1), Offset.zero & overlay.size),
+      items: [
+        if (targets.length == 1) PopupMenuItem(value: 'open', child: _menuRow(Icons.open_in_full_rounded, tr('lib.open'))),
+        PopupMenuItem(
+          value: 'select',
+          child: _menuRow(Icons.check_circle_outline_rounded,
+              _selected.contains(item.relPath) ? tr('lib.unselect') : tr('lib.select')),
+        ),
+        const PopupMenuDivider(),
+        for (final p in ConvertPreset.values)
+          PopupMenuItem(value: 'convert:${p.name}', child: _menuRow(Icons.auto_fix_high_rounded, tr('convert.to', {'preset': p.label}))),
+        PopupMenuItem(value: 'export', child: _menuRow(Icons.drive_file_move_rounded, tr('lib.export'))),
+        if (targets.length == 1)
+          PopupMenuItem(value: 'reveal', child: _menuRow(Icons.folder_open_rounded, tr('common.show_in_folder'))),
+        const PopupMenuDivider(),
+        PopupMenuItem(
+          value: 'delete',
+          child: _menuRow(Icons.delete_outline_rounded,
+              targets.length == 1 ? tr('lib.delete') : tr('lib.delete_n', {'count': targets.length}),
+              danger: true),
+        ),
+      ],
+    );
+    if (!mounted || choice == null) return;
+    final s = widget.services;
+    switch (choice) {
+      case 'open':
+        await Navigator.of(this.context).push(MaterialPageRoute(
+          builder: (_) => ViewerPage(services: s, items: items, initialIndex: index),
+        ));
+      case 'select':
+        setState(() => _selected.contains(item.relPath) ? _selected.remove(item.relPath) : _selected.add(item.relPath));
+      case 'export':
+        await _export(targets);
+      case 'reveal':
+        revealInExplorer(s.library.absPath(item));
+      case 'delete':
+        await _delete(targets);
+      default:
+        if (choice.startsWith('convert:')) {
+          final p = ConvertPreset.values.firstWhere((x) => 'convert:${x.name}' == choice);
+          s.converter.enqueue(targets, p);
+          setState(_selected.clear);
+          ScaffoldMessenger.of(this.context).showSnackBar(
+            SnackBar(content: Text(tr('convert.queued', {'preset': p.label}))),
+          );
+        }
+    }
+  }
+
+  Widget _menuRow(IconData icon, String text, {bool danger = false}) {
+    final color = danger ? Theme.of(context).colorScheme.error : null;
+    return Row(children: [
+      Icon(icon, size: 18, color: color),
+      const SizedBox(width: 12),
+      Text(text, style: TextStyle(color: color)),
+    ]);
   }
 
   Widget _empty(BuildContext context) => Center(
@@ -176,7 +295,7 @@ class _LibraryPageState extends State<LibraryPage> {
         }
       },
       onLongPress: () => setState(() => _selected.add(item.relPath)),
-      onSecondaryTap: () => setState(() => _selected.add(item.relPath)),
+      onSecondaryTapUp: (d) => _contextMenu(context, items, index, d.globalPosition),
       child: Stack(
         fit: StackFit.expand,
         children: [

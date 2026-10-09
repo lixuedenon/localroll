@@ -73,6 +73,10 @@ class DesktopClient {
       PairResponse.fromJson(await _send('POST', LrProtocol.pathPair,
           json: PairRequest(device: me, pin: pin).toJson()));
 
+  /// Assets of this phone deleted on the PC since [sinceMs].
+  Future<ChangesResponse> changes(int sinceMs) async => ChangesResponse.fromJson(
+      await _send('GET', LrProtocol.pathChanges, query: {'since': '$sinceMs'}, timeout: const Duration(seconds: 5)));
+
   /// Tap-to-pair: ask; the PC shows Allow / Deny.
   Future<PairApprovalState> requestApproval(DeviceInfo me) async => PairApprovalState.fromJson(
       await _send('POST', LrProtocol.pathPairRequest, json: PairApprovalRequest(device: me).toJson()));

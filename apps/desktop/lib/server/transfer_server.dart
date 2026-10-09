@@ -159,6 +159,17 @@ class TransferServer extends ChangeNotifier {
       if (req.method == 'POST' && path == LrProtocol.pathVerify) {
         return await _verify(req, device);
       }
+      if (req.method == 'GET' && path == LrProtocol.pathChanges) {
+        final since = int.tryParse(req.uri.queryParameters['since'] ?? '') ?? 0;
+        return _json(
+          res,
+          200,
+          ChangesResponse(
+            deleted: library.deletedSince(device.id, since),
+            now: DateTime.now().millisecondsSinceEpoch,
+          ).toJson(),
+        );
+      }
 
       // /api/v1/sessions/{sid}/files/{fid}[/complete]
       if (segs.length >= 6 &&

@@ -104,5 +104,14 @@
   "auto.waiting": "{count} नए आइटम {pc} पर भेजे जाने का इंतज़ार कर रहे हैं",
   "auto.waiting_hint": "PC बंद है या इस Wi-Fi पर नहीं है। जुड़ते ही अपने-आप भेज दिए जाएँगे।",
   "auto.sending": "नए आइटम {pc} पर भेजे जा रहे हैं… {done}/{total}",
-  "auto.done": "{count} नए आइटम {pc} पर भेज दिए गए"
+  "auto.done": "{count} नए आइटम {pc} पर भेज दिए गए",
+  "settings.title": "सेटिंग",
+  "settings.auto_send": "नई फ़ोटो अपने-आप भेजें",
+  "settings.auto_send_hint": "नई फ़ोटो और वीडियो {pc} उपलब्ध होने पर अपने-आप भेजे जाएँगे।",
+  "settings.pc": "PC",
+  "settings.manage_pcs": "PC जोड़ें, बदलें या हटाएँ",
+  "lost.title": "{pc} पर {count} आइटम हटाए गए",
+  "lost.body": "ये अभी इस फ़ोन पर हैं, पर अब इनका बैकअप नहीं है।",
+  "lost.rebackup": "फिर से बैकअप लें",
+  "lost.ignore": "अनदेखा करें"
 }

@@ -5,7 +5,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:localroll_core/localroll_core.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../l10n/l10n.dart';
@@ -16,6 +15,7 @@ import '../services/uploader.dart';
 import 'cleanup_page.dart';
 import 'connect_page.dart';
 import 'device_badge.dart';
+import 'settings_page.dart';
 import 'theme.dart';
 import 'transfer_page.dart';
 
@@ -88,13 +88,66 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     }
   }
 
-  Future<void> _toggleAuto(bool on) async {
-    await widget.settings.setAutoSend(on);
+  /// Switched in Settings.
+  Future<void> _onAutoSendChanged() => _auto.check();
+
+  /// Reverse signal: the PC deleted items that are still on this phone.
+  Widget _lostBanner(BuildContext context) {
     final d = widget.settings.current;
-    if (on && d != null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('auto.enabled', {'pc': d.name}))));
+    if (d == null) return const SizedBox.shrink();
+    final lost = widget.settings.lostOn(d.id);
+    if (lost.isEmpty) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+      padding: const EdgeInsets.fromLTRB(14, 12, 8, 8),
+      decoration: BoxDecoration(
+        color: LrColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: LrColors.safelight),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            const Icon(Icons.warning_amber_rounded, color: LrColors.safelight, size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(tr('lost.title', {'count': lost.length, 'pc': d.name}), style: theme.textTheme.titleSmall),
+            ),
+          ]),
+          const SizedBox(height: 4),
+          Text(tr('lost.body'), style: theme.textTheme.bodySmall),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(onPressed: () => widget.settings.clearLost(d.id), child: Text(tr('lost.ignore'))),
+              FilledButton.tonal(onPressed: () => _rebackupLost(d), child: Text(tr('lost.rebackup'))),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _rebackupLost(PairedDesktop d) async {
+    final ids = widget.settings.lostOn(d.id).toList();
+    final assets = <AssetEntity>[];
+    for (final id in ids) {
+      final a = await AssetEntity.fromId(id);
+      if (a != null) assets.add(a);
     }
-    await _auto.check();
+    // Deleted on the phone too: nothing to back up for those.
+    await widget.settings.clearLost(d.id, ids.where((id) => !assets.any((a) => a.id == id)));
+    if (!mounted || assets.isEmpty) return;
+    await Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => TransferPage(
+        settings: widget.settings,
+        discovery: widget.discovery,
+        desktop: d,
+        assets: assets,
+      ),
+    ));
   }
 
   /// Status line for auto-send (waiting / sending / sent).
@@ -364,23 +417,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               ],
             ),
             actions: [
-              PopupMenuButton<String>(
-                tooltip: tr('home.language'),
-                icon: const Icon(Icons.translate),
-                onSelected: (code) => widget.settings.setLanguage(code.isEmpty ? null : code),
-                itemBuilder: (_) => [
-                  CheckedPopupMenuItem(
-                    value: '',
-                    checked: widget.settings.language == null,
-                    child: Text(tr('home.language_system')),
+              IconButton(
+                tooltip: tr('settings.title'),
+                onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => SettingsPage(
+                    settings: widget.settings,
+                    discovery: widget.discovery,
+                    onAutoSendChanged: _onAutoSendChanged,
                   ),
-                  for (final l in supportedLanguages)
-                    CheckedPopupMenuItem(
-                      value: l.code,
-                      checked: widget.settings.language == l.code,
-                      child: Text(l.nativeName),
-                    ),
-                ],
+                )),
+                icon: const Icon(Icons.settings_rounded),
               ),
               if (desktop != null)
                 IconButton(
@@ -461,20 +507,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               ),
             ],
           ),
+        _lostBanner(context),
         _autoBanner(context),
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
           child: Row(
             children: [
-              FilterChip(
-                avatar: Icon(Icons.bolt_rounded,
-                    size: 18, color: widget.settings.autoSend ? LrColors.ink : LrColors.safelight),
-                label: Text(tr('home.auto_send')),
-                selected: widget.settings.autoSend,
-                showCheckmark: false,
-                onSelected: widget.settings.current == null ? null : _toggleAuto,
-              ),
-              const SizedBox(width: 8),
               FilterChip(
                 label: Text(tr('home.only_unsent')),
                 selected: _onlyUnsent,

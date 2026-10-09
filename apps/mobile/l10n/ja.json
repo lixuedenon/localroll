@@ -104,5 +104,14 @@
   "auto.waiting": "{count} 件の新しい項目が {pc} への送信を待っています",
   "auto.waiting_hint": "PC の電源が切れているか、この Wi-Fi にいません。つながったら自動で送ります。",
   "auto.sending": "新しい項目を {pc} に送信中… {done}/{total}",
-  "auto.done": "{count} 件を {pc} に送信しました"
+  "auto.done": "{count} 件を {pc} に送信しました",
+  "settings.title": "設定",
+  "settings.auto_send": "新しい写真を自動で送る",
+  "settings.auto_send_hint": "新しい写真と動画は、{pc} に接続できるときに自動で送られます。",
+  "settings.pc": "PC",
+  "settings.manage_pcs": "PC のペアリング・切り替え・削除",
+  "lost.title": "{pc} で {count} 件が削除されました",
+  "lost.body": "このスマホには残っていますが、もうバックアップはありません。",
+  "lost.rebackup": "もう一度バックアップ",
+  "lost.ignore": "無視"
 }

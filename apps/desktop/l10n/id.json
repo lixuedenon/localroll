@@ -112,5 +112,15 @@
   "library.n_videos": "{count} video",
   "settings.startup": "Mulai",
   "settings.autostart": "Jalankan LocalRoll bersama Windows",
-  "settings.autostart_hint": "Terbuka dalam keadaan diperkecil, jadi ponsel selalu bisa mengirim ke PC ini."
+  "settings.autostart_hint": "Terbuka dalam keadaan diperkecil, jadi ponsel selalu bisa mengirim ke PC ini.",
+  "lib.export": "Ekspor ke folder…",
+  "lib.delete": "Hapus",
+  "lib.delete_n": "Hapus {count} item",
+  "lib.delete_title": "Hapus {count} item?",
+  "lib.delete_body": "Item akan masuk Recycle Bin Windows, jadi masih bisa dipulihkan. Ponsel akan diberi tahu saat terhubung lagi bahwa item ini sudah tidak ada di PC.",
+  "lib.deleted": "{count} dipindah ke Recycle Bin",
+  "lib.exported": "{count} disalin",
+  "lib.open": "Buka",
+  "lib.select": "Pilih",
+  "lib.unselect": "Batal pilih"
 }

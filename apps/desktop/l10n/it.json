@@ -112,5 +112,15 @@
   "library.n_videos": "{count} video",
   "settings.startup": "Avvio",
   "settings.autostart": "Avvia LocalRoll con Windows",
-  "settings.autostart_hint": "Si apre ridotto a icona, così i telefoni possono sempre inviare a questo PC."
+  "settings.autostart_hint": "Si apre ridotto a icona, così i telefoni possono sempre inviare a questo PC.",
+  "lib.export": "Esporta in cartella…",
+  "lib.delete": "Elimina",
+  "lib.delete_n": "Elimina {count} elementi",
+  "lib.delete_title": "Eliminare {count} elemento/i?",
+  "lib.delete_body": "Finiscono nel Cestino di Windows e si possono ripristinare. I telefoni lo sapranno alla prossima connessione che non sono più su questo PC.",
+  "lib.deleted": "{count} spostati nel Cestino",
+  "lib.exported": "{count} copiati",
+  "lib.open": "Apri",
+  "lib.select": "Seleziona",
+  "lib.unselect": "Deseleziona"
 }
