@@ -156,6 +156,8 @@ class AppSettings extends ChangeNotifier {
     }
   }
 
+  // Held only to keep the lock open; never read.
+  // ignore: unused_field
   static RandomAccessFile? _instanceLock;
 
   Future<void> update(void Function(AppSettings s) change) async {

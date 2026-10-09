@@ -7,7 +7,6 @@ import '../l10n/l10n.dart';
 import '../services/converter.dart';
 import '../services/library_index.dart';
 import '../services/network.dart';
-import 'format.dart';
 import 'media_thumb.dart';
 import 'viewer_page.dart';
 
