@@ -230,5 +230,101 @@ class _VideoViewState extends State<_VideoView> {
   }
 
   @override
-  Widget build(BuildContext context) => Video(controller: _controller);
+  Widget build(BuildContext context) {
+    // Video on top, controls in their own bar below — the picture is never
+    // covered and stays centred between the title bar and the controls.
+    return Column(
+      children: [
+        Expanded(
+          child: GestureDetector(
+            onTap: _player.playOrPause,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Video(controller: _controller, controls: NoVideoControls, fill: Colors.black),
+            ),
+          ),
+        ),
+        _VideoBar(player: _player),
+      ],
+    );
+  }
+}
+
+/// Play/pause, seek bar, time and mute, below the video.
+class _VideoBar extends StatefulWidget {
+  const _VideoBar({required this.player});
+
+  final Player player;
+
+  @override
+  State<_VideoBar> createState() => _VideoBarState();
+}
+
+class _VideoBarState extends State<_VideoBar> {
+  /// Slider position while the user drags (null = follow playback).
+  double? _dragMs;
+
+  static String _t(Duration d) {
+    final h = d.inHours;
+    final m = d.inMinutes % 60;
+    final s = (d.inSeconds % 60).toString().padLeft(2, '0');
+    return h > 0 ? '$h:${m.toString().padLeft(2, '0')}:$s' : '$m:$s';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = widget.player;
+    return Container(
+      color: Colors.black,
+      padding: const EdgeInsets.fromLTRB(8, 0, 16, 12),
+      child: StreamBuilder<Duration>(
+        stream: p.stream.position,
+        initialData: p.state.position,
+        builder: (context, posSnap) {
+          final dur = p.state.duration;
+          final pos = posSnap.data ?? Duration.zero;
+          final maxMs = dur.inMilliseconds.toDouble();
+          final valueMs = (_dragMs ?? pos.inMilliseconds.toDouble()).clamp(0.0, maxMs > 0 ? maxMs : 0.0);
+          return Row(
+            children: [
+              StreamBuilder<bool>(
+                stream: p.stream.playing,
+                initialData: p.state.playing,
+                builder: (context, snap) => IconButton(
+                  color: Colors.white,
+                  onPressed: p.playOrPause,
+                  icon: Icon(snap.data == true ? Icons.pause : Icons.play_arrow),
+                ),
+              ),
+              Text(_t(Duration(milliseconds: valueMs.round())), style: const TextStyle(color: Colors.white70, fontSize: 12)),
+              Expanded(
+                child: Slider(
+                  value: valueMs,
+                  max: maxMs > 0 ? maxMs : 1,
+                  onChanged: maxMs > 0 ? (v) => setState(() => _dragMs = v) : null,
+                  onChangeEnd: (v) async {
+                    await p.seek(Duration(milliseconds: v.round()));
+                    if (mounted) setState(() => _dragMs = null);
+                  },
+                ),
+              ),
+              Text(_t(dur), style: const TextStyle(color: Colors.white70, fontSize: 12)),
+              StreamBuilder<double>(
+                stream: p.stream.volume,
+                initialData: p.state.volume,
+                builder: (context, snap) {
+                  final muted = (snap.data ?? 100) == 0;
+                  return IconButton(
+                    color: Colors.white,
+                    onPressed: () => p.setVolume(muted ? 100 : 0),
+                    icon: Icon(muted ? Icons.volume_off : Icons.volume_up),
+                  );
+                },
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
 }

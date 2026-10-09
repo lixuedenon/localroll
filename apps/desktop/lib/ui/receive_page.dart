@@ -89,7 +89,7 @@ class _PairingCard extends StatelessWidget {
             Container(
               color: Colors.white,
               padding: const EdgeInsets.all(12),
-              child: QrImageView(data: payload, size: 220, backgroundColor: Colors.white),
+              child: QrImageView(data: payload, size: 300, backgroundColor: Colors.white),
             ),
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
