@@ -106,16 +106,29 @@ class FfmpegService extends ChangeNotifier {
   String _cachePath(MediaItem item, String suffix) =>
       '${library.cacheDir}${Platform.pathSeparator}${shortKey('${item.relPath}|${item.size}')}$suffix.jpg';
 
-  /// Small JPEG for the grid (videos: frame at 1s; HEIC: decoded image).
-  Future<File?> thumbnail(MediaItem item) =>
-      _cached(_cachePath(item, '_t'), item, (src, out) => [
-            if (item.kind == MediaKind.video) ...['-ss', '1'],
+  /// Small JPEG for the grid. Videos: frame at 1s. Still images (HEIC…):
+  /// scaled down from the full preview — ffmpeg decodes iPhone HEIC as a tile
+  /// grid that it stitches itself, and adding our own -vf to that fails.
+  Future<File?> thumbnail(MediaItem item) async {
+    if (item.kind == MediaKind.video) {
+      return _cached(_cachePath(item, '_t'), item, (src, out) => [
+            '-ss', '1',
             '-i', src,
             '-frames:v', '1',
             '-vf', 'scale=360:-2',
             '-q:v', '4',
             out,
           ]);
+    }
+    final full = await preview(item);
+    if (full == null) return null;
+    return _cached(
+      _cachePath(item, '_t'),
+      item,
+      (src, out) => ['-i', src, '-frames:v', '1', '-vf', 'scale=360:-2', '-q:v', '4', out],
+      source: full.path,
+    );
+  }
 
   /// Full-resolution JPEG used to display formats Flutter cannot decode (HEIC, DNG…).
   Future<File?> preview(MediaItem item) =>
@@ -129,14 +142,15 @@ class FfmpegService extends ChangeNotifier {
   Future<File?> _cached(
     String outPath,
     MediaItem item,
-    List<String> Function(String src, String out) args,
-  ) {
+    List<String> Function(String src, String out) args, {
+    String? source,
+  }) {
     return _inflight.putIfAbsent(outPath, () async {
       try {
         final out = File(outPath);
         if (await out.exists() && await out.length() > 0) return out;
         if (!available) return null;
-        final src = library.absPath(item);
+        final src = source ?? library.absPath(item);
         var ok = await _limited(() => _run(args(src, outPath)));
         if (!ok && item.kind == MediaKind.video) {
           // Clips shorter than 1s: grab the first frame instead.
