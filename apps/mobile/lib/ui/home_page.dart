@@ -50,14 +50,19 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    widget.discovery.addListener(_onDiscovery);
     _init();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    widget.discovery.removeListener(_onDiscovery);
     super.dispose();
   }
+
+  /// A paired PC showed up on the Wi-Fi: refresh its name / icon / picture.
+  void _onDiscovery() => refreshPairedLooks(widget.settings, widget.discovery.found);
 
   /// Coming back from the Settings app: re-check photo access.
   @override

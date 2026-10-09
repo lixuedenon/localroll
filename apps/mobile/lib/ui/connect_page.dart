@@ -34,6 +34,8 @@ class _ConnectPageState extends State<ConnectPage> {
   @override
   void initState() {
     super.initState();
+    // Show paired PCs with their current name and picture.
+    refreshPairedLooks(widget.settings, widget.discovery.found);
     _searchTimer = Timer(const Duration(seconds: 8), () {
       if (mounted) setState(() => _searchedLong = true);
     });

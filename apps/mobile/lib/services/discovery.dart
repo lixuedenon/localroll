@@ -118,6 +118,36 @@ Future<PairedDesktop> pairWithDesktop({
   throw Exception(tr('err.cannot_reach', {'error': lastError ?? tr('err.no_address')}));
 }
 
+final Map<String, DateTime> _lookChecked = {};
+
+/// Paired PCs seen on the Wi-Fi: pick up a new name / icon / picture right
+/// away (not only when sending). At most once a minute per PC.
+Future<void> refreshPairedLooks(MobileSettings settings, List<FoundDesktop> found) async {
+  for (final f in found) {
+    final d = settings.byId(f.id);
+    if (d == null) continue;
+    final last = _lookChecked[f.id];
+    if (last != null && DateTime.now().difference(last) < const Duration(minutes: 1)) continue;
+    _lookChecked[f.id] = DateTime.now();
+    for (final h in f.hosts) {
+      final c = DesktopClient(host: h, port: f.port);
+      try {
+        final info = await c.info(timeout: const Duration(seconds: 3));
+        if (info.id != d.id) continue;
+        if (d.lastHost != h || d.port != f.port) {
+          d.port = f.port;
+          await settings.rememberHost(d, h);
+        }
+        await settings.updateLook(d, info);
+        break;
+      } catch (_) {
+      } finally {
+        c.close();
+      }
+    }
+  }
+}
+
 /// Tap-to-pair: asks the PC, then waits for Allow / Deny there.
 /// [onWaiting] gets the three symbols to show (same as on the PC).
 /// [cancelled] is polled; return true to give up.
