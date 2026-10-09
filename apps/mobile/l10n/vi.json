@@ -113,5 +113,9 @@
   "lost.title": "{pc} đã xóa {count} mục",
   "lost.body": "Chúng vẫn còn trên điện thoại này nhưng không còn bản sao lưu.",
   "lost.rebackup": "Sao lưu lại",
-  "lost.ignore": "Bỏ qua"
+  "lost.ignore": "Bỏ qua",
+  "connect.forget": "Quên",
+  "connect.forget_title": "Quên “{name}”?",
+  "connect.forget_body": "Điện thoại sẽ xóa ghép nối và máy tính sẽ không tin cậy điện thoại này nữa. Ảnh đã lưu trên máy tính không bị ảnh hưởng. Muốn dùng lại, chỉ cần chạm và cho phép.",
+  "connect.forgotten": "Đã quên {name}"
 }

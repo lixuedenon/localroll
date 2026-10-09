@@ -63,6 +63,25 @@ class _ConnectPageState extends State<ConnectPage> {
         return null;
       });
 
+  /// "Forget this PC" — e.g. a computer used just once.
+  Future<void> _forget(PairedDesktop d) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr('connect.forget_title', {'name': d.name})),
+        content: Text(tr('connect.forget_body')),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('common.cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('connect.forget'))),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    await forgetDesktop(widget.settings, d);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('connect.forgotten', {'name': d.name}))));
+  }
+
   /// Tap a PC → it asks "Allow?" → done.
   Future<void> _tapToPair(FoundDesktop f, String name) async {
     var cancelled = false;
@@ -284,10 +303,10 @@ class _ConnectPageState extends State<ConnectPage> {
                             ),
                           ]),
                         ),
-                        IconButton(
-                          tooltip: tr('connect.delete'),
-                          icon: const Icon(Icons.delete_outline_rounded),
-                          onPressed: () => s.removeDesktop(d.id),
+                        TextButton.icon(
+                          onPressed: () => _forget(d),
+                          icon: const Icon(Icons.link_off_rounded, size: 18),
+                          label: Text(tr('connect.forget')),
                         ),
                       ]),
                     ),

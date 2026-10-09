@@ -156,6 +156,11 @@ class TransferServer extends ChangeNotifier {
       if (req.method == 'POST' && path == LrProtocol.pathSessions) {
         return await _createSession(req, device);
       }
+      // The phone chose "Forget this PC": stop trusting it here too.
+      if (req.method == 'DELETE' && path == LrProtocol.pathPair) {
+        await settings.update((s) => s.trusted.remove(device.id));
+        return _json(res, 200, {'ok': true});
+      }
       if (req.method == 'POST' && path == LrProtocol.pathVerify) {
         return await _verify(req, device);
       }

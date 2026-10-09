@@ -73,6 +73,9 @@ class DesktopClient {
       PairResponse.fromJson(await _send('POST', LrProtocol.pathPair,
           json: PairRequest(device: me, pin: pin).toJson()));
 
+  /// "Forget this PC": ask the PC to drop its trust in this phone.
+  Future<void> unpair() async => _send('DELETE', LrProtocol.pathPair, timeout: const Duration(seconds: 3));
+
   /// Assets of this phone deleted on the PC since [sinceMs].
   Future<ChangesResponse> changes(int sinceMs) async => ChangesResponse.fromJson(
       await _send('GET', LrProtocol.pathChanges, query: {'since': '$sinceMs'}, timeout: const Duration(seconds: 5)));

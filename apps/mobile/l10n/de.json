@@ -113,5 +113,9 @@
   "lost.title": "{count} Elemente wurden auf {pc} gelöscht",
   "lost.body": "Sie sind noch auf diesem Handy, aber nicht mehr gesichert.",
   "lost.rebackup": "Erneut sichern",
-  "lost.ignore": "Ignorieren"
+  "lost.ignore": "Ignorieren",
+  "connect.forget": "Vergessen",
+  "connect.forget_title": "„{name}“ vergessen?",
+  "connect.forget_body": "Das Handy löscht die Kopplung, und der PC vertraut diesem Handy nicht mehr. Fotos auf dem PC bleiben erhalten. Zum erneuten Nutzen einfach antippen und erlauben.",
+  "connect.forgotten": "{name} vergessen"
 }

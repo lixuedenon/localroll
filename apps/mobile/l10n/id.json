@@ -113,5 +113,9 @@
   "lost.title": "{count} item dihapus di {pc}",
   "lost.body": "Masih ada di ponsel ini, tapi sudah tidak dicadangkan.",
   "lost.rebackup": "Cadangkan lagi",
-  "lost.ignore": "Abaikan"
+  "lost.ignore": "Abaikan",
+  "connect.forget": "Lupakan",
+  "connect.forget_title": "Lupakan “{name}”?",
+  "connect.forget_body": "Ponsel menghapus pemasangan, dan PC tidak lagi memercayai ponsel ini. Foto yang sudah ada di PC tidak terpengaruh. Untuk memakainya lagi, cukup ketuk dan izinkan.",
+  "connect.forgotten": "{name} dilupakan"
 }

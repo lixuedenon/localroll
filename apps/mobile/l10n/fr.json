@@ -113,5 +113,9 @@
   "lost.title": "{count} éléments supprimés sur {pc}",
   "lost.body": "Ils sont encore sur ce téléphone, mais ne sont plus sauvegardés.",
   "lost.rebackup": "Resauvegarder",
-  "lost.ignore": "Ignorer"
+  "lost.ignore": "Ignorer",
+  "connect.forget": "Oublier",
+  "connect.forget_title": "Oublier « {name} » ?",
+  "connect.forget_body": "Le téléphone supprime l’association et le PC cesse de faire confiance à ce téléphone. Les photos déjà sur ce PC ne sont pas touchées. Pour le réutiliser, touchez-le et autorisez.",
+  "connect.forgotten": "{name} oublié"
 }

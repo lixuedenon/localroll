@@ -113,5 +113,9 @@
   "lost.title": "{pc} で {count} 件が削除されました",
   "lost.body": "このスマホには残っていますが、もうバックアップはありません。",
   "lost.rebackup": "もう一度バックアップ",
-  "lost.ignore": "無視"
+  "lost.ignore": "無視",
+  "connect.forget": "削除",
+  "connect.forget_title": "「{name}」を削除しますか？",
+  "connect.forget_body": "このスマホのペアリングを削除し、PC もこのスマホを信頼しなくなります。PC に保存済みの写真はそのままです。また使うときは、タップして PC で許可するだけです。",
+  "connect.forgotten": "{name} を削除しました"
 }

@@ -113,5 +113,9 @@
   "lost.title": "{count} itens foram apagados em {pc}",
   "lost.body": "Ainda estão neste celular, mas não têm mais cópia.",
   "lost.rebackup": "Salvar de novo",
-  "lost.ignore": "Ignorar"
+  "lost.ignore": "Ignorar",
+  "connect.forget": "Esquecer",
+  "connect.forget_title": "Esquecer “{name}”?",
+  "connect.forget_body": "O celular remove o pareamento e o PC deixa de confiar neste celular. As fotos já salvas nesse PC não são afetadas. Para usar de novo, toque nele e permita.",
+  "connect.forgotten": "{name} esquecido"
 }

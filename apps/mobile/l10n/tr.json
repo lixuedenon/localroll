@@ -113,5 +113,9 @@
   "lost.title": "{pc} üzerinde {count} öğe silindi",
   "lost.body": "Hâlâ bu telefonda, ama artık yedekleri yok.",
   "lost.rebackup": "Yeniden yedekle",
-  "lost.ignore": "Yok say"
+  "lost.ignore": "Yok say",
+  "connect.forget": "Unut",
+  "connect.forget_title": "“{name}” unutulsun mu?",
+  "connect.forget_body": "Telefon eşleşmeyi siler ve bilgisayar bu telefona artık güvenmez. Bilgisayardaki fotoğraflar etkilenmez. Yeniden kullanmak için dokunup izin vermeniz yeterli.",
+  "connect.forgotten": "{name} unutuldu"
 }

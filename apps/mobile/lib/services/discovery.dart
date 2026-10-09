@@ -290,3 +290,20 @@ String _short(Object e) {
   if (m != null) return 'errno ${m.group(1)}';
   return s.length > 60 ? s.substring(0, 60) : s;
 }
+
+/// Forget a PC: tell it (best effort, it may be off) and remove it here.
+Future<void> forgetDesktop(MobileSettings settings, PairedDesktop d) async {
+  final hosts = <String>{if (d.lastHost != null) d.lastHost!, ...d.hosts};
+  for (final h in hosts) {
+    final c = DesktopClient(host: h, port: d.port, deviceId: settings.deviceId, token: d.token);
+    try {
+      await c.unpair();
+      break;
+    } catch (_) {
+    } finally {
+      c.close();
+    }
+  }
+  await settings.clearLost(d.id);
+  await settings.removeDesktop(d.id);
+}

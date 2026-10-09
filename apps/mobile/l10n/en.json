@@ -113,5 +113,9 @@
   "lost.title": "{count} items were deleted on {pc}",
   "lost.body": "They are still on this phone, but no longer backed up.",
   "lost.rebackup": "Back up again",
-  "lost.ignore": "Ignore"
+  "lost.ignore": "Ignore",
+  "connect.forget": "Forget",
+  "connect.forget_title": "Forget “{name}”?",
+  "connect.forget_body": "This phone removes the pairing, and the PC stops trusting this phone. Photos already on that PC are not affected. To use it again, just tap it and allow.",
+  "connect.forgotten": "Forgot {name}"
 }

@@ -113,5 +113,9 @@
   "lost.title": "{pc}에서 {count}개가 삭제되었습니다",
   "lost.body": "이 휴대폰에는 남아 있지만 더 이상 백업되어 있지 않습니다.",
   "lost.rebackup": "다시 백업",
-  "lost.ignore": "무시"
+  "lost.ignore": "무시",
+  "connect.forget": "삭제",
+  "connect.forget_title": "“{name}”을(를) 삭제할까요?",
+  "connect.forget_body": "이 휴대폰의 연결이 삭제되고 PC도 이 휴대폰을 더 이상 신뢰하지 않습니다. PC에 저장된 사진은 그대로입니다. 다시 쓰려면 탭하고 허용하면 됩니다.",
+  "connect.forgotten": "{name} 삭제됨"
 }

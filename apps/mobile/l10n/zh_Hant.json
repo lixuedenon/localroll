@@ -113,5 +113,9 @@
   "lost.title": "{pc} 上刪除了 {count} 項",
   "lost.body": "它們還在這支手機上，但已經沒有備份了。",
   "lost.rebackup": "重新備份",
-  "lost.ignore": "略過"
+  "lost.ignore": "略過",
+  "connect.forget": "忘記",
+  "connect.forget_title": "忘記「{name}」？",
+  "connect.forget_body": "手機會刪除和這台電腦的配對，電腦也會不再信任這支手機。電腦上已儲存的照片不受影響。以後要再用，重新點一下它、在電腦上允許即可。",
+  "connect.forgotten": "已忘記 {name}"
 }

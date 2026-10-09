@@ -113,5 +113,9 @@
   "lost.title": "Se eliminaron {count} elementos en {pc}",
   "lost.body": "Siguen en este teléfono, pero ya no tienen copia.",
   "lost.rebackup": "Volver a copiar",
-  "lost.ignore": "Ignorar"
+  "lost.ignore": "Ignorar",
+  "connect.forget": "Olvidar",
+  "connect.forget_title": "¿Olvidar «{name}»?",
+  "connect.forget_body": "El teléfono elimina el emparejamiento y el PC deja de confiar en este teléfono. Las fotos ya guardadas en ese PC no se tocan. Para volver a usarlo, tócalo y permite.",
+  "connect.forgotten": "Se olvidó {name}"
 }
