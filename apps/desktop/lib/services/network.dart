@@ -99,6 +99,37 @@ Future<bool> addFirewallRules(int port) async {
   }
 }
 
+/// Can phones reach this PC? Two usual blockers on a fresh Windows install:
+/// no firewall rule for LocalRoll, and the Wi-Fi marked as a "Public" network.
+class NetworkHealth {
+  const NetworkHealth({required this.firewallRule, required this.publicNetwork});
+
+  final bool firewallRule;
+  final bool publicNetwork;
+
+  bool get likelyBlocked => !firewallRule;
+}
+
+Future<NetworkHealth> checkNetworkHealth(int port) async {
+  if (!Platform.isWindows) return const NetworkHealth(firewallRule: true, publicNetwork: false);
+  var rule = false;
+  var public = false;
+  try {
+    final r = await Process.run('netsh', ['advfirewall', 'firewall', 'show', 'rule', 'name=LocalRoll']);
+    rule = r.exitCode == 0 && (r.stdout as String).contains('$port');
+  } catch (_) {}
+  try {
+    final p = await Process.run('powershell', [
+      '-NoProfile',
+      '-NonInteractive',
+      '-Command',
+      '(Get-NetConnectionProfile | Select-Object -ExpandProperty NetworkCategory) -join ","',
+    ]);
+    public = (p.stdout as String).contains('Public');
+  } catch (_) {}
+  return NetworkHealth(firewallRule: rule, publicNetwork: public);
+}
+
 /// Opens Explorer with [path] selected (or the folder itself).
 Future<void> revealInExplorer(String path) async {
   if (!Platform.isWindows) return;

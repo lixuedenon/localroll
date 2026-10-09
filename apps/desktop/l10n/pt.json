@@ -122,5 +122,9 @@
   "lib.exported": "{count} copiados",
   "lib.open": "Abrir",
   "lib.select": "Selecionar",
-  "lib.unselect": "Desmarcar"
+  "lib.unselect": "Desmarcar",
+  "receive.blocked_title": "Os celulares talvez ainda não encontrem este PC",
+  "receive.blocked_public": "O Firewall do Windows não liberou o LocalRoll e esta Wi-Fi está definida como rede “Pública”. Libere uma vez (o Windows vai pedir confirmação).",
+  "receive.blocked_firewall": "O Firewall do Windows ainda não liberou o LocalRoll. Libere uma vez (o Windows vai pedir confirmação).",
+  "receive.blocked_fix": "Liberar LocalRoll"
 }

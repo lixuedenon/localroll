@@ -122,5 +122,9 @@
   "lib.exported": "{count} 件をコピーしました",
   "lib.open": "開く",
   "lib.select": "選択",
-  "lib.unselect": "選択解除"
+  "lib.unselect": "選択解除",
+  "receive.blocked_title": "スマホからこの PC がまだ見つからない可能性があります",
+  "receive.blocked_public": "Windows ファイアウォールが LocalRoll を許可しておらず、この Wi-Fi は「パブリック」ネットワークになっています。一度だけ許可してください（Windows が確認します）。",
+  "receive.blocked_firewall": "Windows ファイアウォールがまだ LocalRoll を許可していません。一度だけ許可してください（Windows が確認します）。",
+  "receive.blocked_fix": "LocalRoll を許可"
 }

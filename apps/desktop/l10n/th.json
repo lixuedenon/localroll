@@ -122,5 +122,9 @@
   "lib.exported": "คัดลอก {count} รายการแล้ว",
   "lib.open": "เปิด",
   "lib.select": "เลือก",
-  "lib.unselect": "ยกเลิกการเลือก"
+  "lib.unselect": "ยกเลิกการเลือก",
+  "receive.blocked_title": "โทรศัพท์อาจยังหาคอมพิวเตอร์เครื่องนี้ไม่เจอ",
+  "receive.blocked_public": "ไฟร์วอลล์ Windows ยังไม่อนุญาต LocalRoll และ Wi-Fi นี้ตั้งเป็นเครือข่าย “สาธารณะ” อนุญาตครั้งเดียว (Windows จะขอให้ยืนยัน)",
+  "receive.blocked_firewall": "ไฟร์วอลล์ Windows ยังไม่อนุญาต LocalRoll อนุญาตครั้งเดียว (Windows จะขอให้ยืนยัน)",
+  "receive.blocked_fix": "อนุญาต LocalRoll"
 }

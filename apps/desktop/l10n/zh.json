@@ -122,5 +122,9 @@
   "lib.exported": "已复制 {count} 项",
   "lib.open": "打开",
   "lib.select": "选择",
-  "lib.unselect": "取消选择"
+  "lib.unselect": "取消选择",
+  "receive.blocked_title": "手机可能还找不到这台电脑",
+  "receive.blocked_public": "Windows 防火墙还没有放行 LocalRoll，而且这个 Wi-Fi 被设成了「公用网络」。点右边按钮放行一次（Windows 会弹窗请你确认）。",
+  "receive.blocked_firewall": "Windows 防火墙还没有放行 LocalRoll。点右边按钮放行一次（Windows 会弹窗请你确认）。",
+  "receive.blocked_fix": "放行 LocalRoll"
 }

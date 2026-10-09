@@ -12,6 +12,7 @@ import '../services/receive_hub.dart';
 import 'app_nav.dart';
 import 'device_badge.dart';
 import 'format.dart';
+import 'theme.dart';
 
 /// Pairing QR/PIN plus live progress of incoming files.
 class ReceivePage extends StatelessWidget {
@@ -27,6 +28,9 @@ class ReceivePage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
+          // A new PC is usually invisible to phones until the firewall lets
+          // LocalRoll in — say so up front, with a one-click fix.
+          _NetworkCheck(services: s),
           // Who this PC is, as phones see it: the easiest way to connect.
           ListenableBuilder(
             listenable: s.settings,
@@ -260,6 +264,81 @@ class _TransferTile extends StatelessWidget {
           Text('${t.deviceName} · $label · ${formatBytes(t.received)}'
               '${t.total > 0 ? ' / ${formatBytes(t.total)}' : ''}'),
         ],
+      ),
+    );
+  }
+}
+
+class _NetworkCheck extends StatefulWidget {
+  const _NetworkCheck({required this.services});
+
+  final AppServices services;
+
+  @override
+  State<_NetworkCheck> createState() => _NetworkCheckState();
+}
+
+class _NetworkCheckState extends State<_NetworkCheck> {
+  NetworkHealth? _health;
+  bool _fixing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _check();
+  }
+
+  Future<void> _check() async {
+    final h = await checkNetworkHealth(widget.services.server.port);
+    if (mounted) setState(() => _health = h);
+  }
+
+  Future<void> _fix() async {
+    setState(() => _fixing = true);
+    await addFirewallRules(widget.services.server.port);
+    await _check();
+    if (mounted) setState(() => _fixing = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final h = _health;
+    if (h == null || !h.likelyBlocked) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: const BorderSide(color: LrColors.safelight, width: 1.5),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            children: [
+              const Icon(Icons.shield_outlined, color: LrColors.safelight, size: 36),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(tr('receive.blocked_title'), style: theme.textTheme.titleMedium),
+                    const SizedBox(height: 4),
+                    Text(tr(h.publicNetwork ? 'receive.blocked_public' : 'receive.blocked_firewall')),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              FilledButton.icon(
+                onPressed: _fixing ? null : _fix,
+                icon: _fixing
+                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.verified_user_rounded, size: 18),
+                label: Text(tr('receive.blocked_fix')),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

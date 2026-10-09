@@ -122,5 +122,9 @@
   "lib.exported": "{count} copiati",
   "lib.open": "Apri",
   "lib.select": "Seleziona",
-  "lib.unselect": "Deseleziona"
+  "lib.unselect": "Deseleziona",
+  "receive.blocked_title": "I telefoni potrebbero non trovare ancora questo PC",
+  "receive.blocked_public": "Windows Firewall non ha consentito LocalRoll e questa Wi-Fi è impostata come rete «Pubblica». Consentilo una volta (Windows chiederà conferma).",
+  "receive.blocked_firewall": "Windows Firewall non ha ancora consentito LocalRoll. Consentilo una volta (Windows chiederà conferma).",
+  "receive.blocked_fix": "Consenti LocalRoll"
 }

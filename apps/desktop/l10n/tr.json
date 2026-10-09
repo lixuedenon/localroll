@@ -122,5 +122,9 @@
   "lib.exported": "{count} öğe kopyalandı",
   "lib.open": "Aç",
   "lib.select": "Seç",
-  "lib.unselect": "Seçimi kaldır"
+  "lib.unselect": "Seçimi kaldır",
+  "receive.blocked_title": "Telefonlar bu bilgisayarı henüz bulamayabilir",
+  "receive.blocked_public": "Windows Güvenlik Duvarı LocalRoll’a izin vermedi ve bu Wi-Fi “Ortak” ağ olarak ayarlı. Bir kez izin verin (Windows onay isteyecek).",
+  "receive.blocked_firewall": "Windows Güvenlik Duvarı henüz LocalRoll’a izin vermedi. Bir kez izin verin (Windows onay isteyecek).",
+  "receive.blocked_fix": "LocalRoll’a izin ver"
 }

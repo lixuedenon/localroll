@@ -122,5 +122,9 @@
   "lib.exported": "Đã sao chép {count} mục",
   "lib.open": "Mở",
   "lib.select": "Chọn",
-  "lib.unselect": "Bỏ chọn"
+  "lib.unselect": "Bỏ chọn",
+  "receive.blocked_title": "Điện thoại có thể chưa tìm thấy máy tính này",
+  "receive.blocked_public": "Tường lửa Windows chưa cho phép LocalRoll và Wi-Fi này đang là mạng “Công cộng”. Cho phép một lần (Windows sẽ hỏi xác nhận).",
+  "receive.blocked_firewall": "Tường lửa Windows chưa cho phép LocalRoll. Cho phép một lần (Windows sẽ hỏi xác nhận).",
+  "receive.blocked_fix": "Cho phép LocalRoll"
 }

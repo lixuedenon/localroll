@@ -122,5 +122,9 @@
   "lib.exported": "{count} copiés",
   "lib.open": "Ouvrir",
   "lib.select": "Sélectionner",
-  "lib.unselect": "Désélectionner"
+  "lib.unselect": "Désélectionner",
+  "receive.blocked_title": "Les téléphones ne trouvent peut-être pas encore ce PC",
+  "receive.blocked_public": "Le pare-feu Windows n’a pas autorisé LocalRoll et ce Wi-Fi est défini comme réseau « Public ». Autorisez-le une fois (Windows demandera une confirmation).",
+  "receive.blocked_firewall": "Le pare-feu Windows n’a pas encore autorisé LocalRoll. Autorisez-le une fois (Windows demandera une confirmation).",
+  "receive.blocked_fix": "Autoriser LocalRoll"
 }

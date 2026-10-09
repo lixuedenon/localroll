@@ -122,5 +122,9 @@
   "lib.exported": "نُسخ {count}",
   "lib.open": "فتح",
   "lib.select": "تحديد",
-  "lib.unselect": "إلغاء التحديد"
+  "lib.unselect": "إلغاء التحديد",
+  "receive.blocked_title": "قد لا تعثر الهواتف على هذا الكمبيوتر بعد",
+  "receive.blocked_public": "لم يسمح جدار حماية Windows لـ LocalRoll، وشبكة Wi-Fi هذه مضبوطة كشبكة «عامة». اسمح به مرة واحدة (سيطلب Windows التأكيد).",
+  "receive.blocked_firewall": "لم يسمح جدار حماية Windows لـ LocalRoll بعد. اسمح به مرة واحدة (سيطلب Windows التأكيد).",
+  "receive.blocked_fix": "السماح لـ LocalRoll"
 }
