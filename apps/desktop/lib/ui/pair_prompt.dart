@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:localroll_core/localroll_core.dart';
+import 'package:window_manager/window_manager.dart';
 
 import '../l10n/l10n.dart';
 import '../server/transfer_server.dart';
@@ -28,6 +29,15 @@ class PairPrompter {
   }
 
   Future<void> _show(PendingPair p) async {
+    // The window may be minimised (started with Windows) or behind others:
+    // bring it to the front so the Allow / Deny question is actually seen.
+    try {
+      if (await windowManager.isMinimized()) await windowManager.restore();
+      await windowManager.show();
+      await windowManager.setAlwaysOnTop(true);
+      await windowManager.focus();
+      Future<void>.delayed(const Duration(seconds: 2), () => windowManager.setAlwaysOnTop(false));
+    } catch (_) {}
     final ctx = AppNav.instance.navigatorKey.currentContext;
     if (ctx == null) return;
     final allow = await showDialog<bool>(
