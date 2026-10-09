@@ -84,6 +84,7 @@ const Map<String, Map<String, String>> translations = {
     'viewer.from': 'from {name}',
     'viewer.cannot_decode': 'Can\'t decode this image',
     'viewer.needs_ffmpeg': 'Showing {ext} requires ffmpeg. Set it up in Settings.',
+    'app.already_running': 'LocalRoll is already running. Use the open window (check the taskbar or the system tray) and close this one.',
   },
   'ar': {
     'nav.library': 'المكتبة',
@@ -166,6 +167,7 @@ const Map<String, Map<String, String>> translations = {
     'viewer.from': 'من {name}',
     'viewer.cannot_decode': 'تعذّر فك ترميز هذه الصورة',
     'viewer.needs_ffmpeg': 'يتطلب عرض {ext} وجود ffmpeg. اضبطه من الإعدادات.',
+    'app.already_running': 'LocalRoll قيد التشغيل بالفعل. استخدم النافذة المفتوحة (تحقق من شريط المهام) وأغلق هذه النافذة.',
   },
   'de': {
     'nav.library': 'Mediathek',
@@ -248,6 +250,7 @@ const Map<String, Map<String, String>> translations = {
     'viewer.from': 'von {name}',
     'viewer.cannot_decode': 'Dieses Bild kann nicht dekodiert werden',
     'viewer.needs_ffmpeg': 'Zum Anzeigen von {ext} wird ffmpeg benötigt. Bitte in den Einstellungen festlegen.',
+    'app.already_running': 'LocalRoll läuft bereits. Verwende das geöffnete Fenster (siehe Taskleiste) und schließe dieses.',
   },
   'es': {
     'nav.library': 'Biblioteca',
@@ -330,6 +333,7 @@ const Map<String, Map<String, String>> translations = {
     'viewer.from': 'de {name}',
     'viewer.cannot_decode': 'No se puede decodificar esta imagen',
     'viewer.needs_ffmpeg': 'Para mostrar {ext} se necesita ffmpeg. Configúralo en Ajustes.',
+    'app.already_running': 'LocalRoll ya se está ejecutando. Usa la ventana abierta (mira la barra de tareas) y cierra esta.',
   },
   'fr': {
     'nav.library': 'Bibliothèque',
@@ -412,6 +416,7 @@ const Map<String, Map<String, String>> translations = {
     'viewer.from': 'de {name}',
     'viewer.cannot_decode': 'Impossible de décoder cette image',
     'viewer.needs_ffmpeg': 'L\'affichage des {ext} nécessite ffmpeg. Configurez-le dans Réglages.',
+    'app.already_running': 'LocalRoll est déjà en cours d\'exécution. Utilisez la fenêtre ouverte (voir la barre des tâches) et fermez celle-ci.',
   },
   'hi': {
     'nav.library': 'लाइब्रेरी',
@@ -494,6 +499,7 @@ const Map<String, Map<String, String>> translations = {
     'viewer.from': '{name} से',
     'viewer.cannot_decode': 'यह इमेज डिकोड नहीं हो सकी',
     'viewer.needs_ffmpeg': '{ext} दिखाने के लिए ffmpeg चाहिए। इसे सेटिंग्स में सेट करें।',
+    'app.already_running': 'LocalRoll पहले से चल रहा है। खुली हुई विंडो (टास्कबार देखें) का उपयोग करें और इसे बंद करें।',
   },
   'id': {
     'nav.library': 'Pustaka',
@@ -576,6 +582,7 @@ const Map<String, Map<String, String>> translations = {
     'viewer.from': 'dari {name}',
     'viewer.cannot_decode': 'Gambar ini tidak bisa didekode',
     'viewer.needs_ffmpeg': 'Menampilkan {ext} memerlukan ffmpeg. Atur di Pengaturan.',
+    'app.already_running': 'LocalRoll sudah berjalan. Gunakan jendela yang terbuka (lihat taskbar) dan tutup jendela ini.',
   },
   'it': {
     'nav.library': 'Libreria',
@@ -658,6 +665,7 @@ const Map<String, Map<String, String>> translations = {
     'viewer.from': 'da {name}',
     'viewer.cannot_decode': 'Impossibile decodificare questa immagine',
     'viewer.needs_ffmpeg': 'Per mostrare {ext} serve ffmpeg. Configuralo nelle Impostazioni.',
+    'app.already_running': 'LocalRoll è già in esecuzione. Usa la finestra aperta (controlla la barra delle applicazioni) e chiudi questa.',
   },
   'ja': {
     'nav.library': 'ライブラリ',
@@ -740,6 +748,7 @@ const Map<String, Map<String, String>> translations = {
     'viewer.from': '{name} から',
     'viewer.cannot_decode': 'この画像はデコードできません',
     'viewer.needs_ffmpeg': '{ext} を表示するには ffmpeg が必要です。設定で指定してください。',
+    'app.already_running': 'LocalRoll はすでに起動しています。開いているウィンドウ（タスクバーを確認）を使い、このウィンドウは閉じてください。',
   },
   'ko': {
     'nav.library': '라이브러리',
@@ -822,6 +831,7 @@ const Map<String, Map<String, String>> translations = {
     'viewer.from': '{name}에서',
     'viewer.cannot_decode': '이 이미지를 디코딩할 수 없습니다',
     'viewer.needs_ffmpeg': '{ext}를 표시하려면 ffmpeg가 필요합니다. 설정에서 지정하세요.',
+    'app.already_running': 'LocalRoll이 이미 실행 중입니다. 열려 있는 창(작업 표시줄 확인)을 사용하고 이 창은 닫아 주세요.',
   },
   'pt': {
     'nav.library': 'Biblioteca',
@@ -904,6 +914,7 @@ const Map<String, Map<String, String>> translations = {
     'viewer.from': 'de {name}',
     'viewer.cannot_decode': 'Não é possível decodificar esta imagem',
     'viewer.needs_ffmpeg': 'Para exibir {ext} é preciso o ffmpeg. Configure em Configurações.',
+    'app.already_running': 'O LocalRoll já está em execução. Use a janela aberta (veja a barra de tarefas) e feche esta.',
   },
   'ru': {
     'nav.library': 'Медиатека',
@@ -986,6 +997,7 @@ const Map<String, Map<String, String>> translations = {
     'viewer.from': 'с {name}',
     'viewer.cannot_decode': 'Не удаётся декодировать это изображение',
     'viewer.needs_ffmpeg': 'Для показа {ext} нужен ffmpeg. Укажите его в настройках.',
+    'app.already_running': 'LocalRoll уже запущен. Используйте открытое окно (посмотрите на панели задач) и закройте это.',
   },
   'th': {
     'nav.library': 'คลังสื่อ',
@@ -1068,6 +1080,7 @@ const Map<String, Map<String, String>> translations = {
     'viewer.from': 'จาก {name}',
     'viewer.cannot_decode': 'ไม่สามารถถอดรหัสรูปนี้ได้',
     'viewer.needs_ffmpeg': 'ต้องใช้ ffmpeg เพื่อแสดง {ext} โปรดตั้งค่าในหน้าการตั้งค่า',
+    'app.already_running': 'LocalRoll กำลังทำงานอยู่แล้ว ใช้หน้าต่างที่เปิดอยู่ (ดูที่แถบงาน) แล้วปิดหน้าต่างนี้',
   },
   'tr': {
     'nav.library': 'Kitaplık',
@@ -1150,6 +1163,7 @@ const Map<String, Map<String, String>> translations = {
     'viewer.from': 'kaynak: {name}',
     'viewer.cannot_decode': 'Bu görüntünün kodu çözülemiyor',
     'viewer.needs_ffmpeg': '{ext} göstermek için ffmpeg gerekir. Ayarlar\'dan belirleyin.',
+    'app.already_running': 'LocalRoll zaten çalışıyor. Açık olan pencereyi kullanın (görev çubuğuna bakın) ve bunu kapatın.',
   },
   'vi': {
     'nav.library': 'Thư viện',
@@ -1232,6 +1246,7 @@ const Map<String, Map<String, String>> translations = {
     'viewer.from': 'từ {name}',
     'viewer.cannot_decode': 'Không thể giải mã ảnh này',
     'viewer.needs_ffmpeg': 'Cần ffmpeg để hiển thị {ext}. Hãy thiết lập trong Cài đặt.',
+    'app.already_running': 'LocalRoll đang chạy rồi. Hãy dùng cửa sổ đang mở (xem thanh tác vụ) và đóng cửa sổ này.',
   },
   'zh': {
     'nav.library': '媒体库',
@@ -1314,6 +1329,7 @@ const Map<String, Map<String, String>> translations = {
     'viewer.from': '来自 {name}',
     'viewer.cannot_decode': '无法解码这张图片',
     'viewer.needs_ffmpeg': '显示 {ext} 需要 ffmpeg，请到「设置」配置',
+    'app.already_running': 'LocalRoll 已经在运行了。请使用已打开的那个窗口（看看任务栏），然后关闭这个窗口。',
   },
   'zh_Hant': {
     'nav.library': '媒體庫',
@@ -1396,5 +1412,6 @@ const Map<String, Map<String, String>> translations = {
     'viewer.from': '來自 {name}',
     'viewer.cannot_decode': '無法解碼這張圖片',
     'viewer.needs_ffmpeg': '顯示 {ext} 需要 ffmpeg，請到「設定」設定',
+    'app.already_running': 'LocalRoll 已經在執行中。請使用已開啟的那個視窗（看看工作列），然後關閉這個視窗。',
   },
 };

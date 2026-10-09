@@ -78,5 +78,6 @@
   "settings.unpaired": "ペアリングを解除しました：{name}",
   "viewer.from": "{name} から",
   "viewer.cannot_decode": "この画像はデコードできません",
-  "viewer.needs_ffmpeg": "{ext} を表示するには ffmpeg が必要です。設定で指定してください。"
+  "viewer.needs_ffmpeg": "{ext} を表示するには ffmpeg が必要です。設定で指定してください。",
+  "app.already_running": "LocalRoll はすでに起動しています。開いているウィンドウ（タスクバーを確認）を使い、このウィンドウは閉じてください。"
 }

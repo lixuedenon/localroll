@@ -78,5 +78,6 @@
   "settings.unpaired": "अनपेयर किया गया: {name}",
   "viewer.from": "{name} से",
   "viewer.cannot_decode": "यह इमेज डिकोड नहीं हो सकी",
-  "viewer.needs_ffmpeg": "{ext} दिखाने के लिए ffmpeg चाहिए। इसे सेटिंग्स में सेट करें।"
+  "viewer.needs_ffmpeg": "{ext} दिखाने के लिए ffmpeg चाहिए। इसे सेटिंग्स में सेट करें।",
+  "app.already_running": "LocalRoll पहले से चल रहा है। खुली हुई विंडो (टास्कबार देखें) का उपयोग करें और इसे बंद करें।"
 }

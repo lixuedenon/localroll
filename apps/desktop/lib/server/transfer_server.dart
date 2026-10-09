@@ -119,10 +119,10 @@ class TransferServer extends ChangeNotifier {
         return await _pair(req);
       }
 
-      final device = _authenticate(req);
+      final device = await _authenticate(req);
       if (device == null) {
         await req.drain<void>();
-        return _json(res, 401, {'error': 'not paired'});
+        return _json(res, 401, {'error': 'not_paired'});
       }
 
       if (req.method == 'POST' && path == LrProtocol.pathSessions) {
@@ -161,11 +161,16 @@ class TransferServer extends ChangeNotifier {
     }
   }
 
-  TrustedDevice? _authenticate(HttpRequest req) {
+  Future<TrustedDevice?> _authenticate(HttpRequest req) async {
     final id = req.headers.value(LrProtocol.headerDeviceId);
     final token = req.headers.value(LrProtocol.headerToken);
     if (id == null || token == null) return null;
-    final d = settings.trusted[id];
+    var d = settings.trusted[id];
+    if (d == null || d.token != token) {
+      // The pairing may have been saved after we loaded settings.json; re-read once.
+      await settings.reloadTrusted();
+      d = settings.trusted[id];
+    }
     return (d != null && d.token == token) ? d : null;
   }
 

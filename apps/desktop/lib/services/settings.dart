@@ -105,6 +105,37 @@ class AppSettings extends ChangeNotifier {
     await tmp.rename(_file.path);
   }
 
+  /// Re-reads paired phones from settings.json (merging, never dropping).
+  Future<void> reloadTrusted() async {
+    try {
+      final j = jsonDecode(await _file.readAsString()) as Map<String, dynamic>;
+      for (final t in (j['trusted'] as List? ?? const [])) {
+        final d = TrustedDevice.fromJson(t as Map<String, dynamic>);
+        trusted[d.id] = d;
+      }
+    } catch (_) {}
+  }
+
+  /// Holds an exclusive lock for the life of the process so only one
+  /// LocalRoll runs at a time (two copies would split paired phones and
+  /// ports between them). Returns false if another copy holds it.
+  static Future<bool> acquireInstanceLock() async {
+    try {
+      final dir = await getApplicationSupportDirectory();
+      await dir.create(recursive: true);
+      final raf = await File('${dir.path}${Platform.pathSeparator}instance.lock').open(mode: FileMode.write);
+      await raf.lock(FileLock.exclusive);
+      _instanceLock = raf; // keep open: the OS releases it when we exit
+      return true;
+    } on FileSystemException {
+      return false;
+    } catch (_) {
+      return true; // can't tell; don't block startup
+    }
+  }
+
+  static RandomAccessFile? _instanceLock;
+
   Future<void> update(void Function(AppSettings s) change) async {
     change(this);
     await save();

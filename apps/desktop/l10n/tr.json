@@ -78,5 +78,6 @@
   "settings.unpaired": "Eşleştirme kaldırıldı: {name}",
   "viewer.from": "kaynak: {name}",
   "viewer.cannot_decode": "Bu görüntünün kodu çözülemiyor",
-  "viewer.needs_ffmpeg": "{ext} göstermek için ffmpeg gerekir. Ayarlar'dan belirleyin."
+  "viewer.needs_ffmpeg": "{ext} göstermek için ffmpeg gerekir. Ayarlar'dan belirleyin.",
+  "app.already_running": "LocalRoll zaten çalışıyor. Açık olan pencereyi kullanın (görev çubuğuna bakın) ve bunu kapatın."
 }

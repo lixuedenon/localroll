@@ -78,5 +78,6 @@
   "settings.unpaired": "Đã hủy ghép nối: {name}",
   "viewer.from": "từ {name}",
   "viewer.cannot_decode": "Không thể giải mã ảnh này",
-  "viewer.needs_ffmpeg": "Cần ffmpeg để hiển thị {ext}. Hãy thiết lập trong Cài đặt."
+  "viewer.needs_ffmpeg": "Cần ffmpeg để hiển thị {ext}. Hãy thiết lập trong Cài đặt.",
+  "app.already_running": "LocalRoll đang chạy rồi. Hãy dùng cửa sổ đang mở (xem thanh tác vụ) và đóng cửa sổ này."
 }

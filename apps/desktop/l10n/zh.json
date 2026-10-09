@@ -78,5 +78,6 @@
   "settings.unpaired": "已取消配对：{name}",
   "viewer.from": "来自 {name}",
   "viewer.cannot_decode": "无法解码这张图片",
-  "viewer.needs_ffmpeg": "显示 {ext} 需要 ffmpeg，请到「设置」配置"
+  "viewer.needs_ffmpeg": "显示 {ext} 需要 ffmpeg，请到「设置」配置",
+  "app.already_running": "LocalRoll 已经在运行了。请使用已打开的那个窗口（看看任务栏），然后关闭这个窗口。"
 }

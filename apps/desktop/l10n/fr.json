@@ -78,5 +78,6 @@
   "settings.unpaired": "Dissocié : {name}",
   "viewer.from": "de {name}",
   "viewer.cannot_decode": "Impossible de décoder cette image",
-  "viewer.needs_ffmpeg": "L'affichage des {ext} nécessite ffmpeg. Configurez-le dans Réglages."
+  "viewer.needs_ffmpeg": "L'affichage des {ext} nécessite ffmpeg. Configurez-le dans Réglages.",
+  "app.already_running": "LocalRoll est déjà en cours d'exécution. Utilisez la fenêtre ouverte (voir la barre des tâches) et fermez celle-ci."
 }

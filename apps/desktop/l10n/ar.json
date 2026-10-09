@@ -78,5 +78,6 @@
   "settings.unpaired": "تم إلغاء الإقران: {name}",
   "viewer.from": "من {name}",
   "viewer.cannot_decode": "تعذّر فك ترميز هذه الصورة",
-  "viewer.needs_ffmpeg": "يتطلب عرض {ext} وجود ffmpeg. اضبطه من الإعدادات."
+  "viewer.needs_ffmpeg": "يتطلب عرض {ext} وجود ffmpeg. اضبطه من الإعدادات.",
+  "app.already_running": "LocalRoll قيد التشغيل بالفعل. استخدم النافذة المفتوحة (تحقق من شريط المهام) وأغلق هذه النافذة."
 }

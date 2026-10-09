@@ -78,5 +78,6 @@
   "settings.unpaired": "Unpaired: {name}",
   "viewer.from": "from {name}",
   "viewer.cannot_decode": "Can't decode this image",
-  "viewer.needs_ffmpeg": "Showing {ext} requires ffmpeg. Set it up in Settings."
+  "viewer.needs_ffmpeg": "Showing {ext} requires ffmpeg. Set it up in Settings.",
+  "app.already_running": "LocalRoll is already running. Use the open window (check the taskbar or the system tray) and close this one."
 }

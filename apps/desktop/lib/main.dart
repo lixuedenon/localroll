@@ -5,10 +5,15 @@ import 'package:media_kit/media_kit.dart';
 
 import 'app_services.dart';
 import 'l10n/l10n.dart';
+import 'services/settings.dart';
 import 'ui/home_shell.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (!await AppSettings.acquireInstanceLock()) {
+    runApp(const _AlreadyRunningApp());
+    return;
+  }
   MediaKit.ensureInitialized();
   final services = await AppServices.create();
   runApp(LocalRollApp(services: services));
@@ -50,6 +55,37 @@ class LocalRollApp extends StatelessWidget {
           home: HomeShell(services: services),
         );
       },
+    );
+  }
+}
+
+/// Shown when another LocalRoll window is already open.
+class _AlreadyRunningApp extends StatelessWidget {
+  const _AlreadyRunningApp();
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'LocalRoll',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2F6B5E)), useMaterial3: true),
+      supportedLocales: appSupportedLocales,
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      localeListResolutionCallback: (preferred, _) => resolveAppLocale(preferred),
+      builder: (context, child) {
+        applyLocale(Localizations.localeOf(context));
+        return child!;
+      },
+      home: Builder(
+        builder: (context) => Scaffold(
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Text(tr('app.already_running'), textAlign: TextAlign.center, style: const TextStyle(fontSize: 16)),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

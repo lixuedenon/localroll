@@ -78,5 +78,6 @@
   "settings.unpaired": "เลิกจับคู่แล้ว: {name}",
   "viewer.from": "จาก {name}",
   "viewer.cannot_decode": "ไม่สามารถถอดรหัสรูปนี้ได้",
-  "viewer.needs_ffmpeg": "ต้องใช้ ffmpeg เพื่อแสดง {ext} โปรดตั้งค่าในหน้าการตั้งค่า"
+  "viewer.needs_ffmpeg": "ต้องใช้ ffmpeg เพื่อแสดง {ext} โปรดตั้งค่าในหน้าการตั้งค่า",
+  "app.already_running": "LocalRoll กำลังทำงานอยู่แล้ว ใช้หน้าต่างที่เปิดอยู่ (ดูที่แถบงาน) แล้วปิดหน้าต่างนี้"
 }

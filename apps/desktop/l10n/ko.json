@@ -78,5 +78,6 @@
   "settings.unpaired": "페어링 해제됨: {name}",
   "viewer.from": "{name}에서",
   "viewer.cannot_decode": "이 이미지를 디코딩할 수 없습니다",
-  "viewer.needs_ffmpeg": "{ext}를 표시하려면 ffmpeg가 필요합니다. 설정에서 지정하세요."
+  "viewer.needs_ffmpeg": "{ext}를 표시하려면 ffmpeg가 필요합니다. 설정에서 지정하세요.",
+  "app.already_running": "LocalRoll이 이미 실행 중입니다. 열려 있는 창(작업 표시줄 확인)을 사용하고 이 창은 닫아 주세요."
 }

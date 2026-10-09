@@ -78,5 +78,6 @@
   "settings.unpaired": "Dilepaskan: {name}",
   "viewer.from": "dari {name}",
   "viewer.cannot_decode": "Gambar ini tidak bisa didekode",
-  "viewer.needs_ffmpeg": "Menampilkan {ext} memerlukan ffmpeg. Atur di Pengaturan."
+  "viewer.needs_ffmpeg": "Menampilkan {ext} memerlukan ffmpeg. Atur di Pengaturan.",
+  "app.already_running": "LocalRoll sudah berjalan. Gunakan jendela yang terbuka (lihat taskbar) dan tutup jendela ini."
 }

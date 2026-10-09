@@ -78,5 +78,6 @@
   "settings.unpaired": "已取消配對：{name}",
   "viewer.from": "來自 {name}",
   "viewer.cannot_decode": "無法解碼這張圖片",
-  "viewer.needs_ffmpeg": "顯示 {ext} 需要 ffmpeg，請到「設定」設定"
+  "viewer.needs_ffmpeg": "顯示 {ext} 需要 ffmpeg，請到「設定」設定",
+  "app.already_running": "LocalRoll 已經在執行中。請使用已開啟的那個視窗（看看工作列），然後關閉這個視窗。"
 }

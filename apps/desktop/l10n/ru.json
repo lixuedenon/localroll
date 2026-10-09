@@ -78,5 +78,6 @@
   "settings.unpaired": "Отключён: {name}",
   "viewer.from": "с {name}",
   "viewer.cannot_decode": "Не удаётся декодировать это изображение",
-  "viewer.needs_ffmpeg": "Для показа {ext} нужен ffmpeg. Укажите его в настройках."
+  "viewer.needs_ffmpeg": "Для показа {ext} нужен ffmpeg. Укажите его в настройках.",
+  "app.already_running": "LocalRoll уже запущен. Используйте открытое окно (посмотрите на панели задач) и закройте это."
 }
