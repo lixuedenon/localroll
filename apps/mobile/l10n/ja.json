@@ -69,5 +69,18 @@
   "bg.progress": "{done}/{total} · {name}",
   "err.background_expired": "iOS がバックグラウンド転送を一時停止しました。LocalRoll を開いてもう一度送信すると、中断したところから続きます。",
   "transfer.background_ok": "画面をロックしたり他のアプリに切り替えても、送信はバックグラウンドで続きます。",
-  "transfer.keep_open": "送信が終わるまで LocalRoll を開いたままにしてください（バックグラウンド送信には iOS 26 以降が必要です）。"
+  "transfer.keep_open": "送信が終わるまで LocalRoll を開いたままにしてください（バックグラウンド送信には iOS 26 以降が必要です）。",
+  "home.cleanup": "空き容量を増やす",
+  "cleanup.title": "スマホの空き容量を増やす",
+  "cleanup.checking": "{pc} がファイルを再確認しています… {done}/{total}",
+  "cleanup.ready": "{count} 件は {pc} に安全に保存されています",
+  "cleanup.how": "PC が今すべてのファイルを読み直し、元のデータと一致することを確認しました。",
+  "cleanup.not_safe": "{count} 件は PC に見つからないか変更されているため、スマホに残します。",
+  "cleanup.none": "まだ整理できる項目はありません。先に写真を PC に送ってから戻ってきてください。",
+  "cleanup.select_all": "すべて選択",
+  "cleanup.select_none": "選択解除",
+  "cleanup.delete": "スマホから {count} 件を削除 · {size}",
+  "cleanup.done_ios": "空き容量が増えました。削除した項目は「最近削除した項目」に 30 日間残ります。",
+  "cleanup.done": "空き容量が増えました。",
+  "cleanup.cancelled": "何も削除されませんでした。"
 }

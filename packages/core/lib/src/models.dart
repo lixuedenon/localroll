@@ -218,3 +218,57 @@ class CompleteResponse {
         error: j['error'] as String?,
       );
 }
+
+/// Phone → PC: "do you really have these?" (safe cleanup).
+class VerifyRequest {
+  const VerifyRequest({required this.assetIds});
+
+  final List<String> assetIds;
+
+  Map<String, dynamic> toJson() => {'assetIds': assetIds};
+
+  factory VerifyRequest.fromJson(Map<String, dynamic> j) =>
+      VerifyRequest(assetIds: (j['assetIds'] as List? ?? const []).cast<String>());
+}
+
+/// One asset's result. [ok] means: the file exists on the PC, has the size
+/// it was received with, and its SHA-256 still matches the hash checked at
+/// upload time.
+class VerifiedAsset {
+  const VerifiedAsset({required this.assetId, required this.ok, this.size = 0, this.reason});
+
+  final String assetId;
+  final bool ok;
+  final int size;
+
+  /// Why not ok: 'missing' | 'changed' | 'unverified'.
+  final String? reason;
+
+  Map<String, dynamic> toJson() => {
+        'assetId': assetId,
+        'ok': ok,
+        'size': size,
+        if (reason != null) 'reason': reason,
+      };
+
+  factory VerifiedAsset.fromJson(Map<String, dynamic> j) => VerifiedAsset(
+        assetId: j['assetId'] as String,
+        ok: j['ok'] as bool? ?? false,
+        size: (j['size'] as num?)?.toInt() ?? 0,
+        reason: j['reason'] as String?,
+      );
+}
+
+class VerifyResponse {
+  const VerifyResponse({required this.items});
+
+  final List<VerifiedAsset> items;
+
+  Map<String, dynamic> toJson() => {'items': items.map((e) => e.toJson()).toList()};
+
+  factory VerifyResponse.fromJson(Map<String, dynamic> j) => VerifyResponse(
+        items: (j['items'] as List? ?? const [])
+            .map((e) => VerifiedAsset.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+}

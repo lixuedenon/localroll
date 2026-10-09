@@ -129,6 +129,9 @@ class TransferServer extends ChangeNotifier {
       if (req.method == 'POST' && path == LrProtocol.pathSessions) {
         return await _createSession(req, device);
       }
+      if (req.method == 'POST' && path == LrProtocol.pathVerify) {
+        return await _verify(req, device);
+      }
 
       // /api/v1/sessions/{sid}/files/{fid}[/complete]
       if (segs.length >= 6 &&
@@ -231,6 +234,32 @@ class TransferServer extends ChangeNotifier {
       results[f.id] = OfferResult(status: OfferStatus.ready, offset: offset);
     }
     return _json(req.response, 200, SessionResponse(sessionId: sessionId, results: results).toJson());
+  }
+
+  /// Safe cleanup: re-hash what we hold for each asset right now, so the
+  /// phone deletes only files that are provably intact on this PC.
+  Future<void> _verify(HttpRequest req, TrustedDevice device) async {
+    final body = VerifyRequest.fromJson(await _readJson(req));
+    final items = <VerifiedAsset>[];
+    for (final id in body.assetIds.take(LrProtocol.verifyBatch)) {
+      final m = library.findByAsset(device.id, id);
+      if (m == null) {
+        items.add(VerifiedAsset(assetId: id, ok: false, reason: 'missing'));
+        continue;
+      }
+      final f = File(library.absPath(m));
+      if (!await f.exists()) {
+        items.add(VerifiedAsset(assetId: id, ok: false, reason: 'missing'));
+        continue;
+      }
+      if (m.sha256 == null) {
+        items.add(VerifiedAsset(assetId: id, ok: false, size: m.size, reason: 'unverified'));
+        continue;
+      }
+      final same = await f.length() == m.size && await sha256OfFile(f) == m.sha256;
+      items.add(VerifiedAsset(assetId: id, ok: same, size: m.size, reason: same ? null : 'changed'));
+    }
+    return _json(req.response, 200, VerifyResponse(items: items).toJson());
   }
 
   Future<void> _status(HttpRequest req, TrustedDevice device, FileOffer offer) async {

@@ -79,5 +79,16 @@
   "viewer.from": "kaynak: {name}",
   "viewer.cannot_decode": "Bu görüntünün kodu çözülemiyor",
   "viewer.needs_ffmpeg": "{ext} göstermek için ffmpeg gerekir. Ayarlar'dan belirleyin.",
-  "app.already_running": "LocalRoll zaten çalışıyor. Açık olan pencereyi kullanın (görev çubuğuna bakın) ve bunu kapatın."
+  "app.already_running": "LocalRoll zaten çalışıyor. Açık olan pencereyi kullanın (görev çubuğuna bakın) ve bunu kapatın.",
+  "app.back": "Geri",
+  "app.minimize": "Simge durumuna küçült",
+  "app.maximize": "Ekranı kapla",
+  "app.restore": "Önceki boyut",
+  "app.close": "Kapat",
+  "app.exit": "Çıkış",
+  "exit.title": "LocalRoll’dan çıkılsın mı?",
+  "exit.body": "LocalRoll’u yeniden açana kadar telefonlar bu bilgisayara gönderemez.",
+  "exit.body_busy": "Hâlâ {count} dosya alınıyor. Çıkış bunları durdurur; telefon daha sonra devam edebilir.",
+  "exit.stay": "Açık kalsın",
+  "exit.quit": "Çık"
 }

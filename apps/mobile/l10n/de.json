@@ -69,5 +69,18 @@
   "bg.progress": "{done}/{total} · {name}",
   "err.background_expired": "iOS hat die Hintergrundübertragung pausiert. Öffne LocalRoll und sende erneut – es geht dort weiter, wo es aufgehört hat.",
   "transfer.background_ok": "Du kannst den Bildschirm sperren oder die App wechseln – das Senden läuft im Hintergrund weiter.",
-  "transfer.keep_open": "Lass LocalRoll geöffnet, bis das Senden fertig ist (Senden im Hintergrund erfordert iOS 26 oder neuer)."
+  "transfer.keep_open": "Lass LocalRoll geöffnet, bis das Senden fertig ist (Senden im Hintergrund erfordert iOS 26 oder neuer).",
+  "home.cleanup": "Speicher freigeben",
+  "cleanup.title": "Speicher auf dem Handy freigeben",
+  "cleanup.checking": "{pc} prüft deine Dateien erneut… {done}/{total}",
+  "cleanup.ready": "{count} Elemente sind sicher auf {pc}",
+  "cleanup.how": "Der PC hat gerade jede Datei neu gelesen – sie stimmt mit dem Original überein.",
+  "cleanup.not_safe": "{count} Elemente fehlen auf dem PC (oder wurden geändert) und bleiben auf dem Handy.",
+  "cleanup.none": "Noch nichts zum Aufräumen. Sende zuerst Fotos an deinen PC und komm dann zurück.",
+  "cleanup.select_all": "Alle auswählen",
+  "cleanup.select_none": "Keine auswählen",
+  "cleanup.delete": "{count} vom Handy löschen · {size}",
+  "cleanup.done_ios": "Speicher freigegeben. Gelöschte Elemente bleiben 30 Tage in „Zuletzt gelöscht“.",
+  "cleanup.done": "Speicher freigegeben.",
+  "cleanup.cancelled": "Es wurde nichts gelöscht."
 }

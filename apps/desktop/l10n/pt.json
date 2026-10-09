@@ -79,5 +79,16 @@
   "viewer.from": "de {name}",
   "viewer.cannot_decode": "Não é possível decodificar esta imagem",
   "viewer.needs_ffmpeg": "Para exibir {ext} é preciso o ffmpeg. Configure em Configurações.",
-  "app.already_running": "O LocalRoll já está em execução. Use a janela aberta (veja a barra de tarefas) e feche esta."
+  "app.already_running": "O LocalRoll já está em execução. Use a janela aberta (veja a barra de tarefas) e feche esta.",
+  "app.back": "Voltar",
+  "app.minimize": "Minimizar",
+  "app.maximize": "Maximizar",
+  "app.restore": "Restaurar",
+  "app.close": "Fechar",
+  "app.exit": "Sair",
+  "exit.title": "Sair do LocalRoll?",
+  "exit.body": "Os celulares não poderão enviar para este PC até você abrir o LocalRoll de novo.",
+  "exit.body_busy": "Ainda há {count} arquivo(s) sendo recebidos. Sair interrompe; o celular pode continuar depois.",
+  "exit.stay": "Manter aberto",
+  "exit.quit": "Sair"
 }

@@ -69,5 +69,18 @@
   "bg.progress": "{done}/{total} · {name}",
   "err.background_expired": "iOS đã tạm dừng truyền trong nền. Mở LocalRoll và gửi lại — sẽ tiếp tục từ chỗ đã dừng.",
   "transfer.background_ok": "Bạn có thể khóa màn hình hoặc chuyển ứng dụng — việc gửi vẫn tiếp tục trong nền.",
-  "transfer.keep_open": "Hãy giữ LocalRoll mở cho đến khi gửi xong (gửi trong nền cần iOS 26 trở lên)."
+  "transfer.keep_open": "Hãy giữ LocalRoll mở cho đến khi gửi xong (gửi trong nền cần iOS 26 trở lên).",
+  "home.cleanup": "Giải phóng dung lượng",
+  "cleanup.title": "Giải phóng dung lượng điện thoại",
+  "cleanup.checking": "{pc} đang kiểm tra lại tệp… {done}/{total}",
+  "cleanup.ready": "{count} mục đã được lưu an toàn trên {pc}",
+  "cleanup.how": "Máy tính vừa đọc lại từng tệp và khớp với bản gốc.",
+  "cleanup.not_safe": "{count} mục không có trên máy tính (hoặc đã thay đổi) và sẽ được giữ lại trên điện thoại.",
+  "cleanup.none": "Chưa có gì để dọn. Hãy gửi ảnh sang máy tính trước rồi quay lại đây.",
+  "cleanup.select_all": "Chọn tất cả",
+  "cleanup.select_none": "Bỏ chọn",
+  "cleanup.delete": "Xóa {count} khỏi điện thoại · {size}",
+  "cleanup.done_ios": "Đã giải phóng dung lượng. Mục đã xóa nằm trong “Đã xóa gần đây” 30 ngày.",
+  "cleanup.done": "Đã giải phóng dung lượng.",
+  "cleanup.cancelled": "Không có gì bị xóa."
 }

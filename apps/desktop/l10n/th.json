@@ -79,5 +79,16 @@
   "viewer.from": "จาก {name}",
   "viewer.cannot_decode": "ไม่สามารถถอดรหัสรูปนี้ได้",
   "viewer.needs_ffmpeg": "ต้องใช้ ffmpeg เพื่อแสดง {ext} โปรดตั้งค่าในหน้าการตั้งค่า",
-  "app.already_running": "LocalRoll กำลังทำงานอยู่แล้ว ใช้หน้าต่างที่เปิดอยู่ (ดูที่แถบงาน) แล้วปิดหน้าต่างนี้"
+  "app.already_running": "LocalRoll กำลังทำงานอยู่แล้ว ใช้หน้าต่างที่เปิดอยู่ (ดูที่แถบงาน) แล้วปิดหน้าต่างนี้",
+  "app.back": "ย้อนกลับ",
+  "app.minimize": "ย่อ",
+  "app.maximize": "ขยาย",
+  "app.restore": "คืนขนาด",
+  "app.close": "ปิด",
+  "app.exit": "ออก",
+  "exit.title": "ออกจาก LocalRoll ไหม",
+  "exit.body": "โทรศัพท์จะส่งมาที่คอมพิวเตอร์นี้ไม่ได้จนกว่าคุณจะเปิด LocalRoll อีกครั้ง",
+  "exit.body_busy": "ยังรับไฟล์อยู่ {count} ไฟล์ การออกจะหยุดการรับ แต่โทรศัพท์ส่งต่อได้ภายหลัง",
+  "exit.stay": "เปิดไว้",
+  "exit.quit": "ออก"
 }

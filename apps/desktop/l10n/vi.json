@@ -79,5 +79,16 @@
   "viewer.from": "từ {name}",
   "viewer.cannot_decode": "Không thể giải mã ảnh này",
   "viewer.needs_ffmpeg": "Cần ffmpeg để hiển thị {ext}. Hãy thiết lập trong Cài đặt.",
-  "app.already_running": "LocalRoll đang chạy rồi. Hãy dùng cửa sổ đang mở (xem thanh tác vụ) và đóng cửa sổ này."
+  "app.already_running": "LocalRoll đang chạy rồi. Hãy dùng cửa sổ đang mở (xem thanh tác vụ) và đóng cửa sổ này.",
+  "app.back": "Quay lại",
+  "app.minimize": "Thu nhỏ",
+  "app.maximize": "Phóng to",
+  "app.restore": "Khôi phục",
+  "app.close": "Đóng",
+  "app.exit": "Thoát",
+  "exit.title": "Thoát LocalRoll?",
+  "exit.body": "Điện thoại sẽ không gửi được tới máy tính này cho đến khi bạn mở lại LocalRoll.",
+  "exit.body_busy": "Vẫn đang nhận {count} tệp. Thoát sẽ dừng lại; điện thoại có thể tiếp tục sau.",
+  "exit.stay": "Giữ mở",
+  "exit.quit": "Thoát"
 }

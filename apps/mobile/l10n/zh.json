@@ -69,5 +69,18 @@
   "bg.progress": "{done}/{total} · {name}",
   "err.background_expired": "iOS 暂停了后台传输。打开 LocalRoll 再发送一次，会从中断处继续。",
   "transfer.background_ok": "可以锁屏或切到其他 App，发送会在后台继续。",
-  "transfer.keep_open": "发送完成前请保持 LocalRoll 打开（后台发送需要 iOS 26 或更高版本）。"
+  "transfer.keep_open": "发送完成前请保持 LocalRoll 打开（后台发送需要 iOS 26 或更高版本）。",
+  "home.cleanup": "清理空间",
+  "cleanup.title": "清理手机空间",
+  "cleanup.checking": "{pc} 正在重新核对文件… {done}/{total}",
+  "cleanup.ready": "{count} 项已安全保存在 {pc}",
+  "cleanup.how": "电脑刚刚重新读取了每个文件，指纹与原片一致。",
+  "cleanup.not_safe": "{count} 项在电脑上找不到或已改变，会保留在手机上。",
+  "cleanup.none": "还没有可以清理的项目。先把照片发送到电脑，再回来这里。",
+  "cleanup.select_all": "全选",
+  "cleanup.select_none": "全不选",
+  "cleanup.delete": "从手机删除 {count} 项 · {size}",
+  "cleanup.done_ios": "已腾出空间。删除的项目会在「最近删除」里保留 30 天。",
+  "cleanup.done": "已腾出空间。",
+  "cleanup.cancelled": "没有删除任何项目。"
 }

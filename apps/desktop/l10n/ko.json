@@ -79,5 +79,16 @@
   "viewer.from": "{name}에서",
   "viewer.cannot_decode": "이 이미지를 디코딩할 수 없습니다",
   "viewer.needs_ffmpeg": "{ext}를 표시하려면 ffmpeg가 필요합니다. 설정에서 지정하세요.",
-  "app.already_running": "LocalRoll이 이미 실행 중입니다. 열려 있는 창(작업 표시줄 확인)을 사용하고 이 창은 닫아 주세요."
+  "app.already_running": "LocalRoll이 이미 실행 중입니다. 열려 있는 창(작업 표시줄 확인)을 사용하고 이 창은 닫아 주세요.",
+  "app.back": "뒤로",
+  "app.minimize": "최소화",
+  "app.maximize": "최대화",
+  "app.restore": "이전 크기로",
+  "app.close": "닫기",
+  "app.exit": "종료",
+  "exit.title": "LocalRoll을 종료할까요?",
+  "exit.body": "종료하면 LocalRoll을 다시 열 때까지 휴대폰에서 이 PC로 보낼 수 없습니다.",
+  "exit.body_busy": "{count}개 파일을 아직 받는 중입니다. 종료하면 중단되며 나중에 휴대폰에서 이어서 보낼 수 있습니다.",
+  "exit.stay": "계속 열어 두기",
+  "exit.quit": "종료"
 }

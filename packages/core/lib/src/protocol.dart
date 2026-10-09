@@ -24,6 +24,13 @@ class LrProtocol {
   static const String pathPair = '/api/v1/pair';
   static const String pathSessions = '/api/v1/sessions';
 
+  /// Safe cleanup: the PC re-reads and re-hashes the files it holds for the
+  /// given assets so the phone only deletes what is provably on the PC.
+  static const String pathVerify = '/api/v1/verify';
+
+  /// Assets per verify request (each one is re-hashed on the PC).
+  static const int verifyBatch = 100;
+
   /// `/api/v1/sessions/{sessionId}/files/{fileId}` — GET status, PUT chunk.
   static String filePath(String sessionId, String fileId) =>
       '$pathSessions/${Uri.encodeComponent(sessionId)}/files/${Uri.encodeComponent(fileId)}';

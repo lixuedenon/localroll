@@ -79,5 +79,16 @@
   "viewer.from": "來自 {name}",
   "viewer.cannot_decode": "無法解碼這張圖片",
   "viewer.needs_ffmpeg": "顯示 {ext} 需要 ffmpeg，請到「設定」設定",
-  "app.already_running": "LocalRoll 已經在執行中。請使用已開啟的那個視窗（看看工作列），然後關閉這個視窗。"
+  "app.already_running": "LocalRoll 已經在執行中。請使用已開啟的那個視窗（看看工作列），然後關閉這個視窗。",
+  "app.back": "返回",
+  "app.minimize": "最小化",
+  "app.maximize": "最大化",
+  "app.restore": "還原",
+  "app.close": "關閉",
+  "app.exit": "結束",
+  "exit.title": "結束 LocalRoll？",
+  "exit.body": "結束後，手機就無法傳送到這台電腦，直到再次開啟 LocalRoll。",
+  "exit.body_busy": "還有 {count} 個檔案正在接收。結束會中斷傳輸，之後手機可以接著傳。",
+  "exit.stay": "繼續使用",
+  "exit.quit": "結束"
 }

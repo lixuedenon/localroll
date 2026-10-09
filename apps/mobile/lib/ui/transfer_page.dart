@@ -8,6 +8,7 @@ import '../services/desktop_client.dart';
 import '../services/discovery.dart';
 import '../services/mobile_settings.dart';
 import '../services/uploader.dart';
+import 'cleanup_page.dart';
 
 /// Connects to the PC, sends the selected assets and shows per-file progress.
 /// Pops with `true` when everything finished so the selection can be cleared.
@@ -153,6 +154,21 @@ class _TransferPageState extends State<TransferPage> {
                       child: Text(tr('transfer.retry_failed')),
                     ),
                   const Spacer(),
+                  if (up.doneCount + up.skippedCount > 0)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: OutlinedButton.icon(
+                        onPressed: () => Navigator.of(context).pushReplacement(MaterialPageRoute(
+                          builder: (_) => CleanupPage(
+                            settings: widget.settings,
+                            discovery: widget.discovery,
+                            desktop: widget.desktop,
+                          ),
+                        )),
+                        icon: const Icon(Icons.cleaning_services_rounded, size: 18),
+                        label: Text(tr('home.cleanup')),
+                      ),
+                    ),
                   FilledButton(
                     onPressed: () => Navigator.of(context).pop(up.failedCount == 0),
                     child: Text(tr('transfer.done')),

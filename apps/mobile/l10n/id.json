@@ -69,5 +69,18 @@
   "bg.progress": "{done}/{total} · {name}",
   "err.background_expired": "iOS menjeda transfer di latar belakang. Buka LocalRoll dan kirim lagi — akan dilanjutkan dari tempat berhenti.",
   "transfer.background_ok": "Anda bisa mengunci layar atau beralih aplikasi — pengiriman berlanjut di latar belakang.",
-  "transfer.keep_open": "Biarkan LocalRoll tetap terbuka sampai pengiriman selesai (pengiriman di latar belakang perlu iOS 26 atau lebih baru)."
+  "transfer.keep_open": "Biarkan LocalRoll tetap terbuka sampai pengiriman selesai (pengiriman di latar belakang perlu iOS 26 atau lebih baru).",
+  "home.cleanup": "Kosongkan ruang",
+  "cleanup.title": "Kosongkan ruang ponsel",
+  "cleanup.checking": "{pc} sedang memeriksa ulang file… {done}/{total}",
+  "cleanup.ready": "{count} item aman di {pc}",
+  "cleanup.how": "PC baru saja membaca ulang setiap file dan cocok dengan aslinya.",
+  "cleanup.not_safe": "{count} item tidak ada di PC (atau berubah) dan akan tetap di ponsel.",
+  "cleanup.none": "Belum ada yang bisa dibersihkan. Kirim foto ke PC dulu, lalu kembali ke sini.",
+  "cleanup.select_all": "Pilih semua",
+  "cleanup.select_none": "Batal pilih",
+  "cleanup.delete": "Hapus {count} dari ponsel · {size}",
+  "cleanup.done_ios": "Ruang sudah dikosongkan. Item yang dihapus tetap ada di “Baru Dihapus” selama 30 hari.",
+  "cleanup.done": "Ruang sudah dikosongkan.",
+  "cleanup.cancelled": "Tidak ada yang dihapus."
 }

@@ -68,6 +68,17 @@ class AppServices {
     }
   }
 
+  /// Clean exit: unregister from mDNS (so phones don't see a stale PC) and
+  /// close the listening socket.
+  Future<void> shutdown() async {
+    try {
+      await mdns.stop().timeout(const Duration(seconds: 2));
+    } catch (_) {}
+    try {
+      await server.stop().timeout(const Duration(seconds: 2));
+    } catch (_) {}
+  }
+
   Future<void> changeLibrary(String path) async {
     await settings.update((s) => s.libraryPath = path);
     await library.changeRoot(path);

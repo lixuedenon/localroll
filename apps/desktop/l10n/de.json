@@ -79,5 +79,16 @@
   "viewer.from": "von {name}",
   "viewer.cannot_decode": "Dieses Bild kann nicht dekodiert werden",
   "viewer.needs_ffmpeg": "Zum Anzeigen von {ext} wird ffmpeg benötigt. Bitte in den Einstellungen festlegen.",
-  "app.already_running": "LocalRoll läuft bereits. Verwende das geöffnete Fenster (siehe Taskleiste) und schließe dieses."
+  "app.already_running": "LocalRoll läuft bereits. Verwende das geöffnete Fenster (siehe Taskleiste) und schließe dieses.",
+  "app.back": "Zurück",
+  "app.minimize": "Minimieren",
+  "app.maximize": "Maximieren",
+  "app.restore": "Wiederherstellen",
+  "app.close": "Schließen",
+  "app.exit": "Beenden",
+  "exit.title": "LocalRoll beenden?",
+  "exit.body": "Handys können erst wieder an diesen PC senden, wenn LocalRoll erneut geöffnet ist.",
+  "exit.body_busy": "{count} Datei(en) werden noch empfangen. Beenden unterbricht sie; das Handy kann später fortsetzen.",
+  "exit.stay": "Geöffnet lassen",
+  "exit.quit": "Beenden"
 }

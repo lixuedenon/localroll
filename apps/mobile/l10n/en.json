@@ -69,5 +69,18 @@
   "bg.progress": "{done}/{total} · {name}",
   "err.background_expired": "iOS paused the background transfer. Open LocalRoll and send again — it continues where it stopped.",
   "transfer.background_ok": "You can lock the screen or switch apps — sending continues in the background.",
-  "transfer.keep_open": "Keep LocalRoll open until sending finishes (background sending needs iOS 26 or later)."
+  "transfer.keep_open": "Keep LocalRoll open until sending finishes (background sending needs iOS 26 or later).",
+  "home.cleanup": "Free up space",
+  "cleanup.title": "Free up space",
+  "cleanup.checking": "{pc} is re-checking your files… {done}/{total}",
+  "cleanup.ready": "{count} items are safely on {pc}",
+  "cleanup.how": "The PC just re-read each file, and its fingerprint matches the original.",
+  "cleanup.not_safe": "{count} items aren’t on the PC (or have changed) and will stay on your phone.",
+  "cleanup.none": "Nothing to clean up yet. Send photos to your PC first, then come back here.",
+  "cleanup.select_all": "Select all",
+  "cleanup.select_none": "Select none",
+  "cleanup.delete": "Delete {count} from phone · {size}",
+  "cleanup.done_ios": "Space freed. Deleted items stay in “Recently Deleted” for 30 days.",
+  "cleanup.done": "Space freed.",
+  "cleanup.cancelled": "Nothing was deleted."
 }

@@ -11,6 +11,7 @@ import 'package:photo_manager/photo_manager.dart';
 import '../l10n/l10n.dart';
 import '../services/discovery.dart';
 import '../services/mobile_settings.dart';
+import 'cleanup_page.dart';
 import 'connect_page.dart';
 import 'transfer_page.dart';
 
@@ -194,6 +195,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (mounted) setState(() {});
   }
 
+  Future<void> _openCleanup(PairedDesktop desktop) async {
+    await Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => CleanupPage(settings: widget.settings, discovery: widget.discovery, desktop: desktop),
+    ));
+    // Deleted items disappear from the grid.
+    if (mounted) await _reload();
+  }
+
   Future<void> _send() async {
     final desktop = widget.settings.current;
     if (desktop == null) {
@@ -252,6 +261,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     ),
                 ],
               ),
+              if (desktop != null)
+                IconButton(
+                  tooltip: tr('home.cleanup'),
+                  onPressed: () => _openCleanup(desktop),
+                  icon: const Icon(Icons.cleaning_services_rounded),
+                ),
               IconButton(
                 tooltip: tr('home.connect_pc'),
                 onPressed: _openConnect,

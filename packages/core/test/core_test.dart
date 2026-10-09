@@ -81,4 +81,16 @@ void main() {
     expect(t.tr('only_en'), 'English only');
     expect(t.tr('missing.key'), 'missing.key');
   });
+
+  test('verify request/response round-trip', () {
+    final req = VerifyRequest.fromJson(const VerifyRequest(assetIds: ['a', 'b']).toJson());
+    expect(req.assetIds, ['a', 'b']);
+    final res = VerifyResponse.fromJson(const VerifyResponse(items: [
+      VerifiedAsset(assetId: 'a', ok: true, size: 42),
+      VerifiedAsset(assetId: 'b', ok: false, reason: 'missing'),
+    ]).toJson());
+    expect(res.items.first.ok, isTrue);
+    expect(res.items.first.size, 42);
+    expect(res.items.last.reason, 'missing');
+  });
 }

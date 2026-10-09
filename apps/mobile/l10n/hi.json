@@ -69,5 +69,18 @@
   "bg.progress": "{done}/{total} · {name}",
   "err.background_expired": "iOS ने बैकग्राउंड ट्रांसफ़र रोक दिया। LocalRoll खोलकर फिर से भेजें — यह वहीं से जारी रहेगा जहाँ रुका था।",
   "transfer.background_ok": "आप स्क्रीन लॉक कर सकते हैं या दूसरा ऐप खोल सकते हैं — भेजना बैकग्राउंड में जारी रहेगा।",
-  "transfer.keep_open": "भेजना पूरा होने तक LocalRoll खुला रखें (बैकग्राउंड में भेजने के लिए iOS 26 या नया चाहिए)।"
+  "transfer.keep_open": "भेजना पूरा होने तक LocalRoll खुला रखें (बैकग्राउंड में भेजने के लिए iOS 26 या नया चाहिए)।",
+  "home.cleanup": "जगह खाली करें",
+  "cleanup.title": "फ़ोन में जगह खाली करें",
+  "cleanup.checking": "{pc} आपकी फ़ाइलें फिर से जाँच रहा है… {done}/{total}",
+  "cleanup.ready": "{count} आइटम {pc} पर सुरक्षित हैं",
+  "cleanup.how": "PC ने अभी हर फ़ाइल फिर से पढ़ी और वह मूल फ़ाइल से मेल खाती है।",
+  "cleanup.not_safe": "{count} आइटम PC पर नहीं हैं (या बदल गए हैं) और फ़ोन पर ही रहेंगे।",
+  "cleanup.none": "अभी साफ़ करने के लिए कुछ नहीं है। पहले फ़ोटो PC पर भेजें, फिर यहाँ लौटें।",
+  "cleanup.select_all": "सभी चुनें",
+  "cleanup.select_none": "कोई नहीं",
+  "cleanup.delete": "फ़ोन से {count} हटाएँ · {size}",
+  "cleanup.done_ios": "जगह खाली हो गई। हटाए गए आइटम 30 दिनों तक “हाल ही में हटाए गए” में रहते हैं।",
+  "cleanup.done": "जगह खाली हो गई।",
+  "cleanup.cancelled": "कुछ भी नहीं हटाया गया।"
 }

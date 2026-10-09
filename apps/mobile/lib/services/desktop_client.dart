@@ -93,6 +93,14 @@ class DesktopClient {
     return (j['offset'] as num).toInt();
   }
 
+  /// Safe cleanup: the PC re-hashes each file it holds for these assets.
+  Future<VerifyResponse> verify(List<String> assetIds) async => VerifyResponse.fromJson(await _send(
+        'POST',
+        LrProtocol.pathVerify,
+        json: VerifyRequest(assetIds: assetIds).toJson(),
+        timeout: const Duration(minutes: 5),
+      ));
+
   /// The desktop re-hashes the whole file here, so allow time for big videos.
   Future<CompleteResponse> complete(String sessionId, String fileId, CompleteRequest request) async =>
       CompleteResponse.fromJson(await _send(

@@ -79,5 +79,16 @@
   "viewer.from": "来自 {name}",
   "viewer.cannot_decode": "无法解码这张图片",
   "viewer.needs_ffmpeg": "显示 {ext} 需要 ffmpeg，请到「设置」配置",
-  "app.already_running": "LocalRoll 已经在运行了。请使用已打开的那个窗口（看看任务栏），然后关闭这个窗口。"
+  "app.already_running": "LocalRoll 已经在运行了。请使用已打开的那个窗口（看看任务栏），然后关闭这个窗口。",
+  "app.back": "返回",
+  "app.minimize": "最小化",
+  "app.maximize": "最大化",
+  "app.restore": "还原",
+  "app.close": "关闭",
+  "app.exit": "退出",
+  "exit.title": "退出 LocalRoll？",
+  "exit.body": "退出后，手机就无法发送到这台电脑，直到再次打开 LocalRoll。",
+  "exit.body_busy": "还有 {count} 个文件正在接收。退出会中断传输，之后手机可以接着传。",
+  "exit.stay": "继续使用",
+  "exit.quit": "退出"
 }

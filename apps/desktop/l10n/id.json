@@ -79,5 +79,16 @@
   "viewer.from": "dari {name}",
   "viewer.cannot_decode": "Gambar ini tidak bisa didekode",
   "viewer.needs_ffmpeg": "Menampilkan {ext} memerlukan ffmpeg. Atur di Pengaturan.",
-  "app.already_running": "LocalRoll sudah berjalan. Gunakan jendela yang terbuka (lihat taskbar) dan tutup jendela ini."
+  "app.already_running": "LocalRoll sudah berjalan. Gunakan jendela yang terbuka (lihat taskbar) dan tutup jendela ini.",
+  "app.back": "Kembali",
+  "app.minimize": "Perkecil",
+  "app.maximize": "Perbesar",
+  "app.restore": "Pulihkan",
+  "app.close": "Tutup",
+  "app.exit": "Keluar",
+  "exit.title": "Keluar dari LocalRoll?",
+  "exit.body": "Ponsel tidak bisa mengirim ke PC ini sampai LocalRoll dibuka lagi.",
+  "exit.body_busy": "{count} file masih diterima. Keluar akan menghentikannya; ponsel bisa melanjutkan nanti.",
+  "exit.stay": "Tetap buka",
+  "exit.quit": "Keluar"
 }

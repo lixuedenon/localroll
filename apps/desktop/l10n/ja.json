@@ -79,5 +79,16 @@
   "viewer.from": "{name} から",
   "viewer.cannot_decode": "この画像はデコードできません",
   "viewer.needs_ffmpeg": "{ext} を表示するには ffmpeg が必要です。設定で指定してください。",
-  "app.already_running": "LocalRoll はすでに起動しています。開いているウィンドウ（タスクバーを確認）を使い、このウィンドウは閉じてください。"
+  "app.already_running": "LocalRoll はすでに起動しています。開いているウィンドウ（タスクバーを確認）を使い、このウィンドウは閉じてください。",
+  "app.back": "戻る",
+  "app.minimize": "最小化",
+  "app.maximize": "最大化",
+  "app.restore": "元に戻す",
+  "app.close": "閉じる",
+  "app.exit": "終了",
+  "exit.title": "LocalRoll を終了しますか？",
+  "exit.body": "終了すると、再び LocalRoll を開くまでスマホからこの PC に送信できません。",
+  "exit.body_busy": "{count} 件のファイルを受信中です。終了すると中断されますが、後でスマホから再開できます。",
+  "exit.stay": "開いたままにする",
+  "exit.quit": "終了"
 }

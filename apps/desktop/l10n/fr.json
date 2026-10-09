@@ -79,5 +79,16 @@
   "viewer.from": "de {name}",
   "viewer.cannot_decode": "Impossible de décoder cette image",
   "viewer.needs_ffmpeg": "L'affichage des {ext} nécessite ffmpeg. Configurez-le dans Réglages.",
-  "app.already_running": "LocalRoll est déjà en cours d'exécution. Utilisez la fenêtre ouverte (voir la barre des tâches) et fermez celle-ci."
+  "app.already_running": "LocalRoll est déjà en cours d'exécution. Utilisez la fenêtre ouverte (voir la barre des tâches) et fermez celle-ci.",
+  "app.back": "Retour",
+  "app.minimize": "Réduire",
+  "app.maximize": "Agrandir",
+  "app.restore": "Restaurer",
+  "app.close": "Fermer",
+  "app.exit": "Quitter",
+  "exit.title": "Quitter LocalRoll ?",
+  "exit.body": "Les téléphones ne pourront plus envoyer vers ce PC tant que LocalRoll ne sera pas rouvert.",
+  "exit.body_busy": "{count} fichier(s) encore en cours de réception. Quitter les interrompt ; le téléphone pourra reprendre plus tard.",
+  "exit.stay": "Rester ouvert",
+  "exit.quit": "Quitter"
 }

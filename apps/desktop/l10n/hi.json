@@ -79,5 +79,16 @@
   "viewer.from": "{name} से",
   "viewer.cannot_decode": "यह इमेज डिकोड नहीं हो सकी",
   "viewer.needs_ffmpeg": "{ext} दिखाने के लिए ffmpeg चाहिए। इसे सेटिंग्स में सेट करें।",
-  "app.already_running": "LocalRoll पहले से चल रहा है। खुली हुई विंडो (टास्कबार देखें) का उपयोग करें और इसे बंद करें।"
+  "app.already_running": "LocalRoll पहले से चल रहा है। खुली हुई विंडो (टास्कबार देखें) का उपयोग करें और इसे बंद करें।",
+  "app.back": "वापस",
+  "app.minimize": "छोटा करें",
+  "app.maximize": "बड़ा करें",
+  "app.restore": "पहले जैसा करें",
+  "app.close": "बंद करें",
+  "app.exit": "बाहर निकलें",
+  "exit.title": "LocalRoll से बाहर निकलें?",
+  "exit.body": "जब तक आप LocalRoll फिर से नहीं खोलते, फ़ोन इस PC पर नहीं भेज पाएँगे।",
+  "exit.body_busy": "{count} फ़ाइलें अभी भी आ रही हैं। बाहर निकलने पर ये रुक जाएँगी; फ़ोन बाद में फिर से शुरू कर सकता है।",
+  "exit.stay": "खुला रखें",
+  "exit.quit": "बाहर निकलें"
 }

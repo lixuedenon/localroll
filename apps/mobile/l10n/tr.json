@@ -69,5 +69,18 @@
   "bg.progress": "{done}/{total} · {name}",
   "err.background_expired": "iOS arka plan aktarımını duraklattı. LocalRoll'u açıp yeniden gönderin; kaldığı yerden devam eder.",
   "transfer.background_ok": "Ekranı kilitleyebilir veya başka uygulamaya geçebilirsiniz; gönderim arka planda sürer.",
-  "transfer.keep_open": "Gönderim bitene kadar LocalRoll'u açık tutun (arka planda gönderim için iOS 26 veya üstü gerekir)."
+  "transfer.keep_open": "Gönderim bitene kadar LocalRoll'u açık tutun (arka planda gönderim için iOS 26 veya üstü gerekir).",
+  "home.cleanup": "Yer aç",
+  "cleanup.title": "Telefonda yer aç",
+  "cleanup.checking": "{pc} dosyalarınızı yeniden kontrol ediyor… {done}/{total}",
+  "cleanup.ready": "{count} öğe {pc} üzerinde güvende",
+  "cleanup.how": "Bilgisayar her dosyayı az önce yeniden okudu; orijinalle aynı.",
+  "cleanup.not_safe": "{count} öğe bilgisayarda yok (ya da değişmiş) ve telefonunuzda kalacak.",
+  "cleanup.none": "Henüz temizlenecek bir şey yok. Önce fotoğrafları bilgisayara gönderin, sonra buraya dönün.",
+  "cleanup.select_all": "Tümünü seç",
+  "cleanup.select_none": "Hiçbirini seçme",
+  "cleanup.delete": "Telefondan {count} öğeyi sil · {size}",
+  "cleanup.done_ios": "Yer açıldı. Silinen öğeler 30 gün boyunca “Son Silinenler”de kalır.",
+  "cleanup.done": "Yer açıldı.",
+  "cleanup.cancelled": "Hiçbir şey silinmedi."
 }

@@ -69,5 +69,18 @@
   "bg.progress": "{done}/{total} · {name}",
   "err.background_expired": "O iOS pausou a transferência em segundo plano. Abra o LocalRoll e envie de novo — ele continua de onde parou.",
   "transfer.background_ok": "Você pode bloquear a tela ou trocar de app — o envio continua em segundo plano.",
-  "transfer.keep_open": "Mantenha o LocalRoll aberto até o envio terminar (envio em segundo plano requer iOS 26 ou posterior)."
+  "transfer.keep_open": "Mantenha o LocalRoll aberto até o envio terminar (envio em segundo plano requer iOS 26 ou posterior).",
+  "home.cleanup": "Liberar espaço",
+  "cleanup.title": "Liberar espaço no celular",
+  "cleanup.checking": "{pc} está verificando seus arquivos de novo… {done}/{total}",
+  "cleanup.ready": "{count} itens estão seguros em {pc}",
+  "cleanup.how": "O PC acabou de reler cada arquivo e ele confere com o original.",
+  "cleanup.not_safe": "{count} itens não estão no PC (ou mudaram) e vão ficar no seu celular.",
+  "cleanup.none": "Ainda não há nada para limpar. Envie fotos para o PC primeiro e volte aqui.",
+  "cleanup.select_all": "Selecionar tudo",
+  "cleanup.select_none": "Desmarcar tudo",
+  "cleanup.delete": "Apagar {count} do celular · {size}",
+  "cleanup.done_ios": "Espaço liberado. Os itens apagados ficam em “Apagados” por 30 dias.",
+  "cleanup.done": "Espaço liberado.",
+  "cleanup.cancelled": "Nada foi apagado."
 }

@@ -69,5 +69,18 @@
   "bg.progress": "{done}/{total} · {name}",
   "err.background_expired": "أوقف iOS النقل في الخلفية مؤقتًا. افتح LocalRoll وأرسل مرة أخرى — سيستكمل من حيث توقف.",
   "transfer.background_ok": "يمكنك قفل الشاشة أو التبديل إلى تطبيق آخر — سيستمر الإرسال في الخلفية.",
-  "transfer.keep_open": "أبقِ LocalRoll مفتوحًا حتى ينتهي الإرسال (الإرسال في الخلفية يتطلب iOS 26 أو أحدث)."
+  "transfer.keep_open": "أبقِ LocalRoll مفتوحًا حتى ينتهي الإرسال (الإرسال في الخلفية يتطلب iOS 26 أو أحدث).",
+  "home.cleanup": "تحرير مساحة",
+  "cleanup.title": "تحرير مساحة على الهاتف",
+  "cleanup.checking": "يعيد {pc} فحص ملفاتك… {done}/{total}",
+  "cleanup.ready": "{count} عنصرًا محفوظ بأمان على {pc}",
+  "cleanup.how": "أعاد الكمبيوتر قراءة كل ملف للتو وهو مطابق للأصل.",
+  "cleanup.not_safe": "{count} عنصرًا غير موجود على الكمبيوتر (أو تغيّر) وسيبقى على هاتفك.",
+  "cleanup.none": "لا يوجد ما يمكن تنظيفه بعد. أرسل الصور إلى الكمبيوتر أولًا ثم عد إلى هنا.",
+  "cleanup.select_all": "تحديد الكل",
+  "cleanup.select_none": "إلغاء التحديد",
+  "cleanup.delete": "حذف {count} من الهاتف · {size}",
+  "cleanup.done_ios": "تم تحرير المساحة. تبقى العناصر المحذوفة في «المحذوفة مؤخرًا» لمدة 30 يومًا.",
+  "cleanup.done": "تم تحرير المساحة.",
+  "cleanup.cancelled": "لم يتم حذف أي شيء."
 }

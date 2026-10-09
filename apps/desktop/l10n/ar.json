@@ -79,5 +79,16 @@
   "viewer.from": "من {name}",
   "viewer.cannot_decode": "تعذّر فك ترميز هذه الصورة",
   "viewer.needs_ffmpeg": "يتطلب عرض {ext} وجود ffmpeg. اضبطه من الإعدادات.",
-  "app.already_running": "LocalRoll قيد التشغيل بالفعل. استخدم النافذة المفتوحة (تحقق من شريط المهام) وأغلق هذه النافذة."
+  "app.already_running": "LocalRoll قيد التشغيل بالفعل. استخدم النافذة المفتوحة (تحقق من شريط المهام) وأغلق هذه النافذة.",
+  "app.back": "رجوع",
+  "app.minimize": "تصغير",
+  "app.maximize": "تكبير",
+  "app.restore": "استعادة",
+  "app.close": "إغلاق",
+  "app.exit": "خروج",
+  "exit.title": "الخروج من LocalRoll؟",
+  "exit.body": "لن تتمكن الهواتف من الإرسال إلى هذا الكمبيوتر حتى تفتح LocalRoll مرة أخرى.",
+  "exit.body_busy": "لا يزال يتم استلام {count} ملف. الخروج يوقفها، ويمكن للهاتف الاستئناف لاحقًا.",
+  "exit.stay": "إبقاء مفتوحًا",
+  "exit.quit": "خروج"
 }

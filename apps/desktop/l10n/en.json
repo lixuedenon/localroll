@@ -79,5 +79,16 @@
   "viewer.from": "from {name}",
   "viewer.cannot_decode": "Can't decode this image",
   "viewer.needs_ffmpeg": "Showing {ext} requires ffmpeg. Set it up in Settings.",
-  "app.already_running": "LocalRoll is already running. Use the open window (check the taskbar or the system tray) and close this one."
+  "app.already_running": "LocalRoll is already running. Use the open window (check the taskbar or the system tray) and close this one.",
+  "app.back": "Back",
+  "app.minimize": "Minimize",
+  "app.maximize": "Maximize",
+  "app.restore": "Restore",
+  "app.close": "Close",
+  "app.exit": "Exit",
+  "exit.title": "Quit LocalRoll?",
+  "exit.body": "Phones won’t be able to send to this PC until you open LocalRoll again.",
+  "exit.body_busy": "{count} file(s) are still being received. Quitting stops them; the phone can resume later.",
+  "exit.stay": "Keep open",
+  "exit.quit": "Quit"
 }

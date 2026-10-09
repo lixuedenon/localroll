@@ -69,5 +69,18 @@
   "bg.progress": "{done}/{total} · {name}",
   "err.background_expired": "iOS 暫停了背景傳輸。開啟 LocalRoll 再傳送一次，會從中斷處繼續。",
   "transfer.background_ok": "可以鎖定螢幕或切換到其他 App，傳送會在背景繼續。",
-  "transfer.keep_open": "傳送完成前請保持 LocalRoll 開啟（背景傳送需要 iOS 26 或更新版本）。"
+  "transfer.keep_open": "傳送完成前請保持 LocalRoll 開啟（背景傳送需要 iOS 26 或更新版本）。",
+  "home.cleanup": "清理空間",
+  "cleanup.title": "清理手機空間",
+  "cleanup.checking": "{pc} 正在重新核對檔案… {done}/{total}",
+  "cleanup.ready": "{count} 項已安全儲存在 {pc}",
+  "cleanup.how": "電腦剛剛重新讀取了每個檔案，指紋與原檔一致。",
+  "cleanup.not_safe": "{count} 項在電腦上找不到或已變更，會保留在手機上。",
+  "cleanup.none": "還沒有可以清理的項目。先把照片傳送到電腦，再回來這裡。",
+  "cleanup.select_all": "全選",
+  "cleanup.select_none": "全不選",
+  "cleanup.delete": "從手機刪除 {count} 項 · {size}",
+  "cleanup.done_ios": "已騰出空間。刪除的項目會在「最近刪除」裡保留 30 天。",
+  "cleanup.done": "已騰出空間。",
+  "cleanup.cancelled": "沒有刪除任何項目。"
 }

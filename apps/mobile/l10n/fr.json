@@ -69,5 +69,18 @@
   "bg.progress": "{done}/{total} · {name}",
   "err.background_expired": "iOS a mis en pause le transfert en arrière-plan. Ouvrez LocalRoll et renvoyez : il reprendra là où il s'est arrêté.",
   "transfer.background_ok": "Vous pouvez verrouiller l'écran ou changer d'app : l'envoi continue en arrière-plan.",
-  "transfer.keep_open": "Gardez LocalRoll ouvert jusqu'à la fin de l'envoi (l'envoi en arrière-plan nécessite iOS 26 ou plus)."
+  "transfer.keep_open": "Gardez LocalRoll ouvert jusqu'à la fin de l'envoi (l'envoi en arrière-plan nécessite iOS 26 ou plus).",
+  "home.cleanup": "Libérer de l’espace",
+  "cleanup.title": "Libérer de l’espace sur le téléphone",
+  "cleanup.checking": "{pc} revérifie vos fichiers… {done}/{total}",
+  "cleanup.ready": "{count} éléments sont en sécurité sur {pc}",
+  "cleanup.how": "Le PC vient de relire chaque fichier : il correspond à l’original.",
+  "cleanup.not_safe": "{count} éléments ne sont pas sur le PC (ou ont changé) et resteront sur votre téléphone.",
+  "cleanup.none": "Rien à nettoyer pour l’instant. Envoyez d’abord des photos vers votre PC, puis revenez ici.",
+  "cleanup.select_all": "Tout sélectionner",
+  "cleanup.select_none": "Tout désélectionner",
+  "cleanup.delete": "Supprimer {count} du téléphone · {size}",
+  "cleanup.done_ios": "Espace libéré. Les éléments supprimés restent 30 jours dans « Supprimés récemment ».",
+  "cleanup.done": "Espace libéré.",
+  "cleanup.cancelled": "Rien n’a été supprimé."
 }

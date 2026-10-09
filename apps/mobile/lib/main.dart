@@ -6,6 +6,7 @@ import 'l10n/l10n.dart';
 import 'services/discovery.dart';
 import 'services/mobile_settings.dart';
 import 'ui/home_page.dart';
+import 'ui/theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +24,6 @@ class LocalRollMobileApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const seed = Color(0xFF2F6B5E);
     return ListenableBuilder(
       listenable: settings,
       builder: (context, _) {
@@ -31,11 +31,8 @@ class LocalRollMobileApp extends StatelessWidget {
         return MaterialApp(
           title: 'LocalRoll',
           debugShowCheckedModeBanner: false,
-          theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: seed), useMaterial3: true),
-          darkTheme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: seed, brightness: Brightness.dark),
-            useMaterial3: true,
-          ),
+          theme: buildLrTheme(),
+          themeMode: ThemeMode.dark,
           // null = follow the phone's language.
           locale: lang == null ? null : localeForLanguage(lang),
           supportedLocales: appSupportedLocales,
