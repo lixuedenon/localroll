@@ -64,5 +64,10 @@
   "err.no_data": "لم يستلم الكمبيوتر أي بيانات، يُرجى الإرسال مرة أخرى",
   "home.waiting_permission": "في انتظار الوصول إلى الصور…",
   "home.permission_error": "تعذّرت قراءة مكتبة الصور: {error}",
-  "scan.camera_error": "الكاميرا غير متاحة ({error}). اسمح لـ LocalRoll باستخدام الكاميرا من الإعدادات، أو أدخل عنوان IP يدويًا."
+  "scan.camera_error": "الكاميرا غير متاحة ({error}). اسمح لـ LocalRoll باستخدام الكاميرا من الإعدادات، أو أدخل عنوان IP يدويًا.",
+  "bg.title": "LocalRoll يرسل",
+  "bg.progress": "{done}/{total} · {name}",
+  "err.background_expired": "أوقف iOS النقل في الخلفية مؤقتًا. افتح LocalRoll وأرسل مرة أخرى — سيستكمل من حيث توقف.",
+  "transfer.background_ok": "يمكنك قفل الشاشة أو التبديل إلى تطبيق آخر — سيستمر الإرسال في الخلفية.",
+  "transfer.keep_open": "أبقِ LocalRoll مفتوحًا حتى ينتهي الإرسال (الإرسال في الخلفية يتطلب iOS 26 أو أحدث)."
 }

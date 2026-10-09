@@ -64,5 +64,10 @@
   "err.no_data": "电脑没有收到数据，请重新发送",
   "home.waiting_permission": "正在请求访问照片…",
   "home.permission_error": "无法读取相册：{error}",
-  "scan.camera_error": "无法使用相机（{error}）。请在「设置」里允许 LocalRoll 使用相机，或改用「手动输入 IP 地址」。"
+  "scan.camera_error": "无法使用相机（{error}）。请在「设置」里允许 LocalRoll 使用相机，或改用「手动输入 IP 地址」。",
+  "bg.title": "LocalRoll 正在发送",
+  "bg.progress": "{done}/{total} · {name}",
+  "err.background_expired": "iOS 暂停了后台传输。打开 LocalRoll 再发送一次，会从中断处继续。",
+  "transfer.background_ok": "可以锁屏或切到其他 App，发送会在后台继续。",
+  "transfer.keep_open": "发送完成前请保持 LocalRoll 打开（后台发送需要 iOS 26 或更高版本）。"
 }

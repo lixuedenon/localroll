@@ -8,6 +8,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../l10n/l10n.dart';
+import 'background_transfer.dart';
 import 'desktop_client.dart';
 import 'mobile_settings.dart';
 
@@ -47,6 +48,13 @@ class Uploader extends ChangeNotifier {
   bool finished = false;
   bool _cancelled = false;
 
+  /// iOS took the background time back; the rest can be resumed later.
+  bool _expired = false;
+
+  /// How the transfer survives leaving the app (shown on the transfer page).
+  BackgroundMode backgroundMode = BackgroundMode.none;
+  int _current = 0;
+
   int get doneCount => items.where((i) => i.state == UploadState.done).length;
   int get skippedCount => items.where((i) => i.state == UploadState.skipped).length;
   int get failedCount => items.where((i) => i.state == UploadState.failed).length;
@@ -60,11 +68,23 @@ class Uploader extends ChangeNotifier {
     try {
       await WakelockPlus.enable();
     } catch (_) {}
+    BackgroundTransfer.onExpired = () {
+      _expired = true;
+      _cancelled = true;
+    };
+    backgroundMode = await BackgroundTransfer.start(
+      title: tr('bg.title'),
+      text: tr('bg.progress', {'done': 1, 'total': items.length, 'name': ''}),
+    );
+    notifyListeners();
     try {
       for (var i = 0; i < items.length && !_cancelled; i++) {
+        _current = i;
         await _sendOne(items[i], i);
       }
     } finally {
+      await BackgroundTransfer.stop(success: failedCount == 0 && !_cancelled);
+      BackgroundTransfer.onExpired = null;
       try {
         await WakelockPlus.disable();
       } catch (_) {}
@@ -85,6 +105,7 @@ class Uploader extends ChangeNotifier {
       notifyListeners();
       final title = await a.titleAsync;
       it.name = title.isNotEmpty ? title : 'asset_${a.id.hashCode}';
+      _reportBackground(it);
 
       final offer = FileOffer(
         id: '$index',
@@ -131,7 +152,7 @@ class Uploader extends ChangeNotifier {
 
       var retries = 0;
       while (offset < total) {
-        if (_cancelled) throw Exception(tr('err.cancelled'));
+        if (_cancelled) throw Exception(tr(_expired ? 'err.background_expired' : 'err.cancelled'));
         await raf.setPosition(offset);
         final chunk = await raf.read(min(LrProtocol.chunkSize, total - offset));
         try {
@@ -160,6 +181,7 @@ class Uploader extends ChangeNotifier {
         }
         it.sent = offset;
         notifyListeners();
+        _reportBackground(it);
       }
 
       it.state = UploadState.verifying;
@@ -174,6 +196,16 @@ class Uploader extends ChangeNotifier {
     } finally {
       await raf.close();
     }
+  }
+
+  void _reportBackground(UploadItem it) {
+    final n = items.length;
+    final overall = n == 0 ? 0.0 : (_current + (it.fraction ?? 0)) / n;
+    BackgroundTransfer.update(
+      title: tr('bg.title'),
+      text: tr('bg.progress', {'done': _current + 1, 'total': n, 'name': it.name}),
+      progress: overall,
+    );
   }
 
   /// SHA-256 state of the first [length] bytes (needed when resuming).

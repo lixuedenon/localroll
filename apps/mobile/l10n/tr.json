@@ -64,5 +64,10 @@
   "err.no_data": "Bilgisayar veri almadı, lütfen yeniden gönderin",
   "home.waiting_permission": "Fotoğraf erişimi bekleniyor…",
   "home.permission_error": "Fotoğraf arşivi okunamadı: {error}",
-  "scan.camera_error": "Kamera kullanılamıyor ({error}). Ayarlar'dan LocalRoll'a kamera izni verin veya IP adresini girin."
+  "scan.camera_error": "Kamera kullanılamıyor ({error}). Ayarlar'dan LocalRoll'a kamera izni verin veya IP adresini girin.",
+  "bg.title": "LocalRoll gönderiyor",
+  "bg.progress": "{done}/{total} · {name}",
+  "err.background_expired": "iOS arka plan aktarımını duraklattı. LocalRoll'u açıp yeniden gönderin; kaldığı yerden devam eder.",
+  "transfer.background_ok": "Ekranı kilitleyebilir veya başka uygulamaya geçebilirsiniz; gönderim arka planda sürer.",
+  "transfer.keep_open": "Gönderim bitene kadar LocalRoll'u açık tutun (arka planda gönderim için iOS 26 veya üstü gerekir)."
 }

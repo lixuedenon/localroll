@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../l10n/l10n.dart';
+import '../services/background_transfer.dart';
 import '../services/desktop_client.dart';
 import '../services/discovery.dart';
 import '../services/mobile_settings.dart';
@@ -112,6 +113,26 @@ class _TransferPageState extends State<TransferPage> {
           padding: const EdgeInsets.all(16),
           child: Text(summary, style: theme.textTheme.titleSmall),
         ),
+        if (!up.finished && up.backgroundMode != BackgroundMode.none)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Row(
+              children: [
+                Icon(
+                  up.backgroundMode == BackgroundMode.short ? Icons.info_outline : Icons.lock_clock,
+                  size: 18,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    tr(up.backgroundMode == BackgroundMode.short ? 'transfer.keep_open' : 'transfer.background_ok'),
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ),
+              ],
+            ),
+          ),
         Expanded(
           child: ListView.builder(
             itemCount: up.items.length,

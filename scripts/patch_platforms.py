@@ -27,7 +27,18 @@ ANDROID_PERMISSIONS = [
     # Without this Android strips GPS from originals handed to apps.
     "android.permission.ACCESS_MEDIA_LOCATION",
     "android.permission.WAKE_LOCK",
+    # Background transfer: foreground service with a progress notification.
+    "android.permission.FOREGROUND_SERVICE",
+    "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
+    "android.permission.POST_NOTIFICATIONS",
 ]
+
+ANDROID_SERVICE = (
+    '<service\n'
+    '            android:name=".TransferService"\n'
+    '            android:exported="false"\n'
+    '            android:foregroundServiceType="dataSync" />'
+)
 
 # English is the base text for the iOS permission prompts.
 IOS_PLIST_KEYS = {
@@ -38,6 +49,10 @@ IOS_PLIST_KEYS = {
     "NSBonjourServices": "<array>\n\t\t<string>_localroll._tcp</string>\n\t</array>",
     "NSAppTransportSecurity": "<dict>\n\t\t<key>NSAllowsLocalNetworking</key>\n\t\t<true/>\n\t</dict>",
     "PHPhotoLibraryPreventAutomaticLimitedAccessAlert": "<true/>",
+    # Background transfer (iOS 26+ BGContinuedProcessingTask). Xcode expands
+    # $(PRODUCT_BUNDLE_IDENTIFIER) at build time.
+    "BGTaskSchedulerPermittedIdentifiers": "<array>\n\t\t<string>$(PRODUCT_BUNDLE_IDENTIFIER).transfer</string>\n\t</array>",
+    "UIBackgroundModes": "<array>\n\t\t<string>processing</string>\n\t</array>",
     # UIScene lifecycle: on iOS 26 apps without it can silently lose permission
     # prompts (photos/camera never appear). Requires Flutter >= 3.38.
     "UIApplicationSceneManifest": (
@@ -94,6 +109,8 @@ def android_manifest(text: str) -> str:
     if "requestLegacyExternalStorage" not in text:
         text = text.replace("<application", '<application\n        android:requestLegacyExternalStorage="true"', 1)
     text = re.sub(r'android:label="[^"]*"', 'android:label="LocalRoll"', text, count=1)
+    if ".TransferService" not in text:
+        text = text.replace("</application>", "    " + ANDROID_SERVICE + "\n    </application>", 1)
     return text
 
 

@@ -64,5 +64,10 @@
   "err.no_data": "पीसी को कोई डेटा नहीं मिला, कृपया फिर से भेजें",
   "home.waiting_permission": "फ़ोटो की अनुमति का इंतज़ार…",
   "home.permission_error": "फ़ोटो लाइब्रेरी नहीं पढ़ी जा सकी: {error}",
-  "scan.camera_error": "कैमरा उपलब्ध नहीं ({error})। सेटिंग्स में LocalRoll को कैमरे की अनुमति दें, या IP पता डालें।"
+  "scan.camera_error": "कैमरा उपलब्ध नहीं ({error})। सेटिंग्स में LocalRoll को कैमरे की अनुमति दें, या IP पता डालें।",
+  "bg.title": "LocalRoll भेज रहा है",
+  "bg.progress": "{done}/{total} · {name}",
+  "err.background_expired": "iOS ने बैकग्राउंड ट्रांसफ़र रोक दिया। LocalRoll खोलकर फिर से भेजें — यह वहीं से जारी रहेगा जहाँ रुका था।",
+  "transfer.background_ok": "आप स्क्रीन लॉक कर सकते हैं या दूसरा ऐप खोल सकते हैं — भेजना बैकग्राउंड में जारी रहेगा।",
+  "transfer.keep_open": "भेजना पूरा होने तक LocalRoll खुला रखें (बैकग्राउंड में भेजने के लिए iOS 26 या नया चाहिए)।"
 }

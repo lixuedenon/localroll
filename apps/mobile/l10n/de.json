@@ -64,5 +64,10 @@
   "err.no_data": "Der PC hat keine Daten erhalten, bitte erneut senden",
   "home.waiting_permission": "Warte auf Zugriff auf Fotos …",
   "home.permission_error": "Fotomediathek konnte nicht gelesen werden: {error}",
-  "scan.camera_error": "Kamera nicht verfügbar ({error}). Erlauben Sie LocalRoll den Kamerazugriff in den Einstellungen oder geben Sie die IP-Adresse ein."
+  "scan.camera_error": "Kamera nicht verfügbar ({error}). Erlauben Sie LocalRoll den Kamerazugriff in den Einstellungen oder geben Sie die IP-Adresse ein.",
+  "bg.title": "LocalRoll sendet",
+  "bg.progress": "{done}/{total} · {name}",
+  "err.background_expired": "iOS hat die Hintergrundübertragung pausiert. Öffne LocalRoll und sende erneut – es geht dort weiter, wo es aufgehört hat.",
+  "transfer.background_ok": "Du kannst den Bildschirm sperren oder die App wechseln – das Senden läuft im Hintergrund weiter.",
+  "transfer.keep_open": "Lass LocalRoll geöffnet, bis das Senden fertig ist (Senden im Hintergrund erfordert iOS 26 oder neuer)."
 }

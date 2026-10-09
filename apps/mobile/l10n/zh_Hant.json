@@ -64,5 +64,10 @@
   "err.no_data": "電腦沒有收到資料，請重新傳送",
   "home.waiting_permission": "正在請求存取照片…",
   "home.permission_error": "無法讀取相簿：{error}",
-  "scan.camera_error": "無法使用相機（{error}）。請在「設定」中允許 LocalRoll 使用相機，或改用「手動輸入 IP 位址」。"
+  "scan.camera_error": "無法使用相機（{error}）。請在「設定」中允許 LocalRoll 使用相機，或改用「手動輸入 IP 位址」。",
+  "bg.title": "LocalRoll 正在傳送",
+  "bg.progress": "{done}/{total} · {name}",
+  "err.background_expired": "iOS 暫停了背景傳輸。開啟 LocalRoll 再傳送一次，會從中斷處繼續。",
+  "transfer.background_ok": "可以鎖定螢幕或切換到其他 App，傳送會在背景繼續。",
+  "transfer.keep_open": "傳送完成前請保持 LocalRoll 開啟（背景傳送需要 iOS 26 或更新版本）。"
 }

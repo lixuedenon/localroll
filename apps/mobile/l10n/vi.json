@@ -64,5 +64,10 @@
   "err.no_data": "Máy tính chưa nhận được dữ liệu, hãy gửi lại",
   "home.waiting_permission": "Đang chờ quyền truy cập ảnh…",
   "home.permission_error": "Không đọc được thư viện ảnh: {error}",
-  "scan.camera_error": "Không dùng được camera ({error}). Hãy cho phép LocalRoll dùng camera trong Cài đặt, hoặc nhập địa chỉ IP."
+  "scan.camera_error": "Không dùng được camera ({error}). Hãy cho phép LocalRoll dùng camera trong Cài đặt, hoặc nhập địa chỉ IP.",
+  "bg.title": "LocalRoll đang gửi",
+  "bg.progress": "{done}/{total} · {name}",
+  "err.background_expired": "iOS đã tạm dừng truyền trong nền. Mở LocalRoll và gửi lại — sẽ tiếp tục từ chỗ đã dừng.",
+  "transfer.background_ok": "Bạn có thể khóa màn hình hoặc chuyển ứng dụng — việc gửi vẫn tiếp tục trong nền.",
+  "transfer.keep_open": "Hãy giữ LocalRoll mở cho đến khi gửi xong (gửi trong nền cần iOS 26 trở lên)."
 }

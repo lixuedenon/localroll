@@ -64,5 +64,10 @@
   "err.no_data": "คอมพิวเตอร์ไม่ได้รับข้อมูล โปรดส่งอีกครั้ง",
   "home.waiting_permission": "กำลังรอสิทธิ์เข้าถึงรูปภาพ…",
   "home.permission_error": "อ่านคลังรูปภาพไม่ได้: {error}",
-  "scan.camera_error": "ใช้กล้องไม่ได้ ({error}) โปรดอนุญาตให้ LocalRoll ใช้กล้องในการตั้งค่า หรือป้อนที่อยู่ IP แทน"
+  "scan.camera_error": "ใช้กล้องไม่ได้ ({error}) โปรดอนุญาตให้ LocalRoll ใช้กล้องในการตั้งค่า หรือป้อนที่อยู่ IP แทน",
+  "bg.title": "LocalRoll กำลังส่ง",
+  "bg.progress": "{done}/{total} · {name}",
+  "err.background_expired": "iOS หยุดการส่งเบื้องหลังชั่วคราว เปิด LocalRoll แล้วส่งอีกครั้ง จะส่งต่อจากจุดที่หยุดไว้",
+  "transfer.background_ok": "คุณล็อกหน้าจอหรือสลับแอปได้ การส่งจะทำงานต่อในเบื้องหลัง",
+  "transfer.keep_open": "เปิด LocalRoll ไว้จนกว่าจะส่งเสร็จ (การส่งเบื้องหลังต้องใช้ iOS 26 ขึ้นไป)"
 }

@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:localroll_core/localroll_core.dart';
 
+import '../services/keep_awake.dart';
 import '../services/library_index.dart';
 import '../services/receive_hub.dart';
 import '../services/settings.dart';
@@ -143,7 +144,10 @@ class TransferServer extends ChangeNotifier {
         }
         session.lastSeen = DateTime.now();
         if (segs.length == 6 && req.method == 'GET') return await _status(req, device, offer);
-        if (segs.length == 6 && req.method == 'PUT') return await _chunk(req, device, offer);
+        if (segs.length == 6 && req.method == 'PUT') {
+          KeepAwake.instance.ping(); // don't let Windows sleep mid-transfer
+          return await _chunk(req, device, offer);
+        }
         if (segs.length == 7 && segs[6] == 'complete' && req.method == 'POST') {
           return await _complete(req, device, offer);
         }

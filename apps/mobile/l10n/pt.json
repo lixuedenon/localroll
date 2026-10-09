@@ -64,5 +64,10 @@
   "err.no_data": "O PC não recebeu dados; envie novamente",
   "home.waiting_permission": "Aguardando acesso às fotos…",
   "home.permission_error": "Não foi possível ler a fototeca: {error}",
-  "scan.camera_error": "Câmera indisponível ({error}). Permita o acesso à câmera para o LocalRoll nos Ajustes ou digite o endereço IP."
+  "scan.camera_error": "Câmera indisponível ({error}). Permita o acesso à câmera para o LocalRoll nos Ajustes ou digite o endereço IP.",
+  "bg.title": "LocalRoll está enviando",
+  "bg.progress": "{done}/{total} · {name}",
+  "err.background_expired": "O iOS pausou a transferência em segundo plano. Abra o LocalRoll e envie de novo — ele continua de onde parou.",
+  "transfer.background_ok": "Você pode bloquear a tela ou trocar de app — o envio continua em segundo plano.",
+  "transfer.keep_open": "Mantenha o LocalRoll aberto até o envio terminar (envio em segundo plano requer iOS 26 ou posterior)."
 }

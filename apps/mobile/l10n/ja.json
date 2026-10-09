@@ -64,5 +64,10 @@
   "err.no_data": "PC がデータを受信していません。もう一度送信してください",
   "home.waiting_permission": "写真へのアクセスを待っています…",
   "home.permission_error": "写真ライブラリを読み込めません：{error}",
-  "scan.camera_error": "カメラを使用できません（{error}）。設定で LocalRoll のカメラを許可するか、「IP アドレスを入力」を使ってください。"
+  "scan.camera_error": "カメラを使用できません（{error}）。設定で LocalRoll のカメラを許可するか、「IP アドレスを入力」を使ってください。",
+  "bg.title": "LocalRoll で送信中",
+  "bg.progress": "{done}/{total} · {name}",
+  "err.background_expired": "iOS がバックグラウンド転送を一時停止しました。LocalRoll を開いてもう一度送信すると、中断したところから続きます。",
+  "transfer.background_ok": "画面をロックしたり他のアプリに切り替えても、送信はバックグラウンドで続きます。",
+  "transfer.keep_open": "送信が終わるまで LocalRoll を開いたままにしてください（バックグラウンド送信には iOS 26 以降が必要です）。"
 }

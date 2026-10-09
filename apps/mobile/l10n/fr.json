@@ -64,5 +64,10 @@
   "err.no_data": "Le PC n'a reçu aucune donnée, renvoyez le fichier",
   "home.waiting_permission": "En attente de l'accès aux photos…",
   "home.permission_error": "Impossible de lire la photothèque : {error}",
-  "scan.camera_error": "Caméra indisponible ({error}). Autorisez l'accès à la caméra pour LocalRoll dans Réglages, ou saisissez l'adresse IP."
+  "scan.camera_error": "Caméra indisponible ({error}). Autorisez l'accès à la caméra pour LocalRoll dans Réglages, ou saisissez l'adresse IP.",
+  "bg.title": "LocalRoll envoie",
+  "bg.progress": "{done}/{total} · {name}",
+  "err.background_expired": "iOS a mis en pause le transfert en arrière-plan. Ouvrez LocalRoll et renvoyez : il reprendra là où il s'est arrêté.",
+  "transfer.background_ok": "Vous pouvez verrouiller l'écran ou changer d'app : l'envoi continue en arrière-plan.",
+  "transfer.keep_open": "Gardez LocalRoll ouvert jusqu'à la fin de l'envoi (l'envoi en arrière-plan nécessite iOS 26 ou plus)."
 }

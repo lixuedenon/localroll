@@ -64,5 +64,10 @@
   "err.no_data": "The PC received no data, please send again",
   "home.waiting_permission": "Waiting for photo access…",
   "home.permission_error": "Couldn't read your photo library: {error}",
-  "scan.camera_error": "Camera unavailable ({error}). Allow camera access for LocalRoll in Settings, or use \"Enter the IP address\" instead."
+  "scan.camera_error": "Camera unavailable ({error}). Allow camera access for LocalRoll in Settings, or use \"Enter the IP address\" instead.",
+  "bg.title": "LocalRoll is sending",
+  "bg.progress": "{done}/{total} · {name}",
+  "err.background_expired": "iOS paused the background transfer. Open LocalRoll and send again — it continues where it stopped.",
+  "transfer.background_ok": "You can lock the screen or switch apps — sending continues in the background.",
+  "transfer.keep_open": "Keep LocalRoll open until sending finishes (background sending needs iOS 26 or later)."
 }

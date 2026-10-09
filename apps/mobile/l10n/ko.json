@@ -64,5 +64,10 @@
   "err.no_data": "PC가 데이터를 받지 못했습니다. 다시 보내 주세요",
   "home.waiting_permission": "사진 접근 권한을 기다리는 중…",
   "home.permission_error": "사진 보관함을 읽을 수 없습니다: {error}",
-  "scan.camera_error": "카메라를 사용할 수 없습니다({error}). 설정에서 LocalRoll의 카메라 접근을 허용하거나 'IP 주소 입력'을 사용하세요."
+  "scan.camera_error": "카메라를 사용할 수 없습니다({error}). 설정에서 LocalRoll의 카메라 접근을 허용하거나 'IP 주소 입력'을 사용하세요.",
+  "bg.title": "LocalRoll 전송 중",
+  "bg.progress": "{done}/{total} · {name}",
+  "err.background_expired": "iOS가 백그라운드 전송을 일시 중지했습니다. LocalRoll을 열고 다시 보내면 중단된 곳부터 이어집니다.",
+  "transfer.background_ok": "화면을 잠그거나 다른 앱으로 전환해도 백그라운드에서 계속 전송됩니다.",
+  "transfer.keep_open": "전송이 끝날 때까지 LocalRoll을 열어 두세요(백그라운드 전송은 iOS 26 이상 필요)."
 }

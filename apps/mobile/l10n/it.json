@@ -64,5 +64,10 @@
   "err.no_data": "Il PC non ha ricevuto dati, invia di nuovo",
   "home.waiting_permission": "In attesa dell'accesso alle foto…",
   "home.permission_error": "Impossibile leggere la libreria foto: {error}",
-  "scan.camera_error": "Fotocamera non disponibile ({error}). Consenti l'accesso alla fotocamera per LocalRoll nelle Impostazioni o inserisci l'indirizzo IP."
+  "scan.camera_error": "Fotocamera non disponibile ({error}). Consenti l'accesso alla fotocamera per LocalRoll nelle Impostazioni o inserisci l'indirizzo IP.",
+  "bg.title": "LocalRoll sta inviando",
+  "bg.progress": "{done}/{total} · {name}",
+  "err.background_expired": "iOS ha messo in pausa il trasferimento in background. Apri LocalRoll e invia di nuovo: riprenderà da dove si era fermato.",
+  "transfer.background_ok": "Puoi bloccare lo schermo o cambiare app: l'invio continua in background.",
+  "transfer.keep_open": "Tieni LocalRoll aperto finché l'invio non è terminato (l'invio in background richiede iOS 26 o successivo)."
 }

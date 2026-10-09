@@ -64,5 +64,10 @@
   "err.no_data": "PC tidak menerima data, kirim ulang",
   "home.waiting_permission": "Menunggu akses foto…",
   "home.permission_error": "Tidak bisa membaca galeri foto: {error}",
-  "scan.camera_error": "Kamera tidak tersedia ({error}). Izinkan akses kamera untuk LocalRoll di Pengaturan, atau masukkan alamat IP."
+  "scan.camera_error": "Kamera tidak tersedia ({error}). Izinkan akses kamera untuk LocalRoll di Pengaturan, atau masukkan alamat IP.",
+  "bg.title": "LocalRoll sedang mengirim",
+  "bg.progress": "{done}/{total} · {name}",
+  "err.background_expired": "iOS menjeda transfer di latar belakang. Buka LocalRoll dan kirim lagi — akan dilanjutkan dari tempat berhenti.",
+  "transfer.background_ok": "Anda bisa mengunci layar atau beralih aplikasi — pengiriman berlanjut di latar belakang.",
+  "transfer.keep_open": "Biarkan LocalRoll tetap terbuka sampai pengiriman selesai (pengiriman di latar belakang perlu iOS 26 atau lebih baru)."
 }
