@@ -39,7 +39,6 @@ class _CleanupPageState extends State<CleanupPage> {
   final List<AssetEntity> _safe = [];
   final Map<String, int> _sizes = {};
   final Set<String> _selected = {};
-  int _notSafe = 0;
 
   /// Sent before, but the PC no longer has them (deleted / changed there).
   /// The phone holds the only copy: offer to back them up again.
@@ -61,7 +60,6 @@ class _CleanupPageState extends State<CleanupPage> {
       _safe.clear();
       _selected.clear();
       _sizes.clear();
-      _notSafe = 0;
       _lost.clear();
       _lostReason.clear();
     });
@@ -98,7 +96,6 @@ class _CleanupPageState extends State<CleanupPage> {
             _sizes[a.id] = v.size;
             _selected.add(a.id);
           } else {
-            _notSafe++;
             _lost.add(a);
             _lostReason[a.id] = v.reason ?? 'missing';
           }

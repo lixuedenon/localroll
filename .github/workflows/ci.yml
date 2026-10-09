@@ -84,15 +84,27 @@ jobs:
       - name: desktop — analyze & test
         working-directory: apps/desktop
         run: |
+          set -o pipefail
           flutter pub get
-          flutter analyze --no-fatal-infos | tee analyze.log
-          flutter test
+          flutter analyze --no-fatal-infos | tee ../analyze-desktop.log
+          flutter test 2>&1 | tee ../test-desktop.log
       - name: mobile — analyze & test
         working-directory: apps/mobile
         run: |
+          set -o pipefail
           flutter pub get
-          flutter analyze --no-fatal-infos
-          flutter test
+          flutter analyze --no-fatal-infos | tee ../analyze-mobile.log
+          flutter test 2>&1 | tee ../test-mobile.log
+
+      # The logs host isn't reachable from every tool; surface problems as annotations.
+      - name: Report analyze/test errors
+        if: failure()
+        working-directory: apps
+        run: |
+          for f in analyze-*.log test-*.log; do
+            [ -f "$f" ] || continue
+            grep -E "error •|warning •|Error:|FAILED|Expected:|Actual:" "$f" | head -30 | while IFS= read -r l; do echo "::error::$f ${l:0:800}"; done
+          done
 
   build-windows:
     needs: analyze
