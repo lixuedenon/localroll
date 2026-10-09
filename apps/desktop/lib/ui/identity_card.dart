@@ -30,6 +30,20 @@ class _IdentityCardState extends State<IdentityCard> {
       TextEditingController(text: widget.services.settings.deviceName);
   bool _busy = false;
 
+  /// Names already offered this session — rolling again always shows a new one.
+  final Set<String> _offered = {};
+
+  String _rollName() {
+    final avoid = {
+      ..._offered,
+      _s.deviceName,
+      for (final t in _s.trusted.values) t.name,
+    };
+    final n = DeviceNames.random(translator.language, avoid: avoid);
+    _offered.add(n);
+    return n;
+  }
+
   AppSettings get _s => widget.services.settings;
 
   @override
@@ -128,7 +142,7 @@ class _IdentityCardState extends State<IdentityCard> {
                 label: Text(tr('identity.use_pc_name', {'name': AppSettings.originalName})),
               ),
               OutlinedButton.icon(
-                onPressed: () => _apply(name: DeviceNames.random(translator.language)),
+                onPressed: () => _apply(name: _rollName()),
                 icon: const Icon(Icons.casino_rounded, size: 18),
                 label: Text(tr('identity.random_name')),
               ),

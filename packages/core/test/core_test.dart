@@ -111,6 +111,18 @@ void main() {
     expect(DeviceNames.random('xx'), isNotEmpty); // falls back to English
   });
 
+  test('every language has 576 names and avoid works', () {
+    for (final l in supportedLanguages) {
+      expect(DeviceNames.countFor(l.code), 576, reason: l.code);
+    }
+    final rng = Random(7);
+    final seen = <String>{};
+    for (var i = 0; i < 200; i++) {
+      final n = DeviceNames.random('zh', rng: rng, avoid: seen);
+      expect(seen.add(n), isTrue, reason: 'repeated $n after $i');
+    }
+  });
+
   test('DeviceInfo keeps its look', () {
     final d = DeviceInfo.fromJson(const DeviceInfo(
       id: 'a', name: 'n', platform: 'windows', icon: 'sofa', color: 0xFF5FD4C4, avatar: 3,
