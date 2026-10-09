@@ -93,5 +93,16 @@
   "err.pair_denied": "电脑拒绝了连接。",
   "err.pair_expired": "电脑上没有人回应，请再试一次。",
   "connect.all_paired": "这个 Wi-Fi 里的电脑都已经配对过了，在下面的「已配对的电脑」里。",
-  "connect.none_found": "没有找到其他电脑。请确认电脑上的 LocalRoll 已打开，并且和手机连的是同一个 Wi-Fi。"
+  "connect.none_found": "没有找到其他电脑。请确认电脑上的 LocalRoll 已打开，并且和手机连的是同一个 Wi-Fi。",
+  "cleanup.lost_title": "有 {count} 项已经不在 {pc} 上了",
+  "cleanup.lost_body": "它们以前备份过，但之后在电脑上被删除或改动了。手机上的是唯一一份，所以不会被列入可删除。",
+  "cleanup.lost_missing": "已删除",
+  "cleanup.lost_changed": "已改动",
+  "cleanup.rebackup": "重新备份这 {count} 项",
+  "home.auto_send": "自动发送",
+  "auto.enabled": "从现在起，新拍的照片和视频会自动发送到 {pc}。",
+  "auto.waiting": "有 {count} 项新内容等待发送到 {pc}",
+  "auto.waiting_hint": "电脑没开，或者不在这个 Wi-Fi 上。等它在线时会自动发送。",
+  "auto.sending": "正在把新内容发送到 {pc}… {done}/{total}",
+  "auto.done": "已把 {count} 项新内容发送到 {pc}"
 }

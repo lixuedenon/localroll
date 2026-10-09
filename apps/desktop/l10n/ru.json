@@ -106,5 +106,11 @@
   "identity.remove_picture": "Убрать изображение",
   "identity.picture_error": "Не удаётся открыть изображение. Попробуйте JPG или PNG.",
   "identity.edit": "Изменить",
-  "receive.tap_hint": "Откройте LocalRoll на телефоне, нажмите «{name}», затем нажмите здесь «Разрешить»."
+  "receive.tap_hint": "Откройте LocalRoll на телефоне, нажмите «{name}», затем нажмите здесь «Разрешить».",
+  "app.close_viewer": "Закрыть и вернуться в медиатеку",
+  "library.n_photos": "Фото: {count}",
+  "library.n_videos": "Видео: {count}",
+  "settings.startup": "Запуск",
+  "settings.autostart": "Запускать LocalRoll вместе с Windows",
+  "settings.autostart_hint": "Открывается свёрнутым, чтобы телефоны всегда могли отправлять на этот ПК."
 }

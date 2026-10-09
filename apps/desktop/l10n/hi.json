@@ -106,5 +106,11 @@
   "identity.remove_picture": "तस्वीर हटाएँ",
   "identity.picture_error": "यह तस्वीर नहीं खुल रही। JPG या PNG आज़माएँ।",
   "identity.edit": "बदलें",
-  "receive.tap_hint": "फ़ोन पर LocalRoll खोलें और “{name}” पर टैप करें, फिर यहाँ अनुमति दें पर क्लिक करें।"
+  "receive.tap_hint": "फ़ोन पर LocalRoll खोलें और “{name}” पर टैप करें, फिर यहाँ अनुमति दें पर क्लिक करें।",
+  "app.close_viewer": "बंद करें और लाइब्रेरी पर लौटें",
+  "library.n_photos": "{count} फ़ोटो",
+  "library.n_videos": "{count} वीडियो",
+  "settings.startup": "स्टार्टअप",
+  "settings.autostart": "Windows के साथ LocalRoll शुरू करें",
+  "settings.autostart_hint": "छोटा करके खुलता है, ताकि फ़ोन कभी भी इस PC पर भेज सकें।"
 }

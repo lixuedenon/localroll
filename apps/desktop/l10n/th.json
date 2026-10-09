@@ -106,5 +106,11 @@
   "identity.remove_picture": "ลบรูป",
   "identity.picture_error": "เปิดรูปนี้ไม่ได้ ลองใช้ JPG หรือ PNG",
   "identity.edit": "เปลี่ยน",
-  "receive.tap_hint": "เปิด LocalRoll ในโทรศัพท์แล้วแตะ “{name}” จากนั้นคลิกอนุญาตที่นี่"
+  "receive.tap_hint": "เปิด LocalRoll ในโทรศัพท์แล้วแตะ “{name}” จากนั้นคลิกอนุญาตที่นี่",
+  "app.close_viewer": "ปิดและกลับไปที่คลังสื่อ",
+  "library.n_photos": "รูป {count} รูป",
+  "library.n_videos": "วิดีโอ {count} คลิป",
+  "settings.startup": "การเริ่มต้น",
+  "settings.autostart": "เปิด LocalRoll พร้อม Windows",
+  "settings.autostart_hint": "เปิดแบบย่อไว้ โทรศัพท์จึงส่งมาที่คอมพิวเตอร์นี้ได้ตลอด"
 }

@@ -82,11 +82,22 @@ class _LrTitleBarState extends State<LrTitleBar> with WindowListener {
             iconSize: _maximized ? 15 : 18,
             onPressed: () => _maximized ? windowManager.unmaximize() : windowManager.maximize(),
           ),
-          _BarButton(
-            tooltip: tr('app.close'),
-            icon: Icons.close_rounded,
-            danger: true,
-            onPressed: () => confirmExit(widget.services),
+          // While a photo/video is open, × closes the viewer (back to the
+          // library) instead of quitting — the natural "I'm done" click.
+          ListenableBuilder(
+            listenable: AppNav.instance,
+            builder: (context, _) => AppNav.instance.hasPage
+                ? _BarButton(
+                    tooltip: tr('app.close_viewer'),
+                    icon: Icons.close_rounded,
+                    onPressed: AppNav.instance.back,
+                  )
+                : _BarButton(
+                    tooltip: tr('app.close'),
+                    icon: Icons.close_rounded,
+                    danger: true,
+                    onPressed: () => confirmExit(widget.services),
+                  ),
           ),
         ],
       ),

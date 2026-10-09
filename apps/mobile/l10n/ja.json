@@ -93,5 +93,16 @@
   "err.pair_denied": "PC が接続を拒否しました。",
   "err.pair_expired": "PC で応答がありませんでした。もう一度お試しください。",
   "connect.all_paired": "この Wi-Fi の PC はすべてペアリング済みです（下に表示されています）。",
-  "connect.none_found": "他の PC が見つかりません。PC で LocalRoll を開き、同じ Wi-Fi に接続しているか確認してください。"
+  "connect.none_found": "他の PC が見つかりません。PC で LocalRoll を開き、同じ Wi-Fi に接続しているか確認してください。",
+  "cleanup.lost_title": "{count} 件が {pc} にありません",
+  "cleanup.lost_body": "以前バックアップしましたが、その後 PC で削除または変更されました。スマホにしかないので、削除の候補には入れません。",
+  "cleanup.lost_missing": "削除済み",
+  "cleanup.lost_changed": "変更あり",
+  "cleanup.rebackup": "{count} 件をもう一度バックアップ",
+  "home.auto_send": "自動送信",
+  "auto.enabled": "これから撮る写真と動画は自動で {pc} に送られます。",
+  "auto.waiting": "{count} 件の新しい項目が {pc} への送信を待っています",
+  "auto.waiting_hint": "PC の電源が切れているか、この Wi-Fi にいません。つながったら自動で送ります。",
+  "auto.sending": "新しい項目を {pc} に送信中… {done}/{total}",
+  "auto.done": "{count} 件を {pc} に送信しました"
 }

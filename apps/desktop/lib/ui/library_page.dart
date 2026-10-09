@@ -13,7 +13,7 @@ import 'viewer_page.dart';
 
 enum _Filter { all, photos, videos }
 
-/// Received media grouped by capture month, newest first.
+/// Received media grouped by capture day, newest first; All / Photos / Videos.
 class LibraryPage extends StatefulWidget {
   const LibraryPage({super.key, required this.services});
 
@@ -105,7 +105,7 @@ class _LibraryPageState extends State<LibraryPage> {
       );
 
   Widget _grid(BuildContext context, List<MediaItem> items) {
-    // Group into months while keeping the flat index for the viewer.
+    // Group into days while keeping the flat index for the viewer.
     final slivers = <Widget>[];
     var start = 0;
     while (start < items.length) {
@@ -113,16 +113,35 @@ class _LibraryPageState extends State<LibraryPage> {
       var end = start;
       while (end < items.length &&
           items[end].captureTime.year == t.year &&
-          items[end].captureTime.month == t.month) {
+          items[end].captureTime.month == t.month &&
+          items[end].captureTime.day == t.day) {
         end++;
       }
       final groupStart = start;
       final count = end - start;
+      final day = items.sublist(start, end);
+      final photos = day.where((i) => i.kind == MediaKind.image).length;
+      final videos = day.where((i) => i.kind == MediaKind.video).length;
+      final theme = Theme.of(context);
       slivers
         ..add(SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-            child: Text(tr('library.month_count', {'month': formatMonth(t), 'count': count}), style: Theme.of(context).textTheme.titleSmall),
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(formatDayFull(t), style: theme.textTheme.titleMedium),
+                const SizedBox(width: 12),
+                Text(
+                  [
+                    if (photos > 0) tr('library.n_photos', {'count': photos}),
+                    if (videos > 0) tr('library.n_videos', {'count': videos}),
+                  ].join('   '),
+                  style: theme.textTheme.bodySmall,
+                ),
+              ],
+            ),
           ),
         ))
         ..add(SliverPadding(

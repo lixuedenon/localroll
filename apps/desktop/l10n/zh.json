@@ -106,5 +106,11 @@
   "identity.remove_picture": "移除图片",
   "identity.picture_error": "打不开这张图片，请换一张 JPG 或 PNG。",
   "identity.edit": "修改",
-  "receive.tap_hint": "在手机上打开 LocalRoll，点「{name}」，然后在这里点「允许」。"
+  "receive.tap_hint": "在手机上打开 LocalRoll，点「{name}」，然后在这里点「允许」。",
+  "app.close_viewer": "关闭查看，回到媒体库",
+  "library.n_photos": "{count} 张照片",
+  "library.n_videos": "{count} 段视频",
+  "settings.startup": "启动",
+  "settings.autostart": "开机时自动启动 LocalRoll",
+  "settings.autostart_hint": "启动后最小化到任务栏，手机随时都能发送到这台电脑。"
 }

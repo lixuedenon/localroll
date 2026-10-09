@@ -79,6 +79,11 @@ class MobileSettings extends ChangeNotifier {
 
   /// UI language code (see supportedLanguages); null = follow the phone.
   String? language;
+
+  /// Auto-send: photos/videos taken after [autoSendSinceMs] go to the current
+  /// PC by themselves whenever it is reachable.
+  bool autoSend = false;
+  int autoSendSinceMs = 0;
   final Map<String, Set<String>> _sent = {};
 
   static Future<MobileSettings> load() async {
@@ -87,6 +92,8 @@ class MobileSettings extends ChangeNotifier {
     s.deviceId = prefs.getString('deviceId') ?? _randomId(16);
     s.deviceName = prefs.getString('deviceName') ?? (Platform.isIOS ? 'iPhone' : 'Android');
     s.language = prefs.getString('language');
+    s.autoSend = prefs.getBool('autoSend') ?? false;
+    s.autoSendSinceMs = prefs.getInt('autoSendSinceMs') ?? 0;
     final raw = prefs.getString('desktops');
     if (raw != null) {
       try {
@@ -168,6 +175,27 @@ class MobileSettings extends ChangeNotifier {
     await _save();
   }
 
+  /// Turning auto-send on starts from "now": the existing library is not sent
+  /// unasked.
+  Future<void> setAutoSend(bool on) async {
+    autoSend = on;
+    if (on) autoSendSinceMs = DateTime.now().millisecondsSinceEpoch;
+    await _save();
+    notifyListeners();
+  }
+
+  /// The PC no longer has these (deleted or changed there): drop the ✓ so
+  /// they count as not backed up again.
+  Future<void> unmarkSent(String desktopId, Iterable<String> assetIds) async {
+    final set = sentTo(desktopId);
+    final before = set.length;
+    set.removeAll(assetIds);
+    if (set.length != before) {
+      await _prefs.setStringList('sent_$desktopId', set.toList());
+      notifyListeners();
+    }
+  }
+
   /// Asset ids already delivered to [desktopId] (shown with a ✓ badge).
   Set<String> sentTo(String desktopId) =>
       _sent.putIfAbsent(desktopId, () => (_prefs.getStringList('sent_$desktopId') ?? const []).toSet());
@@ -184,6 +212,8 @@ class MobileSettings extends ChangeNotifier {
     await _prefs.setString('deviceId', deviceId);
     await _prefs.setString('deviceName', deviceName);
     await _prefs.setString('desktops', jsonEncode(desktops.map((d) => d.toJson()).toList()));
+    await _prefs.setBool('autoSend', autoSend);
+    await _prefs.setInt('autoSendSinceMs', autoSendSinceMs);
     if (language == null) {
       await _prefs.remove('language');
     } else {

@@ -93,5 +93,16 @@
   "err.pair_denied": "Le PC a refusé la connexion.",
   "err.pair_expired": "Personne n’a répondu sur le PC. Réessayez.",
   "connect.all_paired": "Tous les PC de ce Wi-Fi sont déjà associés ; ils sont listés ci-dessous.",
-  "connect.none_found": "Aucun autre PC trouvé. Ouvrez LocalRoll sur le PC et vérifiez que les deux sont sur le même Wi-Fi."
+  "connect.none_found": "Aucun autre PC trouvé. Ouvrez LocalRoll sur le PC et vérifiez que les deux sont sur le même Wi-Fi.",
+  "cleanup.lost_title": "{count} éléments ne sont plus sur {pc}",
+  "cleanup.lost_body": "Ils avaient été sauvegardés, puis supprimés ou modifiés sur le PC. Votre téléphone a la seule copie : ils ne seront pas proposés à la suppression.",
+  "cleanup.lost_missing": "supprimé",
+  "cleanup.lost_changed": "modifié",
+  "cleanup.rebackup": "Resauvegarder {count}",
+  "home.auto_send": "Envoi auto",
+  "auto.enabled": "Désormais, les nouvelles photos et vidéos partent seules vers {pc}.",
+  "auto.waiting": "{count} nouveaux éléments en attente pour {pc}",
+  "auto.waiting_hint": "Le PC est éteint ou pas sur ce Wi-Fi. Ils partiront automatiquement dès qu’il le sera.",
+  "auto.sending": "Envoi des nouveaux éléments vers {pc}… {done}/{total}",
+  "auto.done": "{count} nouveaux éléments envoyés vers {pc}"
 }

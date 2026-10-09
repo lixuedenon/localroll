@@ -45,3 +45,13 @@ String formatMonthYear(DateTime t) {
     return '${t.year}-${t.month.toString().padLeft(2, '0')}';
   }
 }
+
+/// "Thursday, October 9, 2026" / "2026年10月9日星期四"…
+String formatDayFull(DateTime t) {
+  final tag = translator.language == 'zh_Hant' ? 'zh_TW' : translator.language;
+  try {
+    return DateFormat.yMMMMEEEEd(tag).format(t);
+  } catch (_) {
+    return '${t.year}-${t.month.toString().padLeft(2, '0')}-${t.day.toString().padLeft(2, '0')}';
+  }
+}

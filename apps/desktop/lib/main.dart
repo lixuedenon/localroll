@@ -6,13 +6,14 @@ import 'package:window_manager/window_manager.dart';
 
 import 'app_services.dart';
 import 'l10n/l10n.dart';
+import 'services/autostart.dart';
 import 'services/settings.dart';
 import 'ui/app_nav.dart';
 import 'ui/home_shell.dart';
 import 'ui/theme.dart';
 import 'ui/title_bar.dart';
 
-Future<void> main() async {
+Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   if (!await AppSettings.acquireInstanceLock()) {
     runApp(const _AlreadyRunningApp());
@@ -30,7 +31,12 @@ Future<void> main() async {
     ),
     () async {
       await windowManager.show();
-      await windowManager.focus();
+      // Started with Windows: stay out of the way, just receive.
+      if (args.contains(AutoStart.minimizedFlag)) {
+        await windowManager.minimize();
+      } else {
+        await windowManager.focus();
+      }
     },
   );
   await windowManager.setPreventClose(true);

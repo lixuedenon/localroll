@@ -17,6 +17,9 @@ class AppNav extends ChangeNotifier {
 
   bool get canGoBack => _routes > 1 || _tabs.isNotEmpty;
 
+  /// A page (viewer…) is open on top of the main screen.
+  bool get hasPage => _routes > 1;
+
   /// Switch section and remember where we came from.
   void selectTab(int i) {
     if (i == tab) return;

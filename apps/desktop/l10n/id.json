@@ -106,5 +106,11 @@
   "identity.remove_picture": "Hapus gambar",
   "identity.picture_error": "Gambar ini tidak bisa dibuka. Coba JPG atau PNG.",
   "identity.edit": "Ubah",
-  "receive.tap_hint": "Di ponsel, buka LocalRoll dan ketuk “{name}”, lalu klik Izinkan di sini."
+  "receive.tap_hint": "Di ponsel, buka LocalRoll dan ketuk “{name}”, lalu klik Izinkan di sini.",
+  "app.close_viewer": "Tutup dan kembali ke pustaka",
+  "library.n_photos": "{count} foto",
+  "library.n_videos": "{count} video",
+  "settings.startup": "Mulai",
+  "settings.autostart": "Jalankan LocalRoll bersama Windows",
+  "settings.autostart_hint": "Terbuka dalam keadaan diperkecil, jadi ponsel selalu bisa mengirim ke PC ini."
 }

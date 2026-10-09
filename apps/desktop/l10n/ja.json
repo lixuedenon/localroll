@@ -106,5 +106,11 @@
   "identity.remove_picture": "画像を削除",
   "identity.picture_error": "この画像は開けません。JPG か PNG を試してください。",
   "identity.edit": "変更",
-  "receive.tap_hint": "スマホで LocalRoll を開いて「{name}」をタップし、ここで「許可」をクリックします。"
+  "receive.tap_hint": "スマホで LocalRoll を開いて「{name}」をタップし、ここで「許可」をクリックします。",
+  "app.close_viewer": "閉じてライブラリに戻る",
+  "library.n_photos": "写真 {count} 枚",
+  "library.n_videos": "動画 {count} 本",
+  "settings.startup": "起動",
+  "settings.autostart": "Windows の起動時に LocalRoll を開く",
+  "settings.autostart_hint": "最小化で起動するので、スマホからいつでもこの PC に送れます。"
 }

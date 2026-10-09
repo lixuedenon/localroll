@@ -106,5 +106,11 @@
   "identity.remove_picture": "Resmi kaldır",
   "identity.picture_error": "Bu resim açılamıyor. JPG veya PNG deneyin.",
   "identity.edit": "Değiştir",
-  "receive.tap_hint": "Telefonda LocalRoll’u açıp “{name}”a dokunun, sonra burada İzin ver’e tıklayın."
+  "receive.tap_hint": "Telefonda LocalRoll’u açıp “{name}”a dokunun, sonra burada İzin ver’e tıklayın.",
+  "app.close_viewer": "Kapat ve kitaplığa dön",
+  "library.n_photos": "{count} fotoğraf",
+  "library.n_videos": "{count} video",
+  "settings.startup": "Başlangıç",
+  "settings.autostart": "LocalRoll’u Windows ile başlat",
+  "settings.autostart_hint": "Simge durumunda açılır; telefonlar bu bilgisayara her zaman gönderebilir."
 }

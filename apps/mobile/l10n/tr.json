@@ -93,5 +93,16 @@
   "err.pair_denied": "Bilgisayar bağlantıyı reddetti.",
   "err.pair_expired": "Bilgisayarda kimse yanıt vermedi. Tekrar deneyin.",
   "connect.all_paired": "Bu Wi-Fi’deki tüm bilgisayarlar zaten eşleşmiş; aşağıda listeleniyor.",
-  "connect.none_found": "Başka bilgisayar bulunamadı. Bilgisayarda LocalRoll’u açın ve ikisinin aynı Wi-Fi’de olduğundan emin olun."
+  "connect.none_found": "Başka bilgisayar bulunamadı. Bilgisayarda LocalRoll’u açın ve ikisinin aynı Wi-Fi’de olduğundan emin olun.",
+  "cleanup.lost_title": "{count} öğe artık {pc} üzerinde değil",
+  "cleanup.lost_body": "Daha önce yedeklenmişti ama sonra bilgisayarda silindi ya da değişti. Tek kopya telefonunuzda — silinmek üzere önerilmeyecek.",
+  "cleanup.lost_missing": "silindi",
+  "cleanup.lost_changed": "değişti",
+  "cleanup.rebackup": "{count} öğeyi yeniden yedekle",
+  "home.auto_send": "Otomatik gönder",
+  "auto.enabled": "Bundan sonra yeni fotoğraf ve videolar kendiliğinden {pc} bilgisayarına gider.",
+  "auto.waiting": "{count} yeni öğe {pc} için bekliyor",
+  "auto.waiting_hint": "Bilgisayar kapalı ya da bu Wi-Fi’de değil. Bağlanınca otomatik gönderilecek.",
+  "auto.sending": "Yeni öğeler {pc} bilgisayarına gönderiliyor… {done}/{total}",
+  "auto.done": "{count} yeni öğe {pc} bilgisayarına gönderildi"
 }

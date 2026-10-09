@@ -93,5 +93,16 @@
   "err.pair_denied": "PC menolak koneksi.",
   "err.pair_expired": "Tidak ada yang merespons di PC. Coba lagi.",
   "connect.all_paired": "Semua PC di Wi-Fi ini sudah dipasangkan — tercantum di bawah.",
-  "connect.none_found": "Tidak ada PC lain. Buka LocalRoll di PC dan pastikan keduanya di Wi-Fi yang sama."
+  "connect.none_found": "Tidak ada PC lain. Buka LocalRoll di PC dan pastikan keduanya di Wi-Fi yang sama.",
+  "cleanup.lost_title": "{count} item sudah tidak ada di {pc}",
+  "cleanup.lost_body": "Dulu sudah dicadangkan, tapi kemudian dihapus atau diubah di PC. Ponsel memegang satu-satunya salinan — item ini tidak ditawarkan untuk dihapus.",
+  "cleanup.lost_missing": "dihapus",
+  "cleanup.lost_changed": "diubah",
+  "cleanup.rebackup": "Cadangkan {count} lagi",
+  "home.auto_send": "Kirim otomatis",
+  "auto.enabled": "Mulai sekarang, foto dan video baru otomatis dikirim ke {pc}.",
+  "auto.waiting": "{count} item baru menunggu dikirim ke {pc}",
+  "auto.waiting_hint": "PC mati atau tidak di Wi-Fi ini. Akan dikirim otomatis saat tersambung.",
+  "auto.sending": "Mengirim item baru ke {pc}… {done}/{total}",
+  "auto.done": "{count} item baru terkirim ke {pc}"
 }

@@ -11,6 +11,7 @@ import '../services/desktop_client.dart';
 import '../services/discovery.dart';
 import '../services/mobile_settings.dart';
 import 'theme.dart';
+import 'transfer_page.dart';
 
 enum _Stage { finding, checking, ready, deleting, done, error }
 
@@ -39,6 +40,11 @@ class _CleanupPageState extends State<CleanupPage> {
   final Map<String, int> _sizes = {};
   final Set<String> _selected = {};
   int _notSafe = 0;
+
+  /// Sent before, but the PC no longer has them (deleted / changed there).
+  /// The phone holds the only copy: offer to back them up again.
+  final List<AssetEntity> _lost = [];
+  final Map<String, String> _lostReason = {};
   int _freed = 0;
   final Map<String, Future<Uint8List?>> _thumbs = {};
 
@@ -56,6 +62,8 @@ class _CleanupPageState extends State<CleanupPage> {
       _selected.clear();
       _sizes.clear();
       _notSafe = 0;
+      _lost.clear();
+      _lostReason.clear();
     });
     DesktopClient? client;
     try {
@@ -91,6 +99,8 @@ class _CleanupPageState extends State<CleanupPage> {
             _selected.add(a.id);
           } else {
             _notSafe++;
+            _lost.add(a);
+            _lostReason[a.id] = v.reason ?? 'missing';
           }
         }
         if (!mounted) return;
@@ -98,6 +108,9 @@ class _CleanupPageState extends State<CleanupPage> {
       }
       // Newest first, like the photo library.
       _safe.sort((a, b) => b.createDateTime.compareTo(a.createDateTime));
+      _lost.sort((a, b) => b.createDateTime.compareTo(a.createDateTime));
+      // They are no longer backed up: remove the ✓ on the home grid.
+      if (_lost.isNotEmpty) await widget.settings.unmarkSent(widget.desktop.id, _lost.map((a) => a.id));
       if (mounted) setState(() => _stage = _Stage.ready);
     } catch (e) {
       if (mounted) {
@@ -215,11 +228,99 @@ class _CleanupPageState extends State<CleanupPage> {
         ),
       );
 
+  void _rebackup() {
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+      builder: (_) => TransferPage(
+        settings: widget.settings,
+        discovery: widget.discovery,
+        desktop: widget.desktop,
+        assets: List.of(_lost),
+      ),
+    ));
+  }
+
+  /// Reverse signal: these were on the PC once, but not any more.
+  Widget _lostCard(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: LrColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: LrColors.safelight),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            const Icon(Icons.warning_amber_rounded, color: LrColors.safelight),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(tr('cleanup.lost_title', {'count': _lost.length, 'pc': widget.desktop.name}),
+                  style: theme.textTheme.titleSmall),
+            ),
+          ]),
+          const SizedBox(height: 6),
+          Text(tr('cleanup.lost_body'), style: theme.textTheme.bodySmall),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 64,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: _lost.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 6),
+              itemBuilder: (context, i) {
+                final a = _lost[i];
+                final changed = _lostReason[a.id] == 'changed';
+                return Stack(children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: SizedBox(
+                      width: 64,
+                      height: 64,
+                      child: FutureBuilder<Uint8List?>(
+                        future: _thumb(a),
+                        builder: (context, snap) => snap.data == null
+                            ? Container(color: LrColors.raised)
+                            : Image.memory(snap.data!, fit: BoxFit.cover, gaplessPlayback: true),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 2,
+                    bottom: 2,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                      decoration: BoxDecoration(color: Colors.black87, borderRadius: BorderRadius.circular(4)),
+                      child: Text(
+                        tr(changed ? 'cleanup.lost_changed' : 'cleanup.lost_missing'),
+                        style: const TextStyle(color: Colors.white, fontSize: 9),
+                      ),
+                    ),
+                  ),
+                ]);
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: _rebackup,
+            icon: const Icon(Icons.cloud_upload_rounded, size: 18),
+            label: Text(tr('cleanup.rebackup', {'count': _lost.length})),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _readyView(BuildContext context) {
     final theme = Theme.of(context);
     if (_safe.isEmpty) {
-      return Center(
-        child: Padding(
+      return ListView(
+        children: [
+          if (_lost.isNotEmpty) _lostCard(context),
+          Padding(
           padding: const EdgeInsets.all(32),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -227,18 +328,15 @@ class _CleanupPageState extends State<CleanupPage> {
               const Icon(Icons.cleaning_services_outlined, size: 48, color: LrColors.muted),
               const SizedBox(height: 12),
               Text(tr('cleanup.none'), textAlign: TextAlign.center),
-              if (_notSafe > 0) ...[
-                const SizedBox(height: 8),
-                Text(tr('cleanup.not_safe', {'count': _notSafe}),
-                    textAlign: TextAlign.center, style: theme.textTheme.bodySmall),
-              ],
             ],
           ),
         ),
+        ],
       );
     }
     return Column(
       children: [
+        if (_lost.isNotEmpty) _lostCard(context),
         // Summary: what the PC has proven it holds.
         Container(
           margin: const EdgeInsets.fromLTRB(16, 8, 16, 12),
@@ -260,11 +358,6 @@ class _CleanupPageState extends State<CleanupPage> {
                         style: theme.textTheme.titleSmall),
                     const SizedBox(height: 4),
                     Text(tr('cleanup.how'), style: theme.textTheme.bodySmall),
-                    if (_notSafe > 0) ...[
-                      const SizedBox(height: 4),
-                      Text(tr('cleanup.not_safe', {'count': _notSafe}),
-                          style: theme.textTheme.bodySmall?.copyWith(color: LrColors.safelight)),
-                    ],
                   ],
                 ),
               ),

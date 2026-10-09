@@ -106,5 +106,11 @@
   "identity.remove_picture": "إزالة الصورة",
   "identity.picture_error": "تعذر فتح هذه الصورة. جرّب JPG أو PNG.",
   "identity.edit": "تغيير",
-  "receive.tap_hint": "افتح LocalRoll على هاتفك واضغط «{name}»، ثم انقر «سماح» هنا."
+  "receive.tap_hint": "افتح LocalRoll على هاتفك واضغط «{name}»، ثم انقر «سماح» هنا.",
+  "app.close_viewer": "إغلاق والعودة إلى المكتبة",
+  "library.n_photos": "{count} صورة",
+  "library.n_videos": "{count} فيديو",
+  "settings.startup": "بدء التشغيل",
+  "settings.autostart": "تشغيل LocalRoll مع Windows",
+  "settings.autostart_hint": "يفتح مصغّرًا حتى تتمكن الهواتف دائمًا من الإرسال إلى هذا الكمبيوتر."
 }

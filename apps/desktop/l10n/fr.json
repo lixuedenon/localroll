@@ -106,5 +106,11 @@
   "identity.remove_picture": "Retirer l’image",
   "identity.picture_error": "Impossible d’ouvrir cette image. Essayez un JPG ou un PNG.",
   "identity.edit": "Modifier",
-  "receive.tap_hint": "Sur le téléphone, ouvrez LocalRoll et touchez « {name} », puis cliquez sur Autoriser ici."
+  "receive.tap_hint": "Sur le téléphone, ouvrez LocalRoll et touchez « {name} », puis cliquez sur Autoriser ici.",
+  "app.close_viewer": "Fermer et revenir à la bibliothèque",
+  "library.n_photos": "{count} photos",
+  "library.n_videos": "{count} vidéos",
+  "settings.startup": "Démarrage",
+  "settings.autostart": "Lancer LocalRoll avec Windows",
+  "settings.autostart_hint": "S’ouvre réduit : les téléphones peuvent toujours envoyer vers ce PC."
 }

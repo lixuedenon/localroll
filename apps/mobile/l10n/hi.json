@@ -93,5 +93,16 @@
   "err.pair_denied": "PC ने कनेक्शन अस्वीकार कर दिया।",
   "err.pair_expired": "PC पर किसी ने जवाब नहीं दिया। फिर से कोशिश करें।",
   "connect.all_paired": "इस Wi-Fi के सभी PC पहले से जुड़े हैं — वे नीचे दिखे हैं।",
-  "connect.none_found": "कोई और PC नहीं मिला। PC पर LocalRoll खोलें और देखें कि दोनों एक ही Wi-Fi पर हैं।"
+  "connect.none_found": "कोई और PC नहीं मिला। PC पर LocalRoll खोलें और देखें कि दोनों एक ही Wi-Fi पर हैं।",
+  "cleanup.lost_title": "{count} आइटम अब {pc} पर नहीं हैं",
+  "cleanup.lost_body": "पहले इनका बैकअप हुआ था, पर बाद में PC पर हटाए या बदले गए। फ़ोन पर ही इकलौती कॉपी है — इन्हें हटाने के लिए नहीं दिखाया जाएगा।",
+  "cleanup.lost_missing": "हटाया गया",
+  "cleanup.lost_changed": "बदला गया",
+  "cleanup.rebackup": "{count} का फिर से बैकअप लें",
+  "home.auto_send": "अपने-आप भेजें",
+  "auto.enabled": "अब से नई फ़ोटो और वीडियो अपने-आप {pc} पर जाएँगे।",
+  "auto.waiting": "{count} नए आइटम {pc} पर भेजे जाने का इंतज़ार कर रहे हैं",
+  "auto.waiting_hint": "PC बंद है या इस Wi-Fi पर नहीं है। जुड़ते ही अपने-आप भेज दिए जाएँगे।",
+  "auto.sending": "नए आइटम {pc} पर भेजे जा रहे हैं… {done}/{total}",
+  "auto.done": "{count} नए आइटम {pc} पर भेज दिए गए"
 }

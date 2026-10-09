@@ -93,5 +93,16 @@
   "err.pair_denied": "Máy tính đã từ chối kết nối.",
   "err.pair_expired": "Không ai trả lời trên máy tính. Hãy thử lại.",
   "connect.all_paired": "Mọi máy tính trong Wi-Fi này đều đã ghép nối — có ở danh sách bên dưới.",
-  "connect.none_found": "Không tìm thấy máy tính khác. Hãy mở LocalRoll trên máy tính và kiểm tra hai thiết bị cùng Wi-Fi."
+  "connect.none_found": "Không tìm thấy máy tính khác. Hãy mở LocalRoll trên máy tính và kiểm tra hai thiết bị cùng Wi-Fi.",
+  "cleanup.lost_title": "{count} mục không còn trên {pc}",
+  "cleanup.lost_body": "Chúng từng được sao lưu nhưng sau đó đã bị xóa hoặc thay đổi trên máy tính. Điện thoại giữ bản duy nhất — sẽ không được đề xuất xóa.",
+  "cleanup.lost_missing": "đã xóa",
+  "cleanup.lost_changed": "đã đổi",
+  "cleanup.rebackup": "Sao lưu lại {count} mục",
+  "home.auto_send": "Tự gửi",
+  "auto.enabled": "Từ giờ, ảnh và video mới sẽ tự gửi tới {pc}.",
+  "auto.waiting": "{count} mục mới đang chờ gửi tới {pc}",
+  "auto.waiting_hint": "Máy tính đang tắt hoặc không ở Wi-Fi này. Sẽ tự gửi khi kết nối lại.",
+  "auto.sending": "Đang gửi mục mới tới {pc}… {done}/{total}",
+  "auto.done": "Đã gửi {count} mục mới tới {pc}"
 }

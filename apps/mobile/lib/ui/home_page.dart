@@ -9,11 +9,14 @@ import 'package:localroll_core/localroll_core.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../l10n/l10n.dart';
+import '../services/auto_sender.dart';
 import '../services/discovery.dart';
 import '../services/mobile_settings.dart';
+import '../services/uploader.dart';
 import 'cleanup_page.dart';
 import 'connect_page.dart';
 import 'device_badge.dart';
+import 'theme.dart';
 import 'transfer_page.dart';
 
 /// Photo library grid: pick photos/videos and send them to the PC.
@@ -58,16 +61,109 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     widget.discovery.removeListener(_onDiscovery);
+    _auto.dispose();
     super.dispose();
   }
 
-  /// A paired PC showed up on the Wi-Fi: refresh its name / icon / picture.
-  void _onDiscovery() => refreshPairedLooks(widget.settings, widget.discovery.found);
+  late final AutoSender _auto = AutoSender(widget.settings, widget.discovery);
 
-  /// Coming back from the Settings app: re-check photo access.
+  /// A paired PC showed up on the Wi-Fi: refresh its name / icon / picture,
+  /// and send waiting photos if auto-send is on.
+  void _onDiscovery() {
+    refreshPairedLooks(widget.settings, widget.discovery.found);
+    final d = widget.settings.current;
+    if (_auto.state == AutoState.waiting && d != null && widget.discovery.found.any((f) => f.id == d.id)) {
+      _auto.check();
+    }
+  }
+
+  /// Back in the app: re-check photo access, and look for new photos to send.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && !(_permission?.hasAccess ?? false)) _reload();
+    if (state != AppLifecycleState.resumed) return;
+    if (!(_permission?.hasAccess ?? false)) {
+      _reload();
+    } else {
+      _auto.check();
+    }
+  }
+
+  Future<void> _toggleAuto(bool on) async {
+    await widget.settings.setAutoSend(on);
+    final d = widget.settings.current;
+    if (on && d != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('auto.enabled', {'pc': d.name}))));
+    }
+    await _auto.check();
+  }
+
+  /// Status line for auto-send (waiting / sending / sent).
+  Widget _autoBanner(BuildContext context) {
+    return ListenableBuilder(
+      listenable: _auto,
+      builder: (context, _) {
+        final d = widget.settings.current;
+        if (d == null || _auto.state == AutoState.idle) return const SizedBox.shrink();
+        final theme = Theme.of(context);
+        final up = _auto.uploader;
+        final (IconData icon, Color color, String title, String? body) = switch (_auto.state) {
+          AutoState.waiting => (
+              Icons.cloud_off_rounded,
+              LrColors.safelight,
+              tr('auto.waiting', {'count': _auto.pending, 'pc': d.name}),
+              tr('auto.waiting_hint'),
+            ),
+          AutoState.sending => (
+              Icons.bolt_rounded,
+              LrColors.safelight,
+              tr('auto.sending', {'done': up?.doneCount ?? 0, 'total': _auto.pending, 'pc': d.name}),
+              null,
+            ),
+          _ => (Icons.verified_rounded, LrColors.verified, tr('auto.done', {'count': _auto.lastSent, 'pc': d.name}), null),
+        };
+        return Container(
+          margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+          padding: const EdgeInsets.fromLTRB(14, 12, 6, 12),
+          decoration: BoxDecoration(
+            color: LrColors.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: color.withValues(alpha: 0.6)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(children: [
+                Icon(icon, color: color, size: 20),
+                const SizedBox(width: 10),
+                Expanded(child: Text(title, style: theme.textTheme.titleSmall)),
+                if (_auto.state == AutoState.done)
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    onPressed: _auto.dismiss,
+                    icon: const Icon(Icons.close_rounded, size: 18),
+                  ),
+              ]),
+              if (body != null) ...[
+                const SizedBox(height: 4),
+                Text(body, style: theme.textTheme.bodySmall),
+              ],
+              if (_auto.state == AutoState.sending && up != null) ...[
+                const SizedBox(height: 8),
+                ListenableBuilder(
+                  listenable: up,
+                  builder: (context, _) {
+                    final n = up.items.length;
+                    final cur = up.items.where((i) => i.state == UploadState.uploading).firstOrNull;
+                    final frac = n == 0 ? 0.0 : (up.doneCount + up.skippedCount + (cur?.fraction ?? 0)) / n;
+                    return LinearProgressIndicator(value: frac.clamp(0.0, 1.0), minHeight: 4);
+                  },
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _init() async {
@@ -114,6 +210,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       }
       _all = paths.first;
       await _loadMore();
+      // Photos taken while the PC was off go out now.
+      _auto.check();
     } catch (e) {
       _fail(e);
     }
@@ -363,10 +461,20 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               ),
             ],
           ),
+        _autoBanner(context),
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
           child: Row(
             children: [
+              FilterChip(
+                avatar: Icon(Icons.bolt_rounded,
+                    size: 18, color: widget.settings.autoSend ? LrColors.ink : LrColors.safelight),
+                label: Text(tr('home.auto_send')),
+                selected: widget.settings.autoSend,
+                showCheckmark: false,
+                onSelected: widget.settings.current == null ? null : _toggleAuto,
+              ),
+              const SizedBox(width: 8),
               FilterChip(
                 label: Text(tr('home.only_unsent')),
                 selected: _onlyUnsent,

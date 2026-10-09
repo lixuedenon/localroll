@@ -93,5 +93,16 @@
   "err.pair_denied": "Der PC hat die Verbindung abgelehnt.",
   "err.pair_expired": "Am PC hat niemand reagiert. Versuche es erneut.",
   "connect.all_paired": "Alle PCs in diesem WLAN sind schon gekoppelt – sie stehen unten.",
-  "connect.none_found": "Kein weiterer PC gefunden. Öffne LocalRoll auf dem PC und prüfe, ob beide im selben WLAN sind."
+  "connect.none_found": "Kein weiterer PC gefunden. Öffne LocalRoll auf dem PC und prüfe, ob beide im selben WLAN sind.",
+  "cleanup.lost_title": "{count} Elemente sind nicht mehr auf {pc}",
+  "cleanup.lost_body": "Sie waren gesichert, wurden aber danach auf dem PC gelöscht oder geändert. Dein Handy hat die einzige Kopie – sie werden nicht zum Löschen angeboten.",
+  "cleanup.lost_missing": "gelöscht",
+  "cleanup.lost_changed": "geändert",
+  "cleanup.rebackup": "{count} erneut sichern",
+  "home.auto_send": "Auto-Senden",
+  "auto.enabled": "Ab jetzt gehen neue Fotos und Videos von selbst an {pc}.",
+  "auto.waiting": "{count} neue Elemente warten auf {pc}",
+  "auto.waiting_hint": "Der PC ist aus oder nicht in diesem WLAN. Sie werden automatisch gesendet, sobald er erreichbar ist.",
+  "auto.sending": "Neue Elemente werden an {pc} gesendet… {done}/{total}",
+  "auto.done": "{count} neue Elemente an {pc} gesendet"
 }

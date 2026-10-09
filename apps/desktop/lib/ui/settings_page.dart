@@ -6,6 +6,7 @@ import 'package:localroll_core/localroll_core.dart';
 
 import '../app_services.dart';
 import '../l10n/l10n.dart';
+import '../services/autostart.dart';
 import '../services/network.dart';
 import 'format.dart';
 import 'identity_card.dart';
@@ -64,6 +65,9 @@ class _SettingsPageState extends State<SettingsPage> {
             const SizedBox(height: 28),
             _section(theme, tr('identity.title')),
             IdentityCard(services: s),
+            const SizedBox(height: 28),
+            _section(theme, tr('settings.startup')),
+            const _AutoStartSwitch(),
             const SizedBox(height: 28),
             _section(theme, tr('settings.library_folder')),
             Row(children: [
@@ -162,4 +166,41 @@ class _SettingsPageState extends State<SettingsPage> {
         padding: const EdgeInsets.only(bottom: 8),
         child: Text(title, style: theme.textTheme.titleMedium),
       );
+}
+
+/// "Start with Windows" switch (reads the real state from the registry).
+class _AutoStartSwitch extends StatefulWidget {
+  const _AutoStartSwitch();
+
+  @override
+  State<_AutoStartSwitch> createState() => _AutoStartSwitchState();
+}
+
+class _AutoStartSwitchState extends State<_AutoStartSwitch> {
+  bool? _on;
+
+  @override
+  void initState() {
+    super.initState();
+    AutoStart.isEnabled().then((v) {
+      if (mounted) setState(() => _on = v);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: SwitchListTile(
+        value: _on ?? false,
+        onChanged: _on == null
+            ? null
+            : (v) async {
+                final ok = await AutoStart.setEnabled(v);
+                if (mounted) setState(() => _on = ok ? v : _on);
+              },
+        title: Text(tr('settings.autostart')),
+        subtitle: Text(tr('settings.autostart_hint')),
+      ),
+    );
+  }
 }

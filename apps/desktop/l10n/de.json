@@ -106,5 +106,11 @@
   "identity.remove_picture": "Bild entfernen",
   "identity.picture_error": "Dieses Bild lässt sich nicht öffnen. Versuche ein JPG oder PNG.",
   "identity.edit": "Ändern",
-  "receive.tap_hint": "Öffne LocalRoll auf dem Handy, tippe auf „{name}“ und klicke dann hier auf Erlauben."
+  "receive.tap_hint": "Öffne LocalRoll auf dem Handy, tippe auf „{name}“ und klicke dann hier auf Erlauben.",
+  "app.close_viewer": "Schließen und zur Mediathek zurück",
+  "library.n_photos": "{count} Fotos",
+  "library.n_videos": "{count} Videos",
+  "settings.startup": "Start",
+  "settings.autostart": "LocalRoll mit Windows starten",
+  "settings.autostart_hint": "Startet minimiert, damit Handys jederzeit an diesen PC senden können."
 }
