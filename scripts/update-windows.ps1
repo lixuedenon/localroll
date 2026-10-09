@@ -24,6 +24,12 @@ if ((Test-Path (Join-Path $full '.git')) -or $repoRoot.StartsWith($full + '\', $
 }
 $repo = 'lixuedenon/localroll'
 
+if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
+  throw 'GitHub CLI not found. Run: winget install GitHub.cli   (then reopen the terminal)'
+}
+gh auth status *> $null
+if ($LASTEXITCODE -ne 0) { throw 'Not logged in to GitHub CLI. Run once: gh auth login' }
+
 Write-Host 'Looking for the latest successful build...'
 $runId = gh run list -R $repo -w CI -b main -s success -L 1 --json databaseId -q '.[0].databaseId'
 if (-not $runId) { throw 'No successful build found.' }
