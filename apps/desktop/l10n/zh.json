@@ -90,5 +90,21 @@
   "exit.body": "退出后，手机就无法发送到这台电脑，直到再次打开 LocalRoll。",
   "exit.body_busy": "还有 {count} 个文件正在接收。退出会中断传输，之后手机可以接着传。",
   "exit.stay": "继续使用",
-  "exit.quit": "退出"
+  "exit.quit": "退出",
+  "pair.ask": "「{name}」想连接这台电脑",
+  "pair.check": "确认手机上显示的是同样的三个图案，然后允许。",
+  "pair.allow": "允许",
+  "pair.deny": "拒绝",
+  "identity.title": "这台电脑",
+  "identity.preview_hint": "手机上看到的就是这个样子。",
+  "identity.name": "名字",
+  "identity.use_pc_name": "用电脑原名（{name}）",
+  "identity.random_name": "随机起名",
+  "identity.look": "图标和颜色",
+  "identity.random_look": "随机外观",
+  "identity.use_picture": "用我自己的图片",
+  "identity.remove_picture": "移除图片",
+  "identity.picture_error": "打不开这张图片，请换一张 JPG 或 PNG。",
+  "identity.edit": "修改",
+  "receive.tap_hint": "在手机上打开 LocalRoll，点「{name}」，然后在这里点「允许」。"
 }

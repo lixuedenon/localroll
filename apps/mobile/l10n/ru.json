@@ -82,5 +82,14 @@
   "cleanup.delete": "Удалить с телефона: {count} · {size}",
   "cleanup.done_ios": "Место освобождено. Удалённое хранится в «Недавно удалённых» 30 дней.",
   "cleanup.done": "Место освобождено.",
-  "cleanup.cancelled": "Ничего не удалено."
+  "cleanup.cancelled": "Ничего не удалено.",
+  "pair.contacting": "Связь с «{name}»…",
+  "pair.waiting": "Нажмите «Разрешить» на «{name}»",
+  "pair.same_symbols": "На ПК те же три символа.",
+  "connect.tap_hint": "Нажмите на свой ПК, затем нажмите «Разрешить» на нём.",
+  "connect.tap_to_connect": "Нажмите, чтобы подключиться",
+  "connect.offline": "Сейчас не в этой сети Wi-Fi",
+  "connect.other_ways": "Другие способы подключения",
+  "err.pair_denied": "ПК отклонил подключение.",
+  "err.pair_expired": "На ПК никто не ответил. Попробуйте ещё раз."
 }

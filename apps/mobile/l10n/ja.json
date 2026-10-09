@@ -82,5 +82,14 @@
   "cleanup.delete": "スマホから {count} 件を削除 · {size}",
   "cleanup.done_ios": "空き容量が増えました。削除した項目は「最近削除した項目」に 30 日間残ります。",
   "cleanup.done": "空き容量が増えました。",
-  "cleanup.cancelled": "何も削除されませんでした。"
+  "cleanup.cancelled": "何も削除されませんでした。",
+  "pair.contacting": "「{name}」に問い合わせ中…",
+  "pair.waiting": "「{name}」で「許可」をクリックしてください",
+  "pair.same_symbols": "PC にも同じ 3 つの記号が表示されます。",
+  "connect.tap_hint": "PC をタップして、PC 側で「許可」をクリックします。",
+  "connect.tap_to_connect": "タップして接続",
+  "connect.offline": "現在この Wi-Fi にいません",
+  "connect.other_ways": "その他の接続方法",
+  "err.pair_denied": "PC が接続を拒否しました。",
+  "err.pair_expired": "PC で応答がありませんでした。もう一度お試しください。"
 }

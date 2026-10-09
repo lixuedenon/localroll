@@ -90,5 +90,21 @@
   "exit.body": "Điện thoại sẽ không gửi được tới máy tính này cho đến khi bạn mở lại LocalRoll.",
   "exit.body_busy": "Vẫn đang nhận {count} tệp. Thoát sẽ dừng lại; điện thoại có thể tiếp tục sau.",
   "exit.stay": "Giữ mở",
-  "exit.quit": "Thoát"
+  "exit.quit": "Thoát",
+  "pair.ask": "“{name}” muốn kết nối",
+  "pair.check": "Kiểm tra điện thoại hiện đúng ba ký hiệu giống vậy rồi cho phép.",
+  "pair.allow": "Cho phép",
+  "pair.deny": "Từ chối",
+  "identity.title": "Máy tính này",
+  "identity.preview_hint": "Điện thoại sẽ thấy máy tính này như thế này.",
+  "identity.name": "Tên",
+  "identity.use_pc_name": "Dùng tên máy tính ({name})",
+  "identity.random_name": "Tên ngẫu nhiên",
+  "identity.look": "Biểu tượng và màu",
+  "identity.random_look": "Giao diện ngẫu nhiên",
+  "identity.use_picture": "Dùng ảnh của tôi",
+  "identity.remove_picture": "Xóa ảnh",
+  "identity.picture_error": "Không mở được ảnh này. Hãy thử JPG hoặc PNG.",
+  "identity.edit": "Đổi",
+  "receive.tap_hint": "Trên điện thoại, mở LocalRoll và chạm “{name}”, rồi bấm Cho phép tại đây."
 }

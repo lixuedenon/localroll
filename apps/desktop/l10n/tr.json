@@ -90,5 +90,21 @@
   "exit.body": "LocalRoll’u yeniden açana kadar telefonlar bu bilgisayara gönderemez.",
   "exit.body_busy": "Hâlâ {count} dosya alınıyor. Çıkış bunları durdurur; telefon daha sonra devam edebilir.",
   "exit.stay": "Açık kalsın",
-  "exit.quit": "Çık"
+  "exit.quit": "Çık",
+  "pair.ask": "“{name}” bağlanmak istiyor",
+  "pair.check": "Telefonda aynı üç simgenin göründüğünü kontrol edip izin verin.",
+  "pair.allow": "İzin ver",
+  "pair.deny": "Reddet",
+  "identity.title": "Bu bilgisayar",
+  "identity.preview_hint": "Telefonlar bu bilgisayarı böyle görür.",
+  "identity.name": "Ad",
+  "identity.use_pc_name": "Bilgisayar adını kullan ({name})",
+  "identity.random_name": "Rastgele ad",
+  "identity.look": "Simge ve renk",
+  "identity.random_look": "Rastgele görünüm",
+  "identity.use_picture": "Kendi resmimi kullan",
+  "identity.remove_picture": "Resmi kaldır",
+  "identity.picture_error": "Bu resim açılamıyor. JPG veya PNG deneyin.",
+  "identity.edit": "Değiştir",
+  "receive.tap_hint": "Telefonda LocalRoll’u açıp “{name}”a dokunun, sonra burada İzin ver’e tıklayın."
 }

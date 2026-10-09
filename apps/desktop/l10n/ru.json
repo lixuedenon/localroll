@@ -90,5 +90,21 @@
   "exit.body": "Телефоны не смогут отправлять на этот ПК, пока вы снова не откроете LocalRoll.",
   "exit.body_busy": "Ещё принимается файлов: {count}. Выход прервёт приём; телефон сможет продолжить позже.",
   "exit.stay": "Оставить открытым",
-  "exit.quit": "Выйти"
+  "exit.quit": "Выйти",
+  "pair.ask": "«{name}» хочет подключиться",
+  "pair.check": "Убедитесь, что на телефоне те же три символа, и разрешите.",
+  "pair.allow": "Разрешить",
+  "pair.deny": "Отклонить",
+  "identity.title": "Этот ПК",
+  "identity.preview_hint": "Так этот ПК видят телефоны.",
+  "identity.name": "Имя",
+  "identity.use_pc_name": "Имя компьютера ({name})",
+  "identity.random_name": "Случайное имя",
+  "identity.look": "Значок и цвет",
+  "identity.random_look": "Случайный вид",
+  "identity.use_picture": "Своё изображение",
+  "identity.remove_picture": "Убрать изображение",
+  "identity.picture_error": "Не удаётся открыть изображение. Попробуйте JPG или PNG.",
+  "identity.edit": "Изменить",
+  "receive.tap_hint": "Откройте LocalRoll на телефоне, нажмите «{name}», затем нажмите здесь «Разрешить»."
 }

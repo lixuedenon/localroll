@@ -1,4 +1,5 @@
 // apps/mobile/lib/services/discovery.dart
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -117,6 +118,66 @@ Future<PairedDesktop> pairWithDesktop({
   throw Exception(tr('err.cannot_reach', {'error': lastError ?? tr('err.no_address')}));
 }
 
+/// Tap-to-pair: asks the PC, then waits for Allow / Deny there.
+/// [onWaiting] gets the three symbols to show (same as on the PC).
+/// [cancelled] is polled; return true to give up.
+Future<PairedDesktop?> pairByApproval({
+  required MobileSettings settings,
+  required List<String> hosts,
+  required int port,
+  required void Function(List<String> emoji) onWaiting,
+  required bool Function() cancelled,
+}) async {
+  Object? lastError;
+  for (final host in hosts) {
+    final client = DesktopClient(host: host, port: port);
+    try {
+      final info = await client.info();
+      final start = await client.requestApproval(settings.deviceInfo);
+      onWaiting(pairingEmoji(start.requestId));
+      final deadline = DateTime.now().add(LrProtocol.pairApprovalTimeout + const Duration(seconds: 5));
+      while (DateTime.now().isBefore(deadline)) {
+        if (cancelled()) return null;
+        await Future<void>.delayed(const Duration(seconds: 1));
+        final st = await client.approvalStatus(start.requestId);
+        switch (st.status) {
+          case PairApprovalStatus.pending:
+            continue;
+          case PairApprovalStatus.approved:
+            final desk = st.desktop ?? info;
+            final d = PairedDesktop(
+              id: desk.id,
+              name: desk.name,
+              hosts: hosts,
+              port: port,
+              token: st.token!,
+              lastHost: host,
+              icon: desk.icon,
+              color: desk.color,
+              avatar: desk.avatar,
+            );
+            await settings.upsertDesktop(d);
+            return d;
+          case PairApprovalStatus.denied:
+            throw Exception(tr('err.pair_denied'));
+          case PairApprovalStatus.expired:
+            throw Exception(tr('err.pair_expired'));
+        }
+      }
+      throw Exception(tr('err.pair_expired'));
+    } on LrHttpException catch (e) {
+      throw Exception(e.message);
+    } on SocketException catch (e) {
+      lastError = e;
+    } on TimeoutException catch (e) {
+      lastError = e;
+    } finally {
+      client.close();
+    }
+  }
+  throw Exception(tr('err.cannot_reach', {'error': lastError ?? tr('err.no_address')}));
+}
+
 /// Finds a working address for a paired PC and returns an authenticated client.
 ///
 /// Tries the last working host:port first, then every known host with every
@@ -151,6 +212,7 @@ Future<DesktopClient> connectToDesktop(
         client.close();
         continue;
       }
+      await settings.updateLook(d, info);
       if (host != d.lastHost || port != d.port) {
         d.port = port;
         if (!d.hosts.contains(host)) d.hosts = [host, ...d.hosts];

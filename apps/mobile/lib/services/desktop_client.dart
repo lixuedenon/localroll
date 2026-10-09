@@ -73,6 +73,21 @@ class DesktopClient {
       PairResponse.fromJson(await _send('POST', LrProtocol.pathPair,
           json: PairRequest(device: me, pin: pin).toJson()));
 
+  /// Tap-to-pair: ask; the PC shows Allow / Deny.
+  Future<PairApprovalState> requestApproval(DeviceInfo me) async => PairApprovalState.fromJson(
+      await _send('POST', LrProtocol.pathPairRequest, json: PairApprovalRequest(device: me).toJson()));
+
+  Future<PairApprovalState> approvalStatus(String requestId) async {
+    try {
+      return PairApprovalState.fromJson(
+          await _send('GET', '${LrProtocol.pathPairRequest}/${Uri.encodeComponent(requestId)}',
+              timeout: const Duration(seconds: 5)));
+    } on LrHttpException catch (e) {
+      if (e.status == 404) return PairApprovalState(requestId: requestId, status: PairApprovalStatus.expired);
+      rethrow;
+    }
+  }
+
   Future<SessionResponse> createSession(SessionRequest request) async =>
       SessionResponse.fromJson(await _send('POST', LrProtocol.pathSessions, json: request.toJson()));
 

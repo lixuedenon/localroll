@@ -11,6 +11,20 @@ import '../services/receive_hub.dart';
 import '../services/settings.dart';
 import '../l10n/l10n.dart';
 
+/// A phone waiting for someone to click Allow / Deny on this PC.
+class PendingPair {
+  PendingPair(this.id, this.device);
+
+  final String id;
+  final DeviceInfo device;
+  final DateTime created = DateTime.now();
+  PairApprovalStatus status = PairApprovalStatus.pending;
+  String? token;
+
+  List<String> get emoji => pairingEmoji(id);
+  bool get expired => DateTime.now().difference(created) > LrProtocol.pairApprovalTimeout;
+}
+
 class _UploadSession {
   _UploadSession(this.id, this.device, this.offers);
 
@@ -44,6 +58,10 @@ class TransferServer extends ChangeNotifier {
   /// PIN currently shown on screen; changes after every successful pairing.
   final ValueNotifier<String> pin = ValueNotifier(randomPin());
   int _failedPinAttempts = 0;
+
+  /// Tap-to-pair requests; the UI shows an Allow / Deny dialog for each.
+  final ValueNotifier<List<PendingPair>> pairRequests = ValueNotifier(const []);
+  final Map<String, PendingPair> _pairs = {};
 
   bool get running => _server != null;
   int get port => _server?.port ?? settings.port;
@@ -118,6 +136,15 @@ class TransferServer extends ChangeNotifier {
       }
       if (req.method == 'POST' && path == LrProtocol.pathPair) {
         return await _pair(req);
+      }
+      if (req.method == 'GET' && path == LrProtocol.pathAvatar) {
+        return await _avatar(req);
+      }
+      if (req.method == 'POST' && path == LrProtocol.pathPairRequest) {
+        return await _pairRequest(req);
+      }
+      if (req.method == 'GET' && segs.length == 4 && '/${segs.take(3).join('/')}' == LrProtocol.pathPairRequest) {
+        return await _pairRequestStatus(req, segs[3]);
       }
 
       final device = await _authenticate(req);
@@ -210,6 +237,90 @@ class TransferServer extends ChangeNotifier {
       200,
       PairResponse(token: token, desktop: settings.deviceInfo).toJson(),
     );
+  }
+
+  Future<void> _avatar(HttpRequest req) async {
+    final f = settings.avatarFile;
+    if (settings.avatarVersion == 0 || !await f.exists()) {
+      return _json(req.response, 404, {'error': 'not_found'});
+    }
+    req.response
+      ..statusCode = 200
+      ..headers.contentType = ContentType('image', 'png')
+      ..headers.set(HttpHeaders.cacheControlHeader, 'max-age=86400');
+    await req.response.addStream(f.openRead());
+    await req.response.close();
+  }
+
+  void _prunePairs() {
+    // Answered requests are kept a little longer so the phone can read the answer.
+    _pairs.removeWhere((_, p) => DateTime.now().difference(p.created) > LrProtocol.pairApprovalTimeout * 2);
+    for (final p in _pairs.values) {
+      if (p.status == PairApprovalStatus.pending && p.expired) p.status = PairApprovalStatus.expired;
+    }
+    pairRequests.value = _pairs.values.where((p) => p.status == PairApprovalStatus.pending).toList();
+  }
+
+  Future<void> _pairRequest(HttpRequest req) async {
+    final body = PairApprovalRequest.fromJson(await _readJson(req));
+    _prunePairs();
+    // A few open requests at most, so nobody can flood the screen with dialogs.
+    if (_pairs.values.where((p) => p.status == PairApprovalStatus.pending).length >= 3) {
+      return _json(req.response, 429, {'error': 'too_many_attempts'});
+    }
+    final p = PendingPair(randomId(24), body.device);
+    _pairs[p.id] = p;
+    pairRequests.value = [...pairRequests.value, p];
+    return _json(
+      req.response,
+      200,
+      PairApprovalState(requestId: p.id, status: PairApprovalStatus.pending).toJson(),
+    );
+  }
+
+  Future<void> _pairRequestStatus(HttpRequest req, String id) async {
+    _prunePairs();
+    final p = _pairs[id];
+    if (p == null) {
+      await _json(req.response, 404, PairApprovalState(requestId: id, status: PairApprovalStatus.expired).toJson());
+      return;
+    }
+    await _json(
+      req.response,
+      200,
+      PairApprovalState(
+        requestId: id,
+        status: p.status,
+        token: p.status == PairApprovalStatus.approved ? p.token : null,
+        desktop: p.status == PairApprovalStatus.approved ? settings.deviceInfo : null,
+      ).toJson(),
+    );
+    // The token is handed out once.
+    if (p.status != PairApprovalStatus.pending) _pairs.remove(id);
+  }
+
+  /// Called by the Allow / Deny dialog.
+  Future<void> answerPair(PendingPair p, {required bool allow}) async {
+    if (p.status != PairApprovalStatus.pending) return;
+    if (p.expired) {
+      p.status = PairApprovalStatus.expired;
+    } else if (allow) {
+      final token = randomId(40);
+      await settings.update((s) {
+        s.trusted[p.device.id] = TrustedDevice(
+          id: p.device.id,
+          name: p.device.name,
+          platform: p.device.platform,
+          token: token,
+          pairedMs: DateTime.now().millisecondsSinceEpoch,
+        );
+      });
+      p.token = token;
+      p.status = PairApprovalStatus.approved;
+    } else {
+      p.status = PairApprovalStatus.denied;
+    }
+    pairRequests.value = _pairs.values.where((x) => x.status == PairApprovalStatus.pending).toList();
   }
 
   Future<void> _createSession(HttpRequest req, TrustedDevice device) async {

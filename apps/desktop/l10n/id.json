@@ -90,5 +90,21 @@
   "exit.body": "Ponsel tidak bisa mengirim ke PC ini sampai LocalRoll dibuka lagi.",
   "exit.body_busy": "{count} file masih diterima. Keluar akan menghentikannya; ponsel bisa melanjutkan nanti.",
   "exit.stay": "Tetap buka",
-  "exit.quit": "Keluar"
+  "exit.quit": "Keluar",
+  "pair.ask": "“{name}” ingin terhubung",
+  "pair.check": "Pastikan ponsel menampilkan tiga simbol yang sama, lalu izinkan.",
+  "pair.allow": "Izinkan",
+  "pair.deny": "Tolak",
+  "identity.title": "PC ini",
+  "identity.preview_hint": "Beginilah ponsel melihat PC ini.",
+  "identity.name": "Nama",
+  "identity.use_pc_name": "Pakai nama komputer ({name})",
+  "identity.random_name": "Nama acak",
+  "identity.look": "Ikon dan warna",
+  "identity.random_look": "Tampilan acak",
+  "identity.use_picture": "Pakai gambar sendiri",
+  "identity.remove_picture": "Hapus gambar",
+  "identity.picture_error": "Gambar ini tidak bisa dibuka. Coba JPG atau PNG.",
+  "identity.edit": "Ubah",
+  "receive.tap_hint": "Di ponsel, buka LocalRoll dan ketuk “{name}”, lalu klik Izinkan di sini."
 }

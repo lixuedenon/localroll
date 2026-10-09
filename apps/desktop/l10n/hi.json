@@ -90,5 +90,21 @@
   "exit.body": "जब तक आप LocalRoll फिर से नहीं खोलते, फ़ोन इस PC पर नहीं भेज पाएँगे।",
   "exit.body_busy": "{count} फ़ाइलें अभी भी आ रही हैं। बाहर निकलने पर ये रुक जाएँगी; फ़ोन बाद में फिर से शुरू कर सकता है।",
   "exit.stay": "खुला रखें",
-  "exit.quit": "बाहर निकलें"
+  "exit.quit": "बाहर निकलें",
+  "pair.ask": "“{name}” कनेक्ट होना चाहता है",
+  "pair.check": "देख लें कि फ़ोन पर वही तीन चिह्न दिख रहे हैं, फिर अनुमति दें।",
+  "pair.allow": "अनुमति दें",
+  "pair.deny": "अस्वीकार करें",
+  "identity.title": "यह PC",
+  "identity.preview_hint": "फ़ोन पर यह PC ऐसा दिखता है।",
+  "identity.name": "नाम",
+  "identity.use_pc_name": "कंप्यूटर का नाम इस्तेमाल करें ({name})",
+  "identity.random_name": "रैंडम नाम",
+  "identity.look": "आइकन और रंग",
+  "identity.random_look": "रैंडम रूप",
+  "identity.use_picture": "अपनी तस्वीर इस्तेमाल करें",
+  "identity.remove_picture": "तस्वीर हटाएँ",
+  "identity.picture_error": "यह तस्वीर नहीं खुल रही। JPG या PNG आज़माएँ।",
+  "identity.edit": "बदलें",
+  "receive.tap_hint": "फ़ोन पर LocalRoll खोलें और “{name}” पर टैप करें, फिर यहाँ अनुमति दें पर क्लिक करें।"
 }

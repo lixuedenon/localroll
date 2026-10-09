@@ -90,5 +90,21 @@
   "exit.body": "لن تتمكن الهواتف من الإرسال إلى هذا الكمبيوتر حتى تفتح LocalRoll مرة أخرى.",
   "exit.body_busy": "لا يزال يتم استلام {count} ملف. الخروج يوقفها، ويمكن للهاتف الاستئناف لاحقًا.",
   "exit.stay": "إبقاء مفتوحًا",
-  "exit.quit": "خروج"
+  "exit.quit": "خروج",
+  "pair.ask": "يريد «{name}» الاتصال",
+  "pair.check": "تأكد أن هاتفك يعرض الرموز الثلاثة نفسها، ثم اسمح.",
+  "pair.allow": "سماح",
+  "pair.deny": "رفض",
+  "identity.title": "هذا الكمبيوتر",
+  "identity.preview_hint": "هكذا يظهر هذا الكمبيوتر على الهواتف.",
+  "identity.name": "الاسم",
+  "identity.use_pc_name": "استخدام اسم الكمبيوتر ({name})",
+  "identity.random_name": "اسم عشوائي",
+  "identity.look": "الأيقونة واللون",
+  "identity.random_look": "مظهر عشوائي",
+  "identity.use_picture": "استخدام صورتي",
+  "identity.remove_picture": "إزالة الصورة",
+  "identity.picture_error": "تعذر فتح هذه الصورة. جرّب JPG أو PNG.",
+  "identity.edit": "تغيير",
+  "receive.tap_hint": "افتح LocalRoll على هاتفك واضغط «{name}»، ثم انقر «سماح» هنا."
 }

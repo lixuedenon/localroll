@@ -68,6 +68,29 @@ class AppServices {
     }
   }
 
+  /// Name / icon / colour / picture changed: save and re-announce on the LAN
+  /// (phones read the new look from /info and /avatar).
+  Future<void> updateIdentity({
+    String? name,
+    String? icon,
+    int? color,
+    Uint8List? avatarPng,
+    bool removeAvatar = false,
+  }) async {
+    if (avatarPng != null) await settings.avatarFile.writeAsBytes(avatarPng, flush: true);
+    if (removeAvatar && await settings.avatarFile.exists()) await settings.avatarFile.delete();
+    await settings.update((s) {
+      if (name != null && name.trim().isNotEmpty) s.deviceName = name.trim();
+      if (icon != null) s.iconKey = icon;
+      if (color != null) s.colorValue = color;
+      if (avatarPng != null) s.avatarVersion = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      if (removeAvatar) s.avatarVersion = 0;
+    });
+    if (server.running) {
+      await mdns.start(name: settings.deviceName, deviceId: settings.deviceId, port: server.port);
+    }
+  }
+
   /// Clean exit: unregister from mDNS (so phones don't see a stale PC) and
   /// close the listening socket.
   Future<void> shutdown() async {

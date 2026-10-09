@@ -82,5 +82,14 @@
   "cleanup.delete": "Elimina {count} dal telefono · {size}",
   "cleanup.done_ios": "Spazio liberato. Gli elementi eliminati restano in “Eliminati di recente” per 30 giorni.",
   "cleanup.done": "Spazio liberato.",
-  "cleanup.cancelled": "Non è stato eliminato nulla."
+  "cleanup.cancelled": "Non è stato eliminato nulla.",
+  "pair.contacting": "Contatto con «{name}»…",
+  "pair.waiting": "Fai clic su Consenti su «{name}»",
+  "pair.same_symbols": "Il PC mostra gli stessi tre simboli.",
+  "connect.tap_hint": "Tocca il tuo PC, poi fai clic su Consenti sul PC.",
+  "connect.tap_to_connect": "Tocca per connetterti",
+  "connect.offline": "Non è su questa Wi-Fi ora",
+  "connect.other_ways": "Altri modi per connettersi",
+  "err.pair_denied": "Il PC ha rifiutato la connessione.",
+  "err.pair_expired": "Nessuno ha risposto sul PC. Riprova."
 }

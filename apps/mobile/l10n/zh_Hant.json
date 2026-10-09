@@ -82,5 +82,14 @@
   "cleanup.delete": "從手機刪除 {count} 項 · {size}",
   "cleanup.done_ios": "已騰出空間。刪除的項目會在「最近刪除」裡保留 30 天。",
   "cleanup.done": "已騰出空間。",
-  "cleanup.cancelled": "沒有刪除任何項目。"
+  "cleanup.cancelled": "沒有刪除任何項目。",
+  "pair.contacting": "正在聯絡「{name}」…",
+  "pair.waiting": "請在「{name}」上點「允許」",
+  "pair.same_symbols": "電腦上會顯示同樣的三個圖案。",
+  "connect.tap_hint": "點一下你的電腦，然後在電腦上點「允許」。",
+  "connect.tap_to_connect": "點一下即可連線",
+  "connect.offline": "目前不在這個 Wi-Fi 上",
+  "connect.other_ways": "其他連線方式",
+  "err.pair_denied": "電腦拒絕了連線。",
+  "err.pair_expired": "電腦上沒有人回應，請再試一次。"
 }

@@ -90,5 +90,21 @@
   "exit.body": "โทรศัพท์จะส่งมาที่คอมพิวเตอร์นี้ไม่ได้จนกว่าคุณจะเปิด LocalRoll อีกครั้ง",
   "exit.body_busy": "ยังรับไฟล์อยู่ {count} ไฟล์ การออกจะหยุดการรับ แต่โทรศัพท์ส่งต่อได้ภายหลัง",
   "exit.stay": "เปิดไว้",
-  "exit.quit": "ออก"
+  "exit.quit": "ออก",
+  "pair.ask": "“{name}” ต้องการเชื่อมต่อ",
+  "pair.check": "ตรวจดูว่าโทรศัพท์แสดงสัญลักษณ์สามตัวเดียวกัน แล้วกดอนุญาต",
+  "pair.allow": "อนุญาต",
+  "pair.deny": "ปฏิเสธ",
+  "identity.title": "คอมพิวเตอร์เครื่องนี้",
+  "identity.preview_hint": "โทรศัพท์จะเห็นคอมพิวเตอร์เครื่องนี้แบบนี้",
+  "identity.name": "ชื่อ",
+  "identity.use_pc_name": "ใช้ชื่อคอมพิวเตอร์ ({name})",
+  "identity.random_name": "สุ่มชื่อ",
+  "identity.look": "ไอคอนและสี",
+  "identity.random_look": "สุ่มรูปลักษณ์",
+  "identity.use_picture": "ใช้รูปของฉันเอง",
+  "identity.remove_picture": "ลบรูป",
+  "identity.picture_error": "เปิดรูปนี้ไม่ได้ ลองใช้ JPG หรือ PNG",
+  "identity.edit": "เปลี่ยน",
+  "receive.tap_hint": "เปิด LocalRoll ในโทรศัพท์แล้วแตะ “{name}” จากนั้นคลิกอนุญาตที่นี่"
 }

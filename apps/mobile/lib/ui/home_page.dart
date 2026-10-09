@@ -13,6 +13,7 @@ import '../services/discovery.dart';
 import '../services/mobile_settings.dart';
 import 'cleanup_page.dart';
 import 'connect_page.dart';
+import 'device_badge.dart';
 import 'transfer_page.dart';
 
 /// Photo library grid: pick photos/videos and send them to the PC.
@@ -236,9 +237,26 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('LocalRoll'),
-                Text(
-                  desktop == null ? tr('home.not_connected') : tr('home.send_to', {'name': desktop.name}),
-                  style: Theme.of(context).textTheme.bodySmall,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (desktop != null) ...[
+                      DeviceBadge(
+                        icon: desktop.icon,
+                        color: desktop.color,
+                        image: desktop.avatarUrl == null ? null : NetworkImage(desktop.avatarUrl!),
+                        size: 18,
+                      ),
+                      const SizedBox(width: 6),
+                    ],
+                    Flexible(
+                      child: Text(
+                        desktop == null ? tr('home.not_connected') : tr('home.send_to', {'name': desktop.name}),
+                        style: Theme.of(context).textTheme.bodySmall,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

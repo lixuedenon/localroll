@@ -9,6 +9,9 @@ class DeviceInfo {
     required this.platform,
     this.appVersion = '0.1.0',
     this.protocolVersion = 1,
+    this.icon,
+    this.color,
+    this.avatar = 0,
   });
 
   final String id;
@@ -19,12 +22,21 @@ class DeviceInfo {
   final String appVersion;
   final int protocolVersion;
 
+  /// Look of the device: a key from [DeviceLook.icons], an ARGB colour, and a
+  /// custom picture version (0 = none; otherwise GET /api/v1/avatar?v=N).
+  final String? icon;
+  final int? color;
+  final int avatar;
+
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
         'platform': platform,
         'appVersion': appVersion,
         'protocolVersion': protocolVersion,
+        if (icon != null) 'icon': icon,
+        if (color != null) 'color': color,
+        if (avatar != 0) 'avatar': avatar,
       };
 
   factory DeviceInfo.fromJson(Map<String, dynamic> j) => DeviceInfo(
@@ -33,6 +45,9 @@ class DeviceInfo {
         platform: j['platform'] as String? ?? 'unknown',
         appVersion: j['appVersion'] as String? ?? '',
         protocolVersion: (j['protocolVersion'] as num?)?.toInt() ?? 1,
+        icon: j['icon'] as String?,
+        color: (j['color'] as num?)?.toInt(),
+        avatar: (j['avatar'] as num?)?.toInt() ?? 0,
       );
 }
 
@@ -270,5 +285,47 @@ class VerifyResponse {
         items: (j['items'] as List? ?? const [])
             .map((e) => VerifiedAsset.fromJson(e as Map<String, dynamic>))
             .toList(),
+      );
+}
+
+/// Phone → PC: "may I pair?" — approved by a click on the PC instead of a PIN.
+class PairApprovalRequest {
+  const PairApprovalRequest({required this.device});
+
+  final DeviceInfo device;
+
+  Map<String, dynamic> toJson() => {'device': device.toJson()};
+
+  factory PairApprovalRequest.fromJson(Map<String, dynamic> j) =>
+      PairApprovalRequest(device: DeviceInfo.fromJson(j['device'] as Map<String, dynamic>));
+}
+
+enum PairApprovalStatus { pending, approved, denied, expired }
+
+/// PC → phone. [requestId] is secret to the asking phone; both screens show
+/// [pairingEmoji] of it so the user can see they approve the right phone.
+class PairApprovalState {
+  const PairApprovalState({required this.requestId, required this.status, this.token, this.desktop});
+
+  final String requestId;
+  final PairApprovalStatus status;
+  final String? token;
+  final DeviceInfo? desktop;
+
+  Map<String, dynamic> toJson() => {
+        'requestId': requestId,
+        'status': status.name,
+        if (token != null) 'token': token,
+        if (desktop != null) 'desktop': desktop!.toJson(),
+      };
+
+  factory PairApprovalState.fromJson(Map<String, dynamic> j) => PairApprovalState(
+        requestId: j['requestId'] as String,
+        status: PairApprovalStatus.values.firstWhere(
+          (s) => s.name == j['status'],
+          orElse: () => PairApprovalStatus.expired,
+        ),
+        token: j['token'] as String?,
+        desktop: j['desktop'] == null ? null : DeviceInfo.fromJson(j['desktop'] as Map<String, dynamic>),
       );
 }

@@ -82,5 +82,14 @@
   "cleanup.delete": "Telefondan {count} öğeyi sil · {size}",
   "cleanup.done_ios": "Yer açıldı. Silinen öğeler 30 gün boyunca “Son Silinenler”de kalır.",
   "cleanup.done": "Yer açıldı.",
-  "cleanup.cancelled": "Hiçbir şey silinmedi."
+  "cleanup.cancelled": "Hiçbir şey silinmedi.",
+  "pair.contacting": "“{name}” ile iletişim kuruluyor…",
+  "pair.waiting": "“{name}” üzerinde İzin ver’e tıklayın",
+  "pair.same_symbols": "Bilgisayar aynı üç simgeyi gösterir.",
+  "connect.tap_hint": "Bilgisayarınıza dokunun, sonra bilgisayarda İzin ver’e tıklayın.",
+  "connect.tap_to_connect": "Bağlanmak için dokunun",
+  "connect.offline": "Şu an bu Wi-Fi’de değil",
+  "connect.other_ways": "Diğer bağlanma yolları",
+  "err.pair_denied": "Bilgisayar bağlantıyı reddetti.",
+  "err.pair_expired": "Bilgisayarda kimse yanıt vermedi. Tekrar deneyin."
 }

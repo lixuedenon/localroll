@@ -8,6 +8,7 @@ import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/network.dart';
 import 'format.dart';
+import 'identity_card.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key, required this.services});
@@ -19,8 +20,6 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  late final TextEditingController _name =
-      TextEditingController(text: widget.services.settings.deviceName);
   late final TextEditingController _library =
       TextEditingController(text: widget.services.settings.libraryPath);
   late final TextEditingController _ffmpeg =
@@ -28,7 +27,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   void dispose() {
-    _name.dispose();
     _library.dispose();
     _ffmpeg.dispose();
     super.dispose();
@@ -64,21 +62,8 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
             const SizedBox(height: 28),
-            _section(theme, tr('settings.pc_name')),
-            Row(children: [
-              Expanded(child: TextField(controller: _name)),
-              const SizedBox(width: 12),
-              FilledButton(
-                onPressed: () async {
-                  final v = _name.text.trim();
-                  if (v.isEmpty) return;
-                  await s.settings.update((x) => x.deviceName = v);
-                  await s.startNetworking();
-                  _toast(tr('common.saved'));
-                },
-                child: Text(tr('common.save')),
-              ),
-            ]),
+            _section(theme, tr('identity.title')),
+            IdentityCard(services: s),
             const SizedBox(height: 28),
             _section(theme, tr('settings.library_folder')),
             Row(children: [

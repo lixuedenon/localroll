@@ -82,5 +82,14 @@
   "cleanup.delete": "从手机删除 {count} 项 · {size}",
   "cleanup.done_ios": "已腾出空间。删除的项目会在「最近删除」里保留 30 天。",
   "cleanup.done": "已腾出空间。",
-  "cleanup.cancelled": "没有删除任何项目。"
+  "cleanup.cancelled": "没有删除任何项目。",
+  "pair.contacting": "正在联系「{name}」…",
+  "pair.waiting": "请在「{name}」上点「允许」",
+  "pair.same_symbols": "电脑上会显示同样的三个图案。",
+  "connect.tap_hint": "点一下你的电脑，然后在电脑上点「允许」。",
+  "connect.tap_to_connect": "点一下即可连接",
+  "connect.offline": "目前不在这个 Wi-Fi 上",
+  "connect.other_ways": "其他连接方式",
+  "err.pair_denied": "电脑拒绝了连接。",
+  "err.pair_expired": "电脑上没有人回应，请再试一次。"
 }

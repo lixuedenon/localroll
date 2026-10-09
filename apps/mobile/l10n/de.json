@@ -82,5 +82,14 @@
   "cleanup.delete": "{count} vom Handy löschen · {size}",
   "cleanup.done_ios": "Speicher freigegeben. Gelöschte Elemente bleiben 30 Tage in „Zuletzt gelöscht“.",
   "cleanup.done": "Speicher freigegeben.",
-  "cleanup.cancelled": "Es wurde nichts gelöscht."
+  "cleanup.cancelled": "Es wurde nichts gelöscht.",
+  "pair.contacting": "„{name}“ wird kontaktiert…",
+  "pair.waiting": "Klicke auf „{name}“ auf Erlauben",
+  "pair.same_symbols": "Der PC zeigt dieselben drei Symbole.",
+  "connect.tap_hint": "Tippe auf deinen PC und klicke dort auf Erlauben.",
+  "connect.tap_to_connect": "Zum Verbinden tippen",
+  "connect.offline": "Gerade nicht in diesem WLAN",
+  "connect.other_ways": "Andere Verbindungswege",
+  "err.pair_denied": "Der PC hat die Verbindung abgelehnt.",
+  "err.pair_expired": "Am PC hat niemand reagiert. Versuche es erneut."
 }

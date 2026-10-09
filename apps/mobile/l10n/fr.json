@@ -82,5 +82,14 @@
   "cleanup.delete": "Supprimer {count} du téléphone · {size}",
   "cleanup.done_ios": "Espace libéré. Les éléments supprimés restent 30 jours dans « Supprimés récemment ».",
   "cleanup.done": "Espace libéré.",
-  "cleanup.cancelled": "Rien n’a été supprimé."
+  "cleanup.cancelled": "Rien n’a été supprimé.",
+  "pair.contacting": "Contact de « {name} »…",
+  "pair.waiting": "Cliquez sur Autoriser sur « {name} »",
+  "pair.same_symbols": "Le PC affiche les trois mêmes symboles.",
+  "connect.tap_hint": "Touchez votre PC, puis cliquez sur Autoriser sur celui-ci.",
+  "connect.tap_to_connect": "Toucher pour se connecter",
+  "connect.offline": "Pas sur ce Wi-Fi pour l’instant",
+  "connect.other_ways": "Autres façons de se connecter",
+  "err.pair_denied": "Le PC a refusé la connexion.",
+  "err.pair_expired": "Personne n’a répondu sur le PC. Réessayez."
 }

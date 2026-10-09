@@ -6,6 +6,7 @@ import '../l10n/l10n.dart';
 import 'app_nav.dart';
 import 'jobs_page.dart';
 import 'library_page.dart';
+import 'pair_prompt.dart';
 import 'receive_page.dart';
 import 'settings_page.dart';
 import 'theme.dart';
@@ -22,10 +23,18 @@ class HomeShell extends StatefulWidget {
 
 class _HomeShellState extends State<HomeShell> {
   final AppNav _nav = AppNav.instance;
+  late final PairPrompter _prompter;
+
+  @override
+  void dispose() {
+    _prompter.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
+    _prompter = PairPrompter(widget.services.server); // tap-to-pair dialogs
     // First launch with an empty library: start on the pairing page.
     _nav.initialTab(widget.services.library.items.isEmpty ? 1 : 0);
   }

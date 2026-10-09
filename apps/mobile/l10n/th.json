@@ -82,5 +82,14 @@
   "cleanup.delete": "ลบ {count} รายการออกจากโทรศัพท์ · {size}",
   "cleanup.done_ios": "เพิ่มพื้นที่แล้ว รายการที่ลบจะอยู่ใน “ลบล่าสุด” 30 วัน",
   "cleanup.done": "เพิ่มพื้นที่แล้ว",
-  "cleanup.cancelled": "ไม่ได้ลบอะไรเลย"
+  "cleanup.cancelled": "ไม่ได้ลบอะไรเลย",
+  "pair.contacting": "กำลังติดต่อ “{name}”…",
+  "pair.waiting": "คลิกอนุญาตที่ “{name}”",
+  "pair.same_symbols": "คอมพิวเตอร์แสดงสัญลักษณ์สามตัวเดียวกัน",
+  "connect.tap_hint": "แตะคอมพิวเตอร์ของคุณ แล้วคลิกอนุญาตที่คอมพิวเตอร์",
+  "connect.tap_to_connect": "แตะเพื่อเชื่อมต่อ",
+  "connect.offline": "ตอนนี้ไม่ได้อยู่ใน Wi-Fi นี้",
+  "connect.other_ways": "วิธีเชื่อมต่ออื่น",
+  "err.pair_denied": "คอมพิวเตอร์ปฏิเสธการเชื่อมต่อ",
+  "err.pair_expired": "ไม่มีใครตอบที่คอมพิวเตอร์ ลองอีกครั้ง"
 }

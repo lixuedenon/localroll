@@ -8,3 +8,4 @@ export 'src/media_kind.dart';
 export 'src/pairing.dart';
 export 'src/hashing.dart';
 export 'src/i18n.dart';
+export 'src/device_names.dart';

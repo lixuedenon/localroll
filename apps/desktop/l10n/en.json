@@ -90,5 +90,21 @@
   "exit.body": "Phones won’t be able to send to this PC until you open LocalRoll again.",
   "exit.body_busy": "{count} file(s) are still being received. Quitting stops them; the phone can resume later.",
   "exit.stay": "Keep open",
-  "exit.quit": "Quit"
+  "exit.quit": "Quit",
+  "pair.ask": "“{name}” wants to connect",
+  "pair.check": "Check that your phone shows the same three symbols, then allow.",
+  "pair.allow": "Allow",
+  "pair.deny": "Deny",
+  "identity.title": "This PC",
+  "identity.preview_hint": "This is how phones see this PC.",
+  "identity.name": "Name",
+  "identity.use_pc_name": "Use computer name ({name})",
+  "identity.random_name": "Random name",
+  "identity.look": "Icon and colour",
+  "identity.random_look": "Random look",
+  "identity.use_picture": "Use my own picture",
+  "identity.remove_picture": "Remove picture",
+  "identity.picture_error": "This picture can’t be opened. Try a JPG or PNG.",
+  "identity.edit": "Change",
+  "receive.tap_hint": "On your phone, open LocalRoll and tap “{name}” — then click Allow here."
 }

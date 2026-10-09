@@ -90,5 +90,21 @@
   "exit.body": "Handys können erst wieder an diesen PC senden, wenn LocalRoll erneut geöffnet ist.",
   "exit.body_busy": "{count} Datei(en) werden noch empfangen. Beenden unterbricht sie; das Handy kann später fortsetzen.",
   "exit.stay": "Geöffnet lassen",
-  "exit.quit": "Beenden"
+  "exit.quit": "Beenden",
+  "pair.ask": "„{name}“ möchte sich verbinden",
+  "pair.check": "Prüfe, ob dein Handy dieselben drei Symbole zeigt, und erlaube dann.",
+  "pair.allow": "Erlauben",
+  "pair.deny": "Ablehnen",
+  "identity.title": "Dieser PC",
+  "identity.preview_hint": "So sehen Handys diesen PC.",
+  "identity.name": "Name",
+  "identity.use_pc_name": "Computernamen verwenden ({name})",
+  "identity.random_name": "Zufälliger Name",
+  "identity.look": "Symbol und Farbe",
+  "identity.random_look": "Zufälliges Aussehen",
+  "identity.use_picture": "Eigenes Bild verwenden",
+  "identity.remove_picture": "Bild entfernen",
+  "identity.picture_error": "Dieses Bild lässt sich nicht öffnen. Versuche ein JPG oder PNG.",
+  "identity.edit": "Ändern",
+  "receive.tap_hint": "Öffne LocalRoll auf dem Handy, tippe auf „{name}“ und klicke dann hier auf Erlauben."
 }

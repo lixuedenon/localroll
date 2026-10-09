@@ -1,6 +1,8 @@
 // packages/core/lib/src/pairing.dart
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart' as crypto;
+
 /// Content of the QR code shown by the desktop app.
 ///
 /// Encoded as `LOCALROLL:` + base64url(JSON) so the phone can recognise it
@@ -57,3 +59,20 @@ class PairingPayload {
     }
   }
 }
+
+/// Three emoji derived from a pairing request id. Both the phone and the PC
+/// show them, so the user can check they are approving their own phone.
+List<String> pairingEmoji(String requestId) {
+  final h = crypto.sha256.convert(utf8.encode('localroll-pair|$requestId')).bytes;
+  return [for (var i = 0; i < 3; i++) _emoji[h[i] % _emoji.length]];
+}
+
+// Distinct at a glance, no flags/faces/hands (skin tones, cultural meaning).
+const List<String> _emoji = [
+  '🍊', '🍋', '🍉', '🍇', '🍓', '🍒', '🥝', '🍍', '🥥', '🌽', '🥕', '🍄',
+  '🌵', '🌲', '🌻', '🌷', '🍀', '🌙', '⭐', '☀️', '🌈', '❄️', '🔥', '💧',
+  '⚓', '🚲', '🚀', '⛵', '🚂', '🎈', '🎁', '🎨', '🎸', '🎺', '🥁', '🎲',
+  '🧩', '🪁', '🔔', '🔑', '💡', '📷', '📚', '✏️', '🧭', '⏰', '☂️', '🧸',
+  '🐚', '🦋', '🐢', '🐬', '🦉', '🐝', '🦊', '🐧', '🐼', '🦒', '🐙', '🦜',
+  '🏔️', '🏝️', '🌋', '🏰',
+];

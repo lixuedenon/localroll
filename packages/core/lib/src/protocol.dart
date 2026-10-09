@@ -24,6 +24,16 @@ class LrProtocol {
   static const String pathPair = '/api/v1/pair';
   static const String pathSessions = '/api/v1/sessions';
 
+  /// Tap-to-pair: POST starts a request, GET /{id} polls it until the user
+  /// clicks Allow / Deny on the PC.
+  static const String pathPairRequest = '/api/v1/pair-request';
+
+  /// The PC's custom picture (PNG), if it has one. No auth (like /info).
+  static const String pathAvatar = '/api/v1/avatar';
+
+  /// How long a tap-to-pair request waits for a click on the PC.
+  static const Duration pairApprovalTimeout = Duration(minutes: 2);
+
   /// Safe cleanup: the PC re-reads and re-hashes the files it holds for the
   /// given assets so the phone only deletes what is provably on the PC.
   static const String pathVerify = '/api/v1/verify';

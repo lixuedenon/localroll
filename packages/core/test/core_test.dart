@@ -1,6 +1,7 @@
 // packages/core/test/core_test.dart
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:localroll_core/localroll_core.dart';
 import 'package:test/test.dart';
@@ -92,5 +93,30 @@ void main() {
     expect(res.items.first.ok, isTrue);
     expect(res.items.first.size, 42);
     expect(res.items.last.reason, 'missing');
+  });
+
+  test('pairing emoji are stable, 3 long, and differ between requests', () {
+    final a = pairingEmoji('request-1');
+    expect(a, hasLength(3));
+    expect(pairingEmoji('request-1'), a);
+    expect(pairingEmoji('request-2'), isNot(a));
+  });
+
+  test('random device names exist for every supported language', () {
+    for (final l in supportedLanguages) {
+      final n = DeviceNames.random(l.code, rng: Random(1));
+      expect(n.trim(), isNotEmpty, reason: l.code);
+      expect(n.length, lessThan(30), reason: l.code);
+    }
+    expect(DeviceNames.random('xx'), isNotEmpty); // falls back to English
+  });
+
+  test('DeviceInfo keeps its look', () {
+    final d = DeviceInfo.fromJson(const DeviceInfo(
+      id: 'a', name: 'n', platform: 'windows', icon: 'sofa', color: 0xFF5FD4C4, avatar: 3,
+    ).toJson());
+    expect(d.icon, 'sofa');
+    expect(d.color, 0xFF5FD4C4);
+    expect(d.avatar, 3);
   });
 }

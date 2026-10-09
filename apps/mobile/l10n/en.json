@@ -82,5 +82,14 @@
   "cleanup.delete": "Delete {count} from phone · {size}",
   "cleanup.done_ios": "Space freed. Deleted items stay in “Recently Deleted” for 30 days.",
   "cleanup.done": "Space freed.",
-  "cleanup.cancelled": "Nothing was deleted."
+  "cleanup.cancelled": "Nothing was deleted.",
+  "pair.contacting": "Contacting “{name}”…",
+  "pair.waiting": "Click Allow on “{name}”",
+  "pair.same_symbols": "The PC shows the same three symbols.",
+  "connect.tap_hint": "Tap your PC, then click Allow on it.",
+  "connect.tap_to_connect": "Tap to connect",
+  "connect.offline": "Not on this Wi-Fi right now",
+  "connect.other_ways": "Other ways to connect",
+  "err.pair_denied": "The PC declined the connection.",
+  "err.pair_expired": "Nobody answered on the PC. Try again."
 }

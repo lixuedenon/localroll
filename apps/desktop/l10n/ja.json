@@ -90,5 +90,21 @@
   "exit.body": "終了すると、再び LocalRoll を開くまでスマホからこの PC に送信できません。",
   "exit.body_busy": "{count} 件のファイルを受信中です。終了すると中断されますが、後でスマホから再開できます。",
   "exit.stay": "開いたままにする",
-  "exit.quit": "終了"
+  "exit.quit": "終了",
+  "pair.ask": "「{name}」が接続を求めています",
+  "pair.check": "スマホに同じ 3 つの記号が表示されているか確認してから許可してください。",
+  "pair.allow": "許可",
+  "pair.deny": "拒否",
+  "identity.title": "この PC",
+  "identity.preview_hint": "スマホからはこのように見えます。",
+  "identity.name": "名前",
+  "identity.use_pc_name": "PC の名前を使う（{name}）",
+  "identity.random_name": "ランダムな名前",
+  "identity.look": "アイコンと色",
+  "identity.random_look": "ランダムな見た目",
+  "identity.use_picture": "自分の画像を使う",
+  "identity.remove_picture": "画像を削除",
+  "identity.picture_error": "この画像は開けません。JPG か PNG を試してください。",
+  "identity.edit": "変更",
+  "receive.tap_hint": "スマホで LocalRoll を開いて「{name}」をタップし、ここで「許可」をクリックします。"
 }

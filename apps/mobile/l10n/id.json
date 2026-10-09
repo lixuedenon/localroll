@@ -82,5 +82,14 @@
   "cleanup.delete": "Hapus {count} dari ponsel · {size}",
   "cleanup.done_ios": "Ruang sudah dikosongkan. Item yang dihapus tetap ada di “Baru Dihapus” selama 30 hari.",
   "cleanup.done": "Ruang sudah dikosongkan.",
-  "cleanup.cancelled": "Tidak ada yang dihapus."
+  "cleanup.cancelled": "Tidak ada yang dihapus.",
+  "pair.contacting": "Menghubungi “{name}”…",
+  "pair.waiting": "Klik Izinkan di “{name}”",
+  "pair.same_symbols": "PC menampilkan tiga simbol yang sama.",
+  "connect.tap_hint": "Ketuk PC Anda, lalu klik Izinkan di PC.",
+  "connect.tap_to_connect": "Ketuk untuk terhubung",
+  "connect.offline": "Tidak di Wi-Fi ini sekarang",
+  "connect.other_ways": "Cara lain untuk terhubung",
+  "err.pair_denied": "PC menolak koneksi.",
+  "err.pair_expired": "Tidak ada yang merespons di PC. Coba lagi."
 }

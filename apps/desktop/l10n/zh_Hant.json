@@ -90,5 +90,21 @@
   "exit.body": "結束後，手機就無法傳送到這台電腦，直到再次開啟 LocalRoll。",
   "exit.body_busy": "還有 {count} 個檔案正在接收。結束會中斷傳輸，之後手機可以接著傳。",
   "exit.stay": "繼續使用",
-  "exit.quit": "結束"
+  "exit.quit": "結束",
+  "pair.ask": "「{name}」想連線這台電腦",
+  "pair.check": "確認手機上顯示的是同樣的三個圖案，然後允許。",
+  "pair.allow": "允許",
+  "pair.deny": "拒絕",
+  "identity.title": "這台電腦",
+  "identity.preview_hint": "手機上看到的就是這個樣子。",
+  "identity.name": "名稱",
+  "identity.use_pc_name": "使用電腦原名（{name}）",
+  "identity.random_name": "隨機命名",
+  "identity.look": "圖示和顏色",
+  "identity.random_look": "隨機外觀",
+  "identity.use_picture": "使用我自己的圖片",
+  "identity.remove_picture": "移除圖片",
+  "identity.picture_error": "無法開啟這張圖片，請改用 JPG 或 PNG。",
+  "identity.edit": "修改",
+  "receive.tap_hint": "在手機上開啟 LocalRoll，點「{name}」，然後在這裡點「允許」。"
 }

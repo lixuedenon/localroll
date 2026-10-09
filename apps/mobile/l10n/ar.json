@@ -82,5 +82,14 @@
   "cleanup.delete": "حذف {count} من الهاتف · {size}",
   "cleanup.done_ios": "تم تحرير المساحة. تبقى العناصر المحذوفة في «المحذوفة مؤخرًا» لمدة 30 يومًا.",
   "cleanup.done": "تم تحرير المساحة.",
-  "cleanup.cancelled": "لم يتم حذف أي شيء."
+  "cleanup.cancelled": "لم يتم حذف أي شيء.",
+  "pair.contacting": "جارٍ الاتصال بـ «{name}»…",
+  "pair.waiting": "انقر «سماح» على «{name}»",
+  "pair.same_symbols": "يعرض الكمبيوتر الرموز الثلاثة نفسها.",
+  "connect.tap_hint": "اضغط على الكمبيوتر، ثم انقر «سماح» عليه.",
+  "connect.tap_to_connect": "اضغط للاتصال",
+  "connect.offline": "ليس على شبكة Wi-Fi هذه الآن",
+  "connect.other_ways": "طرق أخرى للاتصال",
+  "err.pair_denied": "رفض الكمبيوتر الاتصال.",
+  "err.pair_expired": "لم يرد أحد على الكمبيوتر. حاول مرة أخرى."
 }

@@ -16,6 +16,9 @@ class PairedDesktop {
     required this.port,
     required this.token,
     this.lastHost,
+    this.icon,
+    this.color,
+    this.avatar = 0,
   });
 
   final String id;
@@ -27,6 +30,18 @@ class PairedDesktop {
   /// Address that worked last time; tried first.
   String? lastHost;
 
+  /// The PC's look (refreshed from /info whenever we connect).
+  String? icon;
+  int? color;
+  int avatar;
+
+  /// URL of the PC's own picture, or null.
+  String? get avatarUrl {
+    final h = lastHost ?? (hosts.isEmpty ? null : hosts.first);
+    if (avatar == 0 || h == null) return null;
+    return 'http://$h:$port${LrProtocol.pathAvatar}?v=$avatar';
+  }
+
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
@@ -34,6 +49,9 @@ class PairedDesktop {
         'port': port,
         'token': token,
         'lastHost': lastHost,
+        if (icon != null) 'icon': icon,
+        if (color != null) 'color': color,
+        'avatar': avatar,
       };
 
   factory PairedDesktop.fromJson(Map<String, dynamic> j) => PairedDesktop(
@@ -43,6 +61,9 @@ class PairedDesktop {
         port: (j['port'] as num?)?.toInt() ?? LrProtocol.defaultPort,
         token: j['token'] as String,
         lastHost: j['lastHost'] as String?,
+        icon: j['icon'] as String?,
+        color: (j['color'] as num?)?.toInt(),
+        avatar: (j['avatar'] as num?)?.toInt() ?? 0,
       );
 }
 
@@ -126,6 +147,18 @@ class MobileSettings extends ChangeNotifier {
 
   Future<void> setLanguage(String? code) async {
     language = code;
+    await _save();
+    notifyListeners();
+  }
+
+  /// The PC was renamed or changed its icon/picture.
+  Future<void> updateLook(PairedDesktop d, DeviceInfo info) async {
+    if (d.name == info.name && d.icon == info.icon && d.color == info.color && d.avatar == info.avatar) return;
+    d
+      ..name = info.name
+      ..icon = info.icon
+      ..color = info.color
+      ..avatar = info.avatar;
     await _save();
     notifyListeners();
   }

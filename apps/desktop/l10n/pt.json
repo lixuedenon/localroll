@@ -90,5 +90,21 @@
   "exit.body": "Os celulares não poderão enviar para este PC até você abrir o LocalRoll de novo.",
   "exit.body_busy": "Ainda há {count} arquivo(s) sendo recebidos. Sair interrompe; o celular pode continuar depois.",
   "exit.stay": "Manter aberto",
-  "exit.quit": "Sair"
+  "exit.quit": "Sair",
+  "pair.ask": "“{name}” quer se conectar",
+  "pair.check": "Confira se o celular mostra os mesmos três símbolos e permita.",
+  "pair.allow": "Permitir",
+  "pair.deny": "Recusar",
+  "identity.title": "Este PC",
+  "identity.preview_hint": "É assim que os celulares veem este PC.",
+  "identity.name": "Nome",
+  "identity.use_pc_name": "Usar o nome do computador ({name})",
+  "identity.random_name": "Nome aleatório",
+  "identity.look": "Ícone e cor",
+  "identity.random_look": "Visual aleatório",
+  "identity.use_picture": "Usar minha própria imagem",
+  "identity.remove_picture": "Remover imagem",
+  "identity.picture_error": "Não foi possível abrir esta imagem. Tente um JPG ou PNG.",
+  "identity.edit": "Alterar",
+  "receive.tap_hint": "No celular, abra o LocalRoll e toque em “{name}”; depois clique em Permitir aqui."
 }

@@ -90,5 +90,21 @@
   "exit.body": "I telefoni non potranno inviare a questo PC finché non riapri LocalRoll.",
   "exit.body_busy": "Sono ancora in ricezione {count} file. Uscendo si interrompono; il telefono potrà riprendere dopo.",
   "exit.stay": "Tieni aperto",
-  "exit.quit": "Esci"
+  "exit.quit": "Esci",
+  "pair.ask": "«{name}» vuole connettersi",
+  "pair.check": "Controlla che il telefono mostri gli stessi tre simboli, poi consenti.",
+  "pair.allow": "Consenti",
+  "pair.deny": "Rifiuta",
+  "identity.title": "Questo PC",
+  "identity.preview_hint": "Così i telefoni vedono questo PC.",
+  "identity.name": "Nome",
+  "identity.use_pc_name": "Usa il nome del computer ({name})",
+  "identity.random_name": "Nome casuale",
+  "identity.look": "Icona e colore",
+  "identity.random_look": "Aspetto casuale",
+  "identity.use_picture": "Usa una mia immagine",
+  "identity.remove_picture": "Rimuovi immagine",
+  "identity.picture_error": "Impossibile aprire l’immagine. Prova un JPG o PNG.",
+  "identity.edit": "Modifica",
+  "receive.tap_hint": "Sul telefono apri LocalRoll e tocca «{name}», poi fai clic su Consenti qui."
 }

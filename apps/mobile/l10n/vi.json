@@ -82,5 +82,14 @@
   "cleanup.delete": "Xóa {count} khỏi điện thoại · {size}",
   "cleanup.done_ios": "Đã giải phóng dung lượng. Mục đã xóa nằm trong “Đã xóa gần đây” 30 ngày.",
   "cleanup.done": "Đã giải phóng dung lượng.",
-  "cleanup.cancelled": "Không có gì bị xóa."
+  "cleanup.cancelled": "Không có gì bị xóa.",
+  "pair.contacting": "Đang liên hệ “{name}”…",
+  "pair.waiting": "Bấm Cho phép trên “{name}”",
+  "pair.same_symbols": "Máy tính hiện đúng ba ký hiệu giống vậy.",
+  "connect.tap_hint": "Chạm vào máy tính của bạn, rồi bấm Cho phép trên máy.",
+  "connect.tap_to_connect": "Chạm để kết nối",
+  "connect.offline": "Hiện không ở Wi-Fi này",
+  "connect.other_ways": "Cách kết nối khác",
+  "err.pair_denied": "Máy tính đã từ chối kết nối.",
+  "err.pair_expired": "Không ai trả lời trên máy tính. Hãy thử lại."
 }

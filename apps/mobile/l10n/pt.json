@@ -82,5 +82,14 @@
   "cleanup.delete": "Apagar {count} do celular · {size}",
   "cleanup.done_ios": "Espaço liberado. Os itens apagados ficam em “Apagados” por 30 dias.",
   "cleanup.done": "Espaço liberado.",
-  "cleanup.cancelled": "Nada foi apagado."
+  "cleanup.cancelled": "Nada foi apagado.",
+  "pair.contacting": "Contatando “{name}”…",
+  "pair.waiting": "Clique em Permitir em “{name}”",
+  "pair.same_symbols": "O PC mostra os mesmos três símbolos.",
+  "connect.tap_hint": "Toque no seu PC e clique em Permitir nele.",
+  "connect.tap_to_connect": "Toque para conectar",
+  "connect.offline": "Não está nesta Wi-Fi agora",
+  "connect.other_ways": "Outras formas de conectar",
+  "err.pair_denied": "O PC recusou a conexão.",
+  "err.pair_expired": "Ninguém respondeu no PC. Tente de novo."
 }

@@ -90,5 +90,21 @@
   "exit.body": "Les téléphones ne pourront plus envoyer vers ce PC tant que LocalRoll ne sera pas rouvert.",
   "exit.body_busy": "{count} fichier(s) encore en cours de réception. Quitter les interrompt ; le téléphone pourra reprendre plus tard.",
   "exit.stay": "Rester ouvert",
-  "exit.quit": "Quitter"
+  "exit.quit": "Quitter",
+  "pair.ask": "« {name} » veut se connecter",
+  "pair.check": "Vérifiez que votre téléphone affiche les trois mêmes symboles, puis autorisez.",
+  "pair.allow": "Autoriser",
+  "pair.deny": "Refuser",
+  "identity.title": "Ce PC",
+  "identity.preview_hint": "Voici comment les téléphones voient ce PC.",
+  "identity.name": "Nom",
+  "identity.use_pc_name": "Utiliser le nom de l’ordinateur ({name})",
+  "identity.random_name": "Nom aléatoire",
+  "identity.look": "Icône et couleur",
+  "identity.random_look": "Apparence aléatoire",
+  "identity.use_picture": "Utiliser ma propre image",
+  "identity.remove_picture": "Retirer l’image",
+  "identity.picture_error": "Impossible d’ouvrir cette image. Essayez un JPG ou un PNG.",
+  "identity.edit": "Modifier",
+  "receive.tap_hint": "Sur le téléphone, ouvrez LocalRoll et touchez « {name} », puis cliquez sur Autoriser ici."
 }

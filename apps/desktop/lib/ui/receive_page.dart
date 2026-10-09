@@ -9,6 +9,8 @@ import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/network.dart';
 import '../services/receive_hub.dart';
+import 'app_nav.dart';
+import 'device_badge.dart';
 import 'format.dart';
 
 /// Pairing QR/PIN plus live progress of incoming files.
@@ -25,6 +27,42 @@ class ReceivePage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
+          // Who this PC is, as phones see it: the easiest way to connect.
+          ListenableBuilder(
+            listenable: s.settings,
+            builder: (context, _) => Card(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Row(
+                  children: [
+                    DeviceBadge(
+                      icon: s.settings.iconKey,
+                      color: s.settings.colorValue,
+                      image: s.settings.avatarVersion != 0 ? FileImage(s.settings.avatarFile) : null,
+                      size: 64,
+                    ),
+                    const SizedBox(width: 20),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(s.settings.deviceName, style: Theme.of(context).textTheme.headlineSmall),
+                          const SizedBox(height: 6),
+                          Text(tr('receive.tap_hint', {'name': s.settings.deviceName})),
+                        ],
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: () => AppNav.instance.selectTab(3),
+                      icon: const Icon(Icons.edit_rounded, size: 18),
+                      label: Text(tr('identity.edit')),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
           ListenableBuilder(
             listenable: Listenable.merge([s.server, s.server.pin, s.addresses]),
             builder: (context, _) => _PairingCard(services: s),

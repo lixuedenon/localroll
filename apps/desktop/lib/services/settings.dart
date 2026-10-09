@@ -56,6 +56,17 @@ class AppSettings extends ChangeNotifier {
 
   /// UI language code (see supportedLanguages); null = follow Windows.
   String? language;
+
+  /// How this PC looks on phones: icon key (DeviceLook.icons), colour, and
+  /// custom picture version (0 = none, file: avatar.png next to settings).
+  late String iconKey;
+  late int colorValue;
+  int avatarVersion = 0;
+
+  File get avatarFile => File('${_file.parent.path}${Platform.pathSeparator}avatar.png');
+
+  /// Windows computer name — the "keep the original name" choice.
+  static String get originalName => _defaultDeviceName();
   final Map<String, TrustedDevice> trusted = {};
 
   static Future<AppSettings> load() async {
@@ -76,6 +87,11 @@ class AppSettings extends ChangeNotifier {
     s.port = (j['port'] as num?)?.toInt() ?? LrProtocol.defaultPort;
     s.ffmpegPath = j['ffmpegPath'] as String?;
     s.language = j['language'] as String?;
+    // First run: pick a look at random (changeable in Settings).
+    s.iconKey = j['iconKey'] as String? ?? DeviceLook.randomIcon();
+    s.colorValue = (j['colorValue'] as num?)?.toInt() ?? DeviceLook.randomColor();
+    s.avatarVersion = (j['avatarVersion'] as num?)?.toInt() ?? 0;
+    if (s.avatarVersion != 0 && !await s.avatarFile.exists()) s.avatarVersion = 0;
     for (final t in (j['trusted'] as List? ?? const [])) {
       final d = TrustedDevice.fromJson(t as Map<String, dynamic>);
       s.trusted[d.id] = d;
@@ -88,6 +104,9 @@ class AppSettings extends ChangeNotifier {
         id: deviceId,
         name: deviceName,
         platform: Platform.operatingSystem,
+        icon: iconKey,
+        color: colorValue,
+        avatar: avatarVersion,
         protocolVersion: LrProtocol.version,
       );
 
@@ -100,6 +119,9 @@ class AppSettings extends ChangeNotifier {
       'port': port,
       'ffmpegPath': ffmpegPath,
       'language': language,
+      'iconKey': iconKey,
+      'colorValue': colorValue,
+      'avatarVersion': avatarVersion,
       'trusted': trusted.values.map((t) => t.toJson()).toList(),
     }));
     await tmp.rename(_file.path);
