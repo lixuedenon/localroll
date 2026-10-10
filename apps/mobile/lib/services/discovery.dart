@@ -20,11 +20,86 @@ class FoundDesktop {
   final int port;
 }
 
-/// Watches the LAN for LocalRoll PCs (Bonjour/mDNS).
+/// Finds LocalRoll PCs on the LAN: Bonjour/mDNS first, plus a direct scan
+/// of the local network as a fallback (some routers and Wi-Fi setups drop
+/// mDNS, so a PC can "disappear" even though it is running).
 class DesktopDiscovery extends ChangeNotifier {
   nsd.Discovery? _discovery;
   List<FoundDesktop> found = const [];
   String? error;
+
+  List<FoundDesktop> _mdns = const [];
+  final Map<String, FoundDesktop> _scanned = {};
+  bool scanning = false;
+
+  void _merge() {
+    found = [
+      ..._mdns,
+      for (final f in _scanned.values)
+        if (!_mdns.any((m) => m.id == f.id)) f,
+    ];
+    notifyListeners();
+  }
+
+  /// Asks every address of this phone's /24 network on the usual LocalRoll
+  /// ports. Takes a few seconds; results are merged into [found].
+  Future<void> scanSubnet({Iterable<int> extraPorts = const []}) async {
+    if (scanning) return;
+    scanning = true;
+    notifyListeners();
+    try {
+      final ports = <int>{LrProtocol.defaultPort, 41530, 31530, 21530, 8530, ...extraPorts};
+      final prefixes = <String>{};
+      for (final ni in await NetworkInterface.list(type: InternetAddressType.IPv4)) {
+        for (final a in ni.addresses) {
+          final ip = a.address;
+          if (a.isLoopback || ip.startsWith('169.254.')) continue;
+          prefixes.add(ip.substring(0, ip.lastIndexOf('.')));
+        }
+      }
+      final targets = <(String, int)>[
+        for (final pre in prefixes)
+          for (var i = 1; i < 255; i++)
+            for (final p in ports) ('$pre.$i', p),
+      ];
+      // Probe in parallel batches; a closed port answers (or times out) fast.
+      const batch = 64;
+      for (var i = 0; i < targets.length; i += batch) {
+        await Future.wait([
+          for (final (host, port) in targets.sublist(i, (i + batch).clamp(0, targets.length))) _probe(host, port),
+        ]);
+      }
+    } catch (_) {
+      // No network interface info: nothing to scan.
+    } finally {
+      scanning = false;
+      _merge();
+    }
+  }
+
+  Future<void> _probe(String host, int port) async {
+    try {
+      final sock = await Socket.connect(host, port, timeout: const Duration(milliseconds: 400));
+      sock.destroy();
+    } catch (_) {
+      return;
+    }
+    final c = DesktopClient(host: host, port: port);
+    try {
+      final info = await c.info(timeout: const Duration(seconds: 2));
+      final prev = _scanned[info.id];
+      _scanned[info.id] = FoundDesktop(
+        id: info.id,
+        name: info.name,
+        hosts: {...?prev?.hosts, host}.toList(),
+        port: port,
+      );
+      _merge();
+    } catch (_) {
+    } finally {
+      c.close();
+    }
+  }
 
   Future<void> start() async {
     if (_discovery != null) return;
@@ -51,7 +126,7 @@ class DesktopDiscovery extends ChangeNotifier {
 
   void _update() {
     final services = _discovery?.services ?? const <nsd.Service>[];
-    found = [
+    _mdns = [
       for (final s in services)
         FoundDesktop(
           id: _txt(s, 'id') ?? s.name ?? '',
@@ -63,7 +138,7 @@ class DesktopDiscovery extends ChangeNotifier {
           port: s.port ?? LrProtocol.defaultPort,
         ),
     ];
-    notifyListeners();
+    _merge();
   }
 
   static String? _txt(nsd.Service s, String key) {

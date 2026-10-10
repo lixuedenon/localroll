@@ -36,6 +36,10 @@ class _ConnectPageState extends State<ConnectPage> {
     super.initState();
     // Show paired PCs with their current name and picture.
     refreshPairedLooks(widget.settings, widget.discovery.found);
+    // mDNS can miss PCs: also scan the local network directly.
+    widget.discovery
+        .scanSubnet(extraPorts: widget.settings.desktops.map((d) => d.port))
+        .then((_) => refreshPairedLooks(widget.settings, widget.discovery.found));
     _searchTimer = Timer(const Duration(seconds: 8), () {
       if (mounted) setState(() => _searchedLong = true);
     });
@@ -224,7 +228,7 @@ class _ConnectPageState extends State<ConnectPage> {
                       if (found.isNotEmpty)
                         // Every PC on this Wi-Fi is already paired — nothing to do here.
                         const Icon(Icons.check_circle_rounded, color: LrColors.verified)
-                      else if (!_searchedLong && widget.discovery.error == null)
+                      else if ((!_searchedLong || widget.discovery.scanning) && widget.discovery.error == null)
                         const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2))
                       else
                         const Icon(Icons.wifi_find_rounded, color: LrColors.muted),
@@ -234,7 +238,7 @@ class _ConnectPageState extends State<ConnectPage> {
                             ? tr('connect.discovery_unavailable', {'error': widget.discovery.error})
                             : found.isNotEmpty
                                 ? tr('connect.all_paired')
-                                : _searchedLong
+                                : _searchedLong && !widget.discovery.scanning
                                     ? tr('connect.none_found')
                                     : tr('connect.searching')),
                       ),
