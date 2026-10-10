@@ -100,7 +100,7 @@ class _CleanupPageState extends State<CleanupPage> {
           final ok = photo != null && photo.ok && (!a.isLivePhoto || (video != null && video.ok));
           if (ok) {
             _safe.add(a);
-            _sizes[a.id] = photo!.size + (video?.size ?? 0);
+            _sizes[a.id] = photo.size + (video?.size ?? 0);
             _selected.add(a.id);
           } else {
             _lost.add(a);
