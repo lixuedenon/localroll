@@ -108,12 +108,64 @@ class _TransferPageState extends State<TransferPage> {
         ? tr('transfer.summary', {'done': up.doneCount, 'skipped': up.skippedCount}) +
             (up.failedCount > 0 ? tr('transfer.summary_failed', {'failed': up.failedCount}) : '')
         : tr('transfer.sending');
+    final total = up.items.length;
+    final processed = up.processedCount;
+    final left = up.timeLeft;
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(16),
-          child: Text(summary, style: theme.textTheme.titleSmall),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(summary, style: theme.textTheme.titleSmall),
+              if (total > 1) ...[
+                const SizedBox(height: 10),
+                LinearProgressIndicator(
+                  value: total == 0 ? null : processed / total,
+                  minHeight: 6,
+                  borderRadius: BorderRadius.circular(3),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  [
+                    tr('transfer.count', {'done': processed, 'total': total}),
+                    if (!up.finished && up.speed > 0) '${formatSize(up.speed.round())}/s',
+                    if (left != null) tr('transfer.time_left', {'time': _formatDuration(left)}),
+                  ].join(' · '),
+                  style: theme.textTheme.bodySmall,
+                ),
+              ],
+            ],
+          ),
         ),
+        // Big batches take hours: say how to keep it going.
+        if (!up.finished && total >= 200)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Row(children: [
+              Icon(Icons.power_rounded, size: 18, color: theme.colorScheme.primary),
+              const SizedBox(width: 8),
+              Expanded(child: Text(tr('transfer.long_tip'), style: theme.textTheme.bodySmall)),
+            ]),
+          ),
+        if (up.finished && up.noSpaceCount > 0)
+          Container(
+            margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(children: [
+              Icon(Icons.sd_storage_rounded, color: theme.colorScheme.error),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(tr('transfer.no_space_summary', {'count': up.noSpaceCount}),
+                    style: theme.textTheme.bodySmall),
+              ),
+            ]),
+          ),
         if (!up.finished && up.backgroundMode != BackgroundMode.none)
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -180,6 +232,13 @@ class _TransferPageState extends State<TransferPage> {
       ],
     );
   }
+}
+
+/// "2 h 05 min" / "12 min" / "< 1 min".
+String _formatDuration(Duration d) {
+  if (d.inMinutes < 1) return tr('transfer.under_minute');
+  if (d.inHours < 1) return tr('transfer.minutes', {'m': d.inMinutes});
+  return tr('transfer.hours', {'h': d.inHours, 'm': (d.inMinutes % 60).toString().padLeft(2, '0')});
 }
 
 class _ItemTile extends StatelessWidget {

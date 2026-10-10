@@ -1,10 +1,12 @@
 // apps/mobile/lib/services/mobile_settings.dart
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:localroll_core/localroll_core.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// A PC this phone has paired with.
@@ -90,7 +92,12 @@ class MobileSettings extends ChangeNotifier {
   /// PC by themselves whenever it is reachable.
   bool autoSend = false;
   int autoSendSinceMs = 0;
+  /// Asset ids already on each PC. Kept in one small file per PC with one id
+  /// per line, appended as items arrive — fast even for 50 000 photos
+  /// (re-writing a big preferences list after every photo was not).
   final Map<String, Set<String>> _sent = {};
+  late Directory _sentDir;
+  Timer? _notifyTimer;
 
   /// Family group: whose phone this is ("Mum"). Phones with the same name
   /// are one family member on the PC ("Mum 1", "Mum 2").
@@ -121,6 +128,11 @@ class MobileSettings extends ChangeNotifier {
           s.desktops.add(PairedDesktop.fromJson(e as Map<String, dynamic>));
         }
       } catch (_) {}
+    }
+    s._sentDir = Directory('${(await getApplicationSupportDirectory()).path}${Platform.pathSeparator}sent');
+    await s._sentDir.create(recursive: true);
+    for (final d in s.desktops) {
+      await s._loadSent(d.id);
     }
     s.currentDesktopId = prefs.getString('currentDesktopId');
     if (s.current == null && s.desktops.isNotEmpty) s.currentDesktopId = s.desktops.first.id;
@@ -167,8 +179,10 @@ class MobileSettings extends ChangeNotifier {
   Future<void> removeDesktop(String id) async {
     desktops.removeWhere((x) => x.id == id);
     if (currentDesktopId == id) currentDesktopId = desktops.isEmpty ? null : desktops.first.id;
-    await _prefs.remove('sent_$id');
     _sent.remove(id);
+    try {
+      await _sentFile(id).delete();
+    } catch (_) {}
     await _save();
     notifyListeners();
   }
@@ -256,23 +270,60 @@ class MobileSettings extends ChangeNotifier {
     final before = set.length;
     set.removeAll(assetIds);
     if (set.length != before) {
-      await _prefs.setStringList('sent_$desktopId', set.toList());
+      await _rewriteSent(desktopId);
       notifyListeners();
     }
   }
 
   /// Asset ids already delivered to [desktopId] (shown with a ✓ badge).
-  Set<String> sentTo(String desktopId) =>
-      _sent.putIfAbsent(desktopId, () => (_prefs.getStringList('sent_$desktopId') ?? const []).toSet());
+  Set<String> sentTo(String desktopId) => _sent.putIfAbsent(desktopId, () => <String>{});
 
   Future<void> markSent(String desktopId, String assetId) async {
     final lost = lostOn(desktopId);
     if (lost.remove(assetId)) await _prefs.setStringList('lost_$desktopId', lost.toList());
     final set = sentTo(desktopId);
     if (set.add(assetId)) {
-      await _prefs.setStringList('sent_$desktopId', set.toList());
-      notifyListeners();
+      try {
+        await _sentFile(desktopId).writeAsString('$assetId\n', mode: FileMode.append, flush: true);
+      } catch (_) {}
+      // Many photos per second during a big backup: redraw at most ~3×/s.
+      _notifyTimer ??= Timer(const Duration(milliseconds: 300), () {
+        _notifyTimer = null;
+        notifyListeners();
+      });
     }
+  }
+
+  File _sentFile(String desktopId) =>
+      File('${_sentDir.path}${Platform.pathSeparator}${base64Url.encode(utf8.encode(desktopId))}.txt');
+
+  Future<void> _loadSent(String desktopId) async {
+    final set = sentTo(desktopId);
+    final f = _sentFile(desktopId);
+    try {
+      if (await f.exists()) {
+        for (final line in await f.readAsLines()) {
+          if (line.isNotEmpty) set.add(line);
+        }
+      }
+    } catch (_) {}
+    // Older versions kept the list in preferences: move it over once.
+    final legacy = _prefs.getStringList('sent_$desktopId');
+    if (legacy != null) {
+      set.addAll(legacy);
+      await _rewriteSent(desktopId);
+      await _prefs.remove('sent_$desktopId');
+    }
+  }
+
+  /// Whole-file rewrite (removals are rare): write a temp file, then swap.
+  Future<void> _rewriteSent(String desktopId) async {
+    final f = _sentFile(desktopId);
+    final tmp = File('${f.path}.tmp');
+    try {
+      await tmp.writeAsString(sentTo(desktopId).map((id) => '$id\n').join(), flush: true);
+      await tmp.rename(f.path);
+    } catch (_) {}
   }
 
   Future<void> _save() async {

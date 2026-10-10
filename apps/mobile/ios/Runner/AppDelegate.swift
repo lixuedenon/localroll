@@ -32,6 +32,35 @@ import UIKit
   }
 }
 
+/// Free space and original sizes, so a nearly full iPhone can still back up
+/// everything: photo_manager exports each original to a temporary copy, and
+/// that copy needs room.
+enum StorageInfo {
+  /// Bytes available for "important" writes (what iOS really lets us use).
+  static func freeBytes() -> Int64 {
+    let url = URL(fileURLWithPath: NSTemporaryDirectory())
+    if let v = try? url.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey]),
+       let cap = v.volumeAvailableCapacityForImportantUsage {
+      return cap
+    }
+    return -1
+  }
+
+  /// Size of the original (or, with [live], of the Live Photo's video);
+  /// -1 if unknown. Includes originals that are only in iCloud.
+  static func originalSize(id: String, live: Bool) -> Int64 {
+    guard let asset = PHAsset.fetchAssets(withLocalIdentifiers: [id], options: nil).firstObject else { return -1 }
+    let wanted: Set<PHAssetResourceType> = live
+      ? [.pairedVideo, .fullSizePairedVideo]
+      : [.photo, .video, .fullSizePhoto, .fullSizeVideo]
+    var best: Int64 = -1
+    for r in PHAssetResource.assetResources(for: asset) where wanted.contains(r.type) {
+      if let n = r.value(forKey: "fileSize") as? Int64, n > best { best = n }
+    }
+    return best
+  }
+}
+
 /// Keeps uploads running when the app leaves the foreground.
 /// iOS 26+: a user-initiated BGContinuedProcessingTask (system progress UI,
 /// no time limit while progress is reported). Older iOS: the usual ~30 s
@@ -65,6 +94,10 @@ enum BackgroundTransfer {
         }
         endShortTask()
         result(nil)
+      case "freeSpace":
+        result(StorageInfo.freeBytes())
+      case "assetSize":
+        result(StorageInfo.originalSize(id: args["id"] as? String ?? "", live: args["live"] as? Bool ?? false))
       default:
         result(FlutterMethodNotImplemented)
       }

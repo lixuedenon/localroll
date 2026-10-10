@@ -4,6 +4,7 @@ package io.github.lixuedenon.localroll_mobile
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.StatFs
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -32,6 +33,10 @@ class MainActivity : FlutterActivity() {
                         TransferService.stop(this)
                         result.success(null)
                     }
+                    // Android reads originals in place (no temporary copy), but
+                    // report free space anyway so the app can warn early.
+                    "freeSpace" -> result.success(StatFs(filesDir.path).availableBytes)
+                    "assetSize" -> result.success(-1L)
                     else -> result.notImplemented()
                 }
             }

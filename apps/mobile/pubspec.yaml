@@ -31,6 +31,8 @@ dependencies:
   # Keep the screen on during long transfers.
   wakelock_plus: '>=1.2.0 <2.0.0'
   shared_preferences: ^2.2.0
+  # App-support folder for the per-PC "already sent" lists.
+  path_provider: ^2.1.0
 
 dev_dependencies:
   flutter_test:

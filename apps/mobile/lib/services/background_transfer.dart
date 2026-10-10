@@ -69,6 +69,25 @@ class BackgroundTransfer {
     } catch (_) {}
   }
 
+  /// Free bytes on the phone (-1 if unknown).
+  static Future<int> freeSpace() async {
+    try {
+      return await _channel.invokeMethod<int>('freeSpace') ?? -1;
+    } catch (_) {
+      return -1;
+    }
+  }
+
+  /// Size of an asset's original (iOS; -1 if unknown). [live]: the Live
+  /// Photo's video instead.
+  static Future<int> originalSize(String assetId, {bool live = false}) async {
+    try {
+      return await _channel.invokeMethod<int>('assetSize', {'id': assetId, 'live': live}) ?? -1;
+    } catch (_) {
+      return -1;
+    }
+  }
+
   static Future<void> stop({bool success = true}) async {
     try {
       await _channel.invokeMethod<void>('stop', {'success': success});

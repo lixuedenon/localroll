@@ -11,6 +11,7 @@ import '../l10n/l10n.dart';
 import 'background_transfer.dart';
 import 'desktop_client.dart';
 import 'mobile_settings.dart';
+import '../ui/cleanup_page.dart' show formatSize;
 
 enum UploadState { waiting, preparing, uploading, verifying, done, skipped, failed }
 
@@ -23,6 +24,9 @@ class UploadItem {
   int sent = 0;
   int total = 0;
   String? error;
+
+  /// Not sent because the phone had no room for the temporary copy.
+  bool noSpace = false;
 
   double? get fraction => total > 0 ? (sent / total).clamp(0.0, 1.0) : null;
 }
@@ -58,12 +62,37 @@ class Uploader extends ChangeNotifier {
   int get doneCount => items.where((i) => i.state == UploadState.done).length;
   int get skippedCount => items.where((i) => i.state == UploadState.skipped).length;
   int get failedCount => items.where((i) => i.state == UploadState.failed).length;
+  int get noSpaceCount => items.where((i) => i.noSpace).length;
+
+  /// Finished one way or another (for the overall progress and time left).
+  int get processedCount => doneCount + skippedCount + failedCount;
+
+  DateTime? _startedAt;
+  int _bytesSent = 0;
+
+  /// Bytes per second over this run (0 until something was sent).
+  double get speed {
+    final t = _startedAt;
+    if (t == null) return 0;
+    final secs = DateTime.now().difference(t).inMilliseconds / 1000;
+    return secs < 1 ? 0 : _bytesSent / secs;
+  }
+
+  /// Rough time left, from the average time per item so far.
+  Duration? get timeLeft {
+    final t = _startedAt;
+    final n = processedCount;
+    if (t == null || n < 3 || finished) return null;
+    final per = DateTime.now().difference(t).inMilliseconds / n;
+    return Duration(milliseconds: (per * (items.length - n)).round());
+  }
 
   void cancel() => _cancelled = true;
 
   Future<void> run() async {
     if (running) return;
     running = true;
+    _startedAt = DateTime.now();
     notifyListeners();
     try {
       await WakelockPlus.enable();
@@ -143,6 +172,11 @@ class Uploader extends ChangeNotifier {
       }
       await settings.markSent(desktop.id, a.id);
       if (!sentPhoto && it.state != UploadState.done) it.state = UploadState.skipped;
+    } on _NoSpace catch (e) {
+      it
+        ..state = UploadState.failed
+        ..noSpace = true
+        ..error = e.bytes > 0 ? tr('err.phone_space_size', {'size': formatSize(e.bytes)}) : tr('err.phone_space');
     } catch (e) {
       it.state = UploadState.failed;
       it.error = e is LrHttpException ? e.message : e.toString().replaceFirst('Exception: ', '');
@@ -163,11 +197,56 @@ class Uploader extends ChangeNotifier {
     final result = session.results[offer.id] ?? const OfferResult(status: OfferStatus.ready);
     if (result.status == OfferStatus.duplicate) return false;
 
-    final file = await open();
-    if (file == null) throw Exception(tr('err.no_original'));
-    it.total = await file.length();
-    await _upload(session.sessionId, offer, file, result.offset, it);
+    // iOS first exports the original to a temporary copy, which needs free
+    // space. On a nearly full phone check before trying, so one big video
+    // is skipped (and named at the end) instead of failing the whole batch.
+    if (Platform.isIOS) {
+      final live = isLiveCompanion(offer.assetId);
+      final need = await BackgroundTransfer.originalSize(livePhotoIdOf(offer.assetId), live: live);
+      final free = await BackgroundTransfer.freeSpace();
+      if (need > 0 && free >= 0 && free < need + _spareBytes) throw _NoSpace(need);
+    }
+
+    File? file;
+    try {
+      file = await open();
+    } catch (e) {
+      if (await _phoneIsFull()) throw const _NoSpace(-1);
+      rethrow;
+    }
+    if (file == null) {
+      if (await _phoneIsFull()) throw const _NoSpace(-1);
+      throw Exception(tr('err.no_original'));
+    }
+    try {
+      it.total = await file.length();
+      await _upload(session.sessionId, offer, file, result.offset, it);
+    } finally {
+      // Free the temporary copy right away: a 5 000-photo backup must never
+      // need 5 000 copies' worth of space at once.
+      await _discardTemporaryCopy(file);
+    }
     return true;
+  }
+
+  /// Keep this much free beyond the file itself, for iOS and other apps.
+  static const int _spareBytes = 300 * 1024 * 1024;
+
+  static Future<bool> _phoneIsFull() async {
+    final free = await BackgroundTransfer.freeSpace();
+    return free >= 0 && free < _spareBytes;
+  }
+
+  /// Deletes [file] only if it is a temporary export inside this app's own
+  /// temp folder (iOS). Android hands us the real file in the gallery — that
+  /// is never touched.
+  static Future<void> _discardTemporaryCopy(File file) async {
+    if (!Platform.isIOS) return;
+    try {
+      final tmp = Directory.systemTemp.resolveSymbolicLinksSync();
+      final path = file.resolveSymbolicLinksSync();
+      if (path.startsWith('$tmp${Platform.pathSeparator}')) await file.delete();
+    } catch (_) {}
   }
 
   Future<void> _upload(String sessionId, FileOffer offer, File file, int startOffset, UploadItem it) async {
@@ -191,6 +270,7 @@ class Uploader extends ChangeNotifier {
           if (newOffset == offset + chunk.length) {
             hasher.add(chunk);
             offset = newOffset;
+            _bytesSent += chunk.length;
           } else {
             offset = newOffset;
             hasher = await _hashPrefix(raf, offset);
@@ -253,4 +333,12 @@ class Uploader extends ChangeNotifier {
     }
     return h;
   }
+}
+
+/// The phone has no room for the temporary copy of this original.
+class _NoSpace implements Exception {
+  const _NoSpace(this.bytes);
+
+  /// Size of the original, or -1 if unknown.
+  final int bytes;
 }
