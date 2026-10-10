@@ -77,16 +77,17 @@ Windows 测试包：下载 `LocalRoll-Windows`，解压后运行 `LocalRoll.exe`
 - 翻译文件：`apps/desktop/l10n/<语言>.json`、`apps/mobile/l10n/<语言>.json`（`en.json` 是基准）。
 - 改完翻译后运行 `python scripts/gen_l10n.py` 重新生成 `lib/l10n/translations.g.dart`。
 - CI 会检查每种语言是否缺词、`{占位符}` 是否一致。
-- 加新语言：在 `packages/core/lib/src/i18n.dart` 的 `supportedLanguages` 里加一行，再给两个应用各加一个 JSON 文件。
+- 加新语言：见 `packages/core/l10n/README.md`。
 
-## 当前限制（v0.1）
+## 当前限制
 
-- Live Photo 只传静态 HEIC，还没带上配对的 MOV。
-- 转换后的 JPEG 还没写回 EXIF（拍摄时间已写到文件修改时间）；计划接入 exiftool。
-- 手机端只在前台传输（会保持屏幕常亮）；后台传输在计划中。
-- 还没有「传完后清理手机空间」功能。
-- iOS 系统权限弹窗（访问照片、本地网络、相机）的说明文字目前只有英文。
+- 局域网传输还是 HTTP + 配对令牌，没有加密（计划：HTTPS + 配对时核对证书指纹）。
+- 家庭组的"仅自己可见"只在 LocalRoll 里隐藏，电脑文件夹本身不加密（计划：Pro 私密保险箱）。
+- 还不能在外面（不在同一个 Wi-Fi）连回家里的电脑。
+- 翻译说明见 `packages/core/l10n/README.md`。
 
 ## 许可
 
-尚未选择开源许可证。注意：CI 打包的 ffmpeg 是 GPL 版本；如果对外分发包含它的安装包，项目需要使用 GPL 兼容的许可证。
+本项目以 **GNU General Public License v3.0**（GPL-3.0）开源，全文见 [LICENSE](LICENSE)。
+你可以自由使用、修改和分发；分发修改后的版本时，必须同样以 GPL-3.0 公开源代码。
+Windows 版打包的 ffmpeg 也是 GPL 构建，与本许可兼容。
