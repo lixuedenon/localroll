@@ -117,5 +117,10 @@
   "connect.forget": "Olvidar",
   "connect.forget_title": "¿Olvidar «{name}»?",
   "connect.forget_body": "El teléfono elimina el emparejamiento y el PC deja de confiar en este teléfono. Las fotos ya guardadas en ese PC no se tocan. Para volver a usarlo, tócalo y permite.",
-  "connect.forgotten": "Se olvidó {name}"
+  "connect.forgotten": "Se olvidó {name}",
+  "ios.photos": "LocalRoll lee tus fotos y vídeos para enviar los originales a tu ordenador.",
+  "ios.camera": "Escanea el código QR de emparejamiento que muestra tu ordenador.",
+  "ios.local_network": "Busca y conecta con ordenadores que ejecutan LocalRoll en tu red local. Los archivos nunca pasan por la nube.",
+  "bg.channel": "Transferencias",
+  "settings.version": "Versión {version}"
 }

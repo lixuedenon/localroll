@@ -73,6 +73,7 @@ class Uploader extends ChangeNotifier {
       _cancelled = true;
     };
     backgroundMode = await BackgroundTransfer.start(
+      channel: tr('bg.channel'),
       title: tr('bg.title'),
       text: tr('bg.progress', {'done': 1, 'total': items.length, 'name': ''}),
     );

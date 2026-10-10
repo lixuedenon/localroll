@@ -126,5 +126,7 @@
   "receive.blocked_title": "Handys finden diesen PC eventuell noch nicht",
   "receive.blocked_public": "Die Windows-Firewall hat LocalRoll nicht zugelassen, und dieses WLAN ist als „Öffentliches“ Netzwerk eingestellt. Einmal zulassen (Windows fragt nach Bestätigung).",
   "receive.blocked_firewall": "Die Windows-Firewall hat LocalRoll noch nicht zugelassen. Einmal zulassen (Windows fragt nach Bestätigung).",
-  "receive.blocked_fix": "LocalRoll zulassen"
+  "receive.blocked_fix": "LocalRoll zulassen",
+  "identity.images": "Bilder",
+  "settings.version": "Version {version}"
 }

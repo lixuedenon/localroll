@@ -117,5 +117,10 @@
   "connect.forget": "Oublier",
   "connect.forget_title": "Oublier « {name} » ?",
   "connect.forget_body": "Le téléphone supprime l’association et le PC cesse de faire confiance à ce téléphone. Les photos déjà sur ce PC ne sont pas touchées. Pour le réutiliser, touchez-le et autorisez.",
-  "connect.forgotten": "{name} oublié"
+  "connect.forgotten": "{name} oublié",
+  "ios.photos": "LocalRoll lit vos photos et vidéos pour envoyer les originaux à votre ordinateur.",
+  "ios.camera": "Scannez le QR code d’appairage affiché sur votre ordinateur.",
+  "ios.local_network": "Trouve les ordinateurs qui exécutent LocalRoll sur votre réseau local et s’y connecte. Les fichiers ne passent jamais par le cloud.",
+  "bg.channel": "Transferts",
+  "settings.version": "Version {version}"
 }

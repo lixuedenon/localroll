@@ -19,7 +19,7 @@ class MainActivity : FlutterActivity() {
                 when (call.method) {
                     "start" -> {
                         askForNotifications()
-                        TransferService.start(this, title, text)
+                        TransferService.start(this, call.argument<String>("channel") ?: title, title, text)
                         result.success("service")
                     }
                     "update" -> {

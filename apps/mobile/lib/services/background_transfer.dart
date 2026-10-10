@@ -36,10 +36,12 @@ class BackgroundTransfer {
     });
   }
 
-  static Future<BackgroundMode> start({required String title, required String text}) async {
+  /// [channel] is the Android notification-category name shown in system
+  /// settings (translated, like everything the user sees).
+  static Future<BackgroundMode> start({required String channel, required String title, required String text}) async {
     _listen();
     try {
-      final mode = await _channel.invokeMethod<String>('start', {'title': title, 'text': text});
+      final mode = await _channel.invokeMethod<String>('start', {'channel': channel, 'title': title, 'text': text});
       return switch (mode) {
         'service' => BackgroundMode.service,
         'continued' => BackgroundMode.continued,

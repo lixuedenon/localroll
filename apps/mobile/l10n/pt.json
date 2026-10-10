@@ -117,5 +117,10 @@
   "connect.forget": "Esquecer",
   "connect.forget_title": "Esquecer “{name}”?",
   "connect.forget_body": "O celular remove o pareamento e o PC deixa de confiar neste celular. As fotos já salvas nesse PC não são afetadas. Para usar de novo, toque nele e permita.",
-  "connect.forgotten": "{name} esquecido"
+  "connect.forgotten": "{name} esquecido",
+  "ios.photos": "O LocalRoll lê suas fotos e vídeos para enviar os originais ao seu computador.",
+  "ios.camera": "Leia o QR code de pareamento exibido no seu computador.",
+  "ios.local_network": "Encontra e conecta-se a computadores com o LocalRoll na sua rede local. Os arquivos nunca passam pela nuvem.",
+  "bg.channel": "Transferências",
+  "settings.version": "Versão {version}"
 }

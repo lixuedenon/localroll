@@ -131,4 +131,22 @@ void main() {
     expect(d.color, 0xFF5FD4C4);
     expect(d.avatar, 3);
   });
+
+  test('language data comes from packages/core/l10n', () {
+    expect(supportedLanguages.first.code, 'en');
+    expect(supportedLanguages.length, 17);
+    final t = Translator(const {})..language = 'ar';
+    expect(t.isRtl, isTrue);
+    for (final l in supportedLanguages) {
+      expect(deviceNameWords.containsKey(l.code), isTrue, reason: l.code);
+    }
+  });
+
+  test('names elide before a vowel (fr / it)', () {
+    final fr = deviceNameWords['fr']!;
+    expect(fr.compose('Phare', 'Ambre'), 'Phare d’Ambre');
+    expect(fr.compose('Phare', 'Lune'), 'Phare de Lune');
+    expect(deviceNameWords['it']!.compose('Faro', 'Luna'), 'Faro di Luna');
+    expect(deviceNameWords['ja']!.compose('琥珀', '灯台'), '琥珀の灯台');
+  });
 }

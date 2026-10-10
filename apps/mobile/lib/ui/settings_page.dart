@@ -101,7 +101,7 @@ class SettingsPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              Center(child: Text('LocalRoll 0.1', style: theme.textTheme.bodySmall)),
+              Center(child: Text('LocalRoll · ${tr('settings.version', {'version': lrVersion})}', style: theme.textTheme.bodySmall)),
             ],
           ),
         );

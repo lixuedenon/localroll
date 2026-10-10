@@ -126,5 +126,7 @@
   "receive.blocked_title": "फ़ोन शायद अभी इस PC को नहीं ढूँढ पाएँगे",
   "receive.blocked_public": "Windows फ़ायरवॉल ने LocalRoll को अनुमति नहीं दी है, और यह Wi-Fi “सार्वजनिक” नेटवर्क पर सेट है। एक बार अनुमति दें (Windows पुष्टि माँगेगा)।",
   "receive.blocked_firewall": "Windows फ़ायरवॉल ने अभी LocalRoll को अनुमति नहीं दी है। एक बार अनुमति दें (Windows पुष्टि माँगेगा)।",
-  "receive.blocked_fix": "LocalRoll को अनुमति दें"
+  "receive.blocked_fix": "LocalRoll को अनुमति दें",
+  "identity.images": "चित्र",
+  "settings.version": "संस्करण {version}"
 }

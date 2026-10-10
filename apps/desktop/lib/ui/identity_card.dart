@@ -70,8 +70,8 @@ class _IdentityCardState extends State<IdentityCard> {
   }
 
   Future<void> _pickPicture() async {
-    final file = await openFile(acceptedTypeGroups: const [
-      XTypeGroup(label: 'Images', extensions: ['jpg', 'jpeg', 'png', 'webp', 'bmp', 'gif']),
+    final file = await openFile(acceptedTypeGroups: [
+      XTypeGroup(label: tr('identity.images'), extensions: const ['jpg', 'jpeg', 'png', 'webp', 'bmp', 'gif']),
     ]);
     if (file == null) return;
     final png = await squareAvatarPng(await file.readAsBytes());

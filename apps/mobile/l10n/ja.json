@@ -117,5 +117,10 @@
   "connect.forget": "削除",
   "connect.forget_title": "「{name}」を削除しますか？",
   "connect.forget_body": "このスマホのペアリングを削除し、PC もこのスマホを信頼しなくなります。PC に保存済みの写真はそのままです。また使うときは、タップして PC で許可するだけです。",
-  "connect.forgotten": "{name} を削除しました"
+  "connect.forgotten": "{name} を削除しました",
+  "ios.photos": "LocalRoll は写真とビデオを読み取り、オリジナルのままパソコンに送ります。",
+  "ios.camera": "パソコンに表示されたペアリング用QRコードを読み取ります。",
+  "ios.local_network": "ローカルネットワーク上で LocalRoll を実行中のパソコンを探して接続します。ファイルがクラウドを経由することはありません。",
+  "bg.channel": "転送",
+  "settings.version": "バージョン {version}"
 }

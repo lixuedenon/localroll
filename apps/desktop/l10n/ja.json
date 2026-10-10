@@ -126,5 +126,7 @@
   "receive.blocked_title": "スマホからこの PC がまだ見つからない可能性があります",
   "receive.blocked_public": "Windows ファイアウォールが LocalRoll を許可しておらず、この Wi-Fi は「パブリック」ネットワークになっています。一度だけ許可してください（Windows が確認します）。",
   "receive.blocked_firewall": "Windows ファイアウォールがまだ LocalRoll を許可していません。一度だけ許可してください（Windows が確認します）。",
-  "receive.blocked_fix": "LocalRoll を許可"
+  "receive.blocked_fix": "LocalRoll を許可",
+  "identity.images": "画像",
+  "settings.version": "バージョン {version}"
 }

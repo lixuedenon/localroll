@@ -117,5 +117,10 @@
   "connect.forget": "Lupakan",
   "connect.forget_title": "Lupakan “{name}”?",
   "connect.forget_body": "Ponsel menghapus pemasangan, dan PC tidak lagi memercayai ponsel ini. Foto yang sudah ada di PC tidak terpengaruh. Untuk memakainya lagi, cukup ketuk dan izinkan.",
-  "connect.forgotten": "{name} dilupakan"
+  "connect.forgotten": "{name} dilupakan",
+  "ios.photos": "LocalRoll membaca foto dan video Anda agar dapat mengirim file asli ke komputer Anda.",
+  "ios.camera": "Pindai kode QR pemasangan yang ditampilkan di komputer Anda.",
+  "ios.local_network": "Menemukan dan terhubung ke komputer yang menjalankan LocalRoll di jaringan lokal Anda. File tidak pernah melewati cloud.",
+  "bg.channel": "Transfer",
+  "settings.version": "Versi {version}"
 }

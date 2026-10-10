@@ -1,36 +1,25 @@
 // packages/core/lib/src/i18n.dart
 
+import 'languages.g.dart';
+
 /// A UI language LocalRoll ships translations for.
 class LrLanguage {
-  const LrLanguage(this.code, this.nativeName);
+  const LrLanguage(this.code, this.nativeName, {this.rtl = false});
 
   /// Translation table key: ISO 639-1, plus `zh_Hant` for Traditional Chinese.
   final String code;
 
   /// Name shown in the language picker, in the language itself.
   final String nativeName;
+
+  /// Written right to left (Arabic).
+  final bool rtl;
 }
 
-/// Supported UI languages. English is the fallback for missing keys.
-const List<LrLanguage> supportedLanguages = [
-  LrLanguage('en', 'English'),
-  LrLanguage('zh', '简体中文'),
-  LrLanguage('zh_Hant', '繁體中文'),
-  LrLanguage('ja', '日本語'),
-  LrLanguage('ko', '한국어'),
-  LrLanguage('es', 'Español'),
-  LrLanguage('fr', 'Français'),
-  LrLanguage('de', 'Deutsch'),
-  LrLanguage('pt', 'Português'),
-  LrLanguage('ru', 'Русский'),
-  LrLanguage('it', 'Italiano'),
-  LrLanguage('ar', 'العربية'),
-  LrLanguage('hi', 'हिन्दी'),
-  LrLanguage('id', 'Bahasa Indonesia'),
-  LrLanguage('vi', 'Tiếng Việt'),
-  LrLanguage('th', 'ไทย'),
-  LrLanguage('tr', 'Türkçe'),
-];
+/// Supported UI languages, in picker order. The list is data, not code:
+/// packages/core/l10n/languages.json (run `python scripts/gen_l10n.py`
+/// after editing). English is the fallback for missing keys.
+const List<LrLanguage> supportedLanguages = generatedLanguages;
 
 const String fallbackLanguage = 'en';
 
@@ -64,7 +53,7 @@ class Translator {
   final Map<String, Map<String, String>> tables;
   String language = fallbackLanguage;
 
-  bool get isRtl => language == 'ar';
+  bool get isRtl => supportedLanguages.any((l) => l.code == language && l.rtl);
 
   bool has(String key) => tables[fallbackLanguage]?.containsKey(key) ?? false;
 

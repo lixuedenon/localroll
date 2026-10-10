@@ -117,5 +117,10 @@
   "connect.forget": "Forget",
   "connect.forget_title": "Forget “{name}”?",
   "connect.forget_body": "This phone removes the pairing, and the PC stops trusting this phone. Photos already on that PC are not affected. To use it again, just tap it and allow.",
-  "connect.forgotten": "Forgot {name}"
+  "connect.forgotten": "Forgot {name}",
+  "ios.photos": "LocalRoll reads your photos and videos so it can send the originals to your computer.",
+  "ios.camera": "Scan the pairing QR code shown on your computer.",
+  "ios.local_network": "Find and connect to computers running LocalRoll on your local network. Files never go through the cloud.",
+  "bg.channel": "Transfers",
+  "settings.version": "Version {version}"
 }

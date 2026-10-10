@@ -117,5 +117,10 @@
   "connect.forget": "삭제",
   "connect.forget_title": "“{name}”을(를) 삭제할까요?",
   "connect.forget_body": "이 휴대폰의 연결이 삭제되고 PC도 이 휴대폰을 더 이상 신뢰하지 않습니다. PC에 저장된 사진은 그대로입니다. 다시 쓰려면 탭하고 허용하면 됩니다.",
-  "connect.forgotten": "{name} 삭제됨"
+  "connect.forgotten": "{name} 삭제됨",
+  "ios.photos": "LocalRoll이 사진과 동영상을 읽어 원본 그대로 컴퓨터로 보냅니다.",
+  "ios.camera": "컴퓨터에 표시된 페어링 QR 코드를 스캔합니다.",
+  "ios.local_network": "로컬 네트워크에서 LocalRoll이 실행 중인 컴퓨터를 찾아 연결합니다. 파일은 클라우드를 거치지 않습니다.",
+  "bg.channel": "전송",
+  "settings.version": "버전 {version}"
 }

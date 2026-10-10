@@ -126,5 +126,7 @@
   "receive.blocked_title": "Phones may not find this PC yet",
   "receive.blocked_public": "Windows Firewall hasn’t let LocalRoll in, and this Wi-Fi is set as a “Public” network. Allow it once (Windows will ask for permission).",
   "receive.blocked_firewall": "Windows Firewall hasn’t let LocalRoll in yet. Allow it once (Windows will ask for permission).",
-  "receive.blocked_fix": "Allow LocalRoll"
+  "receive.blocked_fix": "Allow LocalRoll",
+  "identity.images": "Images",
+  "settings.version": "Version {version}"
 }

@@ -6,9 +6,12 @@ Run from the repository root:  python scripts/patch_platforms.py
 """
 from __future__ import annotations
 
+import hashlib
+import json
 import pathlib
 import re
 import sys
+from xml.sax.saxutils import escape
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 MOBILE = ROOT / "apps" / "mobile"
@@ -40,12 +43,23 @@ ANDROID_SERVICE = (
     '            android:foregroundServiceType="dataSync" />'
 )
 
-# English is the base text for the iOS permission prompts.
+# Language content is data, not code: the languages come from
+# packages/core/l10n/languages.json and the permission-prompt text from the
+# "ios.*" keys in apps/mobile/l10n/<lang>.json. Info.plist gets the English
+# text as the base; the translations go to <lproj>/InfoPlist.strings
+# (written by scripts/gen_l10n.py, registered in the Xcode project below).
+LANGUAGES = json.loads((ROOT / "packages" / "core" / "l10n" / "languages.json").read_text(encoding="utf-8"))["languages"]
+MOBILE_EN = json.loads((MOBILE / "l10n" / "en.json").read_text(encoding="utf-8"))
+IOS_PROMPTS = {
+    "NSPhotoLibraryUsageDescription": "ios.photos",
+    "NSCameraUsageDescription": "ios.camera",
+    "NSLocalNetworkUsageDescription": "ios.local_network",
+}
+IOS_LPROJ = [lang["ios"] for lang in LANGUAGES]
+
 IOS_PLIST_KEYS = {
     "CFBundleDisplayName": "<string>LocalRoll</string>",
-    "NSPhotoLibraryUsageDescription": "<string>LocalRoll reads your photos and videos so it can send the originals to your computer.</string>",
-    "NSCameraUsageDescription": "<string>Scan the pairing QR code shown on your computer.</string>",
-    "NSLocalNetworkUsageDescription": "<string>Find and connect to computers running LocalRoll on your local network. Files never go through the cloud.</string>",
+    **{k: f"<string>{escape(MOBILE_EN[v])}</string>" for k, v in IOS_PROMPTS.items()},
     "NSBonjourServices": "<array>\n\t\t<string>_localroll._tcp</string>\n\t</array>",
     "NSAppTransportSecurity": "<dict>\n\t\t<key>NSAllowsLocalNetworking</key>\n\t\t<true/>\n\t</dict>",
     "PHPhotoLibraryPreventAutomaticLimitedAccessAlert": "<true/>",
@@ -69,9 +83,7 @@ IOS_PLIST_KEYS = {
     # Tells iOS which UI languages the app supports (Flutter needs this to
     # receive the user's real language instead of always English).
     "CFBundleLocalizations": "<array>\n" + "".join(
-        f"\t\t<string>{c}</string>\n"
-        for c in ["en", "zh-Hans", "zh-Hant", "ja", "ko", "es", "fr", "de", "pt", "ru",
-                  "it", "ar", "hi", "id", "vi", "th", "tr"]
+        f"\t\t<string>{c}</string>\n" for c in IOS_LPROJ
     ) + "\t</array>",
 }
 
@@ -136,6 +148,55 @@ def ios_plist(text: str) -> str:
         text = text[:idx] + f"\t{marker}\n\t{value}\n" + text[idx:]
     return text
 
+def _xid(name: str) -> str:
+    """Stable 24-hex Xcode object id (same input -> same id, so re-runs are no-ops)."""
+    return hashlib.sha1(("localroll:" + name).encode()).hexdigest()[:24].upper()
+
+
+def ios_pbxproj(text: str) -> str:
+    """Adds the per-language InfoPlist.strings to the Runner target."""
+    group = _xid("InfoPlist.strings group")
+    build = _xid("InfoPlist.strings build")
+    refs = {code: _xid("InfoPlist.strings " + code) for code in IOS_LPROJ}
+
+    if group not in text:
+        text = text.replace(
+            "/* End PBXBuildFile section */",
+            f"\t\t{build} /* InfoPlist.strings in Resources */ = {{isa = PBXBuildFile; fileRef = {group} /* InfoPlist.strings */; }};\n"
+            "/* End PBXBuildFile section */", 1)
+        text = text.replace(
+            "/* Begin PBXVariantGroup section */",
+            "/* Begin PBXVariantGroup section */\n"
+            f"\t\t{group} /* InfoPlist.strings */ = {{\n\t\t\tisa = PBXVariantGroup;\n\t\t\tchildren = (\n"
+            "\t\t\t);\n\t\t\tname = InfoPlist.strings;\n\t\t\tsourceTree = \"<group>\";\n\t\t};", 1)
+        # Runner group and Runner's Copy Bundle Resources phase.
+        text = re.sub(r"(97C146F01CF9000F007C117D /\* Runner \*/ = \{\s*isa = PBXGroup;\s*children = \()",
+                      lambda m: m.group(1) + f"\n\t\t\t\t{group} /* InfoPlist.strings */,", text, count=1)
+        text = re.sub(r"(97C146EC1CF9000F007C117D /\* Resources \*/ = \{\s*isa = PBXResourcesBuildPhase;\s*buildActionMask = \d+;\s*files = \()",
+                      lambda m: m.group(1) + f"\n\t\t\t\t{build} /* InfoPlist.strings in Resources */,", text, count=1)
+
+    for code, ref in refs.items():
+        if ref in text:
+            continue
+        quoted = f'"{code}"' if "-" in code else code
+        text = text.replace(
+            "/* End PBXFileReference section */",
+            f"\t\t{ref} /* {code} */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.strings; "
+            f"name = {quoted}; path = {code}.lproj/InfoPlist.strings; sourceTree = \"<group>\"; }};\n"
+            "/* End PBXFileReference section */", 1)
+        text = re.sub(re.escape(group) + r"( /\* InfoPlist.strings \*/ = \{\s*isa = PBXVariantGroup;\s*children = \()",
+                      lambda m, r=ref, c=code: group + m.group(1) + f"\n\t\t\t\t{r} /* {c} */,", text, count=1)
+
+    m = re.search(r"knownRegions = \((.*?)\);", text, re.S)
+    if m:
+        have = {r.strip().strip('"') for r in m.group(1).split(",") if r.strip()}
+        add = [c for c in IOS_LPROJ if c not in have]
+        if add:
+            extra = "".join(f'\t\t\t\t{chr(34) + c + chr(34) if "-" in c else c},\n' for c in add)
+            text = text[:m.end(1)].rstrip("\t") + extra + "\t\t\t" + text[m.end(1):]
+    return text
+
+
 def windows_main(text: str) -> str:
     return text.replace('L"localroll_desktop"', 'L"LocalRoll"')
 
@@ -144,6 +205,7 @@ def main() -> int:
     patch(MOBILE / "android" / "app" / "src" / "main" / "AndroidManifest.xml", android_manifest)
     patch(MOBILE / "android" / "app" / "build.gradle.kts", android_gradle)
     patch(MOBILE / "ios" / "Runner" / "Info.plist", ios_plist)
+    patch(MOBILE / "ios" / "Runner.xcodeproj" / "project.pbxproj", ios_pbxproj)
     patch(DESKTOP / "windows" / "runner" / "main.cpp", windows_main)
     return 0
 

@@ -126,5 +126,7 @@
   "receive.blocked_title": "Телефоны могут пока не находить этот ПК",
   "receive.blocked_public": "Брандмауэр Windows не разрешил LocalRoll, а эта сеть Wi-Fi отмечена как «Общедоступная». Разрешите один раз (Windows попросит подтверждение).",
   "receive.blocked_firewall": "Брандмауэр Windows ещё не разрешил LocalRoll. Разрешите один раз (Windows попросит подтверждение).",
-  "receive.blocked_fix": "Разрешить LocalRoll"
+  "receive.blocked_fix": "Разрешить LocalRoll",
+  "identity.images": "Изображения",
+  "settings.version": "Версия {version}"
 }

@@ -28,6 +28,8 @@ concurrency:
 env:
   FLUTTER_VERSION: '3.35.4'
   IOS_FLUTTER_VERSION: '3.47.6'
+  # Shown in both apps' settings: the release tag, or dev.<run> for test builds.
+  LR_VERSION: ${{ inputs.release || (startsWith(github.ref, 'refs/tags/') && github.ref_name) || format('dev.{0}', github.run_number) }}
 
 jobs:
   # Generates the windows/ android/ ios/ folders with `flutter create` the first
@@ -133,7 +135,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          flutter build windows --release -v 2>&1 | tee build.log
+          flutter build windows --release --dart-define=LR_VERSION="$LR_VERSION" -v 2>&1 | tee build.log
       - name: Report build errors
         if: failure()
         working-directory: apps/desktop
@@ -176,7 +178,7 @@ jobs:
         working-directory: apps/mobile
         run: |
           set -o pipefail
-          flutter build apk --release 2>&1 | tee build.log
+          flutter build apk --release --dart-define=LR_VERSION="$LR_VERSION" 2>&1 | tee build.log
       - name: Report build errors
         if: failure()
         working-directory: apps/mobile
@@ -203,7 +205,7 @@ jobs:
         working-directory: apps/mobile
         run: |
           set -o pipefail
-          flutter build ios --release --no-codesign 2>&1 | tee build.log
+          flutter build ios --release --no-codesign --dart-define=LR_VERSION="$LR_VERSION" 2>&1 | tee build.log
       - name: Report build errors
         if: failure()
         working-directory: apps/mobile

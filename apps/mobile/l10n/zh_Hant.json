@@ -117,5 +117,10 @@
   "connect.forget": "忘記",
   "connect.forget_title": "忘記「{name}」？",
   "connect.forget_body": "手機會刪除和這台電腦的配對，電腦也會不再信任這支手機。電腦上已儲存的照片不受影響。以後要再用，重新點一下它、在電腦上允許即可。",
-  "connect.forgotten": "已忘記 {name}"
+  "connect.forgotten": "已忘記 {name}",
+  "ios.photos": "LocalRoll 需要讀取你的照片和影片，才能把原始檔案傳送到你的電腦。",
+  "ios.camera": "掃描電腦上顯示的配對 QR 碼。",
+  "ios.local_network": "在區域網路中尋找並連線執行 LocalRoll 的電腦。檔案不會經過雲端。",
+  "bg.channel": "傳輸",
+  "settings.version": "版本 {version}"
 }

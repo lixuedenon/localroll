@@ -156,6 +156,11 @@ class _SettingsPageState extends State<SettingsPage> {
                   child: Text(tr('settings.unpair')),
                 ),
               ),
+            const SizedBox(height: 28),
+            Center(
+              child: Text('LocalRoll · ${tr('settings.version', {'version': lrVersion})}',
+                  style: theme.textTheme.bodySmall),
+            ),
           ],
         ),
       ),

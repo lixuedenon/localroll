@@ -117,5 +117,10 @@
   "connect.forget": "Unut",
   "connect.forget_title": "“{name}” unutulsun mu?",
   "connect.forget_body": "Telefon eşleşmeyi siler ve bilgisayar bu telefona artık güvenmez. Bilgisayardaki fotoğraflar etkilenmez. Yeniden kullanmak için dokunup izin vermeniz yeterli.",
-  "connect.forgotten": "{name} unutuldu"
+  "connect.forgotten": "{name} unutuldu",
+  "ios.photos": "LocalRoll, orijinallerini bilgisayarınıza gönderebilmek için fotoğraf ve videolarınızı okur.",
+  "ios.camera": "Bilgisayarınızda gösterilen eşleştirme QR kodunu tarayın.",
+  "ios.local_network": "Yerel ağınızda LocalRoll çalıştıran bilgisayarları bulur ve bağlanır. Dosyalar asla buluttan geçmez.",
+  "bg.channel": "Aktarımlar",
+  "settings.version": "Sürüm {version}"
 }

@@ -126,5 +126,7 @@
   "receive.blocked_title": "Puede que los teléfonos aún no encuentren este PC",
   "receive.blocked_public": "El Firewall de Windows no ha permitido LocalRoll y esta Wi-Fi está marcada como red «Pública». Permítelo una vez (Windows pedirá confirmación).",
   "receive.blocked_firewall": "El Firewall de Windows aún no ha permitido LocalRoll. Permítelo una vez (Windows pedirá confirmación).",
-  "receive.blocked_fix": "Permitir LocalRoll"
+  "receive.blocked_fix": "Permitir LocalRoll",
+  "identity.images": "Imágenes",
+  "settings.version": "Versión {version}"
 }

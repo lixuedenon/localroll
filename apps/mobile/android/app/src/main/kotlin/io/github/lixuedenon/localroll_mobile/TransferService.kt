@@ -26,7 +26,9 @@ class TransferService : Service() {
         private const val EXTRA_TITLE = "title"
         private const val EXTRA_TEXT = "text"
 
-        fun start(ctx: Context, title: String, text: String) {
+        /** [channelName] is the translated notification-category name (from Dart). */
+        fun start(ctx: Context, channelName: String, title: String, text: String) {
+            ensureChannel(ctx, channelName)
             val i = Intent(ctx, TransferService::class.java)
                 .putExtra(EXTRA_TITLE, title)
                 .putExtra(EXTRA_TEXT, text)
@@ -43,11 +45,16 @@ class TransferService : Service() {
             ctx.stopService(Intent(ctx, TransferService::class.java))
         }
 
-        private fun ensureChannel(ctx: Context) {
+        /**
+         * Creates the channel, or renames it when [name] is given (Android
+         * allows changing a channel's name, e.g. after a language switch).
+         */
+        private fun ensureChannel(ctx: Context, name: String? = null) {
             if (Build.VERSION.SDK_INT < 26) return
             val nm = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            if (nm.getNotificationChannel(CHANNEL_ID) == null) {
-                val ch = NotificationChannel(CHANNEL_ID, "Transfers", NotificationManager.IMPORTANCE_LOW)
+            val existing = nm.getNotificationChannel(CHANNEL_ID)
+            if (existing == null || (name != null && existing.name != name)) {
+                val ch = NotificationChannel(CHANNEL_ID, name ?: existing?.name ?: "LocalRoll", NotificationManager.IMPORTANCE_LOW)
                 ch.setShowBadge(false)
                 nm.createNotificationChannel(ch)
             }

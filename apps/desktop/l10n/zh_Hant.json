@@ -126,5 +126,7 @@
   "receive.blocked_title": "手機可能還找不到這台電腦",
   "receive.blocked_public": "Windows 防火牆還沒有放行 LocalRoll，而且這個 Wi-Fi 被設成「公用網路」。點右邊按鈕放行一次（Windows 會跳出視窗請你確認）。",
   "receive.blocked_firewall": "Windows 防火牆還沒有放行 LocalRoll。點右邊按鈕放行一次（Windows 會跳出視窗請你確認）。",
-  "receive.blocked_fix": "放行 LocalRoll"
+  "receive.blocked_fix": "放行 LocalRoll",
+  "identity.images": "圖片",
+  "settings.version": "版本 {version}"
 }

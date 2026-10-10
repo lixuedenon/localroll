@@ -117,5 +117,10 @@
   "connect.forget": "Vergessen",
   "connect.forget_title": "„{name}“ vergessen?",
   "connect.forget_body": "Das Handy löscht die Kopplung, und der PC vertraut diesem Handy nicht mehr. Fotos auf dem PC bleiben erhalten. Zum erneuten Nutzen einfach antippen und erlauben.",
-  "connect.forgotten": "{name} vergessen"
+  "connect.forgotten": "{name} vergessen",
+  "ios.photos": "LocalRoll liest deine Fotos und Videos, um die Originale an deinen Computer zu senden.",
+  "ios.camera": "Scanne den Kopplungs-QR-Code, der auf deinem Computer angezeigt wird.",
+  "ios.local_network": "Findet Computer mit LocalRoll im lokalen Netzwerk und verbindet sich mit ihnen. Dateien gehen nie über die Cloud.",
+  "bg.channel": "Übertragungen",
+  "settings.version": "Version {version}"
 }

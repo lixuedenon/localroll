@@ -1,0 +1,91 @@
+{
+  "_about": "Languages LocalRoll ships, in picker order. To add one: add it here, add l10n/<code>.json to apps/desktop and apps/mobile, add names/<code>.json, then run python scripts/gen_l10n.py. 'ios' is the Apple .lproj code; 'rtl' marks right-to-left scripts.",
+  "languages": [
+    {
+      "code": "en",
+      "name": "English",
+      "ios": "en"
+    },
+    {
+      "code": "zh",
+      "name": "简体中文",
+      "ios": "zh-Hans"
+    },
+    {
+      "code": "zh_Hant",
+      "name": "繁體中文",
+      "ios": "zh-Hant"
+    },
+    {
+      "code": "ja",
+      "name": "日本語",
+      "ios": "ja"
+    },
+    {
+      "code": "ko",
+      "name": "한국어",
+      "ios": "ko"
+    },
+    {
+      "code": "es",
+      "name": "Español",
+      "ios": "es"
+    },
+    {
+      "code": "fr",
+      "name": "Français",
+      "ios": "fr"
+    },
+    {
+      "code": "de",
+      "name": "Deutsch",
+      "ios": "de"
+    },
+    {
+      "code": "pt",
+      "name": "Português",
+      "ios": "pt"
+    },
+    {
+      "code": "ru",
+      "name": "Русский",
+      "ios": "ru"
+    },
+    {
+      "code": "it",
+      "name": "Italiano",
+      "ios": "it"
+    },
+    {
+      "code": "ar",
+      "name": "العربية",
+      "ios": "ar",
+      "rtl": true
+    },
+    {
+      "code": "hi",
+      "name": "हिन्दी",
+      "ios": "hi"
+    },
+    {
+      "code": "id",
+      "name": "Bahasa Indonesia",
+      "ios": "id"
+    },
+    {
+      "code": "vi",
+      "name": "Tiếng Việt",
+      "ios": "vi"
+    },
+    {
+      "code": "th",
+      "name": "ไทย",
+      "ios": "th"
+    },
+    {
+      "code": "tr",
+      "name": "Türkçe",
+      "ios": "tr"
+    }
+  ]
+}

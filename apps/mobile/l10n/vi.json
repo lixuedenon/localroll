@@ -117,5 +117,10 @@
   "connect.forget": "Quên",
   "connect.forget_title": "Quên “{name}”?",
   "connect.forget_body": "Điện thoại sẽ xóa ghép nối và máy tính sẽ không tin cậy điện thoại này nữa. Ảnh đã lưu trên máy tính không bị ảnh hưởng. Muốn dùng lại, chỉ cần chạm và cho phép.",
-  "connect.forgotten": "Đã quên {name}"
+  "connect.forgotten": "Đã quên {name}",
+  "ios.photos": "LocalRoll đọc ảnh và video của bạn để gửi bản gốc sang máy tính.",
+  "ios.camera": "Quét mã QR ghép nối hiển thị trên máy tính.",
+  "ios.local_network": "Tìm và kết nối với máy tính đang chạy LocalRoll trong mạng nội bộ. Tệp không bao giờ đi qua đám mây.",
+  "bg.channel": "Truyền tệp",
+  "settings.version": "Phiên bản {version}"
 }

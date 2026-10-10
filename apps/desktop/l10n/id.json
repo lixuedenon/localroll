@@ -126,5 +126,7 @@
   "receive.blocked_title": "Ponsel mungkin belum bisa menemukan PC ini",
   "receive.blocked_public": "Windows Firewall belum mengizinkan LocalRoll, dan Wi-Fi ini diatur sebagai jaringan “Publik”. Izinkan sekali (Windows akan meminta konfirmasi).",
   "receive.blocked_firewall": "Windows Firewall belum mengizinkan LocalRoll. Izinkan sekali (Windows akan meminta konfirmasi).",
-  "receive.blocked_fix": "Izinkan LocalRoll"
+  "receive.blocked_fix": "Izinkan LocalRoll",
+  "identity.images": "Gambar",
+  "settings.version": "Versi {version}"
 }
