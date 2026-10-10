@@ -129,5 +129,18 @@
   "receive.blocked_fix": "Cho phép LocalRoll",
   "identity.images": "Hình ảnh",
   "settings.version": "Phiên bản {version}",
-  "viewer.live": "Live"
+  "viewer.live": "Live",
+  "common.ok": "OK",
+  "common.cancel": "Hủy",
+  "family.title": "Gia đình",
+  "family.hint": "Mỗi điện thoại đã ghép nối thuộc về một thành viên. Nhiều máy của cùng một người được gộp lại và hiển thị “Lan 1”, “Lan 2”. Tên lấy từ điện thoại và có thể đổi ở đây.",
+  "family.rename": "Đổi tên",
+  "family.move": "Thuộc về thành viên khác…",
+  "family.member_name": "Tên thành viên",
+  "family.folder_per_member": "Mỗi thành viên một thư mục",
+  "family.folder_per_member_hint": "Ảnh mới được lưu theo Tên/Năm/Tháng. Ảnh đã nhận giữ nguyên chỗ cũ. Mẹo: nếu mỗi người có tài khoản Windows riêng, bạn còn có thể giới hạn ai mở được thư mục nào.",
+  "family.everyone": "Cả nhà",
+  "family.show_private": "Hiện mục “chỉ mình tôi” ({count})",
+  "family.make_private": "Chỉ người gửi (ẩn với gia đình)",
+  "family.make_shared": "Chia sẻ với gia đình"
 }

@@ -129,5 +129,18 @@
   "receive.blocked_fix": "السماح لـ LocalRoll",
   "identity.images": "الصور",
   "settings.version": "الإصدار {version}",
-  "viewer.live": "مباشر"
+  "viewer.live": "مباشر",
+  "common.ok": "موافق",
+  "common.cancel": "إلغاء",
+  "family.title": "العائلة",
+  "family.hint": "كل هاتف مقترن يخص أحد أفراد العائلة. تُجمع هواتف الشخص الواحد وتظهر باسم «سارة 1» و«سارة 2». يأتي الاسم من الهاتف ويمكن تغييره هنا.",
+  "family.rename": "إعادة تسمية",
+  "family.move": "يخص فردًا آخر من العائلة…",
+  "family.member_name": "اسم فرد العائلة",
+  "family.folder_per_member": "مجلد لكل فرد من العائلة",
+  "family.folder_per_member_hint": "تُحفظ الصور الجديدة بالشكل الاسم/السنة/الشهر. تبقى الصور المستلمة سابقًا في مكانها. نصيحة: مع حساب Windows لكل شخص يمكنك أيضًا تقييد من يفتح كل مجلد.",
+  "family.everyone": "الجميع",
+  "family.show_private": "إظهار «أنا فقط» ({count})",
+  "family.make_private": "المرسل فقط (إخفاء عن العائلة)",
+  "family.make_shared": "مشاركة مع العائلة"
 }

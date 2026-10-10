@@ -198,4 +198,33 @@ void main() {
       expect(Exif.extractTiff(Uint8List.fromList([1, 2, 3, 4, 5])), isNull);
     });
   });
+
+  test('family: phones grouped by person and numbered', () {
+    final f = FamilyDirectory(const [
+      FamilyDevice(id: 'a', deviceName: 'iPhone', pairedMs: 1, owner: 'Anna'),
+      FamilyDevice(id: 'b', deviceName: 'Pixel', pairedMs: 2, owner: 'Ben'),
+      FamilyDevice(id: 'c', deviceName: 'iPad', pairedMs: 3, owner: ' anna '),
+      FamilyDevice(id: 'd', deviceName: 'Galaxy', pairedMs: 4, owner: 'x', memberOverride: 'Ben'),
+      FamilyDevice(id: 'e', deviceName: 'Old phone', pairedMs: 5),
+    ]);
+    expect(f.members, ['Anna', 'Ben', 'Old phone']);
+    expect(f.labelOf('a'), 'Anna 1');
+    expect(f.labelOf('c'), 'Anna 2');
+    expect(f.memberOf('c'), 'Anna');
+    expect(f.labelOf('b'), 'Ben 1');
+    expect(f.labelOf('d'), 'Ben 2');
+    expect(f.labelOf('e'), 'Old phone');
+    expect(f.labelOf('zzz'), isNull);
+    expect(f.devicesOf('ben').map((d) => d.id), ['b', 'd']);
+  });
+
+  test('offers carry the private flag, sessions the owner', () {
+    const o = FileOffer(id: '1', assetId: 'x', name: 'a.jpg', kind: MediaKind.image, createdMs: 1, modifiedMs: 2, private: true);
+    expect(FileOffer.fromJson(o.toJson()).private, isTrue);
+    expect(FileOffer.fromJson((const FileOffer(id: '1', assetId: 'x', name: 'a.jpg', kind: MediaKind.image, createdMs: 1, modifiedMs: 2)).toJson()).private, isFalse);
+    expect(SessionRequest.fromJson(const SessionRequest(files: [], owner: 'Anna').toJson()).owner, 'Anna');
+    final v = VisibilityRequest.fromJson(jsonDecode(jsonEncode(const VisibilityRequest(assetIds: ['a'], private: true).toJson())) as Map<String, dynamic>);
+    expect(v.assetIds, ['a']);
+    expect(v.private, isTrue);
+  });
 }

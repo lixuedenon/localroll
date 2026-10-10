@@ -129,5 +129,18 @@
   "receive.blocked_fix": "อนุญาต LocalRoll",
   "identity.images": "รูปภาพ",
   "settings.version": "เวอร์ชัน {version}",
-  "viewer.live": "Live"
+  "viewer.live": "Live",
+  "common.ok": "ตกลง",
+  "common.cancel": "ยกเลิก",
+  "family.title": "ครอบครัว",
+  "family.hint": "โทรศัพท์ที่จับคู่แต่ละเครื่องเป็นของสมาชิกหนึ่งคน หลายเครื่องของคนเดียวกันจะรวมกันและแสดงเป็น “แอน 1” “แอน 2” ชื่อมาจากโทรศัพท์ และเปลี่ยนได้ที่นี่",
+  "family.rename": "เปลี่ยนชื่อ",
+  "family.move": "เป็นของสมาชิกคนอื่น…",
+  "family.member_name": "ชื่อสมาชิกครอบครัว",
+  "family.folder_per_member": "แยกโฟลเดอร์ตามสมาชิก",
+  "family.folder_per_member_hint": "รูปใหม่จะบันทึกเป็น ชื่อ/ปี/เดือน รูปที่ได้รับแล้วอยู่ที่เดิม เคล็ดลับ: ถ้าแต่ละคนมีบัญชี Windows ของตัวเอง ก็จำกัดได้ว่าใครเปิดโฟลเดอร์ไหนได้",
+  "family.everyone": "ทุกคน",
+  "family.show_private": "แสดงรายการ “เฉพาะฉัน” ({count})",
+  "family.make_private": "เฉพาะผู้ส่ง (ซ่อนจากครอบครัว)",
+  "family.make_shared": "แชร์กับครอบครัว"
 }

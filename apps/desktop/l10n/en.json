@@ -129,5 +129,18 @@
   "receive.blocked_fix": "Allow LocalRoll",
   "identity.images": "Images",
   "settings.version": "Version {version}",
-  "viewer.live": "Live"
+  "viewer.live": "Live",
+  "common.ok": "OK",
+  "common.cancel": "Cancel",
+  "family.title": "Family",
+  "family.hint": "Each paired phone belongs to a family member. Several phones of one person are grouped and shown as “Anna 1”, “Anna 2”. The name comes from the phone and can be changed here.",
+  "family.rename": "Rename",
+  "family.move": "Belongs to another family member…",
+  "family.member_name": "Family member's name",
+  "family.folder_per_member": "One folder per family member",
+  "family.folder_per_member_hint": "New photos are saved as Name/Year/Month. Photos already received stay where they are. Tip: with a separate Windows account per person you can also restrict who may open each folder.",
+  "family.everyone": "Everyone",
+  "family.show_private": "Show “only me” items ({count})",
+  "family.make_private": "Only the sender (hide from family)",
+  "family.make_shared": "Share with family"
 }

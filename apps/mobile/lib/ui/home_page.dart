@@ -14,6 +14,7 @@ import 'cleanup_page.dart';
 import 'connect_page.dart';
 import 'device_badge.dart';
 import 'settings_page.dart';
+import 'simple_home.dart';
 import 'theme.dart';
 import 'transfer_page.dart';
 
@@ -45,6 +46,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   bool _hasMore = true;
   bool _onlyUnsent = false;
   final Set<String> _selected = {};
+
+  /// Simple mode: browsing the full grid for a moment ("Pick photos").
+  bool _browse = false;
   final Map<String, Future<Uint8List?>> _thumbs = {};
 
   @override
@@ -335,6 +339,36 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (mounted) await _reload();
   }
 
+  Future<void> _openSettings() => Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => SettingsPage(
+          settings: widget.settings,
+          discovery: widget.discovery,
+          onAutoSendChanged: _onAutoSendChanged,
+        ),
+      ));
+
+  /// Family group: change who may see already-sent items.
+  Future<void> _setVisibility(List<String> ids, {required bool private}) async {
+    final desktop = widget.settings.current;
+    if (desktop == null || ids.isEmpty) return;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final client = await connectToDesktop(widget.settings, desktop, discovered: widget.discovery.found);
+      try {
+        await client.setVisibility(ids, private: private);
+      } finally {
+        client.close();
+      }
+      if (!mounted) return;
+      setState(_selected.clear);
+      messenger.showSnackBar(SnackBar(
+        content: Text(tr(private ? 'family.now_private' : 'family.now_shared', {'count': ids.length})),
+      ));
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(tr('family.visibility_failed', {'pc': desktop.name}))));
+    }
+  }
+
   Future<void> _send() async {
     final desktop = widget.settings.current;
     if (desktop == null) {
@@ -362,8 +396,30 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         final desktop = widget.settings.current;
         final sent = desktop == null ? const <String>{} : widget.settings.sentTo(desktop.id);
         final visible = _onlyUnsent ? _assets.where((a) => !sent.contains(a.id)).toList() : _assets;
+        if (widget.settings.simpleMode && !_browse) {
+          return SimpleHome(
+            settings: widget.settings,
+            auto: _auto,
+            onConnect: _openConnect,
+            onSettings: _openSettings,
+            onPick: () => setState(() {
+              _browse = true;
+              _onlyUnsent = true;
+            }),
+          );
+        }
         return Scaffold(
           appBar: AppBar(
+            // Simple mode: a clear way back from the photo grid.
+            leading: widget.settings.simpleMode
+                ? IconButton(
+                    onPressed: () => setState(() {
+                      _browse = false;
+                      _selected.clear();
+                    }),
+                    icon: const Icon(Icons.arrow_back_rounded),
+                  )
+                : null,
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -394,13 +450,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             actions: [
               IconButton(
                 tooltip: tr('settings.title'),
-                onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (_) => SettingsPage(
-                    settings: widget.settings,
-                    discovery: widget.discovery,
-                    onAutoSendChanged: _onAutoSendChanged,
-                  ),
-                )),
+                onPressed: _openSettings,
                 icon: const Icon(Icons.settings_rounded),
               ),
               if (desktop != null)
@@ -575,6 +625,23 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           children: [
             if (_selected.isNotEmpty)
               TextButton(onPressed: () => setState(_selected.clear), child: Text(tr('home.clear_selection'))),
+            // Family group: already-sent items can be made "only me" / shared.
+            if (_selected.any(sent.contains))
+              PopupMenuButton<bool>(
+                tooltip: tr('family.who_can_see'),
+                icon: const Icon(Icons.lock_person_rounded),
+                onSelected: (private) => _setVisibility(_selected.where(sent.contains).toList(), private: private),
+                itemBuilder: (_) => [
+                  PopupMenuItem(
+                    value: false,
+                    child: ListTile(leading: const Icon(Icons.groups_rounded), title: Text(tr('family.shared'))),
+                  ),
+                  PopupMenuItem(
+                    value: true,
+                    child: ListTile(leading: const Icon(Icons.lock_rounded), title: Text(tr('family.only_me'))),
+                  ),
+                ],
+              ),
             const Spacer(),
             FilledButton.icon(
               onPressed: _selected.isEmpty ? null : _send,

@@ -129,5 +129,18 @@
   "receive.blocked_fix": "LocalRoll को अनुमति दें",
   "identity.images": "चित्र",
   "settings.version": "संस्करण {version}",
-  "viewer.live": "Live"
+  "viewer.live": "Live",
+  "common.ok": "ठीक है",
+  "common.cancel": "रद्द करें",
+  "family.title": "परिवार",
+  "family.hint": "हर जोड़ा गया फ़ोन परिवार के किसी सदस्य का है। एक व्यक्ति के कई फ़ोन एक साथ रखे जाते हैं और “अनु 1”, “अनु 2” दिखते हैं। नाम फ़ोन से आता है और यहाँ बदला जा सकता है।",
+  "family.rename": "नाम बदलें",
+  "family.move": "परिवार के किसी और सदस्य का है…",
+  "family.member_name": "परिवार के सदस्य का नाम",
+  "family.folder_per_member": "हर सदस्य के लिए अलग फ़ोल्डर",
+  "family.folder_per_member_hint": "नई फ़ोटो नाम/साल/महीना में सहेजी जाती हैं। पहले से मिली फ़ोटो अपनी जगह रहती हैं। सुझाव: हर व्यक्ति का अलग Windows खाता हो तो यह भी सीमित कर सकते हैं कि कौन कौन-सा फ़ोल्डर खोले।",
+  "family.everyone": "सभी",
+  "family.show_private": "“केवल मैं” दिखाएँ ({count})",
+  "family.make_private": "केवल भेजने वाला (परिवार से छिपाएँ)",
+  "family.make_shared": "परिवार के साथ साझा करें"
 }

@@ -129,5 +129,18 @@
   "receive.blocked_fix": "LocalRoll を許可",
   "identity.images": "画像",
   "settings.version": "バージョン {version}",
-  "viewer.live": "ライブ"
+  "viewer.live": "ライブ",
+  "common.ok": "OK",
+  "common.cancel": "キャンセル",
+  "family.title": "家族",
+  "family.hint": "ペアリングした各スマホは家族のだれかに属します。同じ人の複数台はまとめられ、「花子 1」「花子 2」と表示されます。名前はスマホの設定から来ますが、ここでも変更できます。",
+  "family.rename": "名前を変更",
+  "family.move": "別の家族のものにする…",
+  "family.member_name": "家族の名前",
+  "family.folder_per_member": "家族ごとにフォルダーを分ける",
+  "family.folder_per_member_hint": "新しい写真は「名前/年/月」に保存されます。受信済みの写真はそのままです。ヒント：家族ごとに Windows アカウントがあれば、フォルダーを開ける人を制限することもできます。",
+  "family.everyone": "全員",
+  "family.show_private": "「自分だけ」を表示（{count}）",
+  "family.make_private": "送った本人だけ（家族に非表示）",
+  "family.make_shared": "家族に表示"
 }

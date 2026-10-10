@@ -129,5 +129,18 @@
   "receive.blocked_fix": "Izinkan LocalRoll",
   "identity.images": "Gambar",
   "settings.version": "Versi {version}",
-  "viewer.live": "Live"
+  "viewer.live": "Live",
+  "common.ok": "OK",
+  "common.cancel": "Batal",
+  "family.title": "Keluarga",
+  "family.hint": "Setiap ponsel yang dipasangkan milik satu anggota keluarga. Beberapa ponsel milik satu orang dikelompokkan dan ditampilkan sebagai “Ani 1”, “Ani 2”. Nama berasal dari ponsel dan dapat diubah di sini.",
+  "family.rename": "Ganti nama",
+  "family.move": "Milik anggota keluarga lain…",
+  "family.member_name": "Nama anggota keluarga",
+  "family.folder_per_member": "Satu folder per anggota keluarga",
+  "family.folder_per_member_hint": "Foto baru disimpan sebagai Nama/Tahun/Bulan. Foto yang sudah diterima tetap di tempatnya. Tips: dengan akun Windows terpisah per orang, Anda juga dapat membatasi siapa yang membuka setiap folder.",
+  "family.everyone": "Semua",
+  "family.show_private": "Tampilkan “hanya saya” ({count})",
+  "family.make_private": "Hanya pengirim (sembunyikan dari keluarga)",
+  "family.make_shared": "Bagikan ke keluarga"
 }

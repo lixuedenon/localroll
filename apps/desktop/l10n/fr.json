@@ -129,5 +129,18 @@
   "receive.blocked_fix": "Autoriser LocalRoll",
   "identity.images": "Images",
   "settings.version": "Version {version}",
-  "viewer.live": "Live"
+  "viewer.live": "Live",
+  "common.ok": "OK",
+  "common.cancel": "Annuler",
+  "family.title": "Famille",
+  "family.hint": "Chaque téléphone appairé appartient à un membre de la famille. Ceux d’une même personne sont regroupés et affichés « Anne 1 », « Anne 2 ». Le nom vient du téléphone et peut être modifié ici.",
+  "family.rename": "Renommer",
+  "family.move": "Appartient à un autre membre…",
+  "family.member_name": "Nom du membre de la famille",
+  "family.folder_per_member": "Un dossier par membre de la famille",
+  "family.folder_per_member_hint": "Les nouvelles photos sont enregistrées dans Nom/Année/Mois. Celles déjà reçues ne bougent pas. Astuce : avec un compte Windows par personne, vous pouvez aussi limiter qui ouvre chaque dossier.",
+  "family.everyone": "Tout le monde",
+  "family.show_private": "Afficher « moi seul » ({count})",
+  "family.make_private": "Expéditeur seulement (masquer à la famille)",
+  "family.make_shared": "Partager avec la famille"
 }

@@ -80,6 +80,62 @@ class SettingsPage extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
+              // Family group.
+              Text(tr('family.title'), style: theme.textTheme.titleMedium),
+              const SizedBox(height: 8),
+              Card(
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.badge_rounded),
+                      title: Text(tr('family.your_name')),
+                      subtitle: Text(settings.ownerName.isEmpty ? tr('family.your_name_hint') : settings.ownerName),
+                      trailing: const Icon(Icons.edit_rounded, size: 20),
+                      onTap: () => _editName(context),
+                    ),
+                    const Divider(height: 1),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                      child: Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: Text(tr('family.default_visibility'), style: theme.textTheme.bodyMedium),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: SegmentedButton<bool>(
+                          segments: [
+                            ButtonSegment(value: true, icon: const Icon(Icons.groups_rounded), label: Text(tr('family.shared'))),
+                            ButtonSegment(value: false, icon: const Icon(Icons.lock_rounded), label: Text(tr('family.only_me'))),
+                          ],
+                          selected: {settings.shareWithFamily},
+                          onSelectionChanged: (v) => settings.setShareWithFamily(v.first),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                      child: Text(tr('family.visibility_hint'), style: theme.textTheme.bodySmall),
+                    ),
+                    const Divider(height: 1),
+                    SwitchListTile(
+                      secondary: const Icon(Icons.elderly_rounded),
+                      value: settings.simpleMode,
+                      onChanged: (on) async {
+                        await settings.setSimpleMode(on);
+                        await onAutoSendChanged();
+                        if (on && context.mounted) Navigator.of(context).pop();
+                      },
+                      title: Text(tr('simple.title')),
+                      subtitle: Text(tr('simple.hint')),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
               // Language.
               Text(tr('home.language'), style: theme.textTheme.titleMedium),
               const SizedBox(height: 8),
@@ -107,6 +163,38 @@ class SettingsPage extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+extension on SettingsPage {
+  Future<void> _editName(BuildContext context) async {
+    final ctrl = TextEditingController(text: settings.ownerName);
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr('family.your_name')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: ctrl,
+              autofocus: true,
+              textCapitalization: TextCapitalization.words,
+              onSubmitted: (v) => Navigator.pop(ctx, v),
+            ),
+            const SizedBox(height: 8),
+            Text(tr('family.your_name_explain'), style: Theme.of(ctx).textTheme.bodySmall),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('common.cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, ctrl.text), child: Text(tr('common.ok'))),
+        ],
+      ),
+    );
+    ctrl.dispose();
+    if (name != null) await settings.setOwnerName(name);
   }
 }
 

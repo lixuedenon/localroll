@@ -129,5 +129,18 @@
   "receive.blocked_fix": "放行 LocalRoll",
   "identity.images": "圖片",
   "settings.version": "版本 {version}",
-  "viewer.live": "原況"
+  "viewer.live": "原況",
+  "common.ok": "確定",
+  "common.cancel": "取消",
+  "family.title": "家庭成員",
+  "family.hint": "每部配對的手機屬於一位家人。同一個人的多部手機會合併，顯示為「張三 1」「張三 2」。名字來自手機上的設定，也可以在這裡修改。",
+  "family.rename": "改名",
+  "family.move": "改為其他家人的…",
+  "family.member_name": "家人的名字",
+  "family.folder_per_member": "按家人分資料夾儲存",
+  "family.folder_per_member_hint": "新照片會存成 名字/年/月。已經收到的照片位置不變。提示：如果每個人有自己的 Windows 帳戶，還可以限制誰能打開各自的資料夾。",
+  "family.everyone": "全家",
+  "family.show_private": "顯示僅本人可見的（{count}）",
+  "family.make_private": "僅本人可見（對家人隱藏）",
+  "family.make_shared": "家人可見"
 }

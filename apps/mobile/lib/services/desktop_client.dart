@@ -76,6 +76,13 @@ class DesktopClient {
   /// "Forget this PC": ask the PC to drop its trust in this phone.
   Future<void> unpair() async => _send('DELETE', LrProtocol.pathPair, timeout: const Duration(seconds: 3));
 
+  /// Family group: who may see items this phone already sent.
+  Future<void> setVisibility(List<String> assetIds, {required bool private}) async => _send(
+        'POST',
+        LrProtocol.pathVisibility,
+        json: VisibilityRequest(assetIds: assetIds, private: private).toJson(),
+      );
+
   /// Assets of this phone deleted on the PC since [sinceMs].
   Future<ChangesResponse> changes(int sinceMs) async => ChangesResponse.fromJson(
       await _send('GET', LrProtocol.pathChanges, query: {'since': '$sinceMs'}, timeout: const Duration(seconds: 5)));

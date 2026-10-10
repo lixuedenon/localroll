@@ -129,5 +129,18 @@
   "receive.blocked_fix": "LocalRoll’a izin ver",
   "identity.images": "Görseller",
   "settings.version": "Sürüm {version}",
-  "viewer.live": "Live"
+  "viewer.live": "Live",
+  "common.ok": "Tamam",
+  "common.cancel": "İptal",
+  "family.title": "Aile",
+  "family.hint": "Eşleştirilen her telefon bir aile üyesine aittir. Aynı kişinin birden çok cihazı gruplanır ve “Ayşe 1”, “Ayşe 2” olarak gösterilir. Ad telefondan gelir, burada değiştirilebilir.",
+  "family.rename": "Yeniden adlandır",
+  "family.move": "Başka bir aile üyesine ait…",
+  "family.member_name": "Aile üyesinin adı",
+  "family.folder_per_member": "Her aile üyesi için ayrı klasör",
+  "family.folder_per_member_hint": "Yeni fotoğraflar Ad/Yıl/Ay olarak kaydedilir. Önceden alınanlar yerinde kalır. İpucu: Kişi başına ayrı Windows hesabı varsa her klasörü kimin açabileceğini de sınırlayabilirsiniz.",
+  "family.everyone": "Herkes",
+  "family.show_private": "“Yalnızca ben” öğelerini göster ({count})",
+  "family.make_private": "Yalnızca gönderen (aileden gizle)",
+  "family.make_shared": "Aileyle paylaş"
 }

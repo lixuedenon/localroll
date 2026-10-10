@@ -164,6 +164,14 @@ class TransferServer extends ChangeNotifier {
       if (req.method == 'POST' && path == LrProtocol.pathVerify) {
         return await _verify(req, device);
       }
+      if (req.method == 'POST' && path == LrProtocol.pathVisibility) {
+        final body = VisibilityRequest.fromJson(await _readJson(req));
+        final items = [
+          for (final id in body.assetIds) ?library.findByAsset(device.id, id),
+        ];
+        library.setPrivate(items, body.private);
+        return _json(res, 200, {'updated': items.length});
+      }
       if (req.method == 'GET' && path == LrProtocol.pathChanges) {
         final since = int.tryParse(req.uri.queryParameters['since'] ?? '') ?? 0;
         return _json(
@@ -245,6 +253,9 @@ class TransferServer extends ChangeNotifier {
         platform: body.device.platform,
         token: token,
         pairedMs: DateTime.now().millisecondsSinceEpoch,
+        owner: body.device.owner,
+        // Paired again (e.g. after "Forget"): keep the member chosen here.
+        memberName: s.trusted[body.device.id]?.memberName,
       );
     });
     rotatePin();
@@ -329,6 +340,9 @@ class TransferServer extends ChangeNotifier {
           platform: p.device.platform,
           token: token,
           pairedMs: DateTime.now().millisecondsSinceEpoch,
+        owner: p.device.owner,
+        // Paired again (e.g. after "Forget"): keep the member chosen here.
+        memberName: s.trusted[p.device.id]?.memberName,
         );
       });
       p.token = token;
@@ -341,6 +355,11 @@ class TransferServer extends ChangeNotifier {
 
   Future<void> _createSession(HttpRequest req, TrustedDevice device) async {
     final body = SessionRequest.fromJson(await _readJson(req));
+    // Family group: the phone tells us whose phone it is (editable there).
+    final owner = body.owner?.trim();
+    if (owner != null && owner != (device.owner ?? '')) {
+      await settings.update((s) => s.trusted[device.id]?.owner = owner.isEmpty ? null : owner);
+    }
     _sessions.removeWhere(
       (_, s) => DateTime.now().difference(s.lastSeen) > const Duration(hours: 6),
     );
@@ -450,7 +469,10 @@ class TransferServer extends ChangeNotifier {
 
     final captured = DateTime.fromMillisecondsSinceEpoch(offer.createdMs);
     final sep = Platform.pathSeparator;
-    var folder = '${library.rootPath}$sep${captured.year}$sep${captured.month.toString().padLeft(2, '0')}';
+    // Family group option: one folder per person (<member>/<year>/<month>).
+    final member = settings.folderPerMember ? settings.family.memberOf(device.id) : null;
+    final base = member == null ? library.rootPath : '${library.rootPath}$sep${sanitizeFileName(member)}';
+    var folder = '$base$sep${captured.year}$sep${captured.month.toString().padLeft(2, '0')}';
     var fileName = sanitizeFileName(offer.name);
     // Live Photo video: next to its photo, same name (IMG_1234.HEIC + IMG_1234.MOV),
     // the way iPhone exports pair them.
@@ -485,6 +507,7 @@ class TransferServer extends ChangeNotifier {
       deviceId: device.id,
       deviceName: device.name,
       assetId: offer.assetId,
+      private: offer.private,
     ));
     hub.progress(t, length);
     hub.setState(t, TransferState.saved);

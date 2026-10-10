@@ -19,6 +19,7 @@ class MediaItem {
     this.deviceId,
     this.deviceName,
     this.assetId,
+    this.private = false,
   });
 
   /// Path relative to the library root, always with '/' separators.
@@ -32,6 +33,9 @@ class MediaItem {
   final String? deviceId;
   final String? deviceName;
   final String? assetId;
+
+  /// Family group: "only me" — hidden from the family view.
+  bool private;
 
   DateTime get captureTime => DateTime.fromMillisecondsSinceEpoch(captureMs);
   String get extension => extensionOf(name);
@@ -47,6 +51,7 @@ class MediaItem {
         if (deviceId != null) 'deviceId': deviceId,
         if (deviceName != null) 'deviceName': deviceName,
         if (assetId != null) 'assetId': assetId,
+        if (private) 'private': true,
       };
 
   factory MediaItem.fromJson(Map<String, dynamic> j) => MediaItem(
@@ -60,6 +65,7 @@ class MediaItem {
         deviceId: j['deviceId'] as String?,
         deviceName: j['deviceName'] as String?,
         assetId: j['assetId'] as String?,
+        private: j['private'] == true,
       );
 }
 
@@ -164,6 +170,16 @@ class LibraryIndex extends ChangeNotifier {
     _items.removeWhere((i) => i.relPath == item.relPath);
     _items.add(item);
     _sort();
+    _scheduleSave();
+    notifyListeners();
+  }
+
+  /// Family group: mark items (and their Live Photo videos) "only me" or
+  /// visible to the family.
+  void setPrivate(Iterable<MediaItem> items, bool value) {
+    for (final i in withLive(items)) {
+      i.private = value;
+    }
     _scheduleSave();
     notifyListeners();
   }

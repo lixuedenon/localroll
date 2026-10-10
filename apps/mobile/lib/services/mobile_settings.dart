@@ -92,6 +92,17 @@ class MobileSettings extends ChangeNotifier {
   int autoSendSinceMs = 0;
   final Map<String, Set<String>> _sent = {};
 
+  /// Family group: whose phone this is ("Mum"). Phones with the same name
+  /// are one family member on the PC ("Mum 1", "Mum 2").
+  String ownerName = '';
+
+  /// Family group: new uploads are visible to the family (true) or
+  /// "only me" (false). Each item can be changed later.
+  bool shareWithFamily = true;
+
+  /// Simple mode for elders: big text, one big "send" button, auto-send on.
+  bool simpleMode = false;
+
   static Future<MobileSettings> load() async {
     final prefs = await SharedPreferences.getInstance();
     final s = MobileSettings._(prefs);
@@ -100,6 +111,9 @@ class MobileSettings extends ChangeNotifier {
     s.language = prefs.getString('language');
     s.autoSend = prefs.getBool('autoSend') ?? false;
     s.autoSendSinceMs = prefs.getInt('autoSendSinceMs') ?? 0;
+    s.ownerName = prefs.getString('ownerName') ?? '';
+    s.shareWithFamily = prefs.getBool('shareWithFamily') ?? true;
+    s.simpleMode = prefs.getBool('simpleMode') ?? false;
     final raw = prefs.getString('desktops');
     if (raw != null) {
       try {
@@ -119,6 +133,7 @@ class MobileSettings extends ChangeNotifier {
         name: deviceName,
         platform: Platform.operatingSystem,
         protocolVersion: LrProtocol.version,
+        owner: ownerName.trim().isEmpty ? null : ownerName.trim(),
       );
 
   PairedDesktop? get current {
@@ -190,6 +205,29 @@ class MobileSettings extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> setOwnerName(String name) async {
+    ownerName = name.trim();
+    await _save();
+    notifyListeners();
+  }
+
+  Future<void> setShareWithFamily(bool share) async {
+    shareWithFamily = share;
+    await _save();
+    notifyListeners();
+  }
+
+  /// Simple mode also switches auto-send on: nothing to remember.
+  Future<void> setSimpleMode(bool on) async {
+    simpleMode = on;
+    if (on && !autoSend) {
+      autoSend = true;
+      autoSendSinceMs = DateTime.now().millisecondsSinceEpoch;
+    }
+    await _save();
+    notifyListeners();
+  }
+
   /// Items deleted on the PC that are still on this phone: no backup any
   /// more. Shown as a warning on the home screen until re-sent or dismissed.
   Set<String> lostOn(String desktopId) =>
@@ -243,6 +281,9 @@ class MobileSettings extends ChangeNotifier {
     await _prefs.setString('desktops', jsonEncode(desktops.map((d) => d.toJson()).toList()));
     await _prefs.setBool('autoSend', autoSend);
     await _prefs.setInt('autoSendSinceMs', autoSendSinceMs);
+    await _prefs.setString('ownerName', ownerName);
+    await _prefs.setBool('shareWithFamily', shareWithFamily);
+    await _prefs.setBool('simpleMode', simpleMode);
     if (language == null) {
       await _prefs.remove('language');
     } else {

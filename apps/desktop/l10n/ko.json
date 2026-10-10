@@ -129,5 +129,18 @@
   "receive.blocked_fix": "LocalRoll 허용",
   "identity.images": "이미지",
   "settings.version": "버전 {version}",
-  "viewer.live": "라이브"
+  "viewer.live": "라이브",
+  "common.ok": "확인",
+  "common.cancel": "취소",
+  "family.title": "가족",
+  "family.hint": "페어링된 휴대폰은 각각 가족 한 명에게 속합니다. 한 사람의 여러 기기는 묶여서 “민지 1”, “민지 2”로 표시됩니다. 이름은 휴대폰 설정에서 오며 여기서 바꿀 수도 있습니다.",
+  "family.rename": "이름 바꾸기",
+  "family.move": "다른 가족의 기기로 바꾸기…",
+  "family.member_name": "가족 이름",
+  "family.folder_per_member": "가족별로 폴더 나누기",
+  "family.folder_per_member_hint": "새 사진은 이름/연도/월 폴더에 저장됩니다. 이미 받은 사진은 그대로입니다. 팁: 사람마다 Windows 계정이 있으면 각 폴더를 열 수 있는 사람을 제한할 수도 있습니다.",
+  "family.everyone": "모두",
+  "family.show_private": "‘나만’ 항목 보기 ({count})",
+  "family.make_private": "보낸 사람만(가족에게 숨기기)",
+  "family.make_shared": "가족과 공유"
 }

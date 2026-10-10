@@ -129,5 +129,18 @@
   "receive.blocked_fix": "放行 LocalRoll",
   "identity.images": "图片",
   "settings.version": "版本 {version}",
-  "viewer.live": "实况"
+  "viewer.live": "实况",
+  "common.ok": "确定",
+  "common.cancel": "取消",
+  "family.title": "家庭成员",
+  "family.hint": "每部配对的手机属于一位家人。同一个人的多部手机会合并，显示为“张三 1”“张三 2”。名字来自手机上的设置，也可以在这里修改。",
+  "family.rename": "改名",
+  "family.move": "改为其他家人的…",
+  "family.member_name": "家人的名字",
+  "family.folder_per_member": "按家人分文件夹保存",
+  "family.folder_per_member_hint": "新照片会存成 名字/年/月。已经收到的照片位置不变。提示：如果每个人有自己的 Windows 账户，还可以限制谁能打开各自的文件夹。",
+  "family.everyone": "全家",
+  "family.show_private": "显示仅本人可见的（{count}）",
+  "family.make_private": "仅本人可见（对家人隐藏）",
+  "family.make_shared": "家人可见"
 }

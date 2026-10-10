@@ -129,5 +129,18 @@
   "receive.blocked_fix": "Liberar LocalRoll",
   "identity.images": "Imagens",
   "settings.version": "Versão {version}",
-  "viewer.live": "Live"
+  "viewer.live": "Live",
+  "common.ok": "OK",
+  "common.cancel": "Cancelar",
+  "family.title": "Família",
+  "family.hint": "Cada telefone pareado pertence a um membro da família. Os de uma mesma pessoa são agrupados e aparecem como “Ana 1”, “Ana 2”. O nome vem do telefone e pode ser alterado aqui.",
+  "family.rename": "Renomear",
+  "family.move": "Pertence a outro membro…",
+  "family.member_name": "Nome do familiar",
+  "family.folder_per_member": "Uma pasta por membro da família",
+  "family.folder_per_member_hint": "Fotos novas são salvas como Nome/Ano/Mês. As já recebidas ficam onde estão. Dica: com uma conta do Windows por pessoa, você também pode limitar quem abre cada pasta.",
+  "family.everyone": "Todos",
+  "family.show_private": "Mostrar “só eu” ({count})",
+  "family.make_private": "Só quem enviou (ocultar da família)",
+  "family.make_shared": "Compartilhar com a família"
 }

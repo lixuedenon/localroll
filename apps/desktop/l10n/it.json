@@ -129,5 +129,18 @@
   "receive.blocked_fix": "Consenti LocalRoll",
   "identity.images": "Immagini",
   "settings.version": "Versione {version}",
-  "viewer.live": "Live"
+  "viewer.live": "Live",
+  "common.ok": "OK",
+  "common.cancel": "Annulla",
+  "family.title": "Famiglia",
+  "family.hint": "Ogni telefono abbinato appartiene a un familiare. I dispositivi di una stessa persona vengono raggruppati e mostrati come «Anna 1», «Anna 2». Il nome arriva dal telefono e si può cambiare qui.",
+  "family.rename": "Rinomina",
+  "family.move": "Appartiene a un altro familiare…",
+  "family.member_name": "Nome del familiare",
+  "family.folder_per_member": "Una cartella per ogni familiare",
+  "family.folder_per_member_hint": "Le nuove foto vengono salvate come Nome/Anno/Mese. Quelle già ricevute restano dove sono. Suggerimento: con un account Windows per persona puoi anche limitare chi apre ogni cartella.",
+  "family.everyone": "Tutti",
+  "family.show_private": "Mostra «solo io» ({count})",
+  "family.make_private": "Solo chi l’ha inviato (nascondi alla famiglia)",
+  "family.make_shared": "Condividi con la famiglia"
 }

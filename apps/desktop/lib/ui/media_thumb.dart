@@ -86,6 +86,13 @@ class _MediaThumbState extends State<MediaThumb> {
             child: Icon(Icons.play_circle_fill, color: Colors.white, size: 22,
                 shadows: [Shadow(blurRadius: 4, color: Colors.black54)]),
           ),
+        if (widget.item.private)
+          const Positioned(
+            right: 6,
+            top: 6,
+            child: Icon(Icons.lock_rounded, color: Colors.white, size: 18,
+                shadows: [Shadow(blurRadius: 4, color: Colors.black54)]),
+          ),
         // Live Photo: the same concentric-rings mark iPhone uses.
         if (widget.library.liveFor(widget.item) != null)
           const Positioned(

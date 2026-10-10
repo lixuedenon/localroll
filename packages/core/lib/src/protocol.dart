@@ -42,6 +42,9 @@ class LrProtocol {
   /// given assets so the phone only deletes what is provably on the PC.
   static const String pathVerify = '/api/v1/verify';
 
+  /// POST {assetIds, private}: family visibility of items this phone sent.
+  static const String pathVisibility = '/api/v1/visibility';
+
   /// Assets per verify request (each one is re-hashed on the PC).
   static const int verifyBatch = 100;
 

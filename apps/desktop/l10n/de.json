@@ -129,5 +129,18 @@
   "receive.blocked_fix": "LocalRoll zulassen",
   "identity.images": "Bilder",
   "settings.version": "Version {version}",
-  "viewer.live": "Live"
+  "viewer.live": "Live",
+  "common.ok": "OK",
+  "common.cancel": "Abbrechen",
+  "family.title": "Familie",
+  "family.hint": "Jedes gekoppelte Handy gehört zu einem Familienmitglied. Mehrere Geräte einer Person werden zusammengefasst und als „Anna 1“, „Anna 2“ angezeigt. Der Name kommt vom Handy und lässt sich hier ändern.",
+  "family.rename": "Umbenennen",
+  "family.move": "Gehört einem anderen Familienmitglied…",
+  "family.member_name": "Name des Familienmitglieds",
+  "family.folder_per_member": "Ein Ordner pro Familienmitglied",
+  "family.folder_per_member_hint": "Neue Fotos werden unter Name/Jahr/Monat gespeichert. Bereits empfangene bleiben, wo sie sind. Tipp: Mit eigenem Windows-Konto pro Person lässt sich auch festlegen, wer welchen Ordner öffnen darf.",
+  "family.everyone": "Alle",
+  "family.show_private": "„Nur ich“ anzeigen ({count})",
+  "family.make_private": "Nur Absender (vor Familie verbergen)",
+  "family.make_shared": "Mit Familie teilen"
 }

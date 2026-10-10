@@ -28,21 +28,81 @@ class _LibraryPageState extends State<LibraryPage> {
   _Filter _filter = _Filter.all;
   final Set<String> _selected = {};
 
+  /// Family group: show one member only (null = everyone).
+  String? _member;
+
+  /// "Only me" items are hidden until this is switched on.
+  bool _showPrivate = false;
+
   bool get _selecting => _selected.isNotEmpty;
 
-  List<MediaItem> _visible(List<MediaItem> all) => switch (_filter) {
-        _Filter.all => all,
-        _Filter.photos => all.where((i) => i.kind == MediaKind.image).toList(),
-        _Filter.videos => all.where((i) => i.kind == MediaKind.video).toList(),
-      };
+  /// Who sent [i]: the family member of its phone, or the phone's name if it
+  /// is no longer paired.
+  String _memberOf(FamilyDirectory family, MediaItem i) =>
+      (i.deviceId == null ? null : family.memberOf(i.deviceId!)) ?? i.deviceName ?? '?';
+
+  List<MediaItem> _visible(List<MediaItem> all, FamilyDirectory family) => [
+        for (final i in all)
+          if ((_filter == _Filter.all ||
+                  (_filter == _Filter.photos && i.kind == MediaKind.image) ||
+                  (_filter == _Filter.videos && i.kind == MediaKind.video)) &&
+              (_showPrivate || !i.private) &&
+              (_member == null || FamilyDirectory.keyOf(_memberOf(family, i)) == FamilyDirectory.keyOf(_member!)))
+            i,
+      ];
+
+  /// Member chips + "show only-me items", shown once there is a family.
+  PreferredSizeWidget? _familyBar(List<MediaItem> all, FamilyDirectory family) {
+    final members = {for (final i in all) _memberOf(family, i)}.toList();
+    final privateCount = all.where((i) => i.private).length;
+    if (members.length < 2 && privateCount == 0) return null;
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(52),
+      child: SizedBox(
+        height: 52,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          children: [
+            if (members.length >= 2) ...[
+              ChoiceChip(
+                avatar: const Icon(Icons.groups_rounded, size: 18),
+                label: Text(tr('family.everyone')),
+                selected: _member == null,
+                onSelected: (_) => setState(() => _member = null),
+              ),
+              for (final m in members) ...[
+                const SizedBox(width: 8),
+                ChoiceChip(
+                  label: Text(m),
+                  selected: _member != null && FamilyDirectory.keyOf(_member!) == FamilyDirectory.keyOf(m),
+                  onSelected: (_) => setState(() => _member = m),
+                ),
+              ],
+              const SizedBox(width: 16),
+            ],
+            if (privateCount > 0)
+              FilterChip(
+                avatar: Icon(_showPrivate ? Icons.lock_open_rounded : Icons.lock_rounded, size: 18),
+                label: Text(tr('family.show_private', {'count': privateCount})),
+                selected: _showPrivate,
+                onSelected: (v) => setState(() => _showPrivate = v),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final s = widget.services;
     return ListenableBuilder(
-      listenable: s.library,
+      listenable: Listenable.merge([s.library, s.settings]),
       builder: (context, _) {
-        final items = _visible(s.library.items);
+        final family = s.settings.family;
+        final all = s.library.items;
+        final items = _visible(all, family);
         _selected.removeWhere((p) => !items.any((i) => i.relPath == p));
         return Scaffold(
           appBar: AppBar(
@@ -95,6 +155,7 @@ class _LibraryPageState extends State<LibraryPage> {
               ],
               const SizedBox(width: 8),
             ],
+            bottom: _familyBar(all, family),
           ),
           body: items.isEmpty ? _empty(context) : _grid(context, items),
         );
@@ -164,6 +225,11 @@ class _LibraryPageState extends State<LibraryPage> {
         PopupMenuItem(value: 'export', child: _menuRow(Icons.drive_file_move_rounded, tr('lib.export'))),
         if (targets.length == 1)
           PopupMenuItem(value: 'reveal', child: _menuRow(Icons.folder_open_rounded, tr('common.show_in_folder'))),
+        // Family group: who may see it.
+        if (targets.any((i) => !i.private))
+          PopupMenuItem(value: 'private', child: _menuRow(Icons.lock_rounded, tr('family.make_private'))),
+        if (targets.any((i) => i.private))
+          PopupMenuItem(value: 'shared', child: _menuRow(Icons.groups_rounded, tr('family.make_shared'))),
         const PopupMenuDivider(),
         PopupMenuItem(
           value: 'delete',
@@ -186,6 +252,9 @@ class _LibraryPageState extends State<LibraryPage> {
         await _export(targets);
       case 'reveal':
         revealInExplorer(s.library.absPath(item));
+      case 'private' || 'shared':
+        s.library.setPrivate(targets, choice == 'private');
+        setState(_selected.clear);
       case 'delete':
         await _delete(targets);
       default:

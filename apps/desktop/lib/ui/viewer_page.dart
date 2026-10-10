@@ -72,6 +72,10 @@ class _ViewerPageState extends State<ViewerPage> {
     messenger.showSnackBar(SnackBar(content: Text(tr('lib.deleted', {'count': n}))));
   }
 
+  /// "Anna 2" (family member + device number), else the phone's name.
+  String? _from(MediaItem item) =>
+      (item.deviceId == null ? null : widget.services.settings.family.labelOf(item.deviceId!)) ?? item.deviceName;
+
   void _go(int delta) {
     final next = _index + delta;
     if (next < 0 || next >= widget.items.length) return;
@@ -102,7 +106,8 @@ class _ViewerPageState extends State<ViewerPage> {
               Text(item.name, style: const TextStyle(fontSize: 16)),
               Text(
                 '${formatDate(item.captureTime)} · ${formatBytes(item.size)}'
-                '${item.deviceName != null ? ' · ${tr('viewer.from', {'name': item.deviceName})}' : ''}',
+                '${_from(item) != null ? ' · ${tr('viewer.from', {'name': _from(item)})}' : ''}'
+                '${item.private ? ' · 🔒' : ''}',
                 style: const TextStyle(fontSize: 12, color: Colors.white70),
               ),
             ],

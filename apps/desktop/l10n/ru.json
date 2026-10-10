@@ -129,5 +129,18 @@
   "receive.blocked_fix": "Разрешить LocalRoll",
   "identity.images": "Изображения",
   "settings.version": "Версия {version}",
-  "viewer.live": "Live"
+  "viewer.live": "Live",
+  "common.ok": "ОК",
+  "common.cancel": "Отмена",
+  "family.title": "Семья",
+  "family.hint": "Каждый сопряжённый телефон принадлежит члену семьи. Устройства одного человека объединяются и показываются как «Анна 1», «Анна 2». Имя приходит с телефона, его можно изменить здесь.",
+  "family.rename": "Переименовать",
+  "family.move": "Принадлежит другому члену семьи…",
+  "family.member_name": "Имя члена семьи",
+  "family.folder_per_member": "Отдельная папка для каждого",
+  "family.folder_per_member_hint": "Новые фото сохраняются как Имя/Год/Месяц. Уже полученные остаются на месте. Совет: если у каждого своя учётная запись Windows, можно ограничить доступ к папкам.",
+  "family.everyone": "Все",
+  "family.show_private": "Показать «только я» ({count})",
+  "family.make_private": "Только отправитель (скрыть от семьи)",
+  "family.make_shared": "Показывать семье"
 }

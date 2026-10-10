@@ -12,10 +12,15 @@ class DeviceInfo {
     this.icon,
     this.color,
     this.avatar = 0,
+    this.owner,
   });
 
   final String id;
   final String name;
+
+  /// Family group: the person this phone belongs to ("Mum"), as typed on the
+  /// phone. Phones with the same owner are one family member on the PC.
+  final String? owner;
 
   /// 'windows', 'ios', 'android', ...
   final String platform;
@@ -37,6 +42,7 @@ class DeviceInfo {
         if (icon != null) 'icon': icon,
         if (color != null) 'color': color,
         if (avatar != 0) 'avatar': avatar,
+        if (owner != null && owner!.isNotEmpty) 'owner': owner,
       };
 
   factory DeviceInfo.fromJson(Map<String, dynamic> j) => DeviceInfo(
@@ -48,6 +54,7 @@ class DeviceInfo {
         icon: j['icon'] as String?,
         color: (j['color'] as num?)?.toInt(),
         avatar: (j['avatar'] as num?)?.toInt() ?? 0,
+        owner: j['owner'] as String?,
       );
 }
 
@@ -92,6 +99,7 @@ class FileOffer {
     required this.createdMs,
     required this.modifiedMs,
     this.size,
+    this.private = false,
   });
 
   /// Unique within the session (client generated).
@@ -114,6 +122,9 @@ class FileOffer {
   /// Byte size if already known.
   final int? size;
 
+  /// Family group: "only me" — not shown to other family members.
+  final bool private;
+
   Map<String, dynamic> toJson() => {
         'id': id,
         'assetId': assetId,
@@ -122,6 +133,7 @@ class FileOffer {
         'createdMs': createdMs,
         'modifiedMs': modifiedMs,
         if (size != null) 'size': size,
+        if (private) 'private': true,
       };
 
   factory FileOffer.fromJson(Map<String, dynamic> j) => FileOffer(
@@ -132,6 +144,7 @@ class FileOffer {
         createdMs: (j['createdMs'] as num).toInt(),
         modifiedMs: (j['modifiedMs'] as num?)?.toInt() ?? 0,
         size: (j['size'] as num?)?.toInt(),
+        private: j['private'] == true,
       );
 }
 
@@ -161,16 +174,39 @@ class OfferResult {
 }
 
 class SessionRequest {
-  const SessionRequest({required this.files});
+  const SessionRequest({required this.files, this.owner});
 
   final List<FileOffer> files;
 
-  Map<String, dynamic> toJson() => {'files': files.map((f) => f.toJson()).toList()};
+  /// The phone's current owner name (family group); the PC keeps it in sync.
+  final String? owner;
+
+  Map<String, dynamic> toJson() => {
+        'files': files.map((f) => f.toJson()).toList(),
+        if (owner != null) 'owner': owner,
+      };
 
   factory SessionRequest.fromJson(Map<String, dynamic> j) => SessionRequest(
         files: (j['files'] as List)
             .map((e) => FileOffer.fromJson(e as Map<String, dynamic>))
             .toList(),
+        owner: j['owner'] as String?,
+      );
+}
+
+/// Phone -> PC: change who may see items this phone sent ("only me" or
+/// the whole family). Live Photo videos follow their photo.
+class VisibilityRequest {
+  const VisibilityRequest({required this.assetIds, required this.private});
+
+  final List<String> assetIds;
+  final bool private;
+
+  Map<String, dynamic> toJson() => {'assetIds': assetIds, 'private': private};
+
+  factory VisibilityRequest.fromJson(Map<String, dynamic> j) => VisibilityRequest(
+        assetIds: (j['assetIds'] as List).cast<String>(),
+        private: j['private'] == true,
       );
 }
 

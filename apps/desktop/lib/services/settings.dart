@@ -15,6 +15,8 @@ class TrustedDevice {
     required this.platform,
     required this.token,
     required this.pairedMs,
+    this.owner,
+    this.memberName,
   });
 
   final String id;
@@ -23,12 +25,23 @@ class TrustedDevice {
   final String token;
   final int pairedMs;
 
+  /// Family group: the person's name as typed on the phone.
+  String? owner;
+
+  /// Family group: member name chosen on this PC (wins over [owner]).
+  String? memberName;
+
+  FamilyDevice get family =>
+      FamilyDevice(id: id, deviceName: name, pairedMs: pairedMs, owner: owner, memberOverride: memberName);
+
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
         'platform': platform,
         'token': token,
         'pairedMs': pairedMs,
+        if (owner != null) 'owner': owner,
+        if (memberName != null) 'memberName': memberName,
       };
 
   factory TrustedDevice.fromJson(Map<String, dynamic> j) => TrustedDevice(
@@ -37,6 +50,8 @@ class TrustedDevice {
         platform: j['platform'] as String? ?? 'unknown',
         token: j['token'] as String,
         pairedMs: (j['pairedMs'] as num?)?.toInt() ?? 0,
+        owner: j['owner'] as String?,
+        memberName: j['memberName'] as String?,
       );
 }
 
@@ -69,6 +84,13 @@ class AppSettings extends ChangeNotifier {
   static String get originalName => _defaultDeviceName();
   final Map<String, TrustedDevice> trusted = {};
 
+  /// Family group: store originals as <member>/<year>/<month> instead of
+  /// <year>/<month>.
+  bool folderPerMember = false;
+
+  /// Paired phones grouped into family members.
+  FamilyDirectory get family => FamilyDirectory(trusted.values.map((t) => t.family));
+
   static Future<AppSettings> load() async {
     final dir = await getApplicationSupportDirectory();
     await dir.create(recursive: true);
@@ -91,6 +113,7 @@ class AppSettings extends ChangeNotifier {
     s.iconKey = j['iconKey'] as String? ?? DeviceLook.randomIcon();
     s.colorValue = (j['colorValue'] as num?)?.toInt() ?? DeviceLook.randomColor();
     s.avatarVersion = (j['avatarVersion'] as num?)?.toInt() ?? 0;
+    s.folderPerMember = j['folderPerMember'] == true;
     if (s.avatarVersion != 0 && !await s.avatarFile.exists()) s.avatarVersion = 0;
     for (final t in (j['trusted'] as List? ?? const [])) {
       final d = TrustedDevice.fromJson(t as Map<String, dynamic>);
@@ -122,6 +145,7 @@ class AppSettings extends ChangeNotifier {
       'iconKey': iconKey,
       'colorValue': colorValue,
       'avatarVersion': avatarVersion,
+      'folderPerMember': folderPerMember,
       'trusted': trusted.values.map((t) => t.toJson()).toList(),
     }));
     await tmp.rename(_file.path);

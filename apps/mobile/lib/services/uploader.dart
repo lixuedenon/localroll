@@ -117,6 +117,7 @@ class Uploader extends ChangeNotifier {
           kind: a.type == AssetType.video ? MediaKind.video : MediaKind.image,
           createdMs: a.createDateTime.millisecondsSinceEpoch,
           modifiedMs: a.modifiedDateTime.millisecondsSinceEpoch,
+          private: !settings.shareWithFamily,
         ),
         // Original bytes, no transcoding. Downloads from iCloud if needed.
         () => a.originFile,
@@ -135,6 +136,7 @@ class Uploader extends ChangeNotifier {
             kind: MediaKind.video,
             createdMs: a.createDateTime.millisecondsSinceEpoch,
             modifiedMs: a.modifiedDateTime.millisecondsSinceEpoch,
+            private: !settings.shareWithFamily,
           ),
           () => a.originFileWithSubtype,
         );
@@ -157,7 +159,7 @@ class Uploader extends ChangeNotifier {
   /// Returns false when it was a duplicate (nothing sent).
   Future<bool> _sendFile(UploadItem it, FileOffer offer, Future<File?> Function() open) async {
     // Ask first: if the PC already has it we skip without reading the file.
-    final session = await client.createSession(SessionRequest(files: [offer]));
+    final session = await client.createSession(SessionRequest(files: [offer], owner: settings.ownerName));
     final result = session.results[offer.id] ?? const OfferResult(status: OfferStatus.ready);
     if (result.status == OfferStatus.duplicate) return false;
 
