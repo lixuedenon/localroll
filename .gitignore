@@ -42,3 +42,6 @@ build/
 *.HEIC
 ffmpeg.exe
 ffprobe.exe
+
+# Small EXIF test images are part of the tests.
+!packages/core/test/fixtures/*.heic
