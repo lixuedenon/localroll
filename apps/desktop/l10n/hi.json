@@ -128,5 +128,6 @@
   "receive.blocked_firewall": "Windows फ़ायरवॉल ने अभी LocalRoll को अनुमति नहीं दी है। एक बार अनुमति दें (Windows पुष्टि माँगेगा)।",
   "receive.blocked_fix": "LocalRoll को अनुमति दें",
   "identity.images": "चित्र",
-  "settings.version": "संस्करण {version}"
+  "settings.version": "संस्करण {version}",
+  "viewer.live": "Live"
 }

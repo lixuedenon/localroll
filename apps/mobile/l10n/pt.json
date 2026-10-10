@@ -122,5 +122,7 @@
   "ios.camera": "Leia o QR code de pareamento exibido no seu computador.",
   "ios.local_network": "Encontra e conecta-se a computadores com o LocalRoll na sua rede local. Os arquivos nunca passam pela nuvem.",
   "bg.channel": "Transferências",
-  "settings.version": "Versão {version}"
+  "settings.version": "Versão {version}",
+  "cleanup.icloud": "Se o Fotos do iCloud estiver ativado, apagar aqui também remove do iCloud e dos seus outros dispositivos Apple. A cópia em {pc} continua lá.",
+  "cleanup.lost_no_live": "Falta o vídeo Live"
 }

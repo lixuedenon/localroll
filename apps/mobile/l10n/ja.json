@@ -122,5 +122,7 @@
   "ios.camera": "パソコンに表示されたペアリング用QRコードを読み取ります。",
   "ios.local_network": "ローカルネットワーク上で LocalRoll を実行中のパソコンを探して接続します。ファイルがクラウドを経由することはありません。",
   "bg.channel": "転送",
-  "settings.version": "バージョン {version}"
+  "settings.version": "バージョン {version}",
+  "cleanup.icloud": "iCloud写真がオンの場合、ここで削除すると iCloud とほかの Apple デバイスからも削除されます。{pc} のコピーは残ります。",
+  "cleanup.lost_no_live": "Live の動画がありません"
 }

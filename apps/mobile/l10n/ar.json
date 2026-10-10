@@ -122,5 +122,7 @@
   "ios.camera": "امسح رمز QR للاقتران المعروض على حاسوبك.",
   "ios.local_network": "يبحث عن الحواسيب التي تشغّل LocalRoll على شبكتك المحلية ويتصل بها. لا تمر الملفات عبر السحابة أبدًا.",
   "bg.channel": "عمليات النقل",
-  "settings.version": "الإصدار {version}"
+  "settings.version": "الإصدار {version}",
+  "cleanup.icloud": "إذا كانت صور iCloud مفعّلة، فالحذف هنا يحذفها أيضًا من iCloud ومن أجهزة Apple الأخرى. تبقى النسخة الموجودة على {pc}.",
+  "cleanup.lost_no_live": "فيديو Live مفقود"
 }

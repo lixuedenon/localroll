@@ -122,5 +122,7 @@
   "ios.camera": "扫描电脑上显示的配对二维码。",
   "ios.local_network": "在局域网中查找并连接运行 LocalRoll 的电脑。文件不会经过云端。",
   "bg.channel": "传输",
-  "settings.version": "版本 {version}"
+  "settings.version": "版本 {version}",
+  "cleanup.icloud": "如果开启了 iCloud 照片，在这里删除会同时从 iCloud 和你的其他苹果设备上删除。{pc} 上的备份不受影响。",
+  "cleanup.lost_no_live": "缺少实况视频"
 }

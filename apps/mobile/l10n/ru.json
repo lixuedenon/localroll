@@ -122,5 +122,7 @@
   "ios.camera": "Отсканируйте QR-код сопряжения на экране компьютера.",
   "ios.local_network": "Поиск и подключение к компьютерам с LocalRoll в локальной сети. Файлы никогда не проходят через облако.",
   "bg.channel": "Передача файлов",
-  "settings.version": "Версия {version}"
+  "settings.version": "Версия {version}",
+  "cleanup.icloud": "Если включены «Фото iCloud», удаление здесь удалит их и из iCloud, и с других ваших устройств Apple. Копия на {pc} останется.",
+  "cleanup.lost_no_live": "Нет видео Live"
 }

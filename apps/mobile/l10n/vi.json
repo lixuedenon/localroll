@@ -122,5 +122,7 @@
   "ios.camera": "Quét mã QR ghép nối hiển thị trên máy tính.",
   "ios.local_network": "Tìm và kết nối với máy tính đang chạy LocalRoll trong mạng nội bộ. Tệp không bao giờ đi qua đám mây.",
   "bg.channel": "Truyền tệp",
-  "settings.version": "Phiên bản {version}"
+  "settings.version": "Phiên bản {version}",
+  "cleanup.icloud": "Nếu Ảnh iCloud đang bật, xóa ở đây cũng xóa khỏi iCloud và các thiết bị Apple khác của bạn. Bản sao trên {pc} vẫn còn.",
+  "cleanup.lost_no_live": "Thiếu video Live"
 }

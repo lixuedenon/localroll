@@ -128,5 +128,6 @@
   "receive.blocked_firewall": "Windows Firewall belum mengizinkan LocalRoll. Izinkan sekali (Windows akan meminta konfirmasi).",
   "receive.blocked_fix": "Izinkan LocalRoll",
   "identity.images": "Gambar",
-  "settings.version": "Versi {version}"
+  "settings.version": "Versi {version}",
+  "viewer.live": "Live"
 }

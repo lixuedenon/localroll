@@ -122,5 +122,7 @@
   "ios.camera": "Scan the pairing QR code shown on your computer.",
   "ios.local_network": "Find and connect to computers running LocalRoll on your local network. Files never go through the cloud.",
   "bg.channel": "Transfers",
-  "settings.version": "Version {version}"
+  "settings.version": "Version {version}",
+  "cleanup.icloud": "If iCloud Photos is on, deleting here also removes these from iCloud and your other Apple devices. Your copy on {pc} stays.",
+  "cleanup.lost_no_live": "Live video missing"
 }

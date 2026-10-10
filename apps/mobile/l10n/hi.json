@@ -122,5 +122,7 @@
   "ios.camera": "अपने कंप्यूटर पर दिखाया गया पेयरिंग QR कोड स्कैन करें।",
   "ios.local_network": "आपके लोकल नेटवर्क पर LocalRoll चला रहे कंप्यूटर ढूँढकर उनसे जुड़ता है। फ़ाइलें कभी क्लाउड से नहीं गुज़रतीं।",
   "bg.channel": "ट्रांसफ़र",
-  "settings.version": "संस्करण {version}"
+  "settings.version": "संस्करण {version}",
+  "cleanup.icloud": "अगर iCloud फ़ोटो चालू है, तो यहाँ डिलीट करने से ये iCloud और आपके दूसरे Apple डिवाइसों से भी हट जाएँगी। {pc} पर रखी कॉपी बनी रहेगी।",
+  "cleanup.lost_no_live": "Live वीडियो नहीं है"
 }

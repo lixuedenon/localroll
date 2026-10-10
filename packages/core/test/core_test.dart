@@ -2,6 +2,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:localroll_core/localroll_core.dart';
 import 'package:test/test.dart';
@@ -148,5 +149,53 @@ void main() {
     expect(fr.compose('Phare', 'Lune'), 'Phare de Lune');
     expect(deviceNameWords['it']!.compose('Faro', 'Luna'), 'Faro di Luna');
     expect(deviceNameWords['ja']!.compose('琥珀', '灯台'), '琥珀の灯台');
+  });
+
+  test('live photo companion ids', () {
+    final id = liveCompanionId('ABC/L0/001');
+    expect(id, 'ABC/L0/001#live');
+    expect(isLiveCompanion(id), isTrue);
+    expect(isLiveCompanion('ABC/L0/001'), isFalse);
+    expect(livePhotoIdOf(id), 'ABC/L0/001');
+    expect(livePhotoIdOf('X'), 'X');
+  });
+
+  group('Exif', () {
+    // Made with libheif / Pillow: Orientation 6, Make "Apple",
+    // DateTimeOriginal 2026:10:09 12:34:56.
+    final heic = File('test/fixtures/sample.heic').readAsBytesSync();
+    final jpg = File('test/fixtures/sample.jpg').readAsBytesSync();
+
+    test('reads EXIF from HEIC and JPEG', () {
+      for (final f in [heic, jpg]) {
+        final tiff = Exif.extractTiff(f);
+        expect(tiff, isNotNull);
+        expect(Exif.orientation(tiff!), 6);
+        expect(String.fromCharCodes(tiff).contains('2026:10:09 12:34:56'), isTrue);
+      }
+    });
+
+    test('moves EXIF into a converted JPEG and resets orientation', () {
+      final tiff = Exif.withOrientation(Exif.extractTiff(heic)!, 1);
+      expect(Exif.orientation(tiff), 1);
+      // A JPEG without EXIF (strip it from the sample).
+      final bare = Exif.insertIntoJpeg(jpg, Uint8List.fromList([0x49, 0x49, 0x2A, 0, 8, 0, 0, 0, 0, 0]));
+      expect(Exif.orientation(Exif.extractTiff(bare)!), isNull);
+      final out = Exif.insertIntoJpeg(bare, tiff);
+      final back = Exif.extractTiff(out)!;
+      expect(Exif.orientation(back), 1);
+      expect(String.fromCharCodes(back).contains('iPhone Test'), isTrue);
+      expect(out.sublist(out.length - 2), [0xFF, 0xD9]);
+    });
+
+    test('upright filters', () {
+      expect(Exif.uprightFilter(1), isNull);
+      expect(Exif.uprightFilter(6), 'transpose=1');
+      expect(Exif.uprightFilter(8), 'transpose=2');
+    });
+
+    test('not an image', () {
+      expect(Exif.extractTiff(Uint8List.fromList([1, 2, 3, 4, 5])), isNull);
+    });
   });
 }

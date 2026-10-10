@@ -128,5 +128,6 @@
   "receive.blocked_firewall": "لم يسمح جدار حماية Windows لـ LocalRoll بعد. اسمح به مرة واحدة (سيطلب Windows التأكيد).",
   "receive.blocked_fix": "السماح لـ LocalRoll",
   "identity.images": "الصور",
-  "settings.version": "الإصدار {version}"
+  "settings.version": "الإصدار {version}",
+  "viewer.live": "مباشر"
 }

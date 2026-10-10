@@ -108,36 +108,64 @@ class Uploader extends ChangeNotifier {
       it.name = title.isNotEmpty ? title : 'asset_${a.id.hashCode}';
       _reportBackground(it);
 
-      final offer = FileOffer(
-        id: '$index',
-        assetId: a.id,
-        name: it.name,
-        kind: a.type == AssetType.video ? MediaKind.video : MediaKind.image,
-        createdMs: a.createDateTime.millisecondsSinceEpoch,
-        modifiedMs: a.modifiedDateTime.millisecondsSinceEpoch,
+      final sentPhoto = await _sendFile(
+        it,
+        FileOffer(
+          id: '$index',
+          assetId: a.id,
+          name: it.name,
+          kind: a.type == AssetType.video ? MediaKind.video : MediaKind.image,
+          createdMs: a.createDateTime.millisecondsSinceEpoch,
+          modifiedMs: a.modifiedDateTime.millisecondsSinceEpoch,
+        ),
+        // Original bytes, no transcoding. Downloads from iCloud if needed.
+        () => a.originFile,
       );
 
-      // Ask first: if the PC already has it we skip without reading the file.
-      final session = await client.createSession(SessionRequest(files: [offer]));
-      final result = session.results[offer.id] ?? const OfferResult(status: OfferStatus.ready);
-      if (result.status == OfferStatus.duplicate) {
-        it.state = UploadState.skipped;
-        await settings.markSent(desktop.id, a.id);
-        notifyListeners();
-        return;
+      // Live Photo: the moving part is a separate MOV. Without it the PC
+      // would hold only a still, and cleanup would delete the motion for good.
+      if (a.isLivePhoto) {
+        final movName = await a.titleAsyncWithSubtype;
+        await _sendFile(
+          it,
+          FileOffer(
+            id: '$index-live',
+            assetId: liveCompanionId(a.id),
+            name: movName.isNotEmpty && movName != it.name ? movName : _movName(it.name),
+            kind: MediaKind.video,
+            createdMs: a.createDateTime.millisecondsSinceEpoch,
+            modifiedMs: a.modifiedDateTime.millisecondsSinceEpoch,
+          ),
+          () => a.originFileWithSubtype,
+        );
       }
-
-      // Original bytes, no transcoding. Downloads from iCloud if needed.
-      final file = await a.originFile;
-      if (file == null) throw Exception(tr('err.no_original'));
-      it.total = await file.length();
-      await _upload(session.sessionId, offer, file, result.offset, it);
       await settings.markSent(desktop.id, a.id);
+      if (!sentPhoto && it.state != UploadState.done) it.state = UploadState.skipped;
     } catch (e) {
       it.state = UploadState.failed;
       it.error = e is LrHttpException ? e.message : e.toString().replaceFirst('Exception: ', '');
     }
     notifyListeners();
+  }
+
+  static String _movName(String photoName) {
+    final dot = photoName.lastIndexOf('.');
+    return '${dot > 0 ? photoName.substring(0, dot) : photoName}.MOV';
+  }
+
+  /// Offers one file and uploads it unless the PC already has it.
+  /// Returns false when it was a duplicate (nothing sent).
+  Future<bool> _sendFile(UploadItem it, FileOffer offer, Future<File?> Function() open) async {
+    // Ask first: if the PC already has it we skip without reading the file.
+    final session = await client.createSession(SessionRequest(files: [offer]));
+    final result = session.results[offer.id] ?? const OfferResult(status: OfferStatus.ready);
+    if (result.status == OfferStatus.duplicate) return false;
+
+    final file = await open();
+    if (file == null) throw Exception(tr('err.no_original'));
+    it.total = await file.length();
+    await _upload(session.sessionId, offer, file, result.offset, it);
+    return true;
   }
 
   Future<void> _upload(String sessionId, FileOffer offer, File file, int startOffset, UploadItem it) async {

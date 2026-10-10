@@ -125,6 +125,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.forgotten': 'Forgot {name}',
     'bg.channel': 'Transfers',
     'settings.version': 'Version {version}',
+    'cleanup.icloud': 'If iCloud Photos is on, deleting here also removes these from iCloud and your other Apple devices. Your copy on {pc} stays.',
+    'cleanup.lost_no_live': 'Live video missing',
   },
   'zh': {
     'common.cancel': '取消',
@@ -248,6 +250,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.forgotten': '已忘记 {name}',
     'bg.channel': '传输',
     'settings.version': '版本 {version}',
+    'cleanup.icloud': '如果开启了 iCloud 照片，在这里删除会同时从 iCloud 和你的其他苹果设备上删除。{pc} 上的备份不受影响。',
+    'cleanup.lost_no_live': '缺少实况视频',
   },
   'zh_Hant': {
     'common.cancel': '取消',
@@ -371,6 +375,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.forgotten': '已忘記 {name}',
     'bg.channel': '傳輸',
     'settings.version': '版本 {version}',
+    'cleanup.icloud': '如果開啟了 iCloud 照片，在這裡刪除會同時從 iCloud 和你的其他 Apple 裝置上刪除。{pc} 上的備份不受影響。',
+    'cleanup.lost_no_live': '缺少原況影片',
   },
   'ja': {
     'common.cancel': 'キャンセル',
@@ -494,6 +500,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.forgotten': '{name} を削除しました',
     'bg.channel': '転送',
     'settings.version': 'バージョン {version}',
+    'cleanup.icloud': 'iCloud写真がオンの場合、ここで削除すると iCloud とほかの Apple デバイスからも削除されます。{pc} のコピーは残ります。',
+    'cleanup.lost_no_live': 'Live の動画がありません',
   },
   'ko': {
     'common.cancel': '취소',
@@ -617,6 +625,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.forgotten': '{name} 삭제됨',
     'bg.channel': '전송',
     'settings.version': '버전 {version}',
+    'cleanup.icloud': 'iCloud 사진이 켜져 있으면 여기서 삭제할 때 iCloud와 다른 Apple 기기에서도 삭제됩니다. {pc}에 있는 사본은 그대로 남습니다.',
+    'cleanup.lost_no_live': 'Live 동영상 없음',
   },
   'es': {
     'common.cancel': 'Cancelar',
@@ -740,6 +750,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.forgotten': 'Se olvidó {name}',
     'bg.channel': 'Transferencias',
     'settings.version': 'Versión {version}',
+    'cleanup.icloud': 'Si Fotos de iCloud está activado, al borrar aquí también se borran de iCloud y de tus otros dispositivos Apple. La copia en {pc} se conserva.',
+    'cleanup.lost_no_live': 'Falta el vídeo Live',
   },
   'fr': {
     'common.cancel': 'Annuler',
@@ -863,6 +875,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.forgotten': '{name} oublié',
     'bg.channel': 'Transferts',
     'settings.version': 'Version {version}',
+    'cleanup.icloud': 'Si Photos iCloud est activé, les supprimer ici les supprime aussi d’iCloud et de vos autres appareils Apple. La copie sur {pc} est conservée.',
+    'cleanup.lost_no_live': 'Vidéo Live manquante',
   },
   'de': {
     'common.cancel': 'Abbrechen',
@@ -986,6 +1000,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.forgotten': '{name} vergessen',
     'bg.channel': 'Übertragungen',
     'settings.version': 'Version {version}',
+    'cleanup.icloud': 'Ist iCloud-Fotos aktiv, werden sie beim Löschen hier auch aus iCloud und von deinen anderen Apple-Geräten entfernt. Die Kopie auf {pc} bleibt erhalten.',
+    'cleanup.lost_no_live': 'Live-Video fehlt',
   },
   'pt': {
     'common.cancel': 'Cancelar',
@@ -1109,6 +1125,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.forgotten': '{name} esquecido',
     'bg.channel': 'Transferências',
     'settings.version': 'Versão {version}',
+    'cleanup.icloud': 'Se o Fotos do iCloud estiver ativado, apagar aqui também remove do iCloud e dos seus outros dispositivos Apple. A cópia em {pc} continua lá.',
+    'cleanup.lost_no_live': 'Falta o vídeo Live',
   },
   'ru': {
     'common.cancel': 'Отмена',
@@ -1232,6 +1250,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.forgotten': '{name} забыт',
     'bg.channel': 'Передача файлов',
     'settings.version': 'Версия {version}',
+    'cleanup.icloud': 'Если включены «Фото iCloud», удаление здесь удалит их и из iCloud, и с других ваших устройств Apple. Копия на {pc} останется.',
+    'cleanup.lost_no_live': 'Нет видео Live',
   },
   'it': {
     'common.cancel': 'Annulla',
@@ -1355,6 +1375,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.forgotten': '{name} dimenticato',
     'bg.channel': 'Trasferimenti',
     'settings.version': 'Versione {version}',
+    'cleanup.icloud': 'Se Foto di iCloud è attivo, eliminarle qui le rimuove anche da iCloud e dagli altri dispositivi Apple. La copia su {pc} resta.',
+    'cleanup.lost_no_live': 'Manca il video Live',
   },
   'ar': {
     'common.cancel': 'إلغاء',
@@ -1478,6 +1500,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.forgotten': 'تم نسيان {name}',
     'bg.channel': 'عمليات النقل',
     'settings.version': 'الإصدار {version}',
+    'cleanup.icloud': 'إذا كانت صور iCloud مفعّلة، فالحذف هنا يحذفها أيضًا من iCloud ومن أجهزة Apple الأخرى. تبقى النسخة الموجودة على {pc}.',
+    'cleanup.lost_no_live': 'فيديو Live مفقود',
   },
   'hi': {
     'common.cancel': 'रद्द करें',
@@ -1601,6 +1625,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.forgotten': '{name} को भूल गए',
     'bg.channel': 'ट्रांसफ़र',
     'settings.version': 'संस्करण {version}',
+    'cleanup.icloud': 'अगर iCloud फ़ोटो चालू है, तो यहाँ डिलीट करने से ये iCloud और आपके दूसरे Apple डिवाइसों से भी हट जाएँगी। {pc} पर रखी कॉपी बनी रहेगी।',
+    'cleanup.lost_no_live': 'Live वीडियो नहीं है',
   },
   'id': {
     'common.cancel': 'Batal',
@@ -1724,6 +1750,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.forgotten': '{name} dilupakan',
     'bg.channel': 'Transfer',
     'settings.version': 'Versi {version}',
+    'cleanup.icloud': 'Jika Foto iCloud aktif, menghapus di sini juga menghapusnya dari iCloud dan perangkat Apple Anda yang lain. Salinan di {pc} tetap ada.',
+    'cleanup.lost_no_live': 'Video Live tidak ada',
   },
   'vi': {
     'common.cancel': 'Hủy',
@@ -1847,6 +1875,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.forgotten': 'Đã quên {name}',
     'bg.channel': 'Truyền tệp',
     'settings.version': 'Phiên bản {version}',
+    'cleanup.icloud': 'Nếu Ảnh iCloud đang bật, xóa ở đây cũng xóa khỏi iCloud và các thiết bị Apple khác của bạn. Bản sao trên {pc} vẫn còn.',
+    'cleanup.lost_no_live': 'Thiếu video Live',
   },
   'th': {
     'common.cancel': 'ยกเลิก',
@@ -1970,6 +2000,8 @@ const Map<String, Map<String, String>> translations = {
     'connect.forgotten': 'ลืม {name} แล้ว',
     'bg.channel': 'การโอนไฟล์',
     'settings.version': 'เวอร์ชัน {version}',
+    'cleanup.icloud': 'หากเปิดรูปภาพ iCloud ไว้ การลบที่นี่จะลบออกจาก iCloud และอุปกรณ์ Apple เครื่องอื่นของคุณด้วย สำเนาบน {pc} ยังอยู่',
+    'cleanup.lost_no_live': 'ไม่มีวิดีโอ Live',
   },
   'tr': {
     'common.cancel': 'İptal',
@@ -2093,5 +2125,7 @@ const Map<String, Map<String, String>> translations = {
     'connect.forgotten': '{name} unutuldu',
     'bg.channel': 'Aktarımlar',
     'settings.version': 'Sürüm {version}',
+    'cleanup.icloud': 'iCloud Fotoğrafları açıksa burada silmek bunları iCloud\'dan ve diğer Apple aygıtlarınızdan da kaldırır. {pc} üzerindeki kopya kalır.',
+    'cleanup.lost_no_live': 'Live videosu eksik',
   },
 };

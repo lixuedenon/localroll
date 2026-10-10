@@ -122,5 +122,7 @@
   "ios.camera": "Scanne den Kopplungs-QR-Code, der auf deinem Computer angezeigt wird.",
   "ios.local_network": "Findet Computer mit LocalRoll im lokalen Netzwerk und verbindet sich mit ihnen. Dateien gehen nie über die Cloud.",
   "bg.channel": "Übertragungen",
-  "settings.version": "Version {version}"
+  "settings.version": "Version {version}",
+  "cleanup.icloud": "Ist iCloud-Fotos aktiv, werden sie beim Löschen hier auch aus iCloud und von deinen anderen Apple-Geräten entfernt. Die Kopie auf {pc} bleibt erhalten.",
+  "cleanup.lost_no_live": "Live-Video fehlt"
 }

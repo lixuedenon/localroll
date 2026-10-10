@@ -128,5 +128,6 @@
   "receive.blocked_firewall": "Windows 防火牆還沒有放行 LocalRoll。點右邊按鈕放行一次（Windows 會跳出視窗請你確認）。",
   "receive.blocked_fix": "放行 LocalRoll",
   "identity.images": "圖片",
-  "settings.version": "版本 {version}"
+  "settings.version": "版本 {version}",
+  "viewer.live": "原況"
 }

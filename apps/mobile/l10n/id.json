@@ -122,5 +122,7 @@
   "ios.camera": "Pindai kode QR pemasangan yang ditampilkan di komputer Anda.",
   "ios.local_network": "Menemukan dan terhubung ke komputer yang menjalankan LocalRoll di jaringan lokal Anda. File tidak pernah melewati cloud.",
   "bg.channel": "Transfer",
-  "settings.version": "Versi {version}"
+  "settings.version": "Versi {version}",
+  "cleanup.icloud": "Jika Foto iCloud aktif, menghapus di sini juga menghapusnya dari iCloud dan perangkat Apple Anda yang lain. Salinan di {pc} tetap ada.",
+  "cleanup.lost_no_live": "Video Live tidak ada"
 }

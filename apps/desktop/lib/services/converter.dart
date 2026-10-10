@@ -1,6 +1,7 @@
 // apps/desktop/lib/services/converter.dart
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:localroll_core/localroll_core.dart';
@@ -91,9 +92,12 @@ class ConverterService extends ChangeNotifier {
       final src = library.absPath(job.item);
       final out = await _outputPath(job);
       job.outputPath = out;
+      // Photos: ffmpeg drops EXIF, so lift it from the original now and put
+      // it back into the JPEG afterwards (capture time, GPS, camera, lens).
+      final exif = job.item.kind == MediaKind.image ? await _readExif(src) : null;
       final args = job.item.kind == MediaKind.video
           ? await _videoArgs(job, src, out)
-          : _imageArgs(job, src, out);
+          : _imageArgs(job, src, out, exif);
       final durationUs = job.item.kind == MediaKind.video
           ? ((await ffmpeg.probe(src)).durationSec ?? 0) * 1e6
           : 0.0;
@@ -124,7 +128,9 @@ class ConverterService extends ChangeNotifier {
         } catch (_) {}
         throw Exception(errTail.isEmpty ? 'ffmpeg exit $code' : errTail.join('\n'));
       }
+      if (exif != null) await _writeExif(out, exif);
       try {
+        // Explorer / Photos sort by this: the capture time, like the original.
         await File(out).setLastModified(job.item.captureTime);
       } catch (_) {}
       job.progress = 1;
@@ -181,14 +187,47 @@ class ConverterService extends ChangeNotifier {
     ];
   }
 
-  List<String> _imageArgs(ConvertJob job, String src, String out) {
+  /// The pixels are turned upright here (from the EXIF orientation) and the
+  /// copied EXIF then says Orientation = 1, so every viewer — Windows Photos,
+  /// WeChat, browsers — shows the same thing.
+  List<String> _imageArgs(ConvertJob job, String src, String out, Uint8List? exif) {
+    final filters = <String>[];
+    final upright = exif == null ? null : Exif.uprightFilter(Exif.orientation(exif));
+    if (upright != null) filters.add(upright);
+    if (job.preset == ConvertPreset.share) {
+      filters.add("scale='if(gt(iw,ih),min(2048,iw),-2)':'if(gt(iw,ih),-2,min(2048,ih))'");
+    }
     return [
+      // We rotate ourselves (above); without this ffmpeg might rotate as well.
+      if (exif != null && Exif.orientation(exif) != null) '-noautorotate',
       '-i', src,
       '-frames:v', '1',
-      if (job.preset == ConvertPreset.share)
-        ...['-vf', "scale='if(gt(iw,ih),min(2048,iw),-2)':'if(gt(iw,ih),-2,min(2048,ih))'"],
+      if (filters.isNotEmpty) ...['-vf', filters.join(',')],
       '-q:v', job.preset == ConvertPreset.compatible ? '2' : '4',
       out,
     ];
   }
+
+  static Future<Uint8List?> _readExif(String path) async {
+    try {
+      final f = File(path);
+      // EXIF sits near the start; HEIC metadata can point anywhere, so read
+      // the whole file for HEIF (photos are a few MB).
+      return Exif.extractTiff(await f.readAsBytes());
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<void> _writeExif(String jpegPath, Uint8List tiff) async {
+    try {
+      final f = File(jpegPath);
+      final fixed = Exif.orientation(tiff) == null ? tiff : Exif.withOrientation(tiff, 1);
+      final out = Exif.insertIntoJpeg(await f.readAsBytes(), fixed);
+      await f.writeAsBytes(out, flush: true);
+    } catch (_) {
+      // The conversion itself succeeded; missing EXIF is not worth failing it.
+    }
+  }
+
 }

@@ -128,5 +128,6 @@
   "receive.blocked_firewall": "Windows 방화벽이 아직 LocalRoll을 허용하지 않았습니다. 한 번만 허용하세요(Windows가 확인을 요청합니다).",
   "receive.blocked_fix": "LocalRoll 허용",
   "identity.images": "이미지",
-  "settings.version": "버전 {version}"
+  "settings.version": "버전 {version}",
+  "viewer.live": "라이브"
 }

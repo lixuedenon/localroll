@@ -134,6 +134,7 @@ const Map<String, Map<String, String>> translations = {
     'receive.blocked_fix': 'Allow LocalRoll',
     'identity.images': 'Images',
     'settings.version': 'Version {version}',
+    'viewer.live': 'Live',
   },
   'zh': {
     'nav.library': '媒体库',
@@ -266,6 +267,7 @@ const Map<String, Map<String, String>> translations = {
     'receive.blocked_fix': '放行 LocalRoll',
     'identity.images': '图片',
     'settings.version': '版本 {version}',
+    'viewer.live': '实况',
   },
   'zh_Hant': {
     'nav.library': '媒體庫',
@@ -398,6 +400,7 @@ const Map<String, Map<String, String>> translations = {
     'receive.blocked_fix': '放行 LocalRoll',
     'identity.images': '圖片',
     'settings.version': '版本 {version}',
+    'viewer.live': '原況',
   },
   'ja': {
     'nav.library': 'ライブラリ',
@@ -530,6 +533,7 @@ const Map<String, Map<String, String>> translations = {
     'receive.blocked_fix': 'LocalRoll を許可',
     'identity.images': '画像',
     'settings.version': 'バージョン {version}',
+    'viewer.live': 'ライブ',
   },
   'ko': {
     'nav.library': '라이브러리',
@@ -662,6 +666,7 @@ const Map<String, Map<String, String>> translations = {
     'receive.blocked_fix': 'LocalRoll 허용',
     'identity.images': '이미지',
     'settings.version': '버전 {version}',
+    'viewer.live': '라이브',
   },
   'es': {
     'nav.library': 'Biblioteca',
@@ -794,6 +799,7 @@ const Map<String, Map<String, String>> translations = {
     'receive.blocked_fix': 'Permitir LocalRoll',
     'identity.images': 'Imágenes',
     'settings.version': 'Versión {version}',
+    'viewer.live': 'Live',
   },
   'fr': {
     'nav.library': 'Bibliothèque',
@@ -926,6 +932,7 @@ const Map<String, Map<String, String>> translations = {
     'receive.blocked_fix': 'Autoriser LocalRoll',
     'identity.images': 'Images',
     'settings.version': 'Version {version}',
+    'viewer.live': 'Live',
   },
   'de': {
     'nav.library': 'Mediathek',
@@ -1058,6 +1065,7 @@ const Map<String, Map<String, String>> translations = {
     'receive.blocked_fix': 'LocalRoll zulassen',
     'identity.images': 'Bilder',
     'settings.version': 'Version {version}',
+    'viewer.live': 'Live',
   },
   'pt': {
     'nav.library': 'Biblioteca',
@@ -1190,6 +1198,7 @@ const Map<String, Map<String, String>> translations = {
     'receive.blocked_fix': 'Liberar LocalRoll',
     'identity.images': 'Imagens',
     'settings.version': 'Versão {version}',
+    'viewer.live': 'Live',
   },
   'ru': {
     'nav.library': 'Медиатека',
@@ -1322,6 +1331,7 @@ const Map<String, Map<String, String>> translations = {
     'receive.blocked_fix': 'Разрешить LocalRoll',
     'identity.images': 'Изображения',
     'settings.version': 'Версия {version}',
+    'viewer.live': 'Live',
   },
   'it': {
     'nav.library': 'Libreria',
@@ -1454,6 +1464,7 @@ const Map<String, Map<String, String>> translations = {
     'receive.blocked_fix': 'Consenti LocalRoll',
     'identity.images': 'Immagini',
     'settings.version': 'Versione {version}',
+    'viewer.live': 'Live',
   },
   'ar': {
     'nav.library': 'المكتبة',
@@ -1586,6 +1597,7 @@ const Map<String, Map<String, String>> translations = {
     'receive.blocked_fix': 'السماح لـ LocalRoll',
     'identity.images': 'الصور',
     'settings.version': 'الإصدار {version}',
+    'viewer.live': 'مباشر',
   },
   'hi': {
     'nav.library': 'लाइब्रेरी',
@@ -1718,6 +1730,7 @@ const Map<String, Map<String, String>> translations = {
     'receive.blocked_fix': 'LocalRoll को अनुमति दें',
     'identity.images': 'चित्र',
     'settings.version': 'संस्करण {version}',
+    'viewer.live': 'Live',
   },
   'id': {
     'nav.library': 'Pustaka',
@@ -1850,6 +1863,7 @@ const Map<String, Map<String, String>> translations = {
     'receive.blocked_fix': 'Izinkan LocalRoll',
     'identity.images': 'Gambar',
     'settings.version': 'Versi {version}',
+    'viewer.live': 'Live',
   },
   'vi': {
     'nav.library': 'Thư viện',
@@ -1982,6 +1996,7 @@ const Map<String, Map<String, String>> translations = {
     'receive.blocked_fix': 'Cho phép LocalRoll',
     'identity.images': 'Hình ảnh',
     'settings.version': 'Phiên bản {version}',
+    'viewer.live': 'Live',
   },
   'th': {
     'nav.library': 'คลังสื่อ',
@@ -2114,6 +2129,7 @@ const Map<String, Map<String, String>> translations = {
     'receive.blocked_fix': 'อนุญาต LocalRoll',
     'identity.images': 'รูปภาพ',
     'settings.version': 'เวอร์ชัน {version}',
+    'viewer.live': 'Live',
   },
   'tr': {
     'nav.library': 'Kitaplık',
@@ -2246,5 +2262,6 @@ const Map<String, Map<String, String>> translations = {
     'receive.blocked_fix': 'LocalRoll’a izin ver',
     'identity.images': 'Görseller',
     'settings.version': 'Sürüm {version}',
+    'viewer.live': 'Live',
   },
 };

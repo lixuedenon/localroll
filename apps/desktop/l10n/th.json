@@ -128,5 +128,6 @@
   "receive.blocked_firewall": "ไฟร์วอลล์ Windows ยังไม่อนุญาต LocalRoll อนุญาตครั้งเดียว (Windows จะขอให้ยืนยัน)",
   "receive.blocked_fix": "อนุญาต LocalRoll",
   "identity.images": "รูปภาพ",
-  "settings.version": "เวอร์ชัน {version}"
+  "settings.version": "เวอร์ชัน {version}",
+  "viewer.live": "Live"
 }

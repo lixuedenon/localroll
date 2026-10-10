@@ -122,5 +122,7 @@
   "ios.camera": "Scannez le QR code d’appairage affiché sur votre ordinateur.",
   "ios.local_network": "Trouve les ordinateurs qui exécutent LocalRoll sur votre réseau local et s’y connecte. Les fichiers ne passent jamais par le cloud.",
   "bg.channel": "Transferts",
-  "settings.version": "Version {version}"
+  "settings.version": "Version {version}",
+  "cleanup.icloud": "Si Photos iCloud est activé, les supprimer ici les supprime aussi d’iCloud et de vos autres appareils Apple. La copie sur {pc} est conservée.",
+  "cleanup.lost_no_live": "Vidéo Live manquante"
 }

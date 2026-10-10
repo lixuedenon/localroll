@@ -122,5 +122,7 @@
   "ios.camera": "Escanea el código QR de emparejamiento que muestra tu ordenador.",
   "ios.local_network": "Busca y conecta con ordenadores que ejecutan LocalRoll en tu red local. Los archivos nunca pasan por la nube.",
   "bg.channel": "Transferencias",
-  "settings.version": "Versión {version}"
+  "settings.version": "Versión {version}",
+  "cleanup.icloud": "Si Fotos de iCloud está activado, al borrar aquí también se borran de iCloud y de tus otros dispositivos Apple. La copia en {pc} se conserva.",
+  "cleanup.lost_no_live": "Falta el vídeo Live"
 }

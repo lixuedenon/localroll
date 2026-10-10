@@ -10,4 +10,5 @@ export 'src/hashing.dart';
 export 'src/i18n.dart';
 export 'src/device_names.dart';
 export 'src/languages.g.dart' show deviceNameWords;
+export 'src/exif.dart';
 export 'src/version.dart';

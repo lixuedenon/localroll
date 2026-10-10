@@ -122,5 +122,7 @@
   "ios.camera": "Bilgisayarınızda gösterilen eşleştirme QR kodunu tarayın.",
   "ios.local_network": "Yerel ağınızda LocalRoll çalıştıran bilgisayarları bulur ve bağlanır. Dosyalar asla buluttan geçmez.",
   "bg.channel": "Aktarımlar",
-  "settings.version": "Sürüm {version}"
+  "settings.version": "Sürüm {version}",
+  "cleanup.icloud": "iCloud Fotoğrafları açıksa burada silmek bunları iCloud'dan ve diğer Apple aygıtlarınızdan da kaldırır. {pc} üzerindeki kopya kalır.",
+  "cleanup.lost_no_live": "Live videosu eksik"
 }

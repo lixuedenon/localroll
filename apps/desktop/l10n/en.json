@@ -128,5 +128,6 @@
   "receive.blocked_firewall": "Windows Firewall hasn’t let LocalRoll in yet. Allow it once (Windows will ask for permission).",
   "receive.blocked_fix": "Allow LocalRoll",
   "identity.images": "Images",
-  "settings.version": "Version {version}"
+  "settings.version": "Version {version}",
+  "viewer.live": "Live"
 }

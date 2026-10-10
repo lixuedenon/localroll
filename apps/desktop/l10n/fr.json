@@ -128,5 +128,6 @@
   "receive.blocked_firewall": "Le pare-feu Windows n’a pas encore autorisé LocalRoll. Autorisez-le une fois (Windows demandera une confirmation).",
   "receive.blocked_fix": "Autoriser LocalRoll",
   "identity.images": "Images",
-  "settings.version": "Version {version}"
+  "settings.version": "Version {version}",
+  "viewer.live": "Live"
 }

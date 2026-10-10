@@ -128,5 +128,6 @@
   "receive.blocked_firewall": "Windows Güvenlik Duvarı henüz LocalRoll’a izin vermedi. Bir kez izin verin (Windows onay isteyecek).",
   "receive.blocked_fix": "LocalRoll’a izin ver",
   "identity.images": "Görseller",
-  "settings.version": "Sürüm {version}"
+  "settings.version": "Sürüm {version}",
+  "viewer.live": "Live"
 }

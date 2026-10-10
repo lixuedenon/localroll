@@ -450,9 +450,23 @@ class TransferServer extends ChangeNotifier {
 
     final captured = DateTime.fromMillisecondsSinceEpoch(offer.createdMs);
     final sep = Platform.pathSeparator;
-    final folder = '${library.rootPath}$sep${captured.year}$sep${captured.month.toString().padLeft(2, '0')}';
+    var folder = '${library.rootPath}$sep${captured.year}$sep${captured.month.toString().padLeft(2, '0')}';
+    var fileName = sanitizeFileName(offer.name);
+    // Live Photo video: next to its photo, same name (IMG_1234.HEIC + IMG_1234.MOV),
+    // the way iPhone exports pair them.
+    if (isLiveCompanion(offer.assetId)) {
+      final photo = library.findByAsset(device.id, livePhotoIdOf(offer.assetId));
+      if (photo != null) {
+        final photoPath = library.absPath(photo);
+        folder = File(photoPath).parent.path;
+        final base = photoPath.substring(folder.length + 1);
+        final dot = base.lastIndexOf('.');
+        final ext = fileName.lastIndexOf('.') > 0 ? fileName.substring(fileName.lastIndexOf('.')) : '.MOV';
+        fileName = '${dot > 0 ? base.substring(0, dot) : base}$ext';
+      }
+    }
     await Directory(folder).create(recursive: true);
-    final dest = LibraryIndex.uniquePath(folder, sanitizeFileName(offer.name));
+    final dest = LibraryIndex.uniquePath(folder, fileName);
     await part.rename(dest);
     try {
       // Explorer and Windows Photos sort by this; make it the capture time.
@@ -462,7 +476,7 @@ class TransferServer extends ChangeNotifier {
     final rel = dest.substring(library.rootPath.length + 1).replaceAll(sep, '/');
     library.add(MediaItem(
       relPath: rel,
-      name: offer.name,
+      name: rel.substring(rel.lastIndexOf('/') + 1),
       size: length,
       kind: offer.kind == MediaKind.other ? MediaKind.fromName(offer.name) : offer.kind,
       captureMs: offer.createdMs,

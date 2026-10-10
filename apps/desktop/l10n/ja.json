@@ -128,5 +128,6 @@
   "receive.blocked_firewall": "Windows ファイアウォールがまだ LocalRoll を許可していません。一度だけ許可してください（Windows が確認します）。",
   "receive.blocked_fix": "LocalRoll を許可",
   "identity.images": "画像",
-  "settings.version": "バージョン {version}"
+  "settings.version": "バージョン {version}",
+  "viewer.live": "ライブ"
 }

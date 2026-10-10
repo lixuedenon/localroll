@@ -128,5 +128,6 @@
   "receive.blocked_firewall": "Tường lửa Windows chưa cho phép LocalRoll. Cho phép một lần (Windows sẽ hỏi xác nhận).",
   "receive.blocked_fix": "Cho phép LocalRoll",
   "identity.images": "Hình ảnh",
-  "settings.version": "Phiên bản {version}"
+  "settings.version": "Phiên bản {version}",
+  "viewer.live": "Live"
 }

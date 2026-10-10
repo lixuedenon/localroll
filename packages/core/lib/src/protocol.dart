@@ -45,6 +45,11 @@ class LrProtocol {
   /// Assets per verify request (each one is re-hashed on the PC).
   static const int verifyBatch = 100;
 
+  /// Live Photo: the paired video (the MOV) is sent as a file of its own
+  /// whose assetId is the photo's assetId plus this suffix. The PC stores it
+  /// next to the photo and plays it from the photo's viewer.
+  static const String liveSuffix = '#live';
+
   /// `/api/v1/sessions/{sessionId}/files/{fileId}` — GET status, PUT chunk.
   static String filePath(String sessionId, String fileId) =>
       '$pathSessions/${Uri.encodeComponent(sessionId)}/files/${Uri.encodeComponent(fileId)}';
@@ -57,3 +62,14 @@ class LrProtocol {
   static const String headerDeviceId = 'x-lr-device';
   static const String headerToken = 'x-lr-token';
 }
+
+/// Asset id of the video half of a Live Photo.
+String liveCompanionId(String photoAssetId) => '$photoAssetId${LrProtocol.liveSuffix}';
+
+/// True for the video half of a Live Photo.
+bool isLiveCompanion(String assetId) => assetId.endsWith(LrProtocol.liveSuffix);
+
+/// The photo's asset id for a Live Photo video (or [assetId] itself).
+String livePhotoIdOf(String assetId) => isLiveCompanion(assetId)
+    ? assetId.substring(0, assetId.length - LrProtocol.liveSuffix.length)
+    : assetId;

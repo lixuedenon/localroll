@@ -122,5 +122,7 @@
   "ios.camera": "สแกนคิวอาร์โค้ดสำหรับจับคู่ที่แสดงบนคอมพิวเตอร์",
   "ios.local_network": "ค้นหาและเชื่อมต่อคอมพิวเตอร์ที่เปิด LocalRoll ในเครือข่ายภายใน ไฟล์จะไม่ผ่านคลาวด์",
   "bg.channel": "การโอนไฟล์",
-  "settings.version": "เวอร์ชัน {version}"
+  "settings.version": "เวอร์ชัน {version}",
+  "cleanup.icloud": "หากเปิดรูปภาพ iCloud ไว้ การลบที่นี่จะลบออกจาก iCloud และอุปกรณ์ Apple เครื่องอื่นของคุณด้วย สำเนาบน {pc} ยังอยู่",
+  "cleanup.lost_no_live": "ไม่มีวิดีโอ Live"
 }

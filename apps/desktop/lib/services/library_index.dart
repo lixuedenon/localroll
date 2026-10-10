@@ -82,7 +82,28 @@ class LibraryIndex extends ChangeNotifier {
   final List<_Tombstone> _deleted = [];
   Timer? _saveTimer;
 
-  List<MediaItem> get items => List.unmodifiable(_items);
+  /// device|assetId -> item, rebuilt whenever the list changes.
+  Map<String, MediaItem>? _byAssetCache;
+
+  /// What the library shows. The video half of a Live Photo is not listed on
+  /// its own — it belongs to its photo (see [liveFor]).
+  List<MediaItem> get items => List.unmodifiable(
+        _items.where((i) => i.assetId == null || !isLiveCompanion(i.assetId!) || _orphan(i)),
+      );
+
+  /// A Live Photo video whose photo is gone is shown as a normal video.
+  bool _orphan(MediaItem companion) => findByAsset(companion.deviceId ?? '', livePhotoIdOf(companion.assetId!)) == null;
+
+  /// The Live Photo video that belongs to [photo], if it was received.
+  MediaItem? liveFor(MediaItem photo) {
+    if (photo.kind != MediaKind.image || photo.deviceId == null || photo.assetId == null) return null;
+    return findByAsset(photo.deviceId!, liveCompanionId(photo.assetId!));
+  }
+
+  /// [items] plus their Live Photo videos (for delete / export).
+  List<MediaItem> withLive(Iterable<MediaItem> items) => [
+        for (final i in items) ...[i, ?liveFor(i)],
+      ];
 
   String get _sep => Platform.pathSeparator;
   String get metaDir => '$rootPath$_sep.localroll';
@@ -98,6 +119,7 @@ class LibraryIndex extends ChangeNotifier {
     await Directory(cacheDir).create(recursive: true);
     _items.clear();
     _deleted.clear();
+    _byAssetCache = null;
     if (await _indexFile.exists()) {
       try {
         final j = jsonDecode(await _indexFile.readAsString()) as Map<String, dynamic>;
@@ -116,6 +138,7 @@ class LibraryIndex extends ChangeNotifier {
     if (gone.isNotEmpty) {
       _remember(gone);
       _items.removeWhere(gone.contains);
+      _byAssetCache = null;
       _scheduleSave();
     }
     _sort();
@@ -130,10 +153,11 @@ class LibraryIndex extends ChangeNotifier {
   }
 
   MediaItem? findByAsset(String deviceId, String assetId) {
-    for (final i in _items) {
-      if (i.deviceId == deviceId && i.assetId == assetId) return i;
-    }
-    return null;
+    final map = _byAssetCache ??= {
+      for (final i in _items)
+        if (i.deviceId != null && i.assetId != null) '${i.deviceId}|${i.assetId}': i,
+    };
+    return map['$deviceId|$assetId'];
   }
 
   void add(MediaItem item) {
@@ -149,6 +173,7 @@ class LibraryIndex extends ChangeNotifier {
     final set = items.toSet();
     _remember(set);
     _items.removeWhere(set.contains);
+    _byAssetCache = null;
     _scheduleSave();
     notifyListeners();
   }
@@ -170,10 +195,17 @@ class LibraryIndex extends ChangeNotifier {
   /// asset was received again since.
   List<String> deletedSince(String deviceId, int sinceMs) => [
         for (final t in _deleted)
-          if (t.deviceId == deviceId && t.ms > sinceMs && findByAsset(deviceId, t.assetId) == null) t.assetId,
+          if (t.deviceId == deviceId &&
+              t.ms > sinceMs &&
+              !isLiveCompanion(t.assetId) &&
+              findByAsset(deviceId, t.assetId) == null)
+            t.assetId,
       ];
 
-  void _sort() => _items.sort((a, b) => b.captureMs.compareTo(a.captureMs));
+  void _sort() {
+    _items.sort((a, b) => b.captureMs.compareTo(a.captureMs));
+    _byAssetCache = null;
+  }
 
   void _scheduleSave() {
     _saveTimer?.cancel();

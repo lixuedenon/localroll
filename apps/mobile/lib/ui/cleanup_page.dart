@@ -85,19 +85,28 @@ class _CleanupPageState extends State<CleanupPage> {
       });
       client = await connectToDesktop(widget.settings, widget.desktop, discovered: widget.discovery.found);
       final ids = onPhone.keys.toList();
-      for (var i = 0; i < ids.length; i += LrProtocol.verifyBatch) {
-        final batch = ids.sublist(i, (i + LrProtocol.verifyBatch).clamp(0, ids.length));
-        final res = await client.verify(batch);
-        for (final v in res.items) {
-          final a = onPhone[v.assetId];
-          if (a == null) continue;
-          if (v.ok) {
+      // Live Photos count as safe only if the PC also holds their video.
+      const step = LrProtocol.verifyBatch ~/ 2;
+      for (var i = 0; i < ids.length; i += step) {
+        final batch = ids.sublist(i, (i + step).clamp(0, ids.length));
+        final res = await client.verify([
+          for (final id in batch) ...[id, if (onPhone[id]!.isLivePhoto) liveCompanionId(id)],
+        ]);
+        final byId = {for (final v in res.items) v.assetId: v};
+        for (final id in batch) {
+          final a = onPhone[id]!;
+          final photo = byId[id];
+          final video = a.isLivePhoto ? byId[liveCompanionId(id)] : null;
+          final ok = photo != null && photo.ok && (!a.isLivePhoto || (video != null && video.ok));
+          if (ok) {
             _safe.add(a);
-            _sizes[a.id] = v.size;
+            _sizes[a.id] = photo!.size + (video?.size ?? 0);
             _selected.add(a.id);
           } else {
             _lost.add(a);
-            _lostReason[a.id] = v.reason ?? 'missing';
+            // Photo fine but its Live video never arrived (sent by an older
+            // version): say so, "Back up again" sends just the video.
+            _lostReason[a.id] = photo != null && photo.ok ? 'no_live' : (photo?.reason ?? 'missing');
           }
         }
         if (!mounted) return;
@@ -237,6 +246,26 @@ class _CleanupPageState extends State<CleanupPage> {
   }
 
   /// Reverse signal: these were on the PC once, but not any more.
+  Widget _icloudNote(ThemeData theme) => Container(
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: LrColors.safelight.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: LrColors.safelight.withValues(alpha: 0.5)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.cloud_outlined, color: LrColors.safelight, size: 22),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(tr('cleanup.icloud', {'pc': widget.desktop.name}), style: theme.textTheme.bodySmall),
+            ),
+          ],
+        ),
+      );
+
   Widget _lostCard(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
@@ -269,7 +298,7 @@ class _CleanupPageState extends State<CleanupPage> {
               separatorBuilder: (_, _) => const SizedBox(width: 6),
               itemBuilder: (context, i) {
                 final a = _lost[i];
-                final changed = _lostReason[a.id] == 'changed';
+                final reason = _lostReason[a.id];
                 return Stack(children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(6),
@@ -291,7 +320,11 @@ class _CleanupPageState extends State<CleanupPage> {
                       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                       decoration: BoxDecoration(color: Colors.black87, borderRadius: BorderRadius.circular(4)),
                       child: Text(
-                        tr(changed ? 'cleanup.lost_changed' : 'cleanup.lost_missing'),
+                        tr(switch (reason) {
+                          'changed' => 'cleanup.lost_changed',
+                          'no_live' => 'cleanup.lost_no_live',
+                          _ => 'cleanup.lost_missing',
+                        }),
                         style: const TextStyle(color: Colors.white, fontSize: 9),
                       ),
                     ),
@@ -361,6 +394,10 @@ class _CleanupPageState extends State<CleanupPage> {
             ],
           ),
         ),
+        // iCloud Photos syncs deletions: removing a photo here also removes it
+        // from iCloud and every device on the same Apple ID. The PC copy is
+        // what stays — say so before anyone taps Delete.
+        if (Platform.isIOS) _icloudNote(theme),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Row(

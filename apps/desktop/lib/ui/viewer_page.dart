@@ -1,4 +1,5 @@
 // apps/desktop/lib/ui/viewer_page.dart
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -194,8 +195,44 @@ class _ImageViewState extends State<_ImageView> {
     if (!_direct) _preview = widget.services.ffmpeg.preview(widget.item);
   }
 
+  /// Playing the Live Photo's video over the still.
+  bool _playingLive = false;
+
   @override
   Widget build(BuildContext context) {
+    final live = widget.services.library.liveFor(widget.item);
+    final still = _still(context);
+    if (live == null) return still;
+    return Stack(
+      children: [
+        Positioned.fill(child: still),
+        if (_playingLive)
+          Positioned.fill(
+            child: _LivePlayback(
+              path: widget.services.library.absPath(live),
+              onDone: () {
+                if (mounted) setState(() => _playingLive = false);
+              },
+            ),
+          ),
+        Positioned(
+          left: 16,
+          top: 12,
+          child: MouseRegion(
+            // Like pressing on a Live Photo on iPhone: hover (or click) plays it.
+            onEnter: (_) => setState(() => _playingLive = true),
+            child: ActionChip(
+              avatar: const Icon(Icons.motion_photos_on_rounded, size: 18),
+              label: Text(tr('viewer.live')),
+              onPressed: () => setState(() => _playingLive = !_playingLive),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _still(BuildContext context) {
     final lib = widget.services.library;
     if (_direct) return _zoomable(Image.file(File(lib.absPath(widget.item))));
     return FutureBuilder<File?>(
@@ -223,6 +260,45 @@ class _ImageViewState extends State<_ImageView> {
   Widget _zoomable(Widget child) => InteractiveViewer(
         maxScale: 8,
         child: Center(child: child),
+      );
+}
+
+/// Plays a Live Photo's video once (with sound), then hands back to the still.
+class _LivePlayback extends StatefulWidget {
+  const _LivePlayback({required this.path, required this.onDone});
+
+  final String path;
+  final VoidCallback onDone;
+
+  @override
+  State<_LivePlayback> createState() => _LivePlaybackState();
+}
+
+class _LivePlaybackState extends State<_LivePlayback> {
+  late final Player _player = Player();
+  late final VideoController _controller = VideoController(_player);
+  StreamSubscription<bool>? _sub;
+
+  @override
+  void initState() {
+    super.initState();
+    _sub = _player.stream.completed.listen((done) {
+      if (done) widget.onDone();
+    });
+    _player.open(Media(widget.path));
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    _player.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+        onTap: widget.onDone,
+        child: Video(controller: _controller, controls: NoVideoControls, fill: Colors.black),
       );
 }
 

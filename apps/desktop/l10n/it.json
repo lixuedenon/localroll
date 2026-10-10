@@ -128,5 +128,6 @@
   "receive.blocked_firewall": "Windows Firewall non ha ancora consentito LocalRoll. Consentilo una volta (Windows chiederà conferma).",
   "receive.blocked_fix": "Consenti LocalRoll",
   "identity.images": "Immagini",
-  "settings.version": "Versione {version}"
+  "settings.version": "Versione {version}",
+  "viewer.live": "Live"
 }

@@ -122,5 +122,7 @@
   "ios.camera": "掃描電腦上顯示的配對 QR 碼。",
   "ios.local_network": "在區域網路中尋找並連線執行 LocalRoll 的電腦。檔案不會經過雲端。",
   "bg.channel": "傳輸",
-  "settings.version": "版本 {version}"
+  "settings.version": "版本 {version}",
+  "cleanup.icloud": "如果開啟了 iCloud 照片，在這裡刪除會同時從 iCloud 和你的其他 Apple 裝置上刪除。{pc} 上的備份不受影響。",
+  "cleanup.lost_no_live": "缺少原況影片"
 }
