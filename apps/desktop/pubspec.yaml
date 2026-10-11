@@ -33,6 +33,8 @@ dependencies:
   # Custom title bar (Back / Exit, confirm before closing).
   window_manager: '>=0.4.3 <0.6.0'
   qr_flutter: ^4.1.0
+  # HTTPS: this PC's own self-signed certificate (made once, pinned by phones).
+  basic_utils: ^5.7.0
 
 dev_dependencies:
   flutter_test:
