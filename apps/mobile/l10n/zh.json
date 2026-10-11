@@ -236,5 +236,8 @@
   "backup.range_lastMonth": "上个月",
   "backup.range_d90": "最近 3 个月",
   "backup.range_year": "今年",
-  "backup.range_custom": "自选日期…"
+  "backup.range_custom": "自选日期…",
+  "err.cert_changed": "「{name}」的安全证书变了（重装过，或者网络中有人冒充）。为安全起见没有发送。请先“忘记”这台电脑，再重新配对。",
+  "err.upgrade_required": "这台设备必须使用加密连接，请把它上面的 LocalRoll 更新到最新版。",
+  "err.not_lan": "只接受同一个家庭或办公网络里的设备连接。"
 }

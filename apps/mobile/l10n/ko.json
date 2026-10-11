@@ -236,5 +236,8 @@
   "backup.range_lastMonth": "지난달",
   "backup.range_d90": "최근 3개월",
   "backup.range_year": "올해",
-  "backup.range_custom": "날짜 선택…"
+  "backup.range_custom": "날짜 선택…",
+  "err.cert_changed": "“{name}”의 보안 인증서가 바뀌었습니다(재설치했거나 중간에 누군가 있음). 안전을 위해 보내지 않았습니다. 연결을 해제하고 다시 연결하세요.",
+  "err.upgrade_required": "이 기기는 암호화 연결을 사용해야 합니다. LocalRoll을 업데이트하세요.",
+  "err.not_lan": "같은 집이나 사무실 네트워크의 기기만 연결할 수 있습니다."
 }

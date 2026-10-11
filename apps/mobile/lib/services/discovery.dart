@@ -159,18 +159,33 @@ class DesktopDiscovery extends ChangeNotifier {
 }
 
 /// Pairs with a PC: tries each address until one answers, then sends the PIN.
+/// [fingerprint] comes from the QR code: then only that certificate is
+/// accepted. Typed PIN / address: the certificate seen first is kept.
 Future<PairedDesktop> pairWithDesktop({
   required MobileSettings settings,
   required List<String> hosts,
   required int port,
   required String pin,
+  String? fingerprint,
+  int? tlsPort,
 }) async {
   Object? lastError;
   for (final host in hosts) {
-    final client = DesktopClient(host: host, port: port);
+    DesktopClient? client;
     try {
-      await client.info();
-      final res = await client.pair(settings.deviceInfo, pin);
+      final probe = DesktopClient(host: host, port: port);
+      final DeviceInfo info;
+      try {
+        info = await probe.info();
+      } finally {
+        probe.close();
+      }
+      final fp = fingerprint ?? info.fingerprint;
+      final c = fp != null
+          ? DesktopClient(host: host, port: tlsPort ?? info.tlsPort ?? port, secure: true, pin: fingerprint)
+          : DesktopClient(host: host, port: port);
+      client = c;
+      final res = await c.pair(settings.deviceInfo, pin);
       final d = PairedDesktop(
         id: res.desktop.id,
         name: res.desktop.name,
@@ -178,6 +193,7 @@ Future<PairedDesktop> pairWithDesktop({
         port: port,
         token: res.token,
         lastHost: host,
+        fingerprint: c.secure ? (fingerprint ?? c.seenFingerprint) : null,
       );
       await settings.upsertDesktop(d);
       return d;
@@ -187,7 +203,7 @@ Future<PairedDesktop> pairWithDesktop({
     } catch (e) {
       lastError = e;
     } finally {
-      client.close();
+      client?.close();
     }
   }
   throw Exception(tr('err.cannot_reach', {'error': lastError ?? tr('err.no_address')}));
@@ -214,7 +230,7 @@ Future<void> refreshPairedLooks(MobileSettings settings, List<FoundDesktop> foun
           await settings.rememberHost(d, h);
         }
         await settings.updateLook(d, info);
-        await _pullDeletions(settings, d, h, f.port);
+        await _pullDeletions(settings, d, h, f.port, info);
         break;
       } catch (_) {
       } finally {
@@ -226,9 +242,10 @@ Future<void> refreshPairedLooks(MobileSettings settings, List<FoundDesktop> foun
 
 /// Reverse signal: photos deleted on the PC that are still on this phone lose
 /// their ✓ and are listed as "not backed up any more".
-Future<void> _pullDeletions(MobileSettings settings, PairedDesktop d, String host, int port) async {
-  final c = DesktopClient(host: host, port: port, deviceId: settings.deviceId, token: d.token);
+Future<void> _pullDeletions(MobileSettings settings, PairedDesktop d, String host, int port, DeviceInfo info) async {
+  DesktopClient? c;
   try {
+    c = await openDesktop(settings, d, host, port, info);
     final r = await c.changes(d.changesSinceMs);
     if (r.deleted.isNotEmpty) {
       final sent = settings.sentTo(d.id);
@@ -243,8 +260,46 @@ Future<void> _pullDeletions(MobileSettings settings, PairedDesktop d, String hos
   } catch (_) {
     // Older PC version or not paired any more: nothing to do.
   } finally {
-    c.close();
+    c?.close();
   }
+}
+
+/// An authenticated client for paired PC [d] answering at [host]:[port]
+/// ([info] is what it just said about itself).
+///
+/// * Paired with HTTPS: only the remembered certificate is accepted; a PC
+///   showing a different one was reinstalled — or something is in between —
+///   so we stop and ask to pair again.
+/// * Paired before encryption, and the PC now has HTTPS: move over once
+///   (a new token over HTTPS; the old one stops working), then remember the
+///   certificate.
+/// * Older PC without HTTPS: plain HTTP as before.
+Future<DesktopClient> openDesktop(
+  MobileSettings settings,
+  PairedDesktop d,
+  String host,
+  int port,
+  DeviceInfo info,
+) async {
+  final tlsPort = info.tlsPort ?? port;
+  final pinned = d.fingerprint;
+  if (pinned != null) {
+    if (info.fingerprint != null && info.fingerprint != pinned) {
+      throw Exception(tr('err.cert_changed', {'name': d.name}));
+    }
+    return DesktopClient(host: host, port: tlsPort, secure: true, pin: pinned, deviceId: settings.deviceId, token: d.token);
+  }
+  final offered = info.fingerprint;
+  if (offered == null) return DesktopClient(host: host, port: port, deviceId: settings.deviceId, token: d.token);
+  final up = DesktopClient(host: host, port: tlsPort, secure: true, pin: offered, deviceId: settings.deviceId, token: d.token);
+  try {
+    d.token = await up.upgrade();
+  } finally {
+    up.close();
+  }
+  d.fingerprint = offered;
+  await settings.saveDesktop();
+  return DesktopClient(host: host, port: tlsPort, secure: true, pin: offered, deviceId: settings.deviceId, token: d.token);
 }
 
 /// Tap-to-pair: asks the PC, then waits for Allow / Deny there.
@@ -259,11 +314,24 @@ Future<PairedDesktop?> pairByApproval({
 }) async {
   Object? lastError;
   for (final host in hosts) {
-    final client = DesktopClient(host: host, port: port);
+    var client = DesktopClient(host: host, port: port);
     try {
       final info = await client.info();
+      // Newer PC: ask over HTTPS and bind the symbols to the certificate we
+      // actually see — a device in between would make them differ.
+      if (info.fingerprint != null) {
+        client.close();
+        client = DesktopClient(host: host, port: info.tlsPort ?? port, secure: true);
+      }
       final start = await client.requestApproval(settings.deviceInfo);
-      onWaiting(pairingEmoji(start.requestId));
+      final seen = client.secure ? client.seenFingerprint : null;
+      if (client.secure && seen == null) throw const SocketException('no certificate');
+      onWaiting(pairingEmoji(start.requestId, fingerprint: seen));
+      if (seen != null) {
+        // From now on only that certificate.
+        client.close();
+        client = DesktopClient(host: host, port: info.tlsPort ?? port, secure: true, pin: seen);
+      }
       final deadline = DateTime.now().add(LrProtocol.pairApprovalTimeout + const Duration(seconds: 5));
       while (DateTime.now().isBefore(deadline)) {
         if (cancelled()) return null;
@@ -284,6 +352,7 @@ Future<PairedDesktop?> pairByApproval({
               icon: desk.icon,
               color: desk.color,
               avatar: desk.avatar,
+              fingerprint: seen,
             );
             await settings.upsertDesktop(d);
             return d;
@@ -333,25 +402,28 @@ Future<DesktopClient> connectToDesktop(
   final seen = <String>{};
   for (final (host, port) in endpoints) {
     if (!seen.add('$host:$port')) continue;
-    final client = DesktopClient(host: host, port: port, deviceId: settings.deviceId, token: d.token);
+    final probe = DesktopClient(host: host, port: port);
+    final DeviceInfo info;
     try {
-      final info = await client.info(timeout: const Duration(seconds: 3));
-      if (info.id != d.id) {
-        tried.add('$host:$port other PC');
-        client.close();
-        continue;
-      }
-      await settings.updateLook(d, info);
-      if (host != d.lastHost || port != d.port) {
-        d.port = port;
-        if (!d.hosts.contains(host)) d.hosts = [host, ...d.hosts];
-        await settings.rememberHost(d, host);
-      }
-      return client;
+      info = await probe.info(timeout: const Duration(seconds: 3));
     } catch (e) {
       tried.add('$host:$port ${_short(e)}');
-      client.close();
+      continue;
+    } finally {
+      probe.close();
     }
+    if (info.id != d.id) {
+      tried.add('$host:$port other PC');
+      continue;
+    }
+    await settings.updateLook(d, info);
+    if (host != d.lastHost || port != d.port) {
+      d.port = port;
+      if (!d.hosts.contains(host)) d.hosts = [host, ...d.hosts];
+      await settings.rememberHost(d, host);
+    }
+    // Certificate changed: stop here (the message says to pair again).
+    return openDesktop(settings, d, host, port, info);
   }
   throw Exception('${tr('err.pc_not_found', {'name': d.name})}\n\n${tried.join('\n')}');
 }
@@ -370,13 +442,22 @@ String _short(Object e) {
 Future<void> forgetDesktop(MobileSettings settings, PairedDesktop d) async {
   final hosts = <String>{if (d.lastHost != null) d.lastHost!, ...d.hosts};
   for (final h in hosts) {
-    final c = DesktopClient(host: h, port: d.port, deviceId: settings.deviceId, token: d.token);
+    DesktopClient? c;
     try {
+      final probe = DesktopClient(host: h, port: d.port);
+      final DeviceInfo info;
+      try {
+        info = await probe.info(timeout: const Duration(seconds: 3));
+      } finally {
+        probe.close();
+      }
+      if (info.id != d.id) continue;
+      c = await openDesktop(settings, d, h, d.port, info);
       await c.unpair();
       break;
     } catch (_) {
     } finally {
-      c.close();
+      c?.close();
     }
   }
   await settings.clearLost(d.id);

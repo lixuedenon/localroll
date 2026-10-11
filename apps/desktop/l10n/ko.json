@@ -226,5 +226,10 @@
   "send.err_sha256_mismatch": "파일이 손상된 채 도착해 저장되지 않았습니다. 다시 보내세요.",
   "send.err_too_many_attempts": "요청이 너무 많습니다. 잠시 후 다시 시도하세요.",
   "pair.ask_pc": "PC “{name}”이(가) 연결을 요청합니다",
-  "pair.check_pc": "다른 PC에 같은 기호 세 개가 보이는지 확인하세요. 허용하면 두 PC가 서로 보낼 수 있습니다."
+  "pair.check_pc": "다른 PC에 같은 기호 세 개가 보이는지 확인하세요. 허용하면 두 PC가 서로 보낼 수 있습니다.",
+  "send.err_cert_changed": "상대 PC의 보안 인증서가 바뀌었습니다. 안전을 위해 보내지 않았습니다. 연결을 해제하고 다시 연결하세요.",
+  "send.err_upgrade_required": "이 기기는 암호화 연결을 사용해야 합니다. LocalRoll을 업데이트하세요.",
+  "send.err_not_lan": "같은 집이나 사무실 네트워크의 기기만 연결할 수 있습니다.",
+  "receive.encrypted": "전송이 암호화됩니다 · 인증서 {fp}",
+  "receive.not_encrypted": "암호화를 사용할 수 없습니다(인증서를 만들 수 없음). 전송이 암호화되지 않습니다."
 }

@@ -236,5 +236,8 @@
   "backup.range_lastMonth": "Mês passado",
   "backup.range_d90": "Últimos 3 meses",
   "backup.range_year": "Este ano",
-  "backup.range_custom": "Escolher datas…"
+  "backup.range_custom": "Escolher datas…",
+  "err.cert_changed": "“{name}” mostra outro certificado de segurança (reinstalado ou há algo no meio). Por segurança nada foi enviado. Esqueça e pareie de novo.",
+  "err.upgrade_required": "Este aparelho precisa usar conexão criptografada. Atualize o LocalRoll.",
+  "err.not_lan": "Só aparelhos da mesma rede de casa ou do escritório podem se conectar."
 }

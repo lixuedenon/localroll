@@ -236,5 +236,8 @@
   "backup.range_lastMonth": "先月",
   "backup.range_d90": "過去 3 か月",
   "backup.range_year": "今年",
-  "backup.range_custom": "日付を選ぶ…"
+  "backup.range_custom": "日付を選ぶ…",
+  "err.cert_changed": "「{name}」のセキュリティ証明書が変わりました（再インストールされたか、間に何かがいます）。安全のため送信していません。登録を解除してペアリングし直してください。",
+  "err.upgrade_required": "このデバイスは暗号化接続が必要です。LocalRoll を最新版に更新してください。",
+  "err.not_lan": "同じ家庭・職場のネットワーク内の機器だけが接続できます。"
 }

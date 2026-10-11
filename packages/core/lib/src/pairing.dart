@@ -15,6 +15,8 @@ class PairingPayload {
     required this.port,
     required this.pin,
     this.protocolVersion = 1,
+    this.tlsPort,
+    this.fingerprint,
   });
 
   static const String prefix = 'LOCALROLL:';
@@ -28,6 +30,11 @@ class PairingPayload {
   final String pin;
   final int protocolVersion;
 
+  /// HTTPS port and certificate fingerprint (newer PCs): the phone pairs
+  /// over HTTPS and trusts only this certificate.
+  final int? tlsPort;
+  final String? fingerprint;
+
   String encode() {
     final json = jsonEncode({
       'v': protocolVersion,
@@ -36,6 +43,8 @@ class PairingPayload {
       'hosts': hosts,
       'port': port,
       'pin': pin,
+      if (tlsPort != null) 'tls': tlsPort,
+      if (fingerprint != null) 'fp': fingerprint,
     });
     return prefix + base64Url.encode(utf8.encode(json));
   }
@@ -53,6 +62,8 @@ class PairingPayload {
         port: (j['port'] as num).toInt(),
         pin: j['pin'] as String,
         protocolVersion: (j['v'] as num?)?.toInt() ?? 1,
+        tlsPort: (j['tls'] as num?)?.toInt(),
+        fingerprint: j['fp'] as String?,
       );
     } catch (_) {
       return null;
@@ -62,8 +73,11 @@ class PairingPayload {
 
 /// Three emoji derived from a pairing request id. Both the phone and the PC
 /// show them, so the user can check they are approving their own phone.
-List<String> pairingEmoji(String requestId) {
-  final h = crypto.sha256.convert(utf8.encode('localroll-pair|$requestId')).bytes;
+/// Over HTTPS the PC's certificate [fingerprint] is mixed in: a device in
+/// the middle with its own certificate makes the two screens differ.
+List<String> pairingEmoji(String requestId, {String? fingerprint}) {
+  final input = fingerprint == null ? 'localroll-pair|$requestId' : 'localroll-pair|$requestId|${fingerprint.toLowerCase()}';
+  final h = crypto.sha256.convert(utf8.encode(input)).bytes;
   return [for (var i = 0; i < 3; i++) _emoji[h[i] % _emoji.length]];
 }
 

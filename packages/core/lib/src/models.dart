@@ -14,10 +14,18 @@ class DeviceInfo {
     this.color,
     this.avatar = 0,
     this.owner,
+    this.tlsPort,
+    this.fingerprint,
   });
 
   final String id;
   final String name;
+
+  /// PC only: HTTPS port and certificate fingerprint. Learned over plain
+  /// HTTP, so only trusted when confirmed (QR code, symbols, or an earlier
+  /// pairing) — see tls.dart.
+  final int? tlsPort;
+  final String? fingerprint;
 
   /// Family group: the person this phone belongs to ("Mum"), as typed on the
   /// phone. Phones with the same owner are one family member on the PC.
@@ -44,6 +52,8 @@ class DeviceInfo {
         if (color != null) 'color': color,
         if (avatar != 0) 'avatar': avatar,
         if (owner != null && owner!.isNotEmpty) 'owner': owner,
+        if (tlsPort != null) 'tlsPort': tlsPort,
+        if (fingerprint != null) 'fingerprint': fingerprint,
       };
 
   factory DeviceInfo.fromJson(Map<String, dynamic> j) => DeviceInfo(
@@ -56,6 +66,8 @@ class DeviceInfo {
         color: (j['color'] as num?)?.toInt(),
         avatar: (j['avatar'] as num?)?.toInt() ?? 0,
         owner: j['owner'] as String?,
+        tlsPort: (j['tlsPort'] as num?)?.toInt(),
+        fingerprint: j['fingerprint'] as String?,
       );
 }
 
@@ -346,18 +358,31 @@ class VerifyResponse {
 /// [token] is what the other PC will use to send to the asking PC;
 /// [hosts]/[port] are where the asking PC listens.
 class PeerGrant {
-  const PeerGrant({required this.token, required this.hosts, required this.port});
+  const PeerGrant({required this.token, required this.hosts, required this.port, this.tlsPort, this.fingerprint});
 
   final String token;
   final List<String> hosts;
   final int port;
 
-  Map<String, dynamic> toJson() => {'token': token, 'hosts': hosts, 'port': port};
+  /// The asking PC's HTTPS port and certificate (sent over HTTPS to a PC
+  /// the user just confirmed, so it can be trusted).
+  final int? tlsPort;
+  final String? fingerprint;
+
+  Map<String, dynamic> toJson() => {
+        'token': token,
+        'hosts': hosts,
+        'port': port,
+        if (tlsPort != null) 'tlsPort': tlsPort,
+        if (fingerprint != null) 'fingerprint': fingerprint,
+      };
 
   factory PeerGrant.fromJson(Map<String, dynamic> j) => PeerGrant(
         token: j['token'] as String,
         hosts: (j['hosts'] as List? ?? const []).cast<String>(),
         port: (j['port'] as num?)?.toInt() ?? LrProtocol.defaultPort,
+        tlsPort: (j['tlsPort'] as num?)?.toInt(),
+        fingerprint: j['fingerprint'] as String?,
       );
 }
 

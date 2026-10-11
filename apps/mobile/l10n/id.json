@@ -236,5 +236,8 @@
   "backup.range_lastMonth": "Bulan lalu",
   "backup.range_d90": "3 bulan terakhir",
   "backup.range_year": "Tahun ini",
-  "backup.range_custom": "Pilih tanggal…"
+  "backup.range_custom": "Pilih tanggal…",
+  "err.cert_changed": "“{name}” menampilkan sertifikat keamanan lain (dipasang ulang, atau ada pihak di tengah). Demi keamanan tidak ada yang dikirim. Lupakan lalu pasangkan ulang.",
+  "err.upgrade_required": "Perangkat ini harus memakai koneksi terenkripsi. Perbarui LocalRoll.",
+  "err.not_lan": "Hanya perangkat di jaringan rumah atau kantor yang sama yang bisa terhubung."
 }

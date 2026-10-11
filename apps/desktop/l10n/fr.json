@@ -226,5 +226,10 @@
   "send.err_sha256_mismatch": "Un fichier est arrivé endommagé et n’a pas été conservé. Renvoyez-le.",
   "send.err_too_many_attempts": "Trop de demandes. Patientez un instant.",
   "pair.ask_pc": "« {name} » (un PC) souhaite s’associer",
-  "pair.check_pc": "Vérifiez que l’autre PC affiche les trois mêmes symboles. Autoriser permet aux deux PC de s’envoyer des fichiers."
+  "pair.check_pc": "Vérifiez que l’autre PC affiche les trois mêmes symboles. Autoriser permet aux deux PC de s’envoyer des fichiers.",
+  "send.err_cert_changed": "L’autre PC présente un autre certificat de sécurité. Rien n’a été envoyé par sécurité. Oubliez-le puis associez-le à nouveau.",
+  "send.err_upgrade_required": "Cet appareil doit utiliser une connexion chiffrée. Mettez LocalRoll à jour.",
+  "send.err_not_lan": "Seuls les appareils du même réseau domestique ou de bureau peuvent se connecter.",
+  "receive.encrypted": "Transferts chiffrés · certificat {fp}",
+  "receive.not_encrypted": "Chiffrement indisponible (certificat impossible à créer) : les transferts ne sont pas chiffrés."
 }

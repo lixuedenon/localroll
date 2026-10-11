@@ -226,5 +226,10 @@
   "send.err_sha256_mismatch": "有文件传到对方时损坏，没有保存，请重新发送。",
   "send.err_too_many_attempts": "请求太多，请稍等再试。",
   "pair.ask_pc": "电脑「{name}」想和这台电脑配对",
-  "pair.check_pc": "确认另一台电脑上显示的是同样的三个图案。允许后两台电脑可以互相发送。"
+  "pair.check_pc": "确认另一台电脑上显示的是同样的三个图案。允许后两台电脑可以互相发送。",
+  "send.err_cert_changed": "对方电脑的安全证书变了（重装过，或者网络中有人冒充）。为安全起见没有发送。请先“忘记”再重新配对。",
+  "send.err_upgrade_required": "这台设备必须使用加密连接，请把它上面的 LocalRoll 更新到最新版。",
+  "send.err_not_lan": "只接受同一个家庭或办公网络里的设备连接。",
+  "receive.encrypted": "传输已加密 · 证书 {fp}",
+  "receive.not_encrypted": "加密不可用（无法创建证书），传输未加密。"
 }

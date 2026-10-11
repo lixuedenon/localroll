@@ -226,5 +226,10 @@
   "send.err_sha256_mismatch": "Um arquivo chegou danificado e não foi salvo. Envie de novo.",
   "send.err_too_many_attempts": "Muitas solicitações. Aguarde um momento.",
   "pair.ask_pc": "“{name}” (um PC) quer parear",
-  "pair.check_pc": "Confira se o outro PC mostra os mesmos três símbolos. Permitindo, os dois PCs poderão enviar arquivos um ao outro."
+  "pair.check_pc": "Confira se o outro PC mostra os mesmos três símbolos. Permitindo, os dois PCs poderão enviar arquivos um ao outro.",
+  "send.err_cert_changed": "O outro PC mostra outro certificado de segurança. Por segurança nada foi enviado. Esqueça e pareie de novo.",
+  "send.err_upgrade_required": "Este aparelho precisa usar conexão criptografada. Atualize o LocalRoll.",
+  "send.err_not_lan": "Só aparelhos da mesma rede de casa ou do escritório podem se conectar.",
+  "receive.encrypted": "Transferências criptografadas · certificado {fp}",
+  "receive.not_encrypted": "Criptografia indisponível (não foi possível criar o certificado): as transferências não são criptografadas."
 }

@@ -226,5 +226,10 @@
   "send.err_sha256_mismatch": "Sebuah file tiba rusak dan tidak disimpan. Kirim ulang.",
   "send.err_too_many_attempts": "Terlalu banyak permintaan. Tunggu sebentar.",
   "pair.ask_pc": "“{name}” (PC) ingin dipasangkan",
-  "pair.check_pc": "Pastikan PC lain menampilkan tiga simbol yang sama. Dengan mengizinkan, kedua PC bisa saling mengirim."
+  "pair.check_pc": "Pastikan PC lain menampilkan tiga simbol yang sama. Dengan mengizinkan, kedua PC bisa saling mengirim.",
+  "send.err_cert_changed": "PC lain menampilkan sertifikat keamanan lain. Demi keamanan tidak ada yang dikirim. Lupakan lalu pasangkan ulang.",
+  "send.err_upgrade_required": "Perangkat ini harus memakai koneksi terenkripsi. Perbarui LocalRoll.",
+  "send.err_not_lan": "Hanya perangkat di jaringan rumah atau kantor yang sama yang bisa terhubung.",
+  "receive.encrypted": "Transfer terenkripsi · sertifikat {fp}",
+  "receive.not_encrypted": "Enkripsi tidak tersedia (sertifikat tidak bisa dibuat) — transfer tidak terenkripsi."
 }

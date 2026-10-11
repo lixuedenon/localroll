@@ -239,6 +239,9 @@ const Map<String, Map<String, String>> translations = {
     'backup.range_d90': 'Last 3 months',
     'backup.range_year': 'This year',
     'backup.range_custom': 'Choose dates…',
+    'err.cert_changed': '“{name}” shows a different security certificate (reinstalled, or something is in between). For safety nothing was sent. Forget it and pair again.',
+    'err.upgrade_required': 'This device must use an encrypted connection. Update LocalRoll on it.',
+    'err.not_lan': 'Only devices on the same home or office network can connect.',
   },
   'zh': {
     'common.cancel': '取消',
@@ -476,6 +479,9 @@ const Map<String, Map<String, String>> translations = {
     'backup.range_d90': '最近 3 个月',
     'backup.range_year': '今年',
     'backup.range_custom': '自选日期…',
+    'err.cert_changed': '「{name}」的安全证书变了（重装过，或者网络中有人冒充）。为安全起见没有发送。请先“忘记”这台电脑，再重新配对。',
+    'err.upgrade_required': '这台设备必须使用加密连接，请把它上面的 LocalRoll 更新到最新版。',
+    'err.not_lan': '只接受同一个家庭或办公网络里的设备连接。',
   },
   'zh_Hant': {
     'common.cancel': '取消',
@@ -713,6 +719,9 @@ const Map<String, Map<String, String>> translations = {
     'backup.range_d90': '最近 3 個月',
     'backup.range_year': '今年',
     'backup.range_custom': '自選日期…',
+    'err.cert_changed': '「{name}」的安全憑證變了（重裝過，或網路中有人冒充）。為了安全沒有傳送。請先「忘記」這台電腦，再重新配對。',
+    'err.upgrade_required': '這台裝置必須使用加密連線，請把它上面的 LocalRoll 更新到最新版。',
+    'err.not_lan': '只接受同一個家庭或辦公網路中的裝置連線。',
   },
   'ja': {
     'common.cancel': 'キャンセル',
@@ -950,6 +959,9 @@ const Map<String, Map<String, String>> translations = {
     'backup.range_d90': '過去 3 か月',
     'backup.range_year': '今年',
     'backup.range_custom': '日付を選ぶ…',
+    'err.cert_changed': '「{name}」のセキュリティ証明書が変わりました（再インストールされたか、間に何かがいます）。安全のため送信していません。登録を解除してペアリングし直してください。',
+    'err.upgrade_required': 'このデバイスは暗号化接続が必要です。LocalRoll を最新版に更新してください。',
+    'err.not_lan': '同じ家庭・職場のネットワーク内の機器だけが接続できます。',
   },
   'ko': {
     'common.cancel': '취소',
@@ -1187,6 +1199,9 @@ const Map<String, Map<String, String>> translations = {
     'backup.range_d90': '최근 3개월',
     'backup.range_year': '올해',
     'backup.range_custom': '날짜 선택…',
+    'err.cert_changed': '“{name}”의 보안 인증서가 바뀌었습니다(재설치했거나 중간에 누군가 있음). 안전을 위해 보내지 않았습니다. 연결을 해제하고 다시 연결하세요.',
+    'err.upgrade_required': '이 기기는 암호화 연결을 사용해야 합니다. LocalRoll을 업데이트하세요.',
+    'err.not_lan': '같은 집이나 사무실 네트워크의 기기만 연결할 수 있습니다.',
   },
   'es': {
     'common.cancel': 'Cancelar',
@@ -1424,6 +1439,9 @@ const Map<String, Map<String, String>> translations = {
     'backup.range_d90': 'Últimos 3 meses',
     'backup.range_year': 'Este año',
     'backup.range_custom': 'Elegir fechas…',
+    'err.cert_changed': '«{name}» muestra otro certificado de seguridad (reinstalado o hay algo en medio). Por seguridad no se envió nada. Olvídalo y empareja de nuevo.',
+    'err.upgrade_required': 'Este dispositivo debe usar una conexión cifrada. Actualiza LocalRoll.',
+    'err.not_lan': 'Solo pueden conectarse dispositivos de la misma red de casa u oficina.',
   },
   'fr': {
     'common.cancel': 'Annuler',
@@ -1661,6 +1679,9 @@ const Map<String, Map<String, String>> translations = {
     'backup.range_d90': '3 derniers mois',
     'backup.range_year': 'Cette année',
     'backup.range_custom': 'Choisir les dates…',
+    'err.cert_changed': '« {name} » présente un autre certificat de sécurité (réinstallé, ou quelque chose s’interpose). Rien n’a été envoyé par sécurité. Oubliez-le puis associez-le à nouveau.',
+    'err.upgrade_required': 'Cet appareil doit utiliser une connexion chiffrée. Mettez LocalRoll à jour.',
+    'err.not_lan': 'Seuls les appareils du même réseau domestique ou de bureau peuvent se connecter.',
   },
   'de': {
     'common.cancel': 'Abbrechen',
@@ -1898,6 +1919,9 @@ const Map<String, Map<String, String>> translations = {
     'backup.range_d90': 'Letzte 3 Monate',
     'backup.range_year': 'Dieses Jahr',
     'backup.range_custom': 'Daten wählen…',
+    'err.cert_changed': '„{name}“ zeigt ein anderes Sicherheitszertifikat (neu installiert oder jemand dazwischen). Zur Sicherheit wurde nichts gesendet. Entfernen und neu koppeln.',
+    'err.upgrade_required': 'Dieses Gerät muss eine verschlüsselte Verbindung nutzen. Bitte LocalRoll aktualisieren.',
+    'err.not_lan': 'Nur Geräte im selben Heim- oder Büronetz können sich verbinden.',
   },
   'pt': {
     'common.cancel': 'Cancelar',
@@ -2135,6 +2159,9 @@ const Map<String, Map<String, String>> translations = {
     'backup.range_d90': 'Últimos 3 meses',
     'backup.range_year': 'Este ano',
     'backup.range_custom': 'Escolher datas…',
+    'err.cert_changed': '“{name}” mostra outro certificado de segurança (reinstalado ou há algo no meio). Por segurança nada foi enviado. Esqueça e pareie de novo.',
+    'err.upgrade_required': 'Este aparelho precisa usar conexão criptografada. Atualize o LocalRoll.',
+    'err.not_lan': 'Só aparelhos da mesma rede de casa ou do escritório podem se conectar.',
   },
   'ru': {
     'common.cancel': 'Отмена',
@@ -2372,6 +2399,9 @@ const Map<String, Map<String, String>> translations = {
     'backup.range_d90': 'Последние 3 месяца',
     'backup.range_year': 'Этот год',
     'backup.range_custom': 'Выбрать даты…',
+    'err.cert_changed': '«{name}» показывает другой сертификат безопасности (переустановлен или кто-то посередине). Ради безопасности ничего не отправлено. Забудьте его и подключите снова.',
+    'err.upgrade_required': 'Это устройство должно использовать шифрованное соединение. Обновите LocalRoll.',
+    'err.not_lan': 'Подключаться могут только устройства из той же домашней или рабочей сети.',
   },
   'it': {
     'common.cancel': 'Annulla',
@@ -2609,6 +2639,9 @@ const Map<String, Map<String, String>> translations = {
     'backup.range_d90': 'Ultimi 3 mesi',
     'backup.range_year': 'Quest’anno',
     'backup.range_custom': 'Scegli le date…',
+    'err.cert_changed': '«{name}» mostra un altro certificato di sicurezza (reinstallato o c’è qualcosa in mezzo). Per sicurezza non è stato inviato nulla. Dimenticalo e abbinalo di nuovo.',
+    'err.upgrade_required': 'Questo dispositivo deve usare una connessione cifrata. Aggiorna LocalRoll.',
+    'err.not_lan': 'Possono collegarsi solo dispositivi della stessa rete di casa o ufficio.',
   },
   'ar': {
     'common.cancel': 'إلغاء',
@@ -2846,6 +2879,9 @@ const Map<String, Map<String, String>> translations = {
     'backup.range_d90': 'آخر 3 أشهر',
     'backup.range_year': 'هذا العام',
     'backup.range_custom': 'اختر التواريخ…',
+    'err.cert_changed': '"{name}" يعرض شهادة أمان مختلفة (أُعيد تثبيته أو هناك جهاز في المنتصف). لم يُرسل شيء حفاظًا على الأمان. انسَه ثم اقرنه مجددًا.',
+    'err.upgrade_required': 'يجب أن يستخدم هذا الجهاز اتصالًا مشفرًا. حدّث LocalRoll.',
+    'err.not_lan': 'يمكن الاتصال فقط للأجهزة على شبكة المنزل أو المكتب نفسها.',
   },
   'hi': {
     'common.cancel': 'रद्द करें',
@@ -3083,6 +3119,9 @@ const Map<String, Map<String, String>> translations = {
     'backup.range_d90': 'पिछले 3 महीने',
     'backup.range_year': 'इस साल',
     'backup.range_custom': 'तारीखें चुनें…',
+    'err.cert_changed': '“{name}” का सुरक्षा प्रमाणपत्र बदल गया है (दोबारा इंस्टॉल हुआ, या बीच में कोई है)। सुरक्षा के लिए कुछ नहीं भेजा गया। इसे भूलकर दोबारा जोड़ें।',
+    'err.upgrade_required': 'इस डिवाइस को एन्क्रिप्टेड कनेक्शन इस्तेमाल करना होगा। LocalRoll अपडेट करें।',
+    'err.not_lan': 'केवल उसी घर या ऑफ़िस नेटवर्क के डिवाइस जुड़ सकते हैं।',
   },
   'id': {
     'common.cancel': 'Batal',
@@ -3320,6 +3359,9 @@ const Map<String, Map<String, String>> translations = {
     'backup.range_d90': '3 bulan terakhir',
     'backup.range_year': 'Tahun ini',
     'backup.range_custom': 'Pilih tanggal…',
+    'err.cert_changed': '“{name}” menampilkan sertifikat keamanan lain (dipasang ulang, atau ada pihak di tengah). Demi keamanan tidak ada yang dikirim. Lupakan lalu pasangkan ulang.',
+    'err.upgrade_required': 'Perangkat ini harus memakai koneksi terenkripsi. Perbarui LocalRoll.',
+    'err.not_lan': 'Hanya perangkat di jaringan rumah atau kantor yang sama yang bisa terhubung.',
   },
   'vi': {
     'common.cancel': 'Hủy',
@@ -3557,6 +3599,9 @@ const Map<String, Map<String, String>> translations = {
     'backup.range_d90': '3 tháng qua',
     'backup.range_year': 'Năm nay',
     'backup.range_custom': 'Chọn ngày…',
+    'err.cert_changed': '“{name}” có chứng chỉ bảo mật khác (đã cài lại, hoặc có thiết bị chen giữa). Để an toàn nên chưa gửi gì. Hãy quên rồi ghép nối lại.',
+    'err.upgrade_required': 'Thiết bị này phải dùng kết nối mã hóa. Hãy cập nhật LocalRoll.',
+    'err.not_lan': 'Chỉ thiết bị trong cùng mạng gia đình hoặc văn phòng mới kết nối được.',
   },
   'th': {
     'common.cancel': 'ยกเลิก',
@@ -3794,6 +3839,9 @@ const Map<String, Map<String, String>> translations = {
     'backup.range_d90': '3 เดือนล่าสุด',
     'backup.range_year': 'ปีนี้',
     'backup.range_custom': 'เลือกวันที่…',
+    'err.cert_changed': '“{name}” แสดงใบรับรองความปลอดภัยที่ต่างไป (ติดตั้งใหม่ หรือมีผู้แทรกกลาง) เพื่อความปลอดภัยจึงไม่ได้ส่ง เลิกจับคู่แล้วจับคู่ใหม่',
+    'err.upgrade_required': 'อุปกรณ์นี้ต้องใช้การเชื่อมต่อแบบเข้ารหัส กรุณาอัปเดต LocalRoll',
+    'err.not_lan': 'เชื่อมต่อได้เฉพาะอุปกรณ์ในเครือข่ายบ้านหรือที่ทำงานเดียวกัน',
   },
   'tr': {
     'common.cancel': 'İptal',
@@ -4031,5 +4079,8 @@ const Map<String, Map<String, String>> translations = {
     'backup.range_d90': 'Son 3 ay',
     'backup.range_year': 'Bu yıl',
     'backup.range_custom': 'Tarih seç…',
+    'err.cert_changed': '“{name}” farklı bir güvenlik sertifikası gösteriyor (yeniden kuruldu ya da arada biri var). Güvenlik için hiçbir şey gönderilmedi. Unutup yeniden eşleştirin.',
+    'err.upgrade_required': 'Bu cihaz şifreli bağlantı kullanmalı. LocalRoll’u güncelleyin.',
+    'err.not_lan': 'Yalnızca aynı ev veya ofis ağındaki cihazlar bağlanabilir.',
   },
 };

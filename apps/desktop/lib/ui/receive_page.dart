@@ -53,6 +53,23 @@ class ReceivePage extends StatelessWidget {
                           Text(s.settings.deviceName, style: Theme.of(context).textTheme.headlineSmall),
                           const SizedBox(height: 6),
                           Text(tr('receive.tap_hint', {'name': s.settings.deviceName})),
+                          const SizedBox(height: 6),
+                          Row(children: [
+                            Icon(
+                              s.settings.tlsFingerprint != null ? Icons.lock_rounded : Icons.lock_open_rounded,
+                              size: 16,
+                              color: s.settings.tlsFingerprint != null ? LrColors.verified : LrColors.danger,
+                            ),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                s.settings.tlsFingerprint != null
+                                    ? tr('receive.encrypted', {'fp': shortFingerprint(s.settings.tlsFingerprint!)})
+                                    : tr('receive.not_encrypted'),
+                                style: const TextStyle(color: LrColors.muted, fontSize: 12),
+                              ),
+                            ),
+                          ]),
                         ],
                       ),
                     ),
@@ -118,6 +135,8 @@ class _PairingCard extends StatelessWidget {
       hosts: hosts,
       port: s.server.port,
       pin: s.server.pin.value,
+      tlsPort: s.settings.tlsFingerprint == null ? null : s.server.port,
+      fingerprint: s.settings.tlsFingerprint,
     ).encode();
 
     return Card(

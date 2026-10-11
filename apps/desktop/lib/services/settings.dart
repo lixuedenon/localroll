@@ -17,13 +17,18 @@ class TrustedDevice {
     required this.pairedMs,
     this.owner,
     this.memberName,
+    this.secure = false,
   });
 
   final String id;
   String name;
   final String platform;
-  final String token;
+  String token;
   final int pairedMs;
+
+  /// Talks to us over HTTPS only (paired that way, or moved to it); plain
+  /// HTTP with this device's token is refused.
+  bool secure;
 
   /// Family group: the person's name as typed on the phone.
   String? owner;
@@ -42,6 +47,7 @@ class TrustedDevice {
         'pairedMs': pairedMs,
         if (owner != null) 'owner': owner,
         if (memberName != null) 'memberName': memberName,
+        if (secure) 'secure': true,
       };
 
   factory TrustedDevice.fromJson(Map<String, dynamic> j) => TrustedDevice(
@@ -52,6 +58,7 @@ class TrustedDevice {
         pairedMs: (j['pairedMs'] as num?)?.toInt() ?? 0,
         owner: j['owner'] as String?,
         memberName: j['memberName'] as String?,
+        secure: j['secure'] == true,
       );
 }
 
@@ -69,13 +76,18 @@ class PeerPc {
     this.icon,
     this.color,
     this.avatar = 0,
+    this.fingerprint,
   });
 
   final String id;
   String name;
   List<String> hosts;
   int port;
-  final String token;
+  String token;
+
+  /// The other PC's certificate (HTTPS); null for a pairing made before
+  /// encryption — moved over on the next contact.
+  String? fingerprint;
   final int pairedMs;
   String? lastHost;
   String? icon;
@@ -96,6 +108,7 @@ class PeerPc {
         if (icon != null) 'icon': icon,
         if (color != null) 'color': color,
         if (avatar != 0) 'avatar': avatar,
+        if (fingerprint != null) 'fingerprint': fingerprint,
       };
 
   factory PeerPc.fromJson(Map<String, dynamic> j) => PeerPc(
@@ -109,6 +122,7 @@ class PeerPc {
         icon: j['icon'] as String?,
         color: (j['color'] as num?)?.toInt(),
         avatar: (j['avatar'] as num?)?.toInt() ?? 0,
+        fingerprint: j['fingerprint'] as String?,
       );
 }
 
@@ -144,6 +158,12 @@ class AppSettings extends ChangeNotifier {
   /// Windows computer name — the "keep the original name" choice.
   static String get originalName => _defaultDeviceName();
   final Map<String, TrustedDevice> trusted = {};
+
+  /// This PC's certificate fingerprint (set at start-up, not saved here).
+  String? tlsFingerprint;
+
+  /// Folder of settings.json (certificate files live next to it).
+  Directory get dataDir => _file.parent;
 
   /// Other PCs this one can send to.
   final Map<String, PeerPc> peers = {};
@@ -207,6 +227,8 @@ class AppSettings extends ChangeNotifier {
         color: colorValue,
         avatar: avatarVersion,
         protocolVersion: LrProtocol.version,
+        tlsPort: tlsFingerprint == null ? null : port,
+        fingerprint: tlsFingerprint,
       );
 
   Future<void> save() async {

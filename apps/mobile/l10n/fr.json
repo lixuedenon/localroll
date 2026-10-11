@@ -236,5 +236,8 @@
   "backup.range_lastMonth": "Le mois dernier",
   "backup.range_d90": "3 derniers mois",
   "backup.range_year": "Cette année",
-  "backup.range_custom": "Choisir les dates…"
+  "backup.range_custom": "Choisir les dates…",
+  "err.cert_changed": "« {name} » présente un autre certificat de sécurité (réinstallé, ou quelque chose s’interpose). Rien n’a été envoyé par sécurité. Oubliez-le puis associez-le à nouveau.",
+  "err.upgrade_required": "Cet appareil doit utiliser une connexion chiffrée. Mettez LocalRoll à jour.",
+  "err.not_lan": "Seuls les appareils du même réseau domestique ou de bureau peuvent se connecter."
 }

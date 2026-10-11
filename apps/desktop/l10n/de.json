@@ -226,5 +226,10 @@
   "send.err_sha256_mismatch": "Eine Datei kam beschädigt an und wurde nicht gespeichert. Bitte erneut senden.",
   "send.err_too_many_attempts": "Zu viele Anfragen. Bitte kurz warten.",
   "pair.ask_pc": "„{name}“ (ein PC) möchte sich koppeln",
-  "pair.check_pc": "Prüfen Sie, ob der andere PC dieselben drei Symbole zeigt. Mit „Zulassen“ können beide PCs einander senden."
+  "pair.check_pc": "Prüfen Sie, ob der andere PC dieselben drei Symbole zeigt. Mit „Zulassen“ können beide PCs einander senden.",
+  "send.err_cert_changed": "Der andere PC zeigt ein anderes Sicherheitszertifikat. Zur Sicherheit wurde nichts gesendet. Entfernen und neu koppeln.",
+  "send.err_upgrade_required": "Dieses Gerät muss eine verschlüsselte Verbindung nutzen. Bitte LocalRoll aktualisieren.",
+  "send.err_not_lan": "Nur Geräte im selben Heim- oder Büronetz können sich verbinden.",
+  "receive.encrypted": "Übertragungen verschlüsselt · Zertifikat {fp}",
+  "receive.not_encrypted": "Verschlüsselung nicht verfügbar (Zertifikat konnte nicht erstellt werden) – Übertragungen sind unverschlüsselt."
 }

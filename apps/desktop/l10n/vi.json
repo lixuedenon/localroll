@@ -226,5 +226,10 @@
   "send.err_sha256_mismatch": "Một tệp đến nơi bị hỏng nên không được lưu. Hãy gửi lại.",
   "send.err_too_many_attempts": "Quá nhiều yêu cầu. Vui lòng chờ một lát.",
   "pair.ask_pc": "“{name}” (máy tính) muốn ghép nối",
-  "pair.check_pc": "Kiểm tra máy kia hiển thị đúng ba biểu tượng này. Cho phép để hai máy gửi được cho nhau."
+  "pair.check_pc": "Kiểm tra máy kia hiển thị đúng ba biểu tượng này. Cho phép để hai máy gửi được cho nhau.",
+  "send.err_cert_changed": "Máy kia có chứng chỉ bảo mật khác. Để an toàn nên chưa gửi gì. Hãy quên rồi ghép nối lại.",
+  "send.err_upgrade_required": "Thiết bị này phải dùng kết nối mã hóa. Hãy cập nhật LocalRoll.",
+  "send.err_not_lan": "Chỉ thiết bị trong cùng mạng gia đình hoặc văn phòng mới kết nối được.",
+  "receive.encrypted": "Truyền tệp được mã hóa · chứng chỉ {fp}",
+  "receive.not_encrypted": "Không dùng được mã hóa (không tạo được chứng chỉ) — truyền tệp không được mã hóa."
 }

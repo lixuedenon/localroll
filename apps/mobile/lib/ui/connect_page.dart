@@ -171,10 +171,17 @@ class _ConnectPageState extends State<ConnectPage> {
     }
   }
 
-  Future<void> _pair(List<String> hosts, int port, String pin) async {
+  Future<void> _pair(List<String> hosts, int port, String pin, {String? fingerprint, int? tlsPort}) async {
     setState(() => _busy = true);
     try {
-      final d = await pairWithDesktop(settings: widget.settings, hosts: hosts, port: port, pin: pin);
+      final d = await pairWithDesktop(
+        settings: widget.settings,
+        hosts: hosts,
+        port: port,
+        pin: pin,
+        fingerprint: fingerprint,
+        tlsPort: tlsPort,
+      );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('connect.paired_ok', {'name': d.name}))));
       _close();
@@ -192,7 +199,9 @@ class _ConnectPageState extends State<ConnectPage> {
     final payload = await Navigator.of(context).push<PairingPayload>(
       MaterialPageRoute(builder: (_) => const ScanPage()),
     );
-    if (payload != null) await _pair(payload.hosts, payload.port, payload.pin);
+    if (payload != null) {
+      await _pair(payload.hosts, payload.port, payload.pin, fingerprint: payload.fingerprint, tlsPort: payload.tlsPort);
+    }
   }
 
   Future<void> _pinFor(FoundDesktop f) async {

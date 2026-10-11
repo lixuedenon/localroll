@@ -24,13 +24,18 @@ class PairedDesktop {
     this.color,
     this.avatar = 0,
     this.changesSinceMs = 0,
+    this.fingerprint,
   });
 
   final String id;
   String name;
   List<String> hosts;
   int port;
-  final String token;
+  String token;
+
+  /// The PC's certificate (HTTPS). Null for a pairing made before
+  /// encryption; moved over automatically on the next contact.
+  String? fingerprint;
 
   /// Address that worked last time; tried first.
   String? lastHost;
@@ -61,6 +66,7 @@ class PairedDesktop {
         if (color != null) 'color': color,
         'avatar': avatar,
         'changesSinceMs': changesSinceMs,
+        if (fingerprint != null) 'fingerprint': fingerprint,
       };
 
   factory PairedDesktop.fromJson(Map<String, dynamic> j) => PairedDesktop(
@@ -74,6 +80,7 @@ class PairedDesktop {
         color: (j['color'] as num?)?.toInt(),
         avatar: (j['avatar'] as num?)?.toInt() ?? 0,
         changesSinceMs: (j['changesSinceMs'] as num?)?.toInt() ?? 0,
+        fingerprint: j['fingerprint'] as String?,
       );
 }
 

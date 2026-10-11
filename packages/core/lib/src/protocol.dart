@@ -45,6 +45,11 @@ class LrProtocol {
   /// POST {assetIds, private}: family visibility of items this phone sent.
   static const String pathVisibility = '/api/v1/visibility';
 
+  /// Over HTTPS, with the token from an older plain-HTTP pairing: the PC
+  /// answers with a new token and from then on refuses plain HTTP for this
+  /// device (the old token may have been seen on the network).
+  static const String pathUpgrade = '/api/v1/upgrade';
+
   /// PC only, from 127.0.0.1: a second copy of the app asks the running one
   /// to come to the front, then quits.
   static const String pathLocalShow = '/local/show';

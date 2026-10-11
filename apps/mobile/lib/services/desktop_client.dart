@@ -21,16 +21,35 @@ class LrHttpException implements Exception {
 
 /// Thin HTTP client for the desktop receiver (plain dart:io, no extra deps).
 class DesktopClient {
-  DesktopClient({required this.host, required this.port, this.deviceId, this.token});
+  /// Plain HTTP unless [secure]. Over HTTPS only the certificate [pin] is
+  /// accepted; without a pin (first contact while pairing) the certificate
+  /// seen is accepted and kept in [seenFingerprint] — see core tls.dart.
+  DesktopClient({
+    required this.host,
+    required this.port,
+    this.deviceId,
+    this.token,
+    this.secure = false,
+    this.pin,
+  }) {
+    _http = secure
+        ? lrHttpClient(pin: pin, onCertificate: (fp) => seenFingerprint = fp)
+        : (HttpClient()
+          ..connectionTimeout = const Duration(seconds: 4)
+          ..idleTimeout = const Duration(seconds: 30));
+  }
 
   final String host;
   final int port;
   final String? deviceId;
   final String? token;
+  final bool secure;
+  final String? pin;
 
-  final HttpClient _http = HttpClient()
-    ..connectionTimeout = const Duration(seconds: 4)
-    ..idleTimeout = const Duration(seconds: 30);
+  /// Certificate the PC showed (HTTPS only).
+  String? seenFingerprint;
+
+  late final HttpClient _http;
 
   void close() => _http.close(force: true);
 
@@ -42,7 +61,7 @@ class DesktopClient {
     Map<String, String>? query,
     Duration timeout = const Duration(seconds: 20),
   }) async {
-    var uri = Uri.parse('http://$host:$port$path');
+    var uri = Uri(scheme: secure ? 'https' : 'http', host: host, port: port, path: path);
     if (query != null) uri = uri.replace(queryParameters: query);
     final req = await _http.openUrl(method, uri).timeout(timeout);
     if (deviceId != null) req.headers.set(LrProtocol.headerDeviceId, deviceId!);
@@ -101,6 +120,11 @@ class DesktopClient {
       rethrow;
     }
   }
+
+  /// HTTPS only: trade the token of a pairing made before encryption for a
+  /// new one (the PC then refuses plain HTTP from this phone).
+  Future<String> upgrade() async =>
+      (await _send('POST', LrProtocol.pathUpgrade, json: const <String, dynamic>{}))['token'] as String;
 
   Future<SessionResponse> createSession(SessionRequest request) async =>
       SessionResponse.fromJson(await _send('POST', LrProtocol.pathSessions, json: request.toJson()));

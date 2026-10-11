@@ -226,5 +226,10 @@
   "send.err_sha256_mismatch": "Bir dosya bozuk ulaştı ve kaydedilmedi. Yeniden gönderin.",
   "send.err_too_many_attempts": "Çok fazla istek. Biraz bekleyin.",
   "pair.ask_pc": "“{name}” (bir PC) eşleşmek istiyor",
-  "pair.check_pc": "Diğer PC’nin aynı üç sembolü gösterdiğini kontrol edin. İzin verince iki PC de birbirine gönderebilir."
+  "pair.check_pc": "Diğer PC’nin aynı üç sembolü gösterdiğini kontrol edin. İzin verince iki PC de birbirine gönderebilir.",
+  "send.err_cert_changed": "Diğer PC farklı bir güvenlik sertifikası gösteriyor. Güvenlik için hiçbir şey gönderilmedi. Unutup yeniden eşleştirin.",
+  "send.err_upgrade_required": "Bu cihaz şifreli bağlantı kullanmalı. LocalRoll’u güncelleyin.",
+  "send.err_not_lan": "Yalnızca aynı ev veya ofis ağındaki cihazlar bağlanabilir.",
+  "receive.encrypted": "Aktarımlar şifreli · sertifika {fp}",
+  "receive.not_encrypted": "Şifreleme kullanılamıyor (sertifika oluşturulamadı) — aktarımlar şifresiz."
 }

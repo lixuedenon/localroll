@@ -226,5 +226,10 @@
   "send.err_sha256_mismatch": "A file arrived damaged and was not kept. Send it again.",
   "send.err_too_many_attempts": "Too many requests. Wait a moment and try again.",
   "pair.ask_pc": "“{name}” (a PC) wants to pair",
-  "pair.check_pc": "Check that the other PC shows the same three symbols. Allowing lets both PCs send to each other."
+  "pair.check_pc": "Check that the other PC shows the same three symbols. Allowing lets both PCs send to each other.",
+  "send.err_cert_changed": "The other PC shows a different security certificate (reinstalled, or something is in between). For safety nothing was sent. Forget it and pair again.",
+  "send.err_upgrade_required": "This device must use an encrypted connection. Update LocalRoll on it.",
+  "send.err_not_lan": "Only devices on the same home or office network can connect.",
+  "receive.encrypted": "Transfers are encrypted · certificate {fp}",
+  "receive.not_encrypted": "Encryption unavailable (certificate could not be created) — transfers are not encrypted."
 }

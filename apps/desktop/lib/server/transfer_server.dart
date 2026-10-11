@@ -6,17 +6,25 @@ import 'package:flutter/foundation.dart';
 import 'package:localroll_core/localroll_core.dart';
 
 import '../services/keep_awake.dart';
+import '../services/tls_identity.dart';
 import '../services/library_index.dart';
 import '../services/receive_hub.dart';
 import '../services/settings.dart';
 import '../l10n/l10n.dart';
+import 'port_mux.dart';
 
 /// A phone waiting for someone to click Allow / Deny on this PC.
 class PendingPair {
-  PendingPair(this.id, this.device, [this.peer]);
+  PendingPair(this.id, this.device, {this.peer, this.fingerprint});
 
   final String id;
   final DeviceInfo device;
+
+  /// Asked over HTTPS: this PC's certificate fingerprint, mixed into the
+  /// symbols (the asking side mixes in the certificate it saw). Null for
+  /// older phones that still use plain HTTP.
+  final String? fingerprint;
+  bool get secure => fingerprint != null;
 
   /// Set when another PC asks: allowing also lets this PC send to it.
   final PeerGrant? peer;
@@ -25,7 +33,7 @@ class PendingPair {
   PairApprovalStatus status = PairApprovalStatus.pending;
   String? token;
 
-  List<String> get emoji => pairingEmoji(id);
+  List<String> get emoji => pairingEmoji(id, fingerprint: fingerprint);
   bool get expired => DateTime.now().difference(created) > LrProtocol.pairApprovalTimeout;
 }
 
@@ -49,13 +57,22 @@ class _UploadSession {
 ///   PUT  /api/v1/sessions/S/files/F?offset=N  <bytes>  -> {offset}
 ///   POST /api/v1/sessions/S/files/F/complete {size, sha256} -> saved
 class TransferServer extends ChangeNotifier {
-  TransferServer({required this.settings, required this.library, required this.hub});
+  TransferServer({required this.settings, required this.library, required this.hub, this.tls});
 
   final AppSettings settings;
   final LibraryIndex library;
   final ReceiveHub hub;
 
-  HttpServer? _server;
+  /// This PC's certificate; null only if it could not be made (then plain
+  /// HTTP only, as before).
+  final TlsIdentity? tls;
+
+  PortMux? _mux;
+  HttpServer? _plainHttp;
+  HttpServer? _secureHttp;
+
+  /// Failed sign-ins per address, to slow down guessing.
+  final Map<String, List<DateTime>> _failures = {};
   String? error;
   final Map<String, _UploadSession> _sessions = {};
 
@@ -74,8 +91,8 @@ class TransferServer extends ChangeNotifier {
   final ValueNotifier<List<PendingPair>> pairRequests = ValueNotifier(const []);
   final Map<String, PendingPair> _pairs = {};
 
-  bool get running => _server != null;
-  int get port => _server?.port ?? settings.port;
+  bool get running => _mux != null;
+  int get port => _mux?.port ?? settings.port;
 
   /// Ports tried in order. Windows reserves whole blocks of ports for
   /// Hyper-V / WSL / Docker ("excluded port ranges", usually inside
@@ -93,14 +110,20 @@ class TransferServer extends ChangeNotifier {
     final failures = <String>[];
     for (final p in _candidatePorts) {
       try {
-        final server = await HttpServer.bind(InternetAddress.anyIPv4, p);
-        server.idleTimeout = const Duration(minutes: 2);
-        server.listen(_handle, onError: (Object e) => debugPrint('server error: $e'));
-        _server = server;
+        // One port for both: HTTPS for updated devices, plain HTTP for
+        // older phones (see port_mux.dart).
+        final mux = await PortMux.bind(InternetAddress.anyIPv4, p, tls?.context);
+        final plain = HttpServer.listenOn(mux.plain)..idleTimeout = const Duration(minutes: 2);
+        plain.listen((r) => _handle(r, secure: false), onError: (Object e) => debugPrint('server error: $e'));
+        final secure = HttpServer.listenOn(mux.secure)..idleTimeout = const Duration(minutes: 2);
+        secure.listen((r) => _handle(r, secure: true), onError: (Object e) => debugPrint('server error: $e'));
+        _mux = mux;
+        _plainHttp = plain;
+        _secureHttp = secure;
         error = null;
-        if (server.port != settings.port) {
+        if (mux.port != settings.port) {
           // Remember the working port so it stays stable across restarts.
-          await settings.update((s) => s.port = server.port);
+          await settings.update((s) => s.port = mux.port);
         }
         break;
       } on SocketException catch (e) {
@@ -108,15 +131,19 @@ class TransferServer extends ChangeNotifier {
         failures.add('$p${code != null ? ' (${tr('receive.port_error', {'code': code})})' : ''}');
       }
     }
-    if (_server == null) {
+    if (_mux == null) {
       error = tr('receive.no_port', {'ports': failures.join(', ')});
     }
     notifyListeners();
   }
 
   Future<void> stop() async {
-    await _server?.close(force: true);
-    _server = null;
+    await _plainHttp?.close(force: true);
+    await _secureHttp?.close(force: true);
+    await _mux?.close();
+    _plainHttp = null;
+    _secureHttp = null;
+    _mux = null;
   }
 
   void rotatePin() {
@@ -133,11 +160,34 @@ class TransferServer extends ChangeNotifier {
 
   // ---------------------------------------------------------------- routing
 
-  Future<void> _handle(HttpRequest req) async {
+  /// Too many failed sign-ins from [ip] in the last 10 minutes.
+  bool _blocked(String ip) {
+    final list = _failures[ip];
+    if (list == null) return false;
+    list.removeWhere((t) => DateTime.now().difference(t) > const Duration(minutes: 10));
+    if (list.isEmpty) _failures.remove(ip);
+    return (list.length) >= 20;
+  }
+
+  void _failed(String ip) {
+    (_failures[ip] ??= []).add(DateTime.now());
+    if (_failures.length > 1000) _failures.remove(_failures.keys.first);
+  }
+
+  Future<void> _handle(HttpRequest req, {required bool secure}) async {
     final res = req.response;
     try {
       final path = req.uri.path;
       final segs = req.uri.pathSegments;
+      final remote = req.connectionInfo?.remoteAddress;
+      final ip = remote?.address ?? '';
+
+      // Home / office networks only: a port forwarded from the internet
+      // must not expose the library.
+      if (remote == null || !isLanAddress(remote)) {
+        await req.drain<void>();
+        return _json(res, 403, {'error': 'not_lan'});
+      }
 
       if (req.method == 'POST' && path == LrProtocol.pathLocalShow) {
         // Only from this computer.
@@ -149,14 +199,18 @@ class TransferServer extends ChangeNotifier {
       if (req.method == 'GET' && path == LrProtocol.pathInfo) {
         return _json(res, 200, settings.deviceInfo.toJson());
       }
+      if (_blocked(ip)) {
+        await req.drain<void>();
+        return _json(res, 429, {'error': 'too_many_attempts'});
+      }
       if (req.method == 'POST' && path == LrProtocol.pathPair) {
-        return await _pair(req);
+        return await _pair(req, secure: secure, ip: ip);
       }
       if (req.method == 'GET' && path == LrProtocol.pathAvatar) {
         return await _avatar(req);
       }
       if (req.method == 'POST' && path == LrProtocol.pathPairRequest) {
-        return await _pairRequest(req);
+        return await _pairRequest(req, secure: secure);
       }
       if (req.method == 'GET' && segs.length == 4 && '/${segs.take(3).join('/')}' == LrProtocol.pathPairRequest) {
         return await _pairRequestStatus(req, segs[3]);
@@ -164,8 +218,29 @@ class TransferServer extends ChangeNotifier {
 
       final device = await _authenticate(req);
       if (device == null) {
+        _failed(ip);
         await req.drain<void>();
         return _json(res, 401, {'error': 'not_paired'});
+      }
+      // Paired over HTTPS (or already moved to it): plain HTTP is refused,
+      // so a token seen on the network earlier is of no use.
+      if (device.secure && !secure) {
+        await req.drain<void>();
+        return _json(res, 426, {'error': 'upgrade_required'});
+      }
+      // Older pairing, now over HTTPS: hand out a new token and stop
+      // accepting plain HTTP from this device.
+      if (req.method == 'POST' && path == LrProtocol.pathUpgrade) {
+        await req.drain<void>();
+        if (!secure) return _json(res, 426, {'error': 'upgrade_required'});
+        final token = randomId(40);
+        await settings.update((s) {
+          final d = s.trusted[device.id];
+          if (d == null) return;
+          d.token = token;
+          d.secure = true;
+        });
+        return _json(res, 200, {'token': token});
       }
 
       if (req.method == 'POST' && path == LrProtocol.pathSessions) {
@@ -252,7 +327,7 @@ class TransferServer extends ChangeNotifier {
 
   // --------------------------------------------------------------- handlers
 
-  Future<void> _pair(HttpRequest req) async {
+  Future<void> _pair(HttpRequest req, {required bool secure, required String ip}) async {
     final body = PairRequest.fromJson(await _readJson(req));
     if (_failedPinAttempts >= 5) {
       // Too many wrong guesses: invalidate the PIN on screen.
@@ -261,6 +336,7 @@ class TransferServer extends ChangeNotifier {
     }
     if (body.pin.trim() != pin.value) {
       _failedPinAttempts++;
+      _failed(ip);
       return _json(req.response, 403, {'error': 'wrong_pin'});
     }
     final token = randomId(40);
@@ -274,6 +350,7 @@ class TransferServer extends ChangeNotifier {
         owner: body.device.owner,
         // Paired again (e.g. after "Forget"): keep the member chosen here.
         memberName: s.trusted[body.device.id]?.memberName,
+        secure: secure,
       );
     });
     rotatePin();
@@ -306,14 +383,19 @@ class TransferServer extends ChangeNotifier {
     pairRequests.value = _pairs.values.where((p) => p.status == PairApprovalStatus.pending).toList();
   }
 
-  Future<void> _pairRequest(HttpRequest req) async {
+  Future<void> _pairRequest(HttpRequest req, {required bool secure}) async {
     final body = PairApprovalRequest.fromJson(await _readJson(req));
     _prunePairs();
     // A few open requests at most, so nobody can flood the screen with dialogs.
     if (_pairs.values.where((p) => p.status == PairApprovalStatus.pending).length >= 3) {
       return _json(req.response, 429, {'error': 'too_many_attempts'});
     }
-    final p = PendingPair(randomId(24), body.device, body.peer);
+    final p = PendingPair(
+      randomId(24),
+      body.device,
+      peer: body.peer,
+      fingerprint: secure ? tls?.fingerprint : null,
+    );
     _pairs[p.id] = p;
     pairRequests.value = [...pairRequests.value, p];
     return _json(
@@ -361,6 +443,7 @@ class TransferServer extends ChangeNotifier {
           owner: p.device.owner,
           // Paired again (e.g. after "Forget"): keep the member chosen here.
           memberName: s.trusted[p.device.id]?.memberName,
+          secure: p.secure,
         );
         // Another PC: one click pairs both ways.
         final g = p.peer;
@@ -372,6 +455,8 @@ class TransferServer extends ChangeNotifier {
             port: g.port,
             token: g.token,
             pairedMs: DateTime.now().millisecondsSinceEpoch,
+            // Came over HTTPS from a PC the user just confirmed: trusted.
+            fingerprint: p.secure ? g.fingerprint : null,
             icon: p.device.icon,
             color: p.device.color,
             avatar: p.device.avatar,

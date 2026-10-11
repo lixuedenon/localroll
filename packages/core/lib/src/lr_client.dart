@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'models.dart';
 import 'protocol.dart';
+import 'tls.dart';
 
 /// The other side answered with an error. [code] is the stable error code
 /// ('not_paired', 'library_offline', …) or 'HTTP <status>'.
@@ -22,16 +23,42 @@ class LrHttpError implements Exception {
 /// HTTP client for a LocalRoll receiver (plain dart:io). Used PC → PC; the
 /// phone app has its own copy with translated errors.
 class LrClient {
-  LrClient({required this.host, required this.port, this.deviceId, this.token});
+  /// Plain HTTP unless [secure]. Over HTTPS, [pin] is the only certificate
+  /// accepted; without a pin (first contact while pairing) the certificate
+  /// seen is reported to [onCertificate] and kept in [seenFingerprint].
+  LrClient({
+    required this.host,
+    required this.port,
+    this.deviceId,
+    this.token,
+    this.secure = false,
+    this.pin,
+    void Function(String fingerprint)? onCertificate,
+  }) {
+    _http = secure
+        ? lrHttpClient(
+            pin: pin,
+            onCertificate: (fp) {
+              seenFingerprint = fp;
+              onCertificate?.call(fp);
+            },
+          )
+        : (HttpClient()
+          ..connectionTimeout = const Duration(seconds: 4)
+          ..idleTimeout = const Duration(seconds: 30));
+  }
 
   final String host;
   final int port;
   final String? deviceId;
   final String? token;
+  final bool secure;
+  final String? pin;
 
-  final HttpClient _http = HttpClient()
-    ..connectionTimeout = const Duration(seconds: 4)
-    ..idleTimeout = const Duration(seconds: 30);
+  /// Fingerprint of the certificate the server showed (HTTPS only).
+  String? seenFingerprint;
+
+  late final HttpClient _http;
 
   void close() => _http.close(force: true);
 
@@ -43,7 +70,7 @@ class LrClient {
     Map<String, String>? query,
     Duration timeout = const Duration(seconds: 20),
   }) async {
-    var uri = Uri(scheme: 'http', host: host, port: port, path: path);
+    var uri = Uri(scheme: secure ? 'https' : 'http', host: host, port: port, path: path);
     if (query != null) uri = uri.replace(queryParameters: query);
     final req = await _http.openUrl(method, uri).timeout(timeout);
     if (deviceId != null) req.headers.set(LrProtocol.headerDeviceId, deviceId!);
@@ -90,6 +117,10 @@ class LrClient {
       rethrow;
     }
   }
+
+  /// HTTPS only: trade a token from an old plain-HTTP pairing for a new one.
+  Future<String> upgrade() async =>
+      (await _send('POST', LrProtocol.pathUpgrade, json: const <String, dynamic>{}))['token'] as String;
 
   Future<SessionResponse> createSession(SessionRequest request) async => SessionResponse.fromJson(
       await _send('POST', LrProtocol.pathSessions, json: request.toJson(), timeout: const Duration(minutes: 1)));

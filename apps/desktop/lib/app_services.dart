@@ -9,6 +9,7 @@ import 'services/network.dart';
 import 'services/peers.dart';
 import 'services/receive_hub.dart';
 import 'services/settings.dart';
+import 'services/tls_identity.dart';
 
 /// Owns every long-lived service; created once in main().
 class AppServices {
@@ -41,7 +42,15 @@ class AppServices {
     final library = LibraryIndex(settings.libraryPath, stateFile: settings.libraryStateFile);
     await library.load();
     final hub = ReceiveHub();
-    final server = TransferServer(settings: settings, library: library, hub: hub);
+    // HTTPS certificate (made on first start, a few seconds once).
+    TlsIdentity? tls;
+    try {
+      tls = await TlsIdentity.load(settings.dataDir);
+      settings.tlsFingerprint = tls.fingerprint;
+    } catch (e) {
+      debugPrint('TLS certificate unavailable, plain HTTP only: $e');
+    }
+    final server = TransferServer(settings: settings, library: library, hub: hub, tls: tls);
     final ffmpeg = FfmpegService(settings, library);
     final converter = ConverterService(ffmpeg, library);
     final s = AppServices._(

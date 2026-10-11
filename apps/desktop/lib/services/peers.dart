@@ -214,13 +214,39 @@ class PeerDirectory extends ChangeNotifier {
     required bool Function() cancelled,
   }) async {
     final back = randomId(40);
-    final grant = PeerGrant(token: back, hosts: await localIPv4Addresses(), port: server.port);
+    final grant = PeerGrant(
+      token: back,
+      hosts: await localIPv4Addresses(),
+      port: server.port,
+      tlsPort: settings.tlsFingerprint == null ? null : server.port,
+      fingerprint: settings.tlsFingerprint,
+    );
     Object? lastError;
     for (final host in pc.hosts) {
-      final c = LrClient(host: host, port: pc.port);
+      LrClient? c;
       try {
-        var st = await c.requestApproval(settings.deviceInfo, peer: grant);
-        onWaiting(pairingEmoji(st.requestId));
+        // Does it speak HTTPS? Then ask over HTTPS and bind the symbols to
+        // the certificate we see (someone in between would change them).
+        final probe = LrClient(host: host, port: pc.port);
+        final DeviceInfo info;
+        try {
+          info = await probe.info();
+        } finally {
+          probe.close();
+        }
+        final first = info.fingerprint != null
+            ? LrClient(host: host, port: info.tlsPort ?? pc.port, secure: true)
+            : LrClient(host: host, port: pc.port);
+        c = first;
+        var st = await first.requestApproval(settings.deviceInfo, peer: grant);
+        final seen = first.secure ? first.seenFingerprint : null;
+        if (first.secure && seen == null) throw const PeerError('cannot_reach');
+        onWaiting(pairingEmoji(st.requestId, fingerprint: seen));
+        // From now on only that certificate.
+        if (seen != null) {
+          first.close();
+          c = LrClient(host: host, port: info.tlsPort ?? pc.port, secure: true, pin: seen);
+        }
         final until = DateTime.now().add(LrProtocol.pairApprovalTimeout + const Duration(seconds: 5));
         while (st.status == PairApprovalStatus.pending) {
           if (cancelled()) return null;
@@ -244,6 +270,7 @@ class PeerDirectory extends ChangeNotifier {
           icon: d.icon,
           color: d.color,
           avatar: d.avatar,
+          fingerprint: seen,
         );
         await settings.update((s) {
           s.peers[d.id] = peer;
@@ -254,6 +281,8 @@ class PeerDirectory extends ChangeNotifier {
             platform: d.platform,
             token: back,
             pairedMs: DateTime.now().millisecondsSinceEpoch,
+            // It will send to us over HTTPS (it got our certificate above).
+            secure: seen != null && settings.tlsFingerprint != null,
           );
         });
         _reachable[d.id] = FoundPc(id: d.id, name: d.name, hosts: [host], port: pc.port, info: d);
@@ -266,7 +295,7 @@ class PeerDirectory extends ChangeNotifier {
       } catch (e) {
         lastError = e;
       } finally {
-        c.close();
+        c?.close();
       }
     }
     throw PeerError('cannot_reach', '$lastError');
@@ -276,13 +305,14 @@ class PeerDirectory extends ChangeNotifier {
   Future<void> forget(PeerPc p) async {
     final at = where(p.id);
     for (final host in {...?at?.hosts, ...p.tryHosts}) {
-      final c = LrClient(host: host, port: at?.port ?? p.port, deviceId: settings.deviceId, token: p.token);
+      LrClient? c;
       try {
-        await c.unpair();
-        break;
+        c = await openPeer(settings, p, host, at?.port ?? p.port);
+        await c?.unpair();
+        if (c != null) break;
       } catch (_) {
       } finally {
-        c.close();
+        c?.close();
       }
     }
     await settings.update((s) {
@@ -310,6 +340,46 @@ class PeerError implements Exception {
 
   @override
   String toString() => detail == null ? code : '$code: $detail';
+}
+
+/// An authenticated client for a paired PC at [host]:[port], or null if
+/// another (or no) LocalRoll answers there.
+///
+/// * Paired with HTTPS: only its pinned certificate is accepted; a different
+///   one means it was reinstalled (or someone is in between): 'cert_changed'.
+/// * Paired before encryption and it now offers HTTPS: move over once (new
+///   token over HTTPS, the old one stops working), then pin.
+/// * It has no HTTPS yet (older version): plain HTTP as before.
+Future<LrClient?> openPeer(AppSettings settings, PeerPc p, String host, int port) async {
+  final probe = LrClient(host: host, port: port);
+  final DeviceInfo info;
+  try {
+    info = await probe.info(timeout: const Duration(seconds: 3));
+  } finally {
+    probe.close();
+  }
+  if (info.id != p.id) return null;
+  final tlsPort = info.tlsPort ?? port;
+  final pinned = p.fingerprint;
+  if (pinned != null) {
+    if (info.fingerprint != null && info.fingerprint != pinned) throw const PeerError('cert_changed');
+    return LrClient(host: host, port: tlsPort, secure: true, pin: pinned, deviceId: settings.deviceId, token: p.token);
+  }
+  final offered = info.fingerprint;
+  if (offered == null) return LrClient(host: host, port: port, deviceId: settings.deviceId, token: p.token);
+  final up = LrClient(host: host, port: tlsPort, secure: true, pin: offered, deviceId: settings.deviceId, token: p.token);
+  final String token;
+  try {
+    token = await up.upgrade();
+  } finally {
+    up.close();
+  }
+  await settings.update((_) {
+    p
+      ..token = token
+      ..fingerprint = offered;
+  });
+  return LrClient(host: host, port: tlsPort, secure: true, pin: offered, deviceId: settings.deviceId, token: token);
 }
 
 // ------------------------------------------------------------------ sending
@@ -536,10 +606,9 @@ class PeerSender extends ChangeNotifier {
       for (final h in p.tryHosts) (h, p.port),
     };
     for (final (host, port) in candidates) {
-      final probe = LrClient(host: host, port: port);
       try {
-        final info = await probe.info(timeout: const Duration(seconds: 3));
-        if (info.id != p.id) continue;
+        final c = await openPeer(settings, p, host, port);
+        if (c == null) continue;
         if (p.lastHost != host || p.port != port) {
           await settings.update((_) {
             p
@@ -547,11 +616,10 @@ class PeerSender extends ChangeNotifier {
               ..port = port;
           });
         }
-        return LrClient(host: host, port: port, deviceId: settings.deviceId, token: p.token);
-      } catch (_) {
-      } finally {
-        probe.close();
-      }
+        return c;
+      } on PeerError {
+        rethrow; // certificate changed: don't try elsewhere
+      } catch (_) {}
     }
     return null;
   }

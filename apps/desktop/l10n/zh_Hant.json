@@ -226,5 +226,10 @@
   "send.err_sha256_mismatch": "有檔案傳到對方時損壞，沒有儲存，請重新傳送。",
   "send.err_too_many_attempts": "請求太多，請稍候再試。",
   "pair.ask_pc": "電腦「{name}」想和這台電腦配對",
-  "pair.check_pc": "確認另一台電腦上顯示的是同樣的三個圖案。允許後兩台電腦可以互相傳送。"
+  "pair.check_pc": "確認另一台電腦上顯示的是同樣的三個圖案。允許後兩台電腦可以互相傳送。",
+  "send.err_cert_changed": "對方電腦的安全憑證變了（重裝過，或網路中有人冒充）。為了安全沒有傳送。請先「忘記」再重新配對。",
+  "send.err_upgrade_required": "這台裝置必須使用加密連線，請把它上面的 LocalRoll 更新到最新版。",
+  "send.err_not_lan": "只接受同一個家庭或辦公網路中的裝置連線。",
+  "receive.encrypted": "傳輸已加密 · 憑證 {fp}",
+  "receive.not_encrypted": "加密無法使用（無法建立憑證），傳輸未加密。"
 }

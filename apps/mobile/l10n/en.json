@@ -236,5 +236,8 @@
   "backup.range_lastMonth": "Last month",
   "backup.range_d90": "Last 3 months",
   "backup.range_year": "This year",
-  "backup.range_custom": "Choose dates…"
+  "backup.range_custom": "Choose dates…",
+  "err.cert_changed": "“{name}” shows a different security certificate (reinstalled, or something is in between). For safety nothing was sent. Forget it and pair again.",
+  "err.upgrade_required": "This device must use an encrypted connection. Update LocalRoll on it.",
+  "err.not_lan": "Only devices on the same home or office network can connect."
 }

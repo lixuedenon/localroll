@@ -236,5 +236,8 @@
   "backup.range_lastMonth": "Letzter Monat",
   "backup.range_d90": "Letzte 3 Monate",
   "backup.range_year": "Dieses Jahr",
-  "backup.range_custom": "Daten wählen…"
+  "backup.range_custom": "Daten wählen…",
+  "err.cert_changed": "„{name}“ zeigt ein anderes Sicherheitszertifikat (neu installiert oder jemand dazwischen). Zur Sicherheit wurde nichts gesendet. Entfernen und neu koppeln.",
+  "err.upgrade_required": "Dieses Gerät muss eine verschlüsselte Verbindung nutzen. Bitte LocalRoll aktualisieren.",
+  "err.not_lan": "Nur Geräte im selben Heim- oder Büronetz können sich verbinden."
 }

@@ -226,5 +226,10 @@
   "send.err_sha256_mismatch": "Un file è arrivato danneggiato e non è stato salvato. Invialo di nuovo.",
   "send.err_too_many_attempts": "Troppe richieste. Attendi un momento.",
   "pair.ask_pc": "«{name}» (un PC) chiede di abbinarsi",
-  "pair.check_pc": "Controlla che l’altro PC mostri gli stessi tre simboli. Consentendo, i due PC potranno inviarsi file."
+  "pair.check_pc": "Controlla che l’altro PC mostri gli stessi tre simboli. Consentendo, i due PC potranno inviarsi file.",
+  "send.err_cert_changed": "L’altro PC mostra un altro certificato di sicurezza. Per sicurezza non è stato inviato nulla. Dimenticalo e abbinalo di nuovo.",
+  "send.err_upgrade_required": "Questo dispositivo deve usare una connessione cifrata. Aggiorna LocalRoll.",
+  "send.err_not_lan": "Possono collegarsi solo dispositivi della stessa rete di casa o ufficio.",
+  "receive.encrypted": "Trasferimenti cifrati · certificato {fp}",
+  "receive.not_encrypted": "Cifratura non disponibile (impossibile creare il certificato): i trasferimenti non sono cifrati."
 }
