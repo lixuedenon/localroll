@@ -1,6 +1,5 @@
 // apps/mobile/lib/ui/home_page.dart
 import 'dart:async';
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -11,6 +10,7 @@ import '../services/auto_sender.dart';
 import '../services/discovery.dart';
 import '../services/mobile_settings.dart';
 import '../services/uploader.dart';
+import 'backup_page.dart';
 import 'cleanup_page.dart';
 import 'connect_page.dart';
 import 'device_badge.dart';
@@ -370,73 +370,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     }
   }
 
-  /// Everything not yet on the PC, from the whole library (paged, so even
-  /// 50 000 items load without holding thumbnails in memory).
+  /// "Back up…": choose what and when to stop (whole library by default).
   Future<void> _backupAll() async {
     final desktop = widget.settings.current;
     if (desktop == null) {
       await _openConnect();
       return;
     }
-    final messenger = ScaffoldMessenger.of(context);
-    final navigator = Navigator.of(context);
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => PopScope(
-        canPop: false,
-        child: AlertDialog(
-          content: Row(children: [
-            const CircularProgressIndicator(),
-            const SizedBox(width: 20),
-            Expanded(child: Text(tr('home.backup_all_counting'))),
-          ]),
-        ),
-      ),
-    );
-    final todo = <AssetEntity>[];
-    try {
-      final paths = await PhotoManager.getAssetPathList(
-        type: RequestType.common,
-        onlyAll: true,
-        filterOption: FilterOptionGroup(orders: [const OrderOption(type: OrderOptionType.createDate, asc: false)]),
-      );
-      if (paths.isNotEmpty) {
-        final all = paths.first;
-        final count = await all.assetCountAsync;
-        final sent = widget.settings.sentTo(desktop.id);
-        for (var start = 0; start < count; start += 1000) {
-          final page = await all.getAssetListRange(start: start, end: min(count, start + 1000));
-          todo.addAll(page.where((a) => !sent.contains(a.id)));
-        }
-      }
-    } catch (_) {}
-    navigator.pop();
-    if (!mounted) return;
-    if (todo.isEmpty) {
-      messenger.showSnackBar(SnackBar(content: Text(tr('home.backup_all_none', {'pc': desktop.name}))));
-      return;
-    }
-    final go = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        icon: const Icon(Icons.backup_rounded, size: 32),
-        title: Text(tr('home.backup_all_title', {'count': todo.length, 'pc': desktop.name})),
-        content: Text(tr('home.backup_all_body')),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('common.cancel'))),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('home.backup_all_start'))),
-        ],
-      ),
-    );
-    if (go != true || !mounted) return;
-    await navigator.push<bool>(MaterialPageRoute(
-      builder: (_) => TransferPage(
-        settings: widget.settings,
-        discovery: widget.discovery,
-        desktop: desktop,
-        assets: todo,
-      ),
+    await Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => BackupPage(settings: widget.settings, discovery: widget.discovery, desktop: desktop),
     ));
   }
 
@@ -617,7 +559,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               FilledButton.tonalIcon(
                 onPressed: _backupAll,
                 icon: const Icon(Icons.backup_rounded, size: 18),
-                label: Text(tr('home.backup_all')),
+                label: Text(tr('home.backup_more')),
               ),
             ],
           ),

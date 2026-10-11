@@ -15,6 +15,20 @@ import '../ui/cleanup_page.dart' show formatSize;
 
 enum UploadState { waiting, preparing, uploading, verifying, done, skipped, failed }
 
+/// Why a run ended before everything was sent.
+enum StopReason { none, user, size, time, battery, pcUnavailable }
+
+/// "Stop after X MB / Y minutes", "pause on low battery".
+class UploadLimits {
+  const UploadLimits({this.maxBytes, this.maxDuration, this.pauseOnLowBattery = false});
+
+  final int? maxBytes;
+  final Duration? maxDuration;
+  final bool pauseOnLowBattery;
+
+  static const UploadLimits none = UploadLimits();
+}
+
 class UploadItem {
   UploadItem(this.asset);
 
@@ -41,7 +55,13 @@ class Uploader extends ChangeNotifier {
     required this.settings,
     required this.desktop,
     required List<AssetEntity> assets,
+    this.limits = UploadLimits.none,
   }) : items = assets.map(UploadItem.new).toList();
+
+  final UploadLimits limits;
+
+  /// Set when the run stopped early (shown on the transfer page).
+  StopReason stopReason = StopReason.none;
 
   final DesktopClient client;
   final MobileSettings settings;
@@ -87,7 +107,34 @@ class Uploader extends ChangeNotifier {
     return Duration(milliseconds: (per * (items.length - n)).round());
   }
 
-  void cancel() => _cancelled = true;
+  void cancel() {
+    if (stopReason == StopReason.none) stopReason = StopReason.user;
+    _cancelled = true;
+  }
+
+  /// Checked before each item: reached a limit → stop cleanly (the rest
+  /// stays unsent for next time).
+  Future<bool> _limitReached() async {
+    final max = limits.maxBytes;
+    if (max != null && _bytesSent >= max) {
+      stopReason = StopReason.size;
+      return true;
+    }
+    final t = _startedAt;
+    final d = limits.maxDuration;
+    if (t != null && d != null && DateTime.now().difference(t) >= d) {
+      stopReason = StopReason.time;
+      return true;
+    }
+    if (limits.pauseOnLowBattery) {
+      final b = await BackgroundTransfer.battery();
+      if (b.level >= 0 && b.level < 20 && !b.charging) {
+        stopReason = StopReason.battery;
+        return true;
+      }
+    }
+    return false;
+  }
 
   Future<void> run() async {
     if (running) return;
@@ -109,6 +156,7 @@ class Uploader extends ChangeNotifier {
     notifyListeners();
     try {
       for (var i = 0; i < items.length && !_cancelled; i++) {
+        if (await _limitReached()) break;
         _current = i;
         await _sendOne(items[i], i);
       }
@@ -191,7 +239,10 @@ class Uploader extends ChangeNotifier {
       it.error = e is LrHttpException ? e.message : e.toString().replaceFirst('Exception: ', '');
       // The PC can't store anything right now (library drive unplugged):
       // stop instead of failing every remaining item; they stay unsent.
-      if (e is LrHttpException && e.body['error'] == 'library_offline') _cancelled = true;
+      if (e is LrHttpException && e.body['error'] == 'library_offline') {
+        stopReason = StopReason.pcUnavailable;
+        _cancelled = true;
+      }
     }
     notifyListeners();
   }

@@ -19,12 +19,14 @@ class TransferPage extends StatefulWidget {
     required this.discovery,
     required this.desktop,
     required this.assets,
+    this.limits = UploadLimits.none,
   });
 
   final MobileSettings settings;
   final DesktopDiscovery discovery;
   final PairedDesktop desktop;
   final List<AssetEntity> assets;
+  final UploadLimits limits;
 
   @override
   State<TransferPage> createState() => _TransferPageState();
@@ -54,6 +56,7 @@ class _TransferPageState extends State<TransferPage> {
         settings: widget.settings,
         desktop: widget.desktop,
         assets: assets,
+        limits: widget.limits,
       );
       setState(() => _uploader = up);
       await up.run();
@@ -171,6 +174,20 @@ class _TransferPageState extends State<TransferPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(summary, style: theme.textTheme.titleSmall),
+              if (up.finished && up.stopReason != StopReason.none)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    tr(switch (up.stopReason) {
+                      StopReason.size => 'transfer.stopped_size',
+                      StopReason.time => 'transfer.stopped_time',
+                      StopReason.battery => 'transfer.stopped_battery',
+                      StopReason.pcUnavailable => 'transfer.stopped_pc',
+                      _ => 'transfer.stopped_user',
+                    }),
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ),
               if (total > 1) ...[
                 const SizedBox(height: 10),
                 LinearProgressIndicator(

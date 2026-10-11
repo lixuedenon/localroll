@@ -46,6 +46,25 @@ enum StorageInfo {
     return -1
   }
 
+  /// Original size of each asset (photo or video, plus a Live Photo's
+  /// video) — for the backup preview and the size filters.
+  static func originalSizes(ids: [String]) -> [String: Int64] {
+    var out: [String: Int64] = [:]
+    let assets = PHAsset.fetchAssets(withLocalIdentifiers: ids, options: nil)
+    let main: Set<PHAssetResourceType> = [.photo, .video, .fullSizePhoto, .fullSizeVideo]
+    let paired: Set<PHAssetResourceType> = [.pairedVideo, .fullSizePairedVideo]
+    assets.enumerateObjects { asset, _, _ in
+      var a: Int64 = 0
+      var b: Int64 = 0
+      for r in PHAssetResource.assetResources(for: asset) {
+        guard let n = r.value(forKey: "fileSize") as? Int64 else { continue }
+        if main.contains(r.type) { a = max(a, n) } else if paired.contains(r.type) { b = max(b, n) }
+      }
+      out[asset.localIdentifier] = a + b
+    }
+    return out
+  }
+
   /// Size of the original (or, with [live], of the Live Photo's video);
   /// -1 if unknown. Includes originals that are only in iCloud.
   static func originalSize(id: String, live: Bool) -> Int64 {
@@ -98,6 +117,21 @@ enum BackgroundTransfer {
         result(StorageInfo.freeBytes())
       case "assetSize":
         result(StorageInfo.originalSize(id: args["id"] as? String ?? "", live: args["live"] as? Bool ?? false))
+      case "assetSizes":
+        // Whole batches off the main thread: a library has tens of thousands.
+        let ids = args["ids"] as? [String] ?? []
+        DispatchQueue.global(qos: .userInitiated).async {
+          let sizes = StorageInfo.originalSizes(ids: ids)
+          DispatchQueue.main.async { result(sizes) }
+        }
+      case "battery":
+        UIDevice.current.isBatteryMonitoringEnabled = true
+        let level = UIDevice.current.batteryLevel
+        let state = UIDevice.current.batteryState
+        result([
+          "level": level < 0 ? -1 : Int(level * 100),
+          "charging": state == .charging || state == .full,
+        ])
       default:
         result(FlutterMethodNotImplemented)
       }

@@ -9,6 +9,8 @@ import 'package:localroll_core/localroll_core.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'backup_plan.dart';
+
 /// A PC this phone has paired with.
 class PairedDesktop {
   PairedDesktop({
@@ -110,6 +112,9 @@ class MobileSettings extends ChangeNotifier {
   /// Simple mode for elders: big text, one big "send" button, auto-send on.
   bool simpleMode = false;
 
+  /// The backup conditions used last time (remembered).
+  BackupFilter backupFilter = BackupFilter();
+
   static Future<MobileSettings> load() async {
     final prefs = await SharedPreferences.getInstance();
     final s = MobileSettings._(prefs);
@@ -121,6 +126,10 @@ class MobileSettings extends ChangeNotifier {
     s.ownerName = prefs.getString('ownerName') ?? '';
     s.shareWithFamily = prefs.getBool('shareWithFamily') ?? true;
     s.simpleMode = prefs.getBool('simpleMode') ?? false;
+    try {
+      final raw = prefs.getString('backupFilter');
+      if (raw != null) s.backupFilter = BackupFilter.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    } catch (_) {}
     final raw = prefs.getString('desktops');
     if (raw != null) {
       try {
@@ -232,6 +241,11 @@ class MobileSettings extends ChangeNotifier {
   }
 
   /// Simple mode also switches auto-send on: nothing to remember.
+  Future<void> setBackupFilter(BackupFilter f) async {
+    backupFilter = f;
+    await _save();
+  }
+
   Future<void> setSimpleMode(bool on) async {
     simpleMode = on;
     if (on && !autoSend) {
@@ -335,6 +349,7 @@ class MobileSettings extends ChangeNotifier {
     await _prefs.setString('ownerName', ownerName);
     await _prefs.setBool('shareWithFamily', shareWithFamily);
     await _prefs.setBool('simpleMode', simpleMode);
+    await _prefs.setString('backupFilter', jsonEncode(backupFilter.toJson()));
     if (language == null) {
       await _prefs.remove('language');
     } else {

@@ -88,6 +88,33 @@ class BackgroundTransfer {
     }
   }
 
+  /// Original sizes (bytes) for many assets at once; missing = unknown.
+  static Future<Map<String, int>> originalSizes(List<String> ids) async {
+    if (ids.isEmpty) return const {};
+    try {
+      final m = await _channel.invokeMethod<Map<Object?, Object?>>('assetSizes', {'ids': ids});
+      return {
+        for (final e in (m ?? const {}).entries)
+          if (e.key is String && e.value is num) e.key! as String: (e.value! as num).toInt(),
+      };
+    } catch (_) {
+      return const {};
+    }
+  }
+
+  /// Battery level 0–100 (-1 unknown) and whether it is charging.
+  static Future<({int level, bool charging})> battery() async {
+    try {
+      final m = await _channel.invokeMethod<Map<Object?, Object?>>('battery');
+      return (
+        level: (m?['level'] as num?)?.toInt() ?? -1,
+        charging: m?['charging'] == true,
+      );
+    } catch (_) {
+      return (level: -1, charging: false);
+    }
+  }
+
   static Future<void> stop({bool success = true}) async {
     try {
       await _channel.invokeMethod<void>('stop', {'success': success});
