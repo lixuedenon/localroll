@@ -10,6 +10,8 @@ import '../services/auto_sender.dart';
 import '../services/discovery.dart';
 import '../services/mobile_settings.dart';
 import '../services/uploader.dart';
+import '../services/background_transfer.dart';
+import '../services/backup_plan.dart';
 import 'backup_page.dart';
 import 'cleanup_page.dart';
 import 'connect_page.dart';
@@ -50,6 +52,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   /// Simple mode: browsing the full grid for a moment ("Pick photos").
   bool _browse = false;
+
+  /// Bottom navigation: 0 Home, 1 Photos, 2 Free up space, 3 PC.
+  int _tab = 0;
+
+  /// Home: what is not on the PC yet, and how much cleanup could free.
+  BackupPlan? _pending;
+  int _freeable = -1;
+  bool _counting = false;
   final Map<String, Future<Uint8List?>> _thumbs = {};
 
   @override
@@ -300,6 +310,34 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     _nextPage = 0;
     _hasMore = true;
     await _init();
+    unawaited(_refreshHome());
+  }
+
+  /// Counts for the Home tab (whole library, in the background).
+  Future<void> _refreshHome() async {
+    final d = widget.settings.current;
+    if (_counting || d == null || !(_permission?.hasAccess ?? false)) return;
+    setState(() => _counting = true);
+    try {
+      final sent = widget.settings.sentTo(d.id);
+      final plan = await BackupPlanner.plan(BackupFilter(), sent);
+      final sizes = await BackgroundTransfer.originalSizes(sent.toList());
+      if (!mounted) return;
+      setState(() {
+        _pending = plan;
+        _freeable = sizes.values.fold<int>(0, (a, b) => a + b);
+      });
+    } catch (_) {
+    } finally {
+      if (mounted) setState(() => _counting = false);
+    }
+  }
+
+  void _selectTab(int i) {
+    final from = _tab;
+    setState(() => _tab = i);
+    if (from == 2) unawaited(_reload()); // cleanup may have deleted photos
+    if (i == 0) unawaited(_refreshHome());
   }
 
   Future<void> _loadMore() async {
@@ -421,7 +459,43 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             }),
           );
         }
+        if (widget.settings.simpleMode) return _photos(context, desktop, sent, visible);
         return Scaffold(
+          body: switch (_tab) {
+            0 => _home(context, desktop),
+            1 => _photos(context, desktop, sent, visible),
+            2 => desktop == null
+                ? _needPc(context)
+                : CleanupPage(
+                    key: ValueKey('cleanup-${desktop.id}'),
+                    settings: widget.settings,
+                    discovery: widget.discovery,
+                    desktop: desktop,
+                    onDone: () => _selectTab(0),
+                  ),
+            _ => ConnectPage(settings: widget.settings, discovery: widget.discovery, onDone: () => _selectTab(0)),
+          },
+          bottomNavigationBar: NavigationBar(
+            selectedIndex: _tab,
+            onDestinationSelected: _selectTab,
+            destinations: [
+              NavigationDestination(icon: const Icon(Icons.home_outlined), selectedIcon: const Icon(Icons.home_rounded), label: tr('nav.home')),
+              NavigationDestination(
+                  icon: const Icon(Icons.photo_library_outlined), selectedIcon: const Icon(Icons.photo_library_rounded), label: tr('nav.photos')),
+              NavigationDestination(
+                  icon: const Icon(Icons.cleaning_services_outlined),
+                  selectedIcon: const Icon(Icons.cleaning_services_rounded),
+                  label: tr('nav.cleanup')),
+              NavigationDestination(icon: const Icon(Icons.computer_outlined), selectedIcon: const Icon(Icons.computer_rounded), label: tr('nav.pc')),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _photos(BuildContext context, PairedDesktop? desktop, Set<String> sent, List<AssetEntity> visible) {
+    return Scaffold(
           appBar: AppBar(
             // Simple mode: a clear way back from the photo grid.
             leading: widget.settings.simpleMode
@@ -482,7 +556,175 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           body: _body(context, visible, sent),
           bottomNavigationBar: _assets.isEmpty ? null : _bottomBar(context, visible, sent),
         );
-      },
+  }
+
+  Widget _needPc(BuildContext context) => Scaffold(
+        appBar: AppBar(title: Text(tr('home.cleanup'))),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              Text(tr('home.not_connected'), textAlign: TextAlign.center),
+              const SizedBox(height: 16),
+              FilledButton(onPressed: () => _selectTab(3), child: Text(tr('home.connect_pc'))),
+            ]),
+          ),
+        ),
+      );
+
+  /// Home: the PC, what still needs backing up, the main actions.
+  Widget _home(BuildContext context, PairedDesktop? d) {
+    final theme = Theme.of(context);
+    final online = d != null && widget.discovery.found.any((f) => f.id == d.id);
+    final last = d == null ? null : widget.settings.lastBackup(d.id);
+    final pending = _pending;
+    Widget tile(String title, String sub, VoidCallback onTap, {Color? subColor}) => Expanded(
+          child: Material(
+            color: LrColors.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: const BorderSide(color: LrColors.line),
+            ),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: onTap,
+              child: Container(
+                constraints: const BoxConstraints(minHeight: 92),
+                padding: const EdgeInsets.all(16),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 6),
+                  Text(sub, style: TextStyle(color: subColor ?? LrColors.muted, fontSize: 13)),
+                ]),
+              ),
+            ),
+          ),
+        );
+    final shareText = widget.settings.shareWithFamily ? tr('family.shared') : tr('family.only_me');
+    final who = widget.settings.ownerName.isEmpty ? tr('family.your_name_hint') : widget.settings.ownerName;
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('LocalRoll'),
+        actions: [
+          IconButton(tooltip: tr('settings.title'), onPressed: _openSettings, icon: const Icon(Icons.settings_rounded)),
+        ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: _refreshHome,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+          children: [
+            // The PC.
+            Material(
+              color: LrColors.surface,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: const BorderSide(color: LrColors.line)),
+              child: ListTile(
+                onTap: () => _selectTab(3),
+                leading: d == null
+                    ? const Icon(Icons.add_link_rounded)
+                    : DeviceBadge(
+                        icon: d.icon,
+                        color: d.color,
+                        image: d.avatarUrl == null ? null : NetworkImage(d.avatarUrl!),
+                        size: 40,
+                      ),
+                title: Text(d?.name ?? tr('home.not_connected'), style: const TextStyle(fontWeight: FontWeight.w700)),
+                subtitle: d == null
+                    ? null
+                    : Text(online ? tr('home.pc_online') : tr('home.pc_offline'),
+                        style: TextStyle(color: online ? LrColors.verified : LrColors.muted)),
+                trailing: Text(tr(d == null ? 'home.connect_pc' : 'home.change_pc'), style: const TextStyle(color: LrColors.muted)),
+              ),
+            ),
+            _lostBanner(context),
+            _autoBanner(context),
+            const SizedBox(height: 14),
+            // What is not on the PC yet.
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: LrColors.raised,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: LrColors.safelight.withValues(alpha: 0.55)),
+              ),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(tr('home.not_backed_up'), style: const TextStyle(color: LrColors.muted)),
+                const SizedBox(height: 6),
+                if (pending == null)
+                  Row(children: [
+                    const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
+                    const SizedBox(width: 10),
+                    Text(tr('home.counting')),
+                  ])
+                else
+                  Text.rich(TextSpan(children: [
+                    TextSpan(
+                      text: tr('home.items', {'count': pending.assets.length}),
+                      style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                    if (pending.sizesKnown && pending.totalBytes > 0)
+                      TextSpan(text: '  ${tr('home.about', {'size': formatSize(pending.totalBytes)})}', style: const TextStyle(color: LrColors.muted)),
+                  ])),
+                if (last != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    tr('home.last_backup', {
+                      'when': MaterialLocalizations.of(context).formatShortDate(last.time),
+                      'time': TimeOfDay.fromDateTime(last.time).format(context),
+                      'count': last.count,
+                    }),
+                    style: const TextStyle(color: LrColors.muted, fontSize: 13),
+                  ),
+                ],
+                const SizedBox(height: 14),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: FilledButton(
+                    onPressed: () async {
+                      await _backupAll();
+                      unawaited(_refreshHome());
+                    },
+                    child: Text(tr('home.backup_more'), style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+                  ),
+                ),
+              ]),
+            ),
+            const SizedBox(height: 12),
+            Row(children: [
+              tile(tr('home.tile_pick'), tr('home.tile_pick_sub'), () => _selectTab(1)),
+              const SizedBox(width: 12),
+              tile(
+                tr('home.cleanup'),
+                _freeable > 0 ? tr('home.tile_free_sub', {'size': formatSize(_freeable)}) : tr('home.tile_free_none'),
+                () => _selectTab(2),
+                subColor: _freeable > 0 ? LrColors.verified : null,
+              ),
+            ]),
+            const SizedBox(height: 12),
+            Row(children: [
+              tile(tr('home.tile_receive'), tr('home.tile_soon'), () {}),
+              const SizedBox(width: 12),
+              tile(
+                tr('home.auto_send'),
+                widget.settings.autoSend ? tr('home.tile_auto_on') : tr('home.tile_auto_off'),
+                _openSettings,
+                subColor: widget.settings.autoSend ? LrColors.verified : null,
+              ),
+            ]),
+            const SizedBox(height: 12),
+            Material(
+              color: LrColors.surface,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: const BorderSide(color: LrColors.line)),
+              child: ListTile(
+                onTap: _openSettings,
+                title: Text(tr('home.family_line', {'name': who, 'share': shareText})),
+                trailing: const Icon(Icons.chevron_right_rounded),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

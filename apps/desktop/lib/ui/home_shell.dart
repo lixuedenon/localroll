@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import '../app_services.dart';
 import '../l10n/l10n.dart';
 import 'app_nav.dart';
+import 'dashboard_page.dart';
+import 'family_page.dart';
 import 'jobs_page.dart';
 import 'library_page.dart';
 import 'pair_prompt.dart';
@@ -35,24 +37,27 @@ class _HomeShellState extends State<HomeShell> {
   void initState() {
     super.initState();
     _prompter = PairPrompter(widget.services.server); // tap-to-pair dialogs
-    // First launch with an empty library: start on the pairing page.
-    _nav.initialTab(widget.services.library.items.isEmpty ? 1 : 0);
+    // Always start on Home: status, main actions, what needs attention.
+    _nav.initialTab(AppNav.home);
   }
 
   @override
   Widget build(BuildContext context) {
     final s = widget.services;
+    // Same order as AppNav.home … AppNav.settings.
     final pages = [
-      LibraryPage(services: s),
+      DashboardPage(services: s),
       ReceivePage(services: s),
+      LibraryPage(services: s),
       JobsPage(services: s),
+      FamilyPage(services: s),
       SettingsPage(services: s),
     ];
     return Scaffold(
       body: Row(
         children: [
           ListenableBuilder(
-            listenable: Listenable.merge([s.hub, s.converter, _nav]),
+            listenable: Listenable.merge([s.hub, s.converter, s.library, _nav]),
             builder: (context, _) {
               final receiving = s.hub.transfers.any((t) => t.fraction != null && t.fraction! < 1);
               return Container(
@@ -65,34 +70,49 @@ class _HomeShellState extends State<HomeShell> {
                   children: [
                     const SizedBox(height: 14),
                     _RailItem(
-                      icon: Icons.photo_library_outlined,
-                      selectedIcon: Icons.photo_library_rounded,
-                      label: tr('nav.library'),
-                      selected: _nav.tab == 0,
-                      onTap: () => _nav.selectTab(0),
+                      icon: Icons.home_outlined,
+                      selectedIcon: Icons.home_rounded,
+                      label: tr('nav.home'),
+                      selected: _nav.tab == AppNav.home,
+                      onTap: () => _nav.selectTab(AppNav.home),
                     ),
                     _RailItem(
                       icon: Icons.phone_iphone_outlined,
                       selectedIcon: Icons.phone_iphone_rounded,
                       label: tr('nav.receive'),
-                      selected: _nav.tab == 1,
+                      selected: _nav.tab == AppNav.receive,
                       dot: receiving,
-                      onTap: () => _nav.selectTab(1),
+                      onTap: () => _nav.selectTab(AppNav.receive),
+                    ),
+                    _RailItem(
+                      icon: Icons.photo_library_outlined,
+                      selectedIcon: Icons.photo_library_rounded,
+                      label: tr('nav.library'),
+                      selected: _nav.tab == AppNav.library,
+                      dot: s.library.offline || s.library.pendingMissing.isNotEmpty,
+                      onTap: () => _nav.selectTab(AppNav.library),
                     ),
                     _RailItem(
                       icon: Icons.auto_fix_high_outlined,
                       selectedIcon: Icons.auto_fix_high_rounded,
                       label: tr('nav.convert'),
-                      selected: _nav.tab == 2,
+                      selected: _nav.tab == AppNav.convert,
                       count: s.converter.pending,
-                      onTap: () => _nav.selectTab(2),
+                      onTap: () => _nav.selectTab(AppNav.convert),
+                    ),
+                    _RailItem(
+                      icon: Icons.groups_outlined,
+                      selectedIcon: Icons.groups_rounded,
+                      label: tr('family.title'),
+                      selected: _nav.tab == AppNav.family,
+                      onTap: () => _nav.selectTab(AppNav.family),
                     ),
                     _RailItem(
                       icon: Icons.tune_outlined,
                       selectedIcon: Icons.tune_rounded,
                       label: tr('nav.settings'),
-                      selected: _nav.tab == 3,
-                      onTap: () => _nav.selectTab(3),
+                      selected: _nav.tab == AppNav.settings,
+                      onTap: () => _nav.selectTab(AppNav.settings),
                     ),
                     const Spacer(),
                     _RailItem(

@@ -21,7 +21,10 @@ enum _Stage { finding, checking, ready, deleting, done, error }
 /// the system's own confirmation; on iPhone items stay in "Recently Deleted"
 /// for 30 days.
 class CleanupPage extends StatefulWidget {
-  const CleanupPage({super.key, required this.settings, required this.discovery, required this.desktop});
+  const CleanupPage({super.key, required this.settings, required this.discovery, required this.desktop, this.onDone});
+
+  /// Set when shown as a tab: called instead of closing the page.
+  final VoidCallback? onDone;
 
   final MobileSettings settings;
   final DesktopDiscovery discovery;
@@ -238,7 +241,10 @@ class _CleanupPageState extends State<CleanupPage> {
               const SizedBox(height: 8),
               Text(tr(Platform.isIOS ? 'cleanup.done_ios' : 'cleanup.done'), textAlign: TextAlign.center),
               const SizedBox(height: 24),
-              FilledButton(onPressed: () => Navigator.of(context).pop(), child: Text(tr('transfer.done'))),
+              FilledButton(
+                onPressed: () => widget.onDone != null ? widget.onDone!() : Navigator.of(context).pop(),
+                child: Text(tr('transfer.done')),
+              ),
             ],
           ),
         ),

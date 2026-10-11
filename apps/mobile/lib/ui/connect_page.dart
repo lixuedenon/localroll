@@ -15,7 +15,10 @@ import 'theme.dart';
 /// Choose / pair a PC. Main way: tap a PC found on the Wi-Fi and click
 /// "Allow" on the PC. Also: QR scan, PIN, or a typed address.
 class ConnectPage extends StatefulWidget {
-  const ConnectPage({super.key, required this.settings, required this.discovery});
+  const ConnectPage({super.key, required this.settings, required this.discovery, this.onDone});
+
+  /// Set when shown as a tab: called instead of closing the page.
+  final VoidCallback? onDone;
 
   final MobileSettings settings;
   final DesktopDiscovery discovery;
@@ -25,6 +28,14 @@ class ConnectPage extends StatefulWidget {
 }
 
 class _ConnectPageState extends State<ConnectPage> {
+  void _close() {
+    if (widget.onDone != null) {
+      widget.onDone!();
+    } else {
+      Navigator.of(context).pop();
+    }
+  }
+
   bool _busy = false;
 
   /// Stop the "searching" spinner after a while so it never spins forever.
@@ -148,7 +159,7 @@ class _ConnectPageState extends State<ConnectPage> {
       Navigator.of(context).pop(); // the waiting dialog
       if (d == null) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('connect.paired_ok', {'name': d.name}))));
-      Navigator.of(context).pop();
+      _close();
     } catch (e) {
       if (!mounted) return;
       if (!cancelled) Navigator.of(context).pop();
@@ -166,7 +177,7 @@ class _ConnectPageState extends State<ConnectPage> {
       final d = await pairWithDesktop(settings: widget.settings, hosts: hosts, port: port, pin: pin);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('connect.paired_ok', {'name': d.name}))));
-      Navigator.of(context).pop();
+      _close();
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -285,7 +296,7 @@ class _ConnectPageState extends State<ConnectPage> {
                       selected: d.id == s.currentDesktopId,
                       onTap: () async {
                         await s.selectDesktop(d.id);
-                        if (context.mounted) Navigator.of(context).pop();
+                        if (context.mounted) _close();
                       },
                       child: Row(children: [
                         DeviceBadge(

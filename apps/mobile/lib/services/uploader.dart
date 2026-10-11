@@ -170,6 +170,9 @@ class Uploader extends ChangeNotifier {
         // photo_manager copies originals into a cache on iOS; free that space.
         await PhotoManager.clearFileCache();
       } catch (_) {}
+      try {
+        await settings.recordBackup(desktop.id, doneCount);
+      } catch (_) {}
       running = false;
       finished = true;
       notifyListeners();

@@ -240,11 +240,36 @@ class MobileSettings extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Simple mode also switches auto-send on: nothing to remember.
   Future<void> setBackupFilter(BackupFilter f) async {
     backupFilter = f;
     await _save();
   }
+
+  /// When the last send to this PC finished, and how many items it sent.
+  ({DateTime time, int count})? lastBackup(String desktopId) {
+    final raw = _prefs.getString('lastBackup_$desktopId');
+    if (raw == null) return null;
+    try {
+      final j = jsonDecode(raw) as Map<String, dynamic>;
+      return (
+        time: DateTime.fromMillisecondsSinceEpoch((j['t'] as num).toInt()),
+        count: (j['n'] as num).toInt(),
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> recordBackup(String desktopId, int count) async {
+    if (count <= 0) return;
+    await _prefs.setString(
+      'lastBackup_$desktopId',
+      jsonEncode({'t': DateTime.now().millisecondsSinceEpoch, 'n': count}),
+    );
+    notifyListeners();
+  }
+
+  /// Simple mode also switches auto-send on: nothing to remember.
 
   Future<void> setSimpleMode(bool on) async {
     simpleMode = on;

@@ -57,7 +57,7 @@ class ReceivePage extends StatelessWidget {
                       ),
                     ),
                     TextButton.icon(
-                      onPressed: () => AppNav.instance.selectTab(3),
+                      onPressed: () => AppNav.instance.selectTab(AppNav.settings),
                       icon: const Icon(Icons.edit_rounded, size: 18),
                       label: Text(tr('identity.edit')),
                     ),

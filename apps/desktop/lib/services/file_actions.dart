@@ -108,3 +108,24 @@ Future<int> exportItems(LibraryIndex library, List<MediaItem> items, String fold
   }
   return n;
 }
+
+/// Free and total bytes of the drive holding [path] (Windows), or null.
+Future<({int free, int total})?> diskSpace(String path) async {
+  if (!Platform.isWindows || path.length < 2 || path[1] != ':') return null;
+  final letter = path[0].toUpperCase();
+  try {
+    final r = await Process.run('powershell', [
+      '-NoProfile',
+      '-NonInteractive',
+      '-Command',
+      r'$d = Get-PSDrive -Name ' + letter + r'; "$($d.Free) $($d.Used)"',
+    ]);
+    final parts = (r.stdout as String).trim().split(RegExp(r'\s+'));
+    if (parts.length < 2) return null;
+    final free = int.parse(parts[0]);
+    final used = int.parse(parts[1]);
+    return (free: free, total: free + used);
+  } catch (_) {
+    return null;
+  }
+}
