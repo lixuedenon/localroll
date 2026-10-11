@@ -12,6 +12,7 @@ import '../services/mobile_settings.dart';
 import '../services/uploader.dart';
 import 'cleanup_page.dart' show formatSize;
 import 'theme.dart';
+import 'theme.dart';
 import 'transfer_page.dart';
 
 /// "Back up…": choose what (dates, count, type, albums, size, order) and
@@ -88,7 +89,7 @@ class _BackupPageState extends State<BackupPage> {
         case 'try':
           n.maxCount = 50;
         case 'month':
-          n.fromMs = DateTime.now().subtract(const Duration(days: 30)).millisecondsSinceEpoch;
+          n.range = 'd30';
         case 'videos':
           n.photos = false;
         case 'largest':
@@ -117,7 +118,8 @@ class _BackupPageState extends State<BackupPage> {
       ..order = c.order
       ..stopAfterMb = c.stopAfterMb
       ..stopAfterMinutes = c.stopAfterMinutes
-      ..pauseOnLowBattery = c.pauseOnLowBattery;
+      ..pauseOnLowBattery = c.pauseOnLowBattery
+      ..range = c.range;
   }
 
   bool get _isAll {
@@ -129,6 +131,7 @@ class _BackupPageState extends State<BackupPage> {
 
   String _dateText() {
     String d(int ms) => MaterialLocalizations.of(context).formatShortDate(DateTime.fromMillisecondsSinceEpoch(ms));
+    if (_f.range != null) return tr('backup.range_${_f.range}');
     if (_f.fromMs == null && _f.toMs == null) return tr('backup.any');
     if (_f.fromMs != null && _f.toMs != null) return '${d(_f.fromMs!)} – ${d(_f.toMs!)}';
     if (_f.fromMs != null) return tr('backup.since', {'date': d(_f.fromMs!)});
@@ -163,6 +166,51 @@ class _BackupPageState extends State<BackupPage> {
   // ------------------------------------------------------------- editors
 
   Future<void> _editDates() async {
+    // Quick relative ranges first; a calendar for anything else.
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (ctx) {
+        Widget item(String key, String label, bool selected) => ListTile(
+              title: Text(label),
+              trailing: selected ? const Icon(Icons.check_rounded, color: LrColors.verified) : null,
+              onTap: () => Navigator.pop(ctx, key),
+            );
+        final custom = _f.range == null && (_f.fromMs != null || _f.toMs != null);
+        return SafeArea(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.75),
+            child: ListView(shrinkWrap: true, children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                child: Text(tr('backup.dates'), style: Theme.of(ctx).textTheme.titleMedium),
+              ),
+              item('any', tr('backup.any'), _f.range == null && !custom),
+              for (final r in BackupFilter.ranges) item(r, tr('backup.range_$r'), _f.range == r),
+              item('custom', tr('backup.range_custom'), custom),
+            ]),
+          ),
+        );
+      },
+    );
+    if (choice == null || !mounted) return;
+    if (choice == 'any') {
+      _change((f) {
+        f.range = null;
+        f.fromMs = null;
+        f.toMs = null;
+      });
+      return;
+    }
+    if (choice != 'custom') {
+      _change((f) {
+        f.range = choice;
+        f.fromMs = null;
+        f.toMs = null;
+      });
+      return;
+    }
     final now = DateTime.now();
     final r = await showDateRangePicker(
       context: context,
@@ -177,6 +225,7 @@ class _BackupPageState extends State<BackupPage> {
     );
     if (r == null) return;
     _change((f) {
+      f.range = null;
       f.fromMs = r.start.millisecondsSinceEpoch;
       // Include the whole last day.
       f.toMs = DateTime(r.end.year, r.end.month, r.end.day, 23, 59, 59).millisecondsSinceEpoch;

@@ -187,7 +187,7 @@
   "backup.minutes_unit": "phút",
   "backup.preset_all": "Mọi thứ chưa sao lưu",
   "backup.preset_try": "50 mục mới nhất (thử)",
-  "backup.preset_month": "Một tháng qua",
+  "backup.preset_month": "30 ngày qua",
   "backup.preset_videos": "Chỉ video",
   "backup.preset_largest": "Lớn nhất trước",
   "backup.dates": "Ngày chụp",
@@ -225,5 +225,16 @@
   "home.tile_soon": "Sắp ra mắt",
   "home.tile_auto_on": "Bật",
   "home.tile_auto_off": "Tắt",
-  "home.family_line": "Gửi với tên {name} · {share}"
+  "home.family_line": "Gửi với tên {name} · {share}",
+  "backup.range_today": "Hôm nay",
+  "backup.range_yesterday": "Hôm qua",
+  "backup.range_week": "Tuần này",
+  "backup.range_d7": "7 ngày qua",
+  "backup.range_d14": "14 ngày qua",
+  "backup.range_d30": "30 ngày qua",
+  "backup.range_month": "Tháng này",
+  "backup.range_lastMonth": "Tháng trước",
+  "backup.range_d90": "3 tháng qua",
+  "backup.range_year": "Năm nay",
+  "backup.range_custom": "Chọn ngày…"
 }

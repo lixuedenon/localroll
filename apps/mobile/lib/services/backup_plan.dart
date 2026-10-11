@@ -27,7 +27,46 @@ class BackupFilter {
     this.stopAfterMb,
     this.stopAfterMinutes,
     this.pauseOnLowBattery = true,
+    this.range,
   }) : albumIds = albumIds ?? [];
+
+  /// Relative date ranges, worked out again on every run so "last 7 days"
+  /// stays "last 7 days" next week.
+  static const ranges = ['today', 'yesterday', 'week', 'd7', 'd14', 'd30', 'month', 'lastMonth', 'd90', 'year'];
+
+  /// One of [ranges]; when set it wins over [fromMs]/[toMs].
+  String? range;
+
+  /// The capture-date window this filter means right now.
+  ({int? from, int? to}) window([DateTime? now]) {
+    final n = now ?? DateTime.now();
+    final today = DateTime(n.year, n.month, n.day);
+    int ms(DateTime d) => d.millisecondsSinceEpoch;
+    switch (range) {
+      case 'today':
+        return (from: ms(today), to: null);
+      case 'yesterday':
+        return (from: ms(today.subtract(const Duration(days: 1))), to: ms(today) - 1);
+      case 'week':
+        // Week starts on Monday.
+        return (from: ms(today.subtract(Duration(days: today.weekday - 1))), to: null);
+      case 'd7':
+        return (from: ms(today.subtract(const Duration(days: 6))), to: null);
+      case 'd14':
+        return (from: ms(today.subtract(const Duration(days: 13))), to: null);
+      case 'd30':
+        return (from: ms(today.subtract(const Duration(days: 29))), to: null);
+      case 'month':
+        return (from: ms(DateTime(n.year, n.month)), to: null);
+      case 'lastMonth':
+        return (from: ms(DateTime(n.year, n.month - 1)), to: ms(DateTime(n.year, n.month)) - 1);
+      case 'd90':
+        return (from: ms(today.subtract(const Duration(days: 89))), to: null);
+      case 'year':
+        return (from: ms(DateTime(n.year)), to: null);
+    }
+    return (from: fromMs, to: toMs);
+  }
 
   /// Capture date range (inclusive), ms since epoch.
   int? fromMs;
@@ -79,6 +118,7 @@ class BackupFilter {
         if (stopAfterMb != null) 'stopAfterMb': stopAfterMb,
         if (stopAfterMinutes != null) 'stopAfterMinutes': stopAfterMinutes,
         'pauseOnLowBattery': pauseOnLowBattery,
+        if (range != null) 'range': range,
       };
 
   factory BackupFilter.fromJson(Map<String, dynamic> j) => BackupFilter(
@@ -98,6 +138,7 @@ class BackupFilter {
         stopAfterMb: (j['stopAfterMb'] as num?)?.toInt(),
         stopAfterMinutes: (j['stopAfterMinutes'] as num?)?.toInt(),
         pauseOnLowBattery: j['pauseOnLowBattery'] != false,
+        range: ranges.contains(j['range']) ? j['range'] as String : null,
       );
 
   BackupFilter copy() => BackupFilter.fromJson(toJson());
@@ -142,12 +183,13 @@ class BackupPlanner {
         : f.photos
             ? RequestType.image
             : RequestType.video;
+    final w = f.window();
     final filter = FilterOptionGroup(
       orders: [OrderOption(type: OrderOptionType.createDate, asc: f.order == BackupOrder.oldest)],
       createTimeCond: DateTimeCond(
-        min: DateTime.fromMillisecondsSinceEpoch(f.fromMs ?? 0),
-        max: f.toMs == null ? DateTime.now().add(const Duration(days: 1)) : DateTime.fromMillisecondsSinceEpoch(f.toMs!),
-        ignore: f.fromMs == null && f.toMs == null,
+        min: DateTime.fromMillisecondsSinceEpoch(w.from ?? 0),
+        max: w.to == null ? DateTime.now().add(const Duration(days: 1)) : DateTime.fromMillisecondsSinceEpoch(w.to!),
+        ignore: w.from == null && w.to == null,
       ),
     );
     final paths = await PhotoManager.getAssetPathList(

@@ -187,7 +187,7 @@
   "backup.minutes_unit": "min",
   "backup.preset_all": "Tutto ciò che manca",
   "backup.preset_try": "Ultime 50 (prova)",
-  "backup.preset_month": "Ultimo mese",
+  "backup.preset_month": "Ultimi 30 giorni",
   "backup.preset_videos": "Solo video",
   "backup.preset_largest": "Prima i più grandi",
   "backup.dates": "Data di scatto",
@@ -225,5 +225,16 @@
   "home.tile_soon": "In arrivo",
   "home.tile_auto_on": "Attivo",
   "home.tile_auto_off": "Disattivo",
-  "home.family_line": "Invio come {name} · {share}"
+  "home.family_line": "Invio come {name} · {share}",
+  "backup.range_today": "Oggi",
+  "backup.range_yesterday": "Ieri",
+  "backup.range_week": "Questa settimana",
+  "backup.range_d7": "Ultimi 7 giorni",
+  "backup.range_d14": "Ultimi 14 giorni",
+  "backup.range_d30": "Ultimi 30 giorni",
+  "backup.range_month": "Questo mese",
+  "backup.range_lastMonth": "Il mese scorso",
+  "backup.range_d90": "Ultimi 3 mesi",
+  "backup.range_year": "Quest’anno",
+  "backup.range_custom": "Scegli le date…"
 }

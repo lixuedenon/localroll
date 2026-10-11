@@ -187,7 +187,7 @@
   "backup.minutes_unit": "دقيقة",
   "backup.preset_all": "كل ما لم يُنسخ",
   "backup.preset_try": "آخر 50 (تجربة)",
-  "backup.preset_month": "آخر شهر",
+  "backup.preset_month": "آخر 30 يومًا",
   "backup.preset_videos": "فيديو فقط",
   "backup.preset_largest": "الأكبر أولًا",
   "backup.dates": "تاريخ الالتقاط",
@@ -225,5 +225,16 @@
   "home.tile_soon": "قريبًا",
   "home.tile_auto_on": "مفعّل",
   "home.tile_auto_off": "معطّل",
-  "home.family_line": "الإرسال باسم {name} · {share}"
+  "home.family_line": "الإرسال باسم {name} · {share}",
+  "backup.range_today": "اليوم",
+  "backup.range_yesterday": "أمس",
+  "backup.range_week": "هذا الأسبوع",
+  "backup.range_d7": "آخر 7 أيام",
+  "backup.range_d14": "آخر 14 يومًا",
+  "backup.range_d30": "آخر 30 يومًا",
+  "backup.range_month": "هذا الشهر",
+  "backup.range_lastMonth": "الشهر الماضي",
+  "backup.range_d90": "آخر 3 أشهر",
+  "backup.range_year": "هذا العام",
+  "backup.range_custom": "اختر التواريخ…"
 }

@@ -187,7 +187,7 @@
   "backup.minutes_unit": "分钟",
   "backup.preset_all": "全部未备份",
   "backup.preset_try": "最近 50 张试试",
-  "backup.preset_month": "最近一个月",
+  "backup.preset_month": "最近 30 天",
   "backup.preset_videos": "只传视频",
   "backup.preset_largest": "最占空间的先传",
   "backup.dates": "拍摄日期",
@@ -225,5 +225,16 @@
   "home.tile_soon": "即将推出",
   "home.tile_auto_on": "已开启",
   "home.tile_auto_off": "未开启",
-  "home.family_line": "以 {name} 的身份发送 · {share}"
+  "home.family_line": "以 {name} 的身份发送 · {share}",
+  "backup.range_today": "今天",
+  "backup.range_yesterday": "昨天",
+  "backup.range_week": "本周",
+  "backup.range_d7": "最近 7 天",
+  "backup.range_d14": "最近 14 天",
+  "backup.range_d30": "最近 30 天",
+  "backup.range_month": "本月",
+  "backup.range_lastMonth": "上个月",
+  "backup.range_d90": "最近 3 个月",
+  "backup.range_year": "今年",
+  "backup.range_custom": "自选日期…"
 }

@@ -187,7 +187,7 @@
   "backup.minutes_unit": "min",
   "backup.preset_all": "Everything not backed up",
   "backup.preset_try": "Latest 50 (try it)",
-  "backup.preset_month": "Last month",
+  "backup.preset_month": "Last 30 days",
   "backup.preset_videos": "Videos only",
   "backup.preset_largest": "Largest first",
   "backup.dates": "Date taken",
@@ -225,5 +225,16 @@
   "home.tile_soon": "Coming soon",
   "home.tile_auto_on": "On",
   "home.tile_auto_off": "Off",
-  "home.family_line": "Sending as {name} · {share}"
+  "home.family_line": "Sending as {name} · {share}",
+  "backup.range_today": "Today",
+  "backup.range_yesterday": "Yesterday",
+  "backup.range_week": "This week",
+  "backup.range_d7": "Last 7 days",
+  "backup.range_d14": "Last 14 days",
+  "backup.range_d30": "Last 30 days",
+  "backup.range_month": "This month",
+  "backup.range_lastMonth": "Last month",
+  "backup.range_d90": "Last 3 months",
+  "backup.range_year": "This year",
+  "backup.range_custom": "Choose dates…"
 }

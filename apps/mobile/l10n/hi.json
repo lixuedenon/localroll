@@ -187,7 +187,7 @@
   "backup.minutes_unit": "मिनट",
   "backup.preset_all": "जो बैकअप नहीं हुआ, सब",
   "backup.preset_try": "नवीनतम 50 (आज़माएँ)",
-  "backup.preset_month": "पिछला महीना",
+  "backup.preset_month": "पिछले 30 दिन",
   "backup.preset_videos": "केवल वीडियो",
   "backup.preset_largest": "सबसे बड़े पहले",
   "backup.dates": "खींचने की तारीख",
@@ -225,5 +225,16 @@
   "home.tile_soon": "जल्द आ रहा है",
   "home.tile_auto_on": "चालू",
   "home.tile_auto_off": "बंद",
-  "home.family_line": "{name} के रूप में भेज रहे हैं · {share}"
+  "home.family_line": "{name} के रूप में भेज रहे हैं · {share}",
+  "backup.range_today": "आज",
+  "backup.range_yesterday": "कल",
+  "backup.range_week": "इस सप्ताह",
+  "backup.range_d7": "पिछले 7 दिन",
+  "backup.range_d14": "पिछले 14 दिन",
+  "backup.range_d30": "पिछले 30 दिन",
+  "backup.range_month": "इस महीने",
+  "backup.range_lastMonth": "पिछला महीना",
+  "backup.range_d90": "पिछले 3 महीने",
+  "backup.range_year": "इस साल",
+  "backup.range_custom": "तारीखें चुनें…"
 }

@@ -187,7 +187,7 @@
   "backup.minutes_unit": "мин",
   "backup.preset_all": "Всё несохранённое",
   "backup.preset_try": "Последние 50 (проба)",
-  "backup.preset_month": "Последний месяц",
+  "backup.preset_month": "Последние 30 дней",
   "backup.preset_videos": "Только видео",
   "backup.preset_largest": "Сначала самые большие",
   "backup.dates": "Дата съёмки",
@@ -225,5 +225,16 @@
   "home.tile_soon": "Скоро",
   "home.tile_auto_on": "Вкл.",
   "home.tile_auto_off": "Выкл.",
-  "home.family_line": "Отправка как {name} · {share}"
+  "home.family_line": "Отправка как {name} · {share}",
+  "backup.range_today": "Сегодня",
+  "backup.range_yesterday": "Вчера",
+  "backup.range_week": "Эта неделя",
+  "backup.range_d7": "Последние 7 дней",
+  "backup.range_d14": "Последние 14 дней",
+  "backup.range_d30": "Последние 30 дней",
+  "backup.range_month": "Этот месяц",
+  "backup.range_lastMonth": "Прошлый месяц",
+  "backup.range_d90": "Последние 3 месяца",
+  "backup.range_year": "Этот год",
+  "backup.range_custom": "Выбрать даты…"
 }

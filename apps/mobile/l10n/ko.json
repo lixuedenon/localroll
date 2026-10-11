@@ -187,7 +187,7 @@
   "backup.minutes_unit": "분",
   "backup.preset_all": "백업 안 된 전체",
   "backup.preset_try": "최근 50개(테스트)",
-  "backup.preset_month": "최근 한 달",
+  "backup.preset_month": "최근 30일",
   "backup.preset_videos": "동영상만",
   "backup.preset_largest": "큰 파일 먼저",
   "backup.dates": "촬영 날짜",
@@ -225,5 +225,16 @@
   "home.tile_soon": "곧 제공",
   "home.tile_auto_on": "켜짐",
   "home.tile_auto_off": "꺼짐",
-  "home.family_line": "{name}(으)로 보내기 · {share}"
+  "home.family_line": "{name}(으)로 보내기 · {share}",
+  "backup.range_today": "오늘",
+  "backup.range_yesterday": "어제",
+  "backup.range_week": "이번 주",
+  "backup.range_d7": "최근 7일",
+  "backup.range_d14": "최근 14일",
+  "backup.range_d30": "최근 30일",
+  "backup.range_month": "이번 달",
+  "backup.range_lastMonth": "지난달",
+  "backup.range_d90": "최근 3개월",
+  "backup.range_year": "올해",
+  "backup.range_custom": "날짜 선택…"
 }

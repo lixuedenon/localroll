@@ -187,7 +187,7 @@
   "backup.minutes_unit": "นาที",
   "backup.preset_all": "ทั้งหมดที่ยังไม่สำรอง",
   "backup.preset_try": "ล่าสุด 50 (ลองดู)",
-  "backup.preset_month": "เดือนที่แล้ว",
+  "backup.preset_month": "30 วันล่าสุด",
   "backup.preset_videos": "เฉพาะวิดีโอ",
   "backup.preset_largest": "ใหญ่สุดก่อน",
   "backup.dates": "วันที่ถ่าย",
@@ -225,5 +225,16 @@
   "home.tile_soon": "เร็ว ๆ นี้",
   "home.tile_auto_on": "เปิด",
   "home.tile_auto_off": "ปิด",
-  "home.family_line": "ส่งในชื่อ {name} · {share}"
+  "home.family_line": "ส่งในชื่อ {name} · {share}",
+  "backup.range_today": "วันนี้",
+  "backup.range_yesterday": "เมื่อวาน",
+  "backup.range_week": "สัปดาห์นี้",
+  "backup.range_d7": "7 วันล่าสุด",
+  "backup.range_d14": "14 วันล่าสุด",
+  "backup.range_d30": "30 วันล่าสุด",
+  "backup.range_month": "เดือนนี้",
+  "backup.range_lastMonth": "เดือนที่แล้ว",
+  "backup.range_d90": "3 เดือนล่าสุด",
+  "backup.range_year": "ปีนี้",
+  "backup.range_custom": "เลือกวันที่…"
 }

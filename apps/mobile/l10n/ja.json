@@ -187,7 +187,7 @@
   "backup.minutes_unit": "分",
   "backup.preset_all": "未バックアップすべて",
   "backup.preset_try": "最新 50 件（お試し）",
-  "backup.preset_month": "最近 1 か月",
+  "backup.preset_month": "過去 30 日間",
   "backup.preset_videos": "ビデオのみ",
   "backup.preset_largest": "大きい順",
   "backup.dates": "撮影日",
@@ -225,5 +225,16 @@
   "home.tile_soon": "近日公開",
   "home.tile_auto_on": "オン",
   "home.tile_auto_off": "オフ",
-  "home.family_line": "{name} として送信 · {share}"
+  "home.family_line": "{name} として送信 · {share}",
+  "backup.range_today": "今日",
+  "backup.range_yesterday": "昨日",
+  "backup.range_week": "今週",
+  "backup.range_d7": "過去 7 日間",
+  "backup.range_d14": "過去 14 日間",
+  "backup.range_d30": "過去 30 日間",
+  "backup.range_month": "今月",
+  "backup.range_lastMonth": "先月",
+  "backup.range_d90": "過去 3 か月",
+  "backup.range_year": "今年",
+  "backup.range_custom": "日付を選ぶ…"
 }

@@ -187,7 +187,7 @@
   "backup.minutes_unit": "dk",
   "backup.preset_all": "Yedeklenmeyen her şey",
   "backup.preset_try": "Son 50 (deneme)",
-  "backup.preset_month": "Son bir ay",
+  "backup.preset_month": "Son 30 gün",
   "backup.preset_videos": "Yalnızca videolar",
   "backup.preset_largest": "Önce en büyük",
   "backup.dates": "Çekim tarihi",
@@ -225,5 +225,16 @@
   "home.tile_soon": "Yakında",
   "home.tile_auto_on": "Açık",
   "home.tile_auto_off": "Kapalı",
-  "home.family_line": "{name} olarak gönderiliyor · {share}"
+  "home.family_line": "{name} olarak gönderiliyor · {share}",
+  "backup.range_today": "Bugün",
+  "backup.range_yesterday": "Dün",
+  "backup.range_week": "Bu hafta",
+  "backup.range_d7": "Son 7 gün",
+  "backup.range_d14": "Son 14 gün",
+  "backup.range_d30": "Son 30 gün",
+  "backup.range_month": "Bu ay",
+  "backup.range_lastMonth": "Geçen ay",
+  "backup.range_d90": "Son 3 ay",
+  "backup.range_year": "Bu yıl",
+  "backup.range_custom": "Tarih seç…"
 }

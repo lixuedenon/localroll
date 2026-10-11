@@ -187,7 +187,7 @@
   "backup.minutes_unit": "menit",
   "backup.preset_all": "Semua yang belum dicadangkan",
   "backup.preset_try": "50 terbaru (coba)",
-  "backup.preset_month": "Sebulan terakhir",
+  "backup.preset_month": "30 hari terakhir",
   "backup.preset_videos": "Hanya video",
   "backup.preset_largest": "Terbesar dulu",
   "backup.dates": "Tanggal diambil",
@@ -225,5 +225,16 @@
   "home.tile_soon": "Segera hadir",
   "home.tile_auto_on": "Aktif",
   "home.tile_auto_off": "Nonaktif",
-  "home.family_line": "Mengirim sebagai {name} · {share}"
+  "home.family_line": "Mengirim sebagai {name} · {share}",
+  "backup.range_today": "Hari ini",
+  "backup.range_yesterday": "Kemarin",
+  "backup.range_week": "Minggu ini",
+  "backup.range_d7": "7 hari terakhir",
+  "backup.range_d14": "14 hari terakhir",
+  "backup.range_d30": "30 hari terakhir",
+  "backup.range_month": "Bulan ini",
+  "backup.range_lastMonth": "Bulan lalu",
+  "backup.range_d90": "3 bulan terakhir",
+  "backup.range_year": "Tahun ini",
+  "backup.range_custom": "Pilih tanggal…"
 }
