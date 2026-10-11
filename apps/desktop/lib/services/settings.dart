@@ -78,6 +78,10 @@ class AppSettings extends ChangeNotifier {
   late int colorValue;
   int avatarVersion = 0;
 
+  /// How many items each library folder had (kept outside the library, so
+  /// an unplugged drive is recognised as such).
+  File get libraryStateFile => File('${_file.parent.path}${Platform.pathSeparator}library_state.json');
+
   File get avatarFile => File('${_file.parent.path}${Platform.pathSeparator}avatar.png');
 
   /// Windows computer name — the "keep the original name" choice.

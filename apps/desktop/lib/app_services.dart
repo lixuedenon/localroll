@@ -33,7 +33,7 @@ class AppServices {
 
   static Future<AppServices> create() async {
     final settings = await AppSettings.load();
-    final library = LibraryIndex(settings.libraryPath);
+    final library = LibraryIndex(settings.libraryPath, stateFile: settings.libraryStateFile);
     await library.load();
     final hub = ReceiveHub();
     final server = TransferServer(settings: settings, library: library, hub: hub);

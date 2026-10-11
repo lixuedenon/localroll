@@ -158,5 +158,10 @@
   "transfer.minutes": "{m} min",
   "transfer.hours": "{h} h {m} min",
   "transfer.long_tip": "Grosse sauvegarde : laissez le téléphone branché et en Wi-Fi. En cas d’interruption, elle reprend.",
-  "transfer.no_space_summary": "{count} fichiers n’ont pas été envoyés faute d’espace sur le téléphone. Libérez de l’espace (par ex. en supprimant des photos déjà sauvegardées sur le PC), puis renvoyez-les."
+  "transfer.no_space_summary": "{count} fichiers n’ont pas été envoyés faute d’espace sur le téléphone. Libérez de l’espace (par ex. en supprimant des photos déjà sauvegardées sur le PC), puis renvoyez-les.",
+  "err.library_offline": "Le dossier de la photothèque du PC est inaccessible pour l’instant (disque externe débranché ?). Rien n’est perdu : réessayez quand il sera de retour.",
+  "transfer.stop": "Arrêter",
+  "transfer.keep_going": "Continuer",
+  "transfer.stop_title": "Arrêter l’envoi ?",
+  "transfer.stop_body": "Les {done} éléments déjà envoyés sont en sécurité sur {pc}. Le reste reste sur le téléphone et continuera la prochaine fois ; le fichier en cours reprendra là où il s’est arrêté."
 }

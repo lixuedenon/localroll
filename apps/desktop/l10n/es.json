@@ -142,5 +142,10 @@
   "family.everyone": "Todos",
   "family.show_private": "Mostrar «solo yo» ({count})",
   "family.make_private": "Solo quien lo envió (ocultar a la familia)",
-  "family.make_shared": "Compartir con la familia"
+  "family.make_shared": "Compartir con la familia",
+  "lib.offline": "No se puede acceder a la carpeta de la biblioteca ({path}): ¿disco externo desconectado o carpeta movida? La recepción está en pausa y nada se marca como eliminado. Se reanuda sola cuando la carpeta vuelva.",
+  "lib.missing_ask": "{count} archivos ya no están en la carpeta de la biblioteca (¿borrados o movidos en el Explorador?). Si los borraste a propósito, confírmalo: los teléfonos los mostrarán como sin copia.",
+  "lib.missing_rescan": "Buscar de nuevo",
+  "lib.missing_confirm": "Sí, los borré",
+  "lib.deleting": "Moviendo a la Papelera… {done} / {total}"
 }

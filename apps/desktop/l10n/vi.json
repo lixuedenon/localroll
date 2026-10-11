@@ -142,5 +142,10 @@
   "family.everyone": "Cả nhà",
   "family.show_private": "Hiện mục “chỉ mình tôi” ({count})",
   "family.make_private": "Chỉ người gửi (ẩn với gia đình)",
-  "family.make_shared": "Chia sẻ với gia đình"
+  "family.make_shared": "Chia sẻ với gia đình",
+  "lib.offline": "Không mở được thư mục thư viện ({path}) — ổ ngoài bị rút hay thư mục bị chuyển đi? Việc nhận đang tạm dừng và không có gì bị coi là đã xóa. Sẽ tự tiếp tục khi thư mục trở lại.",
+  "lib.missing_ask": "{count} tệp không còn trong thư mục thư viện (đã xóa hoặc di chuyển trong Explorer?). Nếu bạn cố ý xóa, hãy xác nhận — điện thoại sẽ báo các ảnh này không còn bản sao lưu.",
+  "lib.missing_rescan": "Tìm lại",
+  "lib.missing_confirm": "Đúng, tôi đã xóa",
+  "lib.deleting": "Đang chuyển vào Thùng rác… {done} / {total}"
 }

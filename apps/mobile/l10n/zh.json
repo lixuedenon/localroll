@@ -158,5 +158,10 @@
   "transfer.minutes": "{m} 分钟",
   "transfer.hours": "{h} 小时 {m} 分",
   "transfer.long_tip": "大批量备份：请插上电源、保持连着 Wi-Fi。中途断了会接着传。",
-  "transfer.no_space_summary": "有 {count} 个文件因为手机空间不足没有发送。请先腾出一些空间（比如删掉已经安全备份到电脑上的照片），再重新发送。"
+  "transfer.no_space_summary": "有 {count} 个文件因为手机空间不足没有发送。请先腾出一些空间（比如删掉已经安全备份到电脑上的照片），再重新发送。",
+  "err.library_offline": "电脑上的媒体库文件夹现在打不开（移动硬盘拔掉了？）。没有丢失任何东西，接回后再试。",
+  "transfer.stop": "停止",
+  "transfer.keep_going": "继续传",
+  "transfer.stop_title": "停止发送？",
+  "transfer.stop_body": "已经发送的 {done} 项都安全保存在 {pc} 上了。剩下的留在手机里，下次接着传，正在传的那个会从断开处继续。"
 }

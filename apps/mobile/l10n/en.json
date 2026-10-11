@@ -158,5 +158,10 @@
   "transfer.minutes": "{m} min",
   "transfer.hours": "{h} h {m} min",
   "transfer.long_tip": "Big backup: keep the phone plugged in and on Wi-Fi. If it stops, it picks up where it left off.",
-  "transfer.no_space_summary": "{count} files were not sent because the phone ran out of free space. Free up some space (for example, delete photos that are already safely on the PC), then send them again."
+  "transfer.no_space_summary": "{count} files were not sent because the phone ran out of free space. Free up some space (for example, delete photos that are already safely on the PC), then send them again.",
+  "err.library_offline": "The PC's photo library folder can't be reached right now (external drive unplugged?). Nothing was lost — try again when it's back.",
+  "transfer.stop": "Stop",
+  "transfer.keep_going": "Keep sending",
+  "transfer.stop_title": "Stop sending?",
+  "transfer.stop_body": "The {done} items already sent are safely on {pc}. The rest stay on your phone and continue next time — the file in progress resumes where it stopped."
 }

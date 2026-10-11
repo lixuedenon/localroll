@@ -157,10 +157,48 @@ class _LibraryPageState extends State<LibraryPage> {
             ],
             bottom: _familyBar(all, family),
           ),
-          body: items.isEmpty ? _empty(context) : _grid(context, items),
+          body: Column(
+            children: [
+              ..._banners(context),
+              Expanded(child: items.isEmpty ? _empty(context) : _grid(context, items)),
+            ],
+          ),
         );
       },
     );
+  }
+
+  /// Library folder unreachable, or many files vanished at once.
+  List<Widget> _banners(BuildContext context) {
+    final lib = widget.services.library;
+    final theme = Theme.of(context);
+    Widget banner(IconData icon, Color color, String text, List<Widget> actions) => Container(
+          margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withValues(alpha: 0.6)),
+          ),
+          child: Row(children: [
+            Icon(icon, color: color),
+            const SizedBox(width: 12),
+            Expanded(child: Text(text, style: theme.textTheme.bodyMedium)),
+            ...actions,
+          ]),
+        );
+    return [
+      if (lib.offline)
+        banner(Icons.usb_off_rounded, theme.colorScheme.error, tr('lib.offline', {'path': lib.rootPath}), [
+          TextButton(onPressed: lib.retry, child: Text(tr('common.retry'))),
+        ]),
+      if (!lib.offline && lib.pendingMissing.isNotEmpty)
+        banner(Icons.help_outline_rounded, Colors.amber, tr('lib.missing_ask', {'count': lib.pendingMissing.length}), [
+          TextButton(onPressed: lib.retry, child: Text(tr('lib.missing_rescan'))),
+          const SizedBox(width: 4),
+          FilledButton(onPressed: lib.confirmMissing, child: Text(tr('lib.missing_confirm'))),
+        ]),
+    ];
   }
 
   /// Delete = move to the Windows Recycle Bin. Phones are told next time.
@@ -181,8 +219,36 @@ class _LibraryPageState extends State<LibraryPage> {
         ],
       ),
     );
-    if (ok != true) return;
-    final n = await deleteItems(widget.services.library, items);
+    if (ok != true || !mounted) return;
+    // Big deletions: show progress (thousands of files take a little while).
+    final progress = ValueNotifier<(int, int)>((0, items.length));
+    final showProgress = items.length >= 50;
+    if (showProgress) {
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => PopScope(
+          canPop: false,
+          child: AlertDialog(
+            content: ValueListenableBuilder<(int, int)>(
+              valueListenable: progress,
+              builder: (_, v, _) => Column(mainAxisSize: MainAxisSize.min, children: [
+                Text(tr('lib.deleting', {'done': v.$1, 'total': v.$2})),
+                const SizedBox(height: 12),
+                LinearProgressIndicator(value: v.$2 == 0 ? null : v.$1 / v.$2),
+              ]),
+            ),
+          ),
+        ),
+      );
+    }
+    final n = await deleteItems(
+      widget.services.library,
+      items,
+      onProgress: (done, total) => progress.value = (done, total),
+    );
+    if (showProgress && mounted) Navigator.of(context).pop();
+    progress.dispose();
     if (!mounted) return;
     setState(_selected.clear);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('lib.deleted', {'count': n}))));

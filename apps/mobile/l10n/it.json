@@ -158,5 +158,10 @@
   "transfer.minutes": "{m} min",
   "transfer.hours": "{h} h {m} min",
   "transfer.long_tip": "Backup grande: tieni il telefono in carica e sul Wi-Fi. Se si interrompe, riprende.",
-  "transfer.no_space_summary": "{count} file non sono stati inviati perché il telefono ha esaurito lo spazio. Libera spazio (ad es. eliminando foto già al sicuro sul PC) e inviali di nuovo."
+  "transfer.no_space_summary": "{count} file non sono stati inviati perché il telefono ha esaurito lo spazio. Libera spazio (ad es. eliminando foto già al sicuro sul PC) e inviali di nuovo.",
+  "err.library_offline": "La cartella della libreria del PC non è raggiungibile ora (disco esterno scollegato?). Non si è perso nulla: riprova quando torna disponibile.",
+  "transfer.stop": "Interrompi",
+  "transfer.keep_going": "Continua a inviare",
+  "transfer.stop_title": "Interrompere l’invio?",
+  "transfer.stop_body": "I {done} elementi già inviati sono al sicuro su {pc}. Il resto rimane sul telefono e continua la prossima volta; il file in corso riprende da dove si era fermato."
 }

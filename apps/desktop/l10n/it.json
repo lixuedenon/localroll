@@ -142,5 +142,10 @@
   "family.everyone": "Tutti",
   "family.show_private": "Mostra «solo io» ({count})",
   "family.make_private": "Solo chi l’ha inviato (nascondi alla famiglia)",
-  "family.make_shared": "Condividi con la famiglia"
+  "family.make_shared": "Condividi con la famiglia",
+  "lib.offline": "La cartella della libreria non è raggiungibile ({path}): disco esterno scollegato o cartella spostata? La ricezione è in pausa e nulla viene segnato come eliminato. Riprende da sola quando la cartella torna.",
+  "lib.missing_ask": "{count} file non sono più nella cartella della libreria (eliminati o spostati in Esplora file?). Se li hai eliminati di proposito, conferma: i telefoni li mostreranno come non più salvati.",
+  "lib.missing_rescan": "Cerca di nuovo",
+  "lib.missing_confirm": "Sì, li ho eliminati",
+  "lib.deleting": "Spostamento nel Cestino… {done} / {total}"
 }

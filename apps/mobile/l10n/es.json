@@ -158,5 +158,10 @@
   "transfer.minutes": "{m} min",
   "transfer.hours": "{h} h {m} min",
   "transfer.long_tip": "Copia grande: deja el teléfono cargando y en Wi-Fi. Si se interrumpe, sigue donde se quedó.",
-  "transfer.no_space_summary": "{count} archivos no se enviaron porque el teléfono se quedó sin espacio. Libera espacio (por ejemplo, borra fotos que ya están a salvo en el PC) y vuelve a enviarlos."
+  "transfer.no_space_summary": "{count} archivos no se enviaron porque el teléfono se quedó sin espacio. Libera espacio (por ejemplo, borra fotos que ya están a salvo en el PC) y vuelve a enviarlos.",
+  "err.library_offline": "No se puede acceder ahora a la carpeta de la biblioteca del PC (¿disco externo desconectado?). No se ha perdido nada: vuelve a intentarlo cuando esté de vuelta.",
+  "transfer.stop": "Detener",
+  "transfer.keep_going": "Seguir enviando",
+  "transfer.stop_title": "¿Dejar de enviar?",
+  "transfer.stop_body": "Los {done} elementos ya enviados están a salvo en {pc}. El resto se queda en el teléfono y continúa la próxima vez; el archivo en curso sigue donde se quedó."
 }

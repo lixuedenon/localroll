@@ -158,5 +158,10 @@
   "transfer.minutes": "{m} menit",
   "transfer.hours": "{h} jam {m} menit",
   "transfer.long_tip": "Pencadangan besar: biarkan ponsel diisi daya dan tersambung Wi-Fi. Jika terhenti, akan dilanjutkan.",
-  "transfer.no_space_summary": "{count} file tidak terkirim karena ruang ponsel habis. Kosongkan ruang (mis. hapus foto yang sudah aman di PC), lalu kirim lagi."
+  "transfer.no_space_summary": "{count} file tidak terkirim karena ruang ponsel habis. Kosongkan ruang (mis. hapus foto yang sudah aman di PC), lalu kirim lagi.",
+  "err.library_offline": "Folder pustaka di PC tidak dapat diakses saat ini (drive eksternal dicabut?). Tidak ada yang hilang — coba lagi saat sudah kembali.",
+  "transfer.stop": "Hentikan",
+  "transfer.keep_going": "Lanjut kirim",
+  "transfer.stop_title": "Berhenti mengirim?",
+  "transfer.stop_body": "{done} item yang sudah terkirim aman di {pc}. Sisanya tetap di ponsel dan dilanjutkan lain kali — file yang sedang dikirim akan lanjut dari titik terakhir."
 }

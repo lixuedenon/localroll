@@ -142,5 +142,10 @@
   "family.everyone": "全員",
   "family.show_private": "「自分だけ」を表示（{count}）",
   "family.make_private": "送った本人だけ（家族に非表示）",
-  "family.make_shared": "家族に表示"
+  "family.make_shared": "家族に表示",
+  "lib.offline": "ライブラリフォルダー（{path}）にアクセスできません。外付けドライブが外れたか、フォルダーが移動されましたか？受信は一時停止中で、何も削除扱いにはなりません。フォルダーが戻ると自動で再開します。",
+  "lib.missing_ask": "{count} 個のファイルがライブラリフォルダーから消えました（エクスプローラーで削除・移動しましたか？）。意図的に削除した場合は確認してください。スマホには「バックアップがない」と表示されます。",
+  "lib.missing_rescan": "もう一度探す",
+  "lib.missing_confirm": "削除しました",
+  "lib.deleting": "ごみ箱に移動中… {done} / {total}"
 }

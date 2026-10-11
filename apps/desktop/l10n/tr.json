@@ -142,5 +142,10 @@
   "family.everyone": "Herkes",
   "family.show_private": "“Yalnızca ben” öğelerini göster ({count})",
   "family.make_private": "Yalnızca gönderen (aileden gizle)",
-  "family.make_shared": "Aileyle paylaş"
+  "family.make_shared": "Aileyle paylaş",
+  "lib.offline": "Arşiv klasörüne ulaşılamıyor ({path}) — harici disk mi çıkarıldı, klasör mü taşındı? Alma duraklatıldı ve hiçbir şey silinmiş sayılmıyor. Klasör geri gelince kendiliğinden devam eder.",
+  "lib.missing_ask": "{count} dosya artık arşiv klasöründe değil (Gezgin'de silindi ya da taşındı mı?). Bilerek sildiyseniz onaylayın — telefonlar bunları artık yedekli değil olarak gösterir.",
+  "lib.missing_rescan": "Yeniden ara",
+  "lib.missing_confirm": "Evet, ben sildim",
+  "lib.deleting": "Geri Dönüşüm Kutusu'na taşınıyor… {done} / {total}"
 }

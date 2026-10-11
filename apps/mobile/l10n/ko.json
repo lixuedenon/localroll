@@ -158,5 +158,10 @@
   "transfer.minutes": "{m}분",
   "transfer.hours": "{h}시간 {m}분",
   "transfer.long_tip": "대용량 백업 중: 충전기를 연결하고 Wi-Fi를 유지하세요. 멈춰도 이어서 보냅니다.",
-  "transfer.no_space_summary": "휴대폰 공간이 부족해 {count}개 파일을 보내지 못했습니다. 공간을 확보한 뒤(예: PC에 안전하게 백업된 사진 삭제) 다시 보내세요."
+  "transfer.no_space_summary": "휴대폰 공간이 부족해 {count}개 파일을 보내지 못했습니다. 공간을 확보한 뒤(예: PC에 안전하게 백업된 사진 삭제) 다시 보내세요.",
+  "err.library_offline": "PC의 라이브러리 폴더에 지금 접근할 수 없습니다(외장 드라이브가 빠졌나요?). 잃어버린 것은 없습니다. 다시 연결되면 다시 시도하세요.",
+  "transfer.stop": "중지",
+  "transfer.keep_going": "계속 보내기",
+  "transfer.stop_title": "전송을 멈출까요?",
+  "transfer.stop_body": "이미 보낸 {done}개 항목은 {pc}에 안전하게 저장되어 있습니다. 나머지는 휴대폰에 남아 다음에 이어서 보내며, 보내던 파일도 멈춘 곳부터 이어집니다."
 }

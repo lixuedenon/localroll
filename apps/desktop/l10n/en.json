@@ -142,5 +142,10 @@
   "family.everyone": "Everyone",
   "family.show_private": "Show “only me” items ({count})",
   "family.make_private": "Only the sender (hide from family)",
-  "family.make_shared": "Share with family"
+  "family.make_shared": "Share with family",
+  "lib.offline": "The library folder can't be reached ({path}) — external drive unplugged, or the folder moved? Receiving is paused and nothing is marked as deleted. It resumes by itself when the folder is back.",
+  "lib.missing_ask": "{count} files are no longer in the library folder (deleted or moved in Explorer?). If you deleted them on purpose, confirm — the phones will then show them as no longer backed up.",
+  "lib.missing_rescan": "Look again",
+  "lib.missing_confirm": "Yes, I deleted them",
+  "lib.deleting": "Moving to the Recycle Bin… {done} / {total}"
 }

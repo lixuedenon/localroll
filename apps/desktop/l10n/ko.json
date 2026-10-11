@@ -142,5 +142,10 @@
   "family.everyone": "모두",
   "family.show_private": "‘나만’ 항목 보기 ({count})",
   "family.make_private": "보낸 사람만(가족에게 숨기기)",
-  "family.make_shared": "가족과 공유"
+  "family.make_shared": "가족과 공유",
+  "lib.offline": "라이브러리 폴더({path})에 접근할 수 없습니다. 외장 드라이브가 빠졌거나 폴더가 옮겨졌나요? 수신은 일시 중지되며 아무것도 삭제된 것으로 처리하지 않습니다. 폴더가 돌아오면 자동으로 다시 시작합니다.",
+  "lib.missing_ask": "{count}개 파일이 라이브러리 폴더에 없습니다(탐색기에서 삭제하거나 옮겼나요?). 일부러 삭제했다면 확인하세요. 그러면 휴대폰에 백업이 없다고 표시됩니다.",
+  "lib.missing_rescan": "다시 찾기",
+  "lib.missing_confirm": "제가 삭제했어요",
+  "lib.deleting": "휴지통으로 이동 중… {done} / {total}"
 }

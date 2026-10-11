@@ -178,8 +178,20 @@ class Uploader extends ChangeNotifier {
         ..noSpace = true
         ..error = e.bytes > 0 ? tr('err.phone_space_size', {'size': formatSize(e.bytes)}) : tr('err.phone_space');
     } catch (e) {
+      if (_cancelled && !_expired && e is! LrHttpException) {
+        // Stopped by the user: not a failure, it simply waits for next time
+        // (the part already on the PC is kept and resumed).
+        it
+          ..state = UploadState.waiting
+          ..error = null;
+        notifyListeners();
+        return;
+      }
       it.state = UploadState.failed;
       it.error = e is LrHttpException ? e.message : e.toString().replaceFirst('Exception: ', '');
+      // The PC can't store anything right now (library drive unplugged):
+      // stop instead of failing every remaining item; they stay unsent.
+      if (e is LrHttpException && e.body['error'] == 'library_offline') _cancelled = true;
     }
     notifyListeners();
   }

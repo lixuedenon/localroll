@@ -158,5 +158,10 @@
   "transfer.minutes": "{m} 分鐘",
   "transfer.hours": "{h} 小時 {m} 分",
   "transfer.long_tip": "大批量備份：請接上電源、保持連著 Wi-Fi。中途斷了會接著傳。",
-  "transfer.no_space_summary": "有 {count} 個檔案因為手機空間不足沒有傳送。請先騰出一些空間（例如刪掉已經安全備份到電腦上的照片），再重新傳送。"
+  "transfer.no_space_summary": "有 {count} 個檔案因為手機空間不足沒有傳送。請先騰出一些空間（例如刪掉已經安全備份到電腦上的照片），再重新傳送。",
+  "err.library_offline": "電腦上的媒體庫資料夾現在打不開（外接硬碟拔掉了？）。沒有遺失任何東西，接回後再試。",
+  "transfer.stop": "停止",
+  "transfer.keep_going": "繼續傳",
+  "transfer.stop_title": "停止傳送？",
+  "transfer.stop_body": "已經傳送的 {done} 項都安全儲存在 {pc} 上了。剩下的留在手機裡，下次接著傳，正在傳的那個會從斷開處繼續。"
 }

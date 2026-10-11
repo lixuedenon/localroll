@@ -158,5 +158,10 @@
   "transfer.minutes": "{m} Min.",
   "transfer.hours": "{h} Std. {m} Min.",
   "transfer.long_tip": "Große Sicherung: Handy am Strom und im WLAN lassen. Bei Unterbrechung geht es weiter.",
-  "transfer.no_space_summary": "{count} Dateien wurden nicht gesendet, weil der Handyspeicher voll war. Schaffe Platz (z. B. indem du Fotos löschst, die schon sicher auf dem PC sind) und sende sie erneut."
+  "transfer.no_space_summary": "{count} Dateien wurden nicht gesendet, weil der Handyspeicher voll war. Schaffe Platz (z. B. indem du Fotos löschst, die schon sicher auf dem PC sind) und sende sie erneut.",
+  "err.library_offline": "Der Mediathek-Ordner des PCs ist gerade nicht erreichbar (externe Festplatte abgezogen?). Nichts ging verloren – versuche es erneut, wenn er wieder da ist.",
+  "transfer.stop": "Stoppen",
+  "transfer.keep_going": "Weiter senden",
+  "transfer.stop_title": "Senden stoppen?",
+  "transfer.stop_body": "Die {done} bereits gesendeten Elemente sind sicher auf {pc}. Der Rest bleibt auf dem Handy und geht beim nächsten Mal weiter – die laufende Datei setzt dort fort, wo sie aufgehört hat."
 }

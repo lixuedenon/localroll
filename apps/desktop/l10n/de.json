@@ -142,5 +142,10 @@
   "family.everyone": "Alle",
   "family.show_private": "„Nur ich“ anzeigen ({count})",
   "family.make_private": "Nur Absender (vor Familie verbergen)",
-  "family.make_shared": "Mit Familie teilen"
+  "family.make_shared": "Mit Familie teilen",
+  "lib.offline": "Der Mediathek-Ordner ist nicht erreichbar ({path}) – externe Festplatte abgezogen oder Ordner verschoben? Der Empfang ist pausiert, und nichts wird als gelöscht markiert. Es geht automatisch weiter, sobald der Ordner wieder da ist.",
+  "lib.missing_ask": "{count} Dateien sind nicht mehr im Mediathek-Ordner (im Explorer gelöscht oder verschoben?). Wenn du sie absichtlich gelöscht hast, bestätige es – die Handys zeigen sie dann als nicht mehr gesichert an.",
+  "lib.missing_rescan": "Erneut suchen",
+  "lib.missing_confirm": "Ja, ich habe sie gelöscht",
+  "lib.deleting": "In den Papierkorb verschieben… {done} / {total}"
 }

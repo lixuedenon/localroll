@@ -355,6 +355,9 @@ class TransferServer extends ChangeNotifier {
 
   Future<void> _createSession(HttpRequest req, TrustedDevice device) async {
     final body = SessionRequest.fromJson(await _readJson(req));
+    // Library folder unreachable (external drive unplugged): don't accept
+    // files we could not store; the phone shows why and keeps them queued.
+    if (library.offline) return _json(req.response, 503, {'error': 'library_offline'});
     // Family group: the phone tells us whose phone it is (editable there).
     final owner = body.owner?.trim();
     if (owner != null && owner != (device.owner ?? '')) {
@@ -386,6 +389,8 @@ class TransferServer extends ChangeNotifier {
   /// phone deletes only files that are provably intact on this PC.
   Future<void> _verify(HttpRequest req, TrustedDevice device) async {
     final body = VerifyRequest.fromJson(await _readJson(req));
+    // Unplugged library: "can't find it" must not read as "not backed up".
+    if (library.offline) return _json(req.response, 503, {'error': 'library_offline'});
     final items = <VerifiedAsset>[];
     for (final id in body.assetIds.take(LrProtocol.verifyBatch)) {
       final m = library.findByAsset(device.id, id);
@@ -442,6 +447,7 @@ class TransferServer extends ChangeNotifier {
 
   Future<void> _complete(HttpRequest req, TrustedDevice device, FileOffer offer) async {
     final body = CompleteRequest.fromJson(await _readJson(req));
+    if (library.offline) return _json(req.response, 503, {'error': 'library_offline'});
     final part = File(_partPath(device, offer));
 
     if (!await part.exists()) {

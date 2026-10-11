@@ -158,5 +158,10 @@
   "transfer.minutes": "{m} phút",
   "transfer.hours": "{h} giờ {m} phút",
   "transfer.long_tip": "Sao lưu lớn: hãy cắm sạc và giữ Wi-Fi. Nếu gián đoạn, sẽ tiếp tục từ chỗ dừng.",
-  "transfer.no_space_summary": "{count} tệp chưa được gửi vì điện thoại hết dung lượng. Hãy giải phóng bớt (ví dụ xóa ảnh đã sao lưu an toàn trên máy tính) rồi gửi lại."
+  "transfer.no_space_summary": "{count} tệp chưa được gửi vì điện thoại hết dung lượng. Hãy giải phóng bớt (ví dụ xóa ảnh đã sao lưu an toàn trên máy tính) rồi gửi lại.",
+  "err.library_offline": "Hiện không mở được thư mục thư viện trên máy tính (ổ ngoài bị rút?). Không mất gì cả — hãy thử lại khi đã cắm lại.",
+  "transfer.stop": "Dừng",
+  "transfer.keep_going": "Tiếp tục gửi",
+  "transfer.stop_title": "Dừng gửi?",
+  "transfer.stop_body": "{done} mục đã gửi được lưu an toàn trên {pc}. Phần còn lại vẫn ở trên điện thoại và sẽ tiếp tục lần sau — tệp đang gửi sẽ tiếp tục từ chỗ dừng."
 }

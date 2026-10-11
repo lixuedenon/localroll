@@ -158,5 +158,10 @@
   "transfer.minutes": "{m} min",
   "transfer.hours": "{h} h {m} min",
   "transfer.long_tip": "Backup grande: deixe o telefone carregando e no Wi-Fi. Se parar, continua de onde parou.",
-  "transfer.no_space_summary": "{count} arquivos não foram enviados porque o telefone ficou sem espaço. Libere espaço (por exemplo, apagando fotos que já estão seguras no PC) e envie de novo."
+  "transfer.no_space_summary": "{count} arquivos não foram enviados porque o telefone ficou sem espaço. Libere espaço (por exemplo, apagando fotos que já estão seguras no PC) e envie de novo.",
+  "err.library_offline": "A pasta da biblioteca do PC não está acessível agora (disco externo desconectado?). Nada foi perdido — tente de novo quando voltar.",
+  "transfer.stop": "Parar",
+  "transfer.keep_going": "Continuar enviando",
+  "transfer.stop_title": "Parar de enviar?",
+  "transfer.stop_body": "Os {done} itens já enviados estão seguros em {pc}. O restante fica no telefone e continua da próxima vez; o arquivo em andamento retoma de onde parou."
 }

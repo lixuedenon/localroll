@@ -158,5 +158,10 @@
   "transfer.minutes": "{m} dk",
   "transfer.hours": "{h} sa {m} dk",
   "transfer.long_tip": "Büyük yedekleme: telefonu şarjda ve Wi-Fi'da tutun. Durursa kaldığı yerden devam eder.",
-  "transfer.no_space_summary": "Telefonda yer kalmadığı için {count} dosya gönderilmedi. Biraz yer açın (ör. bilgisayara güvenle yedeklenmiş fotoğrafları silin), sonra yeniden gönderin."
+  "transfer.no_space_summary": "Telefonda yer kalmadığı için {count} dosya gönderilmedi. Biraz yer açın (ör. bilgisayara güvenle yedeklenmiş fotoğrafları silin), sonra yeniden gönderin.",
+  "err.library_offline": "Bilgisayardaki arşiv klasörüne şu an ulaşılamıyor (harici disk çıkarıldı mı?). Hiçbir şey kaybolmadı — geri gelince tekrar deneyin.",
+  "transfer.stop": "Durdur",
+  "transfer.keep_going": "Göndermeye devam et",
+  "transfer.stop_title": "Gönderim durdurulsun mu?",
+  "transfer.stop_body": "Gönderilmiş {done} öğe {pc} üzerinde güvende. Kalanlar telefonda kalır ve bir dahaki sefere devam eder; gönderilmekte olan dosya kaldığı yerden sürer."
 }

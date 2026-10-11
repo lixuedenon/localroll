@@ -69,11 +69,63 @@ class _TransferPageState extends State<TransferPage> {
     super.dispose();
   }
 
+  bool get _busy {
+    final up = _uploader;
+    return up != null && up.running && !up.finished;
+  }
+
+  /// Stop (or leave) mid-transfer: say what happens, then stop cleanly.
+  Future<bool> _confirmStop() async {
+    final up = _uploader;
+    if (up == null || !_busy) return true;
+    final stop = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.pause_circle_outline_rounded, size: 32),
+        title: Text(tr('transfer.stop_title')),
+        content: Text(tr('transfer.stop_body', {'done': up.doneCount + up.skippedCount, 'pc': widget.desktop.name})),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('transfer.keep_going'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('transfer.stop'))),
+        ],
+      ),
+    );
+    if (stop == true) up.cancel();
+    return stop == true;
+  }
+
   @override
   Widget build(BuildContext context) {
     final up = _uploader;
+    return PopScope(
+      canPop: !_busy,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final navigator = Navigator.of(context);
+        if (await _confirmStop()) navigator.pop(false);
+      },
+      child: _scaffold(up),
+    );
+  }
+
+  Widget _scaffold(Uploader? up) {
     return Scaffold(
-      appBar: AppBar(title: Text(tr('transfer.title', {'name': widget.desktop.name}))),
+      appBar: AppBar(
+        title: Text(tr('transfer.title', {'name': widget.desktop.name})),
+        actions: [
+          if (up != null)
+            ListenableBuilder(
+              listenable: up,
+              builder: (context, _) => _busy
+                  ? TextButton.icon(
+                      onPressed: _confirmStop,
+                      icon: const Icon(Icons.stop_circle_outlined),
+                      label: Text(tr('transfer.stop')),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+        ],
+      ),
       body: _error != null
           ? _errorView()
           : up == null

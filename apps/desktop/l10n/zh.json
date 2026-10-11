@@ -142,5 +142,10 @@
   "family.everyone": "全家",
   "family.show_private": "显示仅本人可见的（{count}）",
   "family.make_private": "仅本人可见（对家人隐藏）",
-  "family.make_shared": "家人可见"
+  "family.make_shared": "家人可见",
+  "lib.offline": "媒体库文件夹打不开（{path}）：移动硬盘拔掉了，还是文件夹被挪走了？接收已暂停，也不会把任何照片当成已删除。文件夹回来后会自动恢复。",
+  "lib.missing_ask": "有 {count} 个文件不在媒体库文件夹里了（在资源管理器里删除或挪走了？）。如果是你有意删的，请确认，之后手机会提示这些照片没有备份了。",
+  "lib.missing_rescan": "重新查找",
+  "lib.missing_confirm": "是我删的",
+  "lib.deleting": "正在移到回收站… {done} / {total}"
 }

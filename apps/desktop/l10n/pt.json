@@ -142,5 +142,10 @@
   "family.everyone": "Todos",
   "family.show_private": "Mostrar “só eu” ({count})",
   "family.make_private": "Só quem enviou (ocultar da família)",
-  "family.make_shared": "Compartilhar com a família"
+  "family.make_shared": "Compartilhar com a família",
+  "lib.offline": "Não é possível acessar a pasta da biblioteca ({path}): disco externo desconectado ou pasta movida? O recebimento está pausado e nada é marcado como excluído. Retoma sozinho quando a pasta voltar.",
+  "lib.missing_ask": "{count} arquivos não estão mais na pasta da biblioteca (excluídos ou movidos no Explorador?). Se excluiu de propósito, confirme — os telefones vão mostrá-los como sem backup.",
+  "lib.missing_rescan": "Procurar de novo",
+  "lib.missing_confirm": "Sim, eu excluí",
+  "lib.deleting": "Movendo para a Lixeira… {done} / {total}"
 }

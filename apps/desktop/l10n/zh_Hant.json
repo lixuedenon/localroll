@@ -142,5 +142,10 @@
   "family.everyone": "全家",
   "family.show_private": "顯示僅本人可見的（{count}）",
   "family.make_private": "僅本人可見（對家人隱藏）",
-  "family.make_shared": "家人可見"
+  "family.make_shared": "家人可見",
+  "lib.offline": "媒體庫資料夾打不開（{path}）：外接硬碟拔掉了，還是資料夾被移走了？接收已暫停，也不會把任何照片當成已刪除。資料夾回來後會自動恢復。",
+  "lib.missing_ask": "有 {count} 個檔案不在媒體庫資料夾裡了（在檔案總管裡刪除或移走了？）。如果是你有意刪的，請確認，之後手機會提示這些照片沒有備份了。",
+  "lib.missing_rescan": "重新查找",
+  "lib.missing_confirm": "是我刪的",
+  "lib.deleting": "正在移到資源回收筒… {done} / {total}"
 }

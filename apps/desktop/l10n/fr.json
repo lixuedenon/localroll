@@ -142,5 +142,10 @@
   "family.everyone": "Tout le monde",
   "family.show_private": "Afficher « moi seul » ({count})",
   "family.make_private": "Expéditeur seulement (masquer à la famille)",
-  "family.make_shared": "Partager avec la famille"
+  "family.make_shared": "Partager avec la famille",
+  "lib.offline": "Le dossier de la photothèque est inaccessible ({path}) : disque externe débranché ou dossier déplacé ? La réception est en pause et rien n’est marqué comme supprimé. Elle reprend toute seule quand le dossier revient.",
+  "lib.missing_ask": "{count} fichiers ne sont plus dans le dossier de la photothèque (supprimés ou déplacés dans l’Explorateur ?). Si c’était voulu, confirmez : les téléphones les signaleront comme non sauvegardés.",
+  "lib.missing_rescan": "Rechercher à nouveau",
+  "lib.missing_confirm": "Oui, je les ai supprimés",
+  "lib.deleting": "Déplacement vers la Corbeille… {done} / {total}"
 }

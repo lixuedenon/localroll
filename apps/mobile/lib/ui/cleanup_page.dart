@@ -1,5 +1,6 @@
 // apps/mobile/lib/ui/cleanup_page.dart
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -138,9 +139,18 @@ class _CleanupPageState extends State<CleanupPage> {
     final bytes = _selectedBytes;
     setState(() => _stage = _Stage.deleting);
     try {
-      // The system shows its own confirmation dialog here.
-      final deleted = await PhotoManager.editor.deleteWithIds(ids);
-      final gone = deleted.toSet();
+      // The system shows its own confirmation dialog for each call. Very large
+      // selections go in batches: Android passes the list through a size-
+      // limited system channel (thousands at once can crash), and iOS stays
+      // responsive. Cancelling one batch stops the rest.
+      final batch = Platform.isAndroid ? 300 : 1000;
+      final gone = <String>{};
+      for (var i = 0; i < ids.length; i += batch) {
+        final part = ids.sublist(i, min(i + batch, ids.length));
+        final deleted = await PhotoManager.editor.deleteWithIds(part);
+        gone.addAll(deleted);
+        if (deleted.isEmpty) break;
+      }
       if (!mounted) return;
       if (gone.isEmpty) {
         setState(() => _stage = _Stage.ready);

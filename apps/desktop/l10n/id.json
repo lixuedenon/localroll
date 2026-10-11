@@ -142,5 +142,10 @@
   "family.everyone": "Semua",
   "family.show_private": "Tampilkan “hanya saya” ({count})",
   "family.make_private": "Hanya pengirim (sembunyikan dari keluarga)",
-  "family.make_shared": "Bagikan ke keluarga"
+  "family.make_shared": "Bagikan ke keluarga",
+  "lib.offline": "Folder pustaka tidak dapat diakses ({path}) — drive eksternal dicabut atau folder dipindah? Penerimaan dijeda dan tidak ada yang ditandai terhapus. Akan berlanjut sendiri saat folder kembali.",
+  "lib.missing_ask": "{count} file tidak lagi ada di folder pustaka (dihapus atau dipindah di Explorer?). Jika memang sengaja dihapus, konfirmasi — ponsel akan menandainya tidak lagi dicadangkan.",
+  "lib.missing_rescan": "Cari lagi",
+  "lib.missing_confirm": "Ya, saya menghapusnya",
+  "lib.deleting": "Memindahkan ke Recycle Bin… {done} / {total}"
 }
