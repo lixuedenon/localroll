@@ -11,10 +11,11 @@ class AppNav extends ChangeNotifier {
   /// Main sections (left rail), in order.
   static const int home = 0;
   static const int receive = 1;
-  static const int library = 2;
-  static const int convert = 3;
-  static const int family = 4;
-  static const int settings = 5;
+  static const int send = 2;
+  static const int library = 3;
+  static const int convert = 4;
+  static const int family = 5;
+  static const int settings = 6;
 
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   late final NavigatorObserver observer = _Observer(this);

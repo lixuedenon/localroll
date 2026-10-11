@@ -13,10 +13,14 @@ import '../l10n/l10n.dart';
 
 /// A phone waiting for someone to click Allow / Deny on this PC.
 class PendingPair {
-  PendingPair(this.id, this.device);
+  PendingPair(this.id, this.device, [this.peer]);
 
   final String id;
   final DeviceInfo device;
+
+  /// Set when another PC asks: allowing also lets this PC send to it.
+  final PeerGrant? peer;
+  bool get fromPc => peer != null && isDesktopPlatform(device.platform);
   final DateTime created = DateTime.now();
   PairApprovalStatus status = PairApprovalStatus.pending;
   String? token;
@@ -54,6 +58,10 @@ class TransferServer extends ChangeNotifier {
   HttpServer? _server;
   String? error;
   final Map<String, _UploadSession> _sessions = {};
+
+  /// Ordinary files (PC → PC) finished in this run, by device|asset, so a
+  /// retried "complete" whose answer was lost still gets "saved".
+  final Map<String, String> _doneFiles = {};
 
   /// PIN currently shown on screen; changes after every successful pairing.
   final ValueNotifier<String> pin = ValueNotifier(randomPin());
@@ -165,7 +173,10 @@ class TransferServer extends ChangeNotifier {
       }
       // The phone chose "Forget this PC": stop trusting it here too.
       if (req.method == 'DELETE' && path == LrProtocol.pathPair) {
-        await settings.update((s) => s.trusted.remove(device.id));
+        await settings.update((s) {
+          s.trusted.remove(device.id);
+          s.peers.remove(device.id); // another PC: no sending back either
+        });
         return _json(res, 200, {'ok': true});
       }
       if (req.method == 'POST' && path == LrProtocol.pathVerify) {
@@ -302,7 +313,7 @@ class TransferServer extends ChangeNotifier {
     if (_pairs.values.where((p) => p.status == PairApprovalStatus.pending).length >= 3) {
       return _json(req.response, 429, {'error': 'too_many_attempts'});
     }
-    final p = PendingPair(randomId(24), body.device);
+    final p = PendingPair(randomId(24), body.device, body.peer);
     _pairs[p.id] = p;
     pairRequests.value = [...pairRequests.value, p];
     return _json(
@@ -347,10 +358,25 @@ class TransferServer extends ChangeNotifier {
           platform: p.device.platform,
           token: token,
           pairedMs: DateTime.now().millisecondsSinceEpoch,
-        owner: p.device.owner,
-        // Paired again (e.g. after "Forget"): keep the member chosen here.
-        memberName: s.trusted[p.device.id]?.memberName,
+          owner: p.device.owner,
+          // Paired again (e.g. after "Forget"): keep the member chosen here.
+          memberName: s.trusted[p.device.id]?.memberName,
         );
+        // Another PC: one click pairs both ways.
+        final g = p.peer;
+        if (p.fromPc && g != null) {
+          s.peers[p.device.id] = PeerPc(
+            id: p.device.id,
+            name: p.device.name,
+            hosts: g.hosts,
+            port: g.port,
+            token: g.token,
+            pairedMs: DateTime.now().millisecondsSinceEpoch,
+            icon: p.device.icon,
+            color: p.device.color,
+            avatar: p.device.avatar,
+          );
+        }
       });
       p.token = token;
       p.status = PairApprovalStatus.approved;
@@ -364,7 +390,9 @@ class TransferServer extends ChangeNotifier {
     final body = SessionRequest.fromJson(await _readJson(req));
     // Library folder unreachable (external drive unplugged): don't accept
     // files we could not store; the phone shows why and keeps them queued.
-    if (library.offline) return _json(req.response, 503, {'error': 'library_offline'});
+    if (library.offline && body.files.any((f) => !f.isPlainFile)) {
+      return _json(req.response, 503, {'error': 'library_offline'});
+    }
     // Family group: the phone tells us whose phone it is (editable there).
     final owner = body.owner?.trim();
     if (owner != null && owner != (device.owner ?? '')) {
@@ -380,7 +408,11 @@ class TransferServer extends ChangeNotifier {
 
     final results = <String, OfferResult>{};
     for (final f in body.files) {
-      final existing = library.findByAsset(device.id, f.assetId);
+      if (f.isPlainFile && _doneFiles.containsKey(_hubKey(device, f))) {
+        results[f.id] = const OfferResult(status: OfferStatus.duplicate);
+        continue;
+      }
+      final existing = f.isPlainFile ? null : library.findByAsset(device.id, f.assetId);
       if (existing != null && File(library.absPath(existing)).existsSync()) {
         results[f.id] = const OfferResult(status: OfferStatus.duplicate);
         continue;
@@ -454,10 +486,12 @@ class TransferServer extends ChangeNotifier {
 
   Future<void> _complete(HttpRequest req, TrustedDevice device, FileOffer offer) async {
     final body = CompleteRequest.fromJson(await _readJson(req));
-    if (library.offline) return _json(req.response, 503, {'error': 'library_offline'});
+    if (library.offline && !offer.isPlainFile) return _json(req.response, 503, {'error': 'library_offline'});
     final part = File(_partPath(device, offer));
 
     if (!await part.exists()) {
+      final done = _doneFiles[_hubKey(device, offer)];
+      if (done != null) return _json(req.response, 200, CompleteResponse(saved: true, path: done).toJson());
       // Retry of a request that already succeeded (response was lost).
       final existing = library.findByAsset(device.id, offer.assetId);
       if (existing != null) {
@@ -479,6 +513,8 @@ class TransferServer extends ChangeNotifier {
       hub.setState(t, TransferState.failed, error: tr('transfer.verify_failed'));
       return _json(req.response, 422, const CompleteResponse(saved: false, error: 'sha256_mismatch').toJson());
     }
+
+    if (offer.isPlainFile) return _savePlainFile(req, device, offer, part, t);
 
     final captured = DateTime.fromMillisecondsSinceEpoch(offer.createdMs);
     final sep = Platform.pathSeparator;
@@ -524,6 +560,37 @@ class TransferServer extends ChangeNotifier {
     ));
     hub.progress(t, length);
     hub.setState(t, TransferState.saved);
+    return _json(req.response, 200, CompleteResponse(saved: true, path: rel).toJson());
+  }
+
+  /// PC → PC ordinary file: into the "Received files" folder, keeping the
+  /// sender's folder structure. Not added to the photo library.
+  Future<void> _savePlainFile(
+    HttpRequest req,
+    TrustedDevice device,
+    FileOffer offer,
+    File part,
+    TransferProgress t,
+  ) async {
+    final sep = Platform.pathSeparator;
+    final segs = [
+      for (final p in (offer.relPath ?? offer.name).split('/'))
+        if (p.trim().isNotEmpty && p != '.' && p != '..') sanitizeFileName(p),
+    ];
+    if (segs.isEmpty) segs.add(sanitizeFileName(offer.name));
+    final root = settings.receivedPath;
+    final folder = [root, ...segs.take(segs.length - 1)].join(sep);
+    await Directory(folder).create(recursive: true);
+    final dest = LibraryIndex.uniquePath(folder, segs.last);
+    await part.rename(dest);
+    try {
+      if (offer.modifiedMs > 0) await File(dest).setLastModified(DateTime.fromMillisecondsSinceEpoch(offer.modifiedMs));
+    } catch (_) {}
+    final rel = dest.substring(root.length + 1).replaceAll(sep, '/');
+    _doneFiles[_hubKey(device, offer)] = rel;
+    hub.progress(t, await File(dest).length());
+    hub.setState(t, TransferState.saved);
+    hub.fileSaved(dest);
     return _json(req.response, 200, CompleteResponse(saved: true, path: rel).toJson());
   }
 

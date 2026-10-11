@@ -63,6 +63,15 @@ class ReceiveHub extends ChangeNotifier {
     _notify(force: true);
   }
 
+  /// Ordinary files from other PCs saved this run (newest last).
+  final List<String> savedFiles = [];
+
+  void fileSaved(String path) {
+    savedFiles.add(path);
+    if (savedFiles.length > 200) savedFiles.removeAt(0);
+    _notify(force: true);
+  }
+
   void clearFinished() {
     _byKey.removeWhere((_, t) => t.state == TransferState.saved || t.state == TransferState.failed);
     _notify(force: true);

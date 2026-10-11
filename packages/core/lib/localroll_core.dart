@@ -13,3 +13,4 @@ export 'src/languages.g.dart' show deviceNameWords;
 export 'src/exif.dart';
 export 'src/family.dart';
 export 'src/version.dart';
+export 'src/lr_client.dart';

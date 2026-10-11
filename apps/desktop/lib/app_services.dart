@@ -6,6 +6,7 @@ import 'services/converter.dart';
 import 'services/ffmpeg.dart';
 import 'services/library_index.dart';
 import 'services/network.dart';
+import 'services/peers.dart';
 import 'services/receive_hub.dart';
 import 'services/settings.dart';
 
@@ -27,6 +28,10 @@ class AppServices {
   final FfmpegService ffmpeg;
   final ConverterService converter;
   final MdnsAdvertiser mdns = MdnsAdvertiser();
+
+  /// Other PCs: finding, pairing, sending.
+  late final PeerDirectory peers = PeerDirectory(settings: settings, server: server);
+  late final PeerSender sender = PeerSender(settings: settings, peers: peers);
 
   /// LAN addresses shown in the QR code; refreshed on the receive page.
   final ValueNotifier<List<String>> addresses = ValueNotifier(const []);
@@ -104,6 +109,7 @@ class AppServices {
     }
 
     await capped(library.flush, 3000);
+    peers.release();
     await Future.wait([
       capped(mdns.stop, 800),
       capped(server.stop, 800),

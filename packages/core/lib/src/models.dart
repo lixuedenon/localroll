@@ -1,5 +1,6 @@
 // packages/core/lib/src/models.dart
 import 'media_kind.dart';
+import 'protocol.dart';
 
 /// Identity of an app instance (desktop or phone).
 class DeviceInfo {
@@ -100,6 +101,8 @@ class FileOffer {
     required this.modifiedMs,
     this.size,
     this.private = false,
+    this.target,
+    this.relPath,
   });
 
   /// Unique within the session (client generated).
@@ -125,6 +128,17 @@ class FileOffer {
   /// Family group: "only me" — not shown to other family members.
   final bool private;
 
+  /// Where the receiver keeps it: null = the photo library (by capture
+  /// date); [LrProtocol.targetFiles] = an ordinary file, saved under the
+  /// "Received files" folder at [relPath] (PC → PC).
+  final String? target;
+
+  /// For [LrProtocol.targetFiles]: path inside the sent selection with '/'
+  /// separators ("Trip/day 1/notes.pdf"), so folders arrive as folders.
+  final String? relPath;
+
+  bool get isPlainFile => target == LrProtocol.targetFiles;
+
   Map<String, dynamic> toJson() => {
         'id': id,
         'assetId': assetId,
@@ -134,6 +148,8 @@ class FileOffer {
         'modifiedMs': modifiedMs,
         if (size != null) 'size': size,
         if (private) 'private': true,
+        if (target != null) 'target': target,
+        if (relPath != null) 'relPath': relPath,
       };
 
   factory FileOffer.fromJson(Map<String, dynamic> j) => FileOffer(
@@ -145,6 +161,8 @@ class FileOffer {
         modifiedMs: (j['modifiedMs'] as num?)?.toInt() ?? 0,
         size: (j['size'] as num?)?.toInt(),
         private: j['private'] == true,
+        target: j['target'] as String?,
+        relPath: j['relPath'] as String?,
       );
 }
 
@@ -324,16 +342,42 @@ class VerifyResponse {
       );
 }
 
+/// PC → PC pairing: the asking PC also lets the other one send back.
+/// [token] is what the other PC will use to send to the asking PC;
+/// [hosts]/[port] are where the asking PC listens.
+class PeerGrant {
+  const PeerGrant({required this.token, required this.hosts, required this.port});
+
+  final String token;
+  final List<String> hosts;
+  final int port;
+
+  Map<String, dynamic> toJson() => {'token': token, 'hosts': hosts, 'port': port};
+
+  factory PeerGrant.fromJson(Map<String, dynamic> j) => PeerGrant(
+        token: j['token'] as String,
+        hosts: (j['hosts'] as List? ?? const []).cast<String>(),
+        port: (j['port'] as num?)?.toInt() ?? LrProtocol.defaultPort,
+      );
+}
+
 /// Phone → PC: "may I pair?" — approved by a click on the PC instead of a PIN.
+/// From another PC, [peer] makes the pairing two-way with the same click.
 class PairApprovalRequest {
-  const PairApprovalRequest({required this.device});
+  const PairApprovalRequest({required this.device, this.peer});
 
   final DeviceInfo device;
+  final PeerGrant? peer;
 
-  Map<String, dynamic> toJson() => {'device': device.toJson()};
+  Map<String, dynamic> toJson() => {
+        'device': device.toJson(),
+        if (peer != null) 'peer': peer!.toJson(),
+      };
 
-  factory PairApprovalRequest.fromJson(Map<String, dynamic> j) =>
-      PairApprovalRequest(device: DeviceInfo.fromJson(j['device'] as Map<String, dynamic>));
+  factory PairApprovalRequest.fromJson(Map<String, dynamic> j) => PairApprovalRequest(
+        device: DeviceInfo.fromJson(j['device'] as Map<String, dynamic>),
+        peer: j['peer'] is Map<String, dynamic> ? PeerGrant.fromJson(j['peer'] as Map<String, dynamic>) : null,
+      );
 }
 
 enum PairApprovalStatus { pending, approved, denied, expired }

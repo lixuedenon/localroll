@@ -127,7 +127,7 @@ class _DashboardPageState extends State<DashboardPage> {
     final s = widget.services;
     final st = s.settings;
     final theme = Theme.of(context);
-    final phones = st.trusted.length;
+    final phones = st.trusted.values.where((t) => !isDesktopPlatform(t.platform)).length;
     final ok = s.server.running && !s.library.offline;
     final color = ok ? LrColors.verified : LrColors.danger;
     return Row(children: [

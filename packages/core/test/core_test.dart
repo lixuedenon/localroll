@@ -227,4 +227,61 @@ void main() {
     expect(v.assetIds, ['a']);
     expect(v.private, isTrue);
   });
+
+  test('PC to PC: plain-file offers and two-way pairing round-trip', () {
+    const offer = FileOffer(
+      id: 'f1',
+      assetId: 'file:abc',
+      name: 'notes.pdf',
+      kind: MediaKind.other,
+      createdMs: 1,
+      modifiedMs: 2,
+      size: 3,
+      target: LrProtocol.targetFiles,
+      relPath: 'Trip/day 1/notes.pdf',
+    );
+    final o = FileOffer.fromJson(jsonDecode(jsonEncode(offer.toJson())) as Map<String, dynamic>);
+    expect(o.isPlainFile, isTrue);
+    expect(o.relPath, 'Trip/day 1/notes.pdf');
+    // Phones send no target: library item.
+    final phone = FileOffer.fromJson({'id': 'x', 'assetId': 'a', 'name': 'IMG.HEIC', 'kind': 'image', 'createdMs': 0});
+    expect(phone.isPlainFile, isFalse);
+
+    const req = PairApprovalRequest(
+      device: DeviceInfo(id: 'pc1', name: 'Study', platform: 'windows'),
+      peer: PeerGrant(token: 't', hosts: ['192.168.1.5'], port: 41530),
+    );
+    final r = PairApprovalRequest.fromJson(jsonDecode(jsonEncode(req.toJson())) as Map<String, dynamic>);
+    expect(r.peer?.token, 't');
+    expect(r.peer?.port, 41530);
+    expect(PairApprovalRequest.fromJson({'device': {'id': 'p', 'name': 'Phone', 'platform': 'ios'}}).peer, isNull);
+    expect(isDesktopPlatform('windows'), isTrue);
+    expect(isDesktopPlatform('ios'), isFalse);
+  });
+
+  test('LrClient talks to a receiver and reports error codes', () async {
+    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    server.listen((req) async {
+      req.response.headers.contentType = ContentType.json;
+      if (req.uri.path == LrProtocol.pathInfo) {
+        req.response.write(jsonEncode(const DeviceInfo(id: 'pc2', name: 'Living room', platform: 'windows').toJson()));
+      } else {
+        req.response.statusCode = 401;
+        req.response.write(jsonEncode({'error': 'not_paired'}));
+      }
+      await req.response.close();
+    });
+    final c = LrClient(host: '127.0.0.1', port: server.port);
+    try {
+      final info = await c.info();
+      expect(info.id, 'pc2');
+      await expectLater(
+        c.createSession(const SessionRequest(files: [])),
+        throwsA(isA<LrHttpError>().having((e) => e.code, 'code', 'not_paired')),
+      );
+    } finally {
+      c.close();
+      await server.close(force: true);
+    }
+  });
 }

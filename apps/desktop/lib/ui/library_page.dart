@@ -9,7 +9,9 @@ import '../services/converter.dart';
 import '../services/file_actions.dart';
 import '../services/library_index.dart';
 import '../services/network.dart';
+import '../services/peers.dart';
 import 'media_thumb.dart';
+import 'send_page.dart';
 import 'viewer_page.dart';
 
 enum _Filter { all, photos, videos }
@@ -116,6 +118,11 @@ class _LibraryPageState extends State<LibraryPage> {
                   tooltip: tr('lib.export'),
                   icon: const Icon(Icons.drive_file_move_rounded),
                   onPressed: () => _export(items.where((i) => _selected.contains(i.relPath)).toList()),
+                ),
+                IconButton(
+                  tooltip: tr('send.to_pc'),
+                  icon: const Icon(Icons.send_rounded),
+                  onPressed: () => _sendToPc(items.where((i) => _selected.contains(i.relPath)).toList()),
                 ),
                 IconButton(
                   tooltip: tr('lib.delete'),
@@ -254,6 +261,17 @@ class _LibraryPageState extends State<LibraryPage> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('lib.deleted', {'count': n}))));
   }
 
+  /// Send originals (with their Live Photo videos) to another PC's library.
+  Future<void> _sendToPc(List<MediaItem> items) async {
+    if (items.isEmpty) return;
+    final lib = widget.services.library;
+    final files = [for (final i in lib.withLive(items)) ?SendFile.fromLibrary(lib, i)];
+    if (files.isEmpty) return;
+    setState(_selected.clear);
+    await sendToPc(context, widget.services, files,
+        items.length == 1 ? items.first.name : tr('send.n_items', {'count': items.length}));
+  }
+
   /// Copy the originals into a folder of your choice.
   Future<void> _export(List<MediaItem> items) async {
     if (items.isEmpty) return;
@@ -289,6 +307,7 @@ class _LibraryPageState extends State<LibraryPage> {
         for (final p in ConvertPreset.values)
           PopupMenuItem(value: 'convert:${p.name}', child: _menuRow(Icons.auto_fix_high_rounded, tr('convert.to', {'preset': p.label}))),
         PopupMenuItem(value: 'export', child: _menuRow(Icons.drive_file_move_rounded, tr('lib.export'))),
+        PopupMenuItem(value: 'send', child: _menuRow(Icons.send_rounded, tr('send.to_pc'))),
         if (targets.length == 1)
           PopupMenuItem(value: 'reveal', child: _menuRow(Icons.folder_open_rounded, tr('common.show_in_folder'))),
         // Family group: who may see it.
@@ -316,6 +335,8 @@ class _LibraryPageState extends State<LibraryPage> {
         setState(() => _selected.contains(item.relPath) ? _selected.remove(item.relPath) : _selected.add(item.relPath));
       case 'export':
         await _export(targets);
+      case 'send':
+        await _sendToPc(targets);
       case 'reveal':
         revealInExplorer(s.library.absPath(item));
       case 'private' || 'shared':

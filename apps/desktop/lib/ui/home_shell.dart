@@ -10,6 +10,7 @@ import 'jobs_page.dart';
 import 'library_page.dart';
 import 'pair_prompt.dart';
 import 'receive_page.dart';
+import 'send_page.dart';
 import 'settings_page.dart';
 import 'theme.dart';
 import 'title_bar.dart';
@@ -48,6 +49,7 @@ class _HomeShellState extends State<HomeShell> {
     final pages = [
       DashboardPage(services: s),
       ReceivePage(services: s),
+      SendPage(services: s),
       LibraryPage(services: s),
       JobsPage(services: s),
       FamilyPage(services: s),
@@ -57,7 +59,7 @@ class _HomeShellState extends State<HomeShell> {
       body: Row(
         children: [
           ListenableBuilder(
-            listenable: Listenable.merge([s.hub, s.converter, s.library, _nav]),
+            listenable: Listenable.merge([s.hub, s.converter, s.library, s.sender, _nav]),
             builder: (context, _) {
               final receiving = s.hub.transfers.any((t) => t.fraction != null && t.fraction! < 1);
               return Container(
@@ -83,6 +85,14 @@ class _HomeShellState extends State<HomeShell> {
                       selected: _nav.tab == AppNav.receive,
                       dot: receiving,
                       onTap: () => _nav.selectTab(AppNav.receive),
+                    ),
+                    _RailItem(
+                      icon: Icons.send_outlined,
+                      selectedIcon: Icons.send_rounded,
+                      label: tr('nav.send'),
+                      selected: _nav.tab == AppNav.send,
+                      dot: s.sender.busy,
+                      onTap: () => _nav.selectTab(AppNav.send),
                     ),
                     _RailItem(
                       icon: Icons.photo_library_outlined,

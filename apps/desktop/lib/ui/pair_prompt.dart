@@ -88,9 +88,13 @@ class _PairDialogState extends State<_PairDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            DeviceBadge(icon: 'phone', color: p.device.color ?? LrColors.verified.toARGB32(), size: 64),
+            DeviceBadge(
+              icon: p.fromPc ? p.device.icon : 'phone',
+              color: p.device.color ?? LrColors.verified.toARGB32(),
+              size: 64,
+            ),
             const SizedBox(height: 16),
-            Text(tr('pair.ask', {'name': p.device.name}),
+            Text(tr(p.fromPc ? 'pair.ask_pc' : 'pair.ask', {'name': p.device.name}),
                 textAlign: TextAlign.center, style: theme.textTheme.titleLarge),
             const SizedBox(height: 20),
             // The same three symbols are on the phone.
@@ -104,7 +108,7 @@ class _PairDialogState extends State<_PairDialog> {
               child: Text(p.emoji.join('  '), style: const TextStyle(fontSize: 40)),
             ),
             const SizedBox(height: 12),
-            Text(tr('pair.check'), textAlign: TextAlign.center, style: theme.textTheme.bodySmall),
+            Text(tr(p.fromPc ? 'pair.check_pc' : 'pair.check'), textAlign: TextAlign.center, style: theme.textTheme.bodySmall),
           ],
         ),
       ),

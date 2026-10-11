@@ -32,9 +32,9 @@ class _FamilyPageState extends State<FamilyPage> {
           children: [
             Text(tr('family.hint'), style: theme.textTheme.bodyMedium),
             const SizedBox(height: 16),
-            if (s.settings.trusted.isEmpty) Text(tr('settings.no_phones')),
+            if (s.settings.family.members.isEmpty) Text(tr('settings.no_phones')),
             for (final m in s.settings.family.members) _memberCard(theme, m),
-            if (s.settings.trusted.isNotEmpty) ...[
+            if (s.settings.family.members.isNotEmpty) ...[
               const SizedBox(height: 8),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,

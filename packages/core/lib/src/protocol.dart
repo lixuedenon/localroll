@@ -68,6 +68,10 @@ class LrProtocol {
   static String completePath(String sessionId, String fileId) =>
       '${filePath(sessionId, fileId)}/complete';
 
+  /// [FileOffer.target] for ordinary files (PC → PC): kept as files in the
+  /// receiver's "Received files" folder, not in the photo library.
+  static const String targetFiles = 'files';
+
   /// Request headers used for authentication after pairing.
   static const String headerDeviceId = 'x-lr-device';
   static const String headerToken = 'x-lr-token';
@@ -83,3 +87,6 @@ bool isLiveCompanion(String assetId) => assetId.endsWith(LrProtocol.liveSuffix);
 String livePhotoIdOf(String assetId) => isLiveCompanion(assetId)
     ? assetId.substring(0, assetId.length - LrProtocol.liveSuffix.length)
     : assetId;
+
+/// Windows / macOS / Linux: another PC rather than a phone.
+bool isDesktopPlatform(String platform) => const {'windows', 'macos', 'linux'}.contains(platform);

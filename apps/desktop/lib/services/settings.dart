@@ -55,6 +55,63 @@ class TrustedDevice {
       );
 }
 
+/// Another PC this one can send to (PC ↔ PC). [token] is what that PC
+/// gave us; it trusts us under our deviceId.
+class PeerPc {
+  PeerPc({
+    required this.id,
+    required this.name,
+    required this.hosts,
+    required this.port,
+    required this.token,
+    required this.pairedMs,
+    this.lastHost,
+    this.icon,
+    this.color,
+    this.avatar = 0,
+  });
+
+  final String id;
+  String name;
+  List<String> hosts;
+  int port;
+  final String token;
+  final int pairedMs;
+  String? lastHost;
+  String? icon;
+  int? color;
+  int avatar;
+
+  /// Addresses to try, the one that worked last time first.
+  List<String> get tryHosts => {?lastHost, ...hosts}.toList();
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'hosts': hosts,
+        'port': port,
+        'token': token,
+        'pairedMs': pairedMs,
+        if (lastHost != null) 'lastHost': lastHost,
+        if (icon != null) 'icon': icon,
+        if (color != null) 'color': color,
+        if (avatar != 0) 'avatar': avatar,
+      };
+
+  factory PeerPc.fromJson(Map<String, dynamic> j) => PeerPc(
+        id: j['id'] as String,
+        name: j['name'] as String? ?? 'PC',
+        hosts: (j['hosts'] as List? ?? const []).cast<String>(),
+        port: (j['port'] as num?)?.toInt() ?? LrProtocol.defaultPort,
+        token: j['token'] as String,
+        pairedMs: (j['pairedMs'] as num?)?.toInt() ?? 0,
+        lastHost: j['lastHost'] as String?,
+        icon: j['icon'] as String?,
+        color: (j['color'] as num?)?.toInt(),
+        avatar: (j['avatar'] as num?)?.toInt() ?? 0,
+      );
+}
+
 /// Persistent app settings, stored as JSON in the app-support folder.
 class AppSettings extends ChangeNotifier {
   AppSettings._(this._file);
@@ -88,12 +145,20 @@ class AppSettings extends ChangeNotifier {
   static String get originalName => _defaultDeviceName();
   final Map<String, TrustedDevice> trusted = {};
 
+  /// Other PCs this one can send to.
+  final Map<String, PeerPc> peers = {};
+
+  /// Where ordinary files from other PCs are saved (not the photo library).
+  late String receivedPath;
+
   /// Family group: store originals as <member>/<year>/<month> instead of
   /// <year>/<month>.
   bool folderPerMember = false;
 
   /// Paired phones grouped into family members.
-  FamilyDirectory get family => FamilyDirectory(trusted.values.map((t) => t.family));
+  /// Other PCs are not family members.
+  FamilyDirectory get family =>
+      FamilyDirectory(trusted.values.where((t) => !isDesktopPlatform(t.platform)).map((t) => t.family));
 
   static Future<AppSettings> load() async {
     final dir = await getApplicationSupportDirectory();
@@ -110,6 +175,7 @@ class AppSettings extends ChangeNotifier {
     s.deviceId = j['deviceId'] as String? ?? randomId(16);
     s.deviceName = j['deviceName'] as String? ?? _defaultDeviceName();
     s.libraryPath = j['libraryPath'] as String? ?? _defaultLibraryPath();
+    s.receivedPath = j['receivedPath'] as String? ?? _defaultReceivedPath();
     s.port = (j['port'] as num?)?.toInt() ?? LrProtocol.defaultPort;
     s.ffmpegPath = j['ffmpegPath'] as String?;
     s.language = j['language'] as String?;
@@ -122,6 +188,12 @@ class AppSettings extends ChangeNotifier {
     for (final t in (j['trusted'] as List? ?? const [])) {
       final d = TrustedDevice.fromJson(t as Map<String, dynamic>);
       s.trusted[d.id] = d;
+    }
+    for (final p in (j['peers'] as List? ?? const [])) {
+      try {
+        final d = PeerPc.fromJson(p as Map<String, dynamic>);
+        s.peers[d.id] = d;
+      } catch (_) {}
     }
     await s.save();
     return s;
@@ -143,6 +215,7 @@ class AppSettings extends ChangeNotifier {
       'deviceId': deviceId,
       'deviceName': deviceName,
       'libraryPath': libraryPath,
+      'receivedPath': receivedPath,
       'port': port,
       'ffmpegPath': ffmpegPath,
       'language': language,
@@ -151,6 +224,7 @@ class AppSettings extends ChangeNotifier {
       'avatarVersion': avatarVersion,
       'folderPerMember': folderPerMember,
       'trusted': trusted.values.map((t) => t.toJson()).toList(),
+      'peers': peers.values.map((p) => p.toJson()).toList(),
     }));
     await tmp.rename(_file.path);
   }
@@ -212,6 +286,12 @@ class AppSettings extends ChangeNotifier {
     } catch (_) {
       return 'My PC';
     }
+  }
+
+  static String _defaultReceivedPath() {
+    final home = Platform.environment['USERPROFILE'] ?? Platform.environment['HOME'] ?? '.';
+    final sep = Platform.pathSeparator;
+    return '$home${sep}Downloads${sep}LocalRoll';
   }
 
   static String _defaultLibraryPath() {
