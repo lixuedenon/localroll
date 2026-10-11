@@ -57,6 +57,9 @@ class TransferServer extends ChangeNotifier {
 
   /// PIN currently shown on screen; changes after every successful pairing.
   final ValueNotifier<String> pin = ValueNotifier(randomPin());
+
+  /// A second LocalRoll was started: bring this window to the front.
+  void Function()? onShowRequested;
   int _failedPinAttempts = 0;
 
   /// Tap-to-pair requests; the UI shows an Allow / Deny dialog for each.
@@ -73,10 +76,7 @@ class TransferServer extends ChangeNotifier {
   List<int> get _candidatePorts => {
         settings.port,
         LrProtocol.defaultPort,
-        41530,
-        31530,
-        21530,
-        8530,
+        ...LrProtocol.fallbackPorts,
         0, // let the OS pick
       }.toList();
 
@@ -131,6 +131,13 @@ class TransferServer extends ChangeNotifier {
       final path = req.uri.path;
       final segs = req.uri.pathSegments;
 
+      if (req.method == 'POST' && path == LrProtocol.pathLocalShow) {
+        // Only from this computer.
+        final local = req.connectionInfo?.remoteAddress.isLoopback ?? false;
+        await req.drain<void>();
+        if (local) onShowRequested?.call();
+        return _json(res, local ? 200 : 403, {'ok': local});
+      }
       if (req.method == 'GET' && path == LrProtocol.pathInfo) {
         return _json(res, 200, settings.deviceInfo.toJson());
       }

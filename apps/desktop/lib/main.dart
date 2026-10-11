@@ -1,6 +1,9 @@
 // apps/desktop/lib/main.dart
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:localroll_core/localroll_core.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -16,6 +19,9 @@ import 'ui/title_bar.dart';
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   if (!await AppSettings.acquireInstanceLock()) {
+    // Already running: bring that window to the front and quit quietly.
+    // Only if it can't be reached, say so in a small window.
+    if (await _activateRunningCopy()) exit(0);
     runApp(const _AlreadyRunningApp());
     return;
   }
@@ -41,7 +47,38 @@ Future<void> main(List<String> args) async {
   );
   await windowManager.setPreventClose(true);
   final services = await AppServices.create();
+  services.server.onShowRequested = _bringToFront;
   runApp(LocalRollApp(services: services));
+}
+
+Future<void> _bringToFront() async {
+  try {
+    if (await windowManager.isMinimized()) await windowManager.restore();
+    await windowManager.show();
+    await windowManager.setAlwaysOnTop(true);
+    await windowManager.focus();
+    Future<void>.delayed(const Duration(seconds: 1), () => windowManager.setAlwaysOnTop(false));
+  } catch (_) {}
+}
+
+/// Asks the copy that is already running (on this PC only) to show itself.
+Future<bool> _activateRunningCopy() async {
+  final saved = await AppSettings.savedPort();
+  final ports = {?saved, LrProtocol.defaultPort, ...LrProtocol.fallbackPorts};
+  final client = HttpClient()..connectionTimeout = const Duration(milliseconds: 600);
+  try {
+    for (final port in ports) {
+      try {
+        final req = await client.post(InternetAddress.loopbackIPv4.address, port, LrProtocol.pathLocalShow);
+        final res = await req.close().timeout(const Duration(seconds: 1));
+        await res.drain<void>();
+        if (res.statusCode == 200) return true;
+      } catch (_) {}
+    }
+    return false;
+  } finally {
+    client.close(force: true);
+  }
 }
 
 class LocalRollApp extends StatelessWidget {

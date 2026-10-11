@@ -93,13 +93,21 @@ class AppServices {
 
   /// Clean exit: unregister from mDNS (so phones don't see a stale PC) and
   /// close the listening socket.
+  /// Quick, in parallel, each step capped: the window is already hidden
+  /// when this runs, so the user never waits on it. The library index is
+  /// saved first (a pending save must not be lost on exit).
   Future<void> shutdown() async {
-    try {
-      await mdns.stop().timeout(const Duration(seconds: 2));
-    } catch (_) {}
-    try {
-      await server.stop().timeout(const Duration(seconds: 2));
-    } catch (_) {}
+    Future<void> capped(Future<void> Function() f, int ms) async {
+      try {
+        await f().timeout(Duration(milliseconds: ms));
+      } catch (_) {}
+    }
+
+    await capped(library.flush, 3000);
+    await Future.wait([
+      capped(mdns.stop, 800),
+      capped(server.stop, 800),
+    ]);
   }
 
   Future<void> changeLibrary(String path) async {

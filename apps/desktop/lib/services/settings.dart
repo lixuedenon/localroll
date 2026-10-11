@@ -166,6 +166,18 @@ class AppSettings extends ChangeNotifier {
     } catch (_) {}
   }
 
+  /// The port the running copy listens on (read-only peek; never writes).
+  static Future<int?> savedPort() async {
+    try {
+      final dir = await getApplicationSupportDirectory();
+      final f = File('${dir.path}${Platform.pathSeparator}settings.json');
+      final j = jsonDecode(await f.readAsString()) as Map<String, dynamic>;
+      return (j['port'] as num?)?.toInt();
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Holds an exclusive lock for the life of the process so only one
   /// LocalRoll runs at a time (two copies would split paired phones and
   /// ports between them). Returns false if another copy holds it.

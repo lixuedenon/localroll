@@ -1,4 +1,6 @@
 // apps/desktop/lib/ui/title_bar.dart
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -239,7 +241,14 @@ Future<void> confirmExit(AppServices services) async {
   );
   _asking = false;
   if (ok == true) {
+    // Disappear at once; tidy up behind the scenes, then end the process.
+    try {
+      await windowManager.hide();
+    } catch (_) {}
     await services.shutdown();
-    await windowManager.destroy();
+    try {
+      await windowManager.destroy().timeout(const Duration(seconds: 2));
+    } catch (_) {}
+    exit(0);
   }
 }

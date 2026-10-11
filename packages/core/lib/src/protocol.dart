@@ -45,6 +45,13 @@ class LrProtocol {
   /// POST {assetIds, private}: family visibility of items this phone sent.
   static const String pathVisibility = '/api/v1/visibility';
 
+  /// PC only, from 127.0.0.1: a second copy of the app asks the running one
+  /// to come to the front, then quits.
+  static const String pathLocalShow = '/local/show';
+
+  /// Ports the PC tries, in order, if the preferred one is taken.
+  static const List<int> fallbackPorts = [41530, 31530, 21530, 8530];
+
   /// Assets per verify request (each one is re-hashed on the PC).
   static const int verifyBatch = 100;
 
