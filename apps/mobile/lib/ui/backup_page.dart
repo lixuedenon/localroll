@@ -12,7 +12,6 @@ import '../services/mobile_settings.dart';
 import '../services/uploader.dart';
 import 'cleanup_page.dart' show formatSize;
 import 'theme.dart';
-import 'theme.dart';
 import 'transfer_page.dart';
 
 /// "Back up…": choose what (dates, count, type, albums, size, order) and
