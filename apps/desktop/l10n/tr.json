@@ -289,5 +289,14 @@
   "done.ok": "Tamam",
   "done.sent_title": "Hepsi “{name}” adlı cihaza gönderildi",
   "done.sent_failed": "“{name}” adlı cihaza gönderim bitmedi",
-  "done.sent_body": "{sent} dosya gönderildi · toplam {size}"
+  "done.sent_body": "{sent} dosya gönderildi · toplam {size}",
+  "library.filter_docs": "Belgeler",
+  "library.filter_other": "Diğer",
+  "files.delete_title": "“{name}” silinsin mi?",
+  "files.delete_body": "Geri Dönüşüm Kutusu’na gider; oradan geri yükleyebilirsiniz.",
+  "files.empty_docs": "Henüz belge yok.\nBaşka PC’den gelen PDF, Word, Excel… burada görünür.",
+  "files.empty_other": "Henüz bir şey yok.\nBaşka PC’den gelen arşivler, klasörler ve diğer dosyalar burada görünür.",
+  "files.items": "{count} dosya",
+  "family.online": "LocalRoll şu an açık",
+  "family.offline": "Bağlı değil"
 }

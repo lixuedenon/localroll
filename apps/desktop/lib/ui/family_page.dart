@@ -1,9 +1,12 @@
 // apps/desktop/lib/ui/family_page.dart
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../app_services.dart';
 import '../l10n/l10n.dart';
 import 'format.dart';
+import 'theme.dart';
 
 /// Family: paired phones grouped by person — rename people, move a phone to
 /// another person, unpair, one folder per person.
@@ -17,6 +20,23 @@ class FamilyPage extends StatefulWidget {
 }
 
 class _FamilyPageState extends State<FamilyPage> {
+  // Re-check "online" now and then (it turns off by itself after a while).
+  late final Timer _tick = Timer.periodic(const Duration(seconds: 20), (_) {
+    if (mounted) setState(() {});
+  });
+
+  @override
+  void initState() {
+    super.initState();
+    _tick;
+  }
+
+  @override
+  void dispose() {
+    _tick.cancel();
+    super.dispose();
+  }
+
   void _toast(String msg) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
 
   @override
@@ -24,7 +44,7 @@ class _FamilyPageState extends State<FamilyPage> {
     final s = widget.services;
     final theme = Theme.of(context);
     return ListenableBuilder(
-      listenable: s.settings,
+      listenable: Listenable.merge([s.settings, s.server]),
       builder: (context, _) => Scaffold(
         appBar: AppBar(title: Text(tr('family.title'))),
         body: ListView(
@@ -84,9 +104,18 @@ class _FamilyPageState extends State<FamilyPage> {
               ListTile(
                 dense: true,
                 contentPadding: const EdgeInsetsDirectional.only(start: 44),
-                leading: Icon(st.trusted[d.id]?.platform == 'ios' ? Icons.phone_iphone : Icons.phone_android),
+                leading: Badge(
+                  // Green dot: LocalRoll is open on that phone right now.
+                  isLabelVisible: widget.services.server.isOnline(d.id),
+                  backgroundColor: LrColors.verified,
+                  smallSize: 10,
+                  child: Icon(st.trusted[d.id]?.platform == 'ios' ? Icons.phone_iphone : Icons.phone_android),
+                ),
                 title: Text('${family.labelOf(d.id)} · ${d.deviceName}'),
-                subtitle: Text(tr('settings.paired_on', {'date': formatDate(DateTime.fromMillisecondsSinceEpoch(d.pairedMs))})),
+                subtitle: Text([
+                  widget.services.server.isOnline(d.id) ? tr('family.online') : tr('family.offline'),
+                  tr('settings.paired_on', {'date': formatDate(DateTime.fromMillisecondsSinceEpoch(d.pairedMs))}),
+                ].join(' · ')),
                 trailing: PopupMenuButton<String>(
                   onSelected: (v) async {
                     if (v == 'move') {

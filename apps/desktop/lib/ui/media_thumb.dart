@@ -31,55 +31,33 @@ class _MediaThumbState extends State<MediaThumb> {
   Future<File?>? _thumb;
 
   // Live Photo: play the motion while the mouse rests on it (one at a time,
-  // muted, like iPhone's Photos when you press on a Live Photo).
+  // muted) — the same way the viewer plays it, which is known to work.
   static _MediaThumbState? _playingNow;
   Timer? _hover;
-  Player? _player;
-  VideoController? _video;
-  bool _showVideo = false;
+  bool _live = false;
 
   void _enter() {
-    final live = widget.library.liveFor(widget.item);
-    if (live == null) return;
+    if (widget.library.liveFor(widget.item) == null) return;
     _hover?.cancel();
-    _hover = Timer(const Duration(milliseconds: 250), () => _play(live));
-  }
-
-  Future<void> _play(MediaItem live) async {
-    if (!mounted) return;
-    if (_playingNow != this) _playingNow?._stop();
-    _playingNow = this;
-    final p = Player();
-    _player = p;
-    _video = VideoController(p);
-    try {
-      await p.setVolume(0);
-      p.stream.completed.listen((done) {
-        if (done) _stop();
-      });
-      p.stream.playing.listen((on) {
-        if (on && mounted && _player == p && !_showVideo) setState(() => _showVideo = true);
-      });
-      await p.open(Media(widget.library.absPath(live)));
-    } catch (_) {
-      _stop();
-    }
+    _hover = Timer(const Duration(milliseconds: 250), () {
+      if (!mounted) return;
+      if (_playingNow != this) _playingNow?._stop();
+      _playingNow = this;
+      setState(() => _live = true);
+    });
   }
 
   void _stop() {
     _hover?.cancel();
     _hover = null;
-    final p = _player;
-    _player = null;
-    _video = null;
     if (_playingNow == this) _playingNow = null;
-    if (p != null) unawaited(p.dispose());
-    if (mounted && _showVideo) setState(() => _showVideo = false);
+    if (mounted && _live) setState(() => _live = false);
   }
 
   @override
   void dispose() {
-    _stop();
+    _hover?.cancel();
+    if (_playingNow == this) _playingNow = null;
     super.dispose();
   }
 
@@ -131,13 +109,13 @@ class _MediaThumbState extends State<MediaThumb> {
       );
     }
 
-    final video = _video;
+    final live = _live ? widget.library.liveFor(widget.item) : null;
     final stack = Stack(
       fit: StackFit.expand,
       children: [
         image,
-        if (_showVideo && video != null)
-          IgnorePointer(child: Video(controller: video, controls: NoVideoControls, fit: BoxFit.cover)),
+        if (live != null)
+          IgnorePointer(child: _ThumbLive(path: widget.library.absPath(live), onDone: _stop)),
         if (widget.item.kind == MediaKind.video)
           const Positioned(
             right: 6,
@@ -174,4 +152,42 @@ class _MediaThumbState extends State<MediaThumb> {
     );
     return MouseRegion(onEnter: (_) => _enter(), onExit: (_) => _stop(), child: stack);
   }
+}
+
+/// The moving part of a Live Photo, muted, inside a thumbnail.
+class _ThumbLive extends StatefulWidget {
+  const _ThumbLive({required this.path, required this.onDone});
+
+  final String path;
+  final VoidCallback onDone;
+
+  @override
+  State<_ThumbLive> createState() => _ThumbLiveState();
+}
+
+class _ThumbLiveState extends State<_ThumbLive> {
+  late final Player _player = Player();
+  late final VideoController _controller = VideoController(_player);
+  StreamSubscription<bool>? _sub;
+
+  @override
+  void initState() {
+    super.initState();
+    _sub = _player.stream.completed.listen((done) {
+      if (done) widget.onDone();
+    });
+    _player.setVolume(0);
+    _player.open(Media(widget.path));
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    _player.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      Video(controller: _controller, controls: NoVideoControls, fit: BoxFit.cover, fill: Colors.transparent);
 }

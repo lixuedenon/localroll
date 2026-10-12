@@ -286,6 +286,10 @@ class _DashboardPageState extends State<DashboardPage> {
         Wrap(spacing: 8, runSpacing: 8, children: [
           for (final m in family.members)
             ActionChip(
+              // Green dot: one of this person's phones has LocalRoll open now.
+              avatar: family.devicesOf(m).any((d) => s.server.isOnline(d.id))
+                  ? const Icon(Icons.circle, size: 10, color: LrColors.verified)
+                  : null,
               label: Text(family.devicesOf(m).length > 1 ? tr('home.member_devices', {'name': m, 'count': family.devicesOf(m).length}) : m),
               onPressed: () => AppNav.instance.selectTab(AppNav.family),
             ),

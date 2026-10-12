@@ -289,5 +289,14 @@
   "done.ok": "Concluído",
   "done.sent_title": "Tudo enviado para “{name}”",
   "done.sent_failed": "O envio para “{name}” não terminou",
-  "done.sent_body": "{sent} arquivos enviados · {size} no total"
+  "done.sent_body": "{sent} arquivos enviados · {size} no total",
+  "library.filter_docs": "Documentos",
+  "library.filter_other": "Outros",
+  "files.delete_title": "Excluir “{name}”?",
+  "files.delete_body": "Vai para a Lixeira; dá para restaurar de lá.",
+  "files.empty_docs": "Nenhum documento ainda.\nPDF, Word, Excel… enviados de outro PC aparecem aqui.",
+  "files.empty_other": "Nada ainda.\nCompactados, pastas inteiras e outros arquivos de outro PC aparecem aqui.",
+  "files.items": "{count} arquivos",
+  "family.online": "LocalRoll aberto agora",
+  "family.offline": "Não conectado"
 }

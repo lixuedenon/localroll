@@ -10,12 +10,13 @@ import '../services/file_actions.dart';
 import '../services/library_index.dart';
 import '../services/network.dart';
 import '../services/peers.dart';
+import 'files_view.dart';
 import 'media_thumb.dart';
 import 'send_page.dart';
 import 'theme.dart';
 import 'viewer_page.dart';
 
-enum _Filter { all, photos, videos }
+enum _Filter { all, photos, videos, docs, other }
 
 /// Received media grouped by capture day, newest first; All / Photos / Videos.
 class LibraryPage extends StatefulWidget {
@@ -43,6 +44,8 @@ class _LibraryPageState extends State<LibraryPage> {
   /// is no longer paired.
   String _memberOf(FamilyDirectory family, MediaItem i) =>
       (i.deviceId == null ? null : family.memberOf(i.deviceId!)) ?? i.deviceName ?? '?';
+
+  bool get _filesTab => _filter == _Filter.docs || _filter == _Filter.other;
 
   /// Order by when it was taken (default) or when it arrived here.
   bool _byReceived = false;
@@ -188,6 +191,8 @@ class _LibraryPageState extends State<LibraryPage> {
                     ButtonSegment(value: _Filter.all, label: Text(tr('library.filter_all'))),
                     ButtonSegment(value: _Filter.photos, label: Text(tr('library.filter_photos'))),
                     ButtonSegment(value: _Filter.videos, label: Text(tr('library.filter_videos'))),
+                    ButtonSegment(value: _Filter.docs, label: Text(tr('library.filter_docs'))),
+                    ButtonSegment(value: _Filter.other, label: Text(tr('library.filter_other'))),
                   ],
                   selected: {_filter},
                   onSelectionChanged: (v) => setState(() => _filter = v.first),
@@ -213,12 +218,19 @@ class _LibraryPageState extends State<LibraryPage> {
               ],
               const SizedBox(width: 8),
             ],
-            bottom: _familyBar(all, family),
+            bottom: _filesTab ? null : _familyBar(all, family),
           ),
           body: Column(
             children: [
               ..._banners(context),
-              Expanded(child: items.isEmpty ? _empty(context) : _grid(context, items)),
+              Expanded(
+                child: _filesTab
+                    // Documents / other files from PCs: a file list, not photos.
+                    ? FilesView(services: s, document: _filter == _Filter.docs)
+                    : items.isEmpty
+                        ? _empty(context)
+                        : _grid(context, items),
+              ),
             ],
           ),
         );

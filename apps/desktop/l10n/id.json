@@ -289,5 +289,14 @@
   "done.ok": "Selesai",
   "done.sent_title": "Semua terkirim ke “{name}”",
   "done.sent_failed": "Pengiriman ke “{name}” belum selesai",
-  "done.sent_body": "{sent} file terkirim · total {size}"
+  "done.sent_body": "{sent} file terkirim · total {size}",
+  "library.filter_docs": "Dokumen",
+  "library.filter_other": "Lainnya",
+  "files.delete_title": "Hapus “{name}”?",
+  "files.delete_body": "Masuk ke Recycle Bin; bisa dipulihkan dari sana.",
+  "files.empty_docs": "Belum ada dokumen.\nPDF, Word, Excel… dari PC lain muncul di sini.",
+  "files.empty_other": "Belum ada apa pun.\nArsip, folder utuh, dan file lain dari PC lain muncul di sini.",
+  "files.items": "{count} file",
+  "family.online": "LocalRoll sedang dibuka",
+  "family.offline": "Tidak terhubung"
 }

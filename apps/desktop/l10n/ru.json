@@ -289,5 +289,14 @@
   "done.ok": "Готово",
   "done.sent_title": "Всё отправлено на «{name}»",
   "done.sent_failed": "Отправка на «{name}» не завершена",
-  "done.sent_body": "Отправлено файлов: {sent} · всего {size}"
+  "done.sent_body": "Отправлено файлов: {sent} · всего {size}",
+  "library.filter_docs": "Документы",
+  "library.filter_other": "Другое",
+  "files.delete_title": "Удалить «{name}»?",
+  "files.delete_body": "Переместится в корзину; оттуда можно восстановить.",
+  "files.empty_docs": "Документов пока нет.\nЗдесь появятся PDF, Word, Excel… с другого ПК.",
+  "files.empty_other": "Пока пусто.\nЗдесь появятся архивы, папки и другие файлы с другого ПК.",
+  "files.items": "файлов: {count}",
+  "family.online": "LocalRoll открыт",
+  "family.offline": "Не подключён"
 }

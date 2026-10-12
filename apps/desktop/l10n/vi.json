@@ -289,5 +289,14 @@
   "done.ok": "Xong",
   "done.sent_title": "Đã gửi tất cả tới “{name}”",
   "done.sent_failed": "Gửi tới “{name}” chưa xong",
-  "done.sent_body": "Đã gửi {sent} tệp · tổng {size}"
+  "done.sent_body": "Đã gửi {sent} tệp · tổng {size}",
+  "library.filter_docs": "Tài liệu",
+  "library.filter_other": "Khác",
+  "files.delete_title": "Xóa “{name}”?",
+  "files.delete_body": "Sẽ vào Thùng rác, có thể khôi phục từ đó.",
+  "files.empty_docs": "Chưa có tài liệu.\nPDF, Word, Excel… gửi từ máy khác sẽ hiện ở đây.",
+  "files.empty_other": "Chưa có gì.\nTệp nén, cả thư mục và tệp khác gửi từ máy khác sẽ hiện ở đây.",
+  "files.items": "{count} tệp",
+  "family.online": "Đang mở LocalRoll",
+  "family.offline": "Chưa kết nối"
 }

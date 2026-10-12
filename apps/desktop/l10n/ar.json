@@ -289,5 +289,14 @@
   "done.ok": "تم",
   "done.sent_title": "تم إرسال كل شيء إلى \"{name}\"",
   "done.sent_failed": "لم يكتمل الإرسال إلى \"{name}\"",
-  "done.sent_body": "أُرسل {sent} ملف · الإجمالي {size}"
+  "done.sent_body": "أُرسل {sent} ملف · الإجمالي {size}",
+  "library.filter_docs": "المستندات",
+  "library.filter_other": "أخرى",
+  "files.delete_title": "حذف \"{name}\"؟",
+  "files.delete_body": "سيُنقل إلى سلة المحذوفات ويمكن استعادته منها.",
+  "files.empty_docs": "لا توجد مستندات بعد.\nستظهر هنا ملفات PDF وWord وExcel المرسلة من كمبيوتر آخر.",
+  "files.empty_other": "لا شيء بعد.\nستظهر هنا الملفات المضغوطة والمجلدات والملفات الأخرى المرسلة من كمبيوتر آخر.",
+  "files.items": "{count} ملف",
+  "family.online": "LocalRoll مفتوح الآن",
+  "family.offline": "غير متصل"
 }

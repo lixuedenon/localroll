@@ -129,6 +129,16 @@ class TransferServer extends ChangeNotifier {
     if (!ask.answer.isCompleted) ask.answer.complete(accept);
   }
 
+  /// Last signed-in request from each paired device. Phones talk to this PC
+  /// at least once a minute while LocalRoll is open on them (and at once
+  /// when it opens), so this is how the PC knows a phone is "online".
+  final Map<String, DateTime> lastSeen = {};
+
+  bool isOnline(String deviceId) {
+    final t = lastSeen[deviceId];
+    return t != null && DateTime.now().difference(t) < const Duration(seconds: 100);
+  }
+
   /// Failed sign-ins per address, to slow down guessing.
   final Map<String, List<DateTime>> _failures = {};
   String? error;
@@ -279,6 +289,11 @@ class TransferServer extends ChangeNotifier {
         _failed(ip);
         await req.drain<void>();
         return _json(res, 401, {'error': 'not_paired'});
+      }
+      final seenBefore = lastSeen[device.id];
+      lastSeen[device.id] = DateTime.now();
+      if (seenBefore == null || DateTime.now().difference(seenBefore) > const Duration(seconds: 60)) {
+        notifyListeners(); // came online
       }
       // Paired over HTTPS (or already moved to it): plain HTTP is refused,
       // so a token seen on the network earlier is of no use.

@@ -289,5 +289,14 @@
   "done.ok": "เสร็จสิ้น",
   "done.sent_title": "ส่งทั้งหมดถึง “{name}” แล้ว",
   "done.sent_failed": "การส่งถึง “{name}” ยังไม่เสร็จ",
-  "done.sent_body": "ส่งแล้ว {sent} ไฟล์ · รวม {size}"
+  "done.sent_body": "ส่งแล้ว {sent} ไฟล์ · รวม {size}",
+  "library.filter_docs": "เอกสาร",
+  "library.filter_other": "อื่น ๆ",
+  "files.delete_title": "ลบ “{name}”?",
+  "files.delete_body": "จะย้ายไปถังรีไซเคิล กู้คืนได้จากที่นั่น",
+  "files.empty_docs": "ยังไม่มีเอกสาร\nPDF, Word, Excel… ที่ส่งจากเครื่องอื่นจะแสดงที่นี่",
+  "files.empty_other": "ยังไม่มีอะไร\nไฟล์บีบอัด ทั้งโฟลเดอร์ และไฟล์อื่นจากเครื่องอื่นจะแสดงที่นี่",
+  "files.items": "{count} ไฟล์",
+  "family.online": "กำลังเปิด LocalRoll",
+  "family.offline": "ไม่ได้เชื่อมต่อ"
 }

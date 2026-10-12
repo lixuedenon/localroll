@@ -289,5 +289,14 @@
   "done.ok": "Fertig",
   "done.sent_title": "Alles an „{name}“ gesendet",
   "done.sent_failed": "Senden an „{name}“ nicht abgeschlossen",
-  "done.sent_body": "{sent} Dateien gesendet · insgesamt {size}"
+  "done.sent_body": "{sent} Dateien gesendet · insgesamt {size}",
+  "library.filter_docs": "Dokumente",
+  "library.filter_other": "Andere",
+  "files.delete_title": "„{name}“ löschen?",
+  "files.delete_body": "Es kommt in den Papierkorb und kann dort wiederhergestellt werden.",
+  "files.empty_docs": "Noch keine Dokumente.\nVon einem anderen PC gesendete PDF-, Word-, Excel-Dateien erscheinen hier.",
+  "files.empty_other": "Noch nichts da.\nArchive, ganze Ordner und andere Dateien von einem anderen PC erscheinen hier.",
+  "files.items": "{count} Dateien",
+  "family.online": "LocalRoll gerade geöffnet",
+  "family.offline": "Nicht verbunden"
 }

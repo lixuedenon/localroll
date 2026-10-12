@@ -289,5 +289,14 @@
   "done.ok": "Done",
   "done.sent_title": "Everything sent to “{name}”",
   "done.sent_failed": "Sending to “{name}” did not finish",
-  "done.sent_body": "{sent} files sent · {size} in total"
+  "done.sent_body": "{sent} files sent · {size} in total",
+  "library.filter_docs": "Documents",
+  "library.filter_other": "Other",
+  "files.delete_title": "Delete “{name}”?",
+  "files.delete_body": "It goes to the Recycle Bin; you can restore it from there.",
+  "files.empty_docs": "No documents yet.\nPDF, Word, Excel… sent from another PC appear here.",
+  "files.empty_other": "Nothing here yet.\nArchives, whole folders and other files sent from another PC appear here.",
+  "files.items": "{count} files",
+  "family.online": "LocalRoll open now",
+  "family.offline": "Not connected"
 }

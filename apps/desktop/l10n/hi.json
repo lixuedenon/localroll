@@ -289,5 +289,14 @@
   "done.ok": "हो गया",
   "done.sent_title": "“{name}” को सब भेज दिया",
   "done.sent_failed": "“{name}” को भेजना पूरा नहीं हुआ",
-  "done.sent_body": "{sent} फ़ाइलें भेजीं · कुल {size}"
+  "done.sent_body": "{sent} फ़ाइलें भेजीं · कुल {size}",
+  "library.filter_docs": "दस्तावेज़",
+  "library.filter_other": "अन्य",
+  "files.delete_title": "“{name}” हटाएँ?",
+  "files.delete_body": "यह रीसायकल बिन में जाएगा; वहाँ से वापस ला सकते हैं।",
+  "files.empty_docs": "अभी कोई दस्तावेज़ नहीं।\nदूसरे पीसी से भेजे PDF, Word, Excel… यहाँ दिखेंगे।",
+  "files.empty_other": "अभी कुछ नहीं।\nदूसरे पीसी से भेजे आर्काइव, पूरे फ़ोल्डर और अन्य फ़ाइलें यहाँ दिखेंगी।",
+  "files.items": "{count} फ़ाइलें",
+  "family.online": "अभी LocalRoll खुला है",
+  "family.offline": "कनेक्ट नहीं"
 }

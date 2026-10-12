@@ -289,5 +289,14 @@
   "done.ok": "完成",
   "done.sent_title": "已全部傳送到「{name}」",
   "done.sent_failed": "傳送到「{name}」沒有全部完成",
-  "done.sent_body": "已傳送 {sent} 個檔案 · 共 {size}"
+  "done.sent_body": "已傳送 {sent} 個檔案 · 共 {size}",
+  "library.filter_docs": "文件",
+  "library.filter_other": "其他",
+  "files.delete_title": "刪除「{name}」？",
+  "files.delete_body": "會移到資源回收筒，可從那裡還原。",
+  "files.empty_docs": "還沒有文件。\n其他電腦傳來的 PDF、Word、Excel 等會出現在這裡。",
+  "files.empty_other": "這裡還沒有內容。\n其他電腦傳來的壓縮檔、整個資料夾和其他檔案會出現在這裡。",
+  "files.items": "{count} 個檔案",
+  "family.online": "正在使用 LocalRoll",
+  "family.offline": "未連線"
 }

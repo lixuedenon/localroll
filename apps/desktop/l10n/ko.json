@@ -289,5 +289,14 @@
   "done.ok": "완료",
   "done.sent_title": "“{name}”에 모두 보냈습니다",
   "done.sent_failed": "“{name}”(으)로 보내기가 끝나지 않았습니다",
-  "done.sent_body": "파일 {sent}개 보냄 · 총 {size}"
+  "done.sent_body": "파일 {sent}개 보냄 · 총 {size}",
+  "library.filter_docs": "문서",
+  "library.filter_other": "기타",
+  "files.delete_title": "“{name}”을(를) 삭제할까요?",
+  "files.delete_body": "휴지통으로 이동하며 거기서 복원할 수 있습니다.",
+  "files.empty_docs": "아직 문서가 없습니다.\n다른 PC에서 보낸 PDF, Word, Excel 등이 여기에 표시됩니다.",
+  "files.empty_other": "아직 아무것도 없습니다.\n다른 PC에서 보낸 압축 파일, 폴더 등이 여기에 표시됩니다.",
+  "files.items": "파일 {count}개",
+  "family.online": "LocalRoll 사용 중",
+  "family.offline": "연결 안 됨"
 }

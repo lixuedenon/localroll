@@ -75,7 +75,7 @@ Future<List<String>> moveToRecycleBin(List<String> paths, {void Function(int don
       await list.delete();
     } catch (_) {}
   }
-  return [for (final p in paths) if (!File(p).existsSync()) p];
+  return [for (final p in paths) if (FileSystemEntity.typeSync(p) == FileSystemEntityType.notFound) p];
 }
 
 /// Deletes library items (to the Recycle Bin) and updates the index, which

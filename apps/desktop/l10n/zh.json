@@ -289,5 +289,14 @@
   "done.ok": "完成",
   "done.sent_title": "已全部发送到「{name}」",
   "done.sent_failed": "发送到「{name}」没有全部完成",
-  "done.sent_body": "已发送 {sent} 个文件 · 共 {size}"
+  "done.sent_body": "已发送 {sent} 个文件 · 共 {size}",
+  "library.filter_docs": "文档",
+  "library.filter_other": "其他",
+  "files.delete_title": "删除「{name}」？",
+  "files.delete_body": "会移到回收站，可以从回收站恢复。",
+  "files.empty_docs": "还没有文档。\n其他电脑发来的 PDF、Word、Excel 等会出现在这里。",
+  "files.empty_other": "这里还没有内容。\n其他电脑发来的压缩包、整个文件夹和其他文件会出现在这里。",
+  "files.items": "{count} 个文件",
+  "family.online": "正在使用 LocalRoll",
+  "family.offline": "未连接"
 }

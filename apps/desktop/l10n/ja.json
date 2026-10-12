@@ -289,5 +289,14 @@
   "done.ok": "完了",
   "done.sent_title": "「{name}」にすべて送信しました",
   "done.sent_failed": "「{name}」への送信は完了しませんでした",
-  "done.sent_body": "{sent} 件送信 · 合計 {size}"
+  "done.sent_body": "{sent} 件送信 · 合計 {size}",
+  "library.filter_docs": "書類",
+  "library.filter_other": "その他",
+  "files.delete_title": "「{name}」を削除しますか？",
+  "files.delete_body": "ごみ箱に移動します。そこから元に戻せます。",
+  "files.empty_docs": "まだ書類はありません。\n他の PC から届いた PDF・Word・Excel などがここに表示されます。",
+  "files.empty_other": "まだ何もありません。\n他の PC から届いた圧縮ファイルやフォルダーなどがここに表示されます。",
+  "files.items": "{count} 件",
+  "family.online": "LocalRoll 使用中",
+  "family.offline": "未接続"
 }
