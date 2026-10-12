@@ -45,3 +45,7 @@ ffprobe.exe
 
 # Small EXIF test images are part of the tests.
 !packages/core/test/fixtures/*.heic
+
+# Android signing key (made by scripts/setup-android-signing.sh) — never commit
+*.jks
+*.keystore

@@ -176,8 +176,18 @@ jobs:
           cache: true
       - name: Build APK
         working-directory: apps/mobile
+        env:
+          LR_KEYSTORE_B64: ${{ secrets.LR_KEYSTORE_B64 }}
+          LR_KEYSTORE_PASSWORD: ${{ secrets.LR_KEYSTORE_PASSWORD }}
+          LR_KEY_ALIAS: ${{ secrets.LR_KEY_ALIAS }}
+          LR_KEY_PASSWORD: ${{ secrets.LR_KEY_PASSWORD }}
         run: |
           set -o pipefail
+          # Same signing key every build: updates install over the old app.
+          if [ -n "$LR_KEYSTORE_B64" ]; then
+            echo "$LR_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/localroll.jks"
+            export LR_KEYSTORE_PATH="$RUNNER_TEMP/localroll.jks"
+          fi
           flutter build apk --release --dart-define=LR_VERSION="$LR_VERSION" 2>&1 | tee build.log
       - name: Report build errors
         if: failure()
