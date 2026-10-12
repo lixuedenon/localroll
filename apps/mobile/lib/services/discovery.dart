@@ -63,11 +63,13 @@ class DesktopDiscovery extends ChangeNotifier {
             for (final p in ports) ('$pre.$i', p),
       ];
       // Probe in parallel batches; a closed port answers (or times out) fast.
+      // Bounded: never more than ~25 s, and one slow host can't hold a batch.
       const batch = 64;
-      for (var i = 0; i < targets.length; i += batch) {
+      final until = DateTime.now().add(const Duration(seconds: 25));
+      for (var i = 0; i < targets.length && DateTime.now().isBefore(until); i += batch) {
         await Future.wait([
           for (final (host, port) in targets.sublist(i, (i + batch).clamp(0, targets.length))) _probe(host, port),
-        ]);
+        ]).timeout(const Duration(seconds: 6), onTimeout: () => const []);
       }
     } catch (_) {
       // No network interface info: nothing to scan.

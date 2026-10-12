@@ -1,12 +1,10 @@
 // apps/desktop/lib/services/peers.dart
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:localroll_core/localroll_core.dart';
-import 'package:nsd/nsd.dart' as nsd;
 
 import '../server/transfer_server.dart';
 import 'keep_awake.dart';
@@ -33,8 +31,6 @@ class PeerDirectory extends ChangeNotifier {
   final AppSettings settings;
   final TransferServer server;
 
-  nsd.Discovery? _discovery;
-  final Map<String, FoundPc> _mdns = {};
   final Map<String, FoundPc> _scanned = {};
 
   /// Paired PCs that answered recently: id -> where.
@@ -45,7 +41,7 @@ class PeerDirectory extends ChangeNotifier {
 
   /// PCs seen right now (paired or not), never this one.
   List<FoundPc> get found {
-    final all = <String, FoundPc>{..._scanned, ..._mdns, ..._reachable};
+    final all = <String, FoundPc>{..._scanned, ..._reachable};
     all.remove(settings.deviceId);
     return all.values.toList()..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
   }
@@ -57,7 +53,9 @@ class PeerDirectory extends ChangeNotifier {
   void acquire() {
     _users++;
     if (_users > 1) return;
-    unawaited(_startMdns());
+    // No mDNS browsing on Windows: the plugin resolves services on the
+    // window's own thread, which can freeze the whole app. Paired PCs are
+    // checked at their known address and others are found by [scan].
     unawaited(checkPaired());
     _timer = Timer.periodic(const Duration(seconds: 20), (_) => checkPaired());
   }
@@ -67,63 +65,20 @@ class PeerDirectory extends ChangeNotifier {
     if (_users > 0) return;
     _timer?.cancel();
     _timer = null;
-    unawaited(_stopMdns());
-  }
-
-  Future<void> _startMdns() async {
-    if (_discovery != null) return;
-    try {
-      _discovery = await nsd.startDiscovery(LrProtocol.serviceType, ipLookupType: nsd.IpLookupType.v4);
-      _discovery!.addListener(_onMdns);
-    } catch (e) {
-      debugPrint('mDNS discovery failed: $e');
-    }
-  }
-
-  Future<void> _stopMdns() async {
-    final d = _discovery;
-    _discovery = null;
-    if (d == null) return;
-    d.removeListener(_onMdns);
-    try {
-      await nsd.stopDiscovery(d);
-    } catch (_) {}
-  }
-
-  void _onMdns() {
-    _mdns.clear();
-    for (final s in _discovery?.services ?? const <nsd.Service>[]) {
-      final id = _txt(s, 'id') ?? s.name ?? '';
-      if (id.isEmpty || id == settings.deviceId) continue;
-      final hosts = [
-        ...?s.addresses?.where((a) => a.type == InternetAddressType.IPv4).map((a) => a.address),
-        if ((s.addresses == null || s.addresses!.isEmpty) && s.host != null) s.host!,
-      ];
-      if (hosts.isEmpty) continue;
-      _mdns[id] = FoundPc(id: id, name: s.name ?? 'PC', hosts: hosts, port: s.port ?? LrProtocol.defaultPort);
-    }
-    notifyListeners();
-  }
-
-  static String? _txt(nsd.Service s, String key) {
-    final v = s.txt?[key];
-    if (v == null) return null;
-    try {
-      return utf8.decode(v);
-    } catch (_) {
-      return null;
-    }
   }
 
   /// Asks each paired PC (last known address first) whether it is there,
   /// and picks up its new name / look / address.
   Future<void> checkPaired() async {
-    await Future.wait([for (final p in settings.peers.values.toList()) _checkOne(p)]);
+    await Future.wait([
+      for (final p in settings.peers.values.toList())
+        _checkOne(p).timeout(const Duration(seconds: 12), onTimeout: () {}),
+    ]);
     notifyListeners();
   }
 
   Future<void> _checkOne(PeerPc p) async {
-    final m = _mdns[p.id] ?? _scanned[p.id];
+    final m = _scanned[p.id];
     final candidates = <(String, int)>{
       for (final h in p.tryHosts) (h, p.port),
       if (m != null) for (final h in m.hosts) (h, m.port),
@@ -189,22 +144,24 @@ class PeerDirectory extends ChangeNotifier {
     notifyListeners();
     try {
       final ports = <int>{LrProtocol.defaultPort, ...LrProtocol.fallbackPorts, for (final p in settings.peers.values) p.port};
-      final mine = (await localIPv4Addresses()).toSet();
-      final prefixes = {for (final ip in mine) ip.substring(0, ip.lastIndexOf('.'))};
+      final all = await localIPv4Addresses();
+      final mine = all.toSet();
+      // The real network only (virtual adapters are listed last).
+      final prefixes = {for (final ip in all.take(1)) ip.substring(0, ip.lastIndexOf('.'))};
       final targets = <(String, int)>[
-        // At most two networks (real adapters come first).
-        for (final pre in prefixes.take(2))
+        for (final pre in prefixes)
           for (var i = 1; i < 255; i++)
             if (!mine.contains('$pre.$i'))
               for (final p in ports) ('$pre.$i', p),
       ];
-      const batch = 96;
-      for (var i = 0; i < targets.length; i += batch) {
+      const batch = 64;
+      final until = DateTime.now().add(const Duration(seconds: 25));
+      for (var i = 0; i < targets.length && DateTime.now().isBefore(until); i += batch) {
         await Future.wait([
           for (final (h, p) in targets.sublist(i, min(i + batch, targets.length))) _probe(h, p),
-        ]);
+        ]).timeout(const Duration(seconds: 6), onTimeout: () => const []);
       }
-      await checkPaired();
+      await checkPaired().timeout(const Duration(seconds: 15), onTimeout: () {});
     } catch (_) {
     } finally {
       scanning = false;
@@ -355,7 +312,6 @@ class PeerDirectory extends ChangeNotifier {
   @override
   void dispose() {
     _timer?.cancel();
-    unawaited(_stopMdns());
     super.dispose();
   }
 }
