@@ -270,5 +270,5 @@ jobs:
           电脑和手机连同一个 Wi-Fi，手机打开 LocalRoll →「连接电脑」→ 点电脑名字 → 电脑上点「允许」。
           NOTES
           gh release create "${TAG}" -R "${GITHUB_REPOSITORY}" --target "${GITHUB_SHA}" \
-            --title "LocalRoll ${TAG}" --notes-file notes.md --prerelease \
+            --title "LocalRoll ${TAG}" --notes-file notes.md --latest \
             dist/LocalRoll-Windows.zip dist/LocalRoll-Android.apk dist/LocalRoll-iOS-unsigned.ipa
