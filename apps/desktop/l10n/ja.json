@@ -262,5 +262,10 @@
   "receive.other_ways_hint": "代わりに QR コードをスキャンするか PIN を入力します。",
   "library.sort": "並び順",
   "library.sort_taken": "撮影日順",
-  "library.sort_received": "受信日順"
+  "library.sort_received": "受信日順",
+  "lib.recent": "{from} から {count} 件を受信しました（撮影日の位置に並ぶので、古いものは下の方にあります）。",
+  "lib.recent_show": "これだけ表示",
+  "lib.recent_dismiss": "OK",
+  "lib.recent_only": "過去 24 時間に届いたものだけを表示しています。",
+  "lib.recent_all": "すべて表示"
 }

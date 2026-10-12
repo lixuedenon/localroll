@@ -262,5 +262,10 @@
   "receive.other_ways_hint": "Escaneie o QR code ou digite o PIN no celular.",
   "library.sort": "Ordem",
   "library.sort_taken": "Por data da foto",
-  "library.sort_received": "Por data de recebimento"
+  "library.sort_received": "Por data de recebimento",
+  "lib.recent": "Recebidos {count} itens de {from} (ficam na data da foto; os mais antigos aparecem mais abaixo).",
+  "lib.recent_show": "Ver só estes",
+  "lib.recent_dismiss": "Ok",
+  "lib.recent_only": "Mostrando só o que chegou nas últimas 24 horas.",
+  "lib.recent_all": "Ver tudo"
 }

@@ -262,5 +262,10 @@
   "receive.other_ways_hint": "Отсканируйте QR-код или введите PIN на телефоне.",
   "library.sort": "Порядок",
   "library.sort_taken": "По дате съёмки",
-  "library.sort_received": "По дате получения"
+  "library.sort_received": "По дате получения",
+  "lib.recent": "Получено {count} от {from} (они стоят по дате съёмки, старые — ниже).",
+  "lib.recent_show": "Показать их",
+  "lib.recent_dismiss": "Понятно",
+  "lib.recent_only": "Показано только полученное за последние 24 часа.",
+  "lib.recent_all": "Показать всё"
 }

@@ -262,5 +262,10 @@
   "receive.other_ways_hint": "Scan the QR code or type the PIN on the phone instead.",
   "library.sort": "Order",
   "library.sort_taken": "By date taken",
-  "library.sort_received": "By date received"
+  "library.sort_received": "By date received",
+  "lib.recent": "Just received: {count} items from {from} (they are placed by the date they were taken, so older ones are further down).",
+  "lib.recent_show": "Show them",
+  "lib.recent_dismiss": "Got it",
+  "lib.recent_only": "Showing only what arrived in the last 24 hours.",
+  "lib.recent_all": "Show everything"
 }

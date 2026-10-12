@@ -262,5 +262,10 @@
   "receive.other_ways_hint": "改用手机扫描二维码，或输入配对码。",
   "library.sort": "排序",
   "library.sort_taken": "按拍摄日期",
-  "library.sort_received": "按收到日期"
+  "library.sort_received": "按收到日期",
+  "lib.recent": "刚收到 {count} 项，来自 {from}（按拍摄日期排在时间线里，较早拍的会在下面）。",
+  "lib.recent_show": "只看这些",
+  "lib.recent_dismiss": "知道了",
+  "lib.recent_only": "只显示最近 24 小时收到的内容。",
+  "lib.recent_all": "显示全部"
 }

@@ -262,5 +262,10 @@
   "receive.other_ways_hint": "改用手機掃描 QR 碼，或輸入配對碼。",
   "library.sort": "排序",
   "library.sort_taken": "按拍攝日期",
-  "library.sort_received": "按收到日期"
+  "library.sort_received": "按收到日期",
+  "lib.recent": "剛收到 {count} 項，來自 {from}（按拍攝日期排在時間軸中，較早拍的會在下面）。",
+  "lib.recent_show": "只看這些",
+  "lib.recent_dismiss": "知道了",
+  "lib.recent_only": "只顯示最近 24 小時收到的內容。",
+  "lib.recent_all": "顯示全部"
 }

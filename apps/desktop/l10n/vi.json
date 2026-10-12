@@ -262,5 +262,10 @@
   "receive.other_ways_hint": "Quét mã QR hoặc nhập mã PIN trên điện thoại.",
   "library.sort": "Sắp xếp",
   "library.sort_taken": "Theo ngày chụp",
-  "library.sort_received": "Theo ngày nhận"
+  "library.sort_received": "Theo ngày nhận",
+  "lib.recent": "Vừa nhận {count} mục từ {from} (xếp theo ngày chụp, ảnh cũ nằm phía dưới).",
+  "lib.recent_show": "Chỉ xem các mục này",
+  "lib.recent_dismiss": "Đã hiểu",
+  "lib.recent_only": "Chỉ hiện những gì nhận trong 24 giờ qua.",
+  "lib.recent_all": "Hiện tất cả"
 }

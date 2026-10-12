@@ -262,5 +262,10 @@
   "receive.other_ways_hint": "대신 QR 코드를 스캔하거나 PIN을 입력하세요.",
   "library.sort": "정렬",
   "library.sort_taken": "촬영일순",
-  "library.sort_received": "받은 날짜순"
+  "library.sort_received": "받은 날짜순",
+  "lib.recent": "{from}에서 {count}개를 받았습니다(촬영일 위치에 배치되어 오래된 항목은 아래쪽에 있습니다).",
+  "lib.recent_show": "이것만 보기",
+  "lib.recent_dismiss": "확인",
+  "lib.recent_only": "최근 24시간 동안 받은 항목만 표시 중입니다.",
+  "lib.recent_all": "모두 보기"
 }

@@ -262,5 +262,10 @@
   "receive.other_ways_hint": "Bunun yerine QR kodu tarayın veya PIN’i girin.",
   "library.sort": "Sıralama",
   "library.sort_taken": "Çekim tarihine göre",
-  "library.sort_received": "Alınma tarihine göre"
+  "library.sort_received": "Alınma tarihine göre",
+  "lib.recent": "{from} kaynağından {count} öğe alındı (çekim tarihine göre yerleşir, eskiler aşağıdadır).",
+  "lib.recent_show": "Sadece bunları göster",
+  "lib.recent_dismiss": "Tamam",
+  "lib.recent_only": "Yalnızca son 24 saatte gelenler gösteriliyor.",
+  "lib.recent_all": "Hepsini göster"
 }

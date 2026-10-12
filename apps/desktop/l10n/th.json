@@ -262,5 +262,10 @@
   "receive.other_ways_hint": "สแกน QR code หรือพิมพ์ PIN บนโทรศัพท์แทน",
   "library.sort": "เรียงลำดับ",
   "library.sort_taken": "ตามวันที่ถ่าย",
-  "library.sort_received": "ตามวันที่ได้รับ"
+  "library.sort_received": "ตามวันที่ได้รับ",
+  "lib.recent": "เพิ่งได้รับ {count} รายการจาก {from} (เรียงตามวันที่ถ่าย อันเก่าจะอยู่ด้านล่าง)",
+  "lib.recent_show": "ดูเฉพาะรายการนี้",
+  "lib.recent_dismiss": "รับทราบ",
+  "lib.recent_only": "แสดงเฉพาะที่ได้รับใน 24 ชั่วโมงที่ผ่านมา",
+  "lib.recent_all": "แสดงทั้งหมด"
 }

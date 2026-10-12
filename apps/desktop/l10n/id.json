@@ -262,5 +262,10 @@
   "receive.other_ways_hint": "Pindai kode QR atau ketik PIN di ponsel.",
   "library.sort": "Urutan",
   "library.sort_taken": "Menurut tanggal diambil",
-  "library.sort_received": "Menurut tanggal diterima"
+  "library.sort_received": "Menurut tanggal diterima",
+  "lib.recent": "Baru diterima {count} item dari {from} (diurutkan menurut tanggal diambil, yang lama ada di bawah).",
+  "lib.recent_show": "Lihat ini saja",
+  "lib.recent_dismiss": "Oke",
+  "lib.recent_only": "Hanya menampilkan yang diterima 24 jam terakhir.",
+  "lib.recent_all": "Tampilkan semua"
 }

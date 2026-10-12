@@ -262,5 +262,10 @@
   "receive.other_ways_hint": "Scannez le QR code ou saisissez le code PIN sur le téléphone.",
   "library.sort": "Ordre",
   "library.sort_taken": "Par date de prise de vue",
-  "library.sort_received": "Par date de réception"
+  "library.sort_received": "Par date de réception",
+  "lib.recent": "{count} éléments reçus de {from} (rangés par date de prise de vue ; les plus anciens sont plus bas).",
+  "lib.recent_show": "Les afficher",
+  "lib.recent_dismiss": "OK",
+  "lib.recent_only": "Seuls les éléments reçus ces 24 dernières heures sont affichés.",
+  "lib.recent_all": "Tout afficher"
 }

@@ -12,6 +12,7 @@ import '../services/network.dart';
 import '../services/peers.dart';
 import 'media_thumb.dart';
 import 'send_page.dart';
+import 'theme.dart';
 import 'viewer_page.dart';
 
 enum _Filter { all, photos, videos }
@@ -46,10 +47,25 @@ class _LibraryPageState extends State<LibraryPage> {
   /// Order by when it was taken (default) or when it arrived here.
   bool _byReceived = false;
 
+  /// Only what arrived recently ("Just received"), still ordered by date.
+  bool _onlyRecent = false;
+
+  /// Arrivals of the last 24 hours not yet looked at: old photos sent today
+  /// sit far down the timeline, so they are offered at the top as well.
+  List<MediaItem> _recent(List<MediaItem> all) {
+    final since = DateTime.now().subtract(const Duration(hours: 24)).millisecondsSinceEpoch;
+    final from = since > widget.services.settings.recentSeenMs ? since : widget.services.settings.recentSeenMs;
+    return [for (final i in all) if (i.receivedMs > from) i];
+  }
+
   DateTime _dayOf(MediaItem i) => _byReceived ? DateTime.fromMillisecondsSinceEpoch(i.receivedMs) : i.captureTime;
 
   List<MediaItem> _visible(List<MediaItem> all, FamilyDirectory family) {
-    final list = _filtered(all, family);
+    var list = _filtered(all, family);
+    if (_onlyRecent) {
+      final since = DateTime.now().subtract(const Duration(hours: 24)).millisecondsSinceEpoch;
+      list = [for (final i in list) if (i.receivedMs > since) i];
+    }
     if (_byReceived) list.sort((a, b) => b.receivedMs.compareTo(a.receivedMs));
     return list;
   }
@@ -229,7 +245,24 @@ class _LibraryPageState extends State<LibraryPage> {
             ...actions,
           ]),
         );
+    final st = widget.services.settings;
+    final recent = _onlyRecent ? const <MediaItem>[] : _recent(lib.items);
+    final family = st.family;
+    final from = {for (final i in recent) _memberOf(family, i)}.take(3).join('、');
     return [
+      if (_onlyRecent)
+        banner(Icons.schedule_rounded, LrColors.safelight, tr('lib.recent_only'), [
+          TextButton(onPressed: () => setState(() => _onlyRecent = false), child: Text(tr('lib.recent_all'))),
+        ]),
+      if (recent.isNotEmpty)
+        banner(Icons.fiber_new_rounded, LrColors.verified, tr('lib.recent', {'count': recent.length, 'from': from}), [
+          TextButton(
+            onPressed: () => st.update((s) => s.recentSeenMs = DateTime.now().millisecondsSinceEpoch),
+            child: Text(tr('lib.recent_dismiss')),
+          ),
+          const SizedBox(width: 4),
+          FilledButton(onPressed: () => setState(() => _onlyRecent = true), child: Text(tr('lib.recent_show'))),
+        ]),
       if (lib.offline)
         banner(Icons.usb_off_rounded, theme.colorScheme.error, tr('lib.offline', {'path': lib.rootPath}), [
           TextButton(onPressed: lib.retry, child: Text(tr('common.retry'))),

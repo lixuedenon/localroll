@@ -176,6 +176,10 @@ class AppSettings extends ChangeNotifier {
   String? docsFolder;
   String? otherFolder;
 
+  /// Library: arrivals up to this time were already looked at ("Just
+  /// received" banner hidden for them).
+  int recentSeenMs = 0;
+
   /// PCs the user chose to "Forget": not offered under "Nearby" any more.
   final Set<String> hiddenPeers = {};
 
@@ -205,6 +209,7 @@ class AppSettings extends ChangeNotifier {
     s.libraryPath = j['libraryPath'] as String? ?? _defaultLibraryPath();
     s.docsFolder = j['docsFolder'] as String?;
     s.otherFolder = j['otherFolder'] as String?;
+    s.recentSeenMs = (j['recentSeenMs'] as num?)?.toInt() ?? 0;
     s.hiddenPeers.addAll((j['hiddenPeers'] as List? ?? const []).cast<String>());
     s.port = (j['port'] as num?)?.toInt() ?? LrProtocol.defaultPort;
     s.ffmpegPath = j['ffmpegPath'] as String?;
@@ -250,6 +255,7 @@ class AppSettings extends ChangeNotifier {
       if (docsFolder != null) 'docsFolder': docsFolder,
       if (otherFolder != null) 'otherFolder': otherFolder,
       'hiddenPeers': hiddenPeers.toList(),
+      'recentSeenMs': recentSeenMs,
       'port': port,
       'ffmpegPath': ffmpegPath,
       'language': language,

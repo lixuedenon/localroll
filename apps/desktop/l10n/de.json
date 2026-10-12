@@ -262,5 +262,10 @@
   "receive.other_ways_hint": "Stattdessen den QR-Code scannen oder die PIN eingeben.",
   "library.sort": "Sortierung",
   "library.sort_taken": "Nach Aufnahmedatum",
-  "library.sort_received": "Nach Empfangsdatum"
+  "library.sort_received": "Nach Empfangsdatum",
+  "lib.recent": "{count} Objekte von {from} empfangen (nach Aufnahmedatum einsortiert, ältere stehen weiter unten).",
+  "lib.recent_show": "Nur diese zeigen",
+  "lib.recent_dismiss": "OK",
+  "lib.recent_only": "Nur in den letzten 24 Stunden Empfangenes wird angezeigt.",
+  "lib.recent_all": "Alles zeigen"
 }

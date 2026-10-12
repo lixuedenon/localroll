@@ -262,5 +262,10 @@
   "receive.other_ways_hint": "फ़ोन पर QR कोड स्कैन करें या पिन डालें।",
   "library.sort": "क्रम",
   "library.sort_taken": "खींचने की तारीख से",
-  "library.sort_received": "मिलने की तारीख से"
+  "library.sort_received": "मिलने की तारीख से",
+  "lib.recent": "{from} से {count} आइटम मिले (खींचने की तारीख पर रखे जाते हैं, पुराने नीचे होंगे)।",
+  "lib.recent_show": "सिर्फ़ ये दिखाएँ",
+  "lib.recent_dismiss": "ठीक है",
+  "lib.recent_only": "सिर्फ़ पिछले 24 घंटे में मिला दिखाया जा रहा है।",
+  "lib.recent_all": "सब दिखाएँ"
 }

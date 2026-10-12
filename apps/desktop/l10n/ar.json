@@ -262,5 +262,10 @@
   "receive.other_ways_hint": "امسح رمز QR أو أدخل الرمز على الهاتف.",
   "library.sort": "الترتيب",
   "library.sort_taken": "حسب تاريخ الالتقاط",
-  "library.sort_received": "حسب تاريخ الاستلام"
+  "library.sort_received": "حسب تاريخ الاستلام",
+  "lib.recent": "تم استلام {count} عنصر من {from} (تُرتب حسب تاريخ الالتقاط، فالأقدم يظهر في الأسفل).",
+  "lib.recent_show": "عرضها فقط",
+  "lib.recent_dismiss": "حسنًا",
+  "lib.recent_only": "يتم عرض ما وصل خلال آخر 24 ساعة فقط.",
+  "lib.recent_all": "عرض الكل"
 }

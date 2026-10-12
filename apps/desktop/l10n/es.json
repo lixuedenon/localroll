@@ -262,5 +262,10 @@
   "receive.other_ways_hint": "Escanea el código QR o escribe el PIN en el teléfono.",
   "library.sort": "Orden",
   "library.sort_taken": "Por fecha de captura",
-  "library.sort_received": "Por fecha de recepción"
+  "library.sort_received": "Por fecha de recepción",
+  "lib.recent": "Recibidos {count} elementos de {from} (se colocan por fecha de captura; los antiguos quedan más abajo).",
+  "lib.recent_show": "Ver solo estos",
+  "lib.recent_dismiss": "Entendido",
+  "lib.recent_only": "Solo se muestra lo recibido en las últimas 24 horas.",
+  "lib.recent_all": "Ver todo"
 }
