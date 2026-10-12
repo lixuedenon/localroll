@@ -42,11 +42,15 @@ else
       -keyalg RSA -keysize 3072 -validity 36500 -alias localroll \
       -storepass "$pw" -keypass "$pw" -dname "CN=LocalRoll, O=LocalRoll" >/dev/null
   elif command -v openssl >/dev/null; then
-    tmp="$(mktemp -d)"
+    # Windows openssl.exe needs Windows paths (C:/...), and the subject
+    # "/CN=..." must NOT be turned into a path by Git Bash.
+    tmp="$keys/.tmp"
+    mkdir -p "$tmp"
+    w() { cygpath -m "$1" 2>/dev/null || echo "$1"; }
     MSYS_NO_PATHCONV=1 openssl req -x509 -newkey rsa:3072 -nodes -days 36500 \
-      -subj "/CN=LocalRoll/O=LocalRoll" -keyout "$tmp/key.pem" -out "$tmp/cert.pem"
-    openssl pkcs12 -export -name localroll -inkey "$tmp/key.pem" -in "$tmp/cert.pem" \
-      -out "$jks" -passout "pass:$pw"
+      -subj "/CN=LocalRoll/O=LocalRoll" -keyout "$(w "$tmp/key.pem")" -out "$(w "$tmp/cert.pem")" 2>/dev/null
+    MSYS_NO_PATHCONV=1 openssl pkcs12 -export -name localroll -inkey "$(w "$tmp/key.pem")" -in "$(w "$tmp/cert.pem")" \
+      -out "$(w "$jks")" -passout "pass:$pw"
     rm -rf "$tmp"
   else
     echo "Neither keytool nor openssl found. Install Android Studio or a JDK, then run this again."
