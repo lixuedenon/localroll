@@ -48,7 +48,7 @@ else
     mkdir -p "$tmp"
     w() { cygpath -m "$1" 2>/dev/null || echo "$1"; }
     MSYS_NO_PATHCONV=1 openssl req -x509 -newkey rsa:3072 -nodes -days 36500 \
-      -subj "/CN=LocalRoll/O=LocalRoll" -keyout "$(w "$tmp/key.pem")" -out "$(w "$tmp/cert.pem")" 2>/dev/null
+      -subj "/CN=LocalRoll/O=LocalRoll" -keyout "$(w "$tmp/key.pem")" -out "$(w "$tmp/cert.pem")"
     MSYS_NO_PATHCONV=1 openssl pkcs12 -export -name localroll -inkey "$(w "$tmp/key.pem")" -in "$(w "$tmp/cert.pem")" \
       -out "$(w "$jks")" -passout "pass:$pw"
     rm -rf "$tmp"
