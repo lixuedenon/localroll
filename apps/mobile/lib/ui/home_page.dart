@@ -266,6 +266,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     );
   }
 
+  /// Android 10+ removes the GPS position from photos handed to apps unless
+  /// "media location" access is asked for too — ask, so originals arrive on
+  /// the PC with their location (iPhone always includes it).
+  static const PermissionRequestOption _permissionOption = PermissionRequestOption(
+    androidPermission: AndroidPermission(type: RequestType.common, mediaLocation: true),
+  );
+
   Future<void> _init() async {
     if (mounted) setState(() => _error = null);
     PermissionState ps;
@@ -273,15 +280,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       // Ask for photos first and only then start LAN discovery: two system
       // permission prompts at once can leave one callback never firing on iOS.
       await _waitUntilForeground();
-      final before = await PhotoManager.getPermissionState(requestOption: const PermissionRequestOption())
+      final before = await PhotoManager.getPermissionState(requestOption: _permissionOption)
           .timeout(const Duration(seconds: 5));
       final sw = Stopwatch()..start();
-      ps = await PhotoManager.requestPermissionExtend().timeout(const Duration(seconds: 20));
+      ps = await PhotoManager.requestPermissionExtend(requestOption: _permissionOption).timeout(const Duration(seconds: 20));
       _diag = 'before=${before.name} after=${ps.name} ${sw.elapsedMilliseconds}ms';
     } on TimeoutException {
       // The prompt never answered; read the current state instead of hanging.
       try {
-        ps = await PhotoManager.getPermissionState(requestOption: const PermissionRequestOption());
+        ps = await PhotoManager.getPermissionState(requestOption: _permissionOption);
         _diag = 'request timed out, state=${ps.name}';
       } catch (e) {
         _fail(e);
