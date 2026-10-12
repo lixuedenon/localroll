@@ -240,5 +240,10 @@
   "err.cert_changed": "“{name}” có chứng chỉ bảo mật khác (đã cài lại, hoặc có thiết bị chen giữa). Để an toàn nên chưa gửi gì. Hãy quên rồi ghép nối lại.",
   "err.upgrade_required": "Thiết bị này phải dùng kết nối mã hóa. Hãy cập nhật LocalRoll.",
   "err.not_lan": "Chỉ thiết bị trong cùng mạng gia đình hoặc văn phòng mới kết nối được.",
-  "connect.other_ways_hint": "Quét mã QR ở trang Nhận của máy tính, hoặc nhập địa chỉ và mã PIN."
+  "connect.other_ways_hint": "Quét mã QR ở trang Nhận của máy tính, hoặc nhập địa chỉ và mã PIN.",
+  "err.declined": "Máy tính đã từ chối lần truyền này.",
+  "transfer.stopped_declined": "Máy tính đã từ chối lần truyền này.",
+  "transfer.title_all_done": "Đã gửi tất cả",
+  "transfer.title_stopped": "Đã dừng",
+  "transfer.title_partly": "Xong, có lỗi"
 }

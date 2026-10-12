@@ -240,5 +240,10 @@
   "err.cert_changed": "« {name} » présente un autre certificat de sécurité (réinstallé, ou quelque chose s’interpose). Rien n’a été envoyé par sécurité. Oubliez-le puis associez-le à nouveau.",
   "err.upgrade_required": "Cet appareil doit utiliser une connexion chiffrée. Mettez LocalRoll à jour.",
   "err.not_lan": "Seuls les appareils du même réseau domestique ou de bureau peuvent se connecter.",
-  "connect.other_ways_hint": "Scannez le QR code de la page Recevoir du PC, ou saisissez son adresse et son code PIN."
+  "connect.other_ways_hint": "Scannez le QR code de la page Recevoir du PC, ou saisissez son adresse et son code PIN.",
+  "err.declined": "Le PC a refusé ce transfert.",
+  "transfer.stopped_declined": "Le PC a refusé ce transfert.",
+  "transfer.title_all_done": "Tout est envoyé",
+  "transfer.title_stopped": "Arrêté",
+  "transfer.title_partly": "Terminé, avec des échecs"
 }

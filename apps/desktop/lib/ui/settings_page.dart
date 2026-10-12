@@ -65,6 +65,19 @@ class _SettingsPageState extends State<SettingsPage> {
             _section(theme, tr('identity.title')),
             IdentityCard(services: s),
             const SizedBox(height: 28),
+            _section(theme, tr('settings.receiving')),
+            ListenableBuilder(
+              listenable: s.settings,
+              builder: (context, _) => Card(
+                child: SwitchListTile(
+                  value: s.settings.autoAccept,
+                  onChanged: (v) => s.settings.update((x) => x.autoAccept = v),
+                  title: Text(tr('settings.auto_accept')),
+                  subtitle: Text(tr('settings.auto_accept_hint')),
+                ),
+              ),
+            ),
+            const SizedBox(height: 28),
             _section(theme, tr('settings.startup')),
             const _AutoStartSwitch(),
             const SizedBox(height: 28),

@@ -1,17 +1,16 @@
 // apps/desktop/lib/ui/home_shell.dart
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 
 import '../app_services.dart';
 import '../l10n/l10n.dart';
-import '../services/network.dart';
 import 'app_nav.dart';
 import 'dashboard_page.dart';
 import 'family_page.dart';
 import 'jobs_page.dart';
 import 'library_page.dart';
+import 'notices.dart';
 import 'pair_prompt.dart';
 import 'receive_page.dart';
 import 'send_page.dart';
@@ -32,17 +31,7 @@ class HomeShell extends StatefulWidget {
 class _HomeShellState extends State<HomeShell> {
   final AppNav _nav = AppNav.instance;
   late final PairPrompter _prompter;
-
-  int _filesSeen = 0;
-  Timer? _filesTimer;
-
-  @override
-  void dispose() {
-    _prompter.dispose();
-    widget.services.hub.removeListener(_onHub);
-    _filesTimer?.cancel();
-    super.dispose();
-  }
+  late final Notices _notices;
 
   int _textsSeen = 0;
   bool _textOpen = false;
@@ -64,36 +53,24 @@ class _HomeShellState extends State<HomeShell> {
     }
   }
 
-  /// Files from another PC: say where they went (once per burst).
+  /// Texts from other devices pop up in the text window.
   void _onHub() {
     if (widget.services.hub.texts.length > _textsSeen) unawaited(_showTexts());
-    final n = widget.services.hub.savedFiles.length;
-    if (n <= _filesSeen) {
-      _filesSeen = n;
-      return;
-    }
-    _filesTimer?.cancel();
-    _filesTimer = Timer(const Duration(seconds: 2), () {
-      final now = widget.services.hub.savedFiles.length;
-      final got = now - _filesSeen;
-      _filesSeen = now;
-      final ctx = AppNav.instance.navigatorKey.currentContext;
-      if (got <= 0 || ctx == null) return;
-      final last = widget.services.hub.savedFiles.last;
-      final folder = File(last).parent.path;
-      ScaffoldMessenger.maybeOf(ctx)?.showSnackBar(SnackBar(
-        duration: const Duration(seconds: 8),
-        content: Text(tr('receive.got_files', {'count': got, 'folder': folder})),
-        action: SnackBarAction(label: tr('common.show_in_folder'), onPressed: () => revealInExplorer(last)),
-      ));
-    });
+  }
+
+  @override
+  void dispose() {
+    _prompter.dispose();
+    _notices.dispose();
+    widget.services.hub.removeListener(_onHub);
+    super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
     _prompter = PairPrompter(widget.services.server); // tap-to-pair dialogs
-    _filesSeen = widget.services.hub.savedFiles.length;
+    _notices = Notices(widget.services); // accept? / all received / all sent
     _textsSeen = widget.services.hub.texts.length;
     widget.services.hub.addListener(_onHub);
     // Always start on Home: status, main actions, what needs attention.

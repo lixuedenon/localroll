@@ -176,6 +176,10 @@ class AppSettings extends ChangeNotifier {
   String? docsFolder;
   String? otherFolder;
 
+  /// Receive from paired devices without asking. Off: each device's first
+  /// transfer waits for "Accept" on this PC (then 30 minutes free).
+  bool autoAccept = true;
+
   /// Library: arrivals up to this time were already looked at ("Just
   /// received" banner hidden for them).
   int recentSeenMs = 0;
@@ -210,6 +214,7 @@ class AppSettings extends ChangeNotifier {
     s.docsFolder = j['docsFolder'] as String?;
     s.otherFolder = j['otherFolder'] as String?;
     s.recentSeenMs = (j['recentSeenMs'] as num?)?.toInt() ?? 0;
+    s.autoAccept = j['autoAccept'] != false;
     s.hiddenPeers.addAll((j['hiddenPeers'] as List? ?? const []).cast<String>());
     s.port = (j['port'] as num?)?.toInt() ?? LrProtocol.defaultPort;
     s.ffmpegPath = j['ffmpegPath'] as String?;
@@ -256,6 +261,7 @@ class AppSettings extends ChangeNotifier {
       if (otherFolder != null) 'otherFolder': otherFolder,
       'hiddenPeers': hiddenPeers.toList(),
       'recentSeenMs': recentSeenMs,
+      'autoAccept': autoAccept,
       'port': port,
       'ffmpegPath': ffmpegPath,
       'language': language,

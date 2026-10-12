@@ -9,6 +9,7 @@ import '../services/discovery.dart';
 import '../services/mobile_settings.dart';
 import '../services/uploader.dart';
 import 'cleanup_page.dart';
+import 'theme.dart';
 
 /// Connects to the PC, sends the selected assets and shows per-file progress.
 /// Pops with `true` when everything finished so the selection can be cleared.
@@ -173,7 +174,40 @@ class _TransferPageState extends State<TransferPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(summary, style: theme.textTheme.titleSmall),
+              if (up.finished)
+                // A clear "it's over" — like LocalSend's done screen.
+                Row(children: [
+                  Icon(
+                    up.failedCount == 0 && up.stopReason == StopReason.none
+                        ? Icons.check_circle_rounded
+                        : up.failedCount > 0
+                            ? Icons.error_outline_rounded
+                            : Icons.pause_circle_outline_rounded,
+                    size: 44,
+                    color: up.failedCount == 0 && up.stopReason == StopReason.none
+                        ? LrColors.verified
+                        : up.failedCount > 0
+                            ? LrColors.danger
+                            : LrColors.safelight,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text(
+                        tr(up.failedCount > 0
+                            ? 'transfer.title_partly'
+                            : up.stopReason != StopReason.none
+                                ? 'transfer.title_stopped'
+                                : 'transfer.title_all_done'),
+                        style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(summary, style: theme.textTheme.bodyMedium),
+                    ]),
+                  ),
+                ])
+              else
+                Text(summary, style: theme.textTheme.titleSmall),
               if (up.finished && up.stopReason != StopReason.none)
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
@@ -183,6 +217,7 @@ class _TransferPageState extends State<TransferPage> {
                       StopReason.time => 'transfer.stopped_time',
                       StopReason.battery => 'transfer.stopped_battery',
                       StopReason.pcUnavailable => 'transfer.stopped_pc',
+                      StopReason.declined => 'transfer.stopped_declined',
                       _ => 'transfer.stopped_user',
                     }),
                     style: theme.textTheme.bodySmall,

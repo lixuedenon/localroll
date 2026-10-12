@@ -1,4 +1,5 @@
 // apps/desktop/lib/server/transfer_server.dart
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -37,6 +38,16 @@ class PendingPair {
   bool get expired => DateTime.now().difference(created) > LrProtocol.pairApprovalTimeout;
 }
 
+/// A device wants to send while auto-receive is off: the UI asks.
+class IncomingAsk {
+  IncomingAsk(this.device, this.count, this.bytes);
+
+  final TrustedDevice device;
+  final int count;
+  final int bytes;
+  final Completer<bool> answer = Completer<bool>();
+}
+
 class _UploadSession {
   _UploadSession(this.id, this.device, this.offers);
 
@@ -70,6 +81,53 @@ class TransferServer extends ChangeNotifier {
   PortMux? _mux;
   HttpServer? _plainHttp;
   HttpServer? _secureHttp;
+
+  /// Auto-receive off: devices accepted (until) / declined (until).
+  final Map<String, DateTime> _acceptedUntil = {};
+  final Map<String, DateTime> _declinedUntil = {};
+  final Map<String, IncomingAsk> _asking = {};
+
+  /// Open "Accept / Decline" questions (the UI shows a dialog for each).
+  final ValueNotifier<List<IncomingAsk>> incomingAsks = ValueNotifier(const []);
+
+  static const Duration _acceptWindow = Duration(minutes: 30);
+
+  /// May [device] send now? Asks the user once; an Accept covers the rest of
+  /// this transfer (each file is its own request) for [_acceptWindow].
+  Future<bool> _mayReceive(TrustedDevice device, List<FileOffer> files) async {
+    if (settings.autoAccept) return true;
+    final now = DateTime.now();
+    final ok = _acceptedUntil[device.id];
+    if (ok != null && ok.isAfter(now)) {
+      _acceptedUntil[device.id] = now.add(_acceptWindow);
+      return true;
+    }
+    final no = _declinedUntil[device.id];
+    if (no != null && no.isAfter(now)) return false;
+    final ask = _asking[device.id] ??= () {
+      final a = IncomingAsk(device, files.length, files.fold(0, (s, f) => s + (f.size ?? 0)));
+      incomingAsks.value = [...incomingAsks.value, a];
+      return a;
+    }();
+    bool yes;
+    try {
+      yes = await ask.answer.future.timeout(const Duration(minutes: 2), onTimeout: () => false);
+    } finally {
+      _asking.remove(device.id);
+      incomingAsks.value = incomingAsks.value.where((x) => x != ask).toList();
+    }
+    if (yes) {
+      _acceptedUntil[device.id] = DateTime.now().add(_acceptWindow);
+    } else {
+      _declinedUntil[device.id] = DateTime.now().add(const Duration(minutes: 2));
+    }
+    return yes;
+  }
+
+  /// Called by the Accept / Decline dialog.
+  void answerIncoming(IncomingAsk ask, {required bool accept}) {
+    if (!ask.answer.isCompleted) ask.answer.complete(accept);
+  }
 
   /// Failed sign-ins per address, to slow down guessing.
   final Map<String, List<DateTime>> _failures = {};
@@ -485,6 +543,9 @@ class TransferServer extends ChangeNotifier {
     // files we could not store; the phone shows why and keeps them queued.
     if (library.offline) {
       return _json(req.response, 503, {'error': 'library_offline'});
+    }
+    if (!await _mayReceive(device, body.files)) {
+      return _json(req.response, 403, {'error': 'declined'});
     }
     // Family group: the phone tells us whose phone it is (editable there).
     final owner = body.owner?.trim();

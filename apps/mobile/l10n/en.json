@@ -240,5 +240,10 @@
   "err.cert_changed": "“{name}” shows a different security certificate (reinstalled, or something is in between). For safety nothing was sent. Forget it and pair again.",
   "err.upgrade_required": "This device must use an encrypted connection. Update LocalRoll on it.",
   "err.not_lan": "Only devices on the same home or office network can connect.",
-  "connect.other_ways_hint": "Scan the QR code on the PC’s Receive page, or type its address and PIN."
+  "connect.other_ways_hint": "Scan the QR code on the PC’s Receive page, or type its address and PIN.",
+  "err.declined": "The PC declined this transfer.",
+  "transfer.stopped_declined": "The PC declined this transfer.",
+  "transfer.title_all_done": "All sent",
+  "transfer.title_stopped": "Stopped",
+  "transfer.title_partly": "Finished, some failed"
 }

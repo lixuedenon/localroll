@@ -240,5 +240,10 @@
   "err.cert_changed": "„{name}“ zeigt ein anderes Sicherheitszertifikat (neu installiert oder jemand dazwischen). Zur Sicherheit wurde nichts gesendet. Entfernen und neu koppeln.",
   "err.upgrade_required": "Dieses Gerät muss eine verschlüsselte Verbindung nutzen. Bitte LocalRoll aktualisieren.",
   "err.not_lan": "Nur Geräte im selben Heim- oder Büronetz können sich verbinden.",
-  "connect.other_ways_hint": "QR-Code auf der Empfangen-Seite des PCs scannen oder Adresse und PIN eingeben."
+  "connect.other_ways_hint": "QR-Code auf der Empfangen-Seite des PCs scannen oder Adresse und PIN eingeben.",
+  "err.declined": "Der PC hat diese Übertragung abgelehnt.",
+  "transfer.stopped_declined": "Der PC hat diese Übertragung abgelehnt.",
+  "transfer.title_all_done": "Alles gesendet",
+  "transfer.title_stopped": "Angehalten",
+  "transfer.title_partly": "Fertig, mit Fehlern"
 }

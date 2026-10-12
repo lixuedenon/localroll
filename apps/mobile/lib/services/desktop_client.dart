@@ -126,8 +126,9 @@ class DesktopClient {
   Future<String> upgrade() async =>
       (await _send('POST', LrProtocol.pathUpgrade, json: const <String, dynamic>{}))['token'] as String;
 
-  Future<SessionResponse> createSession(SessionRequest request) async =>
-      SessionResponse.fromJson(await _send('POST', LrProtocol.pathSessions, json: request.toJson()));
+  /// May wait while the PC asks its user to accept (auto-receive off).
+  Future<SessionResponse> createSession(SessionRequest request) async => SessionResponse.fromJson(
+      await _send('POST', LrProtocol.pathSessions, json: request.toJson(), timeout: const Duration(minutes: 3)));
 
   Future<int> status(String sessionId, String fileId) async {
     final j = await _send('GET', LrProtocol.filePath(sessionId, fileId));

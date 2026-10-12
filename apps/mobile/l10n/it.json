@@ -240,5 +240,10 @@
   "err.cert_changed": "«{name}» mostra un altro certificato di sicurezza (reinstallato o c’è qualcosa in mezzo). Per sicurezza non è stato inviato nulla. Dimenticalo e abbinalo di nuovo.",
   "err.upgrade_required": "Questo dispositivo deve usare una connessione cifrata. Aggiorna LocalRoll.",
   "err.not_lan": "Possono collegarsi solo dispositivi della stessa rete di casa o ufficio.",
-  "connect.other_ways_hint": "Scansiona il codice QR nella pagina Ricevi del PC o inserisci indirizzo e PIN."
+  "connect.other_ways_hint": "Scansiona il codice QR nella pagina Ricevi del PC o inserisci indirizzo e PIN.",
+  "err.declined": "Il PC ha rifiutato questo trasferimento.",
+  "transfer.stopped_declined": "Il PC ha rifiutato questo trasferimento.",
+  "transfer.title_all_done": "Tutto inviato",
+  "transfer.title_stopped": "Interrotto",
+  "transfer.title_partly": "Finito, con errori"
 }

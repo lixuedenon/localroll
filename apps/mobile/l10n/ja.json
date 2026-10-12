@@ -240,5 +240,10 @@
   "err.cert_changed": "「{name}」のセキュリティ証明書が変わりました（再インストールされたか、間に何かがいます）。安全のため送信していません。登録を解除してペアリングし直してください。",
   "err.upgrade_required": "このデバイスは暗号化接続が必要です。LocalRoll を最新版に更新してください。",
   "err.not_lan": "同じ家庭・職場のネットワーク内の機器だけが接続できます。",
-  "connect.other_ways_hint": "PC の「受信」画面の QR コードをスキャンするか、アドレスと PIN を入力します。"
+  "connect.other_ways_hint": "PC の「受信」画面の QR コードをスキャンするか、アドレスと PIN を入力します。",
+  "err.declined": "PC がこの転送を拒否しました。",
+  "transfer.stopped_declined": "PC がこの転送を拒否しました。",
+  "transfer.title_all_done": "すべて送信しました",
+  "transfer.title_stopped": "停止しました",
+  "transfer.title_partly": "完了（一部失敗）"
 }

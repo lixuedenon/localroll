@@ -240,5 +240,10 @@
   "err.cert_changed": "“{name}” farklı bir güvenlik sertifikası gösteriyor (yeniden kuruldu ya da arada biri var). Güvenlik için hiçbir şey gönderilmedi. Unutup yeniden eşleştirin.",
   "err.upgrade_required": "Bu cihaz şifreli bağlantı kullanmalı. LocalRoll’u güncelleyin.",
   "err.not_lan": "Yalnızca aynı ev veya ofis ağındaki cihazlar bağlanabilir.",
-  "connect.other_ways_hint": "PC’nin Al sayfasındaki QR kodu tarayın veya adres ve PIN girin."
+  "connect.other_ways_hint": "PC’nin Al sayfasındaki QR kodu tarayın veya adres ve PIN girin.",
+  "err.declined": "PC bu aktarımı reddetti.",
+  "transfer.stopped_declined": "PC bu aktarımı reddetti.",
+  "transfer.title_all_done": "Hepsi gönderildi",
+  "transfer.title_stopped": "Durduruldu",
+  "transfer.title_partly": "Bitti, bazıları başarısız"
 }

@@ -240,5 +240,10 @@
   "err.cert_changed": "“{name}” menampilkan sertifikat keamanan lain (dipasang ulang, atau ada pihak di tengah). Demi keamanan tidak ada yang dikirim. Lupakan lalu pasangkan ulang.",
   "err.upgrade_required": "Perangkat ini harus memakai koneksi terenkripsi. Perbarui LocalRoll.",
   "err.not_lan": "Hanya perangkat di jaringan rumah atau kantor yang sama yang bisa terhubung.",
-  "connect.other_ways_hint": "Pindai kode QR di halaman Terima pada PC, atau ketik alamat dan PIN."
+  "connect.other_ways_hint": "Pindai kode QR di halaman Terima pada PC, atau ketik alamat dan PIN.",
+  "err.declined": "PC menolak transfer ini.",
+  "transfer.stopped_declined": "PC menolak transfer ini.",
+  "transfer.title_all_done": "Semua terkirim",
+  "transfer.title_stopped": "Dihentikan",
+  "transfer.title_partly": "Selesai, ada yang gagal"
 }
