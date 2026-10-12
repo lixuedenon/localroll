@@ -315,9 +315,18 @@ class LibraryIndex extends ChangeNotifier {
     return path.substring(prefix.length).replaceAll(_sep, '/');
   }
 
+  /// Top-level folders that hold other kinds of files (documents and other
+  /// files from PCs): kept out of the photo library.
+  Set<String> ignoredFolders = {};
+
   /// Our own folders and hidden ones are not part of the library.
-  static bool _ignored(String rel) =>
-      rel.split('/').any((seg) => seg.startsWith('.')) || rel == '_converted' || rel.startsWith('_converted/');
+  bool _ignored(String rel) {
+    if (rel.split('/').any((seg) => seg.startsWith('.')) || rel == '_converted' || rel.startsWith('_converted/')) {
+      return true;
+    }
+    final top = (rel.contains('/') ? rel.substring(0, rel.indexOf('/')) : rel).toLowerCase();
+    return ignoredFolders.any((f) => f.toLowerCase() == top);
+  }
 
   // ------------------------------------------------------------- reconcile
 

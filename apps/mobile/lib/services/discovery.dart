@@ -214,7 +214,14 @@ final Map<String, DateTime> _lookChecked = {};
 /// Paired PCs seen on the Wi-Fi: pick up a new name / icon / picture right
 /// away (not only when sending). At most once a minute per PC.
 Future<void> refreshPairedLooks(MobileSettings settings, List<FoundDesktop> found) async {
-  for (final f in found) {
+  // Paired PCs the Wi-Fi search has not (re)found: try where they were last.
+  final all = [
+    ...found,
+    for (final d in settings.desktops)
+      if (!found.any((f) => f.id == d.id))
+        FoundDesktop(id: d.id, name: d.name, hosts: [if (d.lastHost != null) d.lastHost!, ...d.hosts], port: d.port),
+  ];
+  for (final f in all) {
     final d = settings.byId(f.id);
     if (d == null) continue;
     final last = _lookChecked[f.id];
@@ -249,7 +256,13 @@ Future<void> _pullDeletions(MobileSettings settings, PairedDesktop d, String hos
     final r = await c.changes(d.changesSinceMs);
     if (r.deleted.isNotEmpty) {
       final sent = settings.sentTo(d.id);
-      final ours = r.deleted.where(sent.contains).toList();
+      // A Live Photo whose video was deleted on the PC is not fully backed
+      // up any more either: treat it as its photo (re-sending then only
+      // sends the missing video).
+      final ours = {
+        for (final id in r.deleted)
+          if (sent.contains(livePhotoIdOf(id))) livePhotoIdOf(id),
+      }.toList();
       if (ours.isNotEmpty) {
         await settings.unmarkSent(d.id, ours);
         await settings.addLost(d.id, ours);

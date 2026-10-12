@@ -67,13 +67,45 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     widget.discovery.addListener(_onDiscovery);
+    widget.settings.addListener(_onSettings);
+    _lastDesktop = widget.settings.current?.id;
+    _lastLost = _lostCount();
+    // Ask the PC now and then what was deleted there (not only when it
+    // re-appears on the Wi-Fi), so the phone notices without a restart.
+    _changesTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+        refreshPairedLooks(widget.settings, widget.discovery.found);
+      }
+    });
     _init();
+  }
+
+  String? _lastDesktop;
+  int _lastLost = 0;
+  Timer? _changesTimer;
+
+  int _lostCount() {
+    final d = widget.settings.current;
+    return d == null ? 0 : widget.settings.lostOn(d.id).length;
+  }
+
+  /// Another PC chosen, or the PC reported deletions: count again.
+  void _onSettings() {
+    final id = widget.settings.current?.id;
+    final lost = _lostCount();
+    if (id != _lastDesktop || lost != _lastLost) {
+      _lastDesktop = id;
+      _lastLost = lost;
+      unawaited(_refreshHome());
+    }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     widget.discovery.removeListener(_onDiscovery);
+    widget.settings.removeListener(_onSettings);
+    _changesTimer?.cancel();
     _auto.dispose();
     super.dispose();
   }
@@ -98,6 +130,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       _reload();
     } else {
       _auto.check();
+      refreshPairedLooks(widget.settings, widget.discovery.found);
+      unawaited(_refreshHome());
     }
   }
 
@@ -278,6 +312,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       await _loadMore();
       // Photos taken while the PC was off go out now.
       _auto.check();
+      unawaited(_refreshHome());
     } catch (e) {
       _fail(e);
     }
@@ -316,12 +351,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   /// Counts for the Home tab (whole library, in the background).
   Future<void> _refreshHome() async {
     final d = widget.settings.current;
-    if (_counting || d == null || !(_permission?.hasAccess ?? false)) return;
+    if (_counting || !(_permission?.hasAccess ?? false)) return;
     setState(() => _counting = true);
     try {
-      final sent = widget.settings.sentTo(d.id);
+      // No PC yet: everything is "not backed up".
+      final sent = d == null ? <String>{} : widget.settings.sentTo(d.id);
       final plan = await BackupPlanner.plan(BackupFilter(), sent);
-      final sizes = await BackgroundTransfer.originalSizes(sent.toList());
+      final sizes = sent.isEmpty ? const <String, int>{} : await BackgroundTransfer.originalSizes(sent.toList());
       if (!mounted) return;
       setState(() {
         _pending = plan;

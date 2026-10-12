@@ -239,5 +239,7 @@
   "backup.range_custom": "Tarih seç…",
   "err.cert_changed": "“{name}” farklı bir güvenlik sertifikası gösteriyor (yeniden kuruldu ya da arada biri var). Güvenlik için hiçbir şey gönderilmedi. Unutup yeniden eşleştirin.",
   "err.upgrade_required": "Bu cihaz şifreli bağlantı kullanmalı. LocalRoll’u güncelleyin.",
-  "err.not_lan": "Yalnızca aynı ev veya ofis ağındaki cihazlar bağlanabilir."
+  "err.not_lan": "Yalnızca aynı ev veya ofis ağındaki cihazlar bağlanabilir.",
+  "settings.exit": "LocalRoll’dan çık",
+  "settings.exit_hint": "Uygulamayı kapatır. Otomatik gönderme bir sonraki açılışta sürer."
 }

@@ -35,6 +35,7 @@ class SendPage extends StatefulWidget {
 
 class _SendPageState extends State<SendPage> {
   bool _looking = false;
+  bool _showHidden = false;
 
   @override
   void initState() {
@@ -72,7 +73,13 @@ class _SendPageState extends State<SendPage> {
       listenable: Listenable.merge([s.peers, s.sender, s.settings]),
       builder: (context, _) {
         final paired = s.settings.peers.values.toList()..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-        final nearby = s.peers.found.where((f) => !s.settings.peers.containsKey(f.id)).toList();
+        final unpaired = s.peers.found.where((f) => !s.settings.peers.containsKey(f.id)).toList();
+        // "Forgotten" PCs are left out unless asked for.
+        final hidden = unpaired.where((f) => s.settings.hiddenPeers.contains(f.id)).toList();
+        final nearby = [
+          for (final f in unpaired)
+            if (_showHidden || !s.settings.hiddenPeers.contains(f.id)) f,
+        ];
         return Scaffold(
           appBar: AppBar(
             title: Text(tr('send.title')),
@@ -113,6 +120,14 @@ class _SendPageState extends State<SendPage> {
                 Text(s.peers.scanning ? tr('send.searching') : tr('send.none_nearby'),
                     style: const TextStyle(color: LrColors.muted)),
               for (final f in nearby) _nearbyCard(context, f),
+              if (hidden.isNotEmpty)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    onPressed: () => setState(() => _showHidden = !_showHidden),
+                    child: Text(_showHidden ? tr('send.hide_forgotten') : tr('send.show_forgotten', {'count': hidden.length})),
+                  ),
+                ),
               if (s.sender.jobs.isNotEmpty) ...[
                 const SizedBox(height: 24),
                 Row(children: [
@@ -125,8 +140,6 @@ class _SendPageState extends State<SendPage> {
                 ]),
                 for (final j in s.sender.jobs) _JobTile(job: j, onCancel: () => s.sender.cancel(j)),
               ],
-              const SizedBox(height: 24),
-              _receivedFolder(context),
             ],
           ),
         );
@@ -177,10 +190,9 @@ class _SendPageState extends State<SendPage> {
             label: Text(tr('send.folder')),
           ),
           PopupMenuButton<String>(
-            onSelected: (v) {
-              if (v == 'forget') _forget(p);
-            },
+            onSelected: (v) => _unpair(p, forget: v == 'forget'),
             itemBuilder: (_) => [
+              PopupMenuItem(value: 'disconnect', child: Text(tr('send.disconnect'))),
               PopupMenuItem(value: 'forget', child: Text(tr('send.forget'))),
             ],
           ),
@@ -206,33 +218,6 @@ class _SendPageState extends State<SendPage> {
           ]),
         ),
       );
-
-  Widget _receivedFolder(BuildContext context) {
-    final s = widget.services;
-    return Card(
-      child: ListTile(
-        leading: const Icon(Icons.download_rounded),
-        title: Text(tr('send.received_folder')),
-        subtitle: Text(s.settings.receivedPath),
-        trailing: Wrap(spacing: 8, children: [
-          TextButton(
-            onPressed: () async {
-              await Directory(s.settings.receivedPath).create(recursive: true);
-              await Process.run('explorer.exe', [s.settings.receivedPath]);
-            },
-            child: Text(tr('common.open')),
-          ),
-          TextButton(
-            onPressed: () async {
-              final d = await getDirectoryPath(initialDirectory: s.settings.receivedPath);
-              if (d != null) await s.settings.update((x) => x.receivedPath = d);
-            },
-            child: Text(tr('send.change')),
-          ),
-        ]),
-      ),
-    );
-  }
 
   // ------------------------------------------------------------- actions
 
@@ -262,22 +247,31 @@ class _SendPageState extends State<SendPage> {
     widget.services.sender.add(p, files, name);
   }
 
-  Future<void> _forget(PeerPc p) async {
+  /// Disconnect: both PCs stop sending to each other; each still sees the
+  /// other under "Nearby" and can pair again with one click.
+  /// Forget: the same, and this PC also stops listing the other one.
+  Future<void> _unpair(PeerPc p, {required bool forget}) async {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(tr('send.forget_title', {'name': p.name})),
-        content: Text(tr('send.forget_body')),
+        title: Text(tr(forget ? 'send.forget_title' : 'send.disconnect_title', {'name': p.name})),
+        content: Text(tr(forget ? 'send.forget_body' : 'send.disconnect_body')),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('common.cancel'))),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('send.forget'))),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(tr(forget ? 'send.forget' : 'send.disconnect')),
+          ),
         ],
       ),
     );
-    if (ok == true) await widget.services.peers.forget(p);
+    if (ok == true) await widget.services.peers.forget(p, hide: forget);
   }
 
   Future<void> _pair(FoundPc f) async {
+    if (widget.services.settings.hiddenPeers.contains(f.id)) {
+      await widget.services.settings.update((x) => x.hiddenPeers.remove(f.id));
+    }
     final emoji = ValueNotifier<List<String>?>(null);
     var cancelled = false;
     final dialog = showDialog<void>(

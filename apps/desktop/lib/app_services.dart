@@ -40,6 +40,8 @@ class AppServices {
   static Future<AppServices> create() async {
     final settings = await AppSettings.load();
     final library = LibraryIndex(settings.libraryPath, stateFile: settings.libraryStateFile);
+    // Documents / other files from PCs live beside the photos, not in the library view.
+    library.ignoredFolders = {?settings.docsFolder, ?settings.otherFolder};
     await library.load();
     final hub = ReceiveHub();
     // HTTPS certificate (made on first start, a few seconds once).

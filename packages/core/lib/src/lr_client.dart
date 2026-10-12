@@ -118,6 +118,11 @@ class LrClient {
     }
   }
 
+  /// Cheap signed-in request: fails with 401 when the other side no longer
+  /// knows us.
+  Future<void> ping() async =>
+      _send('GET', LrProtocol.pathChanges, query: {'since': '${DateTime.now().millisecondsSinceEpoch}'}, timeout: const Duration(seconds: 5));
+
   /// HTTPS only: trade a token from an old plain-HTTP pairing for a new one.
   Future<String> upgrade() async =>
       (await _send('POST', LrProtocol.pathUpgrade, json: const <String, dynamic>{}))['token'] as String;

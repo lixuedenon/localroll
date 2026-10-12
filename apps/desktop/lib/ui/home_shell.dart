@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../app_services.dart';
 import '../l10n/l10n.dart';
+import '../services/network.dart';
 import 'app_nav.dart';
 import 'dashboard_page.dart';
 import 'family_page.dart';
@@ -56,11 +57,12 @@ class _HomeShellState extends State<HomeShell> {
       _filesSeen = now;
       final ctx = AppNav.instance.navigatorKey.currentContext;
       if (got <= 0 || ctx == null) return;
-      final folder = widget.services.settings.receivedPath;
+      final last = widget.services.hub.savedFiles.last;
+      final folder = File(last).parent.path;
       ScaffoldMessenger.maybeOf(ctx)?.showSnackBar(SnackBar(
         duration: const Duration(seconds: 8),
         content: Text(tr('receive.got_files', {'count': got, 'folder': folder})),
-        action: SnackBarAction(label: tr('common.open'), onPressed: () => Process.run('explorer.exe', [folder])),
+        action: SnackBarAction(label: tr('common.show_in_folder'), onPressed: () => revealInExplorer(last)),
       ));
     });
   }

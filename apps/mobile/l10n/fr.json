@@ -239,5 +239,7 @@
   "backup.range_custom": "Choisir les dates…",
   "err.cert_changed": "« {name} » présente un autre certificat de sécurité (réinstallé, ou quelque chose s’interpose). Rien n’a été envoyé par sécurité. Oubliez-le puis associez-le à nouveau.",
   "err.upgrade_required": "Cet appareil doit utiliser une connexion chiffrée. Mettez LocalRoll à jour.",
-  "err.not_lan": "Seuls les appareils du même réseau domestique ou de bureau peuvent se connecter."
+  "err.not_lan": "Seuls les appareils du même réseau domestique ou de bureau peuvent se connecter.",
+  "settings.exit": "Quitter LocalRoll",
+  "settings.exit_hint": "Ferme l’app. L’envoi automatique reprend à la prochaine ouverture."
 }

@@ -134,6 +134,8 @@ class PeerDirectory extends ChangeNotifier {
         final info = await c.info(timeout: const Duration(seconds: 2));
         if (info.id != p.id) continue;
         _reachable[p.id] = FoundPc(id: p.id, name: info.name, hosts: [host], port: port, info: info);
+        // Still paired over there? (It may have unpaired while we were off.)
+        if (!await _stillPaired(p, host, port)) return;
         if (p.lastHost != host || p.port != port || p.name != info.name || p.icon != info.icon || p.color != info.color) {
           await settings.update((s) {
             p
@@ -154,6 +156,30 @@ class PeerDirectory extends ChangeNotifier {
       }
     }
     _reachable.remove(p.id);
+  }
+
+  /// False (and the pairing removed here too) when the other PC answers
+  /// "not paired" — it disconnected or forgot us while we could not hear it.
+  Future<bool> _stillPaired(PeerPc p, String host, int port) async {
+    LrClient? c;
+    try {
+      c = await openPeer(settings, p, host, port);
+      if (c == null) return true;
+      await c.ping();
+      return true;
+    } on LrHttpError catch (e) {
+      if (e.status != 401) return true;
+      await settings.update((s) {
+        s.peers.remove(p.id);
+        s.trusted.remove(p.id);
+      });
+      _reachable.remove(p.id);
+      return false;
+    } catch (_) {
+      return true; // network trouble: decide another time
+    } finally {
+      c?.close();
+    }
   }
 
   /// Asks every address of this PC's local networks on the usual ports.
@@ -301,8 +327,10 @@ class PeerDirectory extends ChangeNotifier {
     throw PeerError('cannot_reach', '$lastError');
   }
 
-  /// Forget a PC on both sides (the other side is told if it is reachable).
-  Future<void> forget(PeerPc p) async {
+  /// Unpair a PC on both sides (the other side is told if it is reachable;
+  /// if not, it finds out the next time it tries). [hide]: "Forget" — also
+  /// stop listing it under "Nearby".
+  Future<void> forget(PeerPc p, {bool hide = false}) async {
     final at = where(p.id);
     for (final host in {...?at?.hosts, ...p.tryHosts}) {
       LrClient? c;
@@ -318,6 +346,7 @@ class PeerDirectory extends ChangeNotifier {
     await settings.update((s) {
       s.peers.remove(p.id);
       s.trusted.remove(p.id);
+      if (hide) s.hiddenPeers.add(p.id);
     });
     _reachable.remove(p.id);
     notifyListeners();

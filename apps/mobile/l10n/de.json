@@ -239,5 +239,7 @@
   "backup.range_custom": "Daten wählen…",
   "err.cert_changed": "„{name}“ zeigt ein anderes Sicherheitszertifikat (neu installiert oder jemand dazwischen). Zur Sicherheit wurde nichts gesendet. Entfernen und neu koppeln.",
   "err.upgrade_required": "Dieses Gerät muss eine verschlüsselte Verbindung nutzen. Bitte LocalRoll aktualisieren.",
-  "err.not_lan": "Nur Geräte im selben Heim- oder Büronetz können sich verbinden."
+  "err.not_lan": "Nur Geräte im selben Heim- oder Büronetz können sich verbinden.",
+  "settings.exit": "LocalRoll beenden",
+  "settings.exit_hint": "Schließt die App. Automatisches Senden geht beim nächsten Öffnen weiter."
 }

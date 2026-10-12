@@ -239,5 +239,7 @@
   "backup.range_custom": "自選日期…",
   "err.cert_changed": "「{name}」的安全憑證變了（重裝過，或網路中有人冒充）。為了安全沒有傳送。請先「忘記」這台電腦，再重新配對。",
   "err.upgrade_required": "這台裝置必須使用加密連線，請把它上面的 LocalRoll 更新到最新版。",
-  "err.not_lan": "只接受同一個家庭或辦公網路中的裝置連線。"
+  "err.not_lan": "只接受同一個家庭或辦公網路中的裝置連線。",
+  "settings.exit": "結束 LocalRoll",
+  "settings.exit_hint": "關閉 App。自動傳送會在下次開啟時繼續。"
 }

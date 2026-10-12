@@ -239,5 +239,7 @@
   "backup.range_custom": "Chọn ngày…",
   "err.cert_changed": "“{name}” có chứng chỉ bảo mật khác (đã cài lại, hoặc có thiết bị chen giữa). Để an toàn nên chưa gửi gì. Hãy quên rồi ghép nối lại.",
   "err.upgrade_required": "Thiết bị này phải dùng kết nối mã hóa. Hãy cập nhật LocalRoll.",
-  "err.not_lan": "Chỉ thiết bị trong cùng mạng gia đình hoặc văn phòng mới kết nối được."
+  "err.not_lan": "Chỉ thiết bị trong cùng mạng gia đình hoặc văn phòng mới kết nối được.",
+  "settings.exit": "Thoát LocalRoll",
+  "settings.exit_hint": "Đóng ứng dụng. Tự động gửi sẽ tiếp tục khi mở lại."
 }

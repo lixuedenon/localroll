@@ -475,7 +475,7 @@ class TransferServer extends ChangeNotifier {
     final body = SessionRequest.fromJson(await _readJson(req));
     // Library folder unreachable (external drive unplugged): don't accept
     // files we could not store; the phone shows why and keeps them queued.
-    if (library.offline && body.files.any((f) => !f.isPlainFile)) {
+    if (library.offline) {
       return _json(req.response, 503, {'error': 'library_offline'});
     }
     // Family group: the phone tells us whose phone it is (editable there).
@@ -571,7 +571,7 @@ class TransferServer extends ChangeNotifier {
 
   Future<void> _complete(HttpRequest req, TrustedDevice device, FileOffer offer) async {
     final body = CompleteRequest.fromJson(await _readJson(req));
-    if (library.offline && !offer.isPlainFile) return _json(req.response, 503, {'error': 'library_offline'});
+    if (library.offline) return _json(req.response, 503, {'error': 'library_offline'});
     final part = File(_partPath(device, offer));
 
     if (!await part.exists()) {
@@ -599,7 +599,26 @@ class TransferServer extends ChangeNotifier {
       return _json(req.response, 422, const CompleteResponse(saved: false, error: 'sha256_mismatch').toJson());
     }
 
-    if (offer.isPlainFile) return _savePlainFile(req, device, offer, part, t);
+    // A file from another PC: photos and videos (recognised by name, or by
+    // content when the name says nothing) go into the library like any
+    // other; documents and everything else into their own folders.
+    var srcName = offer.name;
+    var srcKind = offer.kind == MediaKind.other ? MediaKind.fromName(offer.name) : offer.kind;
+    if (offer.isPlainFile) {
+      final inFolder = (offer.relPath ?? '').contains('/');
+      var isDoc = isDocumentName(offer.name);
+      if (!inFolder && srcKind == MediaKind.other && !isDoc) {
+        final sniff = sniffFileType(await _head(part));
+        if (sniff != null) {
+          srcName = '${offer.name}.${sniff.ext}';
+          srcKind = sniff.kind;
+          isDoc = sniff.ext == 'pdf';
+        }
+      }
+      if (inFolder || srcKind == MediaKind.other) {
+        return _savePlainFile(req, device, offer, part, t, name: srcName, document: !inFolder && isDoc);
+      }
+    }
 
     final captured = DateTime.fromMillisecondsSinceEpoch(offer.createdMs);
     final sep = Platform.pathSeparator;
@@ -607,7 +626,7 @@ class TransferServer extends ChangeNotifier {
     final member = settings.folderPerMember ? settings.family.memberOf(device.id) : null;
     final base = member == null ? library.rootPath : '${library.rootPath}$sep${sanitizeFileName(member)}';
     var folder = '$base$sep${captured.year}$sep${captured.month.toString().padLeft(2, '0')}';
-    var fileName = sanitizeFileName(offer.name);
+    var fileName = sanitizeFileName(srcName);
     // Live Photo video: next to its photo, same name (IMG_1234.HEIC + IMG_1234.MOV),
     // the way iPhone exports pair them.
     if (isLiveCompanion(offer.assetId)) {
@@ -634,7 +653,7 @@ class TransferServer extends ChangeNotifier {
       relPath: rel,
       name: rel.substring(rel.lastIndexOf('/') + 1),
       size: length,
-      kind: offer.kind == MediaKind.other ? MediaKind.fromName(offer.name) : offer.kind,
+      kind: srcKind,
       captureMs: offer.createdMs,
       receivedMs: DateTime.now().millisecondsSinceEpoch,
       sha256: hash,
@@ -656,15 +675,18 @@ class TransferServer extends ChangeNotifier {
     TrustedDevice device,
     FileOffer offer,
     File part,
-    TransferProgress t,
-  ) async {
+    TransferProgress t, {
+    required String name,
+    required bool document,
+  }) async {
     final sep = Platform.pathSeparator;
+    final inFolder = (offer.relPath ?? '').contains('/');
     final segs = [
-      for (final p in (offer.relPath ?? offer.name).split('/'))
+      for (final p in (inFolder ? offer.relPath! : name).split('/'))
         if (p.trim().isNotEmpty && p != '.' && p != '..') sanitizeFileName(p),
     ];
-    if (segs.isEmpty) segs.add(sanitizeFileName(offer.name));
-    final root = settings.receivedPath;
+    if (segs.isEmpty) segs.add(sanitizeFileName(name));
+    final root = '${library.rootPath}$sep${await _folderName(document: document)}';
     final folder = [root, ...segs.take(segs.length - 1)].join(sep);
     await Directory(folder).create(recursive: true);
     final dest = LibraryIndex.uniquePath(folder, segs.last);
@@ -682,6 +704,29 @@ class TransferServer extends ChangeNotifier {
   }
 
   // ---------------------------------------------------------------- helpers
+
+  /// "Documents" / "Other files" inside the library root: named the first
+  /// time in the current language, then kept.
+  Future<String> _folderName({required bool document}) async {
+    var name = document ? settings.docsFolder : settings.otherFolder;
+    if (name == null) {
+      name = sanitizeFileName(tr(document ? 'folders.docs' : 'folders.other'));
+      final n = name;
+      await settings.update((s) => document ? s.docsFolder = n : s.otherFolder = n);
+      library.ignoredFolders = {?settings.docsFolder, ?settings.otherFolder};
+    }
+    return name;
+  }
+
+  /// First bytes of a file (to recognise photos/videos without extension).
+  Future<List<int>> _head(File f) async {
+    final raf = await f.open();
+    try {
+      return await raf.read(16);
+    } finally {
+      await raf.close();
+    }
+  }
 
   /// Partial uploads are keyed by device + asset + edit time, so an
   /// interrupted transfer resumes even from a brand-new session.

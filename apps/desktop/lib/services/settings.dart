@@ -168,8 +168,16 @@ class AppSettings extends ChangeNotifier {
   /// Other PCs this one can send to.
   final Map<String, PeerPc> peers = {};
 
-  /// Where ordinary files from other PCs are saved (not the photo library).
-  late String receivedPath;
+  /// Files from other PCs that are not photos/videos live in two folders
+  /// inside the library root, named once in the language of the day and
+  /// then kept (renaming would split them): documents (PDF, Office…) and
+  /// everything else (archives, whole folders…). Not part of the photo
+  /// library view.
+  String? docsFolder;
+  String? otherFolder;
+
+  /// PCs the user chose to "Forget": not offered under "Nearby" any more.
+  final Set<String> hiddenPeers = {};
 
   /// Family group: store originals as <member>/<year>/<month> instead of
   /// <year>/<month>.
@@ -195,7 +203,9 @@ class AppSettings extends ChangeNotifier {
     s.deviceId = j['deviceId'] as String? ?? randomId(16);
     s.deviceName = j['deviceName'] as String? ?? _defaultDeviceName();
     s.libraryPath = j['libraryPath'] as String? ?? _defaultLibraryPath();
-    s.receivedPath = j['receivedPath'] as String? ?? _defaultReceivedPath();
+    s.docsFolder = j['docsFolder'] as String?;
+    s.otherFolder = j['otherFolder'] as String?;
+    s.hiddenPeers.addAll((j['hiddenPeers'] as List? ?? const []).cast<String>());
     s.port = (j['port'] as num?)?.toInt() ?? LrProtocol.defaultPort;
     s.ffmpegPath = j['ffmpegPath'] as String?;
     s.language = j['language'] as String?;
@@ -237,7 +247,9 @@ class AppSettings extends ChangeNotifier {
       'deviceId': deviceId,
       'deviceName': deviceName,
       'libraryPath': libraryPath,
-      'receivedPath': receivedPath,
+      if (docsFolder != null) 'docsFolder': docsFolder,
+      if (otherFolder != null) 'otherFolder': otherFolder,
+      'hiddenPeers': hiddenPeers.toList(),
       'port': port,
       'ffmpegPath': ffmpegPath,
       'language': language,
@@ -308,12 +320,6 @@ class AppSettings extends ChangeNotifier {
     } catch (_) {
       return 'My PC';
     }
-  }
-
-  static String _defaultReceivedPath() {
-    final home = Platform.environment['USERPROFILE'] ?? Platform.environment['HOME'] ?? '.';
-    final sep = Platform.pathSeparator;
-    return '$home${sep}Downloads${sep}LocalRoll';
   }
 
   static String _defaultLibraryPath() {

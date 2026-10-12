@@ -46,3 +46,42 @@ String sanitizeFileName(String name) {
   if (base.isEmpty) base = 'file';
   return base;
 }
+
+/// PDF and office documents (they get a folder of their own on the PC).
+const Set<String> documentExtensions = {
+  'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods', 'odp', 'rtf', 'txt', 'md', 'csv',
+  'pages', 'numbers', 'key', 'wps', 'et', 'dps', 'epub', 'xps', 'ofd',
+};
+
+bool isDocumentName(String name) => documentExtensions.contains(extensionOf(name));
+
+/// What a file really is, from its first bytes — for files whose name has
+/// no (or a wrong) extension. Returns the kind and the usual extension, or
+/// null when it is neither a photo, a video nor a PDF.
+({MediaKind kind, String ext})? sniffFileType(List<int> h) {
+  bool at(int o, List<int> sig) {
+    if (h.length < o + sig.length) return false;
+    for (var i = 0; i < sig.length; i++) {
+      if (h[o + i] != sig[i]) return false;
+    }
+    return true;
+  }
+
+  List<int> a(String s) => s.codeUnits;
+  if (at(0, [0xFF, 0xD8, 0xFF])) return (kind: MediaKind.image, ext: 'jpg');
+  if (at(0, [0x89, 0x50, 0x4E, 0x47])) return (kind: MediaKind.image, ext: 'png');
+  if (at(0, a('GIF8'))) return (kind: MediaKind.image, ext: 'gif');
+  if (at(0, a('RIFF')) && at(8, a('WEBP'))) return (kind: MediaKind.image, ext: 'webp');
+  if (at(0, a('BM'))) return (kind: MediaKind.image, ext: 'bmp');
+  if (at(0, a('%PDF'))) return (kind: MediaKind.other, ext: 'pdf');
+  if (at(4, a('ftyp'))) {
+    final brand = h.length >= 12 ? String.fromCharCodes(h.sublist(8, 12)) : '';
+    if (const {'heic', 'heix', 'hevc', 'heim', 'heis', 'mif1', 'msf1'}.contains(brand)) {
+      return (kind: MediaKind.image, ext: 'heic');
+    }
+    if (brand == 'avif') return (kind: MediaKind.image, ext: 'avif');
+    if (brand == 'qt  ') return (kind: MediaKind.video, ext: 'mov');
+    return (kind: MediaKind.video, ext: 'mp4');
+  }
+  return null;
+}

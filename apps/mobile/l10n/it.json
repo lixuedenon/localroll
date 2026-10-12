@@ -239,5 +239,7 @@
   "backup.range_custom": "Scegli le date…",
   "err.cert_changed": "«{name}» mostra un altro certificato di sicurezza (reinstallato o c’è qualcosa in mezzo). Per sicurezza non è stato inviato nulla. Dimenticalo e abbinalo di nuovo.",
   "err.upgrade_required": "Questo dispositivo deve usare una connessione cifrata. Aggiorna LocalRoll.",
-  "err.not_lan": "Possono collegarsi solo dispositivi della stessa rete di casa o ufficio."
+  "err.not_lan": "Possono collegarsi solo dispositivi della stessa rete di casa o ufficio.",
+  "settings.exit": "Esci da LocalRoll",
+  "settings.exit_hint": "Chiude l’app. L’invio automatico riprende alla prossima apertura."
 }
