@@ -88,7 +88,7 @@
   "connect.tap_hint": "Bilgisayarınıza dokunun, sonra bilgisayarda İzin ver’e tıklayın.",
   "connect.tap_to_connect": "Bağlanmak için dokunun",
   "connect.offline": "Şu an bu Wi-Fi’de değil",
-  "connect.other_ways": "Diğer bağlanma yolları",
+  "connect.other_ways": "PC listede yok mu? Diğer yollar",
   "err.pair_denied": "Bilgisayar bağlantıyı reddetti.",
   "err.pair_expired": "Bilgisayarda kimse yanıt vermedi. Tekrar deneyin.",
   "connect.all_paired": "Bu Wi-Fi’deki tüm bilgisayarlar zaten eşleşmiş; aşağıda listeleniyor.",
@@ -240,6 +240,5 @@
   "err.cert_changed": "“{name}” farklı bir güvenlik sertifikası gösteriyor (yeniden kuruldu ya da arada biri var). Güvenlik için hiçbir şey gönderilmedi. Unutup yeniden eşleştirin.",
   "err.upgrade_required": "Bu cihaz şifreli bağlantı kullanmalı. LocalRoll’u güncelleyin.",
   "err.not_lan": "Yalnızca aynı ev veya ofis ağındaki cihazlar bağlanabilir.",
-  "settings.exit": "LocalRoll’dan çık",
-  "settings.exit_hint": "Uygulamayı kapatır. Otomatik gönderme bir sonraki açılışta sürer."
+  "connect.other_ways_hint": "PC’nin Al sayfasındaki QR kodu tarayın veya adres ve PIN girin."
 }

@@ -84,9 +84,22 @@ class ReceivePage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          ListenableBuilder(
-            listenable: Listenable.merge([s.server, s.server.pin, s.addresses]),
-            builder: (context, _) => _PairingCard(services: s),
+          // Tap-to-pair from the phone is the normal way; the QR code / PIN
+          // is only for when the phone cannot find this PC by itself.
+          Card(
+            clipBehavior: Clip.antiAlias,
+            child: ExpansionTile(
+              leading: const Icon(Icons.qr_code_2_rounded),
+              title: Text(tr('receive.other_ways')),
+              subtitle: Text(tr('receive.other_ways_hint')),
+              childrenPadding: EdgeInsets.zero,
+              children: [
+                ListenableBuilder(
+                  listenable: Listenable.merge([s.server, s.server.pin, s.addresses]),
+                  builder: (context, _) => _PairingCard(services: s),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 24),
           ListenableBuilder(

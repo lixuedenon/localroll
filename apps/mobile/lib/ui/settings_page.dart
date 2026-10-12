@@ -1,8 +1,5 @@
 // apps/mobile/lib/ui/settings_page.dart
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:localroll_core/localroll_core.dart';
 
 import '../l10n/l10n.dart';
@@ -159,19 +156,6 @@ class SettingsPage extends StatelessWidget {
                   ],
                 ),
               ),
-              // Android: a way out (iOS apps are closed by swiping them away;
-              // Apple does not allow an exit button).
-              if (Platform.isAndroid) ...[
-                const SizedBox(height: 16),
-                Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.power_settings_new_rounded, color: LrColors.danger),
-                    title: Text(tr('settings.exit')),
-                    subtitle: Text(tr('settings.exit_hint')),
-                    onTap: () => SystemNavigator.pop(),
-                  ),
-                ),
-              ],
               const SizedBox(height: 24),
               Center(child: Text('LocalRoll · ${tr('settings.version', {'version': lrVersion})}', style: theme.textTheme.bodySmall)),
             ],

@@ -118,6 +118,9 @@ class LrClient {
     }
   }
 
+  /// Shows [text] in a small text window on the other side.
+  Future<void> sendText(String text) async => _send('POST', LrProtocol.pathText, json: {'text': text});
+
   /// Cheap signed-in request: fails with 401 when the other side no longer
   /// knows us.
   Future<void> ping() async =>

@@ -88,7 +88,7 @@
   "connect.tap_hint": "Tippe auf deinen PC und klicke dort auf Erlauben.",
   "connect.tap_to_connect": "Zum Verbinden tippen",
   "connect.offline": "Gerade nicht in diesem WLAN",
-  "connect.other_ways": "Andere Verbindungswege",
+  "connect.other_ways": "PC nicht dabei? Andere Wege",
   "err.pair_denied": "Der PC hat die Verbindung abgelehnt.",
   "err.pair_expired": "Am PC hat niemand reagiert. Versuche es erneut.",
   "connect.all_paired": "Alle PCs in diesem WLAN sind schon gekoppelt – sie stehen unten.",
@@ -240,6 +240,5 @@
   "err.cert_changed": "„{name}“ zeigt ein anderes Sicherheitszertifikat (neu installiert oder jemand dazwischen). Zur Sicherheit wurde nichts gesendet. Entfernen und neu koppeln.",
   "err.upgrade_required": "Dieses Gerät muss eine verschlüsselte Verbindung nutzen. Bitte LocalRoll aktualisieren.",
   "err.not_lan": "Nur Geräte im selben Heim- oder Büronetz können sich verbinden.",
-  "settings.exit": "LocalRoll beenden",
-  "settings.exit_hint": "Schließt die App. Automatisches Senden geht beim nächsten Öffnen weiter."
+  "connect.other_ways_hint": "QR-Code auf der Empfangen-Seite des PCs scannen oder Adresse und PIN eingeben."
 }

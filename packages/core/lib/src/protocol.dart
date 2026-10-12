@@ -50,6 +50,11 @@ class LrProtocol {
   /// device (the old token may have been seen on the network).
   static const String pathUpgrade = '/api/v1/upgrade';
 
+  /// POST {text}: a piece of text (pasted / typed) shown on the other side
+  /// in a small text window. Signed in, at most [maxText] characters.
+  static const String pathText = '/api/v1/text';
+  static const int maxText = 1000000;
+
   /// PC only, from 127.0.0.1: a second copy of the app asks the running one
   /// to come to the front, then quits.
   static const String pathLocalShow = '/local/show';

@@ -66,6 +66,15 @@ class ReceiveHub extends ChangeNotifier {
     _notify(force: true);
   }
 
+  /// Texts sent from other devices, newest last (shown in a text window).
+  final List<ReceivedText> texts = [];
+
+  void textReceived(String from, String text) {
+    texts.add(ReceivedText(from, text, DateTime.now()));
+    if (texts.length > 500) texts.removeAt(0);
+    _notify(force: true);
+  }
+
   /// Ordinary files from other PCs saved this run (newest last).
   final List<String> savedFiles = [];
 
@@ -88,4 +97,12 @@ class ReceiveHub extends ChangeNotifier {
       notifyListeners();
     }
   }
+}
+
+class ReceivedText {
+  ReceivedText(this.from, this.text, this.time);
+
+  final String from;
+  final String text;
+  final DateTime time;
 }

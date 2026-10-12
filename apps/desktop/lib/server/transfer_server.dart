@@ -254,6 +254,14 @@ class TransferServer extends ChangeNotifier {
         });
         return _json(res, 200, {'ok': true});
       }
+      if (req.method == 'POST' && path == LrProtocol.pathText) {
+        final body = await _readJson(req);
+        final text = body['text'];
+        if (text is! String || text.isEmpty) return _json(res, 400, {'error': 'bad_request'});
+        if (text.length > LrProtocol.maxText) return _json(res, 413, {'error': 'too_large'});
+        hub.textReceived(device.name, text);
+        return _json(res, 200, {'ok': true});
+      }
       if (req.method == 'POST' && path == LrProtocol.pathVerify) {
         return await _verify(req, device);
       }
@@ -493,7 +501,11 @@ class TransferServer extends ChangeNotifier {
 
     final results = <String, OfferResult>{};
     for (final f in body.files) {
-      if (f.isPlainFile && _doneFiles.containsKey(_hubKey(device, f))) {
+      // Already received in this run — and still there (if it was deleted
+      // since, take it again).
+      final done = f.isPlainFile ? _doneFiles[_hubKey(device, f)] : null;
+      if (done != null && !File(done).existsSync()) _doneFiles.remove(_hubKey(device, f));
+      if (done != null && File(done).existsSync()) {
         results[f.id] = const OfferResult(status: OfferStatus.duplicate);
         continue;
       }
@@ -695,7 +707,7 @@ class TransferServer extends ChangeNotifier {
       if (offer.modifiedMs > 0) await File(dest).setLastModified(DateTime.fromMillisecondsSinceEpoch(offer.modifiedMs));
     } catch (_) {}
     final rel = dest.substring(root.length + 1).replaceAll(sep, '/');
-    _doneFiles[_hubKey(device, offer)] = rel;
+    _doneFiles[_hubKey(device, offer)] = dest;
     hub.progress(t, await File(dest).length());
     t.savedPath = dest;
     hub.setState(t, TransferState.saved);
@@ -704,6 +716,13 @@ class TransferServer extends ChangeNotifier {
   }
 
   // ---------------------------------------------------------------- helpers
+
+  /// Full path of the Documents / Other files folder (created if needed).
+  Future<String> folderPath({required bool document}) async {
+    final p = '${library.rootPath}${Platform.pathSeparator}${await _folderName(document: document)}';
+    await Directory(p).create(recursive: true);
+    return p;
+  }
 
   /// "Documents" / "Other files" inside the library root: named the first
   /// time in the current language, then kept.

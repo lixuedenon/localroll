@@ -204,11 +204,6 @@ class _ConnectPageState extends State<ConnectPage> {
     }
   }
 
-  Future<void> _pinFor(FoundDesktop f) async {
-    final pin = await _ask(context, title: tr('connect.pin_title', {'name': f.name}), fields: [tr('connect.pin_field')]);
-    if (pin != null) await _pair(f.hosts, f.port, pin.first);
-  }
-
   Future<void> _manual() async {
     final v = await _ask(context,
         title: tr('connect.manual_title'), fields: [tr('connect.address_field'), tr('connect.pin_field')]);
@@ -290,7 +285,6 @@ class _ConnectPageState extends State<ConnectPage> {
                               Text(tr('connect.tap_to_connect'), style: theme.textTheme.bodySmall),
                             ]),
                           ),
-                          TextButton(onPressed: () => _pinFor(f), child: Text(tr('connect.enter_pin'))),
                         ]),
                       );
                     },
@@ -336,19 +330,33 @@ class _ConnectPageState extends State<ConnectPage> {
                     ),
                 ],
 
-                const SizedBox(height: 28),
-                Text(tr('connect.other_ways'), style: theme.textTheme.titleMedium),
-                const SizedBox(height: 8),
-                OutlinedButton.icon(
-                  onPressed: _scan,
-                  icon: const Icon(Icons.qr_code_scanner_rounded),
-                  label: Text(tr('connect.scan')),
-                ),
-                const SizedBox(height: 8),
-                OutlinedButton.icon(
-                  onPressed: _manual,
-                  icon: const Icon(Icons.keyboard_rounded),
-                  label: Text(tr('connect.manual')),
+                const SizedBox(height: 20),
+                // Only needed when the PC does not show up above (some
+                // routers block finding devices).
+                ExpansionTile(
+                  tilePadding: EdgeInsets.zero,
+                  title: Text(tr('connect.other_ways'), style: theme.textTheme.titleMedium),
+                  subtitle: Text(tr('connect.other_ways_hint'), style: theme.textTheme.bodySmall),
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: _scan,
+                        icon: const Icon(Icons.qr_code_scanner_rounded),
+                        label: Text(tr('connect.scan')),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: _manual,
+                        icon: const Icon(Icons.keyboard_rounded),
+                        label: Text(tr('connect.manual')),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
                 ),
               ],
             );

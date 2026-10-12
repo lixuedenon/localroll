@@ -88,7 +88,7 @@
   "connect.tap_hint": "点一下你的电脑，然后在电脑上点「允许」。",
   "connect.tap_to_connect": "点一下即可连接",
   "connect.offline": "目前不在这个 Wi-Fi 上",
-  "connect.other_ways": "其他连接方式",
+  "connect.other_ways": "找不到电脑？其他连接方式",
   "err.pair_denied": "电脑拒绝了连接。",
   "err.pair_expired": "电脑上没有人回应，请再试一次。",
   "connect.all_paired": "这个 Wi-Fi 里的电脑都已经配对过了，在下面的「已配对的电脑」里。",
@@ -240,6 +240,5 @@
   "err.cert_changed": "「{name}」的安全证书变了（重装过，或者网络中有人冒充）。为安全起见没有发送。请先“忘记”这台电脑，再重新配对。",
   "err.upgrade_required": "这台设备必须使用加密连接，请把它上面的 LocalRoll 更新到最新版。",
   "err.not_lan": "只接受同一个家庭或办公网络里的设备连接。",
-  "settings.exit": "退出 LocalRoll",
-  "settings.exit_hint": "关闭应用。自动发送会在下次打开时继续。"
+  "connect.other_ways_hint": "扫描电脑“接收”页上的二维码，或输入地址和配对码。"
 }

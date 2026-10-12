@@ -88,7 +88,7 @@
   "connect.tap_hint": "Chạm vào máy tính của bạn, rồi bấm Cho phép trên máy.",
   "connect.tap_to_connect": "Chạm để kết nối",
   "connect.offline": "Hiện không ở Wi-Fi này",
-  "connect.other_ways": "Cách kết nối khác",
+  "connect.other_ways": "Không thấy máy tính? Cách khác",
   "err.pair_denied": "Máy tính đã từ chối kết nối.",
   "err.pair_expired": "Không ai trả lời trên máy tính. Hãy thử lại.",
   "connect.all_paired": "Mọi máy tính trong Wi-Fi này đều đã ghép nối — có ở danh sách bên dưới.",
@@ -240,6 +240,5 @@
   "err.cert_changed": "“{name}” có chứng chỉ bảo mật khác (đã cài lại, hoặc có thiết bị chen giữa). Để an toàn nên chưa gửi gì. Hãy quên rồi ghép nối lại.",
   "err.upgrade_required": "Thiết bị này phải dùng kết nối mã hóa. Hãy cập nhật LocalRoll.",
   "err.not_lan": "Chỉ thiết bị trong cùng mạng gia đình hoặc văn phòng mới kết nối được.",
-  "settings.exit": "Thoát LocalRoll",
-  "settings.exit_hint": "Đóng ứng dụng. Tự động gửi sẽ tiếp tục khi mở lại."
+  "connect.other_ways_hint": "Quét mã QR ở trang Nhận của máy tính, hoặc nhập địa chỉ và mã PIN."
 }

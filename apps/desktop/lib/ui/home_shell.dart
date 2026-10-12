@@ -16,6 +16,7 @@ import 'pair_prompt.dart';
 import 'receive_page.dart';
 import 'send_page.dart';
 import 'settings_page.dart';
+import 'text_window.dart';
 import 'theme.dart';
 import 'title_bar.dart';
 
@@ -43,8 +44,29 @@ class _HomeShellState extends State<HomeShell> {
     super.dispose();
   }
 
+  int _textsSeen = 0;
+  bool _textOpen = false;
+
+  /// Text from another device: show it in the text window, one at a time.
+  Future<void> _showTexts() async {
+    if (_textOpen) return;
+    final hub = widget.services.hub;
+    while (_textsSeen < hub.texts.length) {
+      final t = hub.texts[_textsSeen++];
+      final ctx = AppNav.instance.navigatorKey.currentContext;
+      if (ctx == null) return;
+      _textOpen = true;
+      try {
+        await showReceivedText(ctx, widget.services, t);
+      } finally {
+        _textOpen = false;
+      }
+    }
+  }
+
   /// Files from another PC: say where they went (once per burst).
   void _onHub() {
+    if (widget.services.hub.texts.length > _textsSeen) unawaited(_showTexts());
     final n = widget.services.hub.savedFiles.length;
     if (n <= _filesSeen) {
       _filesSeen = n;
@@ -72,6 +94,7 @@ class _HomeShellState extends State<HomeShell> {
     super.initState();
     _prompter = PairPrompter(widget.services.server); // tap-to-pair dialogs
     _filesSeen = widget.services.hub.savedFiles.length;
+    _textsSeen = widget.services.hub.texts.length;
     widget.services.hub.addListener(_onHub);
     // Always start on Home: status, main actions, what needs attention.
     _nav.initialTab(AppNav.home);

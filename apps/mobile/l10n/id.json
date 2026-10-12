@@ -88,7 +88,7 @@
   "connect.tap_hint": "Ketuk PC Anda, lalu klik Izinkan di PC.",
   "connect.tap_to_connect": "Ketuk untuk terhubung",
   "connect.offline": "Tidak di Wi-Fi ini sekarang",
-  "connect.other_ways": "Cara lain untuk terhubung",
+  "connect.other_ways": "PC tidak muncul? Cara lain",
   "err.pair_denied": "PC menolak koneksi.",
   "err.pair_expired": "Tidak ada yang merespons di PC. Coba lagi.",
   "connect.all_paired": "Semua PC di Wi-Fi ini sudah dipasangkan — tercantum di bawah.",
@@ -240,6 +240,5 @@
   "err.cert_changed": "“{name}” menampilkan sertifikat keamanan lain (dipasang ulang, atau ada pihak di tengah). Demi keamanan tidak ada yang dikirim. Lupakan lalu pasangkan ulang.",
   "err.upgrade_required": "Perangkat ini harus memakai koneksi terenkripsi. Perbarui LocalRoll.",
   "err.not_lan": "Hanya perangkat di jaringan rumah atau kantor yang sama yang bisa terhubung.",
-  "settings.exit": "Keluar dari LocalRoll",
-  "settings.exit_hint": "Menutup aplikasi. Kirim otomatis berlanjut saat dibuka lagi."
+  "connect.other_ways_hint": "Pindai kode QR di halaman Terima pada PC, atau ketik alamat dan PIN."
 }

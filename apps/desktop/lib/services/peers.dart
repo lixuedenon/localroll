@@ -601,6 +601,25 @@ class PeerSender extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Sends a piece of text; null when it arrived, else an error code.
+  Future<String?> sendText(PeerPc p, String text) async {
+    LrClient? c;
+    try {
+      c = await _connect(p);
+      if (c == null) return 'peer_offline';
+      await c.sendText(text);
+      return null;
+    } on PeerError catch (e) {
+      return e.code;
+    } on LrHttpError catch (e) {
+      return e.status == 401 ? 'not_paired' : e.code;
+    } catch (_) {
+      return 'peer_offline';
+    } finally {
+      c?.close();
+    }
+  }
+
   void clearFinished() {
     jobs.removeWhere((j) => j.over);
     notifyListeners();

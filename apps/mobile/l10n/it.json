@@ -88,7 +88,7 @@
   "connect.tap_hint": "Tocca il tuo PC, poi fai clic su Consenti sul PC.",
   "connect.tap_to_connect": "Tocca per connetterti",
   "connect.offline": "Non è su questa Wi-Fi ora",
-  "connect.other_ways": "Altri modi per connettersi",
+  "connect.other_ways": "PC non in elenco? Altri modi",
   "err.pair_denied": "Il PC ha rifiutato la connessione.",
   "err.pair_expired": "Nessuno ha risposto sul PC. Riprova.",
   "connect.all_paired": "Tutti i PC su questa Wi-Fi sono già associati: li trovi qui sotto.",
@@ -240,6 +240,5 @@
   "err.cert_changed": "«{name}» mostra un altro certificato di sicurezza (reinstallato o c’è qualcosa in mezzo). Per sicurezza non è stato inviato nulla. Dimenticalo e abbinalo di nuovo.",
   "err.upgrade_required": "Questo dispositivo deve usare una connessione cifrata. Aggiorna LocalRoll.",
   "err.not_lan": "Possono collegarsi solo dispositivi della stessa rete di casa o ufficio.",
-  "settings.exit": "Esci da LocalRoll",
-  "settings.exit_hint": "Chiude l’app. L’invio automatico riprende alla prossima apertura."
+  "connect.other_ways_hint": "Scansiona il codice QR nella pagina Ricevi del PC o inserisci indirizzo e PIN."
 }

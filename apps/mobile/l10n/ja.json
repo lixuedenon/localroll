@@ -88,7 +88,7 @@
   "connect.tap_hint": "PC をタップして、PC 側で「許可」をクリックします。",
   "connect.tap_to_connect": "タップして接続",
   "connect.offline": "現在この Wi-Fi にいません",
-  "connect.other_ways": "その他の接続方法",
+  "connect.other_ways": "PC が表示されない場合",
   "err.pair_denied": "PC が接続を拒否しました。",
   "err.pair_expired": "PC で応答がありませんでした。もう一度お試しください。",
   "connect.all_paired": "この Wi-Fi の PC はすべてペアリング済みです（下に表示されています）。",
@@ -240,6 +240,5 @@
   "err.cert_changed": "「{name}」のセキュリティ証明書が変わりました（再インストールされたか、間に何かがいます）。安全のため送信していません。登録を解除してペアリングし直してください。",
   "err.upgrade_required": "このデバイスは暗号化接続が必要です。LocalRoll を最新版に更新してください。",
   "err.not_lan": "同じ家庭・職場のネットワーク内の機器だけが接続できます。",
-  "settings.exit": "LocalRoll を終了",
-  "settings.exit_hint": "アプリを閉じます。自動送信は次回起動時に再開します。"
+  "connect.other_ways_hint": "PC の「受信」画面の QR コードをスキャンするか、アドレスと PIN を入力します。"
 }

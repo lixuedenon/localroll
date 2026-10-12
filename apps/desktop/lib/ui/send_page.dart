@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:localroll_core/localroll_core.dart';
@@ -13,6 +14,7 @@ import '../services/settings.dart';
 import 'app_nav.dart';
 import 'device_badge.dart';
 import 'format.dart';
+import 'text_window.dart';
 import 'theme.dart';
 
 /// Error code from sending / pairing, in the user's language.
@@ -106,6 +108,8 @@ class _SendPageState extends State<SendPage> {
               Text(tr('send.hint'), style: theme.textTheme.bodyMedium?.copyWith(color: LrColors.muted)),
               const SizedBox(height: 6),
               Text(tr('send.where'), style: theme.textTheme.bodySmall?.copyWith(color: LrColors.muted)),
+              const SizedBox(height: 4),
+              Text(tr('send.drag_hint'), style: theme.textTheme.bodySmall?.copyWith(color: LrColors.muted)),
               const SizedBox(height: 20),
               _section(theme, tr('send.paired')),
               if (paired.isEmpty)
@@ -152,10 +156,51 @@ class _SendPageState extends State<SendPage> {
         child: Text(t, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
       );
 
-  Widget _pairedCard(BuildContext context, PeerPc p) {
+  /// Drop target: files or folders dragged from Explorer onto a PC's card
+  /// are sent to that PC.
+  String? _dropOver;
+
+  Future<void> _dropped(PeerPc p, List<String> paths) async {
+    final files = <SendFile>[];
+    var folders = 0;
+    for (final path in paths) {
+      if (FileSystemEntity.isDirectorySync(path)) {
+        folders++;
+        files.addAll(await filesInFolder(path));
+      } else {
+        final name = path.split(RegExp(r'[\\/]')).last;
+        final f = SendFile.plain(File(path), name, toLibrary: MediaKind.fromName(name) != MediaKind.other);
+        if (f != null) files.add(f);
+      }
+    }
+    if (files.isEmpty || !mounted) return;
+    final title = paths.length == 1
+        ? paths.first.replaceAll(RegExp(r'[\\/]+$'), '').split(RegExp(r'[\\/]')).last
+        : tr('send.n_files', {'count': files.length});
+    widget.services.sender.add(p, files, folders == 0 && files.length > 1 ? tr('send.n_files', {'count': files.length}) : title);
+  }
+
+  Widget _pairedCard(BuildContext context, PeerPc p) => DropTarget(
+        onDragEntered: (_) => setState(() => _dropOver = p.id),
+        onDragExited: (_) => setState(() => _dropOver = null),
+        onDragDone: (d) {
+          setState(() => _dropOver = null);
+          _dropped(p, [for (final f in d.files) f.path]);
+        },
+        child: _pairedCardBody(context, p),
+      );
+
+  Widget _pairedCardBody(BuildContext context, PeerPc p) {
     final s = widget.services;
     final online = s.peers.isOnline(p.id);
+    final over = _dropOver == p.id;
     return Card(
+      shape: over
+          ? RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: LrColors.safelight, width: 2),
+            )
+          : null,
       margin: const EdgeInsets.only(bottom: 10),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -188,6 +233,12 @@ class _SendPageState extends State<SendPage> {
             onPressed: () => _sendFolder(p),
             icon: const Icon(Icons.folder_outlined),
             label: Text(tr('send.folder')),
+          ),
+          const SizedBox(width: 8),
+          OutlinedButton.icon(
+            onPressed: () => showTextComposer(context, widget.services, p),
+            icon: const Icon(Icons.edit_note_rounded),
+            label: Text(tr('send.text')),
           ),
           PopupMenuButton<String>(
             onSelected: (v) => _unpair(p, forget: v == 'forget'),

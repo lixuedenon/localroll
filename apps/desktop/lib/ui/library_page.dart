@@ -43,7 +43,18 @@ class _LibraryPageState extends State<LibraryPage> {
   String _memberOf(FamilyDirectory family, MediaItem i) =>
       (i.deviceId == null ? null : family.memberOf(i.deviceId!)) ?? i.deviceName ?? '?';
 
-  List<MediaItem> _visible(List<MediaItem> all, FamilyDirectory family) => [
+  /// Order by when it was taken (default) or when it arrived here.
+  bool _byReceived = false;
+
+  DateTime _dayOf(MediaItem i) => _byReceived ? DateTime.fromMillisecondsSinceEpoch(i.receivedMs) : i.captureTime;
+
+  List<MediaItem> _visible(List<MediaItem> all, FamilyDirectory family) {
+    final list = _filtered(all, family);
+    if (_byReceived) list.sort((a, b) => b.receivedMs.compareTo(a.receivedMs));
+    return list;
+  }
+
+  List<MediaItem> _filtered(List<MediaItem> all, FamilyDirectory family) => [
         for (final i in all)
           if ((_filter == _Filter.all ||
                   (_filter == _Filter.photos && i.kind == MediaKind.image) ||
@@ -55,7 +66,18 @@ class _LibraryPageState extends State<LibraryPage> {
 
   /// Member chips + "show only-me items", shown once there is a family.
   PreferredSizeWidget? _familyBar(List<MediaItem> all, FamilyDirectory family) {
-    final members = {for (final i in all) _memberOf(family, i)}.toList();
+    // One chip per person / phone / other PC, with how many items each has.
+    final counts = <String, int>{};
+    final pcs = <String>{};
+    final st = widget.services.settings;
+    for (final i in all) {
+      if (i.private && !_showPrivate) continue;
+      final m = _memberOf(family, i);
+      counts[m] = (counts[m] ?? 0) + 1;
+      final t = i.deviceId == null ? null : st.trusted[i.deviceId!];
+      if (t != null && isDesktopPlatform(t.platform)) pcs.add(m);
+    }
+    final members = counts.keys.toList();
     final privateCount = all.where((i) => i.private).length;
     if (members.length < 2 && privateCount == 0) return null;
     return PreferredSize(
@@ -76,7 +98,8 @@ class _LibraryPageState extends State<LibraryPage> {
               for (final m in members) ...[
                 const SizedBox(width: 8),
                 ChoiceChip(
-                  label: Text(m),
+                  avatar: pcs.contains(m) ? const Icon(Icons.computer_rounded, size: 16) : null,
+                  label: Text('$m · ${counts[m]}'),
                   selected: _member != null && FamilyDirectory.keyOf(_member!) == FamilyDirectory.keyOf(m),
                   onSelected: (_) => setState(() => _member = m),
                 ),
@@ -154,6 +177,18 @@ class _LibraryPageState extends State<LibraryPage> {
                   onSelectionChanged: (v) => setState(() => _filter = v.first),
                 ),
                 const SizedBox(width: 8),
+                // New arrivals from a phone or PC can have old capture dates
+                // and land far down the list; "by arrival" puts them on top.
+                PopupMenuButton<bool>(
+                  tooltip: tr('library.sort'),
+                  icon: const Icon(Icons.sort_rounded),
+                  initialValue: _byReceived,
+                  onSelected: (v) => setState(() => _byReceived = v),
+                  itemBuilder: (_) => [
+                    CheckedPopupMenuItem(value: false, checked: !_byReceived, child: Text(tr('library.sort_taken'))),
+                    CheckedPopupMenuItem(value: true, checked: _byReceived, child: Text(tr('library.sort_received'))),
+                  ],
+                ),
                 IconButton(
                   tooltip: tr('library.open_folder'),
                   onPressed: () => revealInExplorer(s.library.rootPath),
@@ -383,12 +418,12 @@ class _LibraryPageState extends State<LibraryPage> {
     final slivers = <Widget>[];
     var start = 0;
     while (start < items.length) {
-      final t = items[start].captureTime;
+      final t = _dayOf(items[start]);
       var end = start;
       while (end < items.length &&
-          items[end].captureTime.year == t.year &&
-          items[end].captureTime.month == t.month &&
-          items[end].captureTime.day == t.day) {
+          _dayOf(items[end]).year == t.year &&
+          _dayOf(items[end]).month == t.month &&
+          _dayOf(items[end]).day == t.day) {
         end++;
       }
       final groupStart = start;

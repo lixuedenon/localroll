@@ -88,7 +88,7 @@
   "connect.tap_hint": "Tap your PC, then click Allow on it.",
   "connect.tap_to_connect": "Tap to connect",
   "connect.offline": "Not on this Wi-Fi right now",
-  "connect.other_ways": "Other ways to connect",
+  "connect.other_ways": "PC not listed? Other ways",
   "err.pair_denied": "The PC declined the connection.",
   "err.pair_expired": "Nobody answered on the PC. Try again.",
   "connect.all_paired": "All PCs on this Wi-Fi are already paired — they’re listed below.",
@@ -240,6 +240,5 @@
   "err.cert_changed": "“{name}” shows a different security certificate (reinstalled, or something is in between). For safety nothing was sent. Forget it and pair again.",
   "err.upgrade_required": "This device must use an encrypted connection. Update LocalRoll on it.",
   "err.not_lan": "Only devices on the same home or office network can connect.",
-  "settings.exit": "Quit LocalRoll",
-  "settings.exit_hint": "Closes the app. Auto-send continues next time you open it."
+  "connect.other_ways_hint": "Scan the QR code on the PC’s Receive page, or type its address and PIN."
 }
