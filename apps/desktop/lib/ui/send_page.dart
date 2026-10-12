@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:localroll_core/localroll_core.dart';
 
 import '../app_services.dart';
 import '../l10n/l10n.dart';
@@ -96,6 +97,8 @@ class _SendPageState extends State<SendPage> {
             padding: const EdgeInsets.all(24),
             children: [
               Text(tr('send.hint'), style: theme.textTheme.bodyMedium?.copyWith(color: LrColors.muted)),
+              const SizedBox(height: 6),
+              Text(tr('send.where'), style: theme.textTheme.bodySmall?.copyWith(color: LrColors.muted)),
               const SizedBox(height: 20),
               _section(theme, tr('send.paired')),
               if (paired.isEmpty)
@@ -115,7 +118,10 @@ class _SendPageState extends State<SendPage> {
                 Row(children: [
                   Expanded(child: _section(theme, tr('send.transfers'))),
                   if (s.sender.jobs.any((j) => j.over))
-                    TextButton(onPressed: s.sender.clearFinished, child: Text(tr('send.clear'))),
+                    Tooltip(
+                      message: tr('common.clear_hint'),
+                      child: TextButton(onPressed: s.sender.clearFinished, child: Text(tr('send.clear'))),
+                    ),
                 ]),
                 for (final j in s.sender.jobs) _JobTile(job: j, onCancel: () => s.sender.cancel(j)),
               ],
@@ -234,7 +240,10 @@ class _SendPageState extends State<SendPage> {
     final picked = await openFiles(confirmButtonText: tr('send.files'));
     if (picked.isEmpty) return;
     final files = [
-      for (final x in picked) ?SendFile.plain(File(x.path), x.name),
+      // Photos and videos go into the other PC's library; other files into
+      // its "Received files" folder.
+      for (final x in picked)
+        ?SendFile.plain(File(x.path), x.name, toLibrary: MediaKind.fromName(x.name) != MediaKind.other),
     ];
     if (files.isEmpty) return;
     widget.services.sender.add(p, files, files.length == 1 ? files.first.name : tr('send.n_files', {'count': files.length}));

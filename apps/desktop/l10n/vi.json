@@ -7,7 +7,7 @@
   "common.save": "Lưu",
   "common.saved": "Đã lưu",
   "common.open": "Mở",
-  "common.clear_finished": "Xóa mục đã xong",
+  "common.clear_finished": "Xóa danh sách",
   "common.failed": "Thất bại",
   "common.show_in_folder": "Hiện trong thư mục",
   "common.unknown_error": "Lỗi không xác định",
@@ -185,7 +185,7 @@
   "send.nearby": "Máy tính ở gần",
   "send.none_nearby": "Không tìm thấy máy tính khác. Mở LocalRoll trên máy kia rồi nhấn Tìm.",
   "send.transfers": "Truyền tệp",
-  "send.clear": "Xóa mục đã xong",
+  "send.clear": "Xóa danh sách",
   "send.online": "Trực tuyến",
   "send.offline": "Không tìm thấy",
   "send.files": "Gửi tệp…",
@@ -231,5 +231,8 @@
   "send.err_upgrade_required": "Thiết bị này phải dùng kết nối mã hóa. Hãy cập nhật LocalRoll.",
   "send.err_not_lan": "Chỉ thiết bị trong cùng mạng gia đình hoặc văn phòng mới kết nối được.",
   "receive.encrypted": "Truyền tệp được mã hóa · chứng chỉ {fp}",
-  "receive.not_encrypted": "Không dùng được mã hóa (không tạo được chứng chỉ) — truyền tệp không được mã hóa."
+  "receive.not_encrypted": "Không dùng được mã hóa (không tạo được chứng chỉ) — truyền tệp không được mã hóa.",
+  "common.clear_hint": "Chỉ xóa các mục đã xong khỏi danh sách trên máy này. Không xóa tệp nào và không ảnh hưởng thiết bị kia.",
+  "receive.got_files": "Đã nhận {count} tệp từ máy tính khác → {folder}",
+  "send.where": "Ảnh và video vào thư viện của máy kia; tệp và thư mục khác vào thư mục tệp đã nhận."
 }

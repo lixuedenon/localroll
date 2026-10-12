@@ -7,7 +7,7 @@
   "common.save": "저장",
   "common.saved": "저장됨",
   "common.open": "열기",
-  "common.clear_finished": "완료된 항목 지우기",
+  "common.clear_finished": "목록 지우기",
   "common.failed": "실패",
   "common.show_in_folder": "폴더에서 보기",
   "common.unknown_error": "알 수 없는 오류",
@@ -185,7 +185,7 @@
   "send.nearby": "근처 PC",
   "send.none_nearby": "다른 PC를 찾지 못했습니다. 다른 PC에서 LocalRoll을 연 다음 검색을 누르세요.",
   "send.transfers": "전송",
-  "send.clear": "완료 항목 지우기",
+  "send.clear": "목록 지우기",
   "send.online": "온라인",
   "send.offline": "찾을 수 없음",
   "send.files": "파일 보내기…",
@@ -231,5 +231,8 @@
   "send.err_upgrade_required": "이 기기는 암호화 연결을 사용해야 합니다. LocalRoll을 업데이트하세요.",
   "send.err_not_lan": "같은 집이나 사무실 네트워크의 기기만 연결할 수 있습니다.",
   "receive.encrypted": "전송이 암호화됩니다 · 인증서 {fp}",
-  "receive.not_encrypted": "암호화를 사용할 수 없습니다(인증서를 만들 수 없음). 전송이 암호화되지 않습니다."
+  "receive.not_encrypted": "암호화를 사용할 수 없습니다(인증서를 만들 수 없음). 전송이 암호화되지 않습니다.",
+  "common.clear_hint": "이 PC 목록에서 완료된 항목만 지웁니다. 파일은 삭제되지 않고 다른 기기에도 영향이 없습니다.",
+  "receive.got_files": "다른 PC에서 파일 {count}개 받음 → {folder}",
+  "send.where": "사진과 동영상은 상대 PC의 라이브러리로, 다른 파일과 폴더는 상대의 “받은 파일” 폴더로 갑니다."
 }

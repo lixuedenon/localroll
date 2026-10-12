@@ -7,7 +7,7 @@
   "common.save": "Enregistrer",
   "common.saved": "Enregistré",
   "common.open": "Ouvrir",
-  "common.clear_finished": "Effacer les terminés",
+  "common.clear_finished": "Vider la liste",
   "common.failed": "Échec",
   "common.show_in_folder": "Afficher dans le dossier",
   "common.unknown_error": "Erreur inconnue",
@@ -185,7 +185,7 @@
   "send.nearby": "PC à proximité",
   "send.none_nearby": "Aucun autre PC trouvé. Ouvrez LocalRoll sur l’autre PC puis cliquez sur Rechercher.",
   "send.transfers": "Transferts",
-  "send.clear": "Effacer les terminés",
+  "send.clear": "Vider la liste",
   "send.online": "En ligne",
   "send.offline": "Introuvable",
   "send.files": "Envoyer des fichiers…",
@@ -231,5 +231,8 @@
   "send.err_upgrade_required": "Cet appareil doit utiliser une connexion chiffrée. Mettez LocalRoll à jour.",
   "send.err_not_lan": "Seuls les appareils du même réseau domestique ou de bureau peuvent se connecter.",
   "receive.encrypted": "Transferts chiffrés · certificat {fp}",
-  "receive.not_encrypted": "Chiffrement indisponible (certificat impossible à créer) : les transferts ne sont pas chiffrés."
+  "receive.not_encrypted": "Chiffrement indisponible (certificat impossible à créer) : les transferts ne sont pas chiffrés.",
+  "common.clear_hint": "Retire seulement les entrées terminées de cette liste sur ce PC. Aucun fichier n’est supprimé et l’autre appareil n’est pas concerné.",
+  "receive.got_files": "{count} fichiers reçus d’un autre PC → {folder}",
+  "send.where": "Les photos et vidéos vont dans la bibliothèque de l’autre PC ; les autres fichiers et dossiers dans son dossier des fichiers reçus."
 }

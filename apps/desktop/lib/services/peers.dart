@@ -424,7 +424,9 @@ class SendFile {
       );
 
   /// Ordinary file (or a file inside a chosen folder): arrives as a file.
-  static SendFile? plain(File f, String relPath) {
+  /// [toLibrary]: a single photo or video lands in the other PC's library
+  /// (by its file date) instead of the "Received files" folder.
+  static SendFile? plain(File f, String relPath, {bool toLibrary = false}) {
     try {
       final st = f.statSync();
       if (st.type != FileSystemEntityType.file) return null;
@@ -438,8 +440,8 @@ class SendFile {
         createdMs: mtime,
         modifiedMs: mtime,
         size: st.size,
-        target: LrProtocol.targetFiles,
-        relPath: relPath,
+        target: toLibrary ? null : LrProtocol.targetFiles,
+        relPath: toLibrary ? null : relPath,
       );
     } catch (_) {
       return null;

@@ -7,7 +7,7 @@
   "common.save": "保存",
   "common.saved": "保存しました",
   "common.open": "開く",
-  "common.clear_finished": "完了したものを消去",
+  "common.clear_finished": "一覧を消去",
   "common.failed": "失敗",
   "common.show_in_folder": "フォルダーで表示",
   "common.unknown_error": "不明なエラー",
@@ -185,7 +185,7 @@
   "send.nearby": "近くの PC",
   "send.none_nearby": "ほかの PC が見つかりません。相手の PC で LocalRoll を開いてから「検索」を押してください。",
   "send.transfers": "転送",
-  "send.clear": "完了分を消去",
+  "send.clear": "一覧を消去",
   "send.online": "オンライン",
   "send.offline": "見つかりません",
   "send.files": "ファイルを送信…",
@@ -231,5 +231,8 @@
   "send.err_upgrade_required": "このデバイスは暗号化接続が必要です。LocalRoll を最新版に更新してください。",
   "send.err_not_lan": "同じ家庭・職場のネットワーク内の機器だけが接続できます。",
   "receive.encrypted": "転送は暗号化されています · 証明書 {fp}",
-  "receive.not_encrypted": "暗号化を利用できません（証明書を作成できませんでした）。転送は暗号化されていません。"
+  "receive.not_encrypted": "暗号化を利用できません（証明書を作成できませんでした）。転送は暗号化されていません。",
+  "common.clear_hint": "この PC の一覧から完了した項目を消すだけです。ファイルは削除されず、相手の機器にも影響しません。",
+  "receive.got_files": "別の PC から {count} 件のファイルを受信 → {folder}",
+  "send.where": "写真と動画は相手の PC のライブラリに、その他のファイルとフォルダーは相手の「受信ファイル」フォルダーに保存されます。"
 }

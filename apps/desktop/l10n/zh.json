@@ -7,7 +7,7 @@
   "common.save": "保存",
   "common.saved": "已保存",
   "common.open": "打开",
-  "common.clear_finished": "清除已完成",
+  "common.clear_finished": "清空列表",
   "common.failed": "失败",
   "common.show_in_folder": "在文件夹中显示",
   "common.unknown_error": "未知错误",
@@ -185,7 +185,7 @@
   "send.nearby": "附近的电脑",
   "send.none_nearby": "没有找到其他电脑。请在另一台电脑上打开 LocalRoll，然后点“搜索”。",
   "send.transfers": "传输记录",
-  "send.clear": "清除已完成",
+  "send.clear": "清空列表",
   "send.online": "在线",
   "send.offline": "未找到",
   "send.files": "发送文件…",
@@ -231,5 +231,8 @@
   "send.err_upgrade_required": "这台设备必须使用加密连接，请把它上面的 LocalRoll 更新到最新版。",
   "send.err_not_lan": "只接受同一个家庭或办公网络里的设备连接。",
   "receive.encrypted": "传输已加密 · 证书 {fp}",
-  "receive.not_encrypted": "加密不可用（无法创建证书），传输未加密。"
+  "receive.not_encrypted": "加密不可用（无法创建证书），传输未加密。",
+  "common.clear_hint": "只是把这台电脑上已完成的记录从列表里去掉。不会删除任何文件，也不影响另一台设备。",
+  "receive.got_files": "收到另一台电脑发来的 {count} 个文件 → {folder}",
+  "send.where": "照片和视频会进入对方的媒体库；其他文件和整个文件夹会存到对方的“收到的文件”文件夹。"
 }

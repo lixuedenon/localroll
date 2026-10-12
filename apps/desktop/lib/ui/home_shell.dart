@@ -1,4 +1,7 @@
 // apps/desktop/lib/ui/home_shell.dart
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../app_services.dart';
@@ -28,16 +31,46 @@ class _HomeShellState extends State<HomeShell> {
   final AppNav _nav = AppNav.instance;
   late final PairPrompter _prompter;
 
+  int _filesSeen = 0;
+  Timer? _filesTimer;
+
   @override
   void dispose() {
     _prompter.dispose();
+    widget.services.hub.removeListener(_onHub);
+    _filesTimer?.cancel();
     super.dispose();
+  }
+
+  /// Files from another PC: say where they went (once per burst).
+  void _onHub() {
+    final n = widget.services.hub.savedFiles.length;
+    if (n <= _filesSeen) {
+      _filesSeen = n;
+      return;
+    }
+    _filesTimer?.cancel();
+    _filesTimer = Timer(const Duration(seconds: 2), () {
+      final now = widget.services.hub.savedFiles.length;
+      final got = now - _filesSeen;
+      _filesSeen = now;
+      final ctx = AppNav.instance.navigatorKey.currentContext;
+      if (got <= 0 || ctx == null) return;
+      final folder = widget.services.settings.receivedPath;
+      ScaffoldMessenger.maybeOf(ctx)?.showSnackBar(SnackBar(
+        duration: const Duration(seconds: 8),
+        content: Text(tr('receive.got_files', {'count': got, 'folder': folder})),
+        action: SnackBarAction(label: tr('common.open'), onPressed: () => Process.run('explorer.exe', [folder])),
+      ));
+    });
   }
 
   @override
   void initState() {
     super.initState();
     _prompter = PairPrompter(widget.services.server); // tap-to-pair dialogs
+    _filesSeen = widget.services.hub.savedFiles.length;
+    widget.services.hub.addListener(_onHub);
     // Always start on Home: status, main actions, what needs attention.
     _nav.initialTab(AppNav.home);
   }

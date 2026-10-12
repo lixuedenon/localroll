@@ -22,6 +22,9 @@ class TransferProgress {
   String? error;
   DateTime updated = DateTime.now();
 
+  /// Where the file was saved (for "Show in folder").
+  String? savedPath;
+
   double? get fraction => total > 0 ? (received / total).clamp(0.0, 1.0) : null;
 }
 

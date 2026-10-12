@@ -7,7 +7,7 @@
   "common.save": "Salvar",
   "common.saved": "Salvo",
   "common.open": "Abrir",
-  "common.clear_finished": "Limpar concluídos",
+  "common.clear_finished": "Limpar lista",
   "common.failed": "Falhou",
   "common.show_in_folder": "Mostrar na pasta",
   "common.unknown_error": "Erro desconhecido",
@@ -185,7 +185,7 @@
   "send.nearby": "PCs próximos",
   "send.none_nearby": "Nenhum outro PC encontrado. Abra o LocalRoll no outro PC e clique em Procurar.",
   "send.transfers": "Transferências",
-  "send.clear": "Limpar concluídas",
+  "send.clear": "Limpar lista",
   "send.online": "Online",
   "send.offline": "Não encontrado",
   "send.files": "Enviar arquivos…",
@@ -231,5 +231,8 @@
   "send.err_upgrade_required": "Este aparelho precisa usar conexão criptografada. Atualize o LocalRoll.",
   "send.err_not_lan": "Só aparelhos da mesma rede de casa ou do escritório podem se conectar.",
   "receive.encrypted": "Transferências criptografadas · certificado {fp}",
-  "receive.not_encrypted": "Criptografia indisponível (não foi possível criar o certificado): as transferências não são criptografadas."
+  "receive.not_encrypted": "Criptografia indisponível (não foi possível criar o certificado): as transferências não são criptografadas.",
+  "common.clear_hint": "Só tira da lista deste PC as entradas concluídas. Nenhum arquivo é apagado e o outro aparelho não é afetado.",
+  "receive.got_files": "{count} arquivos recebidos de outro PC → {folder}",
+  "send.where": "Fotos e vídeos vão para a biblioteca do outro PC; outros arquivos e pastas, para a pasta de arquivos recebidos."
 }

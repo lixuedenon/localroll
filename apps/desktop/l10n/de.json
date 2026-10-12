@@ -7,7 +7,7 @@
   "common.save": "Speichern",
   "common.saved": "Gespeichert",
   "common.open": "Öffnen",
-  "common.clear_finished": "Abgeschlossene entfernen",
+  "common.clear_finished": "Liste leeren",
   "common.failed": "Fehlgeschlagen",
   "common.show_in_folder": "Im Ordner anzeigen",
   "common.unknown_error": "Unbekannter Fehler",
@@ -185,7 +185,7 @@
   "send.nearby": "PCs in der Nähe",
   "send.none_nearby": "Kein anderer PC gefunden. Öffnen Sie LocalRoll auf dem anderen PC und klicken Sie auf Suchen.",
   "send.transfers": "Übertragungen",
-  "send.clear": "Abgeschlossene entfernen",
+  "send.clear": "Liste leeren",
   "send.online": "Online",
   "send.offline": "Nicht gefunden",
   "send.files": "Dateien senden…",
@@ -231,5 +231,8 @@
   "send.err_upgrade_required": "Dieses Gerät muss eine verschlüsselte Verbindung nutzen. Bitte LocalRoll aktualisieren.",
   "send.err_not_lan": "Nur Geräte im selben Heim- oder Büronetz können sich verbinden.",
   "receive.encrypted": "Übertragungen verschlüsselt · Zertifikat {fp}",
-  "receive.not_encrypted": "Verschlüsselung nicht verfügbar (Zertifikat konnte nicht erstellt werden) – Übertragungen sind unverschlüsselt."
+  "receive.not_encrypted": "Verschlüsselung nicht verfügbar (Zertifikat konnte nicht erstellt werden) – Übertragungen sind unverschlüsselt.",
+  "common.clear_hint": "Entfernt nur abgeschlossene Einträge aus dieser Liste auf diesem PC. Keine Datei wird gelöscht, das andere Gerät bleibt unberührt.",
+  "receive.got_files": "{count} Dateien von einem anderen PC empfangen → {folder}",
+  "send.where": "Fotos und Videos landen in der Mediathek des anderen PCs, andere Dateien und Ordner in seinem Ordner für empfangene Dateien."
 }

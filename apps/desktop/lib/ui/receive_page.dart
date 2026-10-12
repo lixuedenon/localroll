@@ -241,7 +241,10 @@ class _TransfersCard extends StatelessWidget {
                 Text(tr('receive.history'), style: theme.textTheme.titleMedium),
                 const Spacer(),
                 if (list.isNotEmpty)
-                  TextButton(onPressed: hub.clearFinished, child: Text(tr('common.clear_finished'))),
+                  Tooltip(
+                    message: tr('common.clear_hint'),
+                    child: TextButton(onPressed: hub.clearFinished, child: Text(tr('common.clear_finished'))),
+                  ),
               ],
             ),
             if (list.isEmpty)
@@ -270,8 +273,16 @@ class _TransferTile extends StatelessWidget {
       TransferState.saved => (Icons.check_circle, tr('common.saved')),
       TransferState.failed => (Icons.error_outline, t.error ?? tr('common.failed')),
     };
+    final path = t.state == TransferState.saved ? t.savedPath : null;
     return ListTile(
       contentPadding: EdgeInsets.zero,
+      trailing: path == null
+          ? null
+          : IconButton(
+              tooltip: tr('common.show_in_folder'),
+              icon: const Icon(Icons.folder_open_rounded),
+              onPressed: () => revealInExplorer(path),
+            ),
       leading: Icon(icon, color: t.state == TransferState.failed ? Theme.of(context).colorScheme.error : null),
       title: Text(t.fileName, overflow: TextOverflow.ellipsis),
       subtitle: Column(

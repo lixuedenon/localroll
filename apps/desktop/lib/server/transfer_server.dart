@@ -644,6 +644,7 @@ class TransferServer extends ChangeNotifier {
       private: offer.private,
     ));
     hub.progress(t, length);
+    t.savedPath = dest;
     hub.setState(t, TransferState.saved);
     return _json(req.response, 200, CompleteResponse(saved: true, path: rel).toJson());
   }
@@ -674,6 +675,7 @@ class TransferServer extends ChangeNotifier {
     final rel = dest.substring(root.length + 1).replaceAll(sep, '/');
     _doneFiles[_hubKey(device, offer)] = rel;
     hub.progress(t, await File(dest).length());
+    t.savedPath = dest;
     hub.setState(t, TransferState.saved);
     hub.fileSaved(dest);
     return _json(req.response, 200, CompleteResponse(saved: true, path: rel).toJson());

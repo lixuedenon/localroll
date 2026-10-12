@@ -7,7 +7,7 @@
   "common.save": "حفظ",
   "common.saved": "تم الحفظ",
   "common.open": "فتح",
-  "common.clear_finished": "مسح المكتمل",
+  "common.clear_finished": "مسح القائمة",
   "common.failed": "فشل",
   "common.show_in_folder": "إظهار في المجلد",
   "common.unknown_error": "خطأ غير معروف",
@@ -185,7 +185,7 @@
   "send.nearby": "أجهزة كمبيوتر قريبة",
   "send.none_nearby": "لم يُعثر على كمبيوتر آخر. افتح LocalRoll على الكمبيوتر الآخر ثم اضغط بحث.",
   "send.transfers": "عمليات النقل",
-  "send.clear": "مسح المكتملة",
+  "send.clear": "مسح القائمة",
   "send.online": "متصل",
   "send.offline": "غير موجود",
   "send.files": "إرسال ملفات…",
@@ -231,5 +231,8 @@
   "send.err_upgrade_required": "يجب أن يستخدم هذا الجهاز اتصالًا مشفرًا. حدّث LocalRoll.",
   "send.err_not_lan": "يمكن الاتصال فقط للأجهزة على شبكة المنزل أو المكتب نفسها.",
   "receive.encrypted": "النقل مشفّر · الشهادة {fp}",
-  "receive.not_encrypted": "التشفير غير متاح (تعذّر إنشاء الشهادة) — النقل غير مشفّر."
+  "receive.not_encrypted": "التشفير غير متاح (تعذّر إنشاء الشهادة) — النقل غير مشفّر.",
+  "common.clear_hint": "يزيل فقط الإدخالات المكتملة من القائمة على هذا الكمبيوتر. لا يُحذف أي ملف ولا يتأثر الجهاز الآخر.",
+  "receive.got_files": "تم استلام {count} ملفات من كمبيوتر آخر ← {folder}",
+  "send.where": "تذهب الصور والفيديو إلى مكتبة الكمبيوتر الآخر، والملفات والمجلدات الأخرى إلى مجلد الملفات المستلمة لديه."
 }

@@ -7,7 +7,7 @@
   "common.save": "Kaydet",
   "common.saved": "Kaydedildi",
   "common.open": "Aç",
-  "common.clear_finished": "Bitenleri temizle",
+  "common.clear_finished": "Listeyi temizle",
   "common.failed": "Başarısız",
   "common.show_in_folder": "Klasörde göster",
   "common.unknown_error": "Bilinmeyen hata",
@@ -185,7 +185,7 @@
   "send.nearby": "Yakındaki PC’ler",
   "send.none_nearby": "Başka PC bulunamadı. Diğer PC’de LocalRoll’u açıp Ara’ya basın.",
   "send.transfers": "Aktarımlar",
-  "send.clear": "Bitenleri temizle",
+  "send.clear": "Listeyi temizle",
   "send.online": "Çevrimiçi",
   "send.offline": "Bulunamadı",
   "send.files": "Dosya gönder…",
@@ -231,5 +231,8 @@
   "send.err_upgrade_required": "Bu cihaz şifreli bağlantı kullanmalı. LocalRoll’u güncelleyin.",
   "send.err_not_lan": "Yalnızca aynı ev veya ofis ağındaki cihazlar bağlanabilir.",
   "receive.encrypted": "Aktarımlar şifreli · sertifika {fp}",
-  "receive.not_encrypted": "Şifreleme kullanılamıyor (sertifika oluşturulamadı) — aktarımlar şifresiz."
+  "receive.not_encrypted": "Şifreleme kullanılamıyor (sertifika oluşturulamadı) — aktarımlar şifresiz.",
+  "common.clear_hint": "Yalnızca bu PC’deki listeden biten kayıtları kaldırır. Hiçbir dosya silinmez, diğer cihaz etkilenmez.",
+  "receive.got_files": "Başka bir PC’den {count} dosya alındı → {folder}",
+  "send.where": "Fotoğraf ve videolar diğer PC’nin kitaplığına, diğer dosya ve klasörler alınan dosyalar klasörüne gider."
 }

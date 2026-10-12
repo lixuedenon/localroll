@@ -7,7 +7,7 @@
   "common.save": "Guardar",
   "common.saved": "Guardado",
   "common.open": "Abrir",
-  "common.clear_finished": "Borrar terminados",
+  "common.clear_finished": "Vaciar lista",
   "common.failed": "Error",
   "common.show_in_folder": "Mostrar en la carpeta",
   "common.unknown_error": "Error desconocido",
@@ -185,7 +185,7 @@
   "send.nearby": "PC cercanos",
   "send.none_nearby": "No se encontró otro PC. Abre LocalRoll en el otro PC y pulsa Buscar.",
   "send.transfers": "Transferencias",
-  "send.clear": "Borrar terminadas",
+  "send.clear": "Vaciar lista",
   "send.online": "En línea",
   "send.offline": "No encontrado",
   "send.files": "Enviar archivos…",
@@ -231,5 +231,8 @@
   "send.err_upgrade_required": "Este dispositivo debe usar una conexión cifrada. Actualiza LocalRoll.",
   "send.err_not_lan": "Solo pueden conectarse dispositivos de la misma red de casa u oficina.",
   "receive.encrypted": "Transferencias cifradas · certificado {fp}",
-  "receive.not_encrypted": "Cifrado no disponible (no se pudo crear el certificado): las transferencias no están cifradas."
+  "receive.not_encrypted": "Cifrado no disponible (no se pudo crear el certificado): las transferencias no están cifradas.",
+  "common.clear_hint": "Solo quita de esta lista las entradas terminadas en este PC. No se borra ningún archivo ni afecta al otro dispositivo.",
+  "receive.got_files": "Recibidos {count} archivos de otro PC → {folder}",
+  "send.where": "Las fotos y vídeos van a la biblioteca del otro PC; los demás archivos y carpetas, a su carpeta de archivos recibidos."
 }

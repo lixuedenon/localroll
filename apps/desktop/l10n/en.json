@@ -7,7 +7,7 @@
   "common.save": "Save",
   "common.saved": "Saved",
   "common.open": "Open",
-  "common.clear_finished": "Clear finished",
+  "common.clear_finished": "Clear list",
   "common.failed": "Failed",
   "common.show_in_folder": "Show in folder",
   "common.unknown_error": "Unknown error",
@@ -185,7 +185,7 @@
   "send.nearby": "Nearby PCs",
   "send.none_nearby": "No other PC found. Open LocalRoll on the other PC, then press Search.",
   "send.transfers": "Transfers",
-  "send.clear": "Clear finished",
+  "send.clear": "Clear list",
   "send.online": "Online",
   "send.offline": "Not found",
   "send.files": "Send files…",
@@ -231,5 +231,8 @@
   "send.err_upgrade_required": "This device must use an encrypted connection. Update LocalRoll on it.",
   "send.err_not_lan": "Only devices on the same home or office network can connect.",
   "receive.encrypted": "Transfers are encrypted · certificate {fp}",
-  "receive.not_encrypted": "Encryption unavailable (certificate could not be created) — transfers are not encrypted."
+  "receive.not_encrypted": "Encryption unavailable (certificate could not be created) — transfers are not encrypted.",
+  "common.clear_hint": "Only removes finished entries from this list on this PC. No file is deleted, and the other device is not affected.",
+  "receive.got_files": "Received {count} files from another PC → {folder}",
+  "send.where": "Photos and videos go into the other PC’s library; other files and whole folders go to its “Received files” folder."
 }
