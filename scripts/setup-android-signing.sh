@@ -11,6 +11,7 @@
 #
 # Usage (Git Bash):  cd /c/Users/lixue/Projects/localroll && ./scripts/setup-android-signing.sh
 set -e
+trap 'echo; echo "Stopped with an error on line $LINENO. Copy everything above and send it to Claude."' ERR
 cd "$(dirname "$0")/.."
 repo=lixuedenon/localroll
 keys="$(cd .. && pwd)/LocalRoll-keys"
@@ -20,11 +21,13 @@ pwfile="$keys/localroll-android-password.txt"
 command -v gh >/dev/null || { echo "GitHub CLI not found. Run: winget install GitHub.cli (then reopen Git Bash)"; exit 1; }
 gh auth status >/dev/null 2>&1 || { echo "Not logged in. Run once: gh auth login"; exit 1; }
 
+echo "1/3 Checking tools..."
 mkdir -p "$keys"
 if [ -f "$jks" ]; then
   echo "Key already exists: $(cygpath -w "$jks" 2>/dev/null || echo "$jks") — reusing it."
   pw="$(tr -d '\r\n' < "$pwfile")"
 else
+  echo "2/3 Making the signing key (takes a few seconds)..."
   pw="$(head -c 32 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 24)"
   # keytool (Android Studio / a JDK) if there is one; otherwise the openssl
   # that comes with Git Bash. Both make a PKCS12 key store Android accepts.
@@ -41,7 +44,7 @@ else
   elif command -v openssl >/dev/null; then
     tmp="$(mktemp -d)"
     MSYS_NO_PATHCONV=1 openssl req -x509 -newkey rsa:3072 -nodes -days 36500 \
-      -subj "/CN=LocalRoll/O=LocalRoll" -keyout "$tmp/key.pem" -out "$tmp/cert.pem" 2>/dev/null
+      -subj "/CN=LocalRoll/O=LocalRoll" -keyout "$tmp/key.pem" -out "$tmp/cert.pem"
     openssl pkcs12 -export -name localroll -inkey "$tmp/key.pem" -in "$tmp/cert.pem" \
       -out "$jks" -passout "pass:$pw"
     rm -rf "$tmp"
@@ -53,6 +56,7 @@ else
   echo "Made a new key: $(cygpath -w "$jks" 2>/dev/null || echo "$jks")"
 fi
 
+echo "3/3 Giving the key to GitHub (Actions secrets)..."
 base64 -w0 "$jks" | gh secret set LR_KEYSTORE_B64 -R "$repo"
 printf '%s' "$pw" | gh secret set LR_KEYSTORE_PASSWORD -R "$repo"
 printf '%s' "$pw" | gh secret set LR_KEY_PASSWORD -R "$repo"
