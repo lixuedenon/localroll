@@ -155,7 +155,7 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           if (ok)
-            BreathingDot(online: online > 0, size: 8)
+            BreathingDot(online: online > 0, size: 12)
           else
             Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
           const SizedBox(width: 6),
@@ -292,7 +292,7 @@ class _DashboardPageState extends State<DashboardPage> {
           for (final m in family.members)
             ActionChip(
               // Breathing dot: one of this person's phones has LocalRoll open now.
-              avatar: BreathingDot(online: family.devicesOf(m).any((d) => s.isOnline(d.id)), size: 8),
+              avatar: BreathingDot(online: family.devicesOf(m).any((d) => s.isOnline(d.id)), size: 12),
               label: Text(family.devicesOf(m).length > 1 ? tr('home.member_devices', {'name': m, 'count': family.devicesOf(m).length}) : m),
               onPressed: () => AppNav.instance.selectTab(AppNav.family),
             ),
@@ -321,7 +321,7 @@ class _DashboardPageState extends State<DashboardPage> {
         Wrap(spacing: 8, runSpacing: 8, children: [
           for (final p in pcs)
             ActionChip(
-              avatar: BreathingDot(online: s.isOnline(p.id), size: 8),
+              avatar: BreathingDot(online: s.isOnline(p.id), size: 12),
               label: Row(mainAxisSize: MainAxisSize.min, children: [
                 const Icon(Icons.computer_rounded, size: 16, color: LrColors.muted),
                 const SizedBox(width: 6),

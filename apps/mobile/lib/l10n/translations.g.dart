@@ -251,6 +251,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '“{name}” is online',
     'presence.offline': '“{name}” went offline',
     'home.online_now': 'Online now · {count}',
+    'home.kind_pc': 'PC',
+    'home.kind_phone': 'Phone',
   },
   'zh': {
     'common.cancel': '取消',
@@ -500,6 +502,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '「{name}」上线了',
     'presence.offline': '「{name}」下线了',
     'home.online_now': '现在在线 · {count}',
+    'home.kind_pc': '电脑',
+    'home.kind_phone': '手机',
   },
   'zh_Hant': {
     'common.cancel': '取消',
@@ -749,6 +753,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '「{name}」上線了',
     'presence.offline': '「{name}」下線了',
     'home.online_now': '現在在線 · {count}',
+    'home.kind_pc': '電腦',
+    'home.kind_phone': '手機',
   },
   'ja': {
     'common.cancel': 'キャンセル',
@@ -998,6 +1004,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '「{name}」がオンラインになりました',
     'presence.offline': '「{name}」がオフラインになりました',
     'home.online_now': 'オンライン · {count}',
+    'home.kind_pc': 'PC',
+    'home.kind_phone': 'スマホ',
   },
   'ko': {
     'common.cancel': '취소',
@@ -1247,6 +1255,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '“{name}”이(가) 온라인입니다',
     'presence.offline': '“{name}”이(가) 오프라인입니다',
     'home.online_now': '지금 온라인 · {count}',
+    'home.kind_pc': 'PC',
+    'home.kind_phone': '휴대폰',
   },
   'es': {
     'common.cancel': 'Cancelar',
@@ -1496,6 +1506,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '«{name}» está en línea',
     'presence.offline': '«{name}» se desconectó',
     'home.online_now': 'En línea ahora · {count}',
+    'home.kind_pc': 'PC',
+    'home.kind_phone': 'Teléfono',
   },
   'fr': {
     'common.cancel': 'Annuler',
@@ -1745,6 +1757,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '« {name} » est en ligne',
     'presence.offline': '« {name} » est hors ligne',
     'home.online_now': 'En ligne · {count}',
+    'home.kind_pc': 'PC',
+    'home.kind_phone': 'Téléphone',
   },
   'de': {
     'common.cancel': 'Abbrechen',
@@ -1994,6 +2008,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '„{name}“ ist online',
     'presence.offline': '„{name}“ ist offline',
     'home.online_now': 'Jetzt online · {count}',
+    'home.kind_pc': 'PC',
+    'home.kind_phone': 'Telefon',
   },
   'pt': {
     'common.cancel': 'Cancelar',
@@ -2243,6 +2259,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '“{name}” está online',
     'presence.offline': '“{name}” ficou offline',
     'home.online_now': 'Online agora · {count}',
+    'home.kind_pc': 'PC',
+    'home.kind_phone': 'Celular',
   },
   'ru': {
     'common.cancel': 'Отмена',
@@ -2492,6 +2510,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '«{name}» в сети',
     'presence.offline': '«{name}» не в сети',
     'home.online_now': 'Сейчас в сети · {count}',
+    'home.kind_pc': 'ПК',
+    'home.kind_phone': 'Телефон',
   },
   'it': {
     'common.cancel': 'Annulla',
@@ -2741,6 +2761,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '«{name}» è online',
     'presence.offline': '«{name}» è offline',
     'home.online_now': 'Online ora · {count}',
+    'home.kind_pc': 'PC',
+    'home.kind_phone': 'Telefono',
   },
   'ar': {
     'common.cancel': 'إلغاء',
@@ -2990,6 +3012,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '"{name}" متصل الآن',
     'presence.offline': '"{name}" غير متصل',
     'home.online_now': 'متصل الآن · {count}',
+    'home.kind_pc': 'كمبيوتر',
+    'home.kind_phone': 'هاتف',
   },
   'hi': {
     'common.cancel': 'रद्द करें',
@@ -3239,6 +3263,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '“{name}” ऑनलाइन है',
     'presence.offline': '“{name}” ऑफ़लाइन हो गया',
     'home.online_now': 'अभी ऑनलाइन · {count}',
+    'home.kind_pc': 'पीसी',
+    'home.kind_phone': 'फ़ोन',
   },
   'id': {
     'common.cancel': 'Batal',
@@ -3488,6 +3514,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '“{name}” online',
     'presence.offline': '“{name}” offline',
     'home.online_now': 'Online sekarang · {count}',
+    'home.kind_pc': 'PC',
+    'home.kind_phone': 'Ponsel',
   },
   'vi': {
     'common.cancel': 'Hủy',
@@ -3737,6 +3765,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '“{name}” đã trực tuyến',
     'presence.offline': '“{name}” đã ngoại tuyến',
     'home.online_now': 'Đang trực tuyến · {count}',
+    'home.kind_pc': 'Máy tính',
+    'home.kind_phone': 'Điện thoại',
   },
   'th': {
     'common.cancel': 'ยกเลิก',
@@ -3986,6 +4016,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '“{name}” ออนไลน์แล้ว',
     'presence.offline': '“{name}” ออฟไลน์แล้ว',
     'home.online_now': 'ออนไลน์ตอนนี้ · {count}',
+    'home.kind_pc': 'พีซี',
+    'home.kind_phone': 'โทรศัพท์',
   },
   'tr': {
     'common.cancel': 'İptal',
@@ -4235,5 +4267,7 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '“{name}” çevrimiçi',
     'presence.offline': '“{name}” çevrimdışı',
     'home.online_now': 'Şu an çevrimiçi · {count}',
+    'home.kind_pc': 'PC',
+    'home.kind_phone': 'Telefon',
   },
 };

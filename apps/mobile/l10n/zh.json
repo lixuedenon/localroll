@@ -248,5 +248,7 @@
   "transfer.title_partly": "发送结束，有失败",
   "presence.online": "「{name}」上线了",
   "presence.offline": "「{name}」下线了",
-  "home.online_now": "现在在线 · {count}"
+  "home.online_now": "现在在线 · {count}",
+  "home.kind_pc": "电脑",
+  "home.kind_phone": "手机"
 }

@@ -248,5 +248,7 @@
   "transfer.title_partly": "Fertig, mit Fehlern",
   "presence.online": "„{name}“ ist online",
   "presence.offline": "„{name}“ ist offline",
-  "home.online_now": "Jetzt online · {count}"
+  "home.online_now": "Jetzt online · {count}",
+  "home.kind_pc": "PC",
+  "home.kind_phone": "Telefon"
 }

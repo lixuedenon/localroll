@@ -248,5 +248,7 @@
   "transfer.title_partly": "傳送結束，有失敗",
   "presence.online": "「{name}」上線了",
   "presence.offline": "「{name}」下線了",
-  "home.online_now": "現在在線 · {count}"
+  "home.online_now": "現在在線 · {count}",
+  "home.kind_pc": "電腦",
+  "home.kind_phone": "手機"
 }

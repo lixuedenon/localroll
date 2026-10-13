@@ -248,5 +248,7 @@
   "transfer.title_partly": "Завершено, есть ошибки",
   "presence.online": "«{name}» в сети",
   "presence.offline": "«{name}» не в сети",
-  "home.online_now": "Сейчас в сети · {count}"
+  "home.online_now": "Сейчас в сети · {count}",
+  "home.kind_pc": "ПК",
+  "home.kind_phone": "Телефон"
 }

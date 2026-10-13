@@ -248,5 +248,7 @@
   "transfer.title_partly": "Bitti, bazıları başarısız",
   "presence.online": "“{name}” çevrimiçi",
   "presence.offline": "“{name}” çevrimdışı",
-  "home.online_now": "Şu an çevrimiçi · {count}"
+  "home.online_now": "Şu an çevrimiçi · {count}",
+  "home.kind_pc": "PC",
+  "home.kind_phone": "Telefon"
 }

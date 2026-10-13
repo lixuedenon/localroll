@@ -106,7 +106,7 @@ class _FamilyPageState extends State<FamilyPage> {
                 contentPadding: const EdgeInsetsDirectional.only(start: 44),
                 leading: Row(mainAxisSize: MainAxisSize.min, children: [
                   // Breathing dot: LocalRoll is open on that phone right now.
-                  BreathingDot(online: widget.services.isOnline(d.id), size: 8),
+                  BreathingDot(online: widget.services.isOnline(d.id), size: 12),
                   Icon(st.trusted[d.id]?.platform == 'ios' ? Icons.phone_iphone : Icons.phone_android),
                 ]),
                 title: Text('${family.labelOf(d.id)} · ${d.deviceName}'),

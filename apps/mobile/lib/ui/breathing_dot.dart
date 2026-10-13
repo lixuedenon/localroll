@@ -7,7 +7,10 @@ import 'theme.dart';
 /// about every 2.6 s). Offline: a still grey dot. Still when the system
 /// asks for less motion.
 class BreathingDot extends StatefulWidget {
-  const BreathingDot({super.key, required this.online, this.size = 10});
+  const BreathingDot({super.key, required this.online, this.size = 12});
+
+  /// Brighter than the theme's cyan, so it catches the eye.
+  static const Color glow = Color(0xFF39F5A0);
 
   final bool online;
   final double size;
@@ -51,21 +54,21 @@ class _BreathingDotState extends State<BreathingDot> with SingleTickerProviderSt
     final still = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     if (!widget.online || still) {
       return SizedBox.square(
-        dimension: s * 2,
+        dimension: s * 2.2,
         child: Center(
           child: Container(
             width: s,
             height: s,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: widget.online ? LrColors.verified : LrColors.muted.withValues(alpha: 0.6),
+              color: widget.online ? BreathingDot.glow : LrColors.muted.withValues(alpha: 0.6),
             ),
           ),
         ),
       );
     }
     return SizedBox.square(
-      dimension: s * 2,
+      dimension: s * 2.2,
       child: AnimatedBuilder(
         animation: _c,
         builder: (context, _) {
@@ -76,12 +79,12 @@ class _BreathingDotState extends State<BreathingDot> with SingleTickerProviderSt
               height: s,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: LrColors.verified.withValues(alpha: 0.55 + 0.45 * t),
+                color: Color.lerp(BreathingDot.glow.withValues(alpha: 0.65), const Color(0xFFB8FFDC), t),
                 boxShadow: [
                   BoxShadow(
-                    color: LrColors.verified.withValues(alpha: 0.55 * t),
-                    blurRadius: s * 0.9 * t,
-                    spreadRadius: s * 0.35 * t,
+                    color: BreathingDot.glow.withValues(alpha: 0.75 * t),
+                    blurRadius: s * 1.1 * t,
+                    spreadRadius: s * 0.45 * t,
                   ),
                 ],
               ),

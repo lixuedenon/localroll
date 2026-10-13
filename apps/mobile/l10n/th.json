@@ -248,5 +248,7 @@
   "transfer.title_partly": "เสร็จแล้ว มีบางรายการล้มเหลว",
   "presence.online": "“{name}” ออนไลน์แล้ว",
   "presence.offline": "“{name}” ออฟไลน์แล้ว",
-  "home.online_now": "ออนไลน์ตอนนี้ · {count}"
+  "home.online_now": "ออนไลน์ตอนนี้ · {count}",
+  "home.kind_pc": "พีซี",
+  "home.kind_phone": "โทรศัพท์"
 }

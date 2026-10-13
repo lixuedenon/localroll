@@ -248,5 +248,7 @@
   "transfer.title_partly": "Xong, có lỗi",
   "presence.online": "“{name}” đã trực tuyến",
   "presence.offline": "“{name}” đã ngoại tuyến",
-  "home.online_now": "Đang trực tuyến · {count}"
+  "home.online_now": "Đang trực tuyến · {count}",
+  "home.kind_pc": "Máy tính",
+  "home.kind_phone": "Điện thoại"
 }

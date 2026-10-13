@@ -315,7 +315,7 @@ class _ConnectPageState extends State<ConnectPage> {
                             Text(d.name, style: theme.textTheme.titleMedium),
                             const SizedBox(height: 2),
                             Row(children: [
-                              BreathingDot(online: widget.discovery.isOnline(d.id), size: 8),
+                              BreathingDot(online: widget.discovery.isOnline(d.id), size: 12),
                               const SizedBox(width: 4),
                               Text(
                                 widget.discovery.isOnline(d.id) ? tr('connect.online') : tr('connect.offline'),

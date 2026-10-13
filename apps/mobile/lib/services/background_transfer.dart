@@ -120,6 +120,14 @@ class BackgroundTransfer {
     }
   }
 
+  /// iPhone: ask for a few seconds after leaving the app (to say "I'm
+  /// leaving" to the PCs). No-op elsewhere.
+  static Future<void> grace(bool on) async {
+    try {
+      await _channel.invokeMethod<void>(on ? 'graceBegin' : 'graceEnd');
+    } catch (_) {}
+  }
+
   static Future<void> stop({bool success = true}) async {
     active = false;
     try {

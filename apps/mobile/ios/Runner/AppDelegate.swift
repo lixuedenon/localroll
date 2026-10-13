@@ -113,6 +113,16 @@ enum BackgroundTransfer {
         }
         endShortTask()
         result(nil)
+      case "graceBegin":
+        // A few seconds after leaving the app, to tell the PCs "I'm leaving".
+        endGraceTask()
+        graceTask = UIApplication.shared.beginBackgroundTask(withName: "LocalRoll goodbye") {
+          endGraceTask()
+        }
+        result(nil)
+      case "graceEnd":
+        endGraceTask()
+        result(nil)
       case "freeSpace":
         result(StorageInfo.freeBytes())
       case "assetSize":
@@ -147,6 +157,15 @@ enum BackgroundTransfer {
     endShortTask()
     shortTask = UIApplication.shared.beginBackgroundTask(withName: "LocalRoll transfer") {
       endShortTask()
+    }
+  }
+
+  static var graceTask: UIBackgroundTaskIdentifier = .invalid
+
+  private static func endGraceTask() {
+    if graceTask != .invalid {
+      UIApplication.shared.endBackgroundTask(graceTask)
+      graceTask = .invalid
     }
   }
 

@@ -135,8 +135,8 @@ class TransferServer extends ChangeNotifier {
   final Map<String, DateTime> lastSeen = {};
 
   /// No word for this long = gone (closed without saying so, Wi-Fi lost,
-  /// phone asleep). Devices check in every 60 s.
-  static const Duration onlineWindow = Duration(seconds: 150);
+  /// phone asleep). Phones check in about every 40 s, PCs every 60 s.
+  static const Duration onlineWindow = Duration(seconds: 90);
 
   bool isOnline(String deviceId) {
     final t = lastSeen[deviceId];

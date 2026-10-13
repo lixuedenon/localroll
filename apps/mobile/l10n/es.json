@@ -248,5 +248,7 @@
   "transfer.title_partly": "Terminado, con errores",
   "presence.online": "«{name}» está en línea",
   "presence.offline": "«{name}» se desconectó",
-  "home.online_now": "En línea ahora · {count}"
+  "home.online_now": "En línea ahora · {count}",
+  "home.kind_pc": "PC",
+  "home.kind_phone": "Teléfono"
 }

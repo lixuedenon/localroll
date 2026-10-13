@@ -248,5 +248,7 @@
   "transfer.title_partly": "انتهى مع إخفاقات",
   "presence.online": "\"{name}\" متصل الآن",
   "presence.offline": "\"{name}\" غير متصل",
-  "home.online_now": "متصل الآن · {count}"
+  "home.online_now": "متصل الآن · {count}",
+  "home.kind_pc": "كمبيوتر",
+  "home.kind_phone": "هاتف"
 }

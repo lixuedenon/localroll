@@ -248,5 +248,7 @@
   "transfer.title_partly": "完了（一部失敗）",
   "presence.online": "「{name}」がオンラインになりました",
   "presence.offline": "「{name}」がオフラインになりました",
-  "home.online_now": "オンライン · {count}"
+  "home.online_now": "オンライン · {count}",
+  "home.kind_pc": "PC",
+  "home.kind_phone": "スマホ"
 }

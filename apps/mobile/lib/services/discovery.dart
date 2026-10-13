@@ -48,12 +48,12 @@ class DesktopDiscovery extends ChangeNotifier {
     if (was != isOnline(id)) notifyListeners();
   }
 
-  /// A paired PC is reachable now: it answered within the last ~2.5 min
-  /// (we check in every minute), or the Wi-Fi search lists it and our last
+  /// A paired PC is reachable now: it answered within the last 90 s
+  /// (we check in about every 40 s), or the Wi-Fi search lists it and our last
   /// direct try did not fail.
   bool isOnline(String id) {
     final t = _reached[id];
-    if (t != null && DateTime.now().difference(t) < const Duration(seconds: 150)) return true;
+    if (t != null && DateTime.now().difference(t) < const Duration(seconds: 90)) return true;
     return found.any((f) => f.id == id) && !_unreachable.contains(id);
   }
 
@@ -268,7 +268,7 @@ Future<PairedDesktop> pairWithDesktop({
 final Map<String, DateTime> _lookChecked = {};
 
 /// Paired PCs: check in ("I'm here"), pick up a new name / icon / picture,
-/// and hear who else is online. About once a minute per PC; [now] skips the
+/// and hear who else is online. About every 40 s per PC; [now] skips the
 /// wait (app opened / back in front).
 Future<void> refreshPairedLooks(MobileSettings settings, DesktopDiscovery discovery, {bool now = false}) async {
   discovery
@@ -286,7 +286,7 @@ Future<void> refreshPairedLooks(MobileSettings settings, DesktopDiscovery discov
     final d = settings.byId(f.id);
     if (d == null) continue;
     final last = _lookChecked[f.id];
-    if (!now && last != null && DateTime.now().difference(last) < const Duration(seconds: 55)) continue;
+    if (!now && last != null && DateTime.now().difference(last) < const Duration(seconds: 25)) continue;
     _lookChecked[f.id] = DateTime.now();
     var ok = false;
     for (final h in f.hosts) {
@@ -547,28 +547,24 @@ Future<void> forgetDesktop(MobileSettings settings, PairedDesktop d) async {
 }
 
 /// Leaving the app: tell the paired PCs we can reach, so they show this
-/// phone offline at once. Best effort, a second at most.
+/// phone offline at once. One request each, straight to the address and
+/// certificate we already know (no lookups: iOS gives a leaving app only a
+/// few seconds). Best effort.
 Future<void> sayBye(MobileSettings settings, DesktopDiscovery discovery) async {
   await Future.wait([
     for (final d in settings.desktops)
       if (discovery.isOnline(d.id) && d.lastHost != null)
         () async {
-          DesktopClient? c;
+          final c = d.fingerprint != null
+              ? DesktopClient(
+                  host: d.lastHost!, port: d.port, secure: true, pin: d.fingerprint, deviceId: settings.deviceId, token: d.token)
+              : DesktopClient(host: d.lastHost!, port: d.port, deviceId: settings.deviceId, token: d.token);
           try {
-            final probe = DesktopClient(host: d.lastHost!, port: d.port);
-            final DeviceInfo info;
-            try {
-              info = await probe.info(timeout: const Duration(milliseconds: 600));
-            } finally {
-              probe.close();
-            }
-            if (info.id != d.id) return;
-            c = await openDesktop(settings, d, d.lastHost!, d.port, info);
-            await c.presence(online: false, timeout: const Duration(milliseconds: 800));
+            await c.presence(online: false, timeout: const Duration(seconds: 3));
           } catch (_) {
           } finally {
-            c?.close();
+            c.close();
           }
         }(),
-  ]).timeout(const Duration(milliseconds: 1500), onTimeout: () => const []);
+  ]).timeout(const Duration(seconds: 4), onTimeout: () => const []);
 }

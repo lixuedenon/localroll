@@ -153,33 +153,57 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     }
   }
 
-  /// Home: who is online now (breathing dots).
+  /// Home: everything else that is online now, each in its own card like
+  /// the PC card above (that PC is already shown there).
   Widget _onlineStrip(BuildContext context) {
     final all = _onlineDevices();
-    if (all.isEmpty) return const SizedBox.shrink();
+    final current = widget.settings.current?.id;
+    final rest = [for (final e in all.entries) if (e.key != current) e];
+    if (rest.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.only(top: 14),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(tr('home.online_now', {'count': all.length}), style: Theme.of(context).textTheme.bodySmall),
-        const SizedBox(height: 6),
-        Wrap(spacing: 8, runSpacing: 8, children: [
-          for (final d in all.values)
-            Container(
-              padding: const EdgeInsets.fromLTRB(4, 4, 12, 4),
-              decoration: BoxDecoration(
-                color: LrColors.surface,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: LrColors.line),
-              ),
-              child: Row(mainAxisSize: MainAxisSize.min, children: [
-                const BreathingDot(online: true, size: 8),
-                Icon(d.$2 ? Icons.computer_rounded : Icons.smartphone_rounded, size: 16, color: LrColors.muted),
-                const SizedBox(width: 6),
-                Text(d.$1, style: const TextStyle(fontSize: 13)),
-              ]),
-            ),
-        ]),
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 6),
+          child: Text(tr('home.online_now', {'count': all.length}), style: Theme.of(context).textTheme.bodySmall),
+        ),
+        for (final e in rest)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: _onlineCard(e.key, e.value.$1, pc: e.value.$2),
+          ),
       ]),
+    );
+  }
+
+  Widget _onlineCard(String id, String name, {required bool pc}) {
+    final paired = widget.settings.byId(id);
+    return Material(
+      color: LrColors.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: const BorderSide(color: LrColors.line)),
+      child: ListTile(
+        // A paired PC: tap to make it the one this phone sends to.
+        onTap: paired == null ? null : () => _selectTab(3),
+        leading: paired != null
+            ? DeviceBadge(
+                icon: paired.icon,
+                color: paired.color,
+                image: paired.avatarUrl == null ? null : NetworkImage(paired.avatarUrl!),
+                size: 40,
+              )
+            : CircleAvatar(
+                radius: 20,
+                backgroundColor: LrColors.raised,
+                child: Icon(pc ? Icons.computer_rounded : Icons.smartphone_rounded, color: LrColors.muted),
+              ),
+        title: Text(name, style: const TextStyle(fontWeight: FontWeight.w700)),
+        subtitle: Row(children: [
+          const BreathingDot(online: true),
+          const SizedBox(width: 4),
+          Text('${tr('home.pc_online')} · ${tr(pc ? 'home.kind_pc' : 'home.kind_phone')}',
+              style: const TextStyle(color: LrColors.verified)),
+        ]),
+      ),
     );
   }
 
@@ -197,9 +221,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     // Leaving the app: "I'm leaving" (unless a transfer keeps going in the
     // background — then the phone is still talking to the PC).
-    if (state == AppLifecycleState.paused && !BackgroundTransfer.active) {
-      _saidBye = true;
-      unawaited(sayBye(widget.settings, widget.discovery));
+    // "hidden" comes first (as soon as the app leaves the screen); "paused"
+    // as a fallback. Once per leaving.
+    if ((state == AppLifecycleState.hidden || state == AppLifecycleState.paused) && !BackgroundTransfer.active) {
+      if (!_saidBye) {
+        _saidBye = true;
+        unawaited(_goodbye());
+      }
       return;
     }
     if (state != AppLifecycleState.resumed) return;
@@ -217,6 +245,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   bool _saidBye = false;
+
+  Future<void> _goodbye() async {
+    await BackgroundTransfer.grace(true); // iPhone: a few seconds to say it
+    try {
+      await sayBye(widget.settings, widget.discovery);
+    } finally {
+      await BackgroundTransfer.grace(false);
+    }
+  }
 
   /// Switched in Settings.
   Future<void> _onAutoSendChanged() => _auto.check();
@@ -759,7 +796,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 subtitle: d == null
                     ? null
                     : Row(children: [
-                        BreathingDot(online: online, size: 8),
+                        BreathingDot(online: online, size: 12),
                         const SizedBox(width: 4),
                         Text(online ? tr('home.pc_online') : tr('home.pc_offline'),
                             style: TextStyle(color: online ? LrColors.verified : LrColors.muted)),
