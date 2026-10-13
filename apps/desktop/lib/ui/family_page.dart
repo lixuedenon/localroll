@@ -7,7 +7,6 @@ import '../app_services.dart';
 import '../l10n/l10n.dart';
 import 'breathing_dot.dart';
 import 'format.dart';
-import 'theme.dart';
 
 /// Family: paired phones grouped by person — rename people, move a phone to
 /// another person, unpair, one folder per person.
