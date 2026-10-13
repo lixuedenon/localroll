@@ -298,5 +298,8 @@
   "files.empty_other": "아직 아무것도 없습니다.\n다른 PC에서 보낸 압축 파일, 폴더 등이 여기에 표시됩니다.",
   "files.items": "파일 {count}개",
   "family.online": "LocalRoll 사용 중",
-  "family.offline": "연결 안 됨"
+  "family.offline": "연결 안 됨",
+  "presence.online": "“{name}”이(가) 온라인입니다",
+  "presence.offline": "“{name}”이(가) 오프라인입니다",
+  "home.status_online": "수신 가능 · 기기 {count}대 온라인"
 }

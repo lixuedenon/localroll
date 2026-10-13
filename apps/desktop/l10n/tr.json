@@ -298,5 +298,8 @@
   "files.empty_other": "Henüz bir şey yok.\nBaşka PC’den gelen arşivler, klasörler ve diğer dosyalar burada görünür.",
   "files.items": "{count} dosya",
   "family.online": "LocalRoll şu an açık",
-  "family.offline": "Bağlı değil"
+  "family.offline": "Bağlı değil",
+  "presence.online": "“{name}” çevrimiçi",
+  "presence.offline": "“{name}” çevrimdışı",
+  "home.status_online": "Almaya hazır · {count} cihaz çevrimiçi"
 }

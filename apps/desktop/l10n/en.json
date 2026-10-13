@@ -298,5 +298,8 @@
   "files.empty_other": "Nothing here yet.\nArchives, whole folders and other files sent from another PC appear here.",
   "files.items": "{count} files",
   "family.online": "LocalRoll open now",
-  "family.offline": "Not connected"
+  "family.offline": "Not connected",
+  "presence.online": "“{name}” is online",
+  "presence.offline": "“{name}” went offline",
+  "home.status_online": "Ready to receive · {count} devices online"
 }

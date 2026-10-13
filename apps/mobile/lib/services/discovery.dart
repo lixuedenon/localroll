@@ -32,6 +32,30 @@ class DesktopDiscovery extends ChangeNotifier {
   final Map<String, FoundDesktop> _scanned = {};
   bool scanning = false;
 
+  /// Paired PCs that answered (or not) when we last asked them directly.
+  final Map<String, DateTime> _reached = {};
+  final Set<String> _unreachable = {};
+
+  void reached(String id, bool ok) {
+    final was = isOnline(id);
+    if (ok) {
+      _reached[id] = DateTime.now();
+      _unreachable.remove(id);
+    } else {
+      _reached.remove(id);
+      _unreachable.add(id);
+    }
+    if (was != isOnline(id)) notifyListeners();
+  }
+
+  /// A paired PC is reachable now: it answered within the last ~90 s, or the
+  /// Wi-Fi search lists it and our last direct try did not fail.
+  bool isOnline(String id) {
+    final t = _reached[id];
+    if (t != null && DateTime.now().difference(t) < const Duration(seconds: 90)) return true;
+    return found.any((f) => f.id == id) && !_unreachable.contains(id);
+  }
+
   void _merge() {
     found = [
       ..._mdns,
@@ -215,7 +239,8 @@ final Map<String, DateTime> _lookChecked = {};
 
 /// Paired PCs seen on the Wi-Fi: pick up a new name / icon / picture right
 /// away (not only when sending). At most once a minute per PC.
-Future<void> refreshPairedLooks(MobileSettings settings, List<FoundDesktop> found) async {
+Future<void> refreshPairedLooks(MobileSettings settings, DesktopDiscovery discovery) async {
+  final found = discovery.found;
   // Paired PCs the Wi-Fi search has not (re)found: try where they were last.
   final all = [
     ...found,
@@ -227,8 +252,9 @@ Future<void> refreshPairedLooks(MobileSettings settings, List<FoundDesktop> foun
     final d = settings.byId(f.id);
     if (d == null) continue;
     final last = _lookChecked[f.id];
-    if (last != null && DateTime.now().difference(last) < const Duration(minutes: 1)) continue;
+    if (last != null && DateTime.now().difference(last) < const Duration(seconds: 25)) continue;
     _lookChecked[f.id] = DateTime.now();
+    var ok = false;
     for (final h in f.hosts) {
       final c = DesktopClient(host: h, port: f.port);
       try {
@@ -239,6 +265,8 @@ Future<void> refreshPairedLooks(MobileSettings settings, List<FoundDesktop> foun
           await settings.rememberHost(d, h);
         }
         await settings.updateLook(d, info);
+        ok = true;
+        // Signed-in request: also how the PC knows this phone is online.
         await _pullDeletions(settings, d, h, f.port, info);
         break;
       } catch (_) {
@@ -246,6 +274,7 @@ Future<void> refreshPairedLooks(MobileSettings settings, List<FoundDesktop> foun
         c.close();
       }
     }
+    discovery.reached(d.id, ok);
   }
 }
 

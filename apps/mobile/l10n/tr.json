@@ -245,5 +245,7 @@
   "transfer.stopped_declined": "PC bu aktarımı reddetti.",
   "transfer.title_all_done": "Hepsi gönderildi",
   "transfer.title_stopped": "Durduruldu",
-  "transfer.title_partly": "Bitti, bazıları başarısız"
+  "transfer.title_partly": "Bitti, bazıları başarısız",
+  "presence.online": "“{name}” çevrimiçi",
+  "presence.offline": "“{name}” çevrimdışı"
 }

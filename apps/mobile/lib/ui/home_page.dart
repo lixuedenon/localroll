@@ -72,9 +72,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     _lastLost = _lostCount();
     // Ask the PC now and then what was deleted there (not only when it
     // re-appears on the Wi-Fi), so the phone notices without a restart.
-    _changesTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+    _changesTimer = Timer.periodic(const Duration(seconds: 20), (_) {
       if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
-        refreshPairedLooks(widget.settings, widget.discovery.found);
+        refreshPairedLooks(widget.settings, widget.discovery);
+        _checkPresence(); // "went offline" also when nothing else changes
       }
     });
     _init();
@@ -114,8 +115,44 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   /// A paired PC showed up on the Wi-Fi: refresh its name / icon / picture,
   /// and send waiting photos if auto-send is on.
+  /// Paired PCs online last time we looked (null = not looked yet).
+  Set<String>? _onlinePcs;
+
+  /// "PC X is online / went offline": a short note at the bottom.
+  void _checkPresence() {
+    if (!mounted) return;
+    final now = {for (final d in widget.settings.desktops) if (widget.discovery.isOnline(d.id)) d.id};
+    final before = _onlinePcs;
+    _onlinePcs = now;
+    if (before == null) return;
+    final m = ScaffoldMessenger.maybeOf(context);
+    for (final id in now.difference(before)) {
+      final name = widget.settings.byId(id)?.name ?? '';
+      m?.showSnackBar(SnackBar(
+        duration: const Duration(seconds: 3),
+        content: Row(children: [
+          const Icon(Icons.computer_rounded, color: LrColors.verified, size: 20),
+          const SizedBox(width: 10),
+          Expanded(child: Text(tr('presence.online', {'name': name}))),
+        ]),
+      ));
+    }
+    for (final id in before.difference(now)) {
+      final name = widget.settings.byId(id)?.name ?? '';
+      m?.showSnackBar(SnackBar(
+        duration: const Duration(seconds: 3),
+        content: Row(children: [
+          const Icon(Icons.computer_rounded, color: LrColors.muted, size: 20),
+          const SizedBox(width: 10),
+          Expanded(child: Text(tr('presence.offline', {'name': name}))),
+        ]),
+      ));
+    }
+  }
+
   void _onDiscovery() {
-    refreshPairedLooks(widget.settings, widget.discovery.found);
+    _checkPresence();
+    refreshPairedLooks(widget.settings, widget.discovery);
     final d = widget.settings.current;
     if (_auto.state == AutoState.waiting && d != null && widget.discovery.found.any((f) => f.id == d.id)) {
       _auto.check();
@@ -130,7 +167,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       _reload();
     } else {
       _auto.check();
-      refreshPairedLooks(widget.settings, widget.discovery.found);
+      refreshPairedLooks(widget.settings, widget.discovery);
       unawaited(_refreshHome());
     }
   }
@@ -618,7 +655,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   /// Home: the PC, what still needs backing up, the main actions.
   Widget _home(BuildContext context, PairedDesktop? d) {
     final theme = Theme.of(context);
-    final online = d != null && widget.discovery.found.any((f) => f.id == d.id);
+    final online = d != null && widget.discovery.isOnline(d.id);
     final last = d == null ? null : widget.settings.lastBackup(d.id);
     final pending = _pending;
     Widget tile(String title, String sub, VoidCallback onTap, {Color? subColor}) => Expanded(

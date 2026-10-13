@@ -34,6 +34,20 @@ class AppServices {
   late final PeerDirectory peers = PeerDirectory(settings: settings, server: server);
   late final PeerSender sender = PeerSender(settings: settings, peers: peers);
 
+  /// A paired phone or PC is reachable right now: it talked to us within
+  /// the last ~100 s (phones do every minute while LocalRoll is open), or
+  /// we reached it ourselves (other PCs).
+  bool isOnline(String deviceId) => server.isOnline(deviceId) || peers.isOnline(deviceId);
+
+  /// Paired devices online now, by id.
+  Set<String> get onlineDevices => {
+        for (final id in {...settings.trusted.keys, ...settings.peers.keys})
+          if (isOnline(id)) id,
+      };
+
+  /// Name to show for a paired device.
+  String deviceName(String id) => settings.peers[id]?.name ?? settings.trusted[id]?.name ?? id;
+
   /// LAN addresses shown in the QR code; refreshed on the receive page.
   final ValueNotifier<List<String>> addresses = ValueNotifier(const []);
 
@@ -64,6 +78,9 @@ class AppServices {
       converter: converter,
     );
     await s.startNetworking();
+    // Keep in touch with paired PCs all the time (not only on the Send
+    // page), so both sides know who is online.
+    s.peers.acquire();
     await ffmpeg.locate();
     return s;
   }

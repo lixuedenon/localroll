@@ -245,5 +245,7 @@
   "transfer.stopped_declined": "電腦拒絕了這次接收。",
   "transfer.title_all_done": "全部傳送完成",
   "transfer.title_stopped": "已停止",
-  "transfer.title_partly": "傳送結束，有失敗"
+  "transfer.title_partly": "傳送結束，有失敗",
+  "presence.online": "「{name}」上線了",
+  "presence.offline": "「{name}」下線了"
 }

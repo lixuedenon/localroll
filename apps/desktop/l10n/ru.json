@@ -298,5 +298,8 @@
   "files.empty_other": "Пока пусто.\nЗдесь появятся архивы, папки и другие файлы с другого ПК.",
   "files.items": "файлов: {count}",
   "family.online": "LocalRoll открыт",
-  "family.offline": "Не подключён"
+  "family.offline": "Не подключён",
+  "presence.online": "«{name}» в сети",
+  "presence.offline": "«{name}» не в сети",
+  "home.status_online": "Готов к приёму · в сети: {count}"
 }

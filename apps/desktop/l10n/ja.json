@@ -298,5 +298,8 @@
   "files.empty_other": "まだ何もありません。\n他の PC から届いた圧縮ファイルやフォルダーなどがここに表示されます。",
   "files.items": "{count} 件",
   "family.online": "LocalRoll 使用中",
-  "family.offline": "未接続"
+  "family.offline": "未接続",
+  "presence.online": "「{name}」がオンラインになりました",
+  "presence.offline": "「{name}」がオフラインになりました",
+  "home.status_online": "受信可能 · {count} 台がオンライン"
 }

@@ -23,6 +23,11 @@ import 'theme.dart';
 ///  * "Sent everything to X" when a PC → PC job ends.
 class Notices {
   Notices(this.s) {
+    // Who is online: checked every few seconds and on any news.
+    _presence = Timer.periodic(const Duration(seconds: 8), (_) => _checkPresence());
+    s.server.addListener(_checkPresence);
+    s.peers.addListener(_checkPresence);
+    _online = s.onlineDevices;
     s.server.incomingAsks.addListener(_onAsks);
     s.hub.addListener(_onHub);
     s.sender.addListener(_onSender);
@@ -34,6 +39,9 @@ class Notices {
   final AppServices s;
 
   void dispose() {
+    _presence?.cancel();
+    s.server.removeListener(_checkPresence);
+    s.peers.removeListener(_checkPresence);
     s.server.incomingAsks.removeListener(_onAsks);
     s.hub.removeListener(_onHub);
     s.sender.removeListener(_onSender);
@@ -41,6 +49,45 @@ class Notices {
   }
 
   BuildContext? get _ctx => AppNav.instance.navigatorKey.currentContext;
+
+  // ------------------------------------------------------- online / offline
+
+  Timer? _presence;
+  Set<String> _online = {};
+
+  /// "X is online" / "X went offline" for every paired phone and PC.
+  void _checkPresence() {
+    final now = s.onlineDevices;
+    final came = now.difference(_online);
+    final left = _online.difference(now);
+    _online = now;
+    final ctx = _ctx;
+    if (ctx == null || (came.isEmpty && left.isEmpty)) return;
+    final m = ScaffoldMessenger.maybeOf(ctx);
+    for (final id in came) {
+      m?.showSnackBar(_presenceBar(id, online: true));
+    }
+    for (final id in left) {
+      m?.showSnackBar(_presenceBar(id, online: false));
+    }
+  }
+
+  SnackBar _presenceBar(String id, {required bool online}) {
+    final pc = s.settings.peers.containsKey(id) || isDesktopPlatform(s.settings.trusted[id]?.platform ?? '');
+    return SnackBar(
+      duration: const Duration(seconds: 4),
+      behavior: SnackBarBehavior.floating,
+      width: 420,
+      content: Row(children: [
+        Icon(pc ? Icons.computer_rounded : Icons.phone_iphone_rounded,
+            color: online ? LrColors.verified : LrColors.muted, size: 20),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(tr(online ? 'presence.online' : 'presence.offline', {'name': s.deviceName(id)})),
+        ),
+      ]),
+    );
+  }
 
   Future<void> _toFront() async {
     try {

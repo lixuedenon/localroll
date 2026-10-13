@@ -298,5 +298,8 @@
   "files.empty_other": "Noch nichts da.\nArchive, ganze Ordner und andere Dateien von einem anderen PC erscheinen hier.",
   "files.items": "{count} Dateien",
   "family.online": "LocalRoll gerade geöffnet",
-  "family.offline": "Nicht verbunden"
+  "family.offline": "Nicht verbunden",
+  "presence.online": "„{name}“ ist online",
+  "presence.offline": "„{name}“ ist offline",
+  "home.status_online": "Empfangsbereit · {count} Geräte online"
 }

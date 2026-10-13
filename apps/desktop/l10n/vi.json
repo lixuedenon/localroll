@@ -298,5 +298,8 @@
   "files.empty_other": "Chưa có gì.\nTệp nén, cả thư mục và tệp khác gửi từ máy khác sẽ hiện ở đây.",
   "files.items": "{count} tệp",
   "family.online": "Đang mở LocalRoll",
-  "family.offline": "Chưa kết nối"
+  "family.offline": "Chưa kết nối",
+  "presence.online": "“{name}” đã trực tuyến",
+  "presence.offline": "“{name}” đã ngoại tuyến",
+  "home.status_online": "Sẵn sàng nhận · {count} thiết bị trực tuyến"
 }

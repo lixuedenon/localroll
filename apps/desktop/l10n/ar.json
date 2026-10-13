@@ -298,5 +298,8 @@
   "files.empty_other": "لا شيء بعد.\nستظهر هنا الملفات المضغوطة والمجلدات والملفات الأخرى المرسلة من كمبيوتر آخر.",
   "files.items": "{count} ملف",
   "family.online": "LocalRoll مفتوح الآن",
-  "family.offline": "غير متصل"
+  "family.offline": "غير متصل",
+  "presence.online": "\"{name}\" متصل الآن",
+  "presence.offline": "\"{name}\" غير متصل",
+  "home.status_online": "جاهز للاستلام · {count} أجهزة متصلة"
 }

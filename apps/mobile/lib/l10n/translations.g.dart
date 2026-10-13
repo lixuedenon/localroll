@@ -248,6 +248,8 @@ const Map<String, Map<String, String>> translations = {
     'transfer.title_all_done': 'All sent',
     'transfer.title_stopped': 'Stopped',
     'transfer.title_partly': 'Finished, some failed',
+    'presence.online': '“{name}” is online',
+    'presence.offline': '“{name}” went offline',
   },
   'zh': {
     'common.cancel': '取消',
@@ -494,6 +496,8 @@ const Map<String, Map<String, String>> translations = {
     'transfer.title_all_done': '全部发送完成',
     'transfer.title_stopped': '已停止',
     'transfer.title_partly': '发送结束，有失败',
+    'presence.online': '「{name}」上线了',
+    'presence.offline': '「{name}」下线了',
   },
   'zh_Hant': {
     'common.cancel': '取消',
@@ -740,6 +744,8 @@ const Map<String, Map<String, String>> translations = {
     'transfer.title_all_done': '全部傳送完成',
     'transfer.title_stopped': '已停止',
     'transfer.title_partly': '傳送結束，有失敗',
+    'presence.online': '「{name}」上線了',
+    'presence.offline': '「{name}」下線了',
   },
   'ja': {
     'common.cancel': 'キャンセル',
@@ -986,6 +992,8 @@ const Map<String, Map<String, String>> translations = {
     'transfer.title_all_done': 'すべて送信しました',
     'transfer.title_stopped': '停止しました',
     'transfer.title_partly': '完了（一部失敗）',
+    'presence.online': '「{name}」がオンラインになりました',
+    'presence.offline': '「{name}」がオフラインになりました',
   },
   'ko': {
     'common.cancel': '취소',
@@ -1232,6 +1240,8 @@ const Map<String, Map<String, String>> translations = {
     'transfer.title_all_done': '모두 보냈습니다',
     'transfer.title_stopped': '중지됨',
     'transfer.title_partly': '완료(일부 실패)',
+    'presence.online': '“{name}”이(가) 온라인입니다',
+    'presence.offline': '“{name}”이(가) 오프라인입니다',
   },
   'es': {
     'common.cancel': 'Cancelar',
@@ -1478,6 +1488,8 @@ const Map<String, Map<String, String>> translations = {
     'transfer.title_all_done': 'Todo enviado',
     'transfer.title_stopped': 'Detenido',
     'transfer.title_partly': 'Terminado, con errores',
+    'presence.online': '«{name}» está en línea',
+    'presence.offline': '«{name}» se desconectó',
   },
   'fr': {
     'common.cancel': 'Annuler',
@@ -1724,6 +1736,8 @@ const Map<String, Map<String, String>> translations = {
     'transfer.title_all_done': 'Tout est envoyé',
     'transfer.title_stopped': 'Arrêté',
     'transfer.title_partly': 'Terminé, avec des échecs',
+    'presence.online': '« {name} » est en ligne',
+    'presence.offline': '« {name} » est hors ligne',
   },
   'de': {
     'common.cancel': 'Abbrechen',
@@ -1970,6 +1984,8 @@ const Map<String, Map<String, String>> translations = {
     'transfer.title_all_done': 'Alles gesendet',
     'transfer.title_stopped': 'Angehalten',
     'transfer.title_partly': 'Fertig, mit Fehlern',
+    'presence.online': '„{name}“ ist online',
+    'presence.offline': '„{name}“ ist offline',
   },
   'pt': {
     'common.cancel': 'Cancelar',
@@ -2216,6 +2232,8 @@ const Map<String, Map<String, String>> translations = {
     'transfer.title_all_done': 'Tudo enviado',
     'transfer.title_stopped': 'Parado',
     'transfer.title_partly': 'Concluído, com falhas',
+    'presence.online': '“{name}” está online',
+    'presence.offline': '“{name}” ficou offline',
   },
   'ru': {
     'common.cancel': 'Отмена',
@@ -2462,6 +2480,8 @@ const Map<String, Map<String, String>> translations = {
     'transfer.title_all_done': 'Всё отправлено',
     'transfer.title_stopped': 'Остановлено',
     'transfer.title_partly': 'Завершено, есть ошибки',
+    'presence.online': '«{name}» в сети',
+    'presence.offline': '«{name}» не в сети',
   },
   'it': {
     'common.cancel': 'Annulla',
@@ -2708,6 +2728,8 @@ const Map<String, Map<String, String>> translations = {
     'transfer.title_all_done': 'Tutto inviato',
     'transfer.title_stopped': 'Interrotto',
     'transfer.title_partly': 'Finito, con errori',
+    'presence.online': '«{name}» è online',
+    'presence.offline': '«{name}» è offline',
   },
   'ar': {
     'common.cancel': 'إلغاء',
@@ -2954,6 +2976,8 @@ const Map<String, Map<String, String>> translations = {
     'transfer.title_all_done': 'تم إرسال الكل',
     'transfer.title_stopped': 'توقف',
     'transfer.title_partly': 'انتهى مع إخفاقات',
+    'presence.online': '"{name}" متصل الآن',
+    'presence.offline': '"{name}" غير متصل',
   },
   'hi': {
     'common.cancel': 'रद्द करें',
@@ -3200,6 +3224,8 @@ const Map<String, Map<String, String>> translations = {
     'transfer.title_all_done': 'सब भेज दिया',
     'transfer.title_stopped': 'रुका',
     'transfer.title_partly': 'पूरा, कुछ विफल',
+    'presence.online': '“{name}” ऑनलाइन है',
+    'presence.offline': '“{name}” ऑफ़लाइन हो गया',
   },
   'id': {
     'common.cancel': 'Batal',
@@ -3446,6 +3472,8 @@ const Map<String, Map<String, String>> translations = {
     'transfer.title_all_done': 'Semua terkirim',
     'transfer.title_stopped': 'Dihentikan',
     'transfer.title_partly': 'Selesai, ada yang gagal',
+    'presence.online': '“{name}” online',
+    'presence.offline': '“{name}” offline',
   },
   'vi': {
     'common.cancel': 'Hủy',
@@ -3692,6 +3720,8 @@ const Map<String, Map<String, String>> translations = {
     'transfer.title_all_done': 'Đã gửi tất cả',
     'transfer.title_stopped': 'Đã dừng',
     'transfer.title_partly': 'Xong, có lỗi',
+    'presence.online': '“{name}” đã trực tuyến',
+    'presence.offline': '“{name}” đã ngoại tuyến',
   },
   'th': {
     'common.cancel': 'ยกเลิก',
@@ -3938,6 +3968,8 @@ const Map<String, Map<String, String>> translations = {
     'transfer.title_all_done': 'ส่งครบแล้ว',
     'transfer.title_stopped': 'หยุดแล้ว',
     'transfer.title_partly': 'เสร็จแล้ว มีบางรายการล้มเหลว',
+    'presence.online': '“{name}” ออนไลน์แล้ว',
+    'presence.offline': '“{name}” ออฟไลน์แล้ว',
   },
   'tr': {
     'common.cancel': 'İptal',
@@ -4184,5 +4216,7 @@ const Map<String, Map<String, String>> translations = {
     'transfer.title_all_done': 'Hepsi gönderildi',
     'transfer.title_stopped': 'Durduruldu',
     'transfer.title_partly': 'Bitti, bazıları başarısız',
+    'presence.online': '“{name}” çevrimiçi',
+    'presence.offline': '“{name}” çevrimdışı',
   },
 };

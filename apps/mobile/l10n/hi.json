@@ -245,5 +245,7 @@
   "transfer.stopped_declined": "पीसी ने यह ट्रांसफ़र अस्वीकार किया।",
   "transfer.title_all_done": "सब भेज दिया",
   "transfer.title_stopped": "रुका",
-  "transfer.title_partly": "पूरा, कुछ विफल"
+  "transfer.title_partly": "पूरा, कुछ विफल",
+  "presence.online": "“{name}” ऑनलाइन है",
+  "presence.offline": "“{name}” ऑफ़लाइन हो गया"
 }

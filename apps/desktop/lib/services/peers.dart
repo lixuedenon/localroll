@@ -46,7 +46,8 @@ class PeerDirectory extends ChangeNotifier {
     return all.values.toList()..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
   }
 
-  bool isOnline(String id) => found.any((f) => f.id == id);
+  /// A paired PC answered our last check (every 20 s).
+  bool isOnline(String id) => _reachable.containsKey(id);
   FoundPc? where(String id) => found.where((f) => f.id == id).firstOrNull;
 
   /// The Send page is open: look actively. Balanced by [release].
@@ -110,7 +111,9 @@ class PeerDirectory extends ChangeNotifier {
         c.close();
       }
     }
-    _reachable.remove(p.id);
+    // Gone: forget where it was seen, too.
+    if (_reachable.remove(p.id) != null) notifyListeners();
+    _scanned.remove(p.id);
   }
 
   /// False (and the pairing removed here too) when the other PC answers

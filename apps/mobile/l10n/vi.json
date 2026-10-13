@@ -245,5 +245,7 @@
   "transfer.stopped_declined": "Máy tính đã từ chối lần truyền này.",
   "transfer.title_all_done": "Đã gửi tất cả",
   "transfer.title_stopped": "Đã dừng",
-  "transfer.title_partly": "Xong, có lỗi"
+  "transfer.title_partly": "Xong, có lỗi",
+  "presence.online": "“{name}” đã trực tuyến",
+  "presence.offline": "“{name}” đã ngoại tuyến"
 }

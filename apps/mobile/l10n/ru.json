@@ -245,5 +245,7 @@
   "transfer.stopped_declined": "ПК отклонил эту передачу.",
   "transfer.title_all_done": "Всё отправлено",
   "transfer.title_stopped": "Остановлено",
-  "transfer.title_partly": "Завершено, есть ошибки"
+  "transfer.title_partly": "Завершено, есть ошибки",
+  "presence.online": "«{name}» в сети",
+  "presence.offline": "«{name}» не в сети"
 }

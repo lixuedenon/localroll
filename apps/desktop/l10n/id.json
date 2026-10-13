@@ -298,5 +298,8 @@
   "files.empty_other": "Belum ada apa pun.\nArsip, folder utuh, dan file lain dari PC lain muncul di sini.",
   "files.items": "{count} file",
   "family.online": "LocalRoll sedang dibuka",
-  "family.offline": "Tidak terhubung"
+  "family.offline": "Tidak terhubung",
+  "presence.online": "“{name}” online",
+  "presence.offline": "“{name}” offline",
+  "home.status_online": "Siap menerima · {count} perangkat online"
 }

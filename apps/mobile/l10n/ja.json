@@ -245,5 +245,7 @@
   "transfer.stopped_declined": "PC がこの転送を拒否しました。",
   "transfer.title_all_done": "すべて送信しました",
   "transfer.title_stopped": "停止しました",
-  "transfer.title_partly": "完了（一部失敗）"
+  "transfer.title_partly": "完了（一部失敗）",
+  "presence.online": "「{name}」がオンラインになりました",
+  "presence.offline": "「{name}」がオフラインになりました"
 }

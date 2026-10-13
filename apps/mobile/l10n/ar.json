@@ -245,5 +245,7 @@
   "transfer.stopped_declined": "رفض الكمبيوتر عملية النقل هذه.",
   "transfer.title_all_done": "تم إرسال الكل",
   "transfer.title_stopped": "توقف",
-  "transfer.title_partly": "انتهى مع إخفاقات"
+  "transfer.title_partly": "انتهى مع إخفاقات",
+  "presence.online": "\"{name}\" متصل الآن",
+  "presence.offline": "\"{name}\" غير متصل"
 }

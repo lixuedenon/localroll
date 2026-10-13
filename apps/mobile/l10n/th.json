@@ -245,5 +245,7 @@
   "transfer.stopped_declined": "คอมพิวเตอร์ปฏิเสธการส่งนี้",
   "transfer.title_all_done": "ส่งครบแล้ว",
   "transfer.title_stopped": "หยุดแล้ว",
-  "transfer.title_partly": "เสร็จแล้ว มีบางรายการล้มเหลว"
+  "transfer.title_partly": "เสร็จแล้ว มีบางรายการล้มเหลว",
+  "presence.online": "“{name}” ออนไลน์แล้ว",
+  "presence.offline": "“{name}” ออฟไลน์แล้ว"
 }

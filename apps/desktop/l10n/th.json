@@ -298,5 +298,8 @@
   "files.empty_other": "ยังไม่มีอะไร\nไฟล์บีบอัด ทั้งโฟลเดอร์ และไฟล์อื่นจากเครื่องอื่นจะแสดงที่นี่",
   "files.items": "{count} ไฟล์",
   "family.online": "กำลังเปิด LocalRoll",
-  "family.offline": "ไม่ได้เชื่อมต่อ"
+  "family.offline": "ไม่ได้เชื่อมต่อ",
+  "presence.online": "“{name}” ออนไลน์แล้ว",
+  "presence.offline": "“{name}” ออฟไลน์แล้ว",
+  "home.status_online": "พร้อมรับ · ออนไลน์ {count} เครื่อง"
 }

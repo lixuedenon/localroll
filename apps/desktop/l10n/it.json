@@ -298,5 +298,8 @@
   "files.empty_other": "Ancora niente.\nQui compaiono archivi, cartelle intere e altri file inviati da un altro PC.",
   "files.items": "{count} file",
   "family.online": "LocalRoll aperto ora",
-  "family.offline": "Non connesso"
+  "family.offline": "Non connesso",
+  "presence.online": "«{name}» è online",
+  "presence.offline": "«{name}» è offline",
+  "home.status_online": "Pronto a ricevere · {count} dispositivi online"
 }

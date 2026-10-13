@@ -298,5 +298,8 @@
   "files.empty_other": "अभी कुछ नहीं।\nदूसरे पीसी से भेजे आर्काइव, पूरे फ़ोल्डर और अन्य फ़ाइलें यहाँ दिखेंगी।",
   "files.items": "{count} फ़ाइलें",
   "family.online": "अभी LocalRoll खुला है",
-  "family.offline": "कनेक्ट नहीं"
+  "family.offline": "कनेक्ट नहीं",
+  "presence.online": "“{name}” ऑनलाइन है",
+  "presence.offline": "“{name}” ऑफ़लाइन हो गया",
+  "home.status_online": "प्राप्त करने को तैयार · {count} डिवाइस ऑनलाइन"
 }

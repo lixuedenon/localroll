@@ -245,5 +245,7 @@
   "transfer.stopped_declined": "PC menolak transfer ini.",
   "transfer.title_all_done": "Semua terkirim",
   "transfer.title_stopped": "Dihentikan",
-  "transfer.title_partly": "Selesai, ada yang gagal"
+  "transfer.title_partly": "Selesai, ada yang gagal",
+  "presence.online": "“{name}” online",
+  "presence.offline": "“{name}” offline"
 }

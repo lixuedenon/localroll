@@ -245,5 +245,7 @@
   "transfer.stopped_declined": "PC가 이 전송을 거절했습니다.",
   "transfer.title_all_done": "모두 보냈습니다",
   "transfer.title_stopped": "중지됨",
-  "transfer.title_partly": "완료(일부 실패)"
+  "transfer.title_partly": "완료(일부 실패)",
+  "presence.online": "“{name}”이(가) 온라인입니다",
+  "presence.offline": "“{name}”이(가) 오프라인입니다"
 }

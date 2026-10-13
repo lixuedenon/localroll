@@ -298,5 +298,8 @@
   "files.empty_other": "這裡還沒有內容。\n其他電腦傳來的壓縮檔、整個資料夾和其他檔案會出現在這裡。",
   "files.items": "{count} 個檔案",
   "family.online": "正在使用 LocalRoll",
-  "family.offline": "未連線"
+  "family.offline": "未連線",
+  "presence.online": "「{name}」上線了",
+  "presence.offline": "「{name}」下線了",
+  "home.status_online": "可以接收 · {count} 台裝置在線"
 }

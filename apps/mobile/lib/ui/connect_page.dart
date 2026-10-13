@@ -46,11 +46,11 @@ class _ConnectPageState extends State<ConnectPage> {
   void initState() {
     super.initState();
     // Show paired PCs with their current name and picture.
-    refreshPairedLooks(widget.settings, widget.discovery.found);
+    refreshPairedLooks(widget.settings, widget.discovery);
     // mDNS can miss PCs: also scan the local network directly.
     widget.discovery
         .scanSubnet(extraPorts: widget.settings.desktops.map((d) => d.port))
-        .then((_) => refreshPairedLooks(widget.settings, widget.discovery.found));
+        .then((_) => refreshPairedLooks(widget.settings, widget.discovery));
     _searchTimer = Timer(const Duration(seconds: 8), () {
       if (mounted) setState(() => _searchedLong = true);
     });
@@ -314,9 +314,9 @@ class _ConnectPageState extends State<ConnectPage> {
                             Text(d.name, style: theme.textTheme.titleMedium),
                             const SizedBox(height: 2),
                             Text(
-                              found.any((f) => f.id == d.id) ? tr('connect.online') : tr('connect.offline'),
+                              widget.discovery.isOnline(d.id) ? tr('connect.online') : tr('connect.offline'),
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: found.any((f) => f.id == d.id) ? LrColors.verified : LrColors.muted,
+                                color: widget.discovery.isOnline(d.id) ? LrColors.verified : LrColors.muted,
                               ),
                             ),
                           ]),

@@ -298,5 +298,8 @@
   "files.empty_other": "Nada ainda.\nCompactados, pastas inteiras e outros arquivos de outro PC aparecem aqui.",
   "files.items": "{count} arquivos",
   "family.online": "LocalRoll aberto agora",
-  "family.offline": "Não conectado"
+  "family.offline": "Não conectado",
+  "presence.online": "“{name}” está online",
+  "presence.offline": "“{name}” ficou offline",
+  "home.status_online": "Pronto para receber · {count} aparelhos online"
 }

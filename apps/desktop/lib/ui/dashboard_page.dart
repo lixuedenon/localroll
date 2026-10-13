@@ -61,7 +61,7 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     final s = widget.services;
     return ListenableBuilder(
-      listenable: Listenable.merge([s.library, s.settings, s.server, s.converter, s.hub]),
+      listenable: Listenable.merge([s.library, s.settings, s.server, s.converter, s.hub, s.peers]),
       builder: (context, _) {
         final items = s.library.items;
         final total = items.fold<int>(0, (sum, i) => sum + i.size);
@@ -127,7 +127,7 @@ class _DashboardPageState extends State<DashboardPage> {
     final s = widget.services;
     final st = s.settings;
     final theme = Theme.of(context);
-    final phones = st.trusted.values.where((t) => !isDesktopPlatform(t.platform)).length;
+    final online = s.onlineDevices.length;
     final ok = s.server.running && !s.library.offline;
     final color = ok ? LrColors.verified : LrColors.danger;
     return Row(children: [
@@ -155,7 +155,7 @@ class _DashboardPageState extends State<DashboardPage> {
           Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
           const SizedBox(width: 8),
           Text(
-            ok ? tr('home.status_ok', {'count': phones}) : tr('home.status_off'),
+            ok ? tr('home.status_online', {'count': online}) : tr('home.status_off'),
             style: TextStyle(color: color, fontSize: 13),
           ),
         ]),

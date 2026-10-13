@@ -245,5 +245,7 @@
   "transfer.stopped_declined": "Der PC hat diese Übertragung abgelehnt.",
   "transfer.title_all_done": "Alles gesendet",
   "transfer.title_stopped": "Angehalten",
-  "transfer.title_partly": "Fertig, mit Fehlern"
+  "transfer.title_partly": "Fertig, mit Fehlern",
+  "presence.online": "„{name}“ ist online",
+  "presence.offline": "„{name}“ ist offline"
 }

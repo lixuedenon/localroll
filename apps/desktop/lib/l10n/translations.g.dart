@@ -304,6 +304,9 @@ const Map<String, Map<String, String>> translations = {
     'files.items': '{count} files',
     'family.online': 'LocalRoll open now',
     'family.offline': 'Not connected',
+    'presence.online': '“{name}” is online',
+    'presence.offline': '“{name}” went offline',
+    'home.status_online': 'Ready to receive · {count} devices online',
   },
   'zh': {
     'nav.library': '媒体库',
@@ -606,6 +609,9 @@ const Map<String, Map<String, String>> translations = {
     'files.items': '{count} 个文件',
     'family.online': '正在使用 LocalRoll',
     'family.offline': '未连接',
+    'presence.online': '「{name}」上线了',
+    'presence.offline': '「{name}」下线了',
+    'home.status_online': '可以接收 · {count} 台设备在线',
   },
   'zh_Hant': {
     'nav.library': '媒體庫',
@@ -908,6 +914,9 @@ const Map<String, Map<String, String>> translations = {
     'files.items': '{count} 個檔案',
     'family.online': '正在使用 LocalRoll',
     'family.offline': '未連線',
+    'presence.online': '「{name}」上線了',
+    'presence.offline': '「{name}」下線了',
+    'home.status_online': '可以接收 · {count} 台裝置在線',
   },
   'ja': {
     'nav.library': 'ライブラリ',
@@ -1210,6 +1219,9 @@ const Map<String, Map<String, String>> translations = {
     'files.items': '{count} 件',
     'family.online': 'LocalRoll 使用中',
     'family.offline': '未接続',
+    'presence.online': '「{name}」がオンラインになりました',
+    'presence.offline': '「{name}」がオフラインになりました',
+    'home.status_online': '受信可能 · {count} 台がオンライン',
   },
   'ko': {
     'nav.library': '라이브러리',
@@ -1512,6 +1524,9 @@ const Map<String, Map<String, String>> translations = {
     'files.items': '파일 {count}개',
     'family.online': 'LocalRoll 사용 중',
     'family.offline': '연결 안 됨',
+    'presence.online': '“{name}”이(가) 온라인입니다',
+    'presence.offline': '“{name}”이(가) 오프라인입니다',
+    'home.status_online': '수신 가능 · 기기 {count}대 온라인',
   },
   'es': {
     'nav.library': 'Biblioteca',
@@ -1814,6 +1829,9 @@ const Map<String, Map<String, String>> translations = {
     'files.items': '{count} archivos',
     'family.online': 'LocalRoll abierto ahora',
     'family.offline': 'No conectado',
+    'presence.online': '«{name}» está en línea',
+    'presence.offline': '«{name}» se desconectó',
+    'home.status_online': 'Listo para recibir · {count} dispositivos en línea',
   },
   'fr': {
     'nav.library': 'Bibliothèque',
@@ -2116,6 +2134,9 @@ const Map<String, Map<String, String>> translations = {
     'files.items': '{count} fichiers',
     'family.online': 'LocalRoll ouvert',
     'family.offline': 'Non connecté',
+    'presence.online': '« {name} » est en ligne',
+    'presence.offline': '« {name} » est hors ligne',
+    'home.status_online': 'Prêt à recevoir · {count} appareils en ligne',
   },
   'de': {
     'nav.library': 'Mediathek',
@@ -2418,6 +2439,9 @@ const Map<String, Map<String, String>> translations = {
     'files.items': '{count} Dateien',
     'family.online': 'LocalRoll gerade geöffnet',
     'family.offline': 'Nicht verbunden',
+    'presence.online': '„{name}“ ist online',
+    'presence.offline': '„{name}“ ist offline',
+    'home.status_online': 'Empfangsbereit · {count} Geräte online',
   },
   'pt': {
     'nav.library': 'Biblioteca',
@@ -2720,6 +2744,9 @@ const Map<String, Map<String, String>> translations = {
     'files.items': '{count} arquivos',
     'family.online': 'LocalRoll aberto agora',
     'family.offline': 'Não conectado',
+    'presence.online': '“{name}” está online',
+    'presence.offline': '“{name}” ficou offline',
+    'home.status_online': 'Pronto para receber · {count} aparelhos online',
   },
   'ru': {
     'nav.library': 'Медиатека',
@@ -3022,6 +3049,9 @@ const Map<String, Map<String, String>> translations = {
     'files.items': 'файлов: {count}',
     'family.online': 'LocalRoll открыт',
     'family.offline': 'Не подключён',
+    'presence.online': '«{name}» в сети',
+    'presence.offline': '«{name}» не в сети',
+    'home.status_online': 'Готов к приёму · в сети: {count}',
   },
   'it': {
     'nav.library': 'Libreria',
@@ -3324,6 +3354,9 @@ const Map<String, Map<String, String>> translations = {
     'files.items': '{count} file',
     'family.online': 'LocalRoll aperto ora',
     'family.offline': 'Non connesso',
+    'presence.online': '«{name}» è online',
+    'presence.offline': '«{name}» è offline',
+    'home.status_online': 'Pronto a ricevere · {count} dispositivi online',
   },
   'ar': {
     'nav.library': 'المكتبة',
@@ -3626,6 +3659,9 @@ const Map<String, Map<String, String>> translations = {
     'files.items': '{count} ملف',
     'family.online': 'LocalRoll مفتوح الآن',
     'family.offline': 'غير متصل',
+    'presence.online': '"{name}" متصل الآن',
+    'presence.offline': '"{name}" غير متصل',
+    'home.status_online': 'جاهز للاستلام · {count} أجهزة متصلة',
   },
   'hi': {
     'nav.library': 'लाइब्रेरी',
@@ -3928,6 +3964,9 @@ const Map<String, Map<String, String>> translations = {
     'files.items': '{count} फ़ाइलें',
     'family.online': 'अभी LocalRoll खुला है',
     'family.offline': 'कनेक्ट नहीं',
+    'presence.online': '“{name}” ऑनलाइन है',
+    'presence.offline': '“{name}” ऑफ़लाइन हो गया',
+    'home.status_online': 'प्राप्त करने को तैयार · {count} डिवाइस ऑनलाइन',
   },
   'id': {
     'nav.library': 'Pustaka',
@@ -4230,6 +4269,9 @@ const Map<String, Map<String, String>> translations = {
     'files.items': '{count} file',
     'family.online': 'LocalRoll sedang dibuka',
     'family.offline': 'Tidak terhubung',
+    'presence.online': '“{name}” online',
+    'presence.offline': '“{name}” offline',
+    'home.status_online': 'Siap menerima · {count} perangkat online',
   },
   'vi': {
     'nav.library': 'Thư viện',
@@ -4532,6 +4574,9 @@ const Map<String, Map<String, String>> translations = {
     'files.items': '{count} tệp',
     'family.online': 'Đang mở LocalRoll',
     'family.offline': 'Chưa kết nối',
+    'presence.online': '“{name}” đã trực tuyến',
+    'presence.offline': '“{name}” đã ngoại tuyến',
+    'home.status_online': 'Sẵn sàng nhận · {count} thiết bị trực tuyến',
   },
   'th': {
     'nav.library': 'คลังสื่อ',
@@ -4834,6 +4879,9 @@ const Map<String, Map<String, String>> translations = {
     'files.items': '{count} ไฟล์',
     'family.online': 'กำลังเปิด LocalRoll',
     'family.offline': 'ไม่ได้เชื่อมต่อ',
+    'presence.online': '“{name}” ออนไลน์แล้ว',
+    'presence.offline': '“{name}” ออฟไลน์แล้ว',
+    'home.status_online': 'พร้อมรับ · ออนไลน์ {count} เครื่อง',
   },
   'tr': {
     'nav.library': 'Kitaplık',
@@ -5136,5 +5184,8 @@ const Map<String, Map<String, String>> translations = {
     'files.items': '{count} dosya',
     'family.online': 'LocalRoll şu an açık',
     'family.offline': 'Bağlı değil',
+    'presence.online': '“{name}” çevrimiçi',
+    'presence.offline': '“{name}” çevrimdışı',
+    'home.status_online': 'Almaya hazır · {count} cihaz çevrimiçi',
   },
 };

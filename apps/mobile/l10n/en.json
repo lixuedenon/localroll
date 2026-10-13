@@ -245,5 +245,7 @@
   "transfer.stopped_declined": "The PC declined this transfer.",
   "transfer.title_all_done": "All sent",
   "transfer.title_stopped": "Stopped",
-  "transfer.title_partly": "Finished, some failed"
+  "transfer.title_partly": "Finished, some failed",
+  "presence.online": "“{name}” is online",
+  "presence.offline": "“{name}” went offline"
 }
