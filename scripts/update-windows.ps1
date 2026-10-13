@@ -34,26 +34,55 @@ Write-Host 'Looking for the latest successful build...'
 $runId = gh run list -R $repo -w CI -b main -s success -L 1 --json databaseId -q '.[0].databaseId'
 if (-not $runId) { throw 'No successful build found.' }
 
+# Close every running LocalRoll, wherever it was started from, and remember
+# copies that run from another folder (those are old and should go).
 Write-Host 'Closing LocalRoll...'
-Get-Process -Name LocalRoll, localroll_desktop -ErrorAction SilentlyContinue | Stop-Process -Force
-Start-Sleep -Seconds 1
+$others = @()
+$running = Get-Process -Name LocalRoll, 'LocalRoll (1)', 'LocalRoll (2)', localroll_desktop -ErrorAction SilentlyContinue
+foreach ($p in $running) {
+  try {
+    $dir = Split-Path $p.Path -Parent
+    if ($dir -and ($dir.TrimEnd('\') -ne $full)) { $others += $dir }
+  } catch {}
+}
+$running | Stop-Process -Force -ErrorAction SilentlyContinue
+# Wait until they are really gone (files stay locked until then).
+for ($i = 0; $i -lt 20; $i++) {
+  if (-not (Get-Process -Name LocalRoll, localroll_desktop -ErrorAction SilentlyContinue)) { break }
+  Start-Sleep -Milliseconds 500
+}
 
 $tmp = Join-Path $env:TEMP "localroll-update-$runId"
 if (Test-Path $tmp) { Remove-Item -Recurse -Force $tmp }
 Write-Host "Downloading build $runId..."
 gh run download $runId -R $repo -n LocalRoll-Windows -D $tmp
+if (-not (Test-Path (Join-Path $tmp 'LocalRoll.exe'))) { throw 'Download incomplete (LocalRoll.exe missing). Nothing was changed.' }
 
-if (Test-Path $InstallDir) { Remove-Item -Recurse -Force $InstallDir }
+# Old folder out completely, new folder in — never files mixed from two versions.
+if (Test-Path $InstallDir) {
+  Write-Host "Removing the old version in $InstallDir"
+  Remove-Item -Recurse -Force $InstallDir -ErrorAction SilentlyContinue
+  if (Test-Path $InstallDir) {
+    throw "Could not remove $InstallDir completely (a file is still in use). Close LocalRoll and any window showing that folder, then run the update again."
+  }
+}
 Move-Item $tmp $InstallDir
 
-# Desktop shortcut (first run only).
+# Desktop shortcut: always points at this folder (an old shortcut may point
+# at a copy somewhere else).
+$exe = Join-Path $InstallDir 'LocalRoll.exe'
 $lnk = Join-Path ([Environment]::GetFolderPath('Desktop')) 'LocalRoll.lnk'
-if (-not (Test-Path $lnk)) {
-  $s = (New-Object -ComObject WScript.Shell).CreateShortcut($lnk)
-  $s.TargetPath = Join-Path $InstallDir 'LocalRoll.exe'
-  $s.WorkingDirectory = $InstallDir
-  $s.Save()
-}
+$s = (New-Object -ComObject WScript.Shell).CreateShortcut($lnk)
+$s.TargetPath = $exe
+$s.WorkingDirectory = $InstallDir
+$s.Save()
 
-Write-Host "Starting LocalRoll from $InstallDir"
-Start-Process (Join-Path $InstallDir 'LocalRoll.exe')
+Write-Host ''
+Write-Host "LocalRoll is installed in: $InstallDir"
+Write-Host "Start it from the desktop shortcut 'LocalRoll' (it points there)."
+foreach ($d in ($others | Select-Object -Unique)) {
+  Write-Host ''
+  Write-Host "NOTE: an old copy was running from $d" -ForegroundColor Yellow
+  Write-Host '      It is not updated by this script. You can delete that folder.' -ForegroundColor Yellow
+}
+Start-Process $exe
