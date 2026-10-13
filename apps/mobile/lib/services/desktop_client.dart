@@ -108,10 +108,15 @@ class DesktopClient {
 
   /// "I'm here" ([online]) or "I'm leaving". Returns the other devices the
   /// PC sees online (older PCs: an empty list).
-  Future<List<OnlineDevice>> presence({required bool online, Duration timeout = const Duration(seconds: 5)}) async {
+  /// [session] is new each time the app opens (or returns after leaving).
+  Future<List<OnlineDevice>> presence({
+    required bool online,
+    String? session,
+    Duration timeout = const Duration(seconds: 5),
+  }) async {
     try {
-      return OnlineDevice.listFrom(
-          await _send('POST', LrProtocol.pathPresence, json: {'online': online}, timeout: timeout));
+      return OnlineDevice.listFrom(await _send('POST', LrProtocol.pathPresence,
+          json: {'online': online, 'session': ?session}, timeout: timeout));
     } on LrHttpException catch (e) {
       if (e.status == 404) return const [];
       rethrow;

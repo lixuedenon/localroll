@@ -79,12 +79,19 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         _checkPresence(); // "went offline" also when nothing else changes
       }
     });
+    // "I'm here" every 10 s while on screen (one small request per PC).
+    _beatTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+      if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+        unawaited(heartbeat(widget.settings, widget.discovery));
+      }
+    });
     _init();
   }
 
   String? _lastDesktop;
   int _lastLost = 0;
   Timer? _changesTimer;
+  Timer? _beatTimer;
 
   int _lostCount() {
     final d = widget.settings.current;
@@ -108,6 +115,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     widget.discovery.removeListener(_onDiscovery);
     widget.settings.removeListener(_onSettings);
     _changesTimer?.cancel();
+    _beatTimer?.cancel();
     _auto.dispose();
     super.dispose();
   }
@@ -251,6 +259,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     try {
       await sayBye(widget.settings, widget.discovery);
     } finally {
+      // Coming back later is a new visit (announced even if this goodbye
+      // never arrived).
+      widget.discovery.newSession();
       await BackgroundTransfer.grace(false);
     }
   }

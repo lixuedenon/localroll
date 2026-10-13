@@ -49,7 +49,7 @@ class DesktopDiscovery extends ChangeNotifier {
   }
 
   /// A paired PC is reachable now: it answered within the last 90 s
-  /// (we check in about every 40 s), or the Wi-Fi search lists it and our last
+  /// (we check in every 10 s), or the Wi-Fi search lists it and our last
   /// direct try did not fail.
   bool isOnline(String id) {
     final t = _reached[id];
@@ -81,6 +81,15 @@ class DesktopDiscovery extends ChangeNotifier {
     }
     return out.values.toList()..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
   }
+
+  /// This run of the app ("I'm here" carries it): new at start and each
+  /// time the app comes back after leaving, so a PC that missed our
+  /// goodbye (an iPhone app swiped away can't say one) still announces us.
+  String session = _newSession();
+
+  void newSession() => session = _newSession();
+
+  static String _newSession() => DateTime.now().microsecondsSinceEpoch.toRadixString(36);
 
   /// This phone's id and its own paired PCs (left out of [others]).
   String? myId;
@@ -268,7 +277,8 @@ Future<PairedDesktop> pairWithDesktop({
 final Map<String, DateTime> _lookChecked = {};
 
 /// Paired PCs: check in ("I'm here"), pick up a new name / icon / picture,
-/// and hear who else is online. About every 40 s per PC; [now] skips the
+/// and hear who else is online. About once a minute per PC (the light
+/// [heartbeat] runs in between); [now] skips the
 /// wait (app opened / back in front).
 Future<void> refreshPairedLooks(MobileSettings settings, DesktopDiscovery discovery, {bool now = false}) async {
   discovery
@@ -286,7 +296,7 @@ Future<void> refreshPairedLooks(MobileSettings settings, DesktopDiscovery discov
     final d = settings.byId(f.id);
     if (d == null) continue;
     final last = _lookChecked[f.id];
-    if (!now && last != null && DateTime.now().difference(last) < const Duration(seconds: 25)) continue;
+    if (!now && last != null && DateTime.now().difference(last) < const Duration(seconds: 55)) continue;
     _lookChecked[f.id] = DateTime.now();
     var ok = false;
     for (final h in f.hosts) {
@@ -320,7 +330,7 @@ Future<void> _pullDeletions(
   try {
     c = await openDesktop(settings, d, host, port, info);
     try {
-      discovery.relayed(d.id, await c.presence(online: true));
+      discovery.relayed(d.id, await c.presence(online: true, session: discovery.session));
     } catch (_) {}
     final r = await c.changes(d.changesSinceMs);
     if (r.deleted.isNotEmpty) {
@@ -544,6 +554,45 @@ Future<void> forgetDesktop(MobileSettings settings, PairedDesktop d) async {
   }
   await settings.clearLost(d.id);
   await settings.removeDesktop(d.id);
+}
+
+/// Open connections for the [heartbeat], per PC (kept alive between beats,
+/// so each beat is one small request, no new handshake).
+final Map<String, (String, DesktopClient)> _beats = {};
+
+DesktopClient _beatClient(MobileSettings settings, PairedDesktop d) {
+  final key = '${d.lastHost}|${d.port}|${d.fingerprint}|${d.token}';
+  final have = _beats[d.id];
+  if (have != null && have.$1 == key) return have.$2;
+  have?.$2.close();
+  final c = d.fingerprint != null
+      ? DesktopClient(host: d.lastHost!, port: d.port, secure: true, pin: d.fingerprint, deviceId: settings.deviceId, token: d.token)
+      : DesktopClient(host: d.lastHost!, port: d.port, deviceId: settings.deviceId, token: d.token);
+  _beats[d.id] = (key, c);
+  return c;
+}
+
+/// While LocalRoll is on screen, every ~10 s: "I'm here" to each paired PC
+/// we know is reachable, and who else is online. If an app is closed
+/// without a goodbye, the PCs notice within ~30 s.
+Future<void> heartbeat(MobileSettings settings, DesktopDiscovery discovery) async {
+  await Future.wait([
+    for (final d in settings.desktops)
+      if (d.lastHost != null && discovery.isOnline(d.id))
+        () async {
+          for (var attempt = 0; attempt < 2; attempt++) {
+            final c = _beatClient(settings, d);
+            try {
+              discovery.relayed(d.id, await c.presence(online: true, session: discovery.session, timeout: const Duration(seconds: 4)));
+              discovery.reached(d.id, true);
+              return;
+            } catch (_) {
+              _beats.remove(d.id)?.$2.close(); // try once more on a fresh connection
+            }
+          }
+          discovery.reached(d.id, false);
+        }(),
+  ]);
 }
 
 /// Leaving the app: tell the paired PCs we can reach, so they show this

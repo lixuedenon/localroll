@@ -24,7 +24,8 @@ import 'theme.dart';
 class Notices {
   Notices(this.s) {
     // Who is online: checked every few seconds and on any news.
-    _presence = Timer.periodic(const Duration(seconds: 8), (_) => _checkPresence());
+    _presence = Timer.periodic(const Duration(seconds: 3), (_) => _checkPresence());
+    _arrivals = s.server.arrivals.listen(_cameBack);
     s.server.addListener(_checkPresence);
     s.peers.addListener(_checkPresence);
     _online = s.onlineDevices;
@@ -40,6 +41,7 @@ class Notices {
 
   void dispose() {
     _presence?.cancel();
+    _arrivals?.cancel();
     s.server.removeListener(_checkPresence);
     s.peers.removeListener(_checkPresence);
     s.server.incomingAsks.removeListener(_onAsks);
@@ -53,7 +55,15 @@ class Notices {
   // ------------------------------------------------------- online / offline
 
   Timer? _presence;
+  StreamSubscription<String>? _arrivals;
   Set<String> _online = {};
+
+  /// Closed and opened again before it counted as gone: still "online".
+  void _cameBack(String id) {
+    final ctx = _ctx;
+    if (ctx == null) return;
+    ScaffoldMessenger.maybeOf(ctx)?.showSnackBar(_presenceBar(id, online: true));
+  }
 
   /// "X is online" / "X went offline" for every paired phone and PC.
   void _checkPresence() {

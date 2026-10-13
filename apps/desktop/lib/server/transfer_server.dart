@@ -134,14 +134,45 @@ class TransferServer extends ChangeNotifier {
   /// say "I'm leaving" when it closes; this is how the PC knows who is online.
   final Map<String, DateTime> lastSeen = {};
 
-  /// No word for this long = gone (closed without saying so, Wi-Fi lost,
-  /// phone asleep). Phones check in about every 40 s, PCs every 60 s.
-  static const Duration onlineWindow = Duration(seconds: 90);
+  /// No word for this long = gone (closed without saying so — an iPhone
+  /// app swiped away gets no chance to — Wi-Fi lost, phone asleep). Phones
+  /// check in every 10 s while LocalRoll is on screen, PCs every 60 s.
+  static const Duration phoneWindow = Duration(seconds: 30);
+  static const Duration pcWindow = Duration(seconds: 90);
 
   bool isOnline(String deviceId) {
+    // In the middle of a request (a big video being checked can take
+    // minutes): certainly there.
+    if ((_inFlight[deviceId] ?? 0) > 0) return true;
     final t = lastSeen[deviceId];
-    return t != null && DateTime.now().difference(t) < onlineWindow;
+    if (t == null) return false;
+    final pc = isDesktopPlatform(settings.trusted[deviceId]?.platform ?? '');
+    return DateTime.now().difference(t) < (pc ? pcWindow : phoneWindow);
   }
+
+  final Map<String, int> _inFlight = {};
+
+  /// Each app start (or return after leaving) has its own id: a new one from
+  /// a device we still thought online means it was closed and opened again
+  /// in between — announced as "online" again.
+  final Map<String, String> _presenceSession = {};
+
+  /// Devices that go quiet drop offline by time alone: look every 3 s and
+  /// tell the listeners (dots, notes) when the set changed.
+  Timer? _presenceTick;
+  Set<String> _onlineBefore = const {};
+
+  void _tickPresence() {
+    final now = {for (final id in lastSeen.keys) if (isOnline(id)) id};
+    if (now.length != _onlineBefore.length || !now.containsAll(_onlineBefore)) {
+      _onlineBefore = now;
+      notifyListeners();
+    }
+  }
+
+  /// A device came back while still counted online (see [_presenceSession]).
+  final StreamController<String> _arrivals = StreamController.broadcast();
+  Stream<String> get arrivals => _arrivals.stream;
 
   /// Set by AppServices: a paired device said it is here / leaving (lets
   /// the PC list react at once).
@@ -186,6 +217,7 @@ class TransferServer extends ChangeNotifier {
 
   Future<void> start() async {
     await stop();
+    _presenceTick ??= Timer.periodic(const Duration(seconds: 3), (_) => _tickPresence());
     final failures = <String>[];
     for (final p in _candidatePorts) {
       try {
@@ -232,6 +264,7 @@ class TransferServer extends ChangeNotifier {
 
   @override
   void dispose() {
+    _presenceTick?.cancel();
     stop();
     pin.dispose();
     super.dispose();
@@ -304,6 +337,40 @@ class TransferServer extends ChangeNotifier {
       final wasOnline = isOnline(device.id);
       lastSeen[device.id] = DateTime.now();
       if (!wasOnline) notifyListeners(); // came online
+      _inFlight[device.id] = (_inFlight[device.id] ?? 0) + 1;
+      try {
+        return await _signedIn(req, res, device, path, segs, secure: secure, wasOnline: wasOnline);
+      } finally {
+        final n = (_inFlight[device.id] ?? 1) - 1;
+        if (n <= 0) {
+          _inFlight.remove(device.id);
+        } else {
+          _inFlight[device.id] = n;
+        }
+        // Still here when it ends (unless this was its "I'm leaving").
+        if (lastSeen.containsKey(device.id)) lastSeen[device.id] = DateTime.now();
+      }
+    } catch (e, st) {
+      debugPrint('request failed: $e\n$st');
+      try {
+        await _json(res, 500, {'error': e.toString()});
+      } catch (_) {
+        // Response already started or socket gone.
+      }
+    }
+  }
+
+  /// Requests from a paired device (already signed in).
+  Future<void> _signedIn(
+    HttpRequest req,
+    HttpResponse res,
+    TrustedDevice device,
+    String path,
+    List<String> segs, {
+    required bool secure,
+    required bool wasOnline,
+  }) async {
+    {
       // Paired over HTTPS (or already moved to it): plain HTTP is refused,
       // so a token seen on the network earlier is of no use.
       if (device.secure && !secure) {
@@ -347,8 +414,16 @@ class TransferServer extends ChangeNotifier {
       if (req.method == 'POST' && path == LrProtocol.pathPresence) {
         final body = await _readJson(req);
         final online = body['online'] != false;
+        final session = body['session'];
+        if (session is String) {
+          final before = _presenceSession[device.id];
+          _presenceSession[device.id] = session;
+          // Closed and opened again before we noticed it was gone.
+          if (online && wasOnline && before != null && before != session) _arrivals.add(device.id);
+        }
         if (!online) {
           lastSeen.remove(device.id);
+          _inFlight.remove(device.id);
           notifyListeners();
         }
         onPresence?.call(device.id, online);
@@ -412,13 +487,6 @@ class TransferServer extends ChangeNotifier {
 
       await req.drain<void>();
       return _json(res, 404, {'error': 'not_found'});
-    } catch (e, st) {
-      debugPrint('request failed: $e\n$st');
-      try {
-        await _json(res, 500, {'error': e.toString()});
-      } catch (_) {
-        // Response already started or socket gone.
-      }
     }
   }
 
