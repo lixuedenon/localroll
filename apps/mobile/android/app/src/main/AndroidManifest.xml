@@ -18,6 +18,7 @@
     <application
         android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true"
+        android:allowBackup="false"
         android:label="LocalRoll"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">

@@ -301,5 +301,7 @@
   "family.offline": "未接続",
   "presence.online": "「{name}」がオンラインになりました",
   "presence.offline": "「{name}」がオフラインになりました",
-  "home.status_online": "受信可能 · {count} 台がオンライン"
+  "home.status_online": "受信可能 · {count} 台がオンライン",
+  "home.other_pcs": "ほかのPC",
+  "home.other_pcs_none": "ほかのPCはまだペアリングされていません。「送信」でペアリングできます。"
 }

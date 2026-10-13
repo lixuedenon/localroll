@@ -301,5 +301,7 @@
   "family.offline": "Non connecté",
   "presence.online": "« {name} » est en ligne",
   "presence.offline": "« {name} » est hors ligne",
-  "home.status_online": "Prêt à recevoir · {count} appareils en ligne"
+  "home.status_online": "Prêt à recevoir · {count} appareils en ligne",
+  "home.other_pcs": "Autres PC",
+  "home.other_pcs_none": "Aucun autre PC associé — associez-en un dans Envoyer."
 }

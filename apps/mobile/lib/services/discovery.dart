@@ -48,13 +48,43 @@ class DesktopDiscovery extends ChangeNotifier {
     if (was != isOnline(id)) notifyListeners();
   }
 
-  /// A paired PC is reachable now: it answered within the last ~90 s, or the
-  /// Wi-Fi search lists it and our last direct try did not fail.
+  /// A paired PC is reachable now: it answered within the last ~2.5 min
+  /// (we check in every minute), or the Wi-Fi search lists it and our last
+  /// direct try did not fail.
   bool isOnline(String id) {
     final t = _reached[id];
-    if (t != null && DateTime.now().difference(t) < const Duration(seconds: 90)) return true;
+    if (t != null && DateTime.now().difference(t) < const Duration(seconds: 150)) return true;
     return found.any((f) => f.id == id) && !_unreachable.contains(id);
   }
+
+  /// Other devices (phones, other PCs) each paired PC told us it sees
+  /// online — this phone can't ask other phones itself.
+  final Map<String, List<OnlineDevice>> _relayed = {};
+
+  void relayed(String pcId, List<OnlineDevice> list) {
+    final before = others.map((o) => o.id).toSet();
+    _relayed[pcId] = list;
+    final after = others.map((o) => o.id).toSet();
+    if (before.length != after.length || !before.containsAll(after)) notifyListeners();
+  }
+
+  /// Devices other than our own paired PCs that are online now, as heard
+  /// from the PCs that are online (each listed once).
+  List<OnlineDevice> get others {
+    final out = <String, OnlineDevice>{};
+    for (final e in _relayed.entries) {
+      if (!isOnline(e.key)) continue;
+      for (final o in e.value) {
+        if (o.id == myId || pairedIds.contains(o.id)) continue;
+        out[o.id] = o;
+      }
+    }
+    return out.values.toList()..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+  }
+
+  /// This phone's id and its own paired PCs (left out of [others]).
+  String? myId;
+  Set<String> pairedIds = const {};
 
   void _merge() {
     found = [
@@ -237,9 +267,13 @@ Future<PairedDesktop> pairWithDesktop({
 
 final Map<String, DateTime> _lookChecked = {};
 
-/// Paired PCs seen on the Wi-Fi: pick up a new name / icon / picture right
-/// away (not only when sending). At most once a minute per PC.
-Future<void> refreshPairedLooks(MobileSettings settings, DesktopDiscovery discovery) async {
+/// Paired PCs: check in ("I'm here"), pick up a new name / icon / picture,
+/// and hear who else is online. About once a minute per PC; [now] skips the
+/// wait (app opened / back in front).
+Future<void> refreshPairedLooks(MobileSettings settings, DesktopDiscovery discovery, {bool now = false}) async {
+  discovery
+    ..myId = settings.deviceId
+    ..pairedIds = {for (final d in settings.desktops) d.id};
   final found = discovery.found;
   // Paired PCs the Wi-Fi search has not (re)found: try where they were last.
   final all = [
@@ -252,7 +286,7 @@ Future<void> refreshPairedLooks(MobileSettings settings, DesktopDiscovery discov
     final d = settings.byId(f.id);
     if (d == null) continue;
     final last = _lookChecked[f.id];
-    if (last != null && DateTime.now().difference(last) < const Duration(seconds: 25)) continue;
+    if (!now && last != null && DateTime.now().difference(last) < const Duration(seconds: 55)) continue;
     _lookChecked[f.id] = DateTime.now();
     var ok = false;
     for (final h in f.hosts) {
@@ -266,8 +300,8 @@ Future<void> refreshPairedLooks(MobileSettings settings, DesktopDiscovery discov
         }
         await settings.updateLook(d, info);
         ok = true;
-        // Signed-in request: also how the PC knows this phone is online.
-        await _pullDeletions(settings, d, h, f.port, info);
+        // Signed-in: "I'm here", then what was deleted on the PC.
+        await _pullDeletions(settings, d, h, f.port, info, discovery);
         break;
       } catch (_) {
       } finally {
@@ -280,10 +314,14 @@ Future<void> refreshPairedLooks(MobileSettings settings, DesktopDiscovery discov
 
 /// Reverse signal: photos deleted on the PC that are still on this phone lose
 /// their ✓ and are listed as "not backed up any more".
-Future<void> _pullDeletions(MobileSettings settings, PairedDesktop d, String host, int port, DeviceInfo info) async {
+Future<void> _pullDeletions(
+    MobileSettings settings, PairedDesktop d, String host, int port, DeviceInfo info, DesktopDiscovery discovery) async {
   DesktopClient? c;
   try {
     c = await openDesktop(settings, d, host, port, info);
+    try {
+      discovery.relayed(d.id, await c.presence(online: true));
+    } catch (_) {}
     final r = await c.changes(d.changesSinceMs);
     if (r.deleted.isNotEmpty) {
       final sent = settings.sentTo(d.id);
@@ -506,4 +544,31 @@ Future<void> forgetDesktop(MobileSettings settings, PairedDesktop d) async {
   }
   await settings.clearLost(d.id);
   await settings.removeDesktop(d.id);
+}
+
+/// Leaving the app: tell the paired PCs we can reach, so they show this
+/// phone offline at once. Best effort, a second at most.
+Future<void> sayBye(MobileSettings settings, DesktopDiscovery discovery) async {
+  await Future.wait([
+    for (final d in settings.desktops)
+      if (discovery.isOnline(d.id) && d.lastHost != null)
+        () async {
+          DesktopClient? c;
+          try {
+            final probe = DesktopClient(host: d.lastHost!, port: d.port);
+            final DeviceInfo info;
+            try {
+              info = await probe.info(timeout: const Duration(milliseconds: 600));
+            } finally {
+              probe.close();
+            }
+            if (info.id != d.id) return;
+            c = await openDesktop(settings, d, d.lastHost!, d.port, info);
+            await c.presence(online: false, timeout: const Duration(milliseconds: 800));
+          } catch (_) {
+          } finally {
+            c?.close();
+          }
+        }(),
+  ]).timeout(const Duration(milliseconds: 1500), onTimeout: () => const []);
 }

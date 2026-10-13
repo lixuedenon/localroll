@@ -30,16 +30,26 @@ class MediaThumb extends StatefulWidget {
 class _MediaThumbState extends State<MediaThumb> {
   Future<File?>? _thumb;
 
-  // Live Photo: play the motion while the mouse rests on it (one at a time,
-  // muted) — the same way the viewer plays it, which is known to work.
+  // Mouse resting on it: a Live Photo plays its motion once; a video plays
+  // muted from the start and loops, like YouTube's preview. One at a time.
   static _MediaThumbState? _playingNow;
   Timer? _hover;
   bool _live = false;
 
+  bool get _isVideo => widget.item.kind == MediaKind.video;
+
+  /// What to play on hover, or null.
+  String? get _previewPath {
+    if (_isVideo) return widget.library.absPath(widget.item);
+    final live = widget.library.liveFor(widget.item);
+    return live == null ? null : widget.library.absPath(live);
+  }
+
   void _enter() {
-    if (widget.library.liveFor(widget.item) == null) return;
+    if (_previewPath == null) return;
     _hover?.cancel();
-    _hover = Timer(const Duration(milliseconds: 250), () {
+    // A short pause, so sweeping the mouse across the grid starts nothing.
+    _hover = Timer(Duration(milliseconds: _isVideo ? 450 : 250), () {
       if (!mounted) return;
       if (_playingNow != this) _playingNow?._stop();
       _playingNow = this;
@@ -109,14 +119,14 @@ class _MediaThumbState extends State<MediaThumb> {
       );
     }
 
-    final live = _live ? widget.library.liveFor(widget.item) : null;
+    final preview = _live ? _previewPath : null;
     final stack = Stack(
       fit: StackFit.expand,
       children: [
         image,
-        if (live != null)
-          IgnorePointer(child: _ThumbLive(path: widget.library.absPath(live), onDone: _stop)),
-        if (widget.item.kind == MediaKind.video)
+        if (preview != null)
+          IgnorePointer(child: _ThumbLive(path: preview, loop: _isVideo, onDone: _stop)),
+        if (widget.item.kind == MediaKind.video && preview == null)
           const Positioned(
             right: 6,
             bottom: 6,
@@ -154,12 +164,14 @@ class _MediaThumbState extends State<MediaThumb> {
   }
 }
 
-/// The moving part of a Live Photo, muted, inside a thumbnail.
+/// Hover preview inside a thumbnail, muted: a Live Photo's motion (once) or
+/// a video (looping, with a thin progress line).
 class _ThumbLive extends StatefulWidget {
-  const _ThumbLive({required this.path, required this.onDone});
+  const _ThumbLive({required this.path, required this.onDone, this.loop = false});
 
   final String path;
   final VoidCallback onDone;
+  final bool loop;
 
   @override
   State<_ThumbLive> createState() => _ThumbLiveState();
@@ -173,10 +185,13 @@ class _ThumbLiveState extends State<_ThumbLive> {
   @override
   void initState() {
     super.initState();
-    _sub = _player.stream.completed.listen((done) {
-      if (done) widget.onDone();
-    });
+    if (!widget.loop) {
+      _sub = _player.stream.completed.listen((done) {
+        if (done) widget.onDone();
+      });
+    }
     _player.setVolume(0);
+    if (widget.loop) _player.setPlaylistMode(PlaylistMode.loop);
     _player.open(Media(widget.path));
   }
 
@@ -188,6 +203,29 @@ class _ThumbLiveState extends State<_ThumbLive> {
   }
 
   @override
-  Widget build(BuildContext context) =>
-      Video(controller: _controller, controls: NoVideoControls, fit: BoxFit.cover, fill: Colors.transparent);
+  Widget build(BuildContext context) {
+    final video = Video(controller: _controller, controls: NoVideoControls, fit: BoxFit.cover, fill: Colors.transparent);
+    if (!widget.loop) return video;
+    return Stack(fit: StackFit.expand, children: [
+      video,
+      Positioned(
+        left: 0,
+        right: 0,
+        bottom: 0,
+        child: StreamBuilder<Duration>(
+          stream: _player.stream.position,
+          builder: (context, snap) {
+            final total = _player.state.duration.inMilliseconds;
+            final at = snap.data?.inMilliseconds ?? 0;
+            return LinearProgressIndicator(
+              value: total <= 0 ? 0 : (at / total).clamp(0.0, 1.0),
+              minHeight: 3,
+              color: const Color(0xFFFF3B30),
+              backgroundColor: Colors.white24,
+            );
+          },
+        ),
+      ),
+    ]);
+  }
 }

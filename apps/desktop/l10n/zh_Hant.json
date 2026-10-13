@@ -301,5 +301,7 @@
   "family.offline": "未連線",
   "presence.online": "「{name}」上線了",
   "presence.offline": "「{name}」下線了",
-  "home.status_online": "可以接收 · {count} 台裝置在線"
+  "home.status_online": "可以接收 · {count} 台裝置在線",
+  "home.other_pcs": "其他電腦",
+  "home.other_pcs_none": "還沒有配對其他電腦——在「發送」裡配對。"
 }

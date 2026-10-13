@@ -13,6 +13,7 @@ import '../services/uploader.dart';
 import '../services/background_transfer.dart';
 import '../services/backup_plan.dart';
 import 'backup_page.dart';
+import 'breathing_dot.dart';
 import 'cleanup_page.dart';
 import 'connect_page.dart';
 import 'device_badge.dart';
@@ -115,39 +116,71 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   /// A paired PC showed up on the Wi-Fi: refresh its name / icon / picture,
   /// and send waiting photos if auto-send is on.
-  /// Paired PCs online last time we looked (null = not looked yet).
-  Set<String>? _onlinePcs;
+  /// Devices online last time we looked, id -> (name, is a PC); null = not
+  /// looked yet (no notes for what was already there when the app opened).
+  Map<String, (String, bool)>? _onlineNow;
 
-  /// "PC X is online / went offline": a short note at the bottom.
+  /// Everything online now: our paired PCs, plus the phones and PCs they
+  /// told us about.
+  Map<String, (String, bool)> _onlineDevices() => {
+        for (final d in widget.settings.desktops)
+          if (widget.discovery.isOnline(d.id)) d.id: (d.name, true),
+        for (final o in widget.discovery.others) o.id: (o.name, o.isDesktop),
+      };
+
+  /// "X is online / went offline" (any phone or PC): a short note at the bottom.
   void _checkPresence() {
     if (!mounted) return;
-    final now = {for (final d in widget.settings.desktops) if (widget.discovery.isOnline(d.id)) d.id};
-    final before = _onlinePcs;
-    _onlinePcs = now;
+    final now = _onlineDevices();
+    final before = _onlineNow;
+    _onlineNow = now;
     if (before == null) return;
     final m = ScaffoldMessenger.maybeOf(context);
-    for (final id in now.difference(before)) {
-      final name = widget.settings.byId(id)?.name ?? '';
-      m?.showSnackBar(SnackBar(
-        duration: const Duration(seconds: 3),
-        content: Row(children: [
-          const Icon(Icons.computer_rounded, color: LrColors.verified, size: 20),
-          const SizedBox(width: 10),
-          Expanded(child: Text(tr('presence.online', {'name': name}))),
-        ]),
-      ));
+    void note((String, bool) d, {required bool online}) => m?.showSnackBar(SnackBar(
+          duration: const Duration(seconds: 3),
+          content: Row(children: [
+            Icon(d.$2 ? Icons.computer_rounded : Icons.smartphone_rounded,
+                color: online ? LrColors.verified : LrColors.muted, size: 20),
+            const SizedBox(width: 10),
+            Expanded(child: Text(tr(online ? 'presence.online' : 'presence.offline', {'name': d.$1}))),
+          ]),
+        ));
+    for (final id in now.keys) {
+      if (!before.containsKey(id)) note(now[id]!, online: true);
     }
-    for (final id in before.difference(now)) {
-      final name = widget.settings.byId(id)?.name ?? '';
-      m?.showSnackBar(SnackBar(
-        duration: const Duration(seconds: 3),
-        content: Row(children: [
-          const Icon(Icons.computer_rounded, color: LrColors.muted, size: 20),
-          const SizedBox(width: 10),
-          Expanded(child: Text(tr('presence.offline', {'name': name}))),
-        ]),
-      ));
+    for (final id in before.keys) {
+      if (!now.containsKey(id)) note(before[id]!, online: false);
     }
+  }
+
+  /// Home: who is online now (breathing dots).
+  Widget _onlineStrip(BuildContext context) {
+    final all = _onlineDevices();
+    if (all.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(tr('home.online_now', {'count': all.length}), style: Theme.of(context).textTheme.bodySmall),
+        const SizedBox(height: 6),
+        Wrap(spacing: 8, runSpacing: 8, children: [
+          for (final d in all.values)
+            Container(
+              padding: const EdgeInsets.fromLTRB(4, 4, 12, 4),
+              decoration: BoxDecoration(
+                color: LrColors.surface,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: LrColors.line),
+              ),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                const BreathingDot(online: true, size: 8),
+                Icon(d.$2 ? Icons.computer_rounded : Icons.smartphone_rounded, size: 16, color: LrColors.muted),
+                const SizedBox(width: 6),
+                Text(d.$1, style: const TextStyle(fontSize: 13)),
+              ]),
+            ),
+        ]),
+      ]),
+    );
   }
 
   void _onDiscovery() {
@@ -162,15 +195,28 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   /// Back in the app: re-check photo access, and look for new photos to send.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Leaving the app: "I'm leaving" (unless a transfer keeps going in the
+    // background — then the phone is still talking to the PC).
+    if (state == AppLifecycleState.paused && !BackgroundTransfer.active) {
+      _saidBye = true;
+      unawaited(sayBye(widget.settings, widget.discovery));
+      return;
+    }
     if (state != AppLifecycleState.resumed) return;
+    // Back: "I'm here" at once.
+    final back = _saidBye;
+    _saidBye = false;
     if (!(_permission?.hasAccess ?? false)) {
       _reload();
+      if (back) refreshPairedLooks(widget.settings, widget.discovery, now: true);
     } else {
       _auto.check();
-      refreshPairedLooks(widget.settings, widget.discovery);
+      refreshPairedLooks(widget.settings, widget.discovery, now: back);
       unawaited(_refreshHome());
     }
   }
+
+  bool _saidBye = false;
 
   /// Switched in Settings.
   Future<void> _onAutoSendChanged() => _auto.check();
@@ -522,7 +568,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: widget.settings,
+      // Discovery too: online dots and "online now" follow it.
+      listenable: Listenable.merge([widget.settings, widget.discovery]),
       builder: (context, _) {
         final desktop = widget.settings.current;
         final sent = desktop == null ? const <String>{} : widget.settings.sentTo(desktop.id);
@@ -711,11 +758,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 title: Text(d?.name ?? tr('home.not_connected'), style: const TextStyle(fontWeight: FontWeight.w700)),
                 subtitle: d == null
                     ? null
-                    : Text(online ? tr('home.pc_online') : tr('home.pc_offline'),
-                        style: TextStyle(color: online ? LrColors.verified : LrColors.muted)),
+                    : Row(children: [
+                        BreathingDot(online: online, size: 8),
+                        const SizedBox(width: 4),
+                        Text(online ? tr('home.pc_online') : tr('home.pc_offline'),
+                            style: TextStyle(color: online ? LrColors.verified : LrColors.muted)),
+                      ]),
                 trailing: Text(tr(d == null ? 'home.connect_pc' : 'home.change_pc'), style: const TextStyle(color: LrColors.muted)),
               ),
             ),
+            _onlineStrip(context),
             _lostBanner(context),
             _autoBanner(context),
             const SizedBox(height: 14),

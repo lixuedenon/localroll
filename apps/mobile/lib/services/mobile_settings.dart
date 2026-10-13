@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'backup_plan.dart';
+import 'secure_store.dart';
 
 /// A PC this phone has paired with.
 class PairedDesktop {
@@ -74,7 +75,8 @@ class PairedDesktop {
         name: j['name'] as String? ?? 'PC',
         hosts: (j['hosts'] as List? ?? const []).cast<String>(),
         port: (j['port'] as num?)?.toInt() ?? LrProtocol.defaultPort,
-        token: j['token'] as String,
+        // Kept in the keychain since beta.22 (filled in by MobileSettings.load).
+        token: j['token'] as String? ?? '',
         lastHost: j['lastHost'] as String?,
         icon: j['icon'] as String?,
         color: (j['color'] as num?)?.toInt(),
@@ -125,7 +127,15 @@ class MobileSettings extends ChangeNotifier {
   static Future<MobileSettings> load() async {
     final prefs = await SharedPreferences.getInstance();
     final s = MobileSettings._(prefs);
-    s.deviceId = prefs.getString('deviceId') ?? _randomId(16);
+    // The keychain first: on an iPhone it survives deleting the app, so a
+    // reinstall keeps the same identity on the PCs.
+    final secrets = await SecureStore.readAll();
+    s._keychain = secrets != null;
+    s._inKeychain.addAll({
+      for (final e in (secrets ?? const <String, String>{}).entries)
+        if (e.key == 'deviceId' || e.key.startsWith('token.')) e.key: e.value,
+    });
+    s.deviceId = secrets?['deviceId'] ?? prefs.getString('deviceId') ?? _randomId(16);
     s.deviceName = prefs.getString('deviceName') ?? (Platform.isIOS ? 'iPhone' : 'Android');
     s.language = prefs.getString('language');
     s.autoSend = prefs.getBool('autoSend') ?? false;
@@ -144,6 +154,12 @@ class MobileSettings extends ChangeNotifier {
           s.desktops.add(PairedDesktop.fromJson(e as Map<String, dynamic>));
         }
       } catch (_) {}
+    }
+    // Tokens: from the keychain; older versions kept them in preferences
+    // (moved over by the save below).
+    for (final d in s.desktops) {
+      final t = secrets?['token.${d.id}'];
+      if (t != null && t.isNotEmpty) d.token = t;
     }
     s._sentDir = Directory('${(await getApplicationSupportDirectory()).path}${Platform.pathSeparator}sent');
     await s._sentDir.create(recursive: true);
@@ -372,10 +388,49 @@ class MobileSettings extends ChangeNotifier {
     } catch (_) {}
   }
 
+  /// The keychain could be read at start-up (else secrets stay where they were).
+  bool _keychain = false;
+
+  /// What is in the keychain now (to write only changes).
+  final Map<String, String> _inKeychain = {};
+
+  /// Tokens and the phone id to the keychain; true when all of it is there.
+  Future<bool> _saveSecrets() async {
+    if (!_keychain) return false;
+    final want = <String, String>{
+      'deviceId': deviceId,
+      for (final d in desktops)
+        if (d.token.isNotEmpty) 'token.${d.id}': d.token,
+    };
+    var ok = true;
+    for (final e in want.entries) {
+      if (_inKeychain[e.key] == e.value) continue;
+      if (await SecureStore.write(e.key, e.value)) {
+        _inKeychain[e.key] = e.value;
+      } else {
+        ok = false;
+      }
+    }
+    for (final k in _inKeychain.keys.where((k) => k.startsWith('token.') && !want.containsKey(k)).toList()) {
+      await SecureStore.delete(k);
+      _inKeychain.remove(k);
+    }
+    return ok;
+  }
+
   Future<void> _save() async {
+    final secured = await _saveSecrets();
     await _prefs.setString('deviceId', deviceId);
     await _prefs.setString('deviceName', deviceName);
-    await _prefs.setString('desktops', jsonEncode(desktops.map((d) => d.toJson()).toList()));
+    await _prefs.setString(
+      'desktops',
+      jsonEncode([
+        for (final d in desktops)
+          // In the keychain: not in plain preferences. If the keychain can't
+          // be used, keep it here so nothing is lost.
+          d.toJson()..removeWhere((k, _) => k == 'token' && (secured || d.token.isEmpty)),
+      ]),
+    );
     await _prefs.setBool('autoSend', autoSend);
     await _prefs.setInt('autoSendSinceMs', autoSendSinceMs);
     await _prefs.setString('ownerName', ownerName);

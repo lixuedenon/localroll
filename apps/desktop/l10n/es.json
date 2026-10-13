@@ -301,5 +301,7 @@
   "family.offline": "No conectado",
   "presence.online": "«{name}» está en línea",
   "presence.offline": "«{name}» se desconectó",
-  "home.status_online": "Listo para recibir · {count} dispositivos en línea"
+  "home.status_online": "Listo para recibir · {count} dispositivos en línea",
+  "home.other_pcs": "Otros PC",
+  "home.other_pcs_none": "Aún no hay otro PC vinculado: vincúlalo en Enviar."
 }

@@ -33,6 +33,8 @@ dependencies:
   shared_preferences: ^2.2.0
   # App-support folder for the per-PC "already sent" lists.
   path_provider: ^2.1.0
+  # Pairing tokens and the phone's id in the Keychain / Android Keystore.
+  flutter_secure_storage: ^9.2.2
 
 dev_dependencies:
   flutter_test:

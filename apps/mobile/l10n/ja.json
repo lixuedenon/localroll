@@ -247,5 +247,6 @@
   "transfer.title_stopped": "停止しました",
   "transfer.title_partly": "完了（一部失敗）",
   "presence.online": "「{name}」がオンラインになりました",
-  "presence.offline": "「{name}」がオフラインになりました"
+  "presence.offline": "「{name}」がオフラインになりました",
+  "home.online_now": "オンライン · {count}"
 }

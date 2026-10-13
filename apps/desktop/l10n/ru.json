@@ -301,5 +301,7 @@
   "family.offline": "Не подключён",
   "presence.online": "«{name}» в сети",
   "presence.offline": "«{name}» не в сети",
-  "home.status_online": "Готов к приёму · в сети: {count}"
+  "home.status_online": "Готов к приёму · в сети: {count}",
+  "home.other_pcs": "Другие ПК",
+  "home.other_pcs_none": "Других ПК пока нет — подключите в разделе «Отправить»."
 }

@@ -301,5 +301,7 @@
   "family.offline": "غير متصل",
   "presence.online": "\"{name}\" متصل الآن",
   "presence.offline": "\"{name}\" غير متصل",
-  "home.status_online": "جاهز للاستلام · {count} أجهزة متصلة"
+  "home.status_online": "جاهز للاستلام · {count} أجهزة متصلة",
+  "home.other_pcs": "أجهزة كمبيوتر أخرى",
+  "home.other_pcs_none": "لم يتم إقران كمبيوتر آخر بعد — أقرنه من \"إرسال\"."
 }

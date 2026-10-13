@@ -301,5 +301,7 @@
   "family.offline": "Bağlı değil",
   "presence.online": "“{name}” çevrimiçi",
   "presence.offline": "“{name}” çevrimdışı",
-  "home.status_online": "Almaya hazır · {count} cihaz çevrimiçi"
+  "home.status_online": "Almaya hazır · {count} cihaz çevrimiçi",
+  "home.other_pcs": "Diğer PC'ler",
+  "home.other_pcs_none": "Henüz başka PC eşlenmedi — Gönder bölümünden eşleyin."
 }

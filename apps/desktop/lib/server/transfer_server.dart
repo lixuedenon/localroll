@@ -129,15 +129,26 @@ class TransferServer extends ChangeNotifier {
     if (!ask.answer.isCompleted) ask.answer.complete(accept);
   }
 
-  /// Last signed-in request from each paired device. Phones talk to this PC
-  /// at least once a minute while LocalRoll is open on them (and at once
-  /// when it opens), so this is how the PC knows a phone is "online".
+  /// Last signed-in request from each paired device. Devices say "I'm
+  /// here" when LocalRoll opens, check in once a minute while it is open and
+  /// say "I'm leaving" when it closes; this is how the PC knows who is online.
   final Map<String, DateTime> lastSeen = {};
+
+  /// No word for this long = gone (closed without saying so, Wi-Fi lost,
+  /// phone asleep). Devices check in every 60 s.
+  static const Duration onlineWindow = Duration(seconds: 150);
 
   bool isOnline(String deviceId) {
     final t = lastSeen[deviceId];
-    return t != null && DateTime.now().difference(t) < const Duration(seconds: 100);
+    return t != null && DateTime.now().difference(t) < onlineWindow;
   }
+
+  /// Set by AppServices: a paired device said it is here / leaving (lets
+  /// the PC list react at once).
+  void Function(String deviceId, bool online)? onPresence;
+
+  /// Set by AppServices: every paired device online now (phones and PCs).
+  Set<String> Function()? onlineNow;
 
   /// Failed sign-ins per address, to slow down guessing.
   final Map<String, List<DateTime>> _failures = {};
@@ -290,11 +301,9 @@ class TransferServer extends ChangeNotifier {
         await req.drain<void>();
         return _json(res, 401, {'error': 'not_paired'});
       }
-      final seenBefore = lastSeen[device.id];
+      final wasOnline = isOnline(device.id);
       lastSeen[device.id] = DateTime.now();
-      if (seenBefore == null || DateTime.now().difference(seenBefore) > const Duration(seconds: 60)) {
-        notifyListeners(); // came online
-      }
+      if (!wasOnline) notifyListeners(); // came online
       // Paired over HTTPS (or already moved to it): plain HTTP is refused,
       // so a token seen on the network earlier is of no use.
       if (device.secure && !secure) {
@@ -334,6 +343,26 @@ class TransferServer extends ChangeNotifier {
         if (text.length > LrProtocol.maxText) return _json(res, 413, {'error': 'too_large'});
         hub.textReceived(device.name, text);
         return _json(res, 200, {'ok': true});
+      }
+      if (req.method == 'POST' && path == LrProtocol.pathPresence) {
+        final body = await _readJson(req);
+        final online = body['online'] != false;
+        if (!online) {
+          lastSeen.remove(device.id);
+          notifyListeners();
+        }
+        onPresence?.call(device.id, online);
+        if (!online) return _json(res, 200, {'online': const []});
+        // Who else is here: the phone shows them too (it can't ask other
+        // phones itself). Names only, and only to paired devices.
+        final ids = onlineNow?.call() ?? {for (final id in lastSeen.keys) if (isOnline(id)) id};
+        return _json(res, 200, {
+          'online': [
+            for (final id in ids)
+              if (id != device.id && settings.trusted[id] != null)
+                OnlineDevice(id: id, name: settings.trusted[id]!.name, platform: settings.trusted[id]!.platform).toJson(),
+          ],
+        });
       }
       if (req.method == 'POST' && path == LrProtocol.pathVerify) {
         return await _verify(req, device);

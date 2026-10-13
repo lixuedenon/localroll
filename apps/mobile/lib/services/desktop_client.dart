@@ -106,6 +106,18 @@ class DesktopClient {
   Future<ChangesResponse> changes(int sinceMs) async => ChangesResponse.fromJson(
       await _send('GET', LrProtocol.pathChanges, query: {'since': '$sinceMs'}, timeout: const Duration(seconds: 5)));
 
+  /// "I'm here" ([online]) or "I'm leaving". Returns the other devices the
+  /// PC sees online (older PCs: an empty list).
+  Future<List<OnlineDevice>> presence({required bool online, Duration timeout = const Duration(seconds: 5)}) async {
+    try {
+      return OnlineDevice.listFrom(
+          await _send('POST', LrProtocol.pathPresence, json: {'online': online}, timeout: timeout));
+    } on LrHttpException catch (e) {
+      if (e.status == 404) return const [];
+      rethrow;
+    }
+  }
+
   /// Tap-to-pair: ask; the PC shows Allow / Deny.
   Future<PairApprovalState> requestApproval(DeviceInfo me) async => PairApprovalState.fromJson(
       await _send('POST', LrProtocol.pathPairRequest, json: PairApprovalRequest(device: me).toJson()));

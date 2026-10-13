@@ -247,5 +247,6 @@
   "transfer.title_stopped": "중지됨",
   "transfer.title_partly": "완료(일부 실패)",
   "presence.online": "“{name}”이(가) 온라인입니다",
-  "presence.offline": "“{name}”이(가) 오프라인입니다"
+  "presence.offline": "“{name}”이(가) 오프라인입니다",
+  "home.online_now": "지금 온라인 · {count}"
 }

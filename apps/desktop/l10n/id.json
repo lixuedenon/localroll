@@ -301,5 +301,7 @@
   "family.offline": "Tidak terhubung",
   "presence.online": "“{name}” online",
   "presence.offline": "“{name}” offline",
-  "home.status_online": "Siap menerima · {count} perangkat online"
+  "home.status_online": "Siap menerima · {count} perangkat online",
+  "home.other_pcs": "PC lain",
+  "home.other_pcs_none": "Belum ada PC lain yang dipasangkan — pasangkan di Kirim."
 }

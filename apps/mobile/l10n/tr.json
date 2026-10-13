@@ -247,5 +247,6 @@
   "transfer.title_stopped": "Durduruldu",
   "transfer.title_partly": "Bitti, bazıları başarısız",
   "presence.online": "“{name}” çevrimiçi",
-  "presence.offline": "“{name}” çevrimdışı"
+  "presence.offline": "“{name}” çevrimdışı",
+  "home.online_now": "Şu an çevrimiçi · {count}"
 }

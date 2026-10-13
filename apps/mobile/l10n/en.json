@@ -247,5 +247,6 @@
   "transfer.title_stopped": "Stopped",
   "transfer.title_partly": "Finished, some failed",
   "presence.online": "“{name}” is online",
-  "presence.offline": "“{name}” went offline"
+  "presence.offline": "“{name}” went offline",
+  "home.online_now": "Online now · {count}"
 }

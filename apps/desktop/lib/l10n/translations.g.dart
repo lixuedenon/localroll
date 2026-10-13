@@ -307,6 +307,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '“{name}” is online',
     'presence.offline': '“{name}” went offline',
     'home.status_online': 'Ready to receive · {count} devices online',
+    'home.other_pcs': 'Other PCs',
+    'home.other_pcs_none': 'No other PC paired yet — pair one under Send.',
   },
   'zh': {
     'nav.library': '媒体库',
@@ -612,6 +614,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '「{name}」上线了',
     'presence.offline': '「{name}」下线了',
     'home.status_online': '可以接收 · {count} 台设备在线',
+    'home.other_pcs': '其他电脑',
+    'home.other_pcs_none': '还没有配对其他电脑——在“发送”里配对。',
   },
   'zh_Hant': {
     'nav.library': '媒體庫',
@@ -917,6 +921,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '「{name}」上線了',
     'presence.offline': '「{name}」下線了',
     'home.status_online': '可以接收 · {count} 台裝置在線',
+    'home.other_pcs': '其他電腦',
+    'home.other_pcs_none': '還沒有配對其他電腦——在「發送」裡配對。',
   },
   'ja': {
     'nav.library': 'ライブラリ',
@@ -1222,6 +1228,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '「{name}」がオンラインになりました',
     'presence.offline': '「{name}」がオフラインになりました',
     'home.status_online': '受信可能 · {count} 台がオンライン',
+    'home.other_pcs': 'ほかのPC',
+    'home.other_pcs_none': 'ほかのPCはまだペアリングされていません。「送信」でペアリングできます。',
   },
   'ko': {
     'nav.library': '라이브러리',
@@ -1527,6 +1535,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '“{name}”이(가) 온라인입니다',
     'presence.offline': '“{name}”이(가) 오프라인입니다',
     'home.status_online': '수신 가능 · 기기 {count}대 온라인',
+    'home.other_pcs': '다른 PC',
+    'home.other_pcs_none': '아직 페어링된 다른 PC가 없습니다. "보내기"에서 페어링하세요.',
   },
   'es': {
     'nav.library': 'Biblioteca',
@@ -1832,6 +1842,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '«{name}» está en línea',
     'presence.offline': '«{name}» se desconectó',
     'home.status_online': 'Listo para recibir · {count} dispositivos en línea',
+    'home.other_pcs': 'Otros PC',
+    'home.other_pcs_none': 'Aún no hay otro PC vinculado: vincúlalo en Enviar.',
   },
   'fr': {
     'nav.library': 'Bibliothèque',
@@ -2137,6 +2149,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '« {name} » est en ligne',
     'presence.offline': '« {name} » est hors ligne',
     'home.status_online': 'Prêt à recevoir · {count} appareils en ligne',
+    'home.other_pcs': 'Autres PC',
+    'home.other_pcs_none': 'Aucun autre PC associé — associez-en un dans Envoyer.',
   },
   'de': {
     'nav.library': 'Mediathek',
@@ -2442,6 +2456,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '„{name}“ ist online',
     'presence.offline': '„{name}“ ist offline',
     'home.status_online': 'Empfangsbereit · {count} Geräte online',
+    'home.other_pcs': 'Andere PCs',
+    'home.other_pcs_none': 'Noch kein anderer PC gekoppelt – unter „Senden“ koppeln.',
   },
   'pt': {
     'nav.library': 'Biblioteca',
@@ -2747,6 +2763,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '“{name}” está online',
     'presence.offline': '“{name}” ficou offline',
     'home.status_online': 'Pronto para receber · {count} aparelhos online',
+    'home.other_pcs': 'Outros PCs',
+    'home.other_pcs_none': 'Nenhum outro PC pareado — pareie em Enviar.',
   },
   'ru': {
     'nav.library': 'Медиатека',
@@ -3052,6 +3070,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '«{name}» в сети',
     'presence.offline': '«{name}» не в сети',
     'home.status_online': 'Готов к приёму · в сети: {count}',
+    'home.other_pcs': 'Другие ПК',
+    'home.other_pcs_none': 'Других ПК пока нет — подключите в разделе «Отправить».',
   },
   'it': {
     'nav.library': 'Libreria',
@@ -3357,6 +3377,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '«{name}» è online',
     'presence.offline': '«{name}» è offline',
     'home.status_online': 'Pronto a ricevere · {count} dispositivi online',
+    'home.other_pcs': 'Altri PC',
+    'home.other_pcs_none': 'Nessun altro PC associato: associalo in Invia.',
   },
   'ar': {
     'nav.library': 'المكتبة',
@@ -3662,6 +3684,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '"{name}" متصل الآن',
     'presence.offline': '"{name}" غير متصل',
     'home.status_online': 'جاهز للاستلام · {count} أجهزة متصلة',
+    'home.other_pcs': 'أجهزة كمبيوتر أخرى',
+    'home.other_pcs_none': 'لم يتم إقران كمبيوتر آخر بعد — أقرنه من "إرسال".',
   },
   'hi': {
     'nav.library': 'लाइब्रेरी',
@@ -3967,6 +3991,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '“{name}” ऑनलाइन है',
     'presence.offline': '“{name}” ऑफ़लाइन हो गया',
     'home.status_online': 'प्राप्त करने को तैयार · {count} डिवाइस ऑनलाइन',
+    'home.other_pcs': 'अन्य पीसी',
+    'home.other_pcs_none': 'अभी कोई अन्य पीसी जोड़ा नहीं गया — "भेजें" में जोड़ें।',
   },
   'id': {
     'nav.library': 'Pustaka',
@@ -4272,6 +4298,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '“{name}” online',
     'presence.offline': '“{name}” offline',
     'home.status_online': 'Siap menerima · {count} perangkat online',
+    'home.other_pcs': 'PC lain',
+    'home.other_pcs_none': 'Belum ada PC lain yang dipasangkan — pasangkan di Kirim.',
   },
   'vi': {
     'nav.library': 'Thư viện',
@@ -4577,6 +4605,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '“{name}” đã trực tuyến',
     'presence.offline': '“{name}” đã ngoại tuyến',
     'home.status_online': 'Sẵn sàng nhận · {count} thiết bị trực tuyến',
+    'home.other_pcs': 'Máy tính khác',
+    'home.other_pcs_none': 'Chưa ghép nối máy tính nào khác — ghép nối trong mục Gửi.',
   },
   'th': {
     'nav.library': 'คลังสื่อ',
@@ -4882,6 +4912,8 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '“{name}” ออนไลน์แล้ว',
     'presence.offline': '“{name}” ออฟไลน์แล้ว',
     'home.status_online': 'พร้อมรับ · ออนไลน์ {count} เครื่อง',
+    'home.other_pcs': 'พีซีเครื่องอื่น',
+    'home.other_pcs_none': 'ยังไม่ได้จับคู่พีซีเครื่องอื่น — จับคู่ได้ที่ "ส่ง"',
   },
   'tr': {
     'nav.library': 'Kitaplık',
@@ -5187,5 +5219,7 @@ const Map<String, Map<String, String>> translations = {
     'presence.online': '“{name}” çevrimiçi',
     'presence.offline': '“{name}” çevrimdışı',
     'home.status_online': 'Almaya hazır · {count} cihaz çevrimiçi',
+    'home.other_pcs': 'Diğer PC\'ler',
+    'home.other_pcs_none': 'Henüz başka PC eşlenmedi — Gönder bölümünden eşleyin.',
   },
 };

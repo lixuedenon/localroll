@@ -247,5 +247,6 @@
   "transfer.title_stopped": "Arrêté",
   "transfer.title_partly": "Terminé, avec des échecs",
   "presence.online": "« {name} » est en ligne",
-  "presence.offline": "« {name} » est hors ligne"
+  "presence.offline": "« {name} » est hors ligne",
+  "home.online_now": "En ligne · {count}"
 }

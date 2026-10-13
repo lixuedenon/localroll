@@ -55,6 +55,10 @@ class LrProtocol {
   static const String pathText = '/api/v1/text';
   static const int maxText = 1000000;
 
+  /// "I'm here" / "I'm leaving" (signed in). The answer lists the other
+  /// paired devices this PC sees online, so phones learn about each other.
+  static const String pathPresence = '/api/v1/presence';
+
   /// PC only, from 127.0.0.1: a second copy of the app asks the running one
   /// to come to the front, then quits.
   static const String pathLocalShow = '/local/show';

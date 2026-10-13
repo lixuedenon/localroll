@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../app_services.dart';
 import '../l10n/l10n.dart';
+import 'breathing_dot.dart';
 import 'format.dart';
 import 'theme.dart';
 
@@ -104,16 +105,14 @@ class _FamilyPageState extends State<FamilyPage> {
               ListTile(
                 dense: true,
                 contentPadding: const EdgeInsetsDirectional.only(start: 44),
-                leading: Badge(
-                  // Green dot: LocalRoll is open on that phone right now.
-                  isLabelVisible: widget.services.server.isOnline(d.id),
-                  backgroundColor: LrColors.verified,
-                  smallSize: 10,
-                  child: Icon(st.trusted[d.id]?.platform == 'ios' ? Icons.phone_iphone : Icons.phone_android),
-                ),
+                leading: Row(mainAxisSize: MainAxisSize.min, children: [
+                  // Breathing dot: LocalRoll is open on that phone right now.
+                  BreathingDot(online: widget.services.isOnline(d.id), size: 8),
+                  Icon(st.trusted[d.id]?.platform == 'ios' ? Icons.phone_iphone : Icons.phone_android),
+                ]),
                 title: Text('${family.labelOf(d.id)} · ${d.deviceName}'),
                 subtitle: Text([
-                  widget.services.server.isOnline(d.id) ? tr('family.online') : tr('family.offline'),
+                  widget.services.isOnline(d.id) ? tr('family.online') : tr('family.offline'),
                   tr('settings.paired_on', {'date': formatDate(DateTime.fromMillisecondsSinceEpoch(d.pairedMs))}),
                 ].join(' · ')),
                 trailing: PopupMenuButton<String>(

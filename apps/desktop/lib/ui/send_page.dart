@@ -11,6 +11,7 @@ import '../l10n/l10n.dart';
 import '../services/peers.dart';
 import '../services/settings.dart';
 import 'app_nav.dart';
+import 'breathing_dot.dart';
 import 'device_badge.dart';
 import 'format.dart';
 import 'text_window.dart';
@@ -169,12 +170,8 @@ class _SendPageState extends State<SendPage> {
               Text(p.name, style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 4),
               Row(children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(color: online ? LrColors.verified : LrColors.muted, shape: BoxShape.circle),
-                ),
-                const SizedBox(width: 6),
+                BreathingDot(online: online, size: 8),
+                const SizedBox(width: 4),
                 Text(online ? tr('send.online') : tr('send.offline'),
                     style: TextStyle(color: online ? LrColors.verified : LrColors.muted, fontSize: 13)),
               ]),
@@ -419,7 +416,7 @@ Future<void> sendToPc(BuildContext context, AppServices s, List<SendFile> files,
               DeviceBadge(icon: p.icon, color: p.color, size: 32),
               const SizedBox(width: 12),
               Expanded(child: Text(p.name)),
-              if (s.peers.isOnline(p.id)) const Icon(Icons.circle, size: 10, color: LrColors.verified),
+              BreathingDot(online: s.peers.isOnline(p.id), size: 8),
             ]),
           ),
       ],

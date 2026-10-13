@@ -301,5 +301,7 @@
   "family.offline": "연결 안 됨",
   "presence.online": "“{name}”이(가) 온라인입니다",
   "presence.offline": "“{name}”이(가) 오프라인입니다",
-  "home.status_online": "수신 가능 · 기기 {count}대 온라인"
+  "home.status_online": "수신 가능 · 기기 {count}대 온라인",
+  "home.other_pcs": "다른 PC",
+  "home.other_pcs_none": "아직 페어링된 다른 PC가 없습니다. \"보내기\"에서 페어링하세요."
 }

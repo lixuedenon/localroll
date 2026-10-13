@@ -301,5 +301,7 @@
   "family.offline": "Nicht verbunden",
   "presence.online": "„{name}“ ist online",
   "presence.offline": "„{name}“ ist offline",
-  "home.status_online": "Empfangsbereit · {count} Geräte online"
+  "home.status_online": "Empfangsbereit · {count} Geräte online",
+  "home.other_pcs": "Andere PCs",
+  "home.other_pcs_none": "Noch kein anderer PC gekoppelt – unter „Senden“ koppeln."
 }

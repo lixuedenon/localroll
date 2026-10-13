@@ -301,5 +301,7 @@
   "family.offline": "ไม่ได้เชื่อมต่อ",
   "presence.online": "“{name}” ออนไลน์แล้ว",
   "presence.offline": "“{name}” ออฟไลน์แล้ว",
-  "home.status_online": "พร้อมรับ · ออนไลน์ {count} เครื่อง"
+  "home.status_online": "พร้อมรับ · ออนไลน์ {count} เครื่อง",
+  "home.other_pcs": "พีซีเครื่องอื่น",
+  "home.other_pcs_none": "ยังไม่ได้จับคู่พีซีเครื่องอื่น — จับคู่ได้ที่ \"ส่ง\""
 }

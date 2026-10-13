@@ -301,5 +301,7 @@
   "family.offline": "Chưa kết nối",
   "presence.online": "“{name}” đã trực tuyến",
   "presence.offline": "“{name}” đã ngoại tuyến",
-  "home.status_online": "Sẵn sàng nhận · {count} thiết bị trực tuyến"
+  "home.status_online": "Sẵn sàng nhận · {count} thiết bị trực tuyến",
+  "home.other_pcs": "Máy tính khác",
+  "home.other_pcs_none": "Chưa ghép nối máy tính nào khác — ghép nối trong mục Gửi."
 }

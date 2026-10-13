@@ -247,5 +247,6 @@
   "transfer.title_stopped": "रुका",
   "transfer.title_partly": "पूरा, कुछ विफल",
   "presence.online": "“{name}” ऑनलाइन है",
-  "presence.offline": "“{name}” ऑफ़लाइन हो गया"
+  "presence.offline": "“{name}” ऑफ़लाइन हो गया",
+  "home.online_now": "अभी ऑनलाइन · {count}"
 }

@@ -38,7 +38,12 @@ class BackgroundTransfer {
 
   /// [channel] is the Android notification-category name shown in system
   /// settings (translated, like everything the user sees).
+  /// A transfer is running (it keeps talking to the PC in the background,
+  /// so leaving the app is not "going offline").
+  static bool active = false;
+
   static Future<BackgroundMode> start({required String channel, required String title, required String text}) async {
+    active = true;
     _listen();
     try {
       final mode = await _channel.invokeMethod<String>('start', {'channel': channel, 'title': title, 'text': text});
@@ -116,6 +121,7 @@ class BackgroundTransfer {
   }
 
   static Future<void> stop({bool success = true}) async {
+    active = false;
     try {
       await _channel.invokeMethod<void>('stop', {'success': success});
     } catch (_) {}

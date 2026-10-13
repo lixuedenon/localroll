@@ -247,5 +247,6 @@
   "transfer.title_stopped": "Đã dừng",
   "transfer.title_partly": "Xong, có lỗi",
   "presence.online": "“{name}” đã trực tuyến",
-  "presence.offline": "“{name}” đã ngoại tuyến"
+  "presence.offline": "“{name}” đã ngoại tuyến",
+  "home.online_now": "Đang trực tuyến · {count}"
 }

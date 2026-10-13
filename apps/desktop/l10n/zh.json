@@ -301,5 +301,7 @@
   "family.offline": "未连接",
   "presence.online": "「{name}」上线了",
   "presence.offline": "「{name}」下线了",
-  "home.status_online": "可以接收 · {count} 台设备在线"
+  "home.status_online": "可以接收 · {count} 台设备在线",
+  "home.other_pcs": "其他电脑",
+  "home.other_pcs_none": "还没有配对其他电脑——在“发送”里配对。"
 }

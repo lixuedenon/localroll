@@ -301,5 +301,7 @@
   "family.offline": "कनेक्ट नहीं",
   "presence.online": "“{name}” ऑनलाइन है",
   "presence.offline": "“{name}” ऑफ़लाइन हो गया",
-  "home.status_online": "प्राप्त करने को तैयार · {count} डिवाइस ऑनलाइन"
+  "home.status_online": "प्राप्त करने को तैयार · {count} डिवाइस ऑनलाइन",
+  "home.other_pcs": "अन्य पीसी",
+  "home.other_pcs_none": "अभी कोई अन्य पीसी जोड़ा नहीं गया — \"भेजें\" में जोड़ें।"
 }

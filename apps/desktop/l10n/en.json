@@ -301,5 +301,7 @@
   "family.offline": "Not connected",
   "presence.online": "“{name}” is online",
   "presence.offline": "“{name}” went offline",
-  "home.status_online": "Ready to receive · {count} devices online"
+  "home.status_online": "Ready to receive · {count} devices online",
+  "home.other_pcs": "Other PCs",
+  "home.other_pcs_none": "No other PC paired yet — pair one under Send."
 }

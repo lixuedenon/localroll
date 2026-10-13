@@ -8,6 +8,7 @@ import '../l10n/l10n.dart';
 import '../services/desktop_client.dart';
 import '../services/discovery.dart';
 import '../services/mobile_settings.dart';
+import 'breathing_dot.dart';
 import 'device_badge.dart';
 import 'scan_page.dart';
 import 'theme.dart';
@@ -313,12 +314,16 @@ class _ConnectPageState extends State<ConnectPage> {
                           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                             Text(d.name, style: theme.textTheme.titleMedium),
                             const SizedBox(height: 2),
-                            Text(
-                              widget.discovery.isOnline(d.id) ? tr('connect.online') : tr('connect.offline'),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: widget.discovery.isOnline(d.id) ? LrColors.verified : LrColors.muted,
+                            Row(children: [
+                              BreathingDot(online: widget.discovery.isOnline(d.id), size: 8),
+                              const SizedBox(width: 4),
+                              Text(
+                                widget.discovery.isOnline(d.id) ? tr('connect.online') : tr('connect.offline'),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: widget.discovery.isOnline(d.id) ? LrColors.verified : LrColors.muted,
+                                ),
                               ),
-                            ),
+                            ]),
                           ]),
                         ),
                         TextButton.icon(

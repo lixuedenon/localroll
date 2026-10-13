@@ -1,4 +1,6 @@
 // apps/desktop/lib/app_services.dart
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import 'server/transfer_server.dart';
@@ -34,9 +36,10 @@ class AppServices {
   late final PeerDirectory peers = PeerDirectory(settings: settings, server: server);
   late final PeerSender sender = PeerSender(settings: settings, peers: peers);
 
-  /// A paired phone or PC is reachable right now: it talked to us within
-  /// the last ~100 s (phones do every minute while LocalRoll is open), or
-  /// we reached it ourselves (other PCs).
+  /// A paired phone or PC is reachable right now: it said "I'm here" or
+  /// checked in within the last ~2.5 min (devices do every minute while
+  /// LocalRoll is open, and say "I'm leaving" when it closes), or we
+  /// reached it ourselves (other PCs).
   bool isOnline(String deviceId) => server.isOnline(deviceId) || peers.isOnline(deviceId);
 
   /// Paired devices online now, by id.
@@ -77,6 +80,17 @@ class AppServices {
       ffmpeg: ffmpeg,
       converter: converter,
     );
+    // Presence: another PC said "I'm here" / "I'm leaving" — update the PC
+    // list at once; phones get the full "who is online" list back.
+    server.onPresence = (id, online) {
+      if (!settings.peers.containsKey(id)) return;
+      if (online) {
+        unawaited(s.peers.checkNow(id));
+      } else {
+        s.peers.markGone(id);
+      }
+    };
+    server.onlineNow = () => s.onlineDevices;
     await s.startNetworking();
     // Keep in touch with paired PCs all the time (not only on the Send
     // page), so both sides know who is online.
@@ -136,7 +150,10 @@ class AppServices {
       } catch (_) {}
     }
 
-    await capped(library.flush, 3000);
+    await Future.wait([
+      capped(library.flush, 3000),
+      capped(peers.sayBye, 1300), // other PCs show us offline at once
+    ]);
     peers.release();
     await Future.wait([
       capped(mdns.stop, 800),

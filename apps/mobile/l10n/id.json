@@ -247,5 +247,6 @@
   "transfer.title_stopped": "Dihentikan",
   "transfer.title_partly": "Selesai, ada yang gagal",
   "presence.online": "“{name}” online",
-  "presence.offline": "“{name}” offline"
+  "presence.offline": "“{name}” offline",
+  "home.online_now": "Online sekarang · {count}"
 }

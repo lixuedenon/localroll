@@ -8,6 +8,7 @@ import '../services/file_actions.dart';
 import '../services/library_index.dart';
 import '../services/network.dart';
 import 'app_nav.dart';
+import 'breathing_dot.dart';
 import 'device_badge.dart';
 import 'format.dart';
 import 'media_thumb.dart';
@@ -113,6 +114,7 @@ class _DashboardPageState extends State<DashboardPage> {
               Wrap(spacing: 16, runSpacing: 16, children: [
                 _box(context, width: 560, child: _recent(context, items)),
                 _box(context, width: 360, child: _family(context, items)),
+                _box(context, width: 360, child: _otherPcs(context)),
                 _box(context, width: 460, child: _diskBox(context, items)),
                 _box(context, width: 460, child: _attention(context)),
               ]),
@@ -152,8 +154,11 @@ class _DashboardPageState extends State<DashboardPage> {
           border: Border.all(color: color.withValues(alpha: 0.5)),
         ),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-          const SizedBox(width: 8),
+          if (ok)
+            BreathingDot(online: online > 0, size: 8)
+          else
+            Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+          const SizedBox(width: 6),
           Text(
             ok ? tr('home.status_online', {'count': online}) : tr('home.status_off'),
             style: TextStyle(color: color, fontSize: 13),
@@ -286,10 +291,8 @@ class _DashboardPageState extends State<DashboardPage> {
         Wrap(spacing: 8, runSpacing: 8, children: [
           for (final m in family.members)
             ActionChip(
-              // Green dot: one of this person's phones has LocalRoll open now.
-              avatar: family.devicesOf(m).any((d) => s.server.isOnline(d.id))
-                  ? const Icon(Icons.circle, size: 10, color: LrColors.verified)
-                  : null,
+              // Breathing dot: one of this person's phones has LocalRoll open now.
+              avatar: BreathingDot(online: family.devicesOf(m).any((d) => s.isOnline(d.id)), size: 8),
               label: Text(family.devicesOf(m).length > 1 ? tr('home.member_devices', {'name': m, 'count': family.devicesOf(m).length}) : m),
               onPressed: () => AppNav.instance.selectTab(AppNav.family),
             ),
@@ -299,6 +302,34 @@ class _DashboardPageState extends State<DashboardPage> {
         Text(tr('home.member_stale', {'names': stale.join(', ')}),
             style: const TextStyle(color: LrColors.muted, fontSize: 13)),
       ],
+    ]);
+  }
+
+  /// Paired PCs (not family members): who is online, breathing like the family.
+  Widget _otherPcs(BuildContext context) {
+    final s = widget.services;
+    final pcs = s.settings.peers.values.toList()
+      ..sort((a, b) {
+        final on = (s.isOnline(b.id) ? 1 : 0) - (s.isOnline(a.id) ? 1 : 0);
+        return on != 0 ? on : a.name.toLowerCase().compareTo(b.name.toLowerCase());
+      });
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      _title(tr('home.other_pcs')),
+      if (pcs.isEmpty)
+        Text(tr('home.other_pcs_none'), style: const TextStyle(color: LrColors.muted))
+      else
+        Wrap(spacing: 8, runSpacing: 8, children: [
+          for (final p in pcs)
+            ActionChip(
+              avatar: BreathingDot(online: s.isOnline(p.id), size: 8),
+              label: Row(mainAxisSize: MainAxisSize.min, children: [
+                const Icon(Icons.computer_rounded, size: 16, color: LrColors.muted),
+                const SizedBox(width: 6),
+                Text(p.name),
+              ]),
+              onPressed: () => AppNav.instance.selectTab(AppNav.send),
+            ),
+        ]),
     ]);
   }
 

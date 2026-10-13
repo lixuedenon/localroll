@@ -451,3 +451,27 @@ class ChangesResponse {
         now: (j['now'] as num?)?.toInt() ?? 0,
       );
 }
+
+/// A paired device another LocalRoll PC sees online (presence answer).
+class OnlineDevice {
+  const OnlineDevice({required this.id, required this.name, required this.platform});
+
+  final String id;
+  final String name;
+  final String platform;
+
+  bool get isDesktop => isDesktopPlatform(platform);
+
+  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'platform': platform};
+
+  factory OnlineDevice.fromJson(Map<String, dynamic> j) => OnlineDevice(
+        id: j['id'] as String? ?? '',
+        name: j['name'] as String? ?? '',
+        platform: j['platform'] as String? ?? '',
+      );
+
+  static List<OnlineDevice> listFrom(Map<String, dynamic> j) => [
+        for (final e in (j['online'] as List? ?? const []))
+          if (e is Map<String, dynamic>) OnlineDevice.fromJson(e),
+      ];
+}

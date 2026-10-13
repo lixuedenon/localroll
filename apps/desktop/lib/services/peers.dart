@@ -46,8 +46,42 @@ class PeerDirectory extends ChangeNotifier {
     return all.values.toList()..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
   }
 
-  /// A paired PC answered our last check (every 20 s).
+  /// A paired PC answered our last check (every 60 s, or it just said
+  /// "I'm here").
   bool isOnline(String id) => _reachable.containsKey(id);
+
+  /// It said "I'm leaving".
+  void markGone(String id) {
+    if (_reachable.remove(id) != null) notifyListeners();
+  }
+
+  /// It said "I'm here": look now instead of at the next check.
+  Future<void> checkNow(String id) async {
+    final p = settings.peers[id];
+    if (p == null) return;
+    await _checkOne(p).timeout(const Duration(seconds: 12), onTimeout: () {});
+    notifyListeners();
+  }
+
+  /// Closing: tell the paired PCs we can reach, so they show us offline at
+  /// once. Best effort, short.
+  Future<void> sayBye() async {
+    await Future.wait([
+      for (final f in _reachable.values.toList())
+        () async {
+          final p = settings.peers[f.id];
+          if (p == null) return;
+          LrClient? c;
+          try {
+            c = await openPeer(settings, p, f.hosts.first, f.port);
+            await c?.presence(online: false, timeout: const Duration(milliseconds: 900));
+          } catch (_) {
+          } finally {
+            c?.close();
+          }
+        }(),
+    ]).timeout(const Duration(milliseconds: 1200), onTimeout: () => const []);
+  }
   FoundPc? where(String id) => found.where((f) => f.id == id).firstOrNull;
 
   /// The Send page is open: look actively. Balanced by [release].
@@ -58,7 +92,8 @@ class PeerDirectory extends ChangeNotifier {
     // window's own thread, which can freeze the whole app. Paired PCs are
     // checked at their known address and others are found by [scan].
     unawaited(checkPaired());
-    _timer = Timer.periodic(const Duration(seconds: 20), (_) => checkPaired());
+    // A light check-in; arrivals and normal departures are announced at once.
+    _timer = Timer.periodic(const Duration(seconds: 60), (_) => checkPaired());
   }
 
   void release() {
@@ -123,7 +158,8 @@ class PeerDirectory extends ChangeNotifier {
     try {
       c = await openPeer(settings, p, host, port);
       if (c == null) return true;
-      await c.ping();
+      // "I'm here" (also tells it we are online).
+      await c.presence(online: true);
       return true;
     } on LrHttpError catch (e) {
       if (e.status != 401) return true;

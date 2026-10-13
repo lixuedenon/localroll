@@ -247,5 +247,6 @@
   "transfer.title_stopped": "已停止",
   "transfer.title_partly": "发送结束，有失败",
   "presence.online": "「{name}」上线了",
-  "presence.offline": "「{name}」下线了"
+  "presence.offline": "「{name}」下线了",
+  "home.online_now": "现在在线 · {count}"
 }

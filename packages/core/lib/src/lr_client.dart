@@ -126,6 +126,19 @@ class LrClient {
   Future<void> ping() async =>
       _send('GET', LrProtocol.pathChanges, query: {'since': '${DateTime.now().millisecondsSinceEpoch}'}, timeout: const Duration(seconds: 5));
 
+  /// "I'm here" ([online]) or "I'm leaving". Returns who else the other side
+  /// sees online. Older receivers (no such route) just get a [ping].
+  Future<List<OnlineDevice>> presence({required bool online, Duration timeout = const Duration(seconds: 5)}) async {
+    try {
+      return OnlineDevice.listFrom(
+          await _send('POST', LrProtocol.pathPresence, json: {'online': online}, timeout: timeout));
+    } on LrHttpError catch (e) {
+      if (e.status != 404) rethrow;
+      if (online) await ping();
+      return const [];
+    }
+  }
+
   /// HTTPS only: trade a token from an old plain-HTTP pairing for a new one.
   Future<String> upgrade() async =>
       (await _send('POST', LrProtocol.pathUpgrade, json: const <String, dynamic>{}))['token'] as String;

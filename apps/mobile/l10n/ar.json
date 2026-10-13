@@ -247,5 +247,6 @@
   "transfer.title_stopped": "توقف",
   "transfer.title_partly": "انتهى مع إخفاقات",
   "presence.online": "\"{name}\" متصل الآن",
-  "presence.offline": "\"{name}\" غير متصل"
+  "presence.offline": "\"{name}\" غير متصل",
+  "home.online_now": "متصل الآن · {count}"
 }
