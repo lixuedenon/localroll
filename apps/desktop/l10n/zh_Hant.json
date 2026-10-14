@@ -176,14 +176,14 @@
   "home.issue_ffmpeg": "缺少影片元件，無法轉換影片。",
   "home.issue_disk": "媒體庫所在磁碟剩餘不足 5 GB。",
   "nav.send": "傳送",
-  "send.title": "傳送到電腦",
+  "send.title": "傳送",
   "send.search": "搜尋",
   "send.searching": "正在搜尋…",
   "send.hint": "把檔案、資料夾或照片傳送到同一網路中另一台安裝了 LocalRoll 的電腦。中斷後會從斷點繼續。",
   "send.paired": "已配對的電腦",
   "send.no_paired": "還沒有配對的電腦，在下面的清單中配對一台。",
-  "send.nearby": "附近的電腦",
-  "send.none_nearby": "沒有找到其他電腦。請在另一台電腦上開啟 LocalRoll，然後按「搜尋」。",
+  "send.nearby": "附近的電腦（未配對）",
+  "send.none_nearby": "沒有發現新的電腦。已配對的電腦顯示在上面。要新增電腦，請在它上面打開 LocalRoll，然後點「搜尋」。",
   "send.transfers": "傳輸記錄",
   "send.clear": "清除已完成的傳輸記錄",
   "send.online": "線上",
@@ -364,5 +364,9 @@
   "send.resend": "重新傳送",
   "done.already_had": "{count} 個這裡已經有了（沒有重複儲存）",
   "done.sent_nothing_new": "「{name}」已經有這些檔案了，沒有重複傳送",
-  "transfer.already_had": "已經有了"
+  "transfer.already_had": "已經有了",
+  "send.phones": "手機",
+  "send.phone_ready": "現在可以接收——對方會先確認",
+  "send.phone_closed_hint": "在手機上打開 LocalRoll 後才能傳送（iPhone 只有打開 App 時才能接收）",
+  "send.err_phone_closed": "手機現在不能接收。請在手機上打開 LocalRoll，然後重新傳送。"
 }

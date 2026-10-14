@@ -176,14 +176,14 @@
   "home.issue_ffmpeg": "Video araçları eksik: videolar dönüştürülemez.",
   "home.issue_disk": "Kitaplık sürücüsünde 5 GB’tan az boş alan var.",
   "nav.send": "Gönder",
-  "send.title": "PC’ye gönder",
+  "send.title": "Gönder",
   "send.search": "Ara",
   "send.searching": "Aranıyor…",
   "send.hint": "Aynı ağdaki LocalRoll çalışan başka bir PC’ye dosya, klasör veya fotoğraf gönderin. Kesilen aktarımlar kaldığı yerden devam eder.",
   "send.paired": "Eşleştirilmiş PC’ler",
   "send.no_paired": "Henüz eşleştirilmiş PC yok. Aşağıdaki listeden birini eşleştirin.",
-  "send.nearby": "Yakındaki PC’ler",
-  "send.none_nearby": "Başka PC bulunamadı. Diğer PC’de LocalRoll’u açıp Ara’ya basın.",
+  "send.nearby": "Yakındaki PC'ler (eşlenmemiş)",
+  "send.none_nearby": "Yeni PC bulunamadı. Eşlenmiş PC'ler yukarıda. Eklemek için onda LocalRoll'u aç ve Ara'ya bas.",
   "send.transfers": "Aktarımlar",
   "send.clear": "Biten aktarımları temizle",
   "send.online": "Çevrimiçi",
@@ -364,5 +364,9 @@
   "send.resend": "Tekrar gönder",
   "done.already_had": "{count} tanesi zaten buradaydı (iki kez kaydedilmedi)",
   "done.sent_nothing_new": "“{name}” bunların hepsine zaten sahip",
-  "transfer.already_had": "Zaten var"
+  "transfer.already_had": "Zaten var",
+  "send.phones": "Telefonlar",
+  "send.phone_ready": "Şimdi alabilir — kabul etmesi istenecek",
+  "send.phone_closed_hint": "Göndermek için telefonda LocalRoll'u aç (iPhone yalnızca uygulama açıkken alır)",
+  "send.err_phone_closed": "Telefon şu an almıyor. Üzerinde LocalRoll'u aç ve tekrar gönder."
 }

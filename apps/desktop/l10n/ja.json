@@ -176,14 +176,14 @@
   "home.issue_ffmpeg": "動画ツールがないため、動画を変換できません。",
   "home.issue_disk": "ライブラリのドライブの空きが 5 GB 未満です。",
   "nav.send": "送信",
-  "send.title": "PC に送信",
+  "send.title": "送信",
   "send.search": "検索",
   "send.searching": "検索中…",
   "send.hint": "ファイル、フォルダー、写真を同じネットワーク上の LocalRoll が入った別の PC に送ります。中断しても続きから再開します。",
   "send.paired": "ペアリング済みの PC",
   "send.no_paired": "まだペアリングした PC がありません。下の一覧からペアリングしてください。",
-  "send.nearby": "近くの PC",
-  "send.none_nearby": "ほかの PC が見つかりません。相手の PC で LocalRoll を開いてから「検索」を押してください。",
+  "send.nearby": "近くのPC（未ペアリング）",
+  "send.none_nearby": "新しいPCは見つかりません。ペアリング済みのPCは上に表示されています。追加するには、そのPCで LocalRoll を開いて「検索」を押してください。",
   "send.transfers": "転送",
   "send.clear": "完了した転送記録を消去",
   "send.online": "オンライン",
@@ -364,5 +364,9 @@
   "send.resend": "もう一度送る",
   "done.already_had": "{count} 件はすでにあります（二重には保存しません）",
   "done.sent_nothing_new": "「{name}」はすでにすべて持っています",
-  "transfer.already_had": "既にあり"
+  "transfer.already_had": "既にあり",
+  "send.phones": "スマホ",
+  "send.phone_ready": "受信できます（相手に確認が表示されます）",
+  "send.phone_closed_hint": "スマホで LocalRoll を開くと送れます（iPhone はアプリを開いている間だけ受信できます）",
+  "send.err_phone_closed": "スマホは今受信できません。LocalRoll を開いてから送り直してください。"
 }

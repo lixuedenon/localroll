@@ -176,14 +176,14 @@
   "home.issue_ffmpeg": "Faltan las herramientas de vídeo: no se pueden convertir vídeos.",
   "home.issue_disk": "Quedan menos de 5 GB en el disco de la biblioteca.",
   "nav.send": "Enviar",
-  "send.title": "Enviar a un PC",
+  "send.title": "Enviar",
   "send.search": "Buscar",
   "send.searching": "Buscando…",
   "send.hint": "Envía archivos, carpetas o fotos a otro PC con LocalRoll en la misma red. Si se interrumpe, continúa donde se quedó.",
   "send.paired": "PC emparejados",
   "send.no_paired": "Aún no hay ningún PC emparejado. Empareja uno de la lista de abajo.",
-  "send.nearby": "PC cercanos",
-  "send.none_nearby": "No se encontró otro PC. Abre LocalRoll en el otro PC y pulsa Buscar.",
+  "send.nearby": "PC cercanos (sin vincular)",
+  "send.none_nearby": "No hay PC nuevos. Los vinculados están arriba. Para añadir uno, abre LocalRoll en él y pulsa Buscar.",
   "send.transfers": "Transferencias",
   "send.clear": "Borrar transferencias terminadas",
   "send.online": "En línea",
@@ -364,5 +364,9 @@
   "send.resend": "Volver a enviar",
   "done.already_had": "{count} ya estaban aquí (no se guardan dos veces)",
   "done.sent_nothing_new": "«{name}» ya tenía todo esto",
-  "transfer.already_had": "Ya estaba"
+  "transfer.already_had": "Ya estaba",
+  "send.phones": "Teléfonos",
+  "send.phone_ready": "Puede recibir ahora; se le pedirá que acepte",
+  "send.phone_closed_hint": "Abre LocalRoll en el teléfono para enviarle (un iPhone solo recibe con la app abierta)",
+  "send.err_phone_closed": "El teléfono no está recibiendo. Abre LocalRoll en él y vuelve a enviar."
 }

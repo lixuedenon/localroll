@@ -77,6 +77,9 @@ class PhoneServer extends ChangeNotifier {
 
   bool get running => _http != null;
 
+  /// This phone's certificate (senders pin it).
+  String? get fingerprint => _tls?.fingerprint;
+
   /// Open "Accept / Decline" questions (the UI shows a dialog for each).
   final ValueNotifier<List<IncomingAsk>> asks = ValueNotifier(const []);
 

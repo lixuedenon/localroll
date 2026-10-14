@@ -176,14 +176,14 @@
   "home.issue_ffmpeg": "Video tools are missing: videos cannot be converted.",
   "home.issue_disk": "Less than 5 GB free on the library drive.",
   "nav.send": "Send",
-  "send.title": "Send to a PC",
+  "send.title": "Send",
   "send.search": "Search",
   "send.searching": "Searching…",
   "send.hint": "Send files, folders or photos to another PC running LocalRoll on the same network. Interrupted transfers continue where they stopped.",
   "send.paired": "Paired PCs",
   "send.no_paired": "No PC paired yet. Pair one from the list below.",
-  "send.nearby": "Nearby PCs",
-  "send.none_nearby": "No other PC found. Open LocalRoll on the other PC, then press Search.",
+  "send.nearby": "Nearby PCs (not paired)",
+  "send.none_nearby": "No new PC found. Paired PCs are listed above. To add one, open LocalRoll on it, then press Search.",
   "send.transfers": "Transfers",
   "send.clear": "Clear finished transfers",
   "send.online": "Online",
@@ -364,5 +364,9 @@
   "send.resend": "Send again",
   "done.already_had": "{count} were already here (not saved twice)",
   "done.sent_nothing_new": "“{name}” already had all of these",
-  "transfer.already_had": "Already here"
+  "transfer.already_had": "Already here",
+  "send.phones": "Phones",
+  "send.phone_ready": "Can receive now — they will be asked to accept",
+  "send.phone_closed_hint": "Open LocalRoll on the phone to send to it (an iPhone receives only while the app is open)",
+  "send.err_phone_closed": "The phone is not receiving now. Open LocalRoll on it and send again."
 }

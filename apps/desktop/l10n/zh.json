@@ -176,14 +176,14 @@
   "home.issue_ffmpeg": "缺少视频组件，无法转换视频。",
   "home.issue_disk": "媒体库所在磁盘剩余不足 5 GB。",
   "nav.send": "发送",
-  "send.title": "发送到电脑",
+  "send.title": "发送",
   "send.search": "搜索",
   "send.searching": "正在搜索…",
   "send.hint": "把文件、文件夹或照片发送到同一网络里另一台装了 LocalRoll 的电脑。中断后会从断点继续。",
   "send.paired": "已配对的电脑",
   "send.no_paired": "还没有配对的电脑，在下面的列表里配对一台。",
-  "send.nearby": "附近的电脑",
-  "send.none_nearby": "没有找到其他电脑。请在另一台电脑上打开 LocalRoll，然后点“搜索”。",
+  "send.nearby": "附近的电脑（未配对）",
+  "send.none_nearby": "没有发现新的电脑。已配对的电脑显示在上面。要添加新电脑，请在它上面打开 LocalRoll，然后点“搜索”。",
   "send.transfers": "传输记录",
   "send.clear": "清除已完成的传输记录",
   "send.online": "在线",
@@ -364,5 +364,9 @@
   "send.resend": "重新发送",
   "done.already_had": "{count} 个这里已经有了（没有重复保存）",
   "done.sent_nothing_new": "「{name}」已经有这些文件了，没有重复发送",
-  "transfer.already_had": "已经有了"
+  "transfer.already_had": "已经有了",
+  "send.phones": "手机",
+  "send.phone_ready": "现在可以接收——对方会先确认",
+  "send.phone_closed_hint": "在手机上打开 LocalRoll 后才能发送（iPhone 只有打开 App 时才能接收）",
+  "send.err_phone_closed": "手机现在不能接收。请在手机上打开 LocalRoll，然后重新发送。"
 }

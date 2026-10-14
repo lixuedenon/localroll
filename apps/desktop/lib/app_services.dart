@@ -2,6 +2,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:localroll_core/localroll_core.dart';
 
 import 'server/transfer_server.dart';
 import 'services/converter.dart';
@@ -79,6 +80,31 @@ class AppServices {
     _onlineSeen = now;
   }
 
+  /// A paired phone that can receive right now (LocalRoll open on it, new
+  /// enough), as a send target; null otherwise.
+  PeerPc? phoneTarget(String id) {
+    final t = settings.trusted[id];
+    final ep = server.phoneEndpoint(id);
+    if (t == null || ep == null) return null;
+    return PeerPc(
+      id: id,
+      name: t.name,
+      hosts: [ep.host],
+      port: ep.port,
+      token: '',
+      pairedMs: t.pairedMs,
+      lastHost: ep.host,
+      fingerprint: ep.fingerprint,
+    );
+  }
+
+  /// Paired phones, those that can receive now first.
+  List<TrustedDevice> get phones => settings.trusted.values.where((t) => !isDesktopPlatform(t.platform)).toList()
+    ..sort((a, b) {
+      final on = (server.phoneEndpoint(b.id) != null ? 1 : 0) - (server.phoneEndpoint(a.id) != null ? 1 : 0);
+      return on != 0 ? on : a.name.toLowerCase().compareTo(b.name.toLowerCase());
+    });
+
   /// Name to show for a paired device.
   String deviceName(String id) => settings.peers[id]?.name ?? settings.trusted[id]?.name ?? id;
 
@@ -122,6 +148,7 @@ class AppServices {
       }
     };
     server.onlineNow = () => s.onlineDevices;
+    s.sender.phoneTarget = s.phoneTarget;
     // Changes are compared on every notification (each link opening or
     // closing notifies on its own), so quick off/on is not lost.
     server.addListener(s._recomputePresence);

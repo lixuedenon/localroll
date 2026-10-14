@@ -124,6 +124,12 @@ class _SendPageState extends State<SendPage> {
                   child: Text(tr('send.no_paired'), style: const TextStyle(color: LrColors.muted)),
                 ),
               for (final p in paired) _pairedCard(context, p),
+              // Phones: they receive while LocalRoll is open on them.
+              if (s.phones.isNotEmpty) ...[
+                const SizedBox(height: 20),
+                _section(theme, tr('send.phones')),
+                for (final t in s.phones) _phoneCard(context, t),
+              ],
               const SizedBox(height: 20),
               _section(theme, tr('send.nearby')),
               if (nearby.isEmpty)
@@ -241,6 +247,50 @@ class _SendPageState extends State<SendPage> {
     );
   }
 
+  /// A paired phone: breathes while it can receive (LocalRoll open on it).
+  Widget _phoneCard(BuildContext context, TrustedDevice t) {
+    final s = widget.services;
+    final target = s.phoneTarget(t.id);
+    final ready = target != null;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Breathing(
+        online: ready,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(children: [
+            CircleAvatar(
+              radius: 24,
+              backgroundColor: LrColors.raised,
+              child: Icon(t.platform == 'ios' ? Icons.phone_iphone_rounded : Icons.phone_android_rounded,
+                  color: ready ? onlineGlow : LrColors.muted),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(t.name, style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 4),
+                Text(tr(ready ? 'send.phone_ready' : 'send.phone_closed_hint'),
+                    style: TextStyle(color: ready ? onlineGlow : LrColors.muted, fontSize: 13)),
+              ]),
+            ),
+            FilledButton.icon(
+              onPressed: target == null ? null : () => _sendFiles(target, toPhone: true),
+              icon: const Icon(Icons.description_outlined),
+              label: Text(tr('send.files')),
+            ),
+            const SizedBox(width: 8),
+            OutlinedButton.icon(
+              onPressed: target == null ? null : () => _sendFolder(target, toPhone: true),
+              icon: const Icon(Icons.folder_outlined),
+              label: Text(tr('send.folder')),
+            ),
+          ]),
+        ),
+      ),
+    );
+  }
+
   Widget _nearbyCard(BuildContext context, FoundPc f) => Card(
         margin: const EdgeInsets.only(bottom: 10),
         child: Padding(
@@ -279,7 +329,7 @@ class _SendPageState extends State<SendPage> {
     }
   }
 
-  Future<void> _sendFiles(PeerPc p) async {
+  Future<void> _sendFiles(PeerPc p, {bool toPhone = false}) async {
     final picked = await openFiles(confirmButtonText: tr('send.files'));
     if (picked.isEmpty) return;
     final files = [
@@ -289,10 +339,11 @@ class _SendPageState extends State<SendPage> {
         ?SendFile.plain(File(x.path), x.name, toLibrary: MediaKind.fromName(x.name) != MediaKind.other),
     ];
     if (files.isEmpty) return;
-    widget.services.sender.add(p, files, files.length == 1 ? files.first.name : tr('send.n_files', {'count': files.length}));
+    widget.services.sender
+        .add(p, files, files.length == 1 ? files.first.name : tr('send.n_files', {'count': files.length}), toPhone: toPhone);
   }
 
-  Future<void> _sendFolder(PeerPc p) async {
+  Future<void> _sendFolder(PeerPc p, {bool toPhone = false}) async {
     final dir = await getDirectoryPath(confirmButtonText: tr('send.folder'));
     if (dir == null) return;
     final files = await filesInFolder(dir);
@@ -302,7 +353,7 @@ class _SendPageState extends State<SendPage> {
       return;
     }
     final name = dir.replaceAll(RegExp(r'[\\/]+$'), '').split(RegExp(r'[\\/]')).last;
-    widget.services.sender.add(p, files, name);
+    widget.services.sender.add(p, files, name, toPhone: toPhone);
   }
 
   /// Disconnect: both PCs stop sending to each other; each still sees the
@@ -462,7 +513,8 @@ class _JobTile extends StatelessWidget {
 /// Library → another PC: choose which one, then queue the items.
 Future<void> sendToPc(BuildContext context, AppServices s, List<SendFile> files, String title) async {
   final peers = s.settings.peers.values.toList();
-  if (peers.isEmpty) {
+  final phones = [for (final t in s.phones) ?s.phoneTarget(t.id)];
+  if (peers.isEmpty && phones.isEmpty) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(tr('send.no_paired')),
       action: SnackBarAction(label: tr('send.title'), onPressed: () => AppNav.instance.selectTab(AppNav.send)),
@@ -474,6 +526,17 @@ Future<void> sendToPc(BuildContext context, AppServices s, List<SendFile> files,
     builder: (ctx) => SimpleDialog(
       title: Text(tr('send.choose_pc', {'what': title})),
       children: [
+        // Phones with LocalRoll open (they ask their owner first).
+        for (final p in phones)
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(ctx, p),
+            child: Row(children: [
+              const CircleAvatar(radius: 16, backgroundColor: LrColors.raised, child: Icon(Icons.smartphone_rounded, size: 18)),
+              const SizedBox(width: 12),
+              Expanded(child: Text(p.name)),
+              const Icon(Icons.circle, size: 10, color: onlineGlow),
+            ]),
+          ),
         for (final p in peers)
           SimpleDialogOption(
             onPressed: () => Navigator.pop(ctx, p),
@@ -488,7 +551,7 @@ Future<void> sendToPc(BuildContext context, AppServices s, List<SendFile> files,
     ),
   );
   if (p == null || !context.mounted) return;
-  s.sender.add(p, files, title);
+  s.sender.add(p, files, title, toPhone: phones.contains(p));
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
     content: Text(tr('send.queued', {'name': p.name})),
     action: SnackBarAction(label: tr('send.title'), onPressed: () => AppNav.instance.selectTab(AppNav.send)),

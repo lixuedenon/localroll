@@ -176,14 +176,14 @@
   "home.issue_ffmpeg": "Thiếu công cụ video: không chuyển đổi được video.",
   "home.issue_disk": "Ổ thư viện còn trống dưới 5 GB.",
   "nav.send": "Gửi",
-  "send.title": "Gửi đến máy tính",
+  "send.title": "Gửi",
   "send.search": "Tìm",
   "send.searching": "Đang tìm…",
   "send.hint": "Gửi tệp, thư mục hoặc ảnh đến máy tính khác chạy LocalRoll trong cùng mạng. Nếu bị gián đoạn sẽ tiếp tục từ chỗ dừng.",
   "send.paired": "Máy tính đã ghép nối",
   "send.no_paired": "Chưa ghép nối máy tính nào. Ghép nối từ danh sách bên dưới.",
-  "send.nearby": "Máy tính ở gần",
-  "send.none_nearby": "Không tìm thấy máy tính khác. Mở LocalRoll trên máy kia rồi nhấn Tìm.",
+  "send.nearby": "Máy tính gần đây (chưa ghép nối)",
+  "send.none_nearby": "Không thấy máy tính mới. Máy đã ghép nối hiện ở trên. Để thêm, mở LocalRoll trên máy đó rồi bấm Tìm.",
   "send.transfers": "Truyền tệp",
   "send.clear": "Xóa các lượt truyền đã xong",
   "send.online": "Trực tuyến",
@@ -364,5 +364,9 @@
   "send.resend": "Gửi lại",
   "done.already_had": "{count} mục đã có sẵn (không lưu trùng)",
   "done.sent_nothing_new": "“{name}” đã có tất cả các tệp này",
-  "transfer.already_had": "Đã có"
+  "transfer.already_had": "Đã có",
+  "send.phones": "Điện thoại",
+  "send.phone_ready": "Có thể nhận ngay — họ sẽ được hỏi trước",
+  "send.phone_closed_hint": "Mở LocalRoll trên điện thoại để gửi (iPhone chỉ nhận khi đang mở ứng dụng)",
+  "send.err_phone_closed": "Điện thoại hiện không nhận. Mở LocalRoll trên đó rồi gửi lại."
 }

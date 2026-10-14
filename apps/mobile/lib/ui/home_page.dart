@@ -77,14 +77,21 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     _liveEvents = _live.events.listen((e) {
       if (mounted) _note(e.id, e.name, pc: e.pc, online: e.online);
     });
-    _live.start();
     // Every device is equal: this phone can receive while LocalRoll is open.
+    // The receiver starts first, so the PCs learn where to send right away.
     widget.discovery.selfId = widget.settings.deviceId;
     _server.asks.addListener(_onAsks);
     _receivedSub = _server.finished.listen((r) {
       if (mounted) unawaited(showReceived(context, r));
     });
-    unawaited(_server.start());
+    _live.receiveInfo = () => {
+          if (_server.running) 'rport': '${_server.port}',
+          if (_server.fingerprint != null) 'rfp': _server.fingerprint!,
+        };
+    unawaited(() async {
+      await _server.start();
+      if (mounted) _live.start();
+    }());
     _lastDesktop = widget.settings.current?.id;
     _lastLost = _lostCount();
     // Ask the PC now and then what was deleted there (not only when it
@@ -299,8 +306,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     final back = _saidBye;
     _saidBye = false;
     if (back) {
-      _live.start();
-      unawaited(_server.start());
+      unawaited(() async {
+        await _server.start();
+        if (mounted) _live.start();
+      }());
     }
     if (!(_permission?.hasAccess ?? false)) {
       _reload();

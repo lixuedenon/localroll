@@ -619,12 +619,16 @@ Future<List<SendFile>> filesInFolder(String dir) async {
 enum SendJobState { waiting, connecting, sending, done, failed, cancelled }
 
 class SendJob {
-  SendJob(this.peer, this.files, this.title)
+  SendJob(this.peer, this.files, this.title, {this.toPhone = false})
       : id = randomId(10),
         totalBytes = files.fold(0, (a, f) => a + f.size);
 
   final String id;
   final PeerPc peer;
+
+  /// To a phone (it asks its owner first; address and certificate come
+  /// from its live link — see [PhoneEndpoint]).
+  final bool toPhone;
   final List<SendFile> files;
 
   /// What was sent ("3 files", "Trip", "12 photos").
@@ -674,8 +678,11 @@ class PeerSender extends ChangeNotifier {
 
   bool get busy => jobs.any((j) => j.active || j.state == SendJobState.waiting);
 
-  SendJob add(PeerPc peer, List<SendFile> files, String title) {
-    final j = SendJob(peer, files, title);
+  /// Where a phone receives now, as a send target (set by AppServices).
+  PeerPc? Function(String id)? phoneTarget;
+
+  SendJob add(PeerPc peer, List<SendFile> files, String title, {bool toPhone = false}) {
+    final j = SendJob(peer, files, title, toPhone: toPhone);
     jobs.insert(0, j);
     while (jobs.length > 50 && jobs.last.over) {
       jobs.removeLast();
@@ -716,9 +723,9 @@ class PeerSender extends ChangeNotifier {
   /// Send a failed or cancelled job again (what already arrived is skipped).
   void resend(SendJob j) {
     if (!j.over) return;
-    final peer = settings.peers[j.peer.id] ?? j.peer;
+    final peer = (j.toPhone ? phoneTarget?.call(j.peer.id) : settings.peers[j.peer.id]) ?? j.peer;
     jobs.remove(j);
-    add(peer, j.files, j.title);
+    add(peer, j.files, j.title, toPhone: j.toPhone);
   }
 
   void clearFinished() {
@@ -783,7 +790,15 @@ class PeerSender extends ChangeNotifier {
     _tick(force: true);
     LrClient? c;
     try {
-      c = await _connect(j.peer);
+      if (j.toPhone) {
+        // The phone's address and certificate as it told us just now.
+        final p = phoneTarget?.call(j.peer.id) ?? j.peer;
+        final host = p.lastHost;
+        if (host == null || p.fingerprint == null) throw const PeerError('phone_closed');
+        c = LrClient(host: host, port: p.port, secure: true, pin: p.fingerprint, deviceId: settings.deviceId);
+      } else {
+        c = await _connect(j.peer);
+      }
       if (c == null) throw const PeerError('peer_offline');
       j.state = SendJobState.sending;
       _tick(force: true);
@@ -792,7 +807,11 @@ class PeerSender extends ChangeNotifier {
         if (j._cancel) break;
         final batch = j.files.sublist(start, min(start + perSession, j.files.length));
         final offers = [for (var i = 0; i < batch.length; i++) batch[i].offer('f${start + i}')];
-        final session = await _retry(() => c!.createSession(SessionRequest(files: offers)));
+        // A phone asks its owner first (and wants to know who is sending).
+        final request = j.toPhone
+            ? SessionRequest(files: offers, from: settings.deviceInfo, batch: j.files.length)
+            : SessionRequest(files: offers);
+        final session = await _retry(() => c!.createSession(request));
         for (var i = 0; i < batch.length; i++) {
           if (j._cancel) break;
           final f = batch[i];

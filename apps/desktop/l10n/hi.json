@@ -176,14 +176,14 @@
   "home.issue_ffmpeg": "वीडियो टूल नहीं हैं: वीडियो बदले नहीं जा सकते।",
   "home.issue_disk": "लाइब्रेरी ड्राइव पर 5 GB से कम खाली।",
   "nav.send": "भेजें",
-  "send.title": "पीसी पर भेजें",
+  "send.title": "भेजें",
   "send.search": "खोजें",
   "send.searching": "खोज रहे हैं…",
   "send.hint": "उसी नेटवर्क पर LocalRoll वाले दूसरे पीसी पर फ़ाइलें, फ़ोल्डर या फ़ोटो भेजें। रुकी हुई ट्रांसफ़र वहीं से आगे चलती है।",
   "send.paired": "जोड़े गए पीसी",
   "send.no_paired": "अभी कोई पीसी नहीं जुड़ा। नीचे की सूची से जोड़ें।",
-  "send.nearby": "आसपास के पीसी",
-  "send.none_nearby": "कोई दूसरा पीसी नहीं मिला। दूसरे पीसी पर LocalRoll खोलें, फिर खोजें दबाएँ।",
+  "send.nearby": "पास के पीसी (जोड़े नहीं गए)",
+  "send.none_nearby": "कोई नया पीसी नहीं मिला। जोड़े गए पीसी ऊपर हैं। जोड़ने के लिए उस पर LocalRoll खोलें, फिर \"खोजें\" दबाएँ।",
   "send.transfers": "ट्रांसफ़र",
   "send.clear": "पूरे हुए ट्रांसफ़र साफ़ करें",
   "send.online": "ऑनलाइन",
@@ -364,5 +364,9 @@
   "send.resend": "फिर भेजें",
   "done.already_had": "{count} पहले से यहाँ थे (दोबारा नहीं सहेजे)",
   "done.sent_nothing_new": "“{name}” के पास ये सब पहले से हैं",
-  "transfer.already_had": "पहले से है"
+  "transfer.already_had": "पहले से है",
+  "send.phones": "फ़ोन",
+  "send.phone_ready": "अभी प्राप्त कर सकता है — उनसे स्वीकार करने को पूछा जाएगा",
+  "send.phone_closed_hint": "भेजने के लिए फ़ोन पर LocalRoll खोलें (iPhone ऐप खुला होने पर ही प्राप्त करता है)",
+  "send.err_phone_closed": "फ़ोन अभी प्राप्त नहीं कर रहा। उस पर LocalRoll खोलें और फिर भेजें।"
 }

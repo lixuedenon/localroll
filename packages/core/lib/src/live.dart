@@ -87,6 +87,10 @@ class LiveLink {
   /// Sent with each connection; new each time the app opens or comes back.
   String session = '';
 
+  /// More to tell the PC when connecting (a phone: where it receives —
+  /// `rport` and `rfp`, its port and certificate fingerprint).
+  Map<String, String> Function()? extraQuery;
+
   bool get connected => _ws != null;
 
   void start() {
@@ -135,7 +139,7 @@ class LiveLink {
         host: t.host,
         port: t.port,
         path: LrProtocol.pathLive,
-        queryParameters: {'session': session},
+        queryParameters: {'session': session, ...?extraQuery?.call()},
       );
       final client = t.secure ? lrHttpClient(pin: t.pin) : (HttpClient()..connectionTimeout = const Duration(seconds: 4));
       final ws = await WebSocket.connect(

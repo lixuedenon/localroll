@@ -176,14 +176,14 @@
   "home.issue_ffmpeg": "Videowerkzeuge fehlen: Videos können nicht umgewandelt werden.",
   "home.issue_disk": "Weniger als 5 GB frei auf dem Mediathek-Laufwerk.",
   "nav.send": "Senden",
-  "send.title": "An einen PC senden",
+  "send.title": "Senden",
   "send.search": "Suchen",
   "send.searching": "Suche…",
   "send.hint": "Dateien, Ordner oder Fotos an einen anderen PC mit LocalRoll im selben Netzwerk senden. Unterbrochene Übertragungen laufen dort weiter, wo sie aufgehört haben.",
   "send.paired": "Gekoppelte PCs",
   "send.no_paired": "Noch kein PC gekoppelt. Koppeln Sie einen aus der Liste unten.",
-  "send.nearby": "PCs in der Nähe",
-  "send.none_nearby": "Kein anderer PC gefunden. Öffnen Sie LocalRoll auf dem anderen PC und klicken Sie auf Suchen.",
+  "send.nearby": "PCs in der Nähe (nicht gekoppelt)",
+  "send.none_nearby": "Kein neuer PC gefunden. Gekoppelte PCs stehen oben. Zum Hinzufügen dort LocalRoll öffnen und „Suchen“ drücken.",
   "send.transfers": "Übertragungen",
   "send.clear": "Abgeschlossene Übertragungen entfernen",
   "send.online": "Online",
@@ -364,5 +364,9 @@
   "send.resend": "Erneut senden",
   "done.already_had": "{count} waren schon da (nicht doppelt gespeichert)",
   "done.sent_nothing_new": "„{name}“ hatte das alles schon",
-  "transfer.already_had": "Schon da"
+  "transfer.already_had": "Schon da",
+  "send.phones": "Telefone",
+  "send.phone_ready": "Kann jetzt empfangen – wird um Zustimmung gefragt",
+  "send.phone_closed_hint": "LocalRoll auf dem Telefon öffnen, um zu senden (ein iPhone empfängt nur bei geöffneter App)",
+  "send.err_phone_closed": "Das Telefon empfängt gerade nicht. LocalRoll öffnen und erneut senden."
 }

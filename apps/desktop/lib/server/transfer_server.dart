@@ -46,6 +46,17 @@ class MembershipAsk {
   final Completer<bool> answer = Completer<bool>();
 }
 
+/// Where a linked phone receives (it listens only while LocalRoll is open).
+class PhoneEndpoint {
+  const PhoneEndpoint(this.host, this.port, this.fingerprint);
+
+  final String host;
+  final int port;
+
+  /// Its certificate: the only one accepted when sending there.
+  final String fingerprint;
+}
+
 class _LiveConn {
   _LiveConn(this.ws, this.session);
 
@@ -204,6 +215,12 @@ class TransferServer extends ChangeNotifier {
 
   bool hasLiveLink(String deviceId) => _live[deviceId]?.isNotEmpty ?? false;
 
+  /// Phones that told us (over their live link) where they receive.
+  final Map<String, PhoneEndpoint> _phoneAt = {};
+
+  /// Where phone [id] receives now, or null (app closed / older version).
+  PhoneEndpoint? phoneEndpoint(String id) => hasLiveLink(id) ? _phoneAt[id] : null;
+
   OnlineDevice? _describe(String id) {
     final t = settings.trusted[id];
     return t == null ? null : OnlineDevice(id: id, name: t.name, platform: t.platform);
@@ -226,6 +243,10 @@ class TransferServer extends ChangeNotifier {
 
   Future<void> _openLive(HttpRequest req, TrustedDevice device, {required bool wasOnline}) async {
     final session = req.uri.queryParameters['session'] ?? '';
+    // A phone says where it receives (PC → phone sending).
+    final rport = int.tryParse(req.uri.queryParameters['rport'] ?? '');
+    final rfp = req.uri.queryParameters['rfp'];
+    final host = req.connectionInfo?.remoteAddress.address;
     final WebSocket ws;
     try {
       ws = await WebSocketTransformer.upgrade(req);
@@ -245,6 +266,9 @@ class TransferServer extends ChangeNotifier {
     }
     final conn = _LiveConn(ws, session);
     list.add(conn);
+    if (rport != null && rfp != null && rfp.isNotEmpty && host != null && !isDesktopPlatform(device.platform)) {
+      _phoneAt[device.id] = PhoneEndpoint(host, rport, rfp);
+    }
     _presenceSession[device.id] = session;
     lastSeen[device.id] = DateTime.now();
     final others = onlineNow?.call() ?? {for (final id in lastSeen.keys) if (isOnline(id)) id};
@@ -271,6 +295,7 @@ class TransferServer extends ChangeNotifier {
     if (list == null || !list.remove(conn)) return; // replaced by a newer link
     if (list.isEmpty) _live.remove(id);
     if (hasLiveLink(id)) return;
+    _phoneAt.remove(id);
     // Gone now (not after the usual quiet time).
     lastSeen.remove(id);
     notifyListeners();
