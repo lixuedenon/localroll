@@ -45,6 +45,8 @@ class Notices {
     s.hub.removeListener(_onHub);
     s.sender.removeListener(_onSender);
     _quiet?.cancel();
+    _doneTimer?.cancel();
+    _doneNote?.remove();
   }
 
   BuildContext? get _ctx => AppNav.instance.navigatorKey.currentContext;
@@ -197,7 +199,13 @@ class Notices {
       _quiet?.cancel();
       return;
     }
-    if (_burstStart == null) return;
+    // Offers that were all "already here" start a burst too (nothing was
+    // received, but the sender should not look like it went nowhere).
+    if (_burstStart == null) {
+      final recent = s.hub.transfers.where((t) => DateTime.now().difference(t.updated) < const Duration(seconds: 10));
+      if (recent.isEmpty) return;
+      _burstStart = recent.map((t) => t.updated).reduce((a, b) => a.isBefore(b) ? a : b).subtract(const Duration(seconds: 1));
+    }
     // Phones send file by file: wait for a quiet moment before saying "done".
     _quiet?.cancel();
     _quiet = Timer(const Duration(seconds: 6), () {
@@ -210,17 +218,27 @@ class Notices {
     });
   }
 
+  /// Every sender in [batch] is in the family group (backups): no dialog to
+  /// click away, a note that goes by itself.
+  bool _allFamily(Iterable<String> names) => names.every((n) =>
+      s.settings.trusted.values.any((t) => t.name == n && t.familyMember));
+
+  OverlayEntry? _doneNote;
+  Timer? _doneTimer;
+
   Future<void> _received(List<TransferProgress> batch) async {
     final byDevice = <String, List<TransferProgress>>{};
     for (final t in batch) {
       (byDevice[t.deviceName] ??= []).add(t);
     }
-    final lines = <Widget>[];
+    final lines = <String>[];
     var failed = 0;
     var media = 0;
+    var had = 0;
     for (final e in byDevice.entries) {
       final ok = e.value.where((t) => t.state == TransferState.saved).toList();
       failed += e.value.where((t) => t.state == TransferState.failed).length;
+      had += e.value.where((t) => t.state == TransferState.alreadyHad).length;
       final photos = ok.where((t) => MediaKind.fromName(t.fileName) == MediaKind.image).length;
       final videos = ok.where((t) => MediaKind.fromName(t.fileName) == MediaKind.video).length;
       final other = ok.length - photos - videos;
@@ -232,11 +250,9 @@ class Notices {
         if (other > 0) tr('done.files', {'count': other}),
       ];
       if (parts.isEmpty) continue;
-      lines.add(Padding(
-        padding: const EdgeInsets.only(bottom: 6),
-        child: Text(tr('done.from', {'name': e.key, 'what': parts.join(tr('done.sep')), 'size': formatBytes(size)})),
-      ));
+      lines.add(tr('done.from', {'name': e.key, 'what': parts.join(tr('done.sep')), 'size': formatBytes(size)}));
     }
+    if (had > 0) lines.add(tr('done.already_had', {'count': had}));
     if (lines.isEmpty && failed == 0) return;
     // A document or other file: offer to show it in its folder.
     final file = batch.lastWhere(
@@ -246,6 +262,72 @@ class Notices {
     final reveal = file.state == TransferState.saved && file.savedPath != null && MediaKind.fromName(file.fileName) == MediaKind.other
         ? file.savedPath
         : null;
+    final title = failed == 0 ? tr('done.received_title') : tr('done.received_partly');
+
+    // Family group (backups): a note in the corner that goes by itself.
+    if (failed == 0 && _allFamily(byDevice.keys)) {
+      final overlay = AppNav.instance.navigatorKey.currentState?.overlay;
+      if (overlay == null) return;
+      _doneTimer?.cancel();
+      _doneNote?.remove();
+      void close() {
+        _doneTimer?.cancel();
+        _doneNote?.remove();
+        _doneNote = null;
+      }
+
+      _doneNote = OverlayEntry(
+        builder: (c) => Positioned(
+          right: 20,
+          bottom: 24,
+          width: 400,
+          child: Material(
+            color: LrColors.raised,
+            elevation: 8,
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(16, 12, 6, 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: LrColors.verified.withValues(alpha: 0.7)),
+              ),
+              child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Row(children: [
+                  const Icon(Icons.check_circle_rounded, color: LrColors.verified, size: 22),
+                  const SizedBox(width: 10),
+                  Expanded(child: Text(title, style: const TextStyle(fontWeight: FontWeight.w700))),
+                  IconButton(visualDensity: VisualDensity.compact, onPressed: close, icon: const Icon(Icons.close_rounded, size: 18)),
+                ]),
+                for (final l in lines)
+                  Padding(padding: const EdgeInsets.only(left: 32, bottom: 4), child: Text(l, style: const TextStyle(fontSize: 13))),
+                Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  if (reveal != null)
+                    TextButton(
+                      onPressed: () {
+                        close();
+                        revealInExplorer(reveal);
+                      },
+                      child: Text(tr('common.show_in_folder')),
+                    ),
+                  if (media > 0)
+                    TextButton(
+                      onPressed: () {
+                        close();
+                        AppNav.instance.selectTab(AppNav.library);
+                      },
+                      child: Text(tr('done.view')),
+                    ),
+                ]),
+              ]),
+            ),
+          ),
+        ),
+      );
+      overlay.insert(_doneNote!);
+      _doneTimer = Timer(const Duration(seconds: 10), close);
+      return;
+    }
+
     final ctx = _ctx;
     if (ctx == null || !ctx.mounted) return;
     await showDialog<void>(
@@ -253,9 +335,9 @@ class Notices {
       builder: (c) => AlertDialog(
         icon: Icon(failed == 0 ? Icons.check_circle_rounded : Icons.error_outline_rounded,
             color: failed == 0 ? LrColors.verified : LrColors.danger, size: 48),
-        title: Text(failed == 0 ? tr('done.received_title') : tr('done.received_partly')),
+        title: Text(title),
         content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          ...lines,
+          for (final l in lines) Padding(padding: const EdgeInsets.only(bottom: 6), child: Text(l)),
           if (failed > 0) Text(tr('done.failed', {'count': failed}), style: const TextStyle(color: LrColors.danger)),
         ]),
         actions: [
@@ -300,7 +382,11 @@ class Notices {
       builder: (c) => AlertDialog(
         icon: Icon(ok ? Icons.check_circle_rounded : Icons.error_outline_rounded,
             color: ok ? LrColors.verified : LrColors.danger, size: 48),
-        title: Text(ok ? tr('done.sent_title', {'name': j.peer.name}) : tr('done.sent_failed', {'name': j.peer.name})),
+        title: Text(!ok
+            ? tr('done.sent_failed', {'name': j.peer.name})
+            : (j.sentFiles == 0 && j.skippedFiles > 0
+                ? tr('done.sent_nothing_new', {'name': j.peer.name})
+                : tr('done.sent_title', {'name': j.peer.name}))),
         content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(j.title, style: const TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 6),

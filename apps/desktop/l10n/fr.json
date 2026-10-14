@@ -361,5 +361,8 @@
   "recover.recreated": "Bibliothèque recréée. {count} éléments notés comme absents de ce PC ; les téléphones proposeront de les renvoyer.",
   "recover.failed": "Impossible de créer le dossier (pas de droits ? disque plein ?).",
   "home.issue_gone": "Le dossier de la bibliothèque a disparu (supprimé ou déplacé) — ouvre la Bibliothèque pour réparer.",
-  "send.resend": "Renvoyer"
+  "send.resend": "Renvoyer",
+  "done.already_had": "{count} étaient déjà là (pas enregistrés deux fois)",
+  "done.sent_nothing_new": "« {name} » avait déjà tout",
+  "transfer.already_had": "Déjà là"
 }

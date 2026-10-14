@@ -361,5 +361,8 @@
   "recover.recreated": "Library made anew. {count} items recorded as no longer on this PC; phones will offer to send them again.",
   "recover.failed": "Could not create the folder (no permission? drive full?).",
   "home.issue_gone": "The library folder is gone (deleted or moved) — open the Library to fix it.",
-  "send.resend": "Send again"
+  "send.resend": "Send again",
+  "done.already_had": "{count} were already here (not saved twice)",
+  "done.sent_nothing_new": "“{name}” already had all of these",
+  "transfer.already_had": "Already here"
 }

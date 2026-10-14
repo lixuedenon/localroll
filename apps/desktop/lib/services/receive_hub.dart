@@ -1,7 +1,15 @@
 // apps/desktop/lib/services/receive_hub.dart
 import 'package:flutter/foundation.dart';
 
-enum TransferState { receiving, verifying, saved, failed }
+enum TransferState {
+  receiving,
+  verifying,
+  saved,
+  failed,
+
+  /// Offered again but already here: not saved twice.
+  alreadyHad,
+}
 
 class TransferProgress {
   TransferProgress({
@@ -53,6 +61,19 @@ class ReceiveHub extends ChangeNotifier {
     return t;
   }
 
+  /// Offered, but this PC already has it (nothing is transferred).
+  void alreadyHad(String key, String deviceName, String fileName, int total) {
+    final t = _byKey.putIfAbsent(
+      key,
+      () => TransferProgress(key: key, deviceName: deviceName, fileName: fileName, total: total),
+    );
+    t
+      ..state = TransferState.alreadyHad
+      ..received = t.total
+      ..updated = DateTime.now();
+    _notify(force: true);
+  }
+
   void progress(TransferProgress t, int received) {
     t.received = received;
     t.updated = DateTime.now();
@@ -85,7 +106,8 @@ class ReceiveHub extends ChangeNotifier {
   }
 
   void clearFinished() {
-    _byKey.removeWhere((_, t) => t.state == TransferState.saved || t.state == TransferState.failed);
+    _byKey.removeWhere((_, t) =>
+        t.state == TransferState.saved || t.state == TransferState.failed || t.state == TransferState.alreadyHad);
     _notify(force: true);
   }
 

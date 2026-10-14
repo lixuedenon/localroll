@@ -361,5 +361,8 @@
   "recover.recreated": "Kütüphane yeniden oluşturuldu. {count} öğe bu PC'de yok olarak kaydedildi; telefonlar yeniden göndermeyi önerecek.",
   "recover.failed": "Klasör oluşturulamadı (izin yok mu? disk dolu mu?).",
   "home.issue_gone": "Kütüphane klasörü yok (silindi veya taşındı) — düzeltmek için Kütüphane'yi aç.",
-  "send.resend": "Tekrar gönder"
+  "send.resend": "Tekrar gönder",
+  "done.already_had": "{count} tanesi zaten buradaydı (iki kez kaydedilmedi)",
+  "done.sent_nothing_new": "“{name}” bunların hepsine zaten sahip",
+  "transfer.already_had": "Zaten var"
 }

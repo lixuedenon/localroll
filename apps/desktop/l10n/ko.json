@@ -361,5 +361,8 @@
   "recover.recreated": "라이브러리를 새로 만들었습니다. {count}개 항목을 이 PC에 없는 것으로 기록했으며, 휴대폰이 다시 보내기를 제안합니다.",
   "recover.failed": "폴더를 만들 수 없습니다(권한이 없나요? 디스크가 가득 찼나요?).",
   "home.issue_gone": "라이브러리 폴더가 없어졌습니다(삭제 또는 이동). \"라이브러리\"에서 해결하세요.",
-  "send.resend": "다시 보내기"
+  "send.resend": "다시 보내기",
+  "done.already_had": "{count}개는 이미 있습니다(중복 저장 안 함)",
+  "done.sent_nothing_new": "“{name}”에 이미 모두 있습니다",
+  "transfer.already_had": "이미 있음"
 }

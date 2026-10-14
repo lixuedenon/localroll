@@ -361,5 +361,8 @@
   "recover.recreated": "Đã tạo lại thư viện. {count} mục được ghi là không còn trên máy này; điện thoại sẽ đề nghị gửi lại.",
   "recover.failed": "Không tạo được thư mục (không có quyền? ổ đầy?).",
   "home.issue_gone": "Thư mục thư viện đã mất (bị xóa hoặc chuyển) — mở Thư viện để khắc phục.",
-  "send.resend": "Gửi lại"
+  "send.resend": "Gửi lại",
+  "done.already_had": "{count} mục đã có sẵn (không lưu trùng)",
+  "done.sent_nothing_new": "“{name}” đã có tất cả các tệp này",
+  "transfer.already_had": "Đã có"
 }

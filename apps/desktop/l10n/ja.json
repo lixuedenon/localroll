@@ -361,5 +361,8 @@
   "recover.recreated": "ライブラリを作り直しました。{count} 件をこのPCにないものとして記録しました。スマホが再送を提案します。",
   "recover.failed": "フォルダーを作成できません（権限がない？ディスクがいっぱい？）。",
   "home.issue_gone": "ライブラリのフォルダーがありません（削除または移動）。「ライブラリ」で対処してください。",
-  "send.resend": "もう一度送る"
+  "send.resend": "もう一度送る",
+  "done.already_had": "{count} 件はすでにあります（二重には保存しません）",
+  "done.sent_nothing_new": "「{name}」はすでにすべて持っています",
+  "transfer.already_had": "既にあり"
 }

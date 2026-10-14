@@ -361,5 +361,8 @@
   "recover.recreated": "已重新建立媒體庫。{count} 項已記為不在這台電腦上，手機會提示重新備份。",
   "recover.failed": "無法建立資料夾（沒有權限？磁碟滿了？）。",
   "home.issue_gone": "媒體庫資料夾不見了（被刪除或移走）——到「媒體庫」裡處理。",
-  "send.resend": "重新傳送"
+  "send.resend": "重新傳送",
+  "done.already_had": "{count} 個這裡已經有了（沒有重複儲存）",
+  "done.sent_nothing_new": "「{name}」已經有這些檔案了，沒有重複傳送",
+  "transfer.already_had": "已經有了"
 }

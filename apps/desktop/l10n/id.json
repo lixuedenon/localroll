@@ -361,5 +361,8 @@
   "recover.recreated": "Pustaka dibuat ulang. {count} item dicatat tidak ada di PC ini; ponsel akan menawarkan kirim ulang.",
   "recover.failed": "Tidak bisa membuat folder (tidak ada izin? disk penuh?).",
   "home.issue_gone": "Folder pustaka hilang (dihapus atau dipindah) — buka Pustaka untuk memperbaiki.",
-  "send.resend": "Kirim lagi"
+  "send.resend": "Kirim lagi",
+  "done.already_had": "{count} sudah ada (tidak disimpan dua kali)",
+  "done.sent_nothing_new": "“{name}” sudah punya semuanya",
+  "transfer.already_had": "Sudah ada"
 }

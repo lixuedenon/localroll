@@ -361,5 +361,8 @@
   "recover.recreated": "Mediathek neu angelegt. {count} Elemente als nicht mehr auf diesem PC vermerkt; Telefone bieten erneutes Senden an.",
   "recover.failed": "Ordner konnte nicht angelegt werden (keine Rechte? Laufwerk voll?).",
   "home.issue_gone": "Der Mediathek-Ordner ist weg (gelöscht oder verschoben) – in der Mediathek beheben.",
-  "send.resend": "Erneut senden"
+  "send.resend": "Erneut senden",
+  "done.already_had": "{count} waren schon da (nicht doppelt gespeichert)",
+  "done.sent_nothing_new": "„{name}“ hatte das alles schon",
+  "transfer.already_had": "Schon da"
 }

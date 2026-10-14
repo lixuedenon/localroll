@@ -361,5 +361,8 @@
   "recover.recreated": "Biblioteca recriada. {count} itens registrados como fora deste PC; os celulares vão sugerir reenviar.",
   "recover.failed": "Não foi possível criar a pasta (sem permissão? disco cheio?).",
   "home.issue_gone": "A pasta da biblioteca sumiu (excluída ou movida) — abra a Biblioteca para resolver.",
-  "send.resend": "Enviar de novo"
+  "send.resend": "Enviar de novo",
+  "done.already_had": "{count} já estavam aqui (não salvos duas vezes)",
+  "done.sent_nothing_new": "“{name}” já tinha tudo isso",
+  "transfer.already_had": "Já existe"
 }

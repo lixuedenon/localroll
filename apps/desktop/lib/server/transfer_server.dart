@@ -874,11 +874,13 @@ class TransferServer extends ChangeNotifier {
       if (done != null && !File(done).existsSync()) _doneFiles.remove(_hubKey(device, f));
       if (done != null && File(done).existsSync()) {
         results[f.id] = const OfferResult(status: OfferStatus.duplicate);
+        hub.alreadyHad(_hubKey(device, f), device.name, f.name, f.size ?? 0);
         continue;
       }
       final existing = f.isPlainFile ? null : library.findByAsset(device.id, f.assetId);
       if (existing != null && File(library.absPath(existing)).existsSync()) {
         results[f.id] = const OfferResult(status: OfferStatus.duplicate);
+        hub.alreadyHad(_hubKey(device, f), device.name, f.name, f.size ?? 0);
         continue;
       }
       final part = File(_partPath(device, f));

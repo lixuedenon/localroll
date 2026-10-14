@@ -285,6 +285,7 @@ class _TransferTile extends StatelessWidget {
       TransferState.verifying => (Icons.verified_outlined, tr('transfer.verifying')),
       TransferState.saved => (Icons.check_circle, tr('common.saved')),
       TransferState.failed => (Icons.error_outline, t.error ?? tr('common.failed')),
+      TransferState.alreadyHad => (Icons.done_all_rounded, tr('transfer.already_had')),
     };
     final path = t.state == TransferState.saved ? t.savedPath : null;
     return ListTile(

@@ -361,5 +361,8 @@
   "recover.recreated": "Biblioteca creada de nuevo. {count} elementos registrados como fuera de este PC; los teléfonos ofrecerán reenviarlos.",
   "recover.failed": "No se pudo crear la carpeta (¿sin permiso? ¿disco lleno?).",
   "home.issue_gone": "La carpeta de la biblioteca ha desaparecido (borrada o movida): ábrela en Biblioteca para arreglarlo.",
-  "send.resend": "Volver a enviar"
+  "send.resend": "Volver a enviar",
+  "done.already_had": "{count} ya estaban aquí (no se guardan dos veces)",
+  "done.sent_nothing_new": "«{name}» ya tenía todo esto",
+  "transfer.already_had": "Ya estaba"
 }

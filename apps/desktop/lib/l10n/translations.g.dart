@@ -367,6 +367,9 @@ const Map<String, Map<String, String>> translations = {
     'recover.failed': 'Could not create the folder (no permission? drive full?).',
     'home.issue_gone': 'The library folder is gone (deleted or moved) — open the Library to fix it.',
     'send.resend': 'Send again',
+    'done.already_had': '{count} were already here (not saved twice)',
+    'done.sent_nothing_new': '“{name}” already had all of these',
+    'transfer.already_had': 'Already here',
   },
   'zh': {
     'nav.library': '媒体库',
@@ -732,6 +735,9 @@ const Map<String, Map<String, String>> translations = {
     'recover.failed': '无法建立文件夹（没有权限？磁盘满了？）。',
     'home.issue_gone': '媒体库文件夹不见了（被删除或移走）——到“媒体库”里处理。',
     'send.resend': '重新发送',
+    'done.already_had': '{count} 个这里已经有了（没有重复保存）',
+    'done.sent_nothing_new': '「{name}」已经有这些文件了，没有重复发送',
+    'transfer.already_had': '已经有了',
   },
   'zh_Hant': {
     'nav.library': '媒體庫',
@@ -1097,6 +1103,9 @@ const Map<String, Map<String, String>> translations = {
     'recover.failed': '無法建立資料夾（沒有權限？磁碟滿了？）。',
     'home.issue_gone': '媒體庫資料夾不見了（被刪除或移走）——到「媒體庫」裡處理。',
     'send.resend': '重新傳送',
+    'done.already_had': '{count} 個這裡已經有了（沒有重複儲存）',
+    'done.sent_nothing_new': '「{name}」已經有這些檔案了，沒有重複傳送',
+    'transfer.already_had': '已經有了',
   },
   'ja': {
     'nav.library': 'ライブラリ',
@@ -1462,6 +1471,9 @@ const Map<String, Map<String, String>> translations = {
     'recover.failed': 'フォルダーを作成できません（権限がない？ディスクがいっぱい？）。',
     'home.issue_gone': 'ライブラリのフォルダーがありません（削除または移動）。「ライブラリ」で対処してください。',
     'send.resend': 'もう一度送る',
+    'done.already_had': '{count} 件はすでにあります（二重には保存しません）',
+    'done.sent_nothing_new': '「{name}」はすでにすべて持っています',
+    'transfer.already_had': '既にあり',
   },
   'ko': {
     'nav.library': '라이브러리',
@@ -1827,6 +1839,9 @@ const Map<String, Map<String, String>> translations = {
     'recover.failed': '폴더를 만들 수 없습니다(권한이 없나요? 디스크가 가득 찼나요?).',
     'home.issue_gone': '라이브러리 폴더가 없어졌습니다(삭제 또는 이동). "라이브러리"에서 해결하세요.',
     'send.resend': '다시 보내기',
+    'done.already_had': '{count}개는 이미 있습니다(중복 저장 안 함)',
+    'done.sent_nothing_new': '“{name}”에 이미 모두 있습니다',
+    'transfer.already_had': '이미 있음',
   },
   'es': {
     'nav.library': 'Biblioteca',
@@ -2192,6 +2207,9 @@ const Map<String, Map<String, String>> translations = {
     'recover.failed': 'No se pudo crear la carpeta (¿sin permiso? ¿disco lleno?).',
     'home.issue_gone': 'La carpeta de la biblioteca ha desaparecido (borrada o movida): ábrela en Biblioteca para arreglarlo.',
     'send.resend': 'Volver a enviar',
+    'done.already_had': '{count} ya estaban aquí (no se guardan dos veces)',
+    'done.sent_nothing_new': '«{name}» ya tenía todo esto',
+    'transfer.already_had': 'Ya estaba',
   },
   'fr': {
     'nav.library': 'Bibliothèque',
@@ -2557,6 +2575,9 @@ const Map<String, Map<String, String>> translations = {
     'recover.failed': 'Impossible de créer le dossier (pas de droits ? disque plein ?).',
     'home.issue_gone': 'Le dossier de la bibliothèque a disparu (supprimé ou déplacé) — ouvre la Bibliothèque pour réparer.',
     'send.resend': 'Renvoyer',
+    'done.already_had': '{count} étaient déjà là (pas enregistrés deux fois)',
+    'done.sent_nothing_new': '« {name} » avait déjà tout',
+    'transfer.already_had': 'Déjà là',
   },
   'de': {
     'nav.library': 'Mediathek',
@@ -2922,6 +2943,9 @@ const Map<String, Map<String, String>> translations = {
     'recover.failed': 'Ordner konnte nicht angelegt werden (keine Rechte? Laufwerk voll?).',
     'home.issue_gone': 'Der Mediathek-Ordner ist weg (gelöscht oder verschoben) – in der Mediathek beheben.',
     'send.resend': 'Erneut senden',
+    'done.already_had': '{count} waren schon da (nicht doppelt gespeichert)',
+    'done.sent_nothing_new': '„{name}“ hatte das alles schon',
+    'transfer.already_had': 'Schon da',
   },
   'pt': {
     'nav.library': 'Biblioteca',
@@ -3287,6 +3311,9 @@ const Map<String, Map<String, String>> translations = {
     'recover.failed': 'Não foi possível criar a pasta (sem permissão? disco cheio?).',
     'home.issue_gone': 'A pasta da biblioteca sumiu (excluída ou movida) — abra a Biblioteca para resolver.',
     'send.resend': 'Enviar de novo',
+    'done.already_had': '{count} já estavam aqui (não salvos duas vezes)',
+    'done.sent_nothing_new': '“{name}” já tinha tudo isso',
+    'transfer.already_had': 'Já existe',
   },
   'ru': {
     'nav.library': 'Медиатека',
@@ -3652,6 +3679,9 @@ const Map<String, Map<String, String>> translations = {
     'recover.failed': 'Не удалось создать папку (нет прав? диск заполнен?).',
     'home.issue_gone': 'Папка медиатеки пропала (удалена или перемещена) — исправь в разделе «Медиатека».',
     'send.resend': 'Отправить снова',
+    'done.already_had': '{count} уже были здесь (не сохранены повторно)',
+    'done.sent_nothing_new': 'У «{name}» всё это уже есть',
+    'transfer.already_had': 'Уже есть',
   },
   'it': {
     'nav.library': 'Libreria',
@@ -4017,6 +4047,9 @@ const Map<String, Map<String, String>> translations = {
     'recover.failed': 'Impossibile creare la cartella (permessi? disco pieno?).',
     'home.issue_gone': 'La cartella della libreria non c\'è più (eliminata o spostata): apri la Libreria per sistemare.',
     'send.resend': 'Invia di nuovo',
+    'done.already_had': '{count} erano già qui (non salvati due volte)',
+    'done.sent_nothing_new': '«{name}» aveva già tutto',
+    'transfer.already_had': 'Già presente',
   },
   'ar': {
     'nav.library': 'المكتبة',
@@ -4382,6 +4415,9 @@ const Map<String, Map<String, String>> translations = {
     'recover.failed': 'تعذّر إنشاء المجلد (لا صلاحية؟ القرص ممتلئ؟).',
     'home.issue_gone': 'اختفى مجلد المكتبة (حُذف أو نُقل) — افتح المكتبة لإصلاحه.',
     'send.resend': 'أعد الإرسال',
+    'done.already_had': '{count} موجودة بالفعل (لم تُحفظ مرتين)',
+    'done.sent_nothing_new': 'لدى "{name}" كل هذه بالفعل',
+    'transfer.already_had': 'موجود بالفعل',
   },
   'hi': {
     'nav.library': 'लाइब्रेरी',
@@ -4747,6 +4783,9 @@ const Map<String, Map<String, String>> translations = {
     'recover.failed': 'फ़ोल्डर नहीं बन सका (अनुमति नहीं? डिस्क भरी?)।',
     'home.issue_gone': 'लाइब्रेरी फ़ोल्डर गायब है (हटाया या खिसकाया) — ठीक करने के लिए लाइब्रेरी खोलें।',
     'send.resend': 'फिर भेजें',
+    'done.already_had': '{count} पहले से यहाँ थे (दोबारा नहीं सहेजे)',
+    'done.sent_nothing_new': '“{name}” के पास ये सब पहले से हैं',
+    'transfer.already_had': 'पहले से है',
   },
   'id': {
     'nav.library': 'Pustaka',
@@ -5112,6 +5151,9 @@ const Map<String, Map<String, String>> translations = {
     'recover.failed': 'Tidak bisa membuat folder (tidak ada izin? disk penuh?).',
     'home.issue_gone': 'Folder pustaka hilang (dihapus atau dipindah) — buka Pustaka untuk memperbaiki.',
     'send.resend': 'Kirim lagi',
+    'done.already_had': '{count} sudah ada (tidak disimpan dua kali)',
+    'done.sent_nothing_new': '“{name}” sudah punya semuanya',
+    'transfer.already_had': 'Sudah ada',
   },
   'vi': {
     'nav.library': 'Thư viện',
@@ -5477,6 +5519,9 @@ const Map<String, Map<String, String>> translations = {
     'recover.failed': 'Không tạo được thư mục (không có quyền? ổ đầy?).',
     'home.issue_gone': 'Thư mục thư viện đã mất (bị xóa hoặc chuyển) — mở Thư viện để khắc phục.',
     'send.resend': 'Gửi lại',
+    'done.already_had': '{count} mục đã có sẵn (không lưu trùng)',
+    'done.sent_nothing_new': '“{name}” đã có tất cả các tệp này',
+    'transfer.already_had': 'Đã có',
   },
   'th': {
     'nav.library': 'คลังสื่อ',
@@ -5842,6 +5887,9 @@ const Map<String, Map<String, String>> translations = {
     'recover.failed': 'สร้างโฟลเดอร์ไม่ได้ (ไม่มีสิทธิ์? ดิสก์เต็ม?)',
     'home.issue_gone': 'โฟลเดอร์คลังหายไป (ถูกลบหรือย้าย) — เปิด "คลัง" เพื่อแก้ไข',
     'send.resend': 'ส่งอีกครั้ง',
+    'done.already_had': '{count} รายการมีอยู่แล้ว (ไม่บันทึกซ้ำ)',
+    'done.sent_nothing_new': '“{name}” มีไฟล์เหล่านี้อยู่แล้ว',
+    'transfer.already_had': 'มีอยู่แล้ว',
   },
   'tr': {
     'nav.library': 'Kitaplık',
@@ -6207,5 +6255,8 @@ const Map<String, Map<String, String>> translations = {
     'recover.failed': 'Klasör oluşturulamadı (izin yok mu? disk dolu mu?).',
     'home.issue_gone': 'Kütüphane klasörü yok (silindi veya taşındı) — düzeltmek için Kütüphane\'yi aç.',
     'send.resend': 'Tekrar gönder',
+    'done.already_had': '{count} tanesi zaten buradaydı (iki kez kaydedilmedi)',
+    'done.sent_nothing_new': '“{name}” bunların hepsine zaten sahip',
+    'transfer.already_had': 'Zaten var',
   },
 };

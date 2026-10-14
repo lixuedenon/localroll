@@ -361,5 +361,8 @@
   "recover.recreated": "已重新建立媒体库。{count} 项已记为不在这台电脑上，手机会提示重新备份。",
   "recover.failed": "无法建立文件夹（没有权限？磁盘满了？）。",
   "home.issue_gone": "媒体库文件夹不见了（被删除或移走）——到“媒体库”里处理。",
-  "send.resend": "重新发送"
+  "send.resend": "重新发送",
+  "done.already_had": "{count} 个这里已经有了（没有重复保存）",
+  "done.sent_nothing_new": "「{name}」已经有这些文件了，没有重复发送",
+  "transfer.already_had": "已经有了"
 }
