@@ -46,20 +46,101 @@ class PeerDirectory extends ChangeNotifier {
     return all.values.toList()..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
   }
 
-  /// A paired PC answered our last check (every 60 s, or it just said
-  /// "I'm here").
-  bool isOnline(String id) => _reachable.containsKey(id);
+  /// A paired PC is there: our live link to it is open (closed the moment
+  /// it quits). Older PCs without live links: it answered our last check.
+  bool isOnline(String id) =>
+      (_links[id]?.connected ?? false) || (!_liveCapable.contains(id) && _reachable.containsKey(id));
+
+  // ------------------------------------------------------------ live links
+
+  /// Per paired PC: is this PC in its family group (what we send there goes
+  /// straight in) — from its live link; missing = not known (older PC).
+  final Map<String, bool> familyAt = {};
+
+  /// Ask PC [id] to make us a family member (its owner says yes or no
+  /// there, within 2 minutes) or leave its family group. Returns the
+  /// membership now.
+  Future<bool> requestMembership(String id, {required bool family}) async {
+    final p = settings.peers[id];
+    if (p == null) throw const PeerError('not_paired');
+    final f = where(id);
+    final host = f?.hosts.first ?? p.lastHost ?? (p.hosts.isEmpty ? null : p.hosts.first);
+    if (host == null) throw const PeerError('peer_offline');
+    LrClient? c;
+    try {
+      c = await openPeer(settings, p, host, f?.port ?? p.port);
+      if (c == null) throw const PeerError('peer_offline');
+      final now = await c.membership(family: family);
+      familyAt[id] = now;
+      notifyListeners();
+      return now;
+    } on LrHttpError catch (e) {
+      throw PeerError(e.status == 404 ? 'old_version' : e.code);
+    } on SocketException {
+      throw const PeerError('peer_offline');
+    } finally {
+      c?.close();
+    }
+  }
+
+  final Map<String, LiveLink> _links = {};
+
+  /// PCs that have accepted a live link at least once (newer versions).
+  final Set<String> _liveCapable = {};
+
+  /// This run of LocalRoll (sent with each link).
+  final String _session = DateTime.now().microsecondsSinceEpoch.toRadixString(36);
+
+  /// One link per paired PC; links to PCs no longer paired are closed.
+  void _syncLinks() {
+    if (_users == 0) return;
+    for (final id in _links.keys.toList()) {
+      if (!settings.peers.containsKey(id)) unawaited(_links.remove(id)!.stop());
+    }
+    for (final p in settings.peers.values) {
+      if (_links.containsKey(p.id)) continue;
+      final id = p.id;
+      final link = LiveLink(
+        deviceId: settings.deviceId,
+        onMessage: (m) {
+          // Are we in its family group? (Its transfers to … no: ours to it.)
+          if ((m.type == 'hello' || m.type == 'you') && m.family != null) {
+            familyAt[id] = m.family!;
+            notifyListeners();
+          }
+        },
+        onConnected: (c) {
+          if (c) _liveCapable.add(id);
+          notifyListeners();
+        },
+      )
+        ..session = _session
+        ..target = () async {
+          final pc = settings.peers[id];
+          if (pc == null) return null;
+          final host = _reachable[id]?.hosts.first ?? pc.lastHost ?? (pc.hosts.isEmpty ? null : pc.hosts.first);
+          if (host == null) return null;
+          final port = _reachable[id]?.port ?? pc.port;
+          return LiveTarget(host: host, port: port, token: pc.token, secure: pc.fingerprint != null, pin: pc.fingerprint);
+        };
+      _links[id] = link;
+      link.start();
+    }
+  }
 
   /// It said "I'm leaving".
   void markGone(String id) {
     if (_reachable.remove(id) != null) notifyListeners();
   }
 
-  /// It said "I'm here": look now instead of at the next check.
+  /// It said "I'm here": look now instead of at the next check, and link up.
   Future<void> checkNow(String id) async {
     final p = settings.peers[id];
     if (p == null) return;
+    _syncLinks();
+    _links[id]?.kick();
     await _checkOne(p).timeout(const Duration(seconds: 12), onTimeout: () {});
+    _links[id]?.kick();
     notifyListeners();
   }
 
@@ -67,7 +148,8 @@ class PeerDirectory extends ChangeNotifier {
   /// once. Best effort, short.
   Future<void> sayBye() async {
     await Future.wait([
-      for (final f in _reachable.values.toList())
+      // Older PCs only: linked ones see the link close.
+      for (final f in _reachable.values.where((f) => !_liveCapable.contains(f.id)).toList())
         () async {
           final p = settings.peers[f.id];
           if (p == null) return;
@@ -92,7 +174,8 @@ class PeerDirectory extends ChangeNotifier {
     // window's own thread, which can freeze the whole app. Paired PCs are
     // checked at their known address and others are found by [scan].
     unawaited(checkPaired());
-    // A light check-in; arrivals and normal departures are announced at once.
+    _syncLinks();
+    // Names, looks and addresses; being online is the live links' job.
     _timer = Timer.periodic(const Duration(seconds: 60), (_) => checkPaired());
   }
 
@@ -101,11 +184,16 @@ class PeerDirectory extends ChangeNotifier {
     if (_users > 0) return;
     _timer?.cancel();
     _timer = null;
+    for (final l in _links.values) {
+      unawaited(l.stop());
+    }
+    _links.clear();
   }
 
   /// Asks each paired PC (last known address first) whether it is there,
   /// and picks up its new name / look / address.
   Future<void> checkPaired() async {
+    _syncLinks();
     await Future.wait([
       for (final p in settings.peers.values.toList())
         _checkOne(p).timeout(const Duration(seconds: 12), onTimeout: () {}),
@@ -182,7 +270,13 @@ class PeerDirectory extends ChangeNotifier {
     scanning = true;
     notifyListeners();
     try {
-      final ports = <int>{LrProtocol.defaultPort, ...LrProtocol.fallbackPorts, for (final p in settings.peers.values) p.port};
+      // The usual port and its first fallback (plus ports paired PCs use):
+      // fewer knocks on every address.
+      final ports = <int>{
+        LrProtocol.defaultPort,
+        if (LrProtocol.fallbackPorts.isNotEmpty) LrProtocol.fallbackPorts.first,
+        for (final p in settings.peers.values) p.port,
+      };
       final all = await localIPv4Addresses();
       final mine = all.toSet();
       // The real network only (virtual adapters are listed last).
@@ -193,7 +287,8 @@ class PeerDirectory extends ChangeNotifier {
             if (!mine.contains('$pre.$i'))
               for (final p in ports) ('$pre.$i', p),
       ];
-      const batch = 64;
+      // Small batches: no burst a router could take for an attack.
+      const batch = 24;
       final until = DateTime.now().add(const Duration(seconds: 25));
       for (var i = 0; i < targets.length && DateTime.now().isBefore(until); i += batch) {
         await Future.wait([
@@ -543,6 +638,9 @@ class SendJob {
   int sentBytes = 0;
   String? current;
   String? error;
+
+  /// Declined with a reason (what the other side typed).
+  String? reason;
   DateTime? started;
   DateTime? finished;
   bool _cancel = false;
@@ -720,7 +818,8 @@ class PeerSender extends ChangeNotifier {
     } on LrHttpError catch (e) {
       j
         ..state = SendJobState.failed
-        ..error = e.code;
+        ..error = e.code
+        ..reason = (e.body['reason'] as String?)?.trim();
     } catch (e) {
       j
         ..state = SendJobState.failed

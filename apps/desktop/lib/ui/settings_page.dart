@@ -8,6 +8,7 @@ import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/autostart.dart';
 import '../services/network.dart';
+import 'app_nav.dart';
 import 'identity_card.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -66,14 +67,15 @@ class _SettingsPageState extends State<SettingsPage> {
             IdentityCard(services: s),
             const SizedBox(height: 28),
             _section(theme, tr('settings.receiving')),
-            ListenableBuilder(
-              listenable: s.settings,
-              builder: (context, _) => Card(
-                child: SwitchListTile(
-                  value: s.settings.autoAccept,
-                  onChanged: (v) => s.settings.update((x) => x.autoAccept = v),
-                  title: Text(tr('settings.auto_accept')),
-                  subtitle: Text(tr('settings.auto_accept_hint')),
+            // Who needs "Accept" is decided per device (family / guest).
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.verified_user_outlined),
+                title: Text(tr('settings.accept_rule')),
+                subtitle: Text(tr('settings.accept_rule_hint')),
+                trailing: TextButton(
+                  onPressed: () => AppNav.instance.selectTab(AppNav.family),
+                  child: Text(tr('family.title')),
                 ),
               ),
             ),

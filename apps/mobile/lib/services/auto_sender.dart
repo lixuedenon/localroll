@@ -21,6 +21,10 @@ enum AutoState {
 
   /// Just finished a batch.
   done,
+
+  /// New photos are waiting, but this phone is a guest on that PC (each
+  /// transfer would need someone to click "Accept" there): paused.
+  guest,
 }
 
 /// Auto-send: photos/videos taken after auto-send was switched on go to the
@@ -54,6 +58,10 @@ class AutoSender extends ChangeNotifier {
       final fresh = await _newAssets(d);
       if (fresh.isEmpty) {
         if (state != AutoState.done) _set(AutoState.idle, 0);
+        return;
+      }
+      if (d.family == false) {
+        _set(AutoState.guest, fresh.length);
         return;
       }
       DesktopClient client;

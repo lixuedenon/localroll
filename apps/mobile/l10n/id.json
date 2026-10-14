@@ -250,5 +250,19 @@
   "presence.offline": "“{name}” offline",
   "home.online_now": "Online sekarang · {count}",
   "home.kind_pc": "PC",
-  "home.kind_phone": "Ponsel"
+  "home.kind_phone": "Ponsel",
+  "auto.guest": "{count} item baru menunggu — ponsel ini tamu di {pc}",
+  "auto.guest_hint": "Kirim otomatis dijeda: setiap kiriman perlu “Terima” di sana. Di halaman PC, minta bergabung ke grup keluarganya.",
+  "connect.family_member": "Anggota keluarga — cadangan langsung diterima",
+  "connect.guest": "Tamu — setiap kiriman perlu persetujuan",
+  "connect.ask_family": "Minta bergabung ke keluarga",
+  "connect.leave_family": "Keluar dari grup keluarga",
+  "connect.ask_family_waiting": "Sudah minta ke “{name}”, menunggu jawaban di PC…",
+  "connect.now_family": "Kamu sekarang anggota keluarga di “{name}”.",
+  "connect.now_guest": "Kamu sekarang tamu di “{name}”.",
+  "connect.family_denied": "“{name}” menolak (atau tidak ada jawaban).",
+  "connect.membership_failed": "Tidak bisa menghubungi “{name}”. Apakah menyala, LocalRoll terbuka dan sudah diperbarui?",
+  "home.change_pc": "Ganti",
+  "transfer.stopped_no_answer": "Tidak ada yang menjawab di PC. Sisanya tidak dikirim; coba lagi nanti.",
+  "transfer.their_reason": "Alasannya: {reason}"
 }

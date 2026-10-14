@@ -250,5 +250,19 @@
   "presence.offline": "„{name}“ ist offline",
   "home.online_now": "Jetzt online · {count}",
   "home.kind_pc": "PC",
-  "home.kind_phone": "Telefon"
+  "home.kind_phone": "Telefon",
+  "auto.guest": "{count} neue Elemente warten – dieses Telefon ist Gast auf {pc}",
+  "auto.guest_hint": "Automatisches Senden pausiert: Jede Übertragung bräuchte dort ein „Annehmen“. Auf der PC-Seite den Beitritt zur Familiengruppe anfragen.",
+  "connect.family_member": "Familienmitglied – Backups kommen direkt an",
+  "connect.guest": "Gast – jede Übertragung braucht Zustimmung",
+  "connect.ask_family": "Beitritt zur Familie anfragen",
+  "connect.leave_family": "Familiengruppe verlassen",
+  "connect.ask_family_waiting": "„{name}“ gefragt – warte auf Antwort am PC…",
+  "connect.now_family": "Du bist jetzt Familienmitglied auf „{name}“.",
+  "connect.now_guest": "Du bist jetzt Gast auf „{name}“.",
+  "connect.family_denied": "„{name}“ hat abgelehnt (oder niemand hat geantwortet).",
+  "connect.membership_failed": "„{name}“ nicht erreichbar. Ist er an, mit LocalRoll geöffnet und aktuell?",
+  "home.change_pc": "Ändern",
+  "transfer.stopped_no_answer": "Am PC hat niemand rechtzeitig geantwortet. Nichts weiter gesendet; später erneut versuchen.",
+  "transfer.their_reason": "Begründung: {reason}"
 }

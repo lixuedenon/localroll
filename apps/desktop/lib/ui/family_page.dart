@@ -2,11 +2,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:localroll_core/localroll_core.dart';
 
 import '../app_services.dart';
 import '../l10n/l10n.dart';
-import 'breathing_dot.dart';
+import 'breathing.dart';
 import 'format.dart';
+import 'theme.dart';
 
 /// Family: paired phones grouped by person — rename people, move a phone to
 /// another person, unpair, one folder per person.
@@ -54,6 +56,8 @@ class _FamilyPageState extends State<FamilyPage> {
             const SizedBox(height: 16),
             if (s.settings.family.members.isEmpty) Text(tr('settings.no_phones')),
             for (final m in s.settings.family.members) _memberCard(theme, m),
+            ..._otherSection(theme, family: true),
+            ..._otherSection(theme, family: false),
             if (s.settings.family.members.isNotEmpty) ...[
               const SizedBox(height: 8),
               SwitchListTile(
@@ -101,14 +105,16 @@ class _FamilyPageState extends State<FamilyPage> {
               ),
             ]),
             for (final d in devices)
-              ListTile(
+              Padding(
+                padding: const EdgeInsetsDirectional.only(start: 36, top: 4, bottom: 4),
+                // Glows while LocalRoll is open on that phone.
+                child: Breathing(
+                  online: widget.services.isOnline(d.id),
+                  radius: 10,
+                  color: LrColors.raised,
+                  child: ListTile(
                 dense: true,
-                contentPadding: const EdgeInsetsDirectional.only(start: 44),
-                leading: Row(mainAxisSize: MainAxisSize.min, children: [
-                  // Breathing dot: LocalRoll is open on that phone right now.
-                  BreathingDot(online: widget.services.isOnline(d.id), size: 12),
-                  Icon(st.trusted[d.id]?.platform == 'ios' ? Icons.phone_iphone : Icons.phone_android),
-                ]),
+                leading: Icon(st.trusted[d.id]?.platform == 'ios' ? Icons.phone_iphone : Icons.phone_android),
                 title: Text('${family.labelOf(d.id)} · ${d.deviceName}'),
                 subtitle: Text([
                   widget.services.isOnline(d.id) ? tr('family.online') : tr('family.offline'),
@@ -119,6 +125,8 @@ class _FamilyPageState extends State<FamilyPage> {
                     if (v == 'move') {
                       final name = await _askMember(member, family.members);
                       if (name != null) await st.update((x) => x.trusted[d.id]?.memberName = name);
+                    } else if (v == 'guest') {
+                      await widget.services.server.setFamily(d.id, false);
                     } else if (v == 'unpair') {
                       await st.update((x) => x.trusted.remove(d.id));
                       _toast(tr('settings.unpaired', {'name': d.deviceName}));
@@ -126,14 +134,70 @@ class _FamilyPageState extends State<FamilyPage> {
                   },
                   itemBuilder: (_) => [
                     PopupMenuItem(value: 'move', child: Text(tr('family.move'))),
+                    PopupMenuItem(value: 'guest', child: Text(tr('family.make_guest'))),
                     PopupMenuItem(value: 'unpair', child: Text(tr('settings.unpair'))),
                   ],
+                ),
+              ),
                 ),
               ),
           ],
         ),
       ),
     );
+  }
+
+  /// "Family PCs" (family: true) or "Guests" (phones and PCs, family: false).
+  List<Widget> _otherSection(ThemeData theme, {required bool family}) {
+    final s = widget.services;
+    final list = [
+      for (final t in s.settings.trusted.values)
+        if (t.familyMember == family && (!family || isDesktopPlatform(t.platform))) t,
+    ]..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    if (list.isEmpty) return const [];
+    return [
+      const SizedBox(height: 18),
+      Text(tr(family ? 'family.pcs' : 'family.guests'), style: theme.textTheme.titleMedium),
+      const SizedBox(height: 2),
+      Text(tr(family ? 'family.pcs_hint' : 'family.guests_hint'), style: theme.textTheme.bodySmall?.copyWith(color: LrColors.muted)),
+      const SizedBox(height: 8),
+      for (final t in list)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Breathing(
+            online: s.isOnline(t.id),
+            radius: 12,
+            child: ListTile(
+              leading: Icon(isDesktopPlatform(t.platform)
+                  ? Icons.computer_rounded
+                  : (t.platform == 'ios' ? Icons.phone_iphone : Icons.phone_android)),
+              title: Text(t.name),
+              subtitle: Text([
+                s.isOnline(t.id) ? tr('family.online') : tr('family.offline'),
+                tr('settings.paired_on', {'date': formatDate(DateTime.fromMillisecondsSinceEpoch(t.pairedMs))}),
+              ].join(' · ')),
+              trailing: PopupMenuButton<String>(
+                onSelected: (v) async {
+                  if (v == 'family') await s.server.setFamily(t.id, true);
+                  if (v == 'guest') await s.server.setFamily(t.id, false);
+                  if (v == 'unpair') {
+                    await s.settings.update((x) => x.trusted.remove(t.id));
+                    _toast(tr('settings.unpaired', {'name': t.name}));
+                  }
+                },
+                itemBuilder: (_) => [
+                  if (family)
+                    PopupMenuItem(value: 'guest', child: Text(tr('family.make_guest')))
+                  else
+                    PopupMenuItem(value: 'family', child: Text(tr('family.make_family'))),
+                  // Other PCs are disconnected on the Send page (both sides).
+                  if (!isDesktopPlatform(t.platform)) PopupMenuItem(value: 'unpair', child: Text(tr('settings.unpair'))),
+                ],
+              ),
+            ),
+          ),
+        ),
+    ];
   }
 
   /// Asks for a member name; existing members are one tap away.

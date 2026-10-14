@@ -8,7 +8,7 @@ import '../services/file_actions.dart';
 import '../services/library_index.dart';
 import '../services/network.dart';
 import 'app_nav.dart';
-import 'breathing_dot.dart';
+import 'breathing.dart';
 import 'device_badge.dart';
 import 'format.dart';
 import 'media_thumb.dart';
@@ -146,25 +146,29 @@ class _DashboardPageState extends State<DashboardPage> {
           Text(st.deviceName, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700)),
         ]),
       ),
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: color.withValues(alpha: 0.5)),
-        ),
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          if (ok)
-            BreathingDot(online: online > 0, size: 12)
-          else
-            Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-          const SizedBox(width: 6),
-          Text(
-            ok ? tr('home.status_online', {'count': online}) : tr('home.status_off'),
-            style: TextStyle(color: color, fontSize: 13),
+      // The pill itself breathes while devices are online.
+      if (ok)
+        Breathing(
+          online: online > 0,
+          radius: 999,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+            child: Text(
+              tr('home.status_online', {'count': online}),
+              style: TextStyle(color: online > 0 ? onlineGlow : LrColors.muted, fontSize: 13, fontWeight: FontWeight.w600),
+            ),
           ),
-        ]),
-      ),
+        )
+      else
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: color.withValues(alpha: 0.5)),
+          ),
+          child: Text(tr('home.status_off'), style: TextStyle(color: color, fontSize: 13)),
+        ),
     ]);
   }
 
@@ -289,13 +293,22 @@ class _DashboardPageState extends State<DashboardPage> {
         Text(tr('settings.no_phones'), style: const TextStyle(color: LrColors.muted))
       else
         Wrap(spacing: 8, runSpacing: 8, children: [
+          // Breathes while one of this person's phones has LocalRoll open.
           for (final m in family.members)
-            ActionChip(
-              // Breathing dot: one of this person's phones has LocalRoll open now.
-              avatar: BreathingDot(online: family.devicesOf(m).any((d) => s.isOnline(d.id)), size: 12),
-              label: Text(family.devicesOf(m).length > 1 ? tr('home.member_devices', {'name': m, 'count': family.devicesOf(m).length}) : m),
-              onPressed: () => AppNav.instance.selectTab(AppNav.family),
+            PresenceChip(
+              icon: Icons.person_rounded,
+              online: family.devicesOf(m).any((d) => s.isOnline(d.id)),
+              label: family.devicesOf(m).length > 1 ? tr('home.member_devices', {'name': m, 'count': family.devicesOf(m).length}) : m,
+              onTap: () => AppNav.instance.selectTab(AppNav.family),
             ),
+          for (final t in s.settings.trusted.values)
+            if (t.familyMember && isDesktopPlatform(t.platform))
+              PresenceChip(
+                icon: Icons.computer_rounded,
+                online: s.isOnline(t.id),
+                label: s.deviceName(t.id),
+                onTap: () => AppNav.instance.selectTab(AppNav.send),
+              ),
         ]),
       if (stale.isNotEmpty) ...[
         const SizedBox(height: 10),
@@ -305,29 +318,26 @@ class _DashboardPageState extends State<DashboardPage> {
     ]);
   }
 
-  /// Paired PCs (not family members): who is online, breathing like the family.
+  /// Guests (phones and PCs outside the family group): they breathe too.
   Widget _otherPcs(BuildContext context) {
     final s = widget.services;
-    final pcs = s.settings.peers.values.toList()
+    final guests = s.settings.trusted.values.where((t) => !t.familyMember).toList()
       ..sort((a, b) {
         final on = (s.isOnline(b.id) ? 1 : 0) - (s.isOnline(a.id) ? 1 : 0);
         return on != 0 ? on : a.name.toLowerCase().compareTo(b.name.toLowerCase());
       });
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _title(tr('home.other_pcs')),
-      if (pcs.isEmpty)
-        Text(tr('home.other_pcs_none'), style: const TextStyle(color: LrColors.muted))
+      _title(tr('family.guests')),
+      if (guests.isEmpty)
+        Text(tr('home.guests_none'), style: const TextStyle(color: LrColors.muted))
       else
         Wrap(spacing: 8, runSpacing: 8, children: [
-          for (final p in pcs)
-            ActionChip(
-              avatar: BreathingDot(online: s.isOnline(p.id), size: 12),
-              label: Row(mainAxisSize: MainAxisSize.min, children: [
-                const Icon(Icons.computer_rounded, size: 16, color: LrColors.muted),
-                const SizedBox(width: 6),
-                Text(p.name),
-              ]),
-              onPressed: () => AppNav.instance.selectTab(AppNav.send),
+          for (final t in guests)
+            PresenceChip(
+              icon: isDesktopPlatform(t.platform) ? Icons.computer_rounded : Icons.smartphone_rounded,
+              online: s.isOnline(t.id),
+              label: s.deviceName(t.id),
+              onTap: () => AppNav.instance.selectTab(AppNav.family),
             ),
         ]),
     ]);

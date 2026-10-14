@@ -59,6 +59,13 @@ class LrProtocol {
   /// paired devices this PC sees online, so phones learn about each other.
   static const String pathPresence = '/api/v1/presence';
 
+  /// Live presence link (WebSocket, signed in): see live.dart.
+  static const String pathLive = '/api/v1/live';
+
+  /// "Make me a family member" / "I'm leaving the family group" (signed in;
+  /// joining waits for the PC's owner to agree).
+  static const String pathMembership = '/api/v1/membership';
+
   /// PC only, from 127.0.0.1: a second copy of the app asks the running one
   /// to come to the front, then quits.
   static const String pathLocalShow = '/local/show';

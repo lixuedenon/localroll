@@ -250,5 +250,19 @@
   "presence.offline": "“{name}” ออฟไลน์แล้ว",
   "home.online_now": "ออนไลน์ตอนนี้ · {count}",
   "home.kind_pc": "พีซี",
-  "home.kind_phone": "โทรศัพท์"
+  "home.kind_phone": "โทรศัพท์",
+  "auto.guest": "มี {count} รายการรอส่ง — โทรศัพท์นี้เป็นแขกของ {pc}",
+  "auto.guest_hint": "หยุดส่งอัตโนมัติไว้ก่อน: ทุกการส่งต้องมีคนกด \"รับ\" ที่พีซี ไปที่หน้า \"พีซี\" เพื่อขอเข้ากลุ่มครอบครัว",
+  "connect.family_member": "สมาชิกครอบครัว — สำรองข้อมูลรับทันที",
+  "connect.guest": "แขก — ทุกการส่งต้องรออนุญาต",
+  "connect.ask_family": "ขอเข้ากลุ่มครอบครัว",
+  "connect.leave_family": "ออกจากกลุ่มครอบครัว",
+  "connect.ask_family_waiting": "ส่งคำขอไปยัง “{name}” แล้ว รอคำตอบที่พีซี…",
+  "connect.now_family": "ตอนนี้คุณเป็นสมาชิกครอบครัวของ “{name}” แล้ว",
+  "connect.now_guest": "ตอนนี้คุณเป็นแขกของ “{name}”",
+  "connect.family_denied": "“{name}” ปฏิเสธ (หรือไม่มีใครตอบ)",
+  "connect.membership_failed": "ติดต่อ “{name}” ไม่ได้ เปิดเครื่องอยู่ เปิด LocalRoll และอัปเดตแล้วหรือยัง?",
+  "home.change_pc": "เปลี่ยน",
+  "transfer.stopped_no_answer": "ไม่มีใครตอบที่พีซีภายในเวลา ส่วนที่เหลือยังไม่ได้ส่ง ลองใหม่ภายหลัง",
+  "transfer.their_reason": "เหตุผล: {reason}"
 }

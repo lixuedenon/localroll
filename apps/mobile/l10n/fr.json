@@ -250,5 +250,19 @@
   "presence.offline": "« {name} » est hors ligne",
   "home.online_now": "En ligne · {count}",
   "home.kind_pc": "PC",
-  "home.kind_phone": "Téléphone"
+  "home.kind_phone": "Téléphone",
+  "auto.guest": "{count} éléments en attente — ce téléphone est invité sur {pc}",
+  "auto.guest_hint": "Envoi automatique en pause : chaque envoi demanderait un « Accepter » là-bas. Sur la page PC, demande à rejoindre son groupe familial.",
+  "connect.family_member": "Membre de la famille : sauvegardes directes",
+  "connect.guest": "Invité : chaque envoi demande leur accord",
+  "connect.ask_family": "Demander à rejoindre la famille",
+  "connect.leave_family": "Quitter la famille",
+  "connect.ask_family_waiting": "Demande envoyée à « {name} », en attente sur le PC…",
+  "connect.now_family": "Tu es maintenant membre de la famille sur « {name} ».",
+  "connect.now_guest": "Tu es maintenant invité sur « {name} ».",
+  "connect.family_denied": "« {name} » a refusé (ou personne n'a répondu).",
+  "connect.membership_failed": "Impossible de joindre « {name} ». Est-il allumé, avec LocalRoll ouvert et à jour ?",
+  "home.change_pc": "Changer",
+  "transfer.stopped_no_answer": "Personne n'a répondu sur le PC à temps. Rien d'autre n'a été envoyé ; réessaie plus tard.",
+  "transfer.their_reason": "Sa raison : {reason}"
 }

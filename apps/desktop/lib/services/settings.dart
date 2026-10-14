@@ -18,11 +18,16 @@ class TrustedDevice {
     this.owner,
     this.memberName,
     this.secure = false,
+    this.familyMember = true,
   });
 
   final String id;
   String name;
   final String platform;
+
+  /// Family group (true): what it sends is received straight away — the
+  /// family's backups. Guest (false): each transfer waits for "Accept" here.
+  bool familyMember;
   String token;
   final int pairedMs;
 
@@ -48,6 +53,7 @@ class TrustedDevice {
         if (owner != null) 'owner': owner,
         if (memberName != null) 'memberName': memberName,
         if (secure) 'secure': true,
+        if (!familyMember) 'guest': true,
       };
 
   factory TrustedDevice.fromJson(Map<String, dynamic> j) => TrustedDevice(
@@ -59,6 +65,8 @@ class TrustedDevice {
         owner: j['owner'] as String?,
         memberName: j['memberName'] as String?,
         secure: j['secure'] == true,
+        // Paired before guests existed: family.
+        familyMember: j['guest'] != true,
       );
 }
 
@@ -191,10 +199,10 @@ class AppSettings extends ChangeNotifier {
   /// <year>/<month>.
   bool folderPerMember = false;
 
-  /// Paired phones grouped into family members.
-  /// Other PCs are not family members.
-  FamilyDirectory get family =>
-      FamilyDirectory(trusted.values.where((t) => !isDesktopPlatform(t.platform)).map((t) => t.family));
+  /// Paired phones in the family group, grouped into family members.
+  /// (PCs and guests are listed separately.)
+  FamilyDirectory get family => FamilyDirectory(
+      trusted.values.where((t) => !isDesktopPlatform(t.platform) && t.familyMember).map((t) => t.family));
 
   static Future<AppSettings> load() async {
     final dir = await getApplicationSupportDirectory();

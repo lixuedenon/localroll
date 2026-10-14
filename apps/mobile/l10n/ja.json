@@ -250,5 +250,19 @@
   "presence.offline": "「{name}」がオフラインになりました",
   "home.online_now": "オンライン · {count}",
   "home.kind_pc": "PC",
-  "home.kind_phone": "スマホ"
+  "home.kind_phone": "スマホ",
+  "auto.guest": "{count} 件が待機中 — このスマホは {pc} のゲストです",
+  "auto.guest_hint": "自動送信は一時停止中です。送信のたびにPC側で「受け取る」が必要なためです。「PC」ページで家族グループへの参加を申請してください。",
+  "connect.family_member": "家族メンバー — バックアップはすぐ届く",
+  "connect.guest": "ゲスト — 送信のたびに相手の確認が必要",
+  "connect.ask_family": "家族グループへの参加を申請",
+  "connect.leave_family": "家族グループを抜ける",
+  "connect.ask_family_waiting": "「{name}」に申請しました。PC側の返事を待っています…",
+  "connect.now_family": "「{name}」の家族メンバーになりました。",
+  "connect.now_guest": "「{name}」のゲストになりました。",
+  "connect.family_denied": "「{name}」に断られました（または応答なし）。",
+  "connect.membership_failed": "「{name}」に接続できません。電源が入っていて、LocalRoll が開いていて最新ですか？",
+  "home.change_pc": "変更",
+  "transfer.stopped_no_answer": "PC側で誰も応答しませんでした。残りは送っていません。後でもう一度試してください。",
+  "transfer.their_reason": "相手の理由：{reason}"
 }

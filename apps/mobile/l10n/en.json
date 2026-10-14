@@ -250,5 +250,19 @@
   "presence.offline": "“{name}” went offline",
   "home.online_now": "Online now · {count}",
   "home.kind_pc": "PC",
-  "home.kind_phone": "Phone"
+  "home.kind_phone": "Phone",
+  "auto.guest": "{count} new items wait — this phone is a guest on {pc}",
+  "auto.guest_hint": "Automatic sending is paused: each transfer would need someone there to click “Accept”. On the PC page, ask to join its family group.",
+  "connect.family_member": "Family member — backups go straight in",
+  "connect.guest": "Guest — each transfer needs their OK",
+  "connect.ask_family": "Ask to join the family group",
+  "connect.leave_family": "Leave the family group",
+  "connect.ask_family_waiting": "Asked “{name}” — waiting for an answer on the PC…",
+  "connect.now_family": "You are now a family member on “{name}”.",
+  "connect.now_guest": "You are now a guest on “{name}”.",
+  "connect.family_denied": "“{name}” said no (or nobody answered).",
+  "connect.membership_failed": "Could not reach “{name}”. Is it on, with LocalRoll open (and updated)?",
+  "home.change_pc": "Change",
+  "transfer.stopped_no_answer": "Nobody answered on the PC in time. Nothing more was sent; try again later.",
+  "transfer.their_reason": "Their reason: {reason}"
 }

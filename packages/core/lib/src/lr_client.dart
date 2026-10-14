@@ -139,6 +139,12 @@ class LrClient {
     }
   }
 
+  /// Join ([family] true; waits up to 2 minutes for the other side's owner
+  /// to agree) or leave its family group. Returns the membership now.
+  Future<bool> membership({required bool family}) async =>
+      (await _send('POST', LrProtocol.pathMembership, json: {'family': family}, timeout: const Duration(minutes: 3)))['family'] ==
+      true;
+
   /// HTTPS only: trade a token from an old plain-HTTP pairing for a new one.
   Future<String> upgrade() async =>
       (await _send('POST', LrProtocol.pathUpgrade, json: const <String, dynamic>{}))['token'] as String;

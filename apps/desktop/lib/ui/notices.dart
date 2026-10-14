@@ -14,6 +14,8 @@ import '../services/receive_hub.dart';
 import 'app_nav.dart';
 import 'device_badge.dart';
 import 'format.dart';
+import 'presence_toasts.dart';
+import 'reasons.dart';
 import 'send_page.dart' show peerErrorText;
 import 'theme.dart';
 
@@ -23,13 +25,10 @@ import 'theme.dart';
 ///  * "Sent everything to X" when a PC → PC job ends.
 class Notices {
   Notices(this.s) {
-    // Who is online: checked every few seconds and on any news.
-    _presence = Timer.periodic(const Duration(seconds: 3), (_) => _checkPresence());
-    _arrivals = s.server.arrivals.listen(_cameBack);
-    s.server.addListener(_checkPresence);
-    s.peers.addListener(_checkPresence);
-    _online = s.onlineDevices;
+    // Who is online: one note per change.
+    _presence = s.presenceEvents.listen(_onPresence);
     s.server.incomingAsks.addListener(_onAsks);
+    s.server.membershipAsks.addListener(_onMembership);
     s.hub.addListener(_onHub);
     s.sender.addListener(_onSender);
     for (final j in s.sender.jobs) {
@@ -41,10 +40,8 @@ class Notices {
 
   void dispose() {
     _presence?.cancel();
-    _arrivals?.cancel();
-    s.server.removeListener(_checkPresence);
-    s.peers.removeListener(_checkPresence);
     s.server.incomingAsks.removeListener(_onAsks);
+    s.server.membershipAsks.removeListener(_onMembership);
     s.hub.removeListener(_onHub);
     s.sender.removeListener(_onSender);
     _quiet?.cancel();
@@ -54,48 +51,20 @@ class Notices {
 
   // ------------------------------------------------------- online / offline
 
-  Timer? _presence;
-  StreamSubscription<String>? _arrivals;
-  Set<String> _online = {};
+  StreamSubscription<PresenceEvent>? _presence;
 
-  /// Closed and opened again before it counted as gone: still "online".
-  void _cameBack(String id) {
-    final ctx = _ctx;
-    if (ctx == null) return;
-    ScaffoldMessenger.maybeOf(ctx)?.showSnackBar(_presenceBar(id, online: true));
-  }
-
-  /// "X is online" / "X went offline" for every paired phone and PC.
-  void _checkPresence() {
-    final now = s.onlineDevices;
-    final came = now.difference(_online);
-    final left = _online.difference(now);
-    _online = now;
-    final ctx = _ctx;
-    if (ctx == null || (came.isEmpty && left.isEmpty)) return;
-    final m = ScaffoldMessenger.maybeOf(ctx);
-    for (final id in came) {
-      m?.showSnackBar(_presenceBar(id, online: true));
-    }
-    for (final id in left) {
-      m?.showSnackBar(_presenceBar(id, online: false));
-    }
-  }
-
-  SnackBar _presenceBar(String id, {required bool online}) {
-    final pc = s.settings.peers.containsKey(id) || isDesktopPlatform(s.settings.trusted[id]?.platform ?? '');
-    return SnackBar(
-      duration: const Duration(seconds: 4),
-      behavior: SnackBarBehavior.floating,
-      width: 420,
-      content: Row(children: [
-        Icon(pc ? Icons.computer_rounded : Icons.phone_iphone_rounded,
-            color: online ? LrColors.verified : LrColors.muted, size: 20),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(tr(online ? 'presence.online' : 'presence.offline', {'name': s.deviceName(id)})),
-        ),
-      ]),
+  /// "X is online" / "X went offline" for every paired phone and PC; a
+  /// newer note about the same device replaces the older one.
+  void _onPresence(PresenceEvent e) {
+    final overlay = AppNav.instance.navigatorKey.currentState?.overlay;
+    if (overlay == null) return;
+    final pc = s.settings.peers.containsKey(e.id) || isDesktopPlatform(s.settings.trusted[e.id]?.platform ?? '');
+    PresenceToasts.show(
+      overlay,
+      key: e.id,
+      text: tr(e.online ? 'presence.online' : 'presence.offline', {'name': s.deviceName(e.id)}),
+      icon: pc ? Icons.computer_rounded : Icons.phone_iphone_rounded,
+      online: e.online,
     );
   }
 
@@ -127,28 +96,88 @@ class Notices {
       if (c != null && c.mounted && _openAsk == a) Navigator.of(c).pop();
     }));
     _openAsk = a;
+    var quiet = false;
+    final answer = await showDialog<AskAnswer>(
+      context: ctx,
+      barrierDismissible: false,
+      builder: (c) => StatefulBuilder(
+        builder: (c, setLocal) => AlertDialog(
+          title: Row(children: [
+            DeviceBadge(icon: isDesktopPlatform(a.device.platform) ? 'desktop' : 'phone', size: 40),
+            const SizedBox(width: 12),
+            Expanded(child: Text(tr('incoming.title', {'name': a.device.name}))),
+          ]),
+          content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            if (a.bytes > 0) Text(tr('incoming.first', {'count': a.count, 'size': formatBytes(a.bytes)})),
+            const SizedBox(height: 8),
+            Text(tr('incoming.guest_hint'), style: Theme.of(c).textTheme.bodySmall?.copyWith(color: LrColors.muted)),
+            const SizedBox(height: 4),
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              dense: true,
+              controlAffinity: ListTileControlAffinity.leading,
+              value: quiet,
+              onChanged: (v) => setLocal(() => quiet = v ?? false),
+              title: Text(tr('incoming.quiet')),
+            ),
+          ]),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(c, const AskAnswer(accept: false)),
+              child: Text(tr('incoming.decline')),
+            ),
+            OutlinedButton(
+              onPressed: () async {
+                final reason = await askDeclineReason(c);
+                if (reason != null && c.mounted) Navigator.pop(c, AskAnswer(accept: false, reason: reason));
+              },
+              child: Text(tr('incoming.decline_reason')),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(c, AskAnswer(accept: true, quiet: quiet)),
+              child: Text(tr('incoming.accept')),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (_openAsk == a) _openAsk = null;
+    s.server.answerIncoming(a, answer ?? const AskAnswer(accept: false));
+  }
+
+  // ------------------------------------------------------ join the family?
+
+  final Set<MembershipAsk> _shownMember = {};
+
+  void _onMembership() {
+    for (final a in s.server.membershipAsks.value) {
+      if (_shownMember.add(a)) unawaited(_askMember(a));
+    }
+  }
+
+  Future<void> _askMember(MembershipAsk a) async {
+    await _toFront();
+    final ctx = _ctx;
+    if (ctx == null || !ctx.mounted) return;
+    var open = true;
+    unawaited(a.answer.future.then((_) {
+      final c = _ctx;
+      if (open && c != null && c.mounted) Navigator.of(c).pop();
+    }));
     final yes = await showDialog<bool>(
       context: ctx,
       barrierDismissible: false,
       builder: (c) => AlertDialog(
-        title: Row(children: [
-          DeviceBadge(icon: isDesktopPlatform(a.device.platform) ? 'desktop' : 'phone', size: 40),
-          const SizedBox(width: 12),
-          Expanded(child: Text(tr('incoming.title', {'name': a.device.name}))),
-        ]),
-        content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          if (a.bytes > 0) Text(tr('incoming.first', {'count': a.count, 'size': formatBytes(a.bytes)})),
-          const SizedBox(height: 8),
-          Text(tr('incoming.window'), style: Theme.of(c).textTheme.bodySmall?.copyWith(color: LrColors.muted)),
-        ]),
+        title: Text(tr('family.join_title', {'name': a.device.name})),
+        content: Text(tr('family.join_body')),
         actions: [
-          OutlinedButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('incoming.decline'))),
-          FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(tr('incoming.accept'))),
+          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('pair.deny'))),
+          FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(tr('family.join_allow'))),
         ],
       ),
     );
-    if (_openAsk == a) _openAsk = null;
-    s.server.answerIncoming(a, accept: yes == true);
+    open = false;
+    s.server.answerMembership(a, allow: yes == true);
   }
 
   IncomingAsk? _openAsk;
@@ -279,7 +308,7 @@ class Notices {
           if (j.skippedFiles > 0) Text(tr('send.skipped', {'count': j.skippedFiles})),
           if (j.failedFiles > 0 || !ok)
             Text(
-              [if (j.failedFiles > 0) tr('done.failed', {'count': j.failedFiles}), if (j.error != null) peerErrorText(j.error)]
+              [if (j.failedFiles > 0) tr('done.failed', {'count': j.failedFiles}), if (j.error != null) peerErrorText(j.error), if (j.reason?.isNotEmpty ?? false) tr('send.their_reason', {'reason': j.reason!})]
                   .join(' · '),
               style: const TextStyle(color: LrColors.danger),
             ),

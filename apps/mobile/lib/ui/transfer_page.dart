@@ -218,8 +218,12 @@ class _TransferPageState extends State<TransferPage> {
                       StopReason.battery => 'transfer.stopped_battery',
                       StopReason.pcUnavailable => 'transfer.stopped_pc',
                       StopReason.declined => 'transfer.stopped_declined',
+                      StopReason.noAnswer => 'transfer.stopped_no_answer',
                       _ => 'transfer.stopped_user',
-                    }),
+                    }) +
+                        (up.stopReason == StopReason.declined && up.declineReason != null
+                            ? '\n${tr('transfer.their_reason', {'reason': up.declineReason!})}'
+                            : ''),
                     style: theme.textTheme.bodySmall,
                   ),
                 ),

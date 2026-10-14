@@ -11,7 +11,7 @@ import '../l10n/l10n.dart';
 import '../services/peers.dart';
 import '../services/settings.dart';
 import 'app_nav.dart';
-import 'breathing_dot.dart';
+import 'breathing.dart';
 import 'device_badge.dart';
 import 'format.dart';
 import 'text_window.dart';
@@ -53,6 +53,8 @@ class _SendPageState extends State<SendPage> {
     super.dispose();
   }
 
+  static bool _autoScanned = false;
+
   /// Look for PCs only while this page is shown.
   void _onNav() {
     final show = AppNav.instance.tab == AppNav.send;
@@ -60,8 +62,13 @@ class _SendPageState extends State<SendPage> {
     _looking = show;
     if (show) {
       widget.services.peers.acquire();
-      // A first scan so PCs whose mDNS is blocked show up too.
-      if (widget.services.peers.found.isEmpty) unawaited(widget.services.peers.scan());
+      // Scanning the whole network is noisy: only by itself when there is
+      // nothing paired yet (once per run); otherwise on "Search".
+      final p = widget.services.peers;
+      if (!_autoScanned && widget.services.settings.peers.isEmpty && p.found.isEmpty) {
+        _autoScanned = true;
+        unawaited(p.scan());
+      }
     } else {
       widget.services.peers.release();
     }
@@ -72,7 +79,7 @@ class _SendPageState extends State<SendPage> {
     final s = widget.services;
     final theme = Theme.of(context);
     return ListenableBuilder(
-      listenable: Listenable.merge([s.peers, s.sender, s.settings]),
+      listenable: Listenable.merge([s.peers, s.sender, s.settings, s.server]),
       builder: (context, _) {
         final paired = s.settings.peers.values.toList()..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
         final unpaired = s.peers.found.where((f) => !s.settings.peers.containsKey(f.id)).toList();
@@ -157,10 +164,14 @@ class _SendPageState extends State<SendPage> {
 
   Widget _pairedCard(BuildContext context, PeerPc p) {
     final s = widget.services;
-    final online = s.peers.isOnline(p.id);
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      child: Padding(
+    final online = s.isOnline(p.id);
+    final family = s.settings.trusted[p.id]?.familyMember ?? true;
+    // The card itself breathes while that PC is online.
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Breathing(
+        online: online,
+        child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(children: [
           DeviceBadge(icon: p.icon, color: p.color, size: 48),
@@ -169,12 +180,17 @@ class _SendPageState extends State<SendPage> {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(p.name, style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 4),
-              Row(children: [
-                BreathingDot(online: online, size: 12),
-                const SizedBox(width: 4),
-                Text(online ? tr('send.online') : tr('send.offline'),
-                    style: TextStyle(color: online ? LrColors.verified : LrColors.muted, fontSize: 13)),
-              ]),
+              Text(
+                online ? tr('send.online') : tr('send.offline'),
+                style: TextStyle(color: online ? onlineGlow : LrColors.muted, fontSize: 13),
+              ),
+              const SizedBox(height: 2),
+              // How each side treats the other: family = straight in, guest = "Accept" first.
+              Text(tr(family ? 'send.in_my_family' : 'send.my_guest'),
+                  style: const TextStyle(color: LrColors.muted, fontSize: 12)),
+              if (s.peers.familyAt[p.id] case final there?)
+                Text(tr(there ? 'send.me_family_there' : 'send.me_guest_there'),
+                    style: TextStyle(color: there ? LrColors.muted : LrColors.safelight, fontSize: 12)),
             ]),
           ),
           FilledButton.icon(
@@ -195,13 +211,32 @@ class _SendPageState extends State<SendPage> {
             label: Text(tr('send.text')),
           ),
           PopupMenuButton<String>(
-            onSelected: (v) => _unpair(p, forget: v == 'forget'),
+            onSelected: (v) {
+              if (v == 'family' || v == 'guest') {
+                unawaited(s.server.setFamily(p.id, v == 'family'));
+              } else if (v == 'ask_family' || v == 'leave_family') {
+                unawaited(_membership(p, family: v == 'ask_family'));
+              } else {
+                _unpair(p, forget: v == 'forget');
+              }
+            },
             itemBuilder: (_) => [
+              // What it sends here: straight in (family) or after "Accept" (guest).
+              if (family)
+                PopupMenuItem(value: 'guest', child: Text(tr('family.make_guest')))
+              else
+                PopupMenuItem(value: 'family', child: Text(tr('family.make_family'))),
+              // Our place in its family group (it decides; leaving is up to us).
+              if (s.peers.familyAt[p.id] == true)
+                PopupMenuItem(value: 'leave_family', child: Text(tr('send.leave_family_there')))
+              else
+                PopupMenuItem(value: 'ask_family', child: Text(tr('send.ask_family_there'))),
               PopupMenuItem(value: 'disconnect', child: Text(tr('send.disconnect'))),
               PopupMenuItem(value: 'forget', child: Text(tr('send.forget'))),
             ],
           ),
         ]),
+        ),
       ),
     );
   }
@@ -225,6 +260,24 @@ class _SendPageState extends State<SendPage> {
       );
 
   // ------------------------------------------------------------- actions
+
+  /// Ask PC [p] to make this PC a family member there, or leave its family.
+  Future<void> _membership(PeerPc p, {required bool family}) async {
+    final m = ScaffoldMessenger.of(context);
+    if (family) m.showSnackBar(SnackBar(content: Text(tr('send.ask_family_waiting', {'name': p.name}))));
+    try {
+      final now = await widget.services.peers.requestMembership(p.id, family: family);
+      if (!mounted) return;
+      m.hideCurrentSnackBar();
+      m.showSnackBar(SnackBar(
+        content: Text(tr(now ? 'send.now_family_there' : (family ? 'send.family_denied' : 'send.now_guest_there'), {'name': p.name})),
+      ));
+    } on PeerError catch (e) {
+      if (!mounted) return;
+      m.hideCurrentSnackBar();
+      m.showSnackBar(SnackBar(content: Text(peerErrorText(e.code))));
+    }
+  }
 
   Future<void> _sendFiles(PeerPc p) async {
     final picked = await openFiles(confirmButtonText: tr('send.files'));
@@ -349,7 +402,10 @@ class _JobTile extends StatelessWidget {
       SendJobState.connecting => (tr('send.connecting'), LrColors.safelight),
       SendJobState.sending => (tr('send.sending'), LrColors.safelight),
       SendJobState.done => (tr('send.done'), LrColors.verified),
-      SendJobState.failed => (peerErrorText(j.error), LrColors.danger),
+      SendJobState.failed => (
+          [peerErrorText(j.error), if (j.reason?.isNotEmpty ?? false) tr('send.their_reason', {'reason': j.reason!})].join(' — '),
+          LrColors.danger
+        ),
       SendJobState.cancelled => (tr('send.cancelled'), LrColors.muted),
     };
     final parts = <String>[
@@ -416,7 +472,7 @@ Future<void> sendToPc(BuildContext context, AppServices s, List<SendFile> files,
               DeviceBadge(icon: p.icon, color: p.color, size: 32),
               const SizedBox(width: 12),
               Expanded(child: Text(p.name)),
-              BreathingDot(online: s.peers.isOnline(p.id), size: 12),
+              if (s.isOnline(p.id)) const Icon(Icons.circle, size: 10, color: onlineGlow),
             ]),
           ),
       ],

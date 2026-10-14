@@ -40,12 +40,13 @@ class PairPrompter {
     } catch (_) {}
     final ctx = AppNav.instance.navigatorKey.currentContext;
     if (ctx == null) return;
-    final allow = await showDialog<bool>(
+    // 'family' / 'guest' / null (deny).
+    final choice = await showDialog<String>(
       context: ctx,
       barrierDismissible: false,
       builder: (_) => _PairDialog(request: p),
     );
-    await server.answerPair(p, allow: allow == true);
+    await server.answerPair(p, allow: choice != null, family: choice == 'family');
   }
 }
 
@@ -67,7 +68,7 @@ class _PairDialogState extends State<_PairDialog> {
     // Nobody answered in time: close as "deny" (the phone sees "expired").
     final left = LrProtocol.pairApprovalTimeout - DateTime.now().difference(widget.request.created);
     _timeout = Timer(left.isNegative ? Duration.zero : left, () {
-      if (mounted) Navigator.of(context).pop(false);
+      if (mounted) Navigator.of(context).pop();
     });
   }
 
@@ -109,13 +110,18 @@ class _PairDialogState extends State<_PairDialog> {
             ),
             const SizedBox(height: 12),
             Text(tr(p.fromPc ? 'pair.check_pc' : 'pair.check'), textAlign: TextAlign.center, style: theme.textTheme.bodySmall),
+            const SizedBox(height: 16),
+            // Family: what it sends arrives straight away (backups).
+            // Guest: each transfer waits for "Accept" here.
+            Text(tr('pair.family_or_guest'), textAlign: TextAlign.center, style: theme.textTheme.bodySmall?.copyWith(color: LrColors.muted)),
           ],
         ),
       ),
       actionsAlignment: MainAxisAlignment.center,
       actions: [
-        OutlinedButton(onPressed: () => Navigator.of(context).pop(false), child: Text(tr('pair.deny'))),
-        FilledButton(onPressed: () => Navigator.of(context).pop(true), child: Text(tr('pair.allow'))),
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(tr('pair.deny'))),
+        OutlinedButton(onPressed: () => Navigator.of(context).pop('guest'), child: Text(tr('pair.allow_guest'))),
+        FilledButton(onPressed: () => Navigator.of(context).pop('family'), child: Text(tr('pair.allow_family'))),
       ],
     );
   }

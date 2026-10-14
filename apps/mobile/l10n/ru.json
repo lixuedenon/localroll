@@ -250,5 +250,19 @@
   "presence.offline": "«{name}» не в сети",
   "home.online_now": "Сейчас в сети · {count}",
   "home.kind_pc": "ПК",
-  "home.kind_phone": "Телефон"
+  "home.kind_phone": "Телефон",
+  "auto.guest": "{count} новых ждут — этот телефон гость на {pc}",
+  "auto.guest_hint": "Автоотправка приостановлена: каждую передачу там нужно было бы принимать. На странице «ПК» попроси добавить в семью.",
+  "connect.family_member": "Член семьи — копии принимаются сразу",
+  "connect.guest": "Гость — каждая передача ждёт согласия",
+  "connect.ask_family": "Попросить добавить в семью",
+  "connect.leave_family": "Выйти из семьи",
+  "connect.ask_family_waiting": "Запрос отправлен «{name}», ждём ответа на ПК…",
+  "connect.now_family": "Теперь ты член семьи на «{name}».",
+  "connect.now_guest": "Теперь ты гость на «{name}».",
+  "connect.family_denied": "«{name}» отказал (или никто не ответил).",
+  "connect.membership_failed": "Не удалось связаться с «{name}». Он включён, LocalRoll открыт и обновлён?",
+  "home.change_pc": "Сменить",
+  "transfer.stopped_no_answer": "На ПК никто не ответил вовремя. Остальное не отправлено, попробуй позже.",
+  "transfer.their_reason": "Причина: {reason}"
 }

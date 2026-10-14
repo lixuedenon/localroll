@@ -250,5 +250,19 @@
   "presence.offline": "“{name}” ऑफ़लाइन हो गया",
   "home.online_now": "अभी ऑनलाइन · {count}",
   "home.kind_pc": "पीसी",
-  "home.kind_phone": "फ़ोन"
+  "home.kind_phone": "फ़ोन",
+  "auto.guest": "{count} नई चीज़ें इंतज़ार में — यह फ़ोन {pc} पर अतिथि है",
+  "auto.guest_hint": "अपने-आप भेजना रुका है: हर भेजने पर वहाँ \"स्वीकार\" दबाना पड़ेगा। \"पीसी\" पेज पर परिवार समूह में शामिल होने का अनुरोध करें।",
+  "connect.family_member": "परिवार सदस्य — बैकअप सीधे जाता है",
+  "connect.guest": "अतिथि — हर भेजने पर उनकी मंज़ूरी चाहिए",
+  "connect.ask_family": "परिवार समूह में शामिल होने का अनुरोध",
+  "connect.leave_family": "परिवार समूह छोड़ें",
+  "connect.ask_family_waiting": "“{name}” से अनुरोध किया — पीसी पर जवाब का इंतज़ार…",
+  "connect.now_family": "अब आप “{name}” पर परिवार सदस्य हैं।",
+  "connect.now_guest": "अब आप “{name}” पर अतिथि हैं।",
+  "connect.family_denied": "“{name}” ने मना किया (या किसी ने जवाब नहीं दिया)।",
+  "connect.membership_failed": "“{name}” तक नहीं पहुँच सके। क्या वह चालू है, LocalRoll खुला और अपडेटेड है?",
+  "home.change_pc": "बदलें",
+  "transfer.stopped_no_answer": "पीसी पर किसी ने समय पर जवाब नहीं दिया। बाकी नहीं भेजा गया; बाद में फिर कोशिश करें।",
+  "transfer.their_reason": "उनका कारण: {reason}"
 }

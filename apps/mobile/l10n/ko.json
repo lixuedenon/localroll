@@ -250,5 +250,19 @@
   "presence.offline": "“{name}”이(가) 오프라인입니다",
   "home.online_now": "지금 온라인 · {count}",
   "home.kind_pc": "PC",
-  "home.kind_phone": "휴대폰"
+  "home.kind_phone": "휴대폰",
+  "auto.guest": "새 항목 {count}개 대기 — 이 휴대폰은 {pc}의 게스트입니다",
+  "auto.guest_hint": "자동 보내기가 일시 중지되었습니다. 보낼 때마다 PC에서 \"수락\"을 눌러야 하기 때문입니다. \"PC\" 페이지에서 가족 그룹 가입을 요청하세요.",
+  "connect.family_member": "가족 구성원 — 백업이 바로 들어감",
+  "connect.guest": "게스트 — 보낼 때마다 상대 승인 필요",
+  "connect.ask_family": "가족 그룹 가입 요청",
+  "connect.leave_family": "가족 그룹 나가기",
+  "connect.ask_family_waiting": "“{name}”에 요청함 — PC의 응답 대기 중…",
+  "connect.now_family": "이제 “{name}”의 가족 구성원입니다.",
+  "connect.now_guest": "이제 “{name}”의 게스트입니다.",
+  "connect.family_denied": "“{name}”이(가) 거절했습니다(또는 응답 없음).",
+  "connect.membership_failed": "“{name}”에 연결할 수 없습니다. 켜져 있고 LocalRoll이 열려 있으며 최신인가요?",
+  "home.change_pc": "변경",
+  "transfer.stopped_no_answer": "PC에서 아무도 응답하지 않았습니다. 나머지는 보내지 않았어요. 나중에 다시 시도하세요.",
+  "transfer.their_reason": "상대방의 이유: {reason}"
 }

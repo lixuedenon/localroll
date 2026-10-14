@@ -250,5 +250,19 @@
   "presence.offline": "“{name}” çevrimdışı",
   "home.online_now": "Şu an çevrimiçi · {count}",
   "home.kind_pc": "PC",
-  "home.kind_phone": "Telefon"
+  "home.kind_phone": "Telefon",
+  "auto.guest": "{count} yeni öğe bekliyor — bu telefon {pc} üzerinde misafir",
+  "auto.guest_hint": "Otomatik gönderim duraklatıldı: her gönderim orada “Kabul et” gerektirir. PC sayfasından aile grubuna katılmayı iste.",
+  "connect.family_member": "Aile üyesi — yedekler doğrudan gider",
+  "connect.guest": "Misafir — her gönderim onay gerektirir",
+  "connect.ask_family": "Aile grubuna katılmayı iste",
+  "connect.leave_family": "Aile grubundan ayrıl",
+  "connect.ask_family_waiting": "“{name}” cihazına soruldu, PC'de yanıt bekleniyor…",
+  "connect.now_family": "Artık “{name}” üzerinde aile üyesisin.",
+  "connect.now_guest": "Artık “{name}” üzerinde misafirsin.",
+  "connect.family_denied": "“{name}” reddetti (ya da yanıt yok).",
+  "connect.membership_failed": "“{name}” cihazına ulaşılamadı. Açık mı, LocalRoll açık ve güncel mi?",
+  "home.change_pc": "Değiştir",
+  "transfer.stopped_no_answer": "PC'de kimse zamanında yanıt vermedi. Başka bir şey gönderilmedi; sonra tekrar dene.",
+  "transfer.their_reason": "Gerekçesi: {reason}"
 }

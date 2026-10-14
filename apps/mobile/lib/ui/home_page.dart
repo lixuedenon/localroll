@@ -8,15 +8,17 @@ import 'package:photo_manager/photo_manager.dart';
 import '../l10n/l10n.dart';
 import '../services/auto_sender.dart';
 import '../services/discovery.dart';
+import '../services/live_service.dart';
 import '../services/mobile_settings.dart';
 import '../services/uploader.dart';
 import '../services/background_transfer.dart';
 import '../services/backup_plan.dart';
 import 'backup_page.dart';
-import 'breathing_dot.dart';
+import 'breathing.dart';
 import 'cleanup_page.dart';
 import 'connect_page.dart';
 import 'device_badge.dart';
+import 'presence_toasts.dart';
 import 'settings_page.dart';
 import 'simple_home.dart';
 import 'theme.dart';
@@ -69,6 +71,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     widget.discovery.addListener(_onDiscovery);
     widget.settings.addListener(_onSettings);
+    _liveEvents = _live.events.listen((e) {
+      if (mounted) _note(e.id, e.name, pc: e.pc, online: e.online);
+    });
+    _live.start();
     _lastDesktop = widget.settings.current?.id;
     _lastLost = _lostCount();
     // Ask the PC now and then what was deleted there (not only when it
@@ -100,6 +106,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   /// Another PC chosen, or the PC reported deletions: count again.
   void _onSettings() {
+    _live.sync(); // a PC paired or forgotten
     final id = widget.settings.current?.id;
     final lost = _lostCount();
     if (id != _lastDesktop || lost != _lastLost) {
@@ -116,6 +123,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     widget.settings.removeListener(_onSettings);
     _changesTimer?.cancel();
     _beatTimer?.cancel();
+    _liveEvents?.cancel();
+    unawaited(_live.stop());
     _auto.dispose();
     super.dispose();
   }
@@ -136,30 +145,41 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         for (final o in widget.discovery.others) o.id: (o.name, o.isDesktop),
       };
 
-  /// "X is online / went offline" (any phone or PC): a short note at the bottom.
+  /// "X is online / went offline" — older PCs without live links only
+  /// (compared now and then); everything else comes from [_live] events.
   void _checkPresence() {
     if (!mounted) return;
-    final now = _onlineDevices();
+    final now = {
+      for (final d in widget.settings.desktops)
+        if (!widget.discovery.linked(d.id) && widget.discovery.isOnline(d.id)) d.id: (d.name, true),
+    };
     final before = _onlineNow;
     _onlineNow = now;
     if (before == null) return;
-    final m = ScaffoldMessenger.maybeOf(context);
-    void note((String, bool) d, {required bool online}) => m?.showSnackBar(SnackBar(
-          duration: const Duration(seconds: 3),
-          content: Row(children: [
-            Icon(d.$2 ? Icons.computer_rounded : Icons.smartphone_rounded,
-                color: online ? LrColors.verified : LrColors.muted, size: 20),
-            const SizedBox(width: 10),
-            Expanded(child: Text(tr(online ? 'presence.online' : 'presence.offline', {'name': d.$1}))),
-          ]),
-        ));
     for (final id in now.keys) {
-      if (!before.containsKey(id)) note(now[id]!, online: true);
+      if (!before.containsKey(id) && !widget.discovery.linked(id)) _note(id, now[id]!.$1, pc: true, online: true);
     }
     for (final id in before.keys) {
-      if (!now.containsKey(id)) note(before[id]!, online: false);
+      if (!now.containsKey(id) && !widget.discovery.linked(id)) _note(id, before[id]!.$1, pc: true, online: false);
     }
   }
+
+  /// One note per device; a newer one about the same device replaces it.
+  void _note(String id, String name, {required bool pc, required bool online}) {
+    final overlay = Navigator.maybeOf(context)?.overlay;
+    if (overlay == null || name.isEmpty) return;
+    PresenceToasts.show(
+      overlay,
+      key: id,
+      text: tr(online ? 'presence.online' : 'presence.offline', {'name': name}),
+      icon: pc ? Icons.computer_rounded : Icons.smartphone_rounded,
+      online: online,
+    );
+  }
+
+  /// Live links to the paired PCs (online state and notes).
+  late final LiveService _live = LiveService(widget.settings, widget.discovery);
+  StreamSubscription<PresenceEvent>? _liveEvents;
 
   /// Home: everything else that is online now, each in its own card like
   /// the PC card above (that PC is already shown there).
@@ -186,10 +206,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Widget _onlineCard(String id, String name, {required bool pc}) {
     final paired = widget.settings.byId(id);
-    return Material(
-      color: LrColors.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: const BorderSide(color: LrColors.line)),
-      child: ListTile(
+    // The card itself breathes (everything listed here is online).
+    return Breathing(
+      online: true,
+      child: Material(
+        type: MaterialType.transparency,
+        child: ListTile(
         // A paired PC: tap to make it the one this phone sends to.
         onTap: paired == null ? null : () => _selectTab(3),
         leading: paired != null
@@ -205,18 +227,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 child: Icon(pc ? Icons.computer_rounded : Icons.smartphone_rounded, color: LrColors.muted),
               ),
         title: Text(name, style: const TextStyle(fontWeight: FontWeight.w700)),
-        subtitle: Row(children: [
-          const BreathingDot(online: true),
-          const SizedBox(width: 4),
-          Text('${tr('home.pc_online')} · ${tr(pc ? 'home.kind_pc' : 'home.kind_phone')}',
-              style: const TextStyle(color: LrColors.verified)),
-        ]),
+        subtitle: Text('${tr('home.pc_online')} · ${tr(pc ? 'home.kind_pc' : 'home.kind_phone')}',
+            style: const TextStyle(color: onlineGlow)),
+        ),
       ),
     );
   }
 
   void _onDiscovery() {
     _checkPresence();
+    _live.kick();
     refreshPairedLooks(widget.settings, widget.discovery);
     final d = widget.settings.current;
     if (_auto.state == AutoState.waiting && d != null && widget.discovery.found.any((f) => f.id == d.id)) {
@@ -242,6 +262,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     // Back: "I'm here" at once.
     final back = _saidBye;
     _saidBye = false;
+    if (back) _live.start();
     if (!(_permission?.hasAccess ?? false)) {
       _reload();
       if (back) refreshPairedLooks(widget.settings, widget.discovery, now: true);
@@ -257,7 +278,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Future<void> _goodbye() async {
     await BackgroundTransfer.grace(true); // iPhone: a few seconds to say it
     try {
-      await sayBye(widget.settings, widget.discovery);
+      // Closing the live links is the goodbye; older PCs get a message.
+      await Future.wait([_live.stop(), sayBye(widget.settings, widget.discovery)]);
     } finally {
       // Coming back later is a new visit (announced even if this goodbye
       // never arrived).
@@ -343,6 +365,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               LrColors.safelight,
               tr('auto.waiting', {'count': _auto.pending, 'pc': d.name}),
               tr('auto.waiting_hint'),
+            ),
+          AutoState.guest => (
+              Icons.lock_clock_rounded,
+              LrColors.safelight,
+              tr('auto.guest', {'count': _auto.pending, 'pc': d.name}),
+              tr('auto.guest_hint'),
             ),
           AutoState.sending => (
               Icons.bolt_rounded,
@@ -789,11 +817,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
           children: [
-            // The PC.
-            Material(
-              color: LrColors.surface,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: const BorderSide(color: LrColors.line)),
-              child: ListTile(
+            // The PC: its card breathes while it is online.
+            Breathing(
+              online: online,
+              child: Material(
+                type: MaterialType.transparency,
+                child: ListTile(
                 onTap: () => _selectTab(3),
                 leading: d == null
                     ? const Icon(Icons.add_link_rounded)
@@ -806,13 +835,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 title: Text(d?.name ?? tr('home.not_connected'), style: const TextStyle(fontWeight: FontWeight.w700)),
                 subtitle: d == null
                     ? null
-                    : Row(children: [
-                        BreathingDot(online: online, size: 12),
-                        const SizedBox(width: 4),
-                        Text(online ? tr('home.pc_online') : tr('home.pc_offline'),
-                            style: TextStyle(color: online ? LrColors.verified : LrColors.muted)),
-                      ]),
+                    : Text(online ? tr('home.pc_online') : tr('home.pc_offline'),
+                        style: TextStyle(color: online ? onlineGlow : LrColors.muted)),
                 trailing: Text(tr(d == null ? 'home.connect_pc' : 'home.change_pc'), style: const TextStyle(color: LrColors.muted)),
+              ),
               ),
             ),
             _onlineStrip(context),

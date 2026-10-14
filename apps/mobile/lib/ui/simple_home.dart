@@ -82,6 +82,11 @@ class SimpleHome extends StatelessWidget {
           LrColors.safelight,
           '${tr('auto.waiting', {'count': auto.pending, 'pc': d.name})}\n${tr('auto.waiting_hint')}',
         ),
+      AutoState.guest => (
+          Icons.lock_clock_rounded,
+          LrColors.safelight,
+          '${tr('auto.guest', {'count': auto.pending, 'pc': d.name})}\n${tr('auto.guest_hint')}',
+        ),
       AutoState.done => (Icons.verified_rounded, LrColors.verified, tr('auto.done', {'count': auto.lastSent, 'pc': d.name})),
       AutoState.idle => (Icons.verified_rounded, LrColors.verified, tr('simple.all_sent', {'pc': d.name})),
     };

@@ -123,6 +123,12 @@ class DesktopClient {
     }
   }
 
+  /// Join ([family] true; waits up to 2 minutes for the PC's owner to agree)
+  /// or leave the PC's family group. Returns the membership now.
+  Future<bool> membership({required bool family}) async =>
+      (await _send('POST', LrProtocol.pathMembership, json: {'family': family}, timeout: const Duration(minutes: 3)))['family'] ==
+      true;
+
   /// Tap-to-pair: ask; the PC shows Allow / Deny.
   Future<PairApprovalState> requestApproval(DeviceInfo me) async => PairApprovalState.fromJson(
       await _send('POST', LrProtocol.pathPairRequest, json: PairApprovalRequest(device: me).toJson()));

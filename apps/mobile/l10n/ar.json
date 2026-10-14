@@ -250,5 +250,19 @@
   "presence.offline": "\"{name}\" غير متصل",
   "home.online_now": "متصل الآن · {count}",
   "home.kind_pc": "كمبيوتر",
-  "home.kind_phone": "هاتف"
+  "home.kind_phone": "هاتف",
+  "auto.guest": "{count} عناصر بانتظار الإرسال — هذا الهاتف ضيف على {pc}",
+  "auto.guest_hint": "الإرسال التلقائي متوقف: كل إرسال يحتاج إلى \"قبول\" هناك. من صفحة الكمبيوتر اطلب الانضمام إلى مجموعته العائلية.",
+  "connect.family_member": "عضو في العائلة — النسخ تصل مباشرة",
+  "connect.guest": "ضيف — كل إرسال يحتاج موافقتهم",
+  "connect.ask_family": "طلب الانضمام إلى العائلة",
+  "connect.leave_family": "مغادرة مجموعة العائلة",
+  "connect.ask_family_waiting": "تم الطلب من \"{name}\"، بانتظار الرد على الكمبيوتر…",
+  "connect.now_family": "أصبحت الآن عضوًا في العائلة على \"{name}\".",
+  "connect.now_guest": "أنت الآن ضيف على \"{name}\".",
+  "connect.family_denied": "رفض \"{name}\" (أو لم يرد أحد).",
+  "connect.membership_failed": "تعذّر الوصول إلى \"{name}\". هل هو قيد التشغيل وLocalRoll مفتوح ومحدّث؟",
+  "home.change_pc": "تغيير",
+  "transfer.stopped_no_answer": "لم يرد أحد على الكمبيوتر في الوقت المحدد. لم يُرسل شيء آخر؛ حاول لاحقًا.",
+  "transfer.their_reason": "السبب: {reason}"
 }

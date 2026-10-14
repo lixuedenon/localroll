@@ -8,7 +8,7 @@ import '../l10n/l10n.dart';
 import '../services/desktop_client.dart';
 import '../services/discovery.dart';
 import '../services/mobile_settings.dart';
-import 'breathing_dot.dart';
+import 'breathing.dart';
 import 'device_badge.dart';
 import 'scan_page.dart';
 import 'theme.dart';
@@ -42,16 +42,21 @@ class _ConnectPageState extends State<ConnectPage> {
   /// Stop the "searching" spinner after a while so it never spins forever.
   bool _searchedLong = false;
   Timer? _searchTimer;
+  Timer? _scanTimer;
 
   @override
   void initState() {
     super.initState();
     // Show paired PCs with their current name and picture.
     refreshPairedLooks(widget.settings, widget.discovery);
-    // mDNS can miss PCs: also scan the local network directly.
-    widget.discovery
-        .scanSubnet(extraPorts: widget.settings.desktops.map((d) => d.port))
-        .then((_) => refreshPairedLooks(widget.settings, widget.discovery));
+    // mDNS can miss PCs. Scanning the whole network is noisy, so only when
+    // the Wi-Fi search found nothing after a few seconds.
+    _scanTimer = Timer(const Duration(seconds: 4), () {
+      if (!mounted || widget.discovery.found.isNotEmpty) return;
+      widget.discovery
+          .scanSubnet(extraPorts: widget.settings.desktops.map((d) => d.port))
+          .then((_) => refreshPairedLooks(widget.settings, widget.discovery));
+    });
     _searchTimer = Timer(const Duration(seconds: 8), () {
       if (mounted) setState(() => _searchedLong = true);
     });
@@ -60,6 +65,7 @@ class _ConnectPageState extends State<ConnectPage> {
   @override
   void dispose() {
     _searchTimer?.cancel();
+    _scanTimer?.cancel();
     super.dispose();
   }
 
@@ -80,6 +86,25 @@ class _ConnectPageState extends State<ConnectPage> {
       });
 
   /// "Forget this PC" — e.g. a computer used just once.
+  /// Ask to join a PC's family group (its owner says yes or no there) or
+  /// leave it (at once).
+  Future<void> _membership(PairedDesktop d, {required bool family}) async {
+    final m = ScaffoldMessenger.of(context);
+    if (family) m.showSnackBar(SnackBar(content: Text(tr('connect.ask_family_waiting', {'name': d.name}))));
+    try {
+      final now = await requestMembership(widget.settings, widget.discovery, d, family: family);
+      if (!mounted) return;
+      m.hideCurrentSnackBar();
+      m.showSnackBar(SnackBar(
+        content: Text(tr(now ? 'connect.now_family' : (family ? 'connect.family_denied' : 'connect.now_guest'), {'name': d.name})),
+      ));
+    } catch (e) {
+      if (!mounted) return;
+      m.hideCurrentSnackBar();
+      m.showSnackBar(SnackBar(content: Text(tr('connect.membership_failed', {'name': d.name}))));
+    }
+  }
+
   Future<void> _forget(PairedDesktop d) async {
     final ok = await showDialog<bool>(
       context: context,
@@ -298,6 +323,7 @@ class _ConnectPageState extends State<ConnectPage> {
                   for (final d in s.desktops)
                     _Card(
                       selected: d.id == s.currentDesktopId,
+                      online: widget.discovery.isOnline(d.id),
                       onTap: () async {
                         await s.selectDesktop(d.id);
                         if (context.mounted) _close();
@@ -314,16 +340,26 @@ class _ConnectPageState extends State<ConnectPage> {
                           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                             Text(d.name, style: theme.textTheme.titleMedium),
                             const SizedBox(height: 2),
-                            Row(children: [
-                              BreathingDot(online: widget.discovery.isOnline(d.id), size: 12),
-                              const SizedBox(width: 4),
-                              Text(
-                                widget.discovery.isOnline(d.id) ? tr('connect.online') : tr('connect.offline'),
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: widget.discovery.isOnline(d.id) ? LrColors.verified : LrColors.muted,
-                                ),
+                            Text(
+                              widget.discovery.isOnline(d.id) ? tr('connect.online') : tr('connect.offline'),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: widget.discovery.isOnline(d.id) ? onlineGlow : LrColors.muted,
                               ),
-                            ]),
+                            ),
+                            // Family member there (backups go straight in) or guest.
+                            if ((widget.discovery.familyAt[d.id] ?? d.family) case final fam?)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Wrap(crossAxisAlignment: WrapCrossAlignment.center, spacing: 6, children: [
+                                  Text(tr(fam ? 'connect.family_member' : 'connect.guest'),
+                                      style: theme.textTheme.bodySmall?.copyWith(color: fam ? onlineGlow : LrColors.safelight)),
+                                  InkWell(
+                                    onTap: () => _membership(d, family: !fam),
+                                    child: Text(tr(fam ? 'connect.leave_family' : 'connect.ask_family'),
+                                        style: theme.textTheme.bodySmall?.copyWith(decoration: TextDecoration.underline)),
+                                  ),
+                                ]),
+                              ),
                           ]),
                         ),
                         TextButton.icon(
@@ -374,28 +410,34 @@ class _ConnectPageState extends State<ConnectPage> {
 
 /// Tappable card used for PCs.
 class _Card extends StatelessWidget {
-  const _Card({required this.child, this.onTap, this.selected = false});
+  const _Card({required this.child, this.onTap, this.selected = false, this.online});
 
   final Widget child;
   final VoidCallback? onTap;
   final bool selected;
 
+  /// A paired PC: the card breathes while it is online.
+  final bool? online;
+
   @override
   Widget build(BuildContext context) {
+    final card = Material(
+      color: online == null ? LrColors.surface : Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: selected
+            ? const BorderSide(color: LrColors.safelight, width: 2)
+            : (online == null ? const BorderSide(color: LrColors.line) : BorderSide.none),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(padding: const EdgeInsets.all(14), child: child),
+      ),
+    );
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: Material(
-        color: LrColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: selected ? LrColors.safelight : LrColors.line, width: selected ? 2 : 1),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(padding: const EdgeInsets.all(14), child: child),
-        ),
-      ),
+      child: online == null ? card : Breathing(online: online!, radius: 16, child: card),
     );
   }
 }

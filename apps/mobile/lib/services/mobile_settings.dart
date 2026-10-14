@@ -26,9 +26,15 @@ class PairedDesktop {
     this.avatar = 0,
     this.changesSinceMs = 0,
     this.fingerprint,
+    this.family,
   });
 
   final String id;
+
+  /// This phone's place at that PC: family member (sends go straight in —
+  /// auto-send works) or guest (each transfer waits for "Accept" there).
+  /// Null = not told yet (older PC).
+  bool? family;
   String name;
   List<String> hosts;
   int port;
@@ -68,6 +74,7 @@ class PairedDesktop {
         'avatar': avatar,
         'changesSinceMs': changesSinceMs,
         if (fingerprint != null) 'fingerprint': fingerprint,
+        if (family != null) 'family': family,
       };
 
   factory PairedDesktop.fromJson(Map<String, dynamic> j) => PairedDesktop(
@@ -83,6 +90,7 @@ class PairedDesktop {
         avatar: (j['avatar'] as num?)?.toInt() ?? 0,
         changesSinceMs: (j['changesSinceMs'] as num?)?.toInt() ?? 0,
         fingerprint: j['fingerprint'] as String?,
+        family: j['family'] as bool?,
       );
 }
 

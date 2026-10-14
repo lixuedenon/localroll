@@ -38,14 +38,45 @@ class PendingPair {
   bool get expired => DateTime.now().difference(created) > LrProtocol.pairApprovalTimeout;
 }
 
-/// A device wants to send while auto-receive is off: the UI asks.
+/// A paired guest asks to join the family group; the UI asks the user.
+class MembershipAsk {
+  MembershipAsk(this.device);
+
+  final TrustedDevice device;
+  final Completer<bool> answer = Completer<bool>();
+}
+
+class _LiveConn {
+  _LiveConn(this.ws, this.session);
+
+  final WebSocket ws;
+  final String session;
+}
+
+/// What the user answered to "X wants to send …".
+class AskAnswer {
+  const AskAnswer({required this.accept, this.reason, this.quiet = false, this.timedOut = false});
+
+  final bool accept;
+
+  /// Nobody answered within 2 minutes.
+  final bool timedOut;
+
+  /// Declined with a reason the sender sees (plain text, short).
+  final String? reason;
+
+  /// Accepted: don't ask again for 30 minutes (paired guests).
+  final bool quiet;
+}
+
+/// A guest device wants to send: the UI asks "Accept / Decline".
 class IncomingAsk {
   IncomingAsk(this.device, this.count, this.bytes);
 
   final TrustedDevice device;
   final int count;
   final int bytes;
-  final Completer<bool> answer = Completer<bool>();
+  final Completer<AskAnswer> answer = Completer<AskAnswer>();
 }
 
 class _UploadSession {
@@ -92,41 +123,57 @@ class TransferServer extends ChangeNotifier {
 
   static const Duration _acceptWindow = Duration(minutes: 30);
 
-  /// May [device] send now? Asks the user once; an Accept covers the rest of
-  /// this transfer (each file is its own request) for [_acceptWindow].
-  Future<bool> _mayReceive(TrustedDevice device, List<FileOffer> files) async {
-    if (settings.autoAccept) return true;
+  /// The answer to the last decline per device (sent back with every
+  /// refused request until it may ask again).
+  final Map<String, AskAnswer> _lastDecline = {};
+
+  /// May [device] send now? Family members: yes. Guests: the user is asked;
+  /// an Accept covers this transfer (each file is its own request) — or 30
+  /// minutes when they ticked "don't ask again". Null = yes; otherwise the
+  /// answer that refused it.
+  Future<AskAnswer?> _mayReceive(TrustedDevice device, List<FileOffer> files) async {
+    if (device.familyMember) return null;
     final now = DateTime.now();
     final ok = _acceptedUntil[device.id];
     if (ok != null && ok.isAfter(now)) {
-      _acceptedUntil[device.id] = now.add(_acceptWindow);
-      return true;
+      _acceptedUntil[device.id] = now.add(_quietAccept[device.id] == true ? _acceptWindow : const Duration(minutes: 2));
+      return null;
     }
     final no = _declinedUntil[device.id];
-    if (no != null && no.isAfter(now)) return false;
+    if (no != null && no.isAfter(now)) return _lastDecline[device.id] ?? const AskAnswer(accept: false);
     final ask = _asking[device.id] ??= () {
       final a = IncomingAsk(device, files.length, files.fold(0, (s, f) => s + (f.size ?? 0)));
       incomingAsks.value = [...incomingAsks.value, a];
       return a;
     }();
-    bool yes;
+    AskAnswer a;
     try {
-      yes = await ask.answer.future.timeout(const Duration(minutes: 2), onTimeout: () => false);
+      a = await ask.answer.future
+          .timeout(const Duration(minutes: 2), onTimeout: () => const AskAnswer(accept: false, timedOut: true));
     } finally {
       _asking.remove(device.id);
       incomingAsks.value = incomingAsks.value.where((x) => x != ask).toList();
     }
-    if (yes) {
-      _acceptedUntil[device.id] = DateTime.now().add(_acceptWindow);
-    } else {
-      _declinedUntil[device.id] = DateTime.now().add(const Duration(minutes: 2));
+    // Timed out: close the dialog too.
+    if (!ask.answer.isCompleted) ask.answer.complete(a);
+    if (a.accept) {
+      _quietAccept[device.id] = a.quiet;
+      // The rest of this batch arrives as separate requests: a short window
+      // (or 30 minutes when asked not to ask again).
+      _acceptedUntil[device.id] = DateTime.now().add(a.quiet ? _acceptWindow : const Duration(minutes: 2));
+      return null;
     }
-    return yes;
+    // Declined: the same sender can't ask again for a minute.
+    _lastDecline[device.id] = a;
+    _declinedUntil[device.id] = DateTime.now().add(const Duration(minutes: 1));
+    return a;
   }
 
+  final Map<String, bool> _quietAccept = {};
+
   /// Called by the Accept / Decline dialog.
-  void answerIncoming(IncomingAsk ask, {required bool accept}) {
-    if (!ask.answer.isCompleted) ask.answer.complete(accept);
+  void answerIncoming(IncomingAsk ask, AskAnswer answer) {
+    if (!ask.answer.isCompleted) ask.answer.complete(answer);
   }
 
   /// Last signed-in request from each paired device. Devices say "I'm
@@ -141,16 +188,145 @@ class TransferServer extends ChangeNotifier {
   static const Duration pcWindow = Duration(seconds: 90);
 
   bool isOnline(String deviceId) {
-    // In the middle of a request (a big video being checked can take
-    // minutes): certainly there.
-    if ((_inFlight[deviceId] ?? 0) > 0) return true;
+    // A live link open: there (closed the moment the app ends).
+    if (_live[deviceId]?.isNotEmpty ?? false) return true;
     final t = lastSeen[deviceId];
     if (t == null) return false;
     final pc = isDesktopPlatform(settings.trusted[deviceId]?.platform ?? '');
     return DateTime.now().difference(t) < (pc ? pcWindow : phoneWindow);
   }
 
-  final Map<String, int> _inFlight = {};
+  // ------------------------------------------------------------ live links
+
+  /// Open live links per device (normally one; briefly two while a phone
+  /// reconnects).
+  final Map<String, List<_LiveConn>> _live = {};
+
+  bool hasLiveLink(String deviceId) => _live[deviceId]?.isNotEmpty ?? false;
+
+  OnlineDevice? _describe(String id) {
+    final t = settings.trusted[id];
+    return t == null ? null : OnlineDevice(id: id, name: t.name, platform: t.platform);
+  }
+
+  /// Tell every other linked device that [id] came / went.
+  void _broadcast(String id, {required bool online}) {
+    final d = _describe(id);
+    final msg = online ? (d == null ? null : LiveMessage.up(d)) : LiveMessage.down(id);
+    if (msg == null) return;
+    for (final e in _live.entries) {
+      if (e.key == id) continue;
+      for (final c in e.value) {
+        try {
+          c.ws.add(msg);
+        } catch (_) {}
+      }
+    }
+  }
+
+  Future<void> _openLive(HttpRequest req, TrustedDevice device, {required bool wasOnline}) async {
+    final session = req.uri.queryParameters['session'] ?? '';
+    final WebSocket ws;
+    try {
+      ws = await WebSocketTransformer.upgrade(req);
+    } catch (_) {
+      return;
+    }
+    ws.pingInterval = livePingInterval;
+    final list = _live.putIfAbsent(device.id, () => []);
+    // An older link of the same device is stale (the app was closed and
+    // opened again before that link died): drop it. A different session
+    // means it really left and came back — announce it again.
+    final before = _presenceSession[device.id];
+    final again = wasOnline && before != null && before != session;
+    for (final old in list.toList()) {
+      list.remove(old);
+      unawaited(old.ws.close(WebSocketStatus.goingAway).catchError((_) {}));
+    }
+    final conn = _LiveConn(ws, session);
+    list.add(conn);
+    _presenceSession[device.id] = session;
+    lastSeen[device.id] = DateTime.now();
+    final others = onlineNow?.call() ?? {for (final id in lastSeen.keys) if (isOnline(id)) id};
+    ws.add(LiveMessage.hello(
+      family: device.familyMember,
+      online: [
+        for (final id in others)
+          if (id != device.id) ?_describe(id),
+      ],
+    ));
+    if (!wasOnline) {
+      notifyListeners();
+      onPresence?.call(device.id, true);
+      _broadcast(device.id, online: true);
+    } else if (again) {
+      _arrivals.add(device.id);
+      _broadcast(device.id, online: true);
+    }
+    ws.listen((_) {}, onDone: () => _closedLive(device.id, conn), onError: (_) => _closedLive(device.id, conn), cancelOnError: true);
+  }
+
+  void _closedLive(String id, _LiveConn conn) {
+    final list = _live[id];
+    if (list == null || !list.remove(conn)) return; // replaced by a newer link
+    if (list.isEmpty) _live.remove(id);
+    if (hasLiveLink(id)) return;
+    // Gone now (not after the usual quiet time).
+    lastSeen.remove(id);
+    notifyListeners();
+    onPresence?.call(id, false);
+    _broadcast(id, online: false);
+  }
+
+  /// A device's family membership changed: tell it.
+  void _tellMembership(TrustedDevice d) {
+    for (final c in _live[d.id] ?? const <_LiveConn>[]) {
+      try {
+        c.ws.add(LiveMessage.you(family: d.familyMember));
+      } catch (_) {}
+    }
+  }
+
+  /// Move a paired device in or out of the family group (from the UI).
+  Future<void> setFamily(String id, bool family) async {
+    await settings.update((s) => s.trusted[id]?.familyMember = family);
+    final d = settings.trusted[id];
+    if (d != null) _tellMembership(d);
+    if (family) {
+      _acceptedUntil.remove(id);
+    }
+  }
+
+  /// "Make me a family member" requests waiting for the user here.
+  final ValueNotifier<List<MembershipAsk>> membershipAsks = ValueNotifier(const []);
+
+  void answerMembership(MembershipAsk ask, {required bool allow}) {
+    if (!ask.answer.isCompleted) ask.answer.complete(allow);
+  }
+
+  Future<void> _membership(HttpRequest req, TrustedDevice device) async {
+    final body = await _readJson(req);
+    final want = body['family'] == true;
+    // Leaving is always allowed (it only adds questions for the leaver).
+    if (!want || device.familyMember) {
+      if (device.familyMember != want) await setFamily(device.id, want);
+      return _json(req.response, 200, {'family': device.familyMember});
+    }
+    if (membershipAsks.value.any((a) => a.device.id == device.id)) {
+      return _json(req.response, 429, {'error': 'too_many_attempts'});
+    }
+    final ask = MembershipAsk(device);
+    membershipAsks.value = [...membershipAsks.value, ask];
+    bool yes;
+    try {
+      yes = await ask.answer.future.timeout(const Duration(minutes: 2), onTimeout: () => false);
+    } finally {
+      membershipAsks.value = membershipAsks.value.where((a) => a != ask).toList();
+    }
+    if (!ask.answer.isCompleted) ask.answer.complete(false); // timed out: close the dialog
+    if (yes) await setFamily(device.id, true);
+    return _json(req.response, 200, {'family': settings.trusted[device.id]?.familyMember ?? false});
+  }
 
   /// Each app start (or return after leaving) has its own id: a new one from
   /// a device we still thought online means it was closed and opened again
@@ -249,6 +425,15 @@ class TransferServer extends ChangeNotifier {
   }
 
   Future<void> stop() async {
+    // Close live links first: the other devices see us leave at once.
+    for (final list in _live.values.toList()) {
+      for (final c in list.toList()) {
+        try {
+          await c.ws.close(WebSocketStatus.goingAway).timeout(const Duration(milliseconds: 300));
+        } catch (_) {}
+      }
+    }
+    _live.clear();
     await _plainHttp?.close(force: true);
     await _secureHttp?.close(force: true);
     await _mux?.close();
@@ -336,17 +521,10 @@ class TransferServer extends ChangeNotifier {
       }
       final wasOnline = isOnline(device.id);
       lastSeen[device.id] = DateTime.now();
-      if (!wasOnline) notifyListeners(); // came online
-      _inFlight[device.id] = (_inFlight[device.id] ?? 0) + 1;
+      if (!wasOnline && !(path == LrProtocol.pathLive)) notifyListeners(); // came online
       try {
         return await _signedIn(req, res, device, path, segs, secure: secure, wasOnline: wasOnline);
       } finally {
-        final n = (_inFlight[device.id] ?? 1) - 1;
-        if (n <= 0) {
-          _inFlight.remove(device.id);
-        } else {
-          _inFlight[device.id] = n;
-        }
         // Still here when it ends (unless this was its "I'm leaving").
         if (lastSeen.containsKey(device.id)) lastSeen[device.id] = DateTime.now();
       }
@@ -411,6 +589,13 @@ class TransferServer extends ChangeNotifier {
         hub.textReceived(device.name, text);
         return _json(res, 200, {'ok': true});
       }
+      if (path == LrProtocol.pathLive && WebSocketTransformer.isUpgradeRequest(req)) {
+        if (!secure && device.secure) return _json(res, 426, {'error': 'upgrade_required'});
+        return await _openLive(req, device, wasOnline: wasOnline);
+      }
+      if (req.method == 'POST' && path == LrProtocol.pathMembership) {
+        return await _membership(req, device);
+      }
       if (req.method == 'POST' && path == LrProtocol.pathPresence) {
         final body = await _readJson(req);
         final online = body['online'] != false;
@@ -421,10 +606,10 @@ class TransferServer extends ChangeNotifier {
           // Closed and opened again before we noticed it was gone.
           if (online && wasOnline && before != null && before != session) _arrivals.add(device.id);
         }
-        if (!online) {
+        if (!online && !hasLiveLink(device.id)) {
           lastSeen.remove(device.id);
-          _inFlight.remove(device.id);
           notifyListeners();
+          _broadcast(device.id, online: false);
         }
         onPresence?.call(device.id, online);
         if (!online) return _json(res, 200, {'online': const []});
@@ -605,7 +790,9 @@ class TransferServer extends ChangeNotifier {
   }
 
   /// Called by the Allow / Deny dialog.
-  Future<void> answerPair(PendingPair p, {required bool allow}) async {
+  /// [family]: join the family group (its transfers need no "Accept");
+  /// otherwise a guest.
+  Future<void> answerPair(PendingPair p, {required bool allow, bool family = true}) async {
     if (p.status != PairApprovalStatus.pending) return;
     if (p.expired) {
       p.status = PairApprovalStatus.expired;
@@ -622,6 +809,7 @@ class TransferServer extends ChangeNotifier {
           // Paired again (e.g. after "Forget"): keep the member chosen here.
           memberName: s.trusted[p.device.id]?.memberName,
           secure: p.secure,
+          familyMember: family,
         );
         // Another PC: one click pairs both ways.
         final g = p.peer;
@@ -656,8 +844,13 @@ class TransferServer extends ChangeNotifier {
     if (library.offline) {
       return _json(req.response, 503, {'error': 'library_offline'});
     }
-    if (!await _mayReceive(device, body.files)) {
-      return _json(req.response, 403, {'error': 'declined'});
+    final refused = await _mayReceive(device, body.files);
+    if (refused != null) {
+      final reason = refused.reason?.trim();
+      return _json(req.response, 403, {
+        'error': refused.timedOut ? 'no_answer' : 'declined',
+        if (reason != null && reason.isNotEmpty) 'reason': reason.length > 200 ? reason.substring(0, 200) : reason,
+      });
     }
     // Family group: the phone tells us whose phone it is (editable there).
     final owner = body.owner?.trim();

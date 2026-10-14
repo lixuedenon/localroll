@@ -250,5 +250,19 @@
   "presence.offline": "“{name}” đã ngoại tuyến",
   "home.online_now": "Đang trực tuyến · {count}",
   "home.kind_pc": "Máy tính",
-  "home.kind_phone": "Điện thoại"
+  "home.kind_phone": "Điện thoại",
+  "auto.guest": "{count} mục mới đang chờ — điện thoại này là khách trên {pc}",
+  "auto.guest_hint": "Đã tạm dừng tự động gửi: mỗi lần gửi cần ai đó bấm \"Chấp nhận\" ở máy tính. Ở trang Máy tính, hãy xin vào nhóm gia đình.",
+  "connect.family_member": "Thành viên gia đình — sao lưu được nhận ngay",
+  "connect.guest": "Khách — mỗi lần gửi cần họ đồng ý",
+  "connect.ask_family": "Xin vào nhóm gia đình",
+  "connect.leave_family": "Rời nhóm gia đình",
+  "connect.ask_family_waiting": "Đã gửi yêu cầu đến “{name}”, đang chờ trên máy tính…",
+  "connect.now_family": "Bạn đã là thành viên gia đình trên “{name}”.",
+  "connect.now_guest": "Bạn giờ là khách trên “{name}”.",
+  "connect.family_denied": "“{name}” đã từ chối (hoặc không ai trả lời).",
+  "connect.membership_failed": "Không liên lạc được với “{name}”. Máy có bật, LocalRoll đang mở và đã cập nhật chưa?",
+  "home.change_pc": "Đổi",
+  "transfer.stopped_no_answer": "Không ai trả lời trên máy tính kịp. Phần còn lại chưa gửi; hãy thử lại sau.",
+  "transfer.their_reason": "Lý do: {reason}"
 }

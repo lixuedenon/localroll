@@ -52,10 +52,41 @@ class DesktopDiscovery extends ChangeNotifier {
   /// (we check in every 10 s), or the Wi-Fi search lists it and our last
   /// direct try did not fail.
   bool isOnline(String id) {
+    // PCs with live links: online exactly while the link is open.
+    if (_liveCapable.contains(id)) return _liveUp.contains(id);
     final t = _reached[id];
     if (t != null && DateTime.now().difference(t) < const Duration(seconds: 90)) return true;
     return found.any((f) => f.id == id) && !_unreachable.contains(id);
   }
+
+  final Set<String> _liveCapable = {};
+  final Set<String> _liveUp = {};
+  List<OnlineDevice> _liveOthers = const [];
+
+  /// From LiveService: the live link to PC [id] opened / closed.
+  void live(String id, bool up) {
+    _liveCapable.add(id);
+    final changed = up ? _liveUp.add(id) : _liveUp.remove(id);
+    if (changed) notifyListeners();
+  }
+
+  /// From LiveService: everyone else the linked PCs see online.
+  void liveOthers(List<OnlineDevice> list) {
+    _liveOthers = list;
+    notifyListeners();
+  }
+
+  /// Per PC: is this phone in its family group (null = not known yet).
+  final Map<String, bool> familyAt = {};
+
+  void setFamilyAt(String pcId, bool family) {
+    if (familyAt[pcId] == family) return;
+    familyAt[pcId] = family;
+    notifyListeners();
+  }
+
+  /// Has a live link (newer PC): no need for the polling check-in.
+  bool linked(String id) => _liveCapable.contains(id);
 
   /// Other devices (phones, other PCs) each paired PC told us it sees
   /// online — this phone can't ask other phones itself.
@@ -71,7 +102,7 @@ class DesktopDiscovery extends ChangeNotifier {
   /// Devices other than our own paired PCs that are online now, as heard
   /// from the PCs that are online (each listed once).
   List<OnlineDevice> get others {
-    final out = <String, OnlineDevice>{};
+    final out = <String, OnlineDevice>{for (final o in _liveOthers) o.id: o};
     for (final e in _relayed.entries) {
       if (!isOnline(e.key)) continue;
       for (final o in e.value) {
@@ -111,7 +142,8 @@ class DesktopDiscovery extends ChangeNotifier {
     scanning = true;
     notifyListeners();
     try {
-      final ports = <int>{LrProtocol.defaultPort, 41530, 31530, 21530, 8530, ...extraPorts};
+      // The usual port and its first fallback (plus ports paired PCs use).
+      final ports = <int>{LrProtocol.defaultPort, 41530, ...extraPorts};
       final prefixes = <String>{};
       for (final ni in await NetworkInterface.list(type: InternetAddressType.IPv4)) {
         for (final a in ni.addresses) {
@@ -127,7 +159,8 @@ class DesktopDiscovery extends ChangeNotifier {
       ];
       // Probe in parallel batches; a closed port answers (or times out) fast.
       // Bounded: never more than ~25 s, and one slow host can't hold a batch.
-      const batch = 64;
+      // Small batches: no burst a router could take for an attack.
+      const batch = 24;
       final until = DateTime.now().add(const Duration(seconds: 25));
       for (var i = 0; i < targets.length && DateTime.now().isBefore(until); i += batch) {
         await Future.wait([
@@ -578,7 +611,8 @@ DesktopClient _beatClient(MobileSettings settings, PairedDesktop d) {
 Future<void> heartbeat(MobileSettings settings, DesktopDiscovery discovery) async {
   await Future.wait([
     for (final d in settings.desktops)
-      if (d.lastHost != null && discovery.isOnline(d.id))
+      // Older PCs only: linked ones know from the open link.
+      if (d.lastHost != null && discovery.isOnline(d.id) && !discovery.linked(d.id))
         () async {
           for (var attempt = 0; attempt < 2; attempt++) {
             final c = _beatClient(settings, d);
@@ -602,7 +636,7 @@ Future<void> heartbeat(MobileSettings settings, DesktopDiscovery discovery) asyn
 Future<void> sayBye(MobileSettings settings, DesktopDiscovery discovery) async {
   await Future.wait([
     for (final d in settings.desktops)
-      if (discovery.isOnline(d.id) && d.lastHost != null)
+      if (discovery.isOnline(d.id) && d.lastHost != null && !discovery.linked(d.id))
         () async {
           final c = d.fingerprint != null
               ? DesktopClient(
@@ -616,4 +650,26 @@ Future<void> sayBye(MobileSettings settings, DesktopDiscovery discovery) async {
           }
         }(),
   ]).timeout(const Duration(seconds: 4), onTimeout: () => const []);
+}
+
+/// Ask PC [d] to make this phone a family member (it shows "Allow / Deny"),
+/// or leave its family group. Returns the membership now; throws when the
+/// PC can't be reached.
+Future<bool> requestMembership(MobileSettings settings, DesktopDiscovery discovery, PairedDesktop d, {required bool family}) async {
+  final host = d.lastHost ?? discovery.found.where((f) => f.id == d.id).firstOrNull?.hosts.firstOrNull;
+  if (host == null) throw Exception(tr('err.no_address'));
+  final c = d.fingerprint != null
+      ? DesktopClient(host: host, port: d.port, secure: true, pin: d.fingerprint, deviceId: settings.deviceId, token: d.token)
+      : DesktopClient(host: host, port: d.port, deviceId: settings.deviceId, token: d.token);
+  try {
+    final now = await c.membership(family: family);
+    discovery.setFamilyAt(d.id, now);
+    if (d.family != now) {
+      d.family = now;
+      await settings.saveDesktop();
+    }
+    return now;
+  } finally {
+    c.close();
+  }
 }

@@ -250,5 +250,19 @@
   "presence.offline": "「{name}」下線了",
   "home.online_now": "現在在線 · {count}",
   "home.kind_pc": "電腦",
-  "home.kind_phone": "手機"
+  "home.kind_phone": "手機",
+  "auto.guest": "有 {count} 項新內容等待發送——這支手機在 {pc} 上是訪客",
+  "auto.guest_hint": "自動發送已暫停：每次發送都要有人在電腦上點「接受」。請在「電腦」頁申請加入它的家庭組。",
+  "connect.family_member": "家庭成員——備份直接接收",
+  "connect.guest": "訪客——每次發送都要對方同意",
+  "connect.ask_family": "申請成為家庭成員",
+  "connect.leave_family": "退出家庭組",
+  "connect.ask_family_waiting": "已向「{name}」申請，等待電腦上的人同意…",
+  "connect.now_family": "你已成為「{name}」的家庭成員。",
+  "connect.now_guest": "你現在是「{name}」的訪客。",
+  "connect.family_denied": "「{name}」沒有同意（或無人回應）。",
+  "connect.membership_failed": "聯繫不上「{name}」。它開著嗎？LocalRoll 打開並更新了嗎？",
+  "home.change_pc": "更換",
+  "transfer.stopped_no_answer": "電腦上沒有人回應。剩下的沒有發送，可以稍後再試。",
+  "transfer.their_reason": "對方的理由：{reason}"
 }

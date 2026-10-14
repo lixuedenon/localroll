@@ -13,6 +13,17 @@ import 'services/receive_hub.dart';
 import 'services/settings.dart';
 import 'services/tls_identity.dart';
 
+/// A paired device came online / went offline.
+class PresenceEvent {
+  const PresenceEvent(this.id, {required this.online, this.again = false});
+
+  final String id;
+  final bool online;
+
+  /// Closed and opened again before it counted as gone.
+  final bool again;
+}
+
 /// Owns every long-lived service; created once in main().
 class AppServices {
   AppServices._({
@@ -47,6 +58,26 @@ class AppServices {
         for (final id in {...settings.trusted.keys, ...settings.peers.keys})
           if (isOnline(id)) id,
       };
+
+  // ------------------------------------------------------------- presence
+
+  final StreamController<PresenceEvent> _presence = StreamController.broadcast();
+
+  /// Every change, one by one: a device came online, went offline, or was
+  /// closed and opened again quickly ([PresenceEvent.again]).
+  Stream<PresenceEvent> get presenceEvents => _presence.stream;
+  Set<String> _onlineSeen = {};
+
+  void _recomputePresence() {
+    final now = onlineDevices;
+    for (final id in now.difference(_onlineSeen)) {
+      _presence.add(PresenceEvent(id, online: true));
+    }
+    for (final id in _onlineSeen.difference(now)) {
+      _presence.add(PresenceEvent(id, online: false));
+    }
+    _onlineSeen = now;
+  }
 
   /// Name to show for a paired device.
   String deviceName(String id) => settings.peers[id]?.name ?? settings.trusted[id]?.name ?? id;
@@ -91,10 +122,16 @@ class AppServices {
       }
     };
     server.onlineNow = () => s.onlineDevices;
+    // Changes are compared on every notification (each link opening or
+    // closing notifies on its own), so quick off/on is not lost.
+    server.addListener(s._recomputePresence);
+    s.peers.addListener(s._recomputePresence);
+    server.arrivals.listen((id) => s._presence.add(PresenceEvent(id, online: true, again: true)));
     await s.startNetworking();
     // Keep in touch with paired PCs all the time (not only on the Send
     // page), so both sides know who is online.
     s.peers.acquire();
+    s._onlineSeen = s.onlineDevices;
     await ffmpeg.locate();
     return s;
   }

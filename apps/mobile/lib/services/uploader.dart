@@ -16,7 +16,7 @@ import '../ui/cleanup_page.dart' show formatSize;
 enum UploadState { waiting, preparing, uploading, verifying, done, skipped, failed }
 
 /// Why a run ended before everything was sent.
-enum StopReason { none, user, size, time, battery, pcUnavailable, declined }
+enum StopReason { none, user, size, time, battery, pcUnavailable, declined, noAnswer }
 
 /// "Stop after X MB / Y minutes", "pause on low battery".
 class UploadLimits {
@@ -62,6 +62,9 @@ class Uploader extends ChangeNotifier {
 
   /// Set when the run stopped early (shown on the transfer page).
   StopReason stopReason = StopReason.none;
+
+  /// Declined with a reason: what they wrote (plain text).
+  String? declineReason;
 
   final DesktopClient client;
   final MobileSettings settings;
@@ -249,6 +252,13 @@ class Uploader extends ChangeNotifier {
       // Someone on the PC clicked "Decline": stop, the rest stay unsent.
       if (e is LrHttpException && e.body['error'] == 'declined') {
         stopReason = StopReason.declined;
+        final r = (e.body['reason'] as String?)?.trim();
+        declineReason = (r == null || r.isEmpty) ? null : r;
+        _cancelled = true;
+      }
+      // Nobody answered "Accept / Decline" there in time.
+      if (e is LrHttpException && e.body['error'] == 'no_answer') {
+        stopReason = StopReason.noAnswer;
         _cancelled = true;
       }
     }
