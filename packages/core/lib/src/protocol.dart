@@ -59,6 +59,11 @@ class LrProtocol {
   /// paired devices this PC sees online, so phones learn about each other.
   static const String pathPresence = '/api/v1/presence';
 
+  /// mDNS TXT: 'kind' = [kindPhone] for phones that can receive (PCs leave
+  /// it out). Phones only accept while LocalRoll is open on them.
+  static const String txtKind = 'kind';
+  static const String kindPhone = 'phone';
+
   /// Live presence link (WebSocket, signed in): see live.dart.
   static const String pathLive = '/api/v1/live';
 

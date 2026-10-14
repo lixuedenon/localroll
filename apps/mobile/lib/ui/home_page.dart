@@ -10,6 +10,7 @@ import '../services/auto_sender.dart';
 import '../services/discovery.dart';
 import '../services/live_service.dart';
 import '../services/mobile_settings.dart';
+import '../services/phone_server.dart';
 import '../services/uploader.dart';
 import '../services/background_transfer.dart';
 import '../services/backup_plan.dart';
@@ -18,7 +19,9 @@ import 'breathing.dart';
 import 'cleanup_page.dart';
 import 'connect_page.dart';
 import 'device_badge.dart';
+import 'incoming.dart';
 import 'presence_toasts.dart';
+import 'send_target.dart';
 import 'settings_page.dart';
 import 'simple_home.dart';
 import 'theme.dart';
@@ -75,6 +78,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       if (mounted) _note(e.id, e.name, pc: e.pc, online: e.online);
     });
     _live.start();
+    // Every device is equal: this phone can receive while LocalRoll is open.
+    widget.discovery.selfId = widget.settings.deviceId;
+    _server.asks.addListener(_onAsks);
+    _receivedSub = _server.finished.listen((r) {
+      if (mounted) unawaited(showReceived(context, r));
+    });
+    unawaited(_server.start());
     _lastDesktop = widget.settings.current?.id;
     _lastLost = _lostCount();
     // Ask the PC now and then what was deleted there (not only when it
@@ -125,6 +135,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     _beatTimer?.cancel();
     _liveEvents?.cancel();
     unawaited(_live.stop());
+    _server.asks.removeListener(_onAsks);
+    _receivedSub?.cancel();
+    unawaited(_server.stop());
     _auto.dispose();
     super.dispose();
   }
@@ -175,6 +188,29 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       icon: pc ? Icons.computer_rounded : Icons.smartphone_rounded,
       online: online,
     );
+  }
+
+  /// Receiving (from phones and PCs nearby).
+  late final PhoneServer _server = PhoneServer(widget.settings);
+  StreamSubscription<Receiving>? _receivedSub;
+  final Set<IncomingAsk> _shownAsks = {};
+  IncomingAsk? _openAsk;
+
+  /// Someone wants to send: ask (one dialog at a time, in order).
+  Future<void> _onAsks() async {
+    if (_openAsk != null || !mounted) return;
+    final next = _server.asks.value.where((a) => !_shownAsks.contains(a)).firstOrNull;
+    if (next == null) return;
+    _shownAsks.add(next);
+    _openAsk = next;
+    // Answered elsewhere / timed out: close the dialog.
+    unawaited(next.answer.future.then((_) {
+      if (_openAsk == next && mounted) Navigator.of(context, rootNavigator: true).maybePop();
+    }));
+    final reply = await askIncoming(context, next);
+    _openAsk = null;
+    _server.answer(next, reply);
+    if (mounted) unawaited(_onAsks());
   }
 
   /// Live links to the paired PCs (online state and notes).
@@ -262,7 +298,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     // Back: "I'm here" at once.
     final back = _saidBye;
     _saidBye = false;
-    if (back) _live.start();
+    if (back) {
+      _live.start();
+      unawaited(_server.start());
+    }
     if (!(_permission?.hasAccess ?? false)) {
       _reload();
       if (back) refreshPairedLooks(widget.settings, widget.discovery, now: true);
@@ -279,7 +318,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     await BackgroundTransfer.grace(true); // iPhone: a few seconds to say it
     try {
       // Closing the live links is the goodbye; older PCs get a message.
-      await Future.wait([_live.stop(), sayBye(widget.settings, widget.discovery)]);
+      await Future.wait([
+        _live.stop(),
+        sayBye(widget.settings, widget.discovery),
+        // Not visible to nearby phones while away (unless something is arriving).
+        if (!_server.busy) _server.stop(),
+      ]);
     } finally {
       // Coming back later is a new visit (announced even if this goodbye
       // never arrived).
@@ -623,19 +667,34 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Future<void> _send() async {
-    final desktop = widget.settings.current;
-    if (desktop == null) {
-      await _openConnect();
-      return;
-    }
+    var desktop = widget.settings.current;
     final chosen = _assets.where((a) => _selected.contains(a.id)).toList();
     if (chosen.isEmpty) return;
+    NearbyPhone? phone;
+    // Phones nearby (or no PC yet): ask where to.
+    if (widget.discovery.phones.isNotEmpty || desktop == null) {
+      if (desktop == null && widget.discovery.phones.isEmpty) {
+        await _openConnect();
+        return;
+      }
+      final target = await chooseSendTarget(context, widget.settings, widget.discovery);
+      if (!mounted || target == null) return;
+      if (target is NearbyPhone) {
+        phone = target;
+        desktop = PairedDesktop(id: target.id, name: target.name, hosts: target.hosts, port: target.port, token: '');
+      } else if (target is PairedDesktop) {
+        desktop = target;
+      }
+    }
+    if (desktop == null) return;
+    final to = desktop;
     final finished = await Navigator.of(context).push<bool>(MaterialPageRoute(
       builder: (_) => TransferPage(
         settings: widget.settings,
         discovery: widget.discovery,
-        desktop: desktop,
+        desktop: to,
         assets: chosen,
+        phone: phone,
       ),
     ));
     if (finished == true && mounted) setState(_selected.clear);
@@ -842,6 +901,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               ),
             ),
             _onlineStrip(context),
+            ReceivingBanner(server: _server),
             _lostBanner(context),
             _autoBanner(context),
             const SizedBox(height: 14),

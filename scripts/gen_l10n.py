@@ -37,6 +37,7 @@ PLACEHOLDER = re.compile(r"\{(\w+)\}")
 IOS_PREFIX = "ios."
 IOS_KEYS = {
     "ios.photos": "NSPhotoLibraryUsageDescription",
+    "ios.photos_add": "NSPhotoLibraryAddUsageDescription",
     "ios.camera": "NSCameraUsageDescription",
     "ios.local_network": "NSLocalNetworkUsageDescription",
 }

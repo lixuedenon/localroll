@@ -52,6 +52,7 @@ LANGUAGES = json.loads((ROOT / "packages" / "core" / "l10n" / "languages.json").
 MOBILE_EN = json.loads((MOBILE / "l10n" / "en.json").read_text(encoding="utf-8"))
 IOS_PROMPTS = {
     "NSPhotoLibraryUsageDescription": "ios.photos",
+    "NSPhotoLibraryAddUsageDescription": "ios.photos_add",
     "NSCameraUsageDescription": "ios.camera",
     "NSLocalNetworkUsageDescription": "ios.local_network",
 }
@@ -63,6 +64,9 @@ IOS_PLIST_KEYS = {
     "NSBonjourServices": "<array>\n\t\t<string>_localroll._tcp</string>\n\t</array>",
     "NSAppTransportSecurity": "<dict>\n\t\t<key>NSAllowsLocalNetworking</key>\n\t\t<true/>\n\t</dict>",
     "PHPhotoLibraryPreventAutomaticLimitedAccessAlert": "<true/>",
+    # Received files that are not photos/videos: Files › On My iPhone › LocalRoll.
+    "UIFileSharingEnabled": "<true/>",
+    "LSSupportsOpeningDocumentsInPlace": "<true/>",
     # Background transfer (iOS 26+ BGContinuedProcessingTask). Xcode expands
     # $(PRODUCT_BUNDLE_IDENTIFIER) at build time.
     "BGTaskSchedulerPermittedIdentifiers": "<array>\n\t\t<string>$(PRODUCT_BUNDLE_IDENTIFIER).transfer</string>\n\t</array>",
@@ -88,7 +92,7 @@ IOS_PLIST_KEYS = {
 }
 
 # Keys whose value is rewritten even if already present.
-IOS_OVERRIDE = {"CFBundleDisplayName", "NSPhotoLibraryUsageDescription", "NSCameraUsageDescription",
+IOS_OVERRIDE = {"CFBundleDisplayName", "NSPhotoLibraryUsageDescription", "NSPhotoLibraryAddUsageDescription", "NSCameraUsageDescription",
                 "NSLocalNetworkUsageDescription", "CFBundleLocalizations"}
 
 
@@ -113,6 +117,10 @@ def android_manifest(text: str) -> str:
     legacy = 'android.permission.READ_EXTERNAL_STORAGE'
     if legacy not in text:
         lines += f'<uses-permission android:name="{legacy}" android:maxSdkVersion="32" />\n    '
+    # Android 9/10: saving received files to Download/LocalRoll.
+    legacy_write = 'android.permission.WRITE_EXTERNAL_STORAGE'
+    if legacy_write not in text:
+        lines += f'<uses-permission android:name="{legacy_write}" android:maxSdkVersion="29" />\n    '
     if lines:
         text = text.replace("<application", lines + "\n    <application", 1)
     # Plain HTTP to the PC on the LAN; nothing ever goes to the internet.

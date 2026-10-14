@@ -35,6 +35,8 @@ dependencies:
   path_provider: ^2.1.0
   # Pairing tokens and the phone's id in the Keychain / Android Keystore.
   flutter_secure_storage: ^9.2.2
+  # This phone's own HTTPS certificate (receiving from other phones).
+  basic_utils: ^5.7.0
 
 dev_dependencies:
   flutter_test:

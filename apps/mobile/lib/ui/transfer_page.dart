@@ -21,7 +21,11 @@ class TransferPage extends StatefulWidget {
     required this.desktop,
     required this.assets,
     this.limits = UploadLimits.none,
+    this.phone,
   });
+
+  /// Sending to a nearby phone instead of a PC ([desktop] then just names it).
+  final NearbyPhone? phone;
 
   final MobileSettings settings;
   final DesktopDiscovery discovery;
@@ -47,17 +51,24 @@ class _TransferPageState extends State<TransferPage> {
   Future<void> _start(List<AssetEntity> assets) async {
     setState(() => _error = null);
     try {
-      _client ??= await connectToDesktop(
-        widget.settings,
-        widget.desktop,
-        discovered: widget.discovery.found,
-      );
+      final phone = widget.phone;
+      if (phone != null) {
+        _client ??= await connectToPhone(widget.settings, phone);
+        if (_client == null) throw Exception(tr('send.phone_gone', {'name': phone.name}));
+      } else {
+        _client ??= await connectToDesktop(
+          widget.settings,
+          widget.desktop,
+          discovered: widget.discovery.found,
+        );
+      }
       final up = Uploader(
         client: _client!,
         settings: widget.settings,
         desktop: widget.desktop,
         assets: assets,
         limits: widget.limits,
+        toPhone: phone != null,
       );
       setState(() => _uploader = up);
       await up.run();
@@ -314,7 +325,9 @@ class _TransferPageState extends State<TransferPage> {
                       child: Text(tr('transfer.retry_failed')),
                     ),
                   const Spacer(),
-                  if (up.doneCount + up.skippedCount > 0)
+                  // Free up space: only after a backup to a PC, never after
+                  // sending to another phone.
+                  if (widget.phone == null && up.doneCount + up.skippedCount > 0)
                     Padding(
                       padding: const EdgeInsets.only(right: 8),
                       child: OutlinedButton.icon(

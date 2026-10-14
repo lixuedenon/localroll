@@ -50,7 +50,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Scan the pairing QR code shown on your computer.</string>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>Find and connect to computers running LocalRoll on your local network. Files never go through the cloud.</string>
+	<string>Find and connect to computers and phones running LocalRoll on your local network. Files never go through the cloud.</string>
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_localroll._tcp</string>
@@ -111,5 +111,11 @@
 	<array>
 		<string>processing</string>
 	</array>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>LocalRoll saves photos and videos sent to you into your photo library (album “LocalRoll”).</string>
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 </dict>
 </plist>

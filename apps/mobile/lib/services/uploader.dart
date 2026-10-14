@@ -56,7 +56,12 @@ class Uploader extends ChangeNotifier {
     required this.desktop,
     required List<AssetEntity> assets,
     this.limits = UploadLimits.none,
+    this.toPhone = false,
   }) : items = assets.map(UploadItem.new).toList();
+
+  /// Sending to another phone (not a backup): it asks its owner first, and
+  /// nothing is marked as backed up here.
+  final bool toPhone;
 
   final UploadLimits limits;
 
@@ -174,7 +179,7 @@ class Uploader extends ChangeNotifier {
         await PhotoManager.clearFileCache();
       } catch (_) {}
       try {
-        await settings.recordBackup(desktop.id, doneCount);
+        if (!toPhone) await settings.recordBackup(desktop.id, doneCount);
       } catch (_) {}
       running = false;
       finished = true;
@@ -224,7 +229,7 @@ class Uploader extends ChangeNotifier {
           () => a.originFileWithSubtype,
         );
       }
-      await settings.markSent(desktop.id, a.id);
+      if (!toPhone) await settings.markSent(desktop.id, a.id);
       if (!sentPhoto && it.state != UploadState.done) it.state = UploadState.skipped;
     } on _NoSpace catch (e) {
       it
@@ -274,7 +279,9 @@ class Uploader extends ChangeNotifier {
   /// Returns false when it was a duplicate (nothing sent).
   Future<bool> _sendFile(UploadItem it, FileOffer offer, Future<File?> Function() open) async {
     // Ask first: if the PC already has it we skip without reading the file.
-    final session = await client.createSession(SessionRequest(files: [offer], owner: settings.ownerName));
+    final session = await client.createSession(toPhone
+        ? SessionRequest(files: [offer], from: settings.deviceInfo, batch: items.length)
+        : SessionRequest(files: [offer], owner: settings.ownerName));
     final result = session.results[offer.id] ?? const OfferResult(status: OfferStatus.ready);
     if (result.status == OfferStatus.duplicate) return false;
 

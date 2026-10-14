@@ -204,16 +204,25 @@ class OfferResult {
 }
 
 class SessionRequest {
-  const SessionRequest({required this.files, this.owner});
+  const SessionRequest({required this.files, this.owner, this.from, this.batch});
 
   final List<FileOffer> files;
 
   /// The phone's current owner name (family group); the PC keeps it in sync.
   final String? owner;
 
+  /// Sending to a device we are not paired with (phone ↔ phone): who we
+  /// are, for its "X wants to send you …" question.
+  final DeviceInfo? from;
+
+  /// How many items this whole transfer has (each file is its own session).
+  final int? batch;
+
   Map<String, dynamic> toJson() => {
         'files': files.map((f) => f.toJson()).toList(),
         if (owner != null) 'owner': owner,
+        if (from != null) 'from': from!.toJson(),
+        if (batch != null) 'batch': batch,
       };
 
   factory SessionRequest.fromJson(Map<String, dynamic> j) => SessionRequest(
@@ -221,6 +230,8 @@ class SessionRequest {
             .map((e) => FileOffer.fromJson(e as Map<String, dynamic>))
             .toList(),
         owner: j['owner'] as String?,
+        from: j['from'] is Map<String, dynamic> ? DeviceInfo.fromJson(j['from'] as Map<String, dynamic>) : null,
+        batch: (j['batch'] as num?)?.toInt(),
       );
 }
 

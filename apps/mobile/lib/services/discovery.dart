@@ -11,6 +11,19 @@ import '../l10n/l10n.dart';
 import 'desktop_client.dart';
 import 'mobile_settings.dart';
 
+/// Another phone nearby with LocalRoll open (it can receive).
+class NearbyPhone {
+  const NearbyPhone({required this.id, required this.name, required this.platform, required this.hosts, required this.port});
+
+  final String id;
+  final String name;
+
+  /// 'ios' / 'android'.
+  final String platform;
+  final List<String> hosts;
+  final int port;
+}
+
 class FoundDesktop {
   const FoundDesktop({required this.id, required this.name, required this.hosts, required this.port});
 
@@ -29,6 +42,14 @@ class DesktopDiscovery extends ChangeNotifier {
   String? error;
 
   List<FoundDesktop> _mdns = const [];
+
+  /// Phones nearby (LocalRoll open on them), never this one.
+  List<NearbyPhone> phones = const [];
+  List<NearbyPhone> _mdnsPhones = const [];
+  final Map<String, NearbyPhone> _scannedPhones = {};
+
+  /// This phone (left out of [phones]).
+  String? selfId;
   final Map<String, FoundDesktop> _scanned = {};
   bool scanning = false;
 
@@ -132,7 +153,22 @@ class DesktopDiscovery extends ChangeNotifier {
       for (final f in _scanned.values)
         if (!_mdns.any((m) => m.id == f.id)) f,
     ];
+    phones = [
+      for (final p in _mdnsPhones)
+        if (p.id != selfId && p.id.isNotEmpty) p,
+      for (final p in _scannedPhones.values)
+        if (p.id != selfId && !_mdnsPhones.any((m) => m.id == p.id)) p,
+    ]..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
     notifyListeners();
+  }
+
+  /// A nearby phone stopped answering: drop it now (mDNS may keep it a while
+  /// when its app was killed).
+  void phoneGone(String id) {
+    _scannedPhones.remove(id);
+    final before = _mdnsPhones.length;
+    _mdnsPhones = _mdnsPhones.where((p) => p.id != id).toList();
+    if (before != _mdnsPhones.length || phones.any((p) => p.id == id)) _merge();
   }
 
   /// Asks every address of this phone's /24 network on the usual LocalRoll
@@ -185,6 +221,12 @@ class DesktopDiscovery extends ChangeNotifier {
     final c = DesktopClient(host: host, port: port);
     try {
       final info = await c.info(timeout: const Duration(seconds: 2));
+      if (!isDesktopPlatform(info.platform)) {
+        _scannedPhones[info.id] =
+            NearbyPhone(id: info.id, name: info.name, platform: info.platform, hosts: [host], port: port);
+        _merge();
+        return;
+      }
       final prev = _scanned[info.id];
       _scanned[info.id] = FoundDesktop(
         id: info.id,
@@ -223,7 +265,24 @@ class DesktopDiscovery extends ChangeNotifier {
   }
 
   void _update() {
-    final services = _discovery?.services ?? const <nsd.Service>[];
+    final all = _discovery?.services ?? const <nsd.Service>[];
+    List<String> hostsOf(nsd.Service s) => [
+          ...?s.addresses?.where((a) => a.type == InternetAddressType.IPv4).map((a) => a.address),
+          if ((s.addresses == null || s.addresses!.isEmpty) && s.host != null) s.host!,
+        ];
+    bool isPhone(nsd.Service s) => _txt(s, LrProtocol.txtKind) == LrProtocol.kindPhone;
+    _mdnsPhones = [
+      for (final s in all)
+        if (isPhone(s))
+          NearbyPhone(
+            id: _txt(s, 'id') ?? '',
+            name: s.name ?? '',
+            platform: _txt(s, 'platform') ?? '',
+            hosts: hostsOf(s),
+            port: s.port ?? LrProtocol.defaultPort,
+          ),
+    ];
+    final services = [for (final s in all) if (!isPhone(s)) s];
     _mdns = [
       for (final s in services)
         FoundDesktop(
@@ -672,4 +731,38 @@ Future<bool> requestMembership(MobileSettings settings, DesktopDiscovery discove
   } finally {
     c.close();
   }
+}
+
+/// Connect to a nearby phone (no pairing between phones: every transfer is
+/// accepted on it). Its certificate is taken on first contact and then
+/// pinned for this transfer; returns null if it does not answer.
+Future<DesktopClient?> connectToPhone(MobileSettings settings, NearbyPhone p) async {
+  for (final host in p.hosts) {
+    final probe = DesktopClient(host: host, port: p.port, secure: true);
+    try {
+      final info = await probe.info(timeout: const Duration(seconds: 3));
+      final fp = probe.seenFingerprint;
+      if (info.id != p.id || fp == null) continue;
+      return DesktopClient(host: host, port: p.port, secure: true, pin: fp, deviceId: settings.deviceId);
+    } catch (_) {
+    } finally {
+      probe.close();
+    }
+  }
+  return null;
+}
+
+/// Is [p] still there? (quick look, used while choosing where to send)
+Future<bool> phoneAnswers(NearbyPhone p) async {
+  for (final host in p.hosts) {
+    final c = DesktopClient(host: host, port: p.port, secure: true);
+    try {
+      final info = await c.info(timeout: const Duration(seconds: 2));
+      if (info.id == p.id) return true;
+    } catch (_) {
+    } finally {
+      c.close();
+    }
+  }
+  return false;
 }
