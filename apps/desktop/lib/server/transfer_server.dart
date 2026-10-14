@@ -643,6 +643,7 @@ class TransferServer extends ChangeNotifier {
           ChangesResponse(
             deleted: library.deletedSince(device.id, since),
             now: DateTime.now().millisecondsSinceEpoch,
+            library: library.libraryId.isEmpty ? null : library.libraryId,
           ).toJson(),
         );
       }

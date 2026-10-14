@@ -713,6 +713,14 @@ class PeerSender extends ChangeNotifier {
     }
   }
 
+  /// Send a failed or cancelled job again (what already arrived is skipped).
+  void resend(SendJob j) {
+    if (!j.over) return;
+    final peer = settings.peers[j.peer.id] ?? j.peer;
+    jobs.remove(j);
+    add(peer, j.files, j.title);
+  }
+
   void clearFinished() {
     jobs.removeWhere((j) => j.over);
     notifyListeners();

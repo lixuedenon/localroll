@@ -11,6 +11,7 @@ import 'app_nav.dart';
 import 'breathing.dart';
 import 'device_badge.dart';
 import 'format.dart';
+import 'library_recovery.dart';
 import 'media_thumb.dart';
 import 'theme.dart';
 
@@ -71,6 +72,8 @@ class _DashboardPageState extends State<DashboardPage> {
             padding: const EdgeInsets.fromLTRB(36, 28, 36, 36),
             children: [
               _header(context),
+              // Library folder unreachable: say so first, with what can be done.
+              if (s.library.offline) LibraryRecovery(services: s),
               const SizedBox(height: 24),
               LayoutBuilder(builder: (context, c) {
                 final cards = [
@@ -374,7 +377,12 @@ class _DashboardPageState extends State<DashboardPage> {
     final s = widget.services;
     final net = _net;
     final issues = <(IconData, String, VoidCallback?)>[
-      if (s.library.offline) (Icons.usb_off_rounded, tr('home.issue_offline'), () => AppNav.instance.selectTab(AppNav.library)),
+      if (s.library.offline)
+        (
+          s.library.loss == LibraryLoss.gone ? Icons.folder_off_rounded : Icons.usb_off_rounded,
+          tr(s.library.loss == LibraryLoss.gone ? 'home.issue_gone' : 'home.issue_offline'),
+          () => AppNav.instance.selectTab(AppNav.library)
+        ),
       if (s.library.pendingMissing.isNotEmpty)
         (Icons.help_outline_rounded, tr('home.issue_missing', {'count': s.library.pendingMissing.length}),
             () => AppNav.instance.selectTab(AppNav.library)),

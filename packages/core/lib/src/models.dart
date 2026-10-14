@@ -448,18 +448,24 @@ class PairApprovalState {
 
 /// PC → phone: assets of this phone that were deleted on the PC since `since`.
 class ChangesResponse {
-  const ChangesResponse({required this.deleted, required this.now});
+  const ChangesResponse({required this.deleted, required this.now, this.library});
 
   final List<String> deleted;
 
   /// Pass back as `since` next time.
   final int now;
 
-  Map<String, dynamic> toJson() => {'deleted': deleted, 'now': now};
+  /// Id of the PC's library folder. A different one than last time means the
+  /// library was rebuilt (lost folder made anew, another folder chosen):
+  /// the phone re-checks what it thinks is backed up there.
+  final String? library;
+
+  Map<String, dynamic> toJson() => {'deleted': deleted, 'now': now, if (library != null) 'library': library};
 
   factory ChangesResponse.fromJson(Map<String, dynamic> j) => ChangesResponse(
         deleted: (j['deleted'] as List? ?? const []).cast<String>(),
         now: (j['now'] as num?)?.toInt() ?? 0,
+        library: j['library'] as String?,
       );
 }
 

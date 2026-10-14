@@ -148,7 +148,7 @@ class _SendPageState extends State<SendPage> {
                       child: TextButton(onPressed: s.sender.clearFinished, child: Text(tr('send.clear'))),
                     ),
                 ]),
-                for (final j in s.sender.jobs) _JobTile(job: j, onCancel: () => s.sender.cancel(j)),
+                for (final j in s.sender.jobs) _JobTile(job: j, onCancel: () => s.sender.cancel(j), onResend: () => s.sender.resend(j)),
               ],
             ],
           ),
@@ -389,10 +389,13 @@ class _SendPageState extends State<SendPage> {
 }
 
 class _JobTile extends StatelessWidget {
-  const _JobTile({required this.job, required this.onCancel});
+  const _JobTile({required this.job, required this.onCancel, this.onResend});
 
   final SendJob job;
   final VoidCallback onCancel;
+
+  /// Failed / cancelled: send it again (finished files are skipped).
+  final VoidCallback? onResend;
 
   @override
   Widget build(BuildContext context) {
@@ -429,6 +432,12 @@ class _JobTile extends StatelessWidget {
             ),
             Text(status, style: TextStyle(color: color, fontSize: 13)),
             if (!j.over) IconButton(tooltip: tr('common.cancel'), onPressed: onCancel, icon: const Icon(Icons.close_rounded)),
+            if (onResend != null && (j.state == SendJobState.failed || j.state == SendJobState.cancelled))
+              TextButton.icon(
+                onPressed: onResend,
+                icon: const Icon(Icons.refresh_rounded, size: 18),
+                label: Text(tr('send.resend')),
+              ),
           ]),
           const SizedBox(height: 8),
           ClipRRect(

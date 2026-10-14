@@ -87,6 +87,17 @@ class MediaItem {
 ///   * copied in from elsewhere → added to the library.
 /// "Can't find it" is never taken as "deleted" when the whole folder is
 /// unreachable (external drive unplugged): see [offline].
+/// Why the library folder can't be reached.
+enum LibraryLoss {
+  none,
+
+  /// Its drive is gone (external drive unplugged): wait for it.
+  unplugged,
+
+  /// The drive is there but the folder is not: deleted or moved.
+  gone,
+}
+
 class LibraryIndex extends ChangeNotifier {
   LibraryIndex(this.rootPath, {this.stateFile});
 
@@ -110,6 +121,13 @@ class LibraryIndex extends ChangeNotifier {
   /// moved or renamed). Nothing is received and nothing is marked deleted
   /// until it is back.
   bool offline = false;
+
+  /// When [offline]: unplugged drive, or the folder itself deleted / moved.
+  LibraryLoss loss = LibraryLoss.none;
+
+  /// This library folder's own id (kept in .localroll/library_id). A new
+  /// one means a new library: phones re-check what they think is on it.
+  String libraryId = '';
 
   /// Many files vanished at once (folder moved? mistake?): they wait here,
   /// hidden, until the user confirms. Phones are not told before that.
@@ -169,8 +187,10 @@ class LibraryIndex extends ChangeNotifier {
       return;
     }
     offline = false;
+    loss = LibraryLoss.none;
     _offlineRetry?.cancel();
     await Directory(incomingDir).create(recursive: true);
+    libraryId = await _loadLibraryId();
     await Directory(cacheDir).create(recursive: true);
     if (await _indexFile.exists()) {
       try {
@@ -190,6 +210,7 @@ class LibraryIndex extends ChangeNotifier {
     await reconcile();
     _startWatching();
     notifyListeners();
+    unawaited(_writeBackup(force: true));
   }
 
   /// Switches to another library folder.
@@ -235,8 +256,39 @@ class LibraryIndex extends ChangeNotifier {
     } catch (_) {}
   }
 
+  File get _idFile => File('$metaDir${_sep}library_id');
+
+  Future<String> _loadLibraryId() async {
+    try {
+      if (await _idFile.exists()) {
+        final id = (await _idFile.readAsString()).trim();
+        if (id.isNotEmpty) return id;
+      }
+      final id = shortKey('${DateTime.now().microsecondsSinceEpoch}|$rootPath');
+      await _idFile.writeAsString(id, flush: true);
+      return id;
+    } catch (_) {
+      return '';
+    }
+  }
+
+  /// Drive letter root (C:\) of the library, if it has one.
+  String? get _driveRoot {
+    final m = RegExp(r'^([A-Za-z]:[\\/])').firstMatch(rootPath);
+    return m?.group(1);
+  }
+
   void _goOffline() {
     offline = true;
+    unawaited(() async {
+      final drive = _driveRoot;
+      final driveThere = drive == null ? Directory(rootPath).parent.existsSync() : await Directory(drive).exists();
+      final l = driveThere ? LibraryLoss.gone : LibraryLoss.unplugged;
+      if (l != loss) {
+        loss = l;
+        notifyListeners();
+      }
+    }());
     _stopWatching();
     // Check again every 20 s; when the drive is back everything resumes.
     _offlineRetry?.cancel();
@@ -247,6 +299,69 @@ class LibraryIndex extends ChangeNotifier {
       }
     });
     notifyListeners();
+  }
+
+  // --------------------------------------------------------------- repair
+
+  /// A copy of the item list kept outside the library (in the app's own
+  /// folder), so a deleted library folder can still tell phones what is
+  /// no longer on this PC.
+  File? get _backupFile {
+    final f = stateFile;
+    if (f == null) return null;
+    return File('${f.parent.path}${_sep}library_backup_${shortKey(rootPath.toLowerCase())}.json');
+  }
+
+  DateTime _lastBackup = DateTime.fromMillisecondsSinceEpoch(0);
+
+  Future<void> _writeBackup({bool force = false}) async {
+    final f = _backupFile;
+    if (f == null || offline) return;
+    if (!force && DateTime.now().difference(_lastBackup) < const Duration(minutes: 2)) return;
+    _lastBackup = DateTime.now();
+    try {
+      final tmp = File('${f.path}.tmp');
+      await tmp.writeAsString(jsonEncode({'items': _items.map((i) => i.toJson()).toList()}));
+      await tmp.rename(f.path);
+    } catch (_) {}
+  }
+
+  Future<List<MediaItem>> _readBackup() async {
+    final f = _backupFile;
+    if (f == null || !await f.exists()) return const [];
+    try {
+      final j = jsonDecode(await f.readAsString()) as Map<String, dynamic>;
+      return [for (final e in (j['items'] as List? ?? const [])) MediaItem.fromJson(e as Map<String, dynamic>)];
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  /// The folder is gone for good: make it again, empty. What was in it is
+  /// recorded as "no longer on this PC" (from the backup list, when there
+  /// is one), so phones show those items as not backed up and can send them
+  /// again. Returns how many items were recorded so.
+  Future<int> recreate() async {
+    final before = await _readBackup();
+    await Directory(rootPath).create(recursive: true);
+    await load();
+    final now = DateTime.now().millisecondsSinceEpoch;
+    var n = 0;
+    for (final i in before) {
+      if (i.deviceId == null || i.assetId == null) continue;
+      _deleted.add(_Tombstone(i.deviceId!, i.assetId!, now, i));
+      n++;
+    }
+    await flush();
+    await _writeBackup(force: true);
+    notifyListeners();
+    return n;
+  }
+
+  /// Does [folder] hold a LocalRoll library (moved here)?
+  static Future<bool> isLibraryFolder(String folder) async {
+    final sep = Platform.pathSeparator;
+    return File('$folder$sep.localroll${sep}index.json').exists();
   }
 
   /// "Try again" from the banner.
@@ -567,6 +682,7 @@ class LibraryIndex extends ChangeNotifier {
     }));
     await tmp.rename(_indexFile.path);
     await _saveKnownCount();
+    await _writeBackup();
   }
 
   /// Picks a free file name inside [folder] (adds " (1)", " (2)" … if needed).

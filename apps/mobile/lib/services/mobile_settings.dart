@@ -27,9 +27,15 @@ class PairedDesktop {
     this.changesSinceMs = 0,
     this.fingerprint,
     this.family,
+    this.libraryId,
   });
 
   final String id;
+
+  /// Id of the PC's library last time we asked. When it changes the PC's
+  /// library was rebuilt (lost folder made anew, another folder chosen), so
+  /// what this phone thinks is backed up there is checked again.
+  String? libraryId;
 
   /// This phone's place at that PC: family member (sends go straight in —
   /// auto-send works) or guest (each transfer waits for "Accept" there).
@@ -75,6 +81,7 @@ class PairedDesktop {
         'changesSinceMs': changesSinceMs,
         if (fingerprint != null) 'fingerprint': fingerprint,
         if (family != null) 'family': family,
+        if (libraryId != null) 'libraryId': libraryId,
       };
 
   factory PairedDesktop.fromJson(Map<String, dynamic> j) => PairedDesktop(
@@ -91,6 +98,7 @@ class PairedDesktop {
         changesSinceMs: (j['changesSinceMs'] as num?)?.toInt() ?? 0,
         fingerprint: j['fingerprint'] as String?,
         family: j['family'] as bool?,
+        libraryId: j['libraryId'] as String?,
       );
 }
 

@@ -439,12 +439,35 @@ Future<void> _pullDeletions(
         await settings.addLost(d.id, ours);
       }
     }
+    // The PC's library was rebuilt: ask about everything we think is there;
+    // what it no longer has is shown as "not backed up any more".
+    final lib = r.library;
+    if (lib != null && lib != d.libraryId) {
+      if (d.libraryId != null) await _recheckAll(settings, d, c);
+      d.libraryId = lib;
+    }
     d.changesSinceMs = r.now;
     await settings.saveDesktop();
   } catch (_) {
     // Older PC version or not paired any more: nothing to do.
   } finally {
     c?.close();
+  }
+}
+
+Future<void> _recheckAll(MobileSettings settings, PairedDesktop d, DesktopClient c) async {
+  final ids = settings.sentTo(d.id).where((id) => !isLiveCompanion(id)).toList();
+  final gone = <String>[];
+  for (var i = 0; i < ids.length; i += LrProtocol.verifyBatch) {
+    final batch = ids.sublist(i, i + LrProtocol.verifyBatch > ids.length ? ids.length : i + LrProtocol.verifyBatch);
+    final r = await c.verify(batch);
+    for (final v in r.items) {
+      if (!v.ok && v.reason == 'missing') gone.add(v.assetId);
+    }
+  }
+  if (gone.isNotEmpty) {
+    await settings.unmarkSent(d.id, gone);
+    await settings.addLost(d.id, gone);
   }
 }
 

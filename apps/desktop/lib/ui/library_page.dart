@@ -11,6 +11,7 @@ import '../services/library_index.dart';
 import '../services/network.dart';
 import '../services/peers.dart';
 import 'files_view.dart';
+import 'library_recovery.dart';
 import 'media_thumb.dart';
 import 'send_page.dart';
 import 'theme.dart';
@@ -275,10 +276,8 @@ class _LibraryPageState extends State<LibraryPage> {
           const SizedBox(width: 4),
           FilledButton(onPressed: () => setState(() => _onlyRecent = true), child: Text(tr('lib.recent_show'))),
         ]),
-      if (lib.offline)
-        banner(Icons.usb_off_rounded, theme.colorScheme.error, tr('lib.offline', {'path': lib.rootPath}), [
-          TextButton(onPressed: lib.retry, child: Text(tr('common.retry'))),
-        ]),
+      // Unplugged drive / deleted or moved folder: what can be done.
+      if (lib.offline) LibraryRecovery(services: widget.services),
       if (!lib.offline && lib.pendingMissing.isNotEmpty)
         banner(Icons.help_outline_rounded, Colors.amber, tr('lib.missing_ask', {'count': lib.pendingMissing.length}), [
           TextButton(onPressed: lib.retry, child: Text(tr('lib.missing_rescan'))),
