@@ -382,6 +382,7 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.note': 'The originals on this PC stay as they are; the converted copies are only for sending. Everything else goes as it is.',
     'phonefmt.as_is': 'Send as they are',
     'phonefmt.convert': 'Convert and send',
+    'send.phone_online_not_ready': 'Online, but its receiver isn\'t ready. Close LocalRoll on the phone and open it again; if this stays, update LocalRoll on the phone.',
   },
   'zh': {
     'nav.library': '媒体库',
@@ -762,6 +763,7 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.note': '电脑上的原文件不会改动，转换的副本只用于发送。其余文件原样发送。',
     'phonefmt.as_is': '全部原样发送',
     'phonefmt.convert': '转换后发送',
+    'send.phone_online_not_ready': '手机在线，但接收功能还没准备好。在手机上把 LocalRoll 关掉再打开；如果一直这样，请把手机上的 LocalRoll 更新到最新版。',
   },
   'zh_Hant': {
     'nav.library': '媒體庫',
@@ -1142,6 +1144,7 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.note': '電腦上的原檔案不會改動，轉換的副本只用於傳送。其餘檔案原樣傳送。',
     'phonefmt.as_is': '全部原樣傳送',
     'phonefmt.convert': '轉換後傳送',
+    'send.phone_online_not_ready': '手機在線，但接收功能還沒準備好。在手機上把 LocalRoll 關掉再打開；如果一直這樣，請把手機上的 LocalRoll 更新到最新版。',
   },
   'ja': {
     'nav.library': 'ライブラリ',
@@ -1522,6 +1525,7 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.note': 'このPCの元ファイルはそのまま。変換したコピーは送信にだけ使います。その他はそのまま送ります。',
     'phonefmt.as_is': 'そのまま送る',
     'phonefmt.convert': '変換して送る',
+    'send.phone_online_not_ready': 'オンラインですが、受信の準備ができていません。スマホの LocalRoll を閉じて開き直してください。続く場合はスマホの LocalRoll を更新してください。',
   },
   'ko': {
     'nav.library': '라이브러리',
@@ -1902,6 +1906,7 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.note': '이 PC의 원본은 그대로이며, 변환본은 보내는 데만 씁니다. 나머지는 그대로 보냅니다.',
     'phonefmt.as_is': '그대로 보내기',
     'phonefmt.convert': '변환 후 보내기',
+    'send.phone_online_not_ready': '온라인이지만 받을 준비가 되지 않았습니다. 휴대폰에서 LocalRoll을 닫았다가 다시 여세요. 계속되면 휴대폰의 LocalRoll을 업데이트하세요.',
   },
   'es': {
     'nav.library': 'Biblioteca',
@@ -2282,6 +2287,7 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.note': 'Los originales en este PC no cambian; las copias convertidas son solo para enviar. El resto va tal cual.',
     'phonefmt.as_is': 'Enviar tal cual',
     'phonefmt.convert': 'Convertir y enviar',
+    'send.phone_online_not_ready': 'En línea, pero su recepción no está lista. Cierra LocalRoll en el teléfono y ábrelo de nuevo; si sigue así, actualiza LocalRoll en el teléfono.',
   },
   'fr': {
     'nav.library': 'Bibliothèque',
@@ -2662,6 +2668,7 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.note': 'Les originaux sur ce PC restent tels quels ; les copies converties servent seulement à l\'envoi. Le reste part tel quel.',
     'phonefmt.as_is': 'Envoyer tels quels',
     'phonefmt.convert': 'Convertir et envoyer',
+    'send.phone_online_not_ready': 'En ligne, mais sa réception n\'est pas prête. Ferme LocalRoll sur le téléphone et rouvre-le ; si ça persiste, mets à jour LocalRoll sur le téléphone.',
   },
   'de': {
     'nav.library': 'Mediathek',
@@ -3042,6 +3049,7 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.note': 'Die Originale auf diesem PC bleiben unverändert; umgewandelte Kopien dienen nur dem Senden. Alles andere geht unverändert.',
     'phonefmt.as_is': 'Unverändert senden',
     'phonefmt.convert': 'Umwandeln und senden',
+    'send.phone_online_not_ready': 'Online, aber der Empfang ist nicht bereit. LocalRoll auf dem Handy schließen und neu öffnen; bleibt es so, LocalRoll auf dem Handy aktualisieren.',
   },
   'pt': {
     'nav.library': 'Biblioteca',
@@ -3422,6 +3430,7 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.note': 'Os originais neste PC ficam como estão; as cópias convertidas são só para enviar. O resto vai como está.',
     'phonefmt.as_is': 'Enviar como estão',
     'phonefmt.convert': 'Converter e enviar',
+    'send.phone_online_not_ready': 'Online, mas a receção não está pronta. Feche o LocalRoll no telefone e abra de novo; se continuar, atualize o LocalRoll no telefone.',
   },
   'ru': {
     'nav.library': 'Медиатека',
@@ -3802,6 +3811,7 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.note': 'Оригиналы на этом ПК не меняются; преобразованные копии только для отправки. Остальное уходит как есть.',
     'phonefmt.as_is': 'Отправить как есть',
     'phonefmt.convert': 'Преобразовать и отправить',
+    'send.phone_online_not_ready': 'В сети, но приём не готов. Закройте LocalRoll на телефоне и откройте снова; если не поможет, обновите LocalRoll на телефоне.',
   },
   'it': {
     'nav.library': 'Libreria',
@@ -4182,6 +4192,7 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.note': 'Gli originali su questo PC restano invariati; le copie convertite servono solo per l\'invio. Il resto va così com\'è.',
     'phonefmt.as_is': 'Invia così come sono',
     'phonefmt.convert': 'Converti e invia',
+    'send.phone_online_not_ready': 'Online, ma la ricezione non è pronta. Chiudi LocalRoll sul telefono e riaprilo; se continua, aggiorna LocalRoll sul telefono.',
   },
   'ar': {
     'nav.library': 'المكتبة',
@@ -4562,6 +4573,7 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.note': 'تبقى الأصول على هذا الكمبيوتر كما هي؛ النسخ المحوّلة للإرسال فقط. والباقي يُرسل كما هو.',
     'phonefmt.as_is': 'أرسل كما هي',
     'phonefmt.convert': 'حوّل وأرسل',
+    'send.phone_online_not_ready': 'متصل، لكن الاستقبال غير جاهز. أغلق LocalRoll على الهاتف وافتحه مجددًا؛ وإن استمر ذلك فحدّث LocalRoll على الهاتف.',
   },
   'hi': {
     'nav.library': 'लाइब्रेरी',
@@ -4942,6 +4954,7 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.note': 'इस पीसी पर मूल फ़ाइलें वैसी ही रहती हैं; बदली गई कॉपी सिर्फ़ भेजने के लिए हैं। बाकी वैसे ही जाती हैं।',
     'phonefmt.as_is': 'जैसे हैं वैसे भेजें',
     'phonefmt.convert': 'बदलकर भेजें',
+    'send.phone_online_not_ready': 'ऑनलाइन है, पर पाने के लिए तैयार नहीं। फ़ोन पर LocalRoll बंद करके फिर खोलें; फिर भी ऐसा रहे तो फ़ोन पर LocalRoll अपडेट करें।',
   },
   'id': {
     'nav.library': 'Pustaka',
@@ -5322,6 +5335,7 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.note': 'File asli di PC ini tetap; salinan hasil konversi hanya untuk dikirim. Sisanya dikirim apa adanya.',
     'phonefmt.as_is': 'Kirim apa adanya',
     'phonefmt.convert': 'Konversi lalu kirim',
+    'send.phone_online_not_ready': 'Online, tetapi penerimaannya belum siap. Tutup LocalRoll di ponsel lalu buka lagi; jika tetap begini, perbarui LocalRoll di ponsel.',
   },
   'vi': {
     'nav.library': 'Thư viện',
@@ -5702,6 +5716,7 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.note': 'Bản gốc trên máy này giữ nguyên; bản chuyển đổi chỉ dùng để gửi. Phần còn lại gửi nguyên trạng.',
     'phonefmt.as_is': 'Gửi nguyên trạng',
     'phonefmt.convert': 'Chuyển đổi rồi gửi',
+    'send.phone_online_not_ready': 'Đang trực tuyến nhưng chưa sẵn sàng nhận. Đóng LocalRoll trên điện thoại rồi mở lại; nếu vẫn vậy, hãy cập nhật LocalRoll trên điện thoại.',
   },
   'th': {
     'nav.library': 'คลังสื่อ',
@@ -6082,6 +6097,7 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.note': 'ไฟล์ต้นฉบับบนพีซีนี้ไม่เปลี่ยน สำเนาที่แปลงใช้สำหรับส่งเท่านั้น ที่เหลือส่งตามเดิม',
     'phonefmt.as_is': 'ส่งตามเดิม',
     'phonefmt.convert': 'แปลงแล้วส่ง',
+    'send.phone_online_not_ready': 'ออนไลน์ แต่ยังไม่พร้อมรับ ปิด LocalRoll บนมือถือแล้วเปิดใหม่ หากยังเป็นอยู่ ให้อัปเดต LocalRoll บนมือถือ',
   },
   'tr': {
     'nav.library': 'Kitaplık',
@@ -6462,5 +6478,6 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.note': 'Bu PC\'deki orijinaller aynı kalır; dönüştürülen kopyalar yalnızca gönderim için. Gerisi olduğu gibi gider.',
     'phonefmt.as_is': 'Olduğu gibi gönder',
     'phonefmt.convert': 'Dönüştür ve gönder',
+    'send.phone_online_not_ready': 'Çevrimiçi, ancak alma hazır değil. Telefonda LocalRoll\'u kapatıp yeniden açın; böyle kalırsa telefondaki LocalRoll\'u güncelleyin.',
   },
 };

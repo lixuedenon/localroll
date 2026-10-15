@@ -376,5 +376,6 @@
   "phonefmt.h264": "{count} videos → MP4 (H.264), near-original quality — this can take a while",
   "phonefmt.note": "The originals on this PC stay as they are; the converted copies are only for sending. Everything else goes as it is.",
   "phonefmt.as_is": "Send as they are",
-  "phonefmt.convert": "Convert and send"
+  "phonefmt.convert": "Convert and send",
+  "send.phone_online_not_ready": "Online, but its receiver isn't ready. Close LocalRoll on the phone and open it again; if this stays, update LocalRoll on the phone."
 }

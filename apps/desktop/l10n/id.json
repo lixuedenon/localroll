@@ -376,5 +376,6 @@
   "phonefmt.h264": "{count} video → MP4 (H.264), kualitas hampir asli — bisa agak lama",
   "phonefmt.note": "File asli di PC ini tetap; salinan hasil konversi hanya untuk dikirim. Sisanya dikirim apa adanya.",
   "phonefmt.as_is": "Kirim apa adanya",
-  "phonefmt.convert": "Konversi lalu kirim"
+  "phonefmt.convert": "Konversi lalu kirim",
+  "send.phone_online_not_ready": "Online, tetapi penerimaannya belum siap. Tutup LocalRoll di ponsel lalu buka lagi; jika tetap begini, perbarui LocalRoll di ponsel."
 }

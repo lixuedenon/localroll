@@ -376,5 +376,6 @@
   "phonefmt.h264": "ビデオ {count} 本 → MP4（H.264）、元に近い画質（時間がかかることがあります）",
   "phonefmt.note": "このPCの元ファイルはそのまま。変換したコピーは送信にだけ使います。その他はそのまま送ります。",
   "phonefmt.as_is": "そのまま送る",
-  "phonefmt.convert": "変換して送る"
+  "phonefmt.convert": "変換して送る",
+  "send.phone_online_not_ready": "オンラインですが、受信の準備ができていません。スマホの LocalRoll を閉じて開き直してください。続く場合はスマホの LocalRoll を更新してください。"
 }

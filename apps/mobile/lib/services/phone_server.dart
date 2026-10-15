@@ -101,7 +101,17 @@ class PhoneServer extends ChangeNotifier {
   /// Somebody is sending to us now (keep listening a little after leaving).
   bool get busy => receiving != null;
 
-  Future<void> start() async {
+  /// Start / stop run one at a time (leaving and coming back quickly must
+  /// not end with the server stopped while the app is on screen).
+  Future<void> _turn = Future.value();
+  Future<void> _serial(Future<void> Function() f) => _turn = _turn.then((_) => f()).catchError((Object e) {
+        debugPrint('phone server: $e');
+      });
+
+  Future<void> start() => _serial(_start);
+  Future<void> stop() => _serial(_stop);
+
+  Future<void> _start() async {
     if (_http != null) return;
     try {
       _tls ??= await TlsIdentity.load(await getApplicationSupportDirectory());
@@ -140,7 +150,7 @@ class PhoneServer extends ChangeNotifier {
 
   /// App left the screen: stop being visible (iPhone can't listen in the
   /// background anyway). Waiting questions count as "no answer".
-  Future<void> stop() async {
+  Future<void> _stop() async {
     final r = _mdns;
     _mdns = null;
     if (r != null) {

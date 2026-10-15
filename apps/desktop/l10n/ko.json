@@ -376,5 +376,6 @@
   "phonefmt.h264": "동영상 {count}개 → MP4(H.264), 원본에 가까운 화질 — 시간이 걸릴 수 있음",
   "phonefmt.note": "이 PC의 원본은 그대로이며, 변환본은 보내는 데만 씁니다. 나머지는 그대로 보냅니다.",
   "phonefmt.as_is": "그대로 보내기",
-  "phonefmt.convert": "변환 후 보내기"
+  "phonefmt.convert": "변환 후 보내기",
+  "send.phone_online_not_ready": "온라인이지만 받을 준비가 되지 않았습니다. 휴대폰에서 LocalRoll을 닫았다가 다시 여세요. 계속되면 휴대폰의 LocalRoll을 업데이트하세요."
 }

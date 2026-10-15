@@ -376,5 +376,6 @@
   "phonefmt.h264": "{count} Videos → MP4 (H.264), fast Originalqualität – kann dauern",
   "phonefmt.note": "Die Originale auf diesem PC bleiben unverändert; umgewandelte Kopien dienen nur dem Senden. Alles andere geht unverändert.",
   "phonefmt.as_is": "Unverändert senden",
-  "phonefmt.convert": "Umwandeln und senden"
+  "phonefmt.convert": "Umwandeln und senden",
+  "send.phone_online_not_ready": "Online, aber der Empfang ist nicht bereit. LocalRoll auf dem Handy schließen und neu öffnen; bleibt es so, LocalRoll auf dem Handy aktualisieren."
 }

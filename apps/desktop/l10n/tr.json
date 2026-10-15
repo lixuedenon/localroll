@@ -376,5 +376,6 @@
   "phonefmt.h264": "{count} video → MP4 (H.264), aslına yakın kalite — biraz sürebilir",
   "phonefmt.note": "Bu PC'deki orijinaller aynı kalır; dönüştürülen kopyalar yalnızca gönderim için. Gerisi olduğu gibi gider.",
   "phonefmt.as_is": "Olduğu gibi gönder",
-  "phonefmt.convert": "Dönüştür ve gönder"
+  "phonefmt.convert": "Dönüştür ve gönder",
+  "send.phone_online_not_ready": "Çevrimiçi, ancak alma hazır değil. Telefonda LocalRoll'u kapatıp yeniden açın; böyle kalırsa telefondaki LocalRoll'u güncelleyin."
 }

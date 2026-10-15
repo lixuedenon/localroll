@@ -88,10 +88,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           if (_server.running) 'rport': '${_server.port}',
           if (_server.fingerprint != null) 'rfp': _server.fingerprint!,
         };
-    unawaited(() async {
-      await _server.start();
-      if (mounted) _live.start();
-    }());
+    _queue(_comeBack);
     _lastDesktop = widget.settings.current?.id;
     _lastLost = _lostCount();
     // Ask the PC now and then what was deleted there (not only when it
@@ -100,6 +97,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
         refreshPairedLooks(widget.settings, widget.discovery);
         _checkPresence(); // "went offline" also when nothing else changes
+        // On screen but not receiving / not linked (start failed earlier):
+        // set it up again.
+        if (!_saidBye && (!_server.running || !_live.running)) _queue(_comeBack);
       }
     });
     // "I'm here" every 10 s while on screen (one small request per PC).
@@ -297,7 +297,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if ((state == AppLifecycleState.hidden || state == AppLifecycleState.paused) && !BackgroundTransfer.active) {
       if (!_saidBye) {
         _saidBye = true;
-        unawaited(_goodbye());
+        _queue(_goodbye);
       }
       return;
     }
@@ -305,12 +305,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     // Back: "I'm here" at once.
     final back = _saidBye;
     _saidBye = false;
-    if (back) {
-      unawaited(() async {
-        await _server.start();
-        if (mounted) _live.start();
-      }());
-    }
+    if (back) _queue(_comeBack);
     if (!(_permission?.hasAccess ?? false)) {
       _reload();
       if (back) refreshPairedLooks(widget.settings, widget.discovery, now: true);
@@ -323,8 +318,36 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   bool _saidBye = false;
 
+  /// Leaving and coming back run one after the other, never interleaved:
+  /// coming back quickly must not end with the links closed and the
+  /// receiver stopped while the app is on screen (the PC then sees the
+  /// phone as "online" from its check-ins but can't send to it).
+  Future<void> _lifecycle = Future.value();
+  void _queue(Future<void> Function() step) {
+    _lifecycle = _lifecycle.then((_) => step()).catchError((Object e) {
+      debugPrint('lifecycle: $e');
+    });
+  }
+
+  /// On screen: receiver up first (its port goes with the live links), then
+  /// the live links. If the receiver came up only now, links opened
+  /// without it are reopened so the PCs learn where to send.
+  Future<void> _comeBack() async {
+    if (_saidBye || !mounted) return; // left again meanwhile
+    final had = _server.running;
+    await _server.start();
+    if (_saidBye || !mounted) return;
+    if (!had && _server.running && _live.running) await _live.stop();
+    if (!_live.running) _live.start();
+  }
+
   Future<void> _goodbye() async {
+    if (!_saidBye) return; // already back: nothing to say
     await BackgroundTransfer.grace(true); // iPhone: a few seconds to say it
+    if (!_saidBye) {
+      await BackgroundTransfer.grace(false);
+      return;
+    }
     try {
       // Closing the live links is the goodbye; older PCs get a message.
       await Future.wait([

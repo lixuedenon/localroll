@@ -254,6 +254,9 @@ class _SendPageState extends State<SendPage> {
     final s = widget.services;
     final target = s.phoneTarget(t.id);
     final ready = target != null;
+    // Online (checking in) but not telling where it receives: an older
+    // LocalRoll on the phone, or its receiver is still starting.
+    final onlineOnly = !ready && s.isOnline(t.id);
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Breathing(
@@ -272,8 +275,8 @@ class _SendPageState extends State<SendPage> {
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(t.name, style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 4),
-                Text(tr(ready ? 'send.phone_ready' : 'send.phone_closed_hint'),
-                    style: TextStyle(color: ready ? onlineGlow : LrColors.muted, fontSize: 13)),
+                Text(tr(ready ? 'send.phone_ready' : (onlineOnly ? 'send.phone_online_not_ready' : 'send.phone_closed_hint')),
+                    style: TextStyle(color: ready ? onlineGlow : (onlineOnly ? LrColors.safelight : LrColors.muted), fontSize: 13)),
               ]),
             ),
             FilledButton.icon(

@@ -49,6 +49,8 @@ class LiveService extends ChangeNotifier {
   /// Others online as last reported (to tell what changed).
   Map<String, OnlineDevice> _others = {};
 
+  bool get running => _running;
+
   /// App on screen: (re)connect everything, as a new visit.
   void start() {
     _session = DateTime.now().microsecondsSinceEpoch.toRadixString(36);

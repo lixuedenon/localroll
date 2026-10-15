@@ -376,5 +376,6 @@
   "phonefmt.h264": "{count} video → MP4 (H.264), gần như bản gốc — có thể mất thời gian",
   "phonefmt.note": "Bản gốc trên máy này giữ nguyên; bản chuyển đổi chỉ dùng để gửi. Phần còn lại gửi nguyên trạng.",
   "phonefmt.as_is": "Gửi nguyên trạng",
-  "phonefmt.convert": "Chuyển đổi rồi gửi"
+  "phonefmt.convert": "Chuyển đổi rồi gửi",
+  "send.phone_online_not_ready": "Đang trực tuyến nhưng chưa sẵn sàng nhận. Đóng LocalRoll trên điện thoại rồi mở lại; nếu vẫn vậy, hãy cập nhật LocalRoll trên điện thoại."
 }
