@@ -373,9 +373,10 @@
   "phonefmt.title": "有 {count} 个文件需要转换，「{name}」才能显示或播放",
   "phonefmt.jpeg": "{count} 张照片 → 高质量 JPEG（保留拍摄日期、地点和相机信息）",
   "phonefmt.remux": "{count} 段视频 → 只换成 MP4 外壳，画面完全不变（每段几秒）",
-  "phonefmt.h264": "{count} 段视频 → MP4（H.264），画质接近原片——可能需要一些时间",
+  "phonefmt.h264": "{count} 段视频 → 手机能播放的 MP4，画质接近原片（电脑有显卡加速时用 H.265，很快；没有时用 H.264，可能需要一些时间）",
   "phonefmt.note": "电脑上的原文件不会改动，转换的副本只用于发送。其余文件原样发送。",
   "phonefmt.as_is": "全部原样发送",
   "phonefmt.convert": "转换后发送",
-  "send.phone_online_not_ready": "手机在线，但接收功能还没准备好。在手机上把 LocalRoll 关掉再打开；如果一直这样，请把手机上的 LocalRoll 更新到最新版。"
+  "send.phone_online_not_ready": "手机在线，但接收功能还没准备好。在手机上把 LocalRoll 关掉再打开；如果一直这样，请把手机上的 LocalRoll 更新到最新版。",
+  "send.converting_hw": "正在为手机转换 {done}/{total}（显卡加速）"
 }

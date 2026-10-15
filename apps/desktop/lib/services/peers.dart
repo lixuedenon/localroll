@@ -634,6 +634,9 @@ class SendJob {
   int convertTotal = 0;
   double convertProgress = 0;
 
+  /// Videos are re-encoded on the graphics chip (fast).
+  bool convertHw = false;
+
   final String id;
   final PeerPc peer;
 
@@ -901,6 +904,7 @@ class PeerSender extends ChangeNotifier {
     final actions = [for (final f in j.files) await fmt.decide(f, j.platform)];
     final todo = actions.where((a) => a != PhoneAction.asIs).length;
     if (todo == 0) return j.files;
+    if (actions.contains(PhoneAction.toH264)) j.convertHw = await fmt.hardwareEncoder() != null;
     j
       ..state = SendJobState.converting
       ..convertTotal = todo

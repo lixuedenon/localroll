@@ -373,9 +373,10 @@
   "phonefmt.title": "“{name}”에서 보려면 {count}개 파일을 변환해야 합니다",
   "phonefmt.jpeg": "사진 {count}장 → 고화질 JPEG(날짜·위치·카메라 정보 유지)",
   "phonefmt.remux": "동영상 {count}개 → MP4로 포장만 변경, 화질 그대로(각 몇 초)",
-  "phonefmt.h264": "동영상 {count}개 → MP4(H.264), 원본에 가까운 화질 — 시간이 걸릴 수 있음",
+  "phonefmt.h264": "동영상 {count}개 → 휴대폰에서 재생되는 MP4, 원본에 가까운 화질 (그래픽 가속이 있으면 H.265로 빠르게, 없으면 H.264로 시간이 걸릴 수 있음)",
   "phonefmt.note": "이 PC의 원본은 그대로이며, 변환본은 보내는 데만 씁니다. 나머지는 그대로 보냅니다.",
   "phonefmt.as_is": "그대로 보내기",
   "phonefmt.convert": "변환 후 보내기",
-  "send.phone_online_not_ready": "온라인이지만 받을 준비가 되지 않았습니다. 휴대폰에서 LocalRoll을 닫았다가 다시 여세요. 계속되면 휴대폰의 LocalRoll을 업데이트하세요."
+  "send.phone_online_not_ready": "온라인이지만 받을 준비가 되지 않았습니다. 휴대폰에서 LocalRoll을 닫았다가 다시 여세요. 계속되면 휴대폰의 LocalRoll을 업데이트하세요.",
+  "send.converting_hw": "휴대폰용으로 변환 중 {done}/{total} (그래픽 가속)"
 }

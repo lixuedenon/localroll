@@ -22,8 +22,11 @@ enum PhoneAction {
   /// (MKV with H.264…): new MP4 box, picture untouched — seconds, lossless.
   remux,
 
-  /// Video the phone can't play (AVI, WMV, MPEG-2, Xvid…): H.264 + AAC MP4,
-  /// near-lossless. Capture date, place and rotation are kept.
+  /// Video the phone can't play (AVI, WMV, MPEG-2, Xvid…): re-encoded to an
+  /// MP4 every phone plays — H.265 on the graphics chip when this PC has
+  /// one that can (fast, small files), else H.264 on the processor (x265
+  /// on the processor would be several times slower). Near-original
+  /// quality; capture date, place and rotation are kept.
   toH264,
 }
 
@@ -44,6 +47,37 @@ class PhoneFormatter {
   final FfmpegService ffmpeg;
 
   bool get available => ffmpeg.available;
+
+  /// Hardware H.265 encoder that works on this PC (NVIDIA, Intel, AMD), or
+  /// null: then H.264 on the processor. Tried once, with a tiny test.
+  Future<String?> hardwareEncoder() => _hw ??= _findHardware();
+  Future<String?>? _hw;
+
+  static const _hwEncoders = ['hevc_nvenc', 'hevc_qsv', 'hevc_amf'];
+
+  Future<String?> _findHardware() async {
+    final exe = ffmpeg.ffmpeg;
+    if (exe == null) return null;
+    for (final enc in _hwEncoders) {
+      try {
+        final r = await Process.run(exe, [
+          '-hide_banner', '-loglevel', 'error', '-nostdin',
+          '-f', 'lavfi', '-i', 'color=c=black:s=640x360:d=0.2',
+          '-vf', 'format=nv12', '-c:v', enc, '-f', 'null', '-',
+        ]).timeout(const Duration(seconds: 15));
+        if (r.exitCode == 0) return enc;
+      } catch (_) {}
+    }
+    return null;
+  }
+
+  /// Encoder settings: near-original quality, 8-bit, what phones play.
+  static List<String> _encodeArgs(String? hw) => switch (hw) {
+        'hevc_nvenc' => ['-c:v', 'hevc_nvenc', '-preset', 'p5', '-tune', 'hq', '-rc', 'vbr', '-cq', '21', '-b:v', '0', '-profile:v', 'main', '-tag:v', 'hvc1'],
+        'hevc_qsv' => ['-c:v', 'hevc_qsv', '-preset', 'medium', '-global_quality', '21', '-profile:v', 'main', '-tag:v', 'hvc1'],
+        'hevc_amf' => ['-c:v', 'hevc_amf', '-quality', 'quality', '-rc', 'cqp', '-qp_i', '20', '-qp_p', '22', '-profile:v', 'main', '-tag:v', 'hvc1'],
+        _ => ['-c:v', 'libx264', '-crf', '18', '-preset', 'faster', '-profile:v', 'high'],
+      };
 
   /// [platform]: 'ios' or 'android'.
   Future<PhoneAction> decide(SendFile f, String platform) async {
@@ -183,18 +217,33 @@ class PhoneFormatter {
   Future<bool> _video(String src, File out, {required bool reencode, void Function(double)? onProgress}) async {
     if (!ffmpeg.available) return false;
     final info = await ffmpeg.probe(src);
+    if (!reencode) return _videoWith(src, out, info, reencode: false, onProgress: onProgress);
+    final hw = await hardwareEncoder();
+    if (hw != null) {
+      if (await _videoWith(src, out, info, reencode: true, hw: hw, onProgress: onProgress)) return true;
+      // The graphics chip refused this one (size, format…): processor.
+      try {
+        if (await out.exists()) await out.delete();
+      } catch (_) {}
+      onProgress?.call(0);
+    }
+    return _videoWith(src, out, info, reencode: true, onProgress: onProgress);
+  }
+
+  Future<bool> _videoWith(String src, File out, ProbeInfo info,
+      {required bool reencode, String? hw, void Function(double)? onProgress}) {
     final filters = <String>[
       // HDR (iPhone HLG, HDR10) to normal colours, else it looks washed out.
       if (reencode && info.isHdr)
         'zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv',
-      if (reencode) 'format=yuv420p',
+      if (reencode) hw == null ? 'format=yuv420p' : 'format=nv12',
     ];
     final args = [
       '-i', src,
       '-map', '0:v:0', '-map', '0:a:0?',
       if (reencode) ...[
         '-vf', filters.join(','),
-        '-c:v', 'libx264', '-crf', '18', '-preset', 'medium', '-profile:v', 'high',
+        ..._encodeArgs(hw),
       ] else
         ...['-c:v', 'copy', if (info.codec == 'hevc') ...['-tag:v', 'hvc1']],
       // Phones want AAC sound (AC-3, DTS, Vorbis, WMA… are re-encoded).
@@ -209,7 +258,7 @@ class PhoneFormatter {
 
   Future<bool> _ffmpeg(List<String> args, {double? durationSec, void Function(double)? onProgress}) async {
     try {
-      final proc = await Process.start(ffmpeg.ffmpeg!, ['-hide_banner', '-loglevel', 'error', '-y', '-nostats', '-progress', 'pipe:1', ...args]);
+      final proc = await Process.start(ffmpeg.ffmpeg!, ['-hide_banner', '-loglevel', 'error', '-nostdin', '-y', '-nostats', '-progress', 'pipe:1', ...args]);
       final err = proc.stderr.drain<void>();
       final total = (durationSec ?? 0) * 1e6;
       await for (final line in proc.stdout.transform(utf8.decoder).transform(const LineSplitter())) {

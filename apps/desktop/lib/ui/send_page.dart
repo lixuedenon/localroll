@@ -132,6 +132,19 @@ class _SendPageState extends State<SendPage> {
                 _section(theme, tr('send.phones')),
                 for (final t in s.phones) _phoneCard(context, t),
               ],
+              // Transfers right under the devices (not below a long list of nearby PCs).
+              if (s.sender.jobs.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                Row(children: [
+                  Expanded(child: _section(theme, tr('send.transfers'))),
+                  if (s.sender.jobs.any((j) => j.over))
+                    Tooltip(
+                      message: tr('common.clear_hint'),
+                      child: TextButton(onPressed: s.sender.clearFinished, child: Text(tr('send.clear'))),
+                    ),
+                ]),
+                for (final j in s.sender.jobs) _JobTile(job: j, onCancel: () => s.sender.cancel(j), onResend: () => s.sender.resend(j)),
+              ],
               const SizedBox(height: 20),
               _section(theme, tr('send.nearby')),
               if (nearby.isEmpty)
@@ -146,18 +159,6 @@ class _SendPageState extends State<SendPage> {
                     child: Text(_showHidden ? tr('send.hide_forgotten') : tr('send.show_forgotten', {'count': hidden.length})),
                   ),
                 ),
-              if (s.sender.jobs.isNotEmpty) ...[
-                const SizedBox(height: 24),
-                Row(children: [
-                  Expanded(child: _section(theme, tr('send.transfers'))),
-                  if (s.sender.jobs.any((j) => j.over))
-                    Tooltip(
-                      message: tr('common.clear_hint'),
-                      child: TextButton(onPressed: s.sender.clearFinished, child: Text(tr('send.clear'))),
-                    ),
-                ]),
-                for (final j in s.sender.jobs) _JobTile(job: j, onCancel: () => s.sender.cancel(j), onResend: () => s.sender.resend(j)),
-              ],
             ],
           ),
         );
@@ -199,6 +200,7 @@ class _SendPageState extends State<SendPage> {
               if (s.peers.familyAt[p.id] case final there?)
                 Text(tr(there ? 'send.me_family_there' : 'send.me_guest_there'),
                     style: TextStyle(color: there ? LrColors.muted : LrColors.safelight, fontSize: 12)),
+              ..._activeLine(p.id),
             ]),
           ),
           FilledButton.icon(
@@ -249,6 +251,22 @@ class _SendPageState extends State<SendPage> {
     );
   }
 
+  /// The transfer to [id] going on now, shown on its card (status + bar).
+  List<Widget> _activeLine(String id) {
+    final j = widget.services.sender.jobs.where((j) => j.peer.id == id && !j.over).firstOrNull;
+    if (j == null) return const [];
+    final (status, color) = jobStatus(j);
+    return [
+      const SizedBox(height: 6),
+      Text(status, style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w600)),
+      const SizedBox(height: 4),
+      ClipRRect(
+        borderRadius: BorderRadius.circular(3),
+        child: LinearProgressIndicator(value: jobProgress(j), minHeight: 4, color: LrColors.verified, backgroundColor: LrColors.raised),
+      ),
+    ];
+  }
+
   /// A paired phone: breathes while it can receive (LocalRoll open on it).
   Widget _phoneCard(BuildContext context, TrustedDevice t) {
     final s = widget.services;
@@ -277,6 +295,7 @@ class _SendPageState extends State<SendPage> {
                 const SizedBox(height: 4),
                 Text(tr(ready ? 'send.phone_ready' : (onlineOnly ? 'send.phone_online_not_ready' : 'send.phone_closed_hint')),
                     style: TextStyle(color: ready ? onlineGlow : (onlineOnly ? LrColors.safelight : LrColors.muted), fontSize: 13)),
+                ..._activeLine(t.id),
               ]),
             ),
             FilledButton.icon(
@@ -453,6 +472,34 @@ class _SendPageState extends State<SendPage> {
   }
 }
 
+/// What a transfer is doing now, and its colour.
+(String, Color) jobStatus(SendJob j) => switch (j.state) {
+      SendJobState.waiting => (tr('send.waiting'), LrColors.muted),
+      SendJobState.converting => (
+          [
+            tr(j.convertHw ? 'send.converting_hw' : 'send.converting',
+                {'done': min(j.convertDone + 1, j.convertTotal), 'total': j.convertTotal}),
+            if (j.convertProgress > 0) '${(j.convertProgress * 100).round()}%',
+          ].join(' · '),
+          LrColors.safelight
+        ),
+      SendJobState.connecting => (tr('send.connecting'), LrColors.safelight),
+      SendJobState.sending => (tr('send.sending'), LrColors.safelight),
+      SendJobState.done => (tr('send.done'), LrColors.verified),
+      SendJobState.failed => (
+          [peerErrorText(j.error), if (j.reason?.isNotEmpty ?? false) tr('send.their_reason', {'reason': j.reason!})].join(' — '),
+          LrColors.danger
+        ),
+      SendJobState.cancelled => (tr('send.cancelled'), LrColors.muted),
+    };
+
+/// 0…1, or null while it can't be told (connecting).
+double? jobProgress(SendJob j) => j.state == SendJobState.connecting
+    ? null
+    : j.state == SendJobState.converting
+        ? (j.convertTotal == 0 ? null : ((j.convertDone + j.convertProgress) / j.convertTotal).clamp(0.0, 1.0))
+        : j.fraction;
+
 class _JobTile extends StatelessWidget {
   const _JobTile({required this.job, required this.onCancel, this.onResend});
 
@@ -465,21 +512,7 @@ class _JobTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final j = job;
-    final (String status, Color color) = switch (j.state) {
-      SendJobState.waiting => (tr('send.waiting'), LrColors.muted),
-      SendJobState.converting => (
-          tr('send.converting', {'done': min(j.convertDone + 1, j.convertTotal), 'total': j.convertTotal}),
-          LrColors.safelight
-        ),
-      SendJobState.connecting => (tr('send.connecting'), LrColors.safelight),
-      SendJobState.sending => (tr('send.sending'), LrColors.safelight),
-      SendJobState.done => (tr('send.done'), LrColors.verified),
-      SendJobState.failed => (
-          [peerErrorText(j.error), if (j.reason?.isNotEmpty ?? false) tr('send.their_reason', {'reason': j.reason!})].join(' — '),
-          LrColors.danger
-        ),
-      SendJobState.cancelled => (tr('send.cancelled'), LrColors.muted),
-    };
+    final (String status, Color color) = jobStatus(j);
     final parts = <String>[
       tr('send.progress', {'done': j.processed, 'total': j.files.length}),
       '${formatBytes(j.sentBytes)} / ${formatBytes(j.totalBytes)}',
@@ -512,11 +545,7 @@ class _JobTile extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
-              value: j.state == SendJobState.connecting
-                  ? null
-                  : j.state == SendJobState.converting
-                      ? (j.convertTotal == 0 ? null : ((j.convertDone + j.convertProgress) / j.convertTotal).clamp(0.0, 1.0))
-                      : j.fraction,
+              value: jobProgress(j),
               minHeight: 6,
               color: j.state == SendJobState.failed ? LrColors.danger : LrColors.verified,
               backgroundColor: LrColors.raised,

@@ -373,9 +373,10 @@
   "phonefmt.title": "“{name}” gösterebilsin diye {count} dosya dönüştürülmeli",
   "phonefmt.jpeg": "{count} fotoğraf → yüksek kaliteli JPEG (tarih, yer ve kamera bilgisi korunur)",
   "phonefmt.remux": "{count} video → MP4, görüntü değişmez (her biri saniyeler)",
-  "phonefmt.h264": "{count} video → MP4 (H.264), aslına yakın kalite — biraz sürebilir",
+  "phonefmt.h264": "{count} video → telefonun oynatabildiği MP4, orijinale yakın kalite (ekran kartı varsa H.265 — hızlı; yoksa H.264, biraz sürebilir)",
   "phonefmt.note": "Bu PC'deki orijinaller aynı kalır; dönüştürülen kopyalar yalnızca gönderim için. Gerisi olduğu gibi gider.",
   "phonefmt.as_is": "Olduğu gibi gönder",
   "phonefmt.convert": "Dönüştür ve gönder",
-  "send.phone_online_not_ready": "Çevrimiçi, ancak alma hazır değil. Telefonda LocalRoll'u kapatıp yeniden açın; böyle kalırsa telefondaki LocalRoll'u güncelleyin."
+  "send.phone_online_not_ready": "Çevrimiçi, ancak alma hazır değil. Telefonda LocalRoll'u kapatıp yeniden açın; böyle kalırsa telefondaki LocalRoll'u güncelleyin.",
+  "send.converting_hw": "Telefon için dönüştürülüyor {done}/{total} (ekran kartı)"
 }

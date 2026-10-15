@@ -373,9 +373,10 @@
   "phonefmt.title": "{count} file vanno convertiti perché «{name}» li mostri",
   "phonefmt.jpeg": "{count} foto → JPEG di alta qualità (data, luogo e fotocamera mantenuti)",
   "phonefmt.remux": "{count} video → MP4, immagine invariata (pochi secondi ciascuno)",
-  "phonefmt.h264": "{count} video → MP4 (H.264), qualità quasi originale: può richiedere tempo",
+  "phonefmt.h264": "{count} video → MP4 riproducibile dal telefono, qualità quasi originale (H.265 sulla scheda grafica se presente: veloce; altrimenti H.264, può richiedere tempo)",
   "phonefmt.note": "Gli originali su questo PC restano invariati; le copie convertite servono solo per l'invio. Il resto va così com'è.",
   "phonefmt.as_is": "Invia così come sono",
   "phonefmt.convert": "Converti e invia",
-  "send.phone_online_not_ready": "Online, ma la ricezione non è pronta. Chiudi LocalRoll sul telefono e riaprilo; se continua, aggiorna LocalRoll sul telefono."
+  "send.phone_online_not_ready": "Online, ma la ricezione non è pronta. Chiudi LocalRoll sul telefono e riaprilo; se continua, aggiorna LocalRoll sul telefono.",
+  "send.converting_hw": "Conversione per il telefono {done}/{total} (scheda grafica)"
 }

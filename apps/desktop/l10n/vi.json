@@ -373,9 +373,10 @@
   "phonefmt.title": "Cần chuyển {count} tệp để “{name}” hiển thị được",
   "phonefmt.jpeg": "{count} ảnh → JPEG chất lượng cao (giữ ngày, địa điểm, thông tin máy ảnh)",
   "phonefmt.remux": "{count} video → MP4, hình giữ nguyên (vài giây mỗi video)",
-  "phonefmt.h264": "{count} video → MP4 (H.264), gần như bản gốc — có thể mất thời gian",
+  "phonefmt.h264": "{count} video → MP4 điện thoại phát được, chất lượng gần như gốc (có card đồ họa thì dùng H.265 — nhanh; không thì H.264, có thể mất một lúc)",
   "phonefmt.note": "Bản gốc trên máy này giữ nguyên; bản chuyển đổi chỉ dùng để gửi. Phần còn lại gửi nguyên trạng.",
   "phonefmt.as_is": "Gửi nguyên trạng",
   "phonefmt.convert": "Chuyển đổi rồi gửi",
-  "send.phone_online_not_ready": "Đang trực tuyến nhưng chưa sẵn sàng nhận. Đóng LocalRoll trên điện thoại rồi mở lại; nếu vẫn vậy, hãy cập nhật LocalRoll trên điện thoại."
+  "send.phone_online_not_ready": "Đang trực tuyến nhưng chưa sẵn sàng nhận. Đóng LocalRoll trên điện thoại rồi mở lại; nếu vẫn vậy, hãy cập nhật LocalRoll trên điện thoại.",
+  "send.converting_hw": "Đang chuyển đổi cho điện thoại {done}/{total} (card đồ họa)"
 }

@@ -373,9 +373,10 @@
   "phonefmt.title": "「{name}」で表示・再生するには {count} 件の変換が必要です",
   "phonefmt.jpeg": "写真 {count} 枚 → 高画質 JPEG（日付・場所・カメラ情報を保持）",
   "phonefmt.remux": "ビデオ {count} 本 → MP4 に入れ替えるだけ、画質は変わりません（数秒）",
-  "phonefmt.h264": "ビデオ {count} 本 → MP4（H.264）、元に近い画質（時間がかかることがあります）",
+  "phonefmt.h264": "{count} 本の動画 → スマホで再生できる MP4（ほぼ元の画質。GPU があれば H.265 で高速、なければ H.264 で時間がかかることがあります）",
   "phonefmt.note": "このPCの元ファイルはそのまま。変換したコピーは送信にだけ使います。その他はそのまま送ります。",
   "phonefmt.as_is": "そのまま送る",
   "phonefmt.convert": "変換して送る",
-  "send.phone_online_not_ready": "オンラインですが、受信の準備ができていません。スマホの LocalRoll を閉じて開き直してください。続く場合はスマホの LocalRoll を更新してください。"
+  "send.phone_online_not_ready": "オンラインですが、受信の準備ができていません。スマホの LocalRoll を閉じて開き直してください。続く場合はスマホの LocalRoll を更新してください。",
+  "send.converting_hw": "スマホ用に変換中 {done}/{total}（GPU）"
 }

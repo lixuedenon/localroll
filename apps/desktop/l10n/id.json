@@ -373,9 +373,10 @@
   "phonefmt.title": "{count} file perlu dikonversi agar “{name}” bisa menampilkannya",
   "phonefmt.jpeg": "{count} foto → JPEG kualitas tinggi (tanggal, lokasi, info kamera tetap)",
   "phonefmt.remux": "{count} video → MP4, gambar tidak berubah (beberapa detik)",
-  "phonefmt.h264": "{count} video → MP4 (H.264), kualitas hampir asli — bisa agak lama",
+  "phonefmt.h264": "{count} video → MP4 yang bisa diputar ponsel, kualitas hampir asli (H.265 dengan kartu grafis jika ada — cepat; jika tidak H.264, bisa agak lama)",
   "phonefmt.note": "File asli di PC ini tetap; salinan hasil konversi hanya untuk dikirim. Sisanya dikirim apa adanya.",
   "phonefmt.as_is": "Kirim apa adanya",
   "phonefmt.convert": "Konversi lalu kirim",
-  "send.phone_online_not_ready": "Online, tetapi penerimaannya belum siap. Tutup LocalRoll di ponsel lalu buka lagi; jika tetap begini, perbarui LocalRoll di ponsel."
+  "send.phone_online_not_ready": "Online, tetapi penerimaannya belum siap. Tutup LocalRoll di ponsel lalu buka lagi; jika tetap begini, perbarui LocalRoll di ponsel.",
+  "send.converting_hw": "Mengonversi untuk ponsel {done}/{total} (kartu grafis)"
 }

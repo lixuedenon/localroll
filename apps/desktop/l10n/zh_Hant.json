@@ -373,9 +373,10 @@
   "phonefmt.title": "有 {count} 個檔案需要轉換，「{name}」才能顯示或播放",
   "phonefmt.jpeg": "{count} 張照片 → 高品質 JPEG（保留拍攝日期、地點和相機資訊）",
   "phonefmt.remux": "{count} 段影片 → 只換成 MP4 外殼，畫面完全不變（每段幾秒）",
-  "phonefmt.h264": "{count} 段影片 → MP4（H.264），畫質接近原片——可能需要一些時間",
+  "phonefmt.h264": "{count} 段影片 → 手機能播放的 MP4，畫質接近原片（電腦有顯示卡加速時用 H.265，很快；沒有時用 H.264，可能需要一些時間）",
   "phonefmt.note": "電腦上的原檔案不會改動，轉換的副本只用於傳送。其餘檔案原樣傳送。",
   "phonefmt.as_is": "全部原樣傳送",
   "phonefmt.convert": "轉換後傳送",
-  "send.phone_online_not_ready": "手機在線，但接收功能還沒準備好。在手機上把 LocalRoll 關掉再打開；如果一直這樣，請把手機上的 LocalRoll 更新到最新版。"
+  "send.phone_online_not_ready": "手機在線，但接收功能還沒準備好。在手機上把 LocalRoll 關掉再打開；如果一直這樣，請把手機上的 LocalRoll 更新到最新版。",
+  "send.converting_hw": "正在為手機轉換 {done}/{total}（顯示卡加速）"
 }
