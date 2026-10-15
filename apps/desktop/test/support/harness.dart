@@ -26,13 +26,34 @@ class TestPc {
   /// What the fake disk reports as free (bytes).
   static int free = 100 * 1024 * 1024 * 1024;
 
+  /// Certificates take seconds to make in pure Dart; tests reuse two
+  /// (copied into each PC's folder), alternating so two PCs in one test
+  /// differ. A fresh-certificate test lives in tls_test.dart.
+  static final List<Directory> _made = [];
+  static int _next = 0;
+
+  static Future<TlsIdentity> _identity(Directory dataDir) async {
+    final slot = _next++ % 2;
+    if (_made.length <= slot) {
+      final d = await Directory.systemTemp.createTemp('lr_tls_pool');
+      await TlsIdentity.load(d);
+      _made.add(d);
+    }
+    final sep = Platform.pathSeparator;
+    await dataDir.create(recursive: true);
+    for (final f in ['tls_cert.pem', 'tls_key.pem']) {
+      await File('${_made[slot].path}$sep$f').copy('${dataDir.path}$sep$f');
+    }
+    return TlsIdentity.load(dataDir);
+  }
+
   static Future<TestPc> start() async {
     final tmp = await Directory.systemTemp.createTemp('lr_server_test');
     final sep = Platform.pathSeparator;
     final settings = await AppSettings.loadFrom(Directory('${tmp.path}${sep}data'));
     settings.port = 0; // any free port
     settings.libraryPath = '${tmp.path}${sep}Library';
-    final tls = await TlsIdentity.load(settings.dataDir);
+    final tls = await _identity(settings.dataDir);
     settings.tlsFingerprint = tls.fingerprint;
     final library = LibraryIndex(settings.libraryPath, stateFile: settings.libraryStateFile);
     await library.load();
