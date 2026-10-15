@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'backup_plan.dart';
 import 'secure_store.dart';
+import 'phone_server.dart' show PhoneIdentity;
 
 /// A PC this phone has paired with.
 class PairedDesktop {
@@ -102,7 +103,7 @@ class PairedDesktop {
       );
 }
 
-class MobileSettings extends ChangeNotifier {
+class MobileSettings extends ChangeNotifier implements PhoneIdentity {
   MobileSettings._(this._prefs);
 
   final SharedPreferences _prefs;

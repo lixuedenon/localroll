@@ -11,8 +11,17 @@ import 'package:nsd/nsd.dart' as nsd;
 import 'package:path_provider/path_provider.dart';
 
 import 'media_saver.dart';
-import 'mobile_settings.dart';
 import 'tls_identity.dart';
+
+/// What the receiver needs to know about this phone (MobileSettings).
+abstract interface class PhoneIdentity {
+  String get deviceId;
+  String get deviceName;
+}
+
+class _TooLarge implements Exception {
+  const _TooLarge();
+}
 
 /// What the person on this phone answered to "X wants to send you …".
 class IncomingReply {
@@ -65,10 +74,28 @@ class _InSession {
 /// any LocalRoll can send to it. Photos and videos go to the photo library
 /// (album "LocalRoll"), other files to Files / Download.
 class PhoneServer extends ChangeNotifier {
-  PhoneServer(this.settings);
+  PhoneServer(
+    this.settings, {
+    MediaSaver? saver,
+    Future<Directory> Function()? dataDir,
+    Future<Directory> Function()? tempDir,
+    this.advertise = true,
+    List<int>? ports,
+  })  : saver = saver ?? MediaSaver(),
+        _dataDir = dataDir ?? getApplicationSupportDirectory,
+        _tempDir = tempDir ?? getTemporaryDirectory,
+        _ports = ports ?? [LrProtocol.defaultPort, ...LrProtocol.fallbackPorts, 0];
 
-  final MobileSettings settings;
-  final MediaSaver saver = MediaSaver();
+  /// Where the certificate is kept / partial downloads go (tests: a temp folder).
+  final Future<Directory> Function() _dataDir;
+  final Future<Directory> Function() _tempDir;
+
+  /// Show up for nearby phones (mDNS); off in tests.
+  final bool advertise;
+  final List<int> _ports;
+
+  final PhoneIdentity settings;
+  final MediaSaver saver;
 
   HttpServer? _http;
   nsd.Registration? _mdns;
@@ -114,12 +141,12 @@ class PhoneServer extends ChangeNotifier {
   Future<void> _start() async {
     if (_http != null) return;
     try {
-      _tls ??= await TlsIdentity.load(await getApplicationSupportDirectory());
+      _tls ??= await TlsIdentity.load(await _dataDir());
     } catch (e) {
       debugPrint('phone certificate unavailable: $e');
       return;
     }
-    for (final p in [LrProtocol.defaultPort, ...LrProtocol.fallbackPorts, 0]) {
+    for (final p in _ports) {
       try {
         final s = await HttpServer.bindSecure(InternetAddress.anyIPv4, p, _tls!.context);
         s.idleTimeout = const Duration(minutes: 2);
@@ -131,19 +158,21 @@ class PhoneServer extends ChangeNotifier {
     }
     if (_http == null) return;
     // Show up for nearby phones (PCs ignore entries marked as phones).
-    try {
-      _mdns = await nsd.register(nsd.Service(
-        name: settings.deviceName,
-        type: LrProtocol.serviceType,
-        port: port,
-        txt: {
-          'id': Uint8List.fromList(utf8.encode(settings.deviceId)),
-          LrProtocol.txtKind: Uint8List.fromList(utf8.encode(LrProtocol.kindPhone)),
-          'platform': Uint8List.fromList(utf8.encode(Platform.operatingSystem)),
-        },
-      ));
-    } catch (e) {
-      debugPrint('phone mDNS failed: $e');
+    if (advertise) {
+      try {
+        _mdns = await nsd.register(nsd.Service(
+          name: settings.deviceName,
+          type: LrProtocol.serviceType,
+          port: port,
+          txt: {
+            'id': Uint8List.fromList(utf8.encode(settings.deviceId)),
+            LrProtocol.txtKind: Uint8List.fromList(utf8.encode(LrProtocol.kindPhone)),
+            'platform': Uint8List.fromList(utf8.encode(Platform.operatingSystem)),
+          },
+        ));
+      } catch (e) {
+        debugPrint('phone mDNS failed: $e');
+      }
     }
     notifyListeners();
   }
@@ -223,6 +252,18 @@ class PhoneServer extends ChangeNotifier {
       }
       await req.drain<void>();
       return _json(res, 404, {'error': 'not_found'});
+    } on _TooLarge {
+      try {
+        await _json(res, 413, {'error': 'too_large'});
+      } catch (_) {}
+    } on FormatException {
+      try {
+        await _json(res, 400, {'error': 'bad_request'});
+      } catch (_) {}
+    } on TypeError {
+      try {
+        await _json(res, 400, {'error': 'bad_request'});
+      } catch (_) {}
     } catch (e) {
       try {
         await _json(res, 500, {'error': '$e'});
@@ -299,7 +340,7 @@ class PhoneServer extends ChangeNotifier {
   }
 
   Future<Directory> _inbox() async {
-    final d = Directory('${(await getTemporaryDirectory()).path}/lr_in');
+    final d = Directory('${(await _tempDir()).path}/lr_in');
     await d.create(recursive: true);
     return d;
   }
@@ -323,10 +364,22 @@ class PhoneServer extends ChangeNotifier {
         ..file = offer.name
         ..size = total;
     }
+    // Never more than the file said it is (a broken or hostile sender
+    // can't fill the phone).
+    final cap = offer.size ?? (total > 0 ? total : null);
     var received = current;
+    var over = false;
     final sink = part.openWrite(mode: FileMode.append);
     try {
       await for (final data in req) {
+        if (over) continue;
+        if (cap != null && received + data.length > cap) {
+          final fits = cap - received;
+          if (fits > 0) sink.add(data.sublist(0, fits));
+          received += max(0, fits);
+          over = true;
+          continue;
+        }
         sink.add(data);
         received += data.length;
         if (r != null) r.bytes = received;
@@ -336,6 +389,7 @@ class PhoneServer extends ChangeNotifier {
     } finally {
       await sink.close();
     }
+    if (over) return _json(req.response, 413, {'error': 'too_large', 'offset': received});
     return _json(req.response, 200, {'offset': received});
   }
 
@@ -402,10 +456,21 @@ class PhoneServer extends ChangeNotifier {
     return List.generate(length, (_) => chars[r.nextInt(chars.length)]).join();
   }
 
+  /// Largest JSON request accepted.
+  static const int maxJson = 4 * 1024 * 1024;
+
   static Future<Map<String, dynamic>> _readJson(HttpRequest req) async {
-    final text = await utf8.decoder.bind(req).join();
-    if (text.length > 4 * 1024 * 1024) throw const FormatException('too large');
-    return jsonDecode(text) as Map<String, dynamic>;
+    final bytes = BytesBuilder(copy: false);
+    var tooBig = req.contentLength > maxJson;
+    await for (final data in req) {
+      if (tooBig) continue;
+      bytes.add(data);
+      if (bytes.length > maxJson) tooBig = true;
+    }
+    if (tooBig) throw const _TooLarge();
+    final j = jsonDecode(utf8.decode(bytes.takeBytes()));
+    if (j is! Map<String, dynamic>) throw const FormatException('not an object');
+    return j;
   }
 
   static Future<void> _json(HttpResponse res, int status, Object body) async {
