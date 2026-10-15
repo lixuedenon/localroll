@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:pdfrx/pdfrx.dart';
 
 import '../l10n/l10n.dart';
-import '../services/file_actions.dart';
+import '../services/network.dart';
 import 'theme.dart';
 
 /// Reads a PDF inside LocalRoll (scans and documents that arrived): scroll
