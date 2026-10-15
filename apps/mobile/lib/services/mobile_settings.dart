@@ -328,10 +328,18 @@ class MobileSettings extends ChangeNotifier implements PhoneIdentity {
   final Map<String, Set<String>> _lost = {};
 
   Future<void> addLost(String desktopId, Iterable<String> ids) async {
-    final set = lostOn(desktopId)..addAll(ids);
+    final set = lostOn(desktopId);
+    final fresh = [for (final id in ids) if (!set.contains(id)) id];
+    set.addAll(ids);
     await _prefs.setStringList('lost_$desktopId', set.toList());
     notifyListeners();
+    if (fresh.isNotEmpty) _lostAdded.add(LostNews(desktopId, fresh));
   }
+
+  /// Items the PC just deleted (only the new ones each time): the phone
+  /// shows them at once, with pictures.
+  final StreamController<LostNews> _lostAdded = StreamController.broadcast();
+  Stream<LostNews> get lostAdded => _lostAdded.stream;
 
   Future<void> clearLost(String desktopId, [Iterable<String>? ids]) async {
     final set = lostOn(desktopId);
@@ -471,4 +479,12 @@ class MobileSettings extends ChangeNotifier implements PhoneIdentity {
     final r = Random.secure();
     return List.generate(length, (_) => chars[r.nextInt(chars.length)]).join();
   }
+}
+
+/// PC [desktopId] just deleted these items (asset ids on this phone).
+class LostNews {
+  const LostNews(this.desktopId, this.ids);
+
+  final String desktopId;
+  final List<String> ids;
 }

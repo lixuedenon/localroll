@@ -22,6 +22,7 @@ import 'cleanup_page.dart';
 import 'connect_page.dart';
 import 'device_badge.dart';
 import 'incoming.dart';
+import 'lost_notice.dart';
 import 'document_scan_page.dart';
 import 'send_files_page.dart';
 import 'pc_library_page.dart';
@@ -84,6 +85,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     });
     // The PC says photos were deleted there: ask it now ("not backed up any
     // more" shows without a pull-down).
+    _lostSub = widget.settings.lostAdded.listen(_onLostNews);
     _live.onChanged = (pcId) {
       if (mounted) unawaited(refreshPairedLooks(widget.settings, widget.discovery, now: true, only: pcId));
     };
@@ -151,6 +153,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     _changesTimer?.cancel();
     _beatTimer?.cancel();
     _liveEvents?.cancel();
+    _lostSub?.cancel();
     unawaited(_live.stop());
     _server.asks.removeListener(_onAsks);
     _receivedSub?.cancel();
@@ -186,9 +189,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     final before = _onlineNow;
     _onlineNow = now;
     // Just came on: what we find now was already there.
-    if (before == null || _live.quiet) return;
+    if (before == null || _live.quiet) {
+      now.keys.forEach(_live.markSeen);
+      return;
+    }
     for (final id in now.keys) {
-      if (!before.containsKey(id) && !widget.discovery.linked(id)) _note(id, now[id]!.$1, pc: true, online: true);
+      if (!before.containsKey(id) && !widget.discovery.linked(id) && _live.announceOnline(id)) {
+        _note(id, now[id]!.$1, pc: true, online: true);
+      }
     }
     for (final id in before.keys) {
       if (!now.containsKey(id) && !widget.discovery.linked(id)) _note(id, before[id]!.$1, pc: true, online: false);
@@ -398,7 +406,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       decoration: BoxDecoration(
         color: LrColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: LrColors.safelight),
+        border: Border.all(color: LrColors.safelight, width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -412,6 +420,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           ]),
           const SizedBox(height: 4),
           Text(tr('lost.body'), style: theme.textTheme.bodySmall),
+          const SizedBox(height: 8),
+          LostThumbs(ids: lost.toList()),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -424,8 +434,37 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     );
   }
 
-  Future<void> _rebackupLost(PairedDesktop d) async {
-    final ids = widget.settings.lostOn(d.id).toList();
+  /// Just deleted on a PC: say so clearly, with the pictures (one notice at
+  /// a time; news arriving meanwhile is added to the next one).
+  StreamSubscription<LostNews>? _lostSub;
+  final Map<String, List<String>> _lostWaiting = {};
+  bool _lostShowing = false;
+
+  void _onLostNews(LostNews n) {
+    (_lostWaiting[n.desktopId] ??= []).addAll(n.ids);
+    unawaited(_showLostNews());
+  }
+
+  Future<void> _showLostNews() async {
+    if (_lostShowing || !mounted || _lostWaiting.isEmpty) return;
+    final pcId = _lostWaiting.keys.first;
+    final ids = _lostWaiting.remove(pcId)!.toSet().toList();
+    final d = widget.settings.byId(pcId);
+    // Still lost (not re-sent or dismissed meanwhile).
+    final still = d == null ? const <String>[] : ids.where(widget.settings.lostOn(pcId).contains).toList();
+    if (d == null || still.isEmpty) return _showLostNews();
+    _lostShowing = true;
+    try {
+      final again = await showLostNotice(context, pc: d.name, ids: still);
+      if (again && mounted) await _rebackupLost(d, only: still);
+    } finally {
+      _lostShowing = false;
+    }
+    if (mounted) unawaited(_showLostNews());
+  }
+
+  Future<void> _rebackupLost(PairedDesktop d, {List<String>? only}) async {
+    final ids = only ?? widget.settings.lostOn(d.id).toList();
     final assets = <AssetEntity>[];
     for (final id in ids) {
       final a = await AssetEntity.fromId(id);

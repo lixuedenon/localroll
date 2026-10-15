@@ -64,7 +64,28 @@ class LiveService extends ChangeNotifier {
   /// PC [pcId] says photos were deleted there: ask it for /changes now.
   void Function(String pcId)? onChanged;
 
+  /// Devices seen online since this phone came on; and when that was.
+  final Set<String> _seenUp = {};
+  DateTime _startedAt = DateTime.fromMillisecondsSinceEpoch(0);
+
+  /// Should "X is online" be shown for [id] now? Not right after we came on
+  /// (it was there before us), and not the first time we reach a device in
+  /// the first minute either — a link can take a while to get through
+  /// (Wi‑Fi waking up, address changed), and that PC was on all along.
+  /// A device that went away and came back is always announced.
+  bool announceOnline(String id) {
+    final first = _seenUp.add(id);
+    if (_quiet) return false;
+    if (first && DateTime.now().difference(_startedAt) < const Duration(seconds: 60)) return false;
+    return true;
+  }
+
+  /// Seen online without a note (already there).
+  void markSeen(String id) => _seenUp.add(id);
+
   void start() {
+    _seenUp.clear();
+    _startedAt = DateTime.now();
     _quietUntil = DateTime.now().add(const Duration(seconds: 15));
     _session = DateTime.now().microsecondsSinceEpoch.toRadixString(36);
     _running = true;
@@ -128,7 +149,15 @@ class LiveService extends ChangeNotifier {
     if (!up) _heard.remove(pcId);
     if (was != up) DiagLog.log('live', '$name ${up ? 'linked' : 'lost'}');
     // A PC found while we are just coming on was already there.
-    if (was != up && _running && !(up && _quiet)) _events.add(PresenceEvent(pcId, name, pc: true, online: up));
+    if (was != up && _running) {
+      if (!up) {
+        _events.add(PresenceEvent(pcId, name, pc: true, online: false));
+      } else if (announceOnline(pcId)) {
+        _events.add(PresenceEvent(pcId, name, pc: true, online: true));
+      }
+    } else if (up) {
+      markSeen(pcId);
+    }
     // Losing the link to a PC doesn't mean the devices it told us about
     // went away: no notes for them.
     _recompute(quiet: !up);
@@ -143,6 +172,9 @@ class LiveService extends ChangeNotifier {
         final a = m.access;
         if (a != null) discovery.setAccessAt(pcId, a);
         _heard[pcId] = {for (final d in m.online) d.id: d};
+        for (final d in m.online) {
+          markSeen(d.id);
+        }
         // Who was already on when we connected: shown, not announced.
         _recompute(quiet: true);
         notifyListeners();
@@ -195,7 +227,9 @@ class LiveService extends ChangeNotifier {
     }
     if (!quiet && !_quiet) {
       for (final d in now.values) {
-        if (!_others.containsKey(d.id)) _events.add(PresenceEvent(d.id, d.name, pc: d.isDesktop, online: true));
+        if (!_others.containsKey(d.id) && announceOnline(d.id)) {
+          _events.add(PresenceEvent(d.id, d.name, pc: d.isDesktop, online: true));
+        }
       }
       for (final d in _others.values) {
         if (!now.containsKey(d.id)) _events.add(PresenceEvent(d.id, d.name, pc: d.isDesktop, online: false));
