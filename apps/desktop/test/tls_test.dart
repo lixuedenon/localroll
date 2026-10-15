@@ -97,4 +97,19 @@ void main() {
     expect(isLanAddress(InternetAddress('2001:4860::1')), isFalse);
     expect(isLanAddress(InternetAddress('fd00::1')), isTrue);
   });
+
+  test('fresh certificates are always usable (several in a row)', () async {
+    for (var i = 0; i < 4; i++) {
+      final d = await Directory.systemTemp.createTemp('lr_tls_new');
+      try {
+        final fresh = await TlsIdentity.load(d);
+        final m = await PortMux.bind(InternetAddress.loopbackIPv4, 0, fresh.context);
+        await m.close();
+        expect((await TlsIdentity.load(d)).fingerprint, fresh.fingerprint);
+      } finally {
+        await d.delete(recursive: true);
+      }
+    }
+  }, timeout: const Timeout(Duration(minutes: 3)));
 }
+

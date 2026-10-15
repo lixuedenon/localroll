@@ -38,12 +38,24 @@ class TlsIdentity {
         return id;
       } catch (_) {}
     }
-    // RSA key generation in pure Dart takes a few seconds: not on the UI thread.
-    final (cert, key) = await Isolate.run(_generate);
-    await dir.create(recursive: true);
-    await keyFile.writeAsString(key, flush: true);
-    await certFile.writeAsString(cert, flush: true);
-    return TlsIdentity._(cert, key);
+    // RSA key generation in pure Dart takes a few seconds: not on the UI
+    // thread. Each new pair is tried before it is kept (the TLS library
+    // refuses the odd malformed one).
+    for (var attempt = 1;; attempt++) {
+      final (cert, key) = await Isolate.run(_generate);
+      final id = TlsIdentity._(cert, key);
+      try {
+        id.context; // throws if unusable
+      } catch (e) {
+        DiagLog.log('tls', 'new certificate unusable (try $attempt): $e');
+        if (attempt >= 5) rethrow;
+        continue;
+      }
+      await dir.create(recursive: true);
+      await keyFile.writeAsString(key, flush: true);
+      await certFile.writeAsString(cert, flush: true);
+      return id;
+    }
   }
 
   static (String, String) _generate() {
