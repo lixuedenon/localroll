@@ -356,5 +356,6 @@
   "files.sending": "Отправка…",
   "files.done": "Отправлено на «{name}»: {count}",
   "files.failed": "Не отправлено",
-  "files.already": "{count} уже были там"
+  "files.already": "{count} уже были там",
+  "pclib.delete_hint": "Чтобы удалять отсюда, разрешите это на «{pc}»: Семья › этот телефон › «Может просматривать и удалять»."
 }

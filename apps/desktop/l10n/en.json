@@ -401,5 +401,6 @@
   "pdf.zoom_out": "Zoom out (−)",
   "pdf.prev": "Previous page (Page Up)",
   "pdf.next": "Next page (Page Down)",
-  "pdf.open_with": "Open with the usual PDF program"
+  "pdf.open_with": "Open with the usual PDF program",
+  "family.access_title": "What this phone may do with the library"
 }

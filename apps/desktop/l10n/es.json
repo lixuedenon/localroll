@@ -401,5 +401,6 @@
   "pdf.zoom_out": "Alejar (−)",
   "pdf.prev": "Página anterior (Re Pág)",
   "pdf.next": "Página siguiente (Av Pág)",
-  "pdf.open_with": "Abrir con el programa PDF habitual"
+  "pdf.open_with": "Abrir con el programa PDF habitual",
+  "family.access_title": "Qué puede hacer este teléfono con la biblioteca"
 }

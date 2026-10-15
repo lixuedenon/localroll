@@ -356,5 +356,6 @@
   "files.sending": "正在傳送…",
   "files.done": "已傳送 {count} 個到「{name}」",
   "files.failed": "沒有傳送成功",
-  "files.already": "{count} 個對方已經有了"
+  "files.already": "{count} 個對方已經有了",
+  "pclib.delete_hint": "要在這裡刪除，需要先在「{pc}」上開啟：家庭成員 → 這部手機 → 「可以瀏覽和刪除」。"
 }

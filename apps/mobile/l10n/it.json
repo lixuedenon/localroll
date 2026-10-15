@@ -356,5 +356,6 @@
   "files.sending": "Invio…",
   "files.done": "{count} inviati a «{name}»",
   "files.failed": "Non inviato",
-  "files.already": "{count} erano già presenti"
+  "files.already": "{count} erano già presenti",
+  "pclib.delete_hint": "Per eliminare da qui, consentilo su «{pc}»: Famiglia › questo telefono › «Può sfogliare ed eliminare»."
 }

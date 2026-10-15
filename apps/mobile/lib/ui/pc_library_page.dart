@@ -221,6 +221,25 @@ class _PcLibraryPageState extends State<PcLibraryPage> {
               child: Text(tr('pclib.count', {'count': lib.total}), style: theme.textTheme.bodySmall?.copyWith(color: LrColors.muted)),
             ),
           ),
+          // Selecting, but this PC doesn't let this phone delete: say where
+          // that is turned on (people looked for a delete button).
+          if (_selected.isNotEmpty && !lib.canDelete)
+            SliverToBoxAdapter(
+              child: Container(
+                margin: const EdgeInsets.fromLTRB(12, 10, 12, 0),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: LrColors.raised,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: LrColors.safelight.withValues(alpha: 0.5)),
+                ),
+                child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  const Icon(Icons.info_outline_rounded, size: 18, color: LrColors.safelight),
+                  const SizedBox(width: 10),
+                  Expanded(child: Text(tr('pclib.delete_hint', {'pc': widget.desktop.name}), style: theme.textTheme.bodySmall)),
+                ]),
+              ),
+            ),
           for (final e in days.entries) ...[
             SliverToBoxAdapter(
               child: Padding(

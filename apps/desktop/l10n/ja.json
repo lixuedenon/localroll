@@ -401,5 +401,6 @@
   "pdf.zoom_out": "縮小（−）",
   "pdf.prev": "前のページ（Page Up）",
   "pdf.next": "次のページ（Page Down）",
-  "pdf.open_with": "いつもの PDF アプリで開く"
+  "pdf.open_with": "いつもの PDF アプリで開く",
+  "family.access_title": "このスマホがライブラリでできること"
 }

@@ -401,5 +401,6 @@
   "pdf.zoom_out": "Riduci (−)",
   "pdf.prev": "Pagina precedente (Pag su)",
   "pdf.next": "Pagina successiva (Pag giù)",
-  "pdf.open_with": "Apri con il solito programma PDF"
+  "pdf.open_with": "Apri con il solito programma PDF",
+  "family.access_title": "Cosa può fare questo telefono con la libreria"
 }

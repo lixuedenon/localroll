@@ -356,5 +356,6 @@
   "files.sending": "A enviar…",
   "files.done": "{count} enviados para «{name}»",
   "files.failed": "Não enviado",
-  "files.already": "{count} já lá estavam"
+  "files.already": "{count} já lá estavam",
+  "pclib.delete_hint": "Para apagar daqui, permita em «{pc}»: Família › este telefone › «Pode ver e apagar»."
 }

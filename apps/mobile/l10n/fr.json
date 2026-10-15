@@ -356,5 +356,6 @@
   "files.sending": "Envoi…",
   "files.done": "{count} envoyés à « {name} »",
   "files.failed": "Non envoyé",
-  "files.already": "{count} y étaient déjà"
+  "files.already": "{count} y étaient déjà",
+  "pclib.delete_hint": "Pour supprimer d’ici, autorisez-le sur « {pc} » : Famille › ce téléphone › « Peut parcourir et supprimer »."
 }

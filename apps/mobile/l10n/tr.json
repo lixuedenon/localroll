@@ -356,5 +356,6 @@
   "files.sending": "Gönderiliyor…",
   "files.done": "{count} öğe “{name}” adresine gönderildi",
   "files.failed": "Gönderilmedi",
-  "files.already": "{count} öğe zaten oradaydı"
+  "files.already": "{count} öğe zaten oradaydı",
+  "pclib.delete_hint": "Buradan silmek için “{pc}” üzerinde izin verin: Aile › bu telefon › “Göz atabilir ve silebilir”."
 }

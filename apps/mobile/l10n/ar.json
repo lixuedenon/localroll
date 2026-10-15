@@ -356,5 +356,6 @@
   "files.sending": "جارٍ الإرسال…",
   "files.done": "أُرسل {count} إلى «{name}»",
   "files.failed": "لم يُرسل",
-  "files.already": "{count} موجودة مسبقًا"
+  "files.already": "{count} موجودة مسبقًا",
+  "pclib.delete_hint": "للحذف من هنا، اسمح بذلك على «{pc}»: العائلة › هذا الهاتف › «يمكنه التصفح والحذف»."
 }

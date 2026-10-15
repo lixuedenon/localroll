@@ -407,6 +407,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.prev': 'Previous page (Page Up)',
     'pdf.next': 'Next page (Page Down)',
     'pdf.open_with': 'Open with the usual PDF program',
+    'family.access_title': 'What this phone may do with the library',
   },
   'zh': {
     'nav.library': '媒体库',
@@ -812,6 +813,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.prev': '上一页（Page Up）',
     'pdf.next': '下一页（Page Down）',
     'pdf.open_with': '用电脑常用的 PDF 程序打开',
+    'family.access_title': '这部手机能对媒体库做什么',
   },
   'zh_Hant': {
     'nav.library': '媒體庫',
@@ -1217,6 +1219,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.prev': '上一頁（Page Up）',
     'pdf.next': '下一頁（Page Down）',
     'pdf.open_with': '用電腦常用的 PDF 程式開啟',
+    'family.access_title': '這部手機能對媒體庫做什麼',
   },
   'ja': {
     'nav.library': 'ライブラリ',
@@ -1622,6 +1625,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.prev': '前のページ（Page Up）',
     'pdf.next': '次のページ（Page Down）',
     'pdf.open_with': 'いつもの PDF アプリで開く',
+    'family.access_title': 'このスマホがライブラリでできること',
   },
   'ko': {
     'nav.library': '라이브러리',
@@ -2027,6 +2031,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.prev': '이전 페이지(Page Up)',
     'pdf.next': '다음 페이지(Page Down)',
     'pdf.open_with': '기본 PDF 프로그램으로 열기',
+    'family.access_title': '이 휴대폰이 라이브러리에서 할 수 있는 일',
   },
   'es': {
     'nav.library': 'Biblioteca',
@@ -2432,6 +2437,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.prev': 'Página anterior (Re Pág)',
     'pdf.next': 'Página siguiente (Av Pág)',
     'pdf.open_with': 'Abrir con el programa PDF habitual',
+    'family.access_title': 'Qué puede hacer este teléfono con la biblioteca',
   },
   'fr': {
     'nav.library': 'Bibliothèque',
@@ -2837,6 +2843,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.prev': 'Page précédente (Pg préc)',
     'pdf.next': 'Page suivante (Pg suiv)',
     'pdf.open_with': 'Ouvrir avec le lecteur PDF habituel',
+    'family.access_title': 'Ce que ce téléphone peut faire avec la bibliothèque',
   },
   'de': {
     'nav.library': 'Mediathek',
@@ -3242,6 +3249,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.prev': 'Vorherige Seite (Bild ↑)',
     'pdf.next': 'Nächste Seite (Bild ↓)',
     'pdf.open_with': 'Mit dem üblichen PDF-Programm öffnen',
+    'family.access_title': 'Was dieses Handy mit der Mediathek darf',
   },
   'pt': {
     'nav.library': 'Biblioteca',
@@ -3647,6 +3655,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.prev': 'Página anterior (Page Up)',
     'pdf.next': 'Página seguinte (Page Down)',
     'pdf.open_with': 'Abrir com o programa de PDF habitual',
+    'family.access_title': 'O que este telefone pode fazer com a biblioteca',
   },
   'ru': {
     'nav.library': 'Медиатека',
@@ -4052,6 +4061,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.prev': 'Предыдущая страница (Page Up)',
     'pdf.next': 'Следующая страница (Page Down)',
     'pdf.open_with': 'Открыть в обычной программе для PDF',
+    'family.access_title': 'Что этот телефон может делать с медиатекой',
   },
   'it': {
     'nav.library': 'Libreria',
@@ -4457,6 +4467,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.prev': 'Pagina precedente (Pag su)',
     'pdf.next': 'Pagina successiva (Pag giù)',
     'pdf.open_with': 'Apri con il solito programma PDF',
+    'family.access_title': 'Cosa può fare questo telefono con la libreria',
   },
   'ar': {
     'nav.library': 'المكتبة',
@@ -4862,6 +4873,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.prev': 'الصفحة السابقة (Page Up)',
     'pdf.next': 'الصفحة التالية (Page Down)',
     'pdf.open_with': 'فتح ببرنامج PDF المعتاد',
+    'family.access_title': 'ما يمكن لهذا الهاتف فعله بالمكتبة',
   },
   'hi': {
     'nav.library': 'लाइब्रेरी',
@@ -5267,6 +5279,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.prev': 'पिछला पेज (Page Up)',
     'pdf.next': 'अगला पेज (Page Down)',
     'pdf.open_with': 'सामान्य PDF प्रोग्राम में खोलें',
+    'family.access_title': 'यह फ़ोन लाइब्रेरी के साथ क्या कर सकता है',
   },
   'id': {
     'nav.library': 'Pustaka',
@@ -5672,6 +5685,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.prev': 'Halaman sebelumnya (Page Up)',
     'pdf.next': 'Halaman berikutnya (Page Down)',
     'pdf.open_with': 'Buka dengan program PDF biasa',
+    'family.access_title': 'Apa yang boleh dilakukan ponsel ini pada pustaka',
   },
   'vi': {
     'nav.library': 'Thư viện',
@@ -6077,6 +6091,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.prev': 'Trang trước (Page Up)',
     'pdf.next': 'Trang sau (Page Down)',
     'pdf.open_with': 'Mở bằng chương trình PDF thường dùng',
+    'family.access_title': 'Điện thoại này được làm gì với thư viện',
   },
   'th': {
     'nav.library': 'คลังสื่อ',
@@ -6482,6 +6497,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.prev': 'หน้าก่อน (Page Up)',
     'pdf.next': 'หน้าถัดไป (Page Down)',
     'pdf.open_with': 'เปิดด้วยโปรแกรม PDF ปกติ',
+    'family.access_title': 'มือถือนี้ทำอะไรกับคลังได้บ้าง',
   },
   'tr': {
     'nav.library': 'Kitaplık',
@@ -6887,5 +6903,6 @@ const Map<String, Map<String, String>> translations = {
     'pdf.prev': 'Önceki sayfa (Page Up)',
     'pdf.next': 'Sonraki sayfa (Page Down)',
     'pdf.open_with': 'Her zamanki PDF programıyla aç',
+    'family.access_title': 'Bu telefon arşivle ne yapabilir',
   },
 };

@@ -356,5 +356,6 @@
   "files.sending": "भेजा जा रहा है…",
   "files.done": "“{name}” को {count} भेजे गए",
   "files.failed": "नहीं भेजा गया",
-  "files.already": "{count} पहले से वहाँ थे"
+  "files.already": "{count} पहले से वहाँ थे",
+  "pclib.delete_hint": "यहाँ से हटाने के लिए “{pc}” पर अनुमति दें: परिवार › यह फ़ोन › “देख और हटा सकता है”।"
 }

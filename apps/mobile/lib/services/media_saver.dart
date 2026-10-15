@@ -122,12 +122,22 @@ class MediaSaver {
   /// given above already is the album).
   Future<void> _intoAlbum(AssetEntity asset) async {
     if (!Platform.isIOS) return;
-    try {
-      _album ??= await _findAlbum() ?? await PhotoManager.editor.darwin.createAlbum(albumName);
-      final album = _album;
-      if (album != null) await PhotoManager.editor.copyAssetToPath(asset: asset, pathEntity: album);
-    } catch (_) {
-      // In the library anyway; the album is a nicety.
+    for (var attempt = 1; attempt <= 2; attempt++) {
+      try {
+        _album ??= await _findAlbum() ?? await PhotoManager.editor.darwin.createAlbum(albumName);
+        final album = _album;
+        if (album == null) {
+          DiagLog.log('album', 'no "$albumName" album (could not create it)');
+          return;
+        }
+        await PhotoManager.editor.copyAssetToPath(asset: asset, pathEntity: album);
+        return;
+      } catch (e) {
+        // In the library anyway; the album is a nicety. A stale album
+        // (deleted in Photos meanwhile): look it up again once.
+        DiagLog.log('album', 'adding to "$albumName" failed (try $attempt): $e');
+        _album = null;
+      }
     }
   }
 
@@ -160,8 +170,10 @@ class MediaSaver {
         if (ext != null) return Directory('${ext.path}/$albumName')..createSync(recursive: true);
       }
     }
+    // iPhone: the app's own folder is what Files shows as
+    // On My iPhone › LocalRoll — keep files right there, one level deep.
     final docs = await getApplicationDocumentsDirectory();
-    return Directory('${docs.path}/$albumName')..createSync(recursive: true);
+    return docs..createSync(recursive: true);
   }
 
   Future<SavedTo> _toFiles(File file, String name) async {

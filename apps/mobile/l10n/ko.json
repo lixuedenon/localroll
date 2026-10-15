@@ -356,5 +356,6 @@
   "files.sending": "보내는 중…",
   "files.done": "“{name}”(으)로 {count}개 보냄",
   "files.failed": "보내지 못함",
-  "files.already": "{count}개는 이미 있습니다"
+  "files.already": "{count}개는 이미 있습니다",
+  "pclib.delete_hint": "여기서 삭제하려면 “{pc}”에서 허용하세요: 가족 › 이 휴대폰 › “보기 및 삭제 가능”."
 }

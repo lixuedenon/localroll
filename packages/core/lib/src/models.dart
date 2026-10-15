@@ -471,20 +471,44 @@ class ChangesResponse {
 
 /// A paired device another LocalRoll PC sees online (presence answer).
 class OnlineDevice {
-  const OnlineDevice({required this.id, required this.name, required this.platform});
+  const OnlineDevice({
+    required this.id,
+    required this.name,
+    required this.platform,
+    this.host,
+    this.port,
+    this.fingerprint,
+  });
 
   final String id;
   final String name;
   final String platform;
 
+  /// A phone with LocalRoll open: where it receives and its certificate, as
+  /// the PC knows them — other phones can send to it even when the Wi-Fi
+  /// search can't see it (and know it is really that phone).
+  final String? host;
+  final int? port;
+  final String? fingerprint;
+
   bool get isDesktop => isDesktopPlatform(platform);
 
-  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'platform': platform};
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'platform': platform,
+        if (host != null) 'host': host,
+        if (port != null) 'port': port,
+        if (fingerprint != null) 'fp': fingerprint,
+      };
 
   factory OnlineDevice.fromJson(Map<String, dynamic> j) => OnlineDevice(
         id: j['id'] as String? ?? '',
         name: j['name'] as String? ?? '',
         platform: j['platform'] as String? ?? '',
+        host: j['host'] as String?,
+        port: (j['port'] as num?)?.toInt(),
+        fingerprint: j['fp'] as String?,
       );
 
   static List<OnlineDevice> listFrom(Map<String, dynamic> j) => [

@@ -401,5 +401,6 @@
   "pdf.zoom_out": "छोटा करें (−)",
   "pdf.prev": "पिछला पेज (Page Up)",
   "pdf.next": "अगला पेज (Page Down)",
-  "pdf.open_with": "सामान्य PDF प्रोग्राम में खोलें"
+  "pdf.open_with": "सामान्य PDF प्रोग्राम में खोलें",
+  "family.access_title": "यह फ़ोन लाइब्रेरी के साथ क्या कर सकता है"
 }

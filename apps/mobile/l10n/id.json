@@ -356,5 +356,6 @@
   "files.sending": "Mengirim…",
   "files.done": "{count} terkirim ke “{name}”",
   "files.failed": "Tidak terkirim",
-  "files.already": "{count} sudah ada di sana"
+  "files.already": "{count} sudah ada di sana",
+  "pclib.delete_hint": "Untuk menghapus dari sini, izinkan di “{pc}”: Keluarga › ponsel ini › “Bisa menelusuri dan menghapus”."
 }

@@ -401,5 +401,6 @@
   "pdf.zoom_out": "Zoom arrière (−)",
   "pdf.prev": "Page précédente (Pg préc)",
   "pdf.next": "Page suivante (Pg suiv)",
-  "pdf.open_with": "Ouvrir avec le lecteur PDF habituel"
+  "pdf.open_with": "Ouvrir avec le lecteur PDF habituel",
+  "family.access_title": "Ce que ce téléphone peut faire avec la bibliothèque"
 }

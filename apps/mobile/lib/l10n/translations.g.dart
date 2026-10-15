@@ -358,6 +358,7 @@ const Map<String, Map<String, String>> translations = {
     'files.done': '{count} sent to “{name}”',
     'files.failed': 'Not sent',
     'files.already': '{count} were already there',
+    'pclib.delete_hint': 'To delete from here, allow it on “{pc}”: Family › this phone › “Can browse and delete”.',
   },
   'zh': {
     'common.cancel': '取消',
@@ -714,6 +715,7 @@ const Map<String, Map<String, String>> translations = {
     'files.done': '已发送 {count} 个到「{name}」',
     'files.failed': '没有发送成功',
     'files.already': '{count} 个对方已经有了',
+    'pclib.delete_hint': '要在这里删除，需要先在「{pc}」上打开：家庭成员 → 这部手机 → “可以浏览和删除”。',
   },
   'zh_Hant': {
     'common.cancel': '取消',
@@ -1070,6 +1072,7 @@ const Map<String, Map<String, String>> translations = {
     'files.done': '已傳送 {count} 個到「{name}」',
     'files.failed': '沒有傳送成功',
     'files.already': '{count} 個對方已經有了',
+    'pclib.delete_hint': '要在這裡刪除，需要先在「{pc}」上開啟：家庭成員 → 這部手機 → 「可以瀏覽和刪除」。',
   },
   'ja': {
     'common.cancel': 'キャンセル',
@@ -1426,6 +1429,7 @@ const Map<String, Map<String, String>> translations = {
     'files.done': '「{name}」に {count} 件送りました',
     'files.failed': '送信できませんでした',
     'files.already': '{count} 件は相手にすでにあります',
+    'pclib.delete_hint': 'ここから削除するには「{pc}」で許可してください：家族 › このスマホ › 「閲覧と削除ができる」。',
   },
   'ko': {
     'common.cancel': '취소',
@@ -1782,6 +1786,7 @@ const Map<String, Map<String, String>> translations = {
     'files.done': '“{name}”(으)로 {count}개 보냄',
     'files.failed': '보내지 못함',
     'files.already': '{count}개는 이미 있습니다',
+    'pclib.delete_hint': '여기서 삭제하려면 “{pc}”에서 허용하세요: 가족 › 이 휴대폰 › “보기 및 삭제 가능”.',
   },
   'es': {
     'common.cancel': 'Cancelar',
@@ -2138,6 +2143,7 @@ const Map<String, Map<String, String>> translations = {
     'files.done': '{count} enviados a «{name}»',
     'files.failed': 'No enviado',
     'files.already': '{count} ya estaban allí',
+    'pclib.delete_hint': 'Para borrar desde aquí, permítelo en «{pc}»: Familia › este teléfono › «Puede ver y borrar».',
   },
   'fr': {
     'common.cancel': 'Annuler',
@@ -2494,6 +2500,7 @@ const Map<String, Map<String, String>> translations = {
     'files.done': '{count} envoyés à « {name} »',
     'files.failed': 'Non envoyé',
     'files.already': '{count} y étaient déjà',
+    'pclib.delete_hint': 'Pour supprimer d’ici, autorisez-le sur « {pc} » : Famille › ce téléphone › « Peut parcourir et supprimer ».',
   },
   'de': {
     'common.cancel': 'Abbrechen',
@@ -2850,6 +2857,7 @@ const Map<String, Map<String, String>> translations = {
     'files.done': '{count} an „{name}“ gesendet',
     'files.failed': 'Nicht gesendet',
     'files.already': '{count} waren schon da',
+    'pclib.delete_hint': 'Zum Löschen von hier auf „{pc}“ erlauben: Familie › dieses Handy › „Kann ansehen und löschen“.',
   },
   'pt': {
     'common.cancel': 'Cancelar',
@@ -3206,6 +3214,7 @@ const Map<String, Map<String, String>> translations = {
     'files.done': '{count} enviados para «{name}»',
     'files.failed': 'Não enviado',
     'files.already': '{count} já lá estavam',
+    'pclib.delete_hint': 'Para apagar daqui, permita em «{pc}»: Família › este telefone › «Pode ver e apagar».',
   },
   'ru': {
     'common.cancel': 'Отмена',
@@ -3562,6 +3571,7 @@ const Map<String, Map<String, String>> translations = {
     'files.done': 'Отправлено на «{name}»: {count}',
     'files.failed': 'Не отправлено',
     'files.already': '{count} уже были там',
+    'pclib.delete_hint': 'Чтобы удалять отсюда, разрешите это на «{pc}»: Семья › этот телефон › «Может просматривать и удалять».',
   },
   'it': {
     'common.cancel': 'Annulla',
@@ -3918,6 +3928,7 @@ const Map<String, Map<String, String>> translations = {
     'files.done': '{count} inviati a «{name}»',
     'files.failed': 'Non inviato',
     'files.already': '{count} erano già presenti',
+    'pclib.delete_hint': 'Per eliminare da qui, consentilo su «{pc}»: Famiglia › questo telefono › «Può sfogliare ed eliminare».',
   },
   'ar': {
     'common.cancel': 'إلغاء',
@@ -4274,6 +4285,7 @@ const Map<String, Map<String, String>> translations = {
     'files.done': 'أُرسل {count} إلى «{name}»',
     'files.failed': 'لم يُرسل',
     'files.already': '{count} موجودة مسبقًا',
+    'pclib.delete_hint': 'للحذف من هنا، اسمح بذلك على «{pc}»: العائلة › هذا الهاتف › «يمكنه التصفح والحذف».',
   },
   'hi': {
     'common.cancel': 'रद्द करें',
@@ -4630,6 +4642,7 @@ const Map<String, Map<String, String>> translations = {
     'files.done': '“{name}” को {count} भेजे गए',
     'files.failed': 'नहीं भेजा गया',
     'files.already': '{count} पहले से वहाँ थे',
+    'pclib.delete_hint': 'यहाँ से हटाने के लिए “{pc}” पर अनुमति दें: परिवार › यह फ़ोन › “देख और हटा सकता है”।',
   },
   'id': {
     'common.cancel': 'Batal',
@@ -4986,6 +4999,7 @@ const Map<String, Map<String, String>> translations = {
     'files.done': '{count} terkirim ke “{name}”',
     'files.failed': 'Tidak terkirim',
     'files.already': '{count} sudah ada di sana',
+    'pclib.delete_hint': 'Untuk menghapus dari sini, izinkan di “{pc}”: Keluarga › ponsel ini › “Bisa menelusuri dan menghapus”.',
   },
   'vi': {
     'common.cancel': 'Hủy',
@@ -5342,6 +5356,7 @@ const Map<String, Map<String, String>> translations = {
     'files.done': 'Đã gửi {count} đến “{name}”',
     'files.failed': 'Chưa gửi được',
     'files.already': '{count} đã có sẵn',
+    'pclib.delete_hint': 'Để xóa từ đây, hãy cho phép trên “{pc}”: Gia đình › điện thoại này › “Được xem và xóa”.',
   },
   'th': {
     'common.cancel': 'ยกเลิก',
@@ -5698,6 +5713,7 @@ const Map<String, Map<String, String>> translations = {
     'files.done': 'ส่ง {count} รายการไปยัง “{name}” แล้ว',
     'files.failed': 'ส่งไม่สำเร็จ',
     'files.already': '{count} รายการมีอยู่แล้ว',
+    'pclib.delete_hint': 'หากต้องการลบจากที่นี่ ให้อนุญาตบน “{pc}”: ครอบครัว › มือถือนี้ › “ดูและลบได้”',
   },
   'tr': {
     'common.cancel': 'İptal',
@@ -6054,5 +6070,6 @@ const Map<String, Map<String, String>> translations = {
     'files.done': '{count} öğe “{name}” adresine gönderildi',
     'files.failed': 'Gönderilmedi',
     'files.already': '{count} öğe zaten oradaydı',
+    'pclib.delete_hint': 'Buradan silmek için “{pc}” üzerinde izin verin: Aile › bu telefon › “Göz atabilir ve silebilir”.',
   },
 };

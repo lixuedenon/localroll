@@ -401,5 +401,6 @@
   "pdf.zoom_out": "축소(−)",
   "pdf.prev": "이전 페이지(Page Up)",
   "pdf.next": "다음 페이지(Page Down)",
-  "pdf.open_with": "기본 PDF 프로그램으로 열기"
+  "pdf.open_with": "기본 PDF 프로그램으로 열기",
+  "family.access_title": "이 휴대폰이 라이브러리에서 할 수 있는 일"
 }

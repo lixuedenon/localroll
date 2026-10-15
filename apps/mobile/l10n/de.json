@@ -356,5 +356,6 @@
   "files.sending": "Senden…",
   "files.done": "{count} an „{name}“ gesendet",
   "files.failed": "Nicht gesendet",
-  "files.already": "{count} waren schon da"
+  "files.already": "{count} waren schon da",
+  "pclib.delete_hint": "Zum Löschen von hier auf „{pc}“ erlauben: Familie › dieses Handy › „Kann ansehen und löschen“."
 }

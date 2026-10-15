@@ -356,5 +356,6 @@
   "files.sending": "Đang gửi…",
   "files.done": "Đã gửi {count} đến “{name}”",
   "files.failed": "Chưa gửi được",
-  "files.already": "{count} đã có sẵn"
+  "files.already": "{count} đã có sẵn",
+  "pclib.delete_hint": "Để xóa từ đây, hãy cho phép trên “{pc}”: Gia đình › điện thoại này › “Được xem và xóa”."
 }

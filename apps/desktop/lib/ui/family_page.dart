@@ -120,9 +120,10 @@ class _FamilyPageState extends State<FamilyPage> {
                 subtitle: Text([
                   widget.services.isOnline(d.id) ? tr('family.online') : tr('family.offline'),
                   tr('settings.paired_on', {'date': formatDate(DateTime.fromMillisecondsSinceEpoch(d.pairedMs))}),
-                  if (st.trusted[d.id] case final t?) tr('family.access_${t.libraryAccess.name}'),
                 ].join(' · ')),
-                trailing: PopupMenuButton<String>(
+                trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                  if (st.trusted[d.id] case final t?) _accessChip(t),
+                  PopupMenuButton<String>(
                   onSelected: (v) async {
                     if (v.startsWith('access_')) {
                       await _setAccess(d.id, v);
@@ -143,6 +144,7 @@ class _FamilyPageState extends State<FamilyPage> {
                     if (st.trusted[d.id] case final t?) ..._accessItems(t),
                   ],
                 ),
+                ]),
               ),
                 ),
               ),
@@ -180,9 +182,10 @@ class _FamilyPageState extends State<FamilyPage> {
               subtitle: Text([
                 s.isOnline(t.id) ? tr('family.online') : tr('family.offline'),
                 tr('settings.paired_on', {'date': formatDate(DateTime.fromMillisecondsSinceEpoch(t.pairedMs))}),
-                if (!isDesktopPlatform(t.platform)) tr('family.access_${t.libraryAccess.name}'),
               ].join(' · ')),
-              trailing: PopupMenuButton<String>(
+              trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                if (!isDesktopPlatform(t.platform)) _accessChip(t),
+                PopupMenuButton<String>(
                 onSelected: (v) async {
                   if (v.startsWith('access_')) await _setAccess(t.id, v);
                   if (v == 'family') await s.server.setFamily(t.id, true);
@@ -202,11 +205,40 @@ class _FamilyPageState extends State<FamilyPage> {
                   if (!isDesktopPlatform(t.platform)) ..._accessItems(t),
                 ],
               ),
+              ]),
             ),
           ),
         ),
     ];
   }
+
+  /// The phone's library access, shown where it is seen and changed in one
+  /// click (it was easy to miss inside the ⋮ menu).
+  Widget _accessChip(TrustedDevice t) => PopupMenuButton<LibraryAccess>(
+        tooltip: tr('family.access_title'),
+        onSelected: (a) => widget.services.settings.update((x) => x.trusted[t.id]?.access = a),
+        itemBuilder: (_) => [
+          for (final a in LibraryAccess.values)
+            CheckedPopupMenuItem(value: a, checked: t.libraryAccess == a, child: Text(tr('family.access_${a.name}'))),
+        ],
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: t.libraryAccess == LibraryAccess.none ? LrColors.line : LrColors.verified),
+          ),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            Icon(
+              t.libraryAccess == LibraryAccess.manage ? Icons.delete_sweep_outlined : Icons.photo_library_outlined,
+              size: 16,
+              color: t.libraryAccess == LibraryAccess.none ? LrColors.muted : LrColors.verified,
+            ),
+            const SizedBox(width: 6),
+            Text(tr('family.access_${t.libraryAccess.name}'), style: const TextStyle(fontSize: 12.5)),
+            const Icon(Icons.arrow_drop_down_rounded, size: 18),
+          ]),
+        ),
+      );
 
   /// What a phone may do with this library from afar (browse / manage).
   List<PopupMenuEntry<String>> _accessItems(TrustedDevice t) => [

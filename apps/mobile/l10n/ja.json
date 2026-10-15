@@ -356,5 +356,6 @@
   "files.sending": "送信中…",
   "files.done": "「{name}」に {count} 件送りました",
   "files.failed": "送信できませんでした",
-  "files.already": "{count} 件は相手にすでにあります"
+  "files.already": "{count} 件は相手にすでにあります",
+  "pclib.delete_hint": "ここから削除するには「{pc}」で許可してください：家族 › このスマホ › 「閲覧と削除ができる」。"
 }

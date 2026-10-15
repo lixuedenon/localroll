@@ -521,6 +521,25 @@ void main() {
       await eventually(() => pc.server.phoneEndpoint(phone.id) == null);
     });
 
+    test('a phone learns where another phone receives (from the PC, with its certificate)', () async {
+      final a = await pc.pairPhone(id: 'phoneA', name: 'A');
+      final b = await pc.pairPhone(id: 'phoneB', name: 'B');
+      final wsA = await link(a, extra: {'rport': '53317', 'rfp': 'ab' * 32});
+      await eventually(() => pc.server.phoneEndpoint(a.id) != null);
+      final wsB = await link(b);
+      final hello = Completer<LiveMessage>();
+      wsB.listen((d) {
+        final m = LiveMessage.parse(d);
+        if (m != null && m.type == 'hello' && !hello.isCompleted) hello.complete(m);
+      });
+      final seen = (await hello.future.timeout(const Duration(seconds: 5))).online.firstWhere((o) => o.id == 'phoneA');
+      expect(seen.port, 53317);
+      expect(seen.fingerprint, 'ab' * 32);
+      expect(seen.host, isNotNull);
+      await wsA.close();
+      await wsB.close();
+    });
+
     test('a live link needs a valid token', () async {
       final phone = await pc.pairPhone();
       await expectLater(link(TestPhone(pc, phone.id, 'wrong')), throwsA(anything));

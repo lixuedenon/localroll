@@ -401,5 +401,6 @@
   "pdf.zoom_out": "ย่อ (−)",
   "pdf.prev": "หน้าก่อน (Page Up)",
   "pdf.next": "หน้าถัดไป (Page Down)",
-  "pdf.open_with": "เปิดด้วยโปรแกรม PDF ปกติ"
+  "pdf.open_with": "เปิดด้วยโปรแกรม PDF ปกติ",
+  "family.access_title": "มือถือนี้ทำอะไรกับคลังได้บ้าง"
 }

@@ -13,7 +13,18 @@ import 'mobile_settings.dart';
 
 /// Another phone nearby with LocalRoll open (it can receive).
 class NearbyPhone {
-  const NearbyPhone({required this.id, required this.name, required this.platform, required this.hosts, required this.port});
+  const NearbyPhone({
+    required this.id,
+    required this.name,
+    required this.platform,
+    required this.hosts,
+    required this.port,
+    this.fingerprint,
+  });
+
+  /// Its certificate as a paired PC vouched for it (null: found by the
+  /// Wi-Fi search; the certificate seen first is used).
+  final String? fingerprint;
 
   final String id;
   final String name;
@@ -94,7 +105,7 @@ class DesktopDiscovery extends ChangeNotifier {
   /// From LiveService: everyone else the linked PCs see online.
   void liveOthers(List<OnlineDevice> list) {
     _liveOthers = list;
-    notifyListeners();
+    _merge(); // phones the PCs know about can be sent to as well
   }
 
   /// Per PC: is this phone in its family group (null = not known yet).
@@ -158,6 +169,12 @@ class DesktopDiscovery extends ChangeNotifier {
         if (p.id != selfId && p.id.isNotEmpty) p,
       for (final p in _scannedPhones.values)
         if (p.id != selfId && !_mdnsPhones.any((m) => m.id == p.id)) p,
+      // Phones a paired PC sees with LocalRoll open (when the Wi-Fi search
+      // can't find them; certificate as the PC knows it).
+      for (final o in _liveOthers)
+        if (!o.isDesktop && o.host != null && o.port != null && o.fingerprint != null && o.id != selfId &&
+            !_mdnsPhones.any((m) => m.id == o.id) && !_scannedPhones.containsKey(o.id))
+          NearbyPhone(id: o.id, name: o.name, platform: o.platform, hosts: [o.host!], port: o.port!, fingerprint: o.fingerprint),
     ]..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
     notifyListeners();
   }
@@ -760,6 +777,19 @@ Future<bool> requestMembership(MobileSettings settings, DesktopDiscovery discove
 /// accepted on it). Its certificate is taken on first contact and then
 /// pinned for this transfer; returns null if it does not answer.
 Future<DesktopClient?> connectToPhone(MobileSettings settings, NearbyPhone p) async {
+  // Vouched for by a paired PC: only that certificate is accepted.
+  final known = p.fingerprint;
+  if (known != null) {
+    for (final host in p.hosts) {
+      final c = DesktopClient(host: host, port: p.port, secure: true, pin: known, deviceId: settings.deviceId);
+      try {
+        final info = await c.info(timeout: const Duration(seconds: 3));
+        if (info.id == p.id) return c;
+      } catch (_) {}
+      c.close();
+    }
+    return null;
+  }
   for (final host in p.hosts) {
     final probe = DesktopClient(host: host, port: p.port, secure: true);
     try {

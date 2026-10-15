@@ -356,5 +356,6 @@
   "files.sending": "กำลังส่ง…",
   "files.done": "ส่ง {count} รายการไปยัง “{name}” แล้ว",
   "files.failed": "ส่งไม่สำเร็จ",
-  "files.already": "{count} รายการมีอยู่แล้ว"
+  "files.already": "{count} รายการมีอยู่แล้ว",
+  "pclib.delete_hint": "หากต้องการลบจากที่นี่ ให้อนุญาตบน “{pc}”: ครอบครัว › มือถือนี้ › “ดูและลบได้”"
 }

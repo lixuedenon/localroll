@@ -265,7 +265,9 @@ class TransferServer extends ChangeNotifier {
 
   OnlineDevice? _describe(String id) {
     final t = settings.trusted[id];
-    return t == null ? null : OnlineDevice(id: id, name: t.name, platform: t.platform);
+    if (t == null) return null;
+    final ep = phoneEndpoint(id);
+    return OnlineDevice(id: id, name: t.name, platform: t.platform, host: ep?.host, port: ep?.port, fingerprint: ep?.fingerprint);
   }
 
   /// Tell every other linked device that [id] came / went.
@@ -717,8 +719,7 @@ class TransferServer extends ChangeNotifier {
         return _json(res, 200, {
           'online': [
             for (final id in ids)
-              if (id != device.id && settings.trusted[id] != null)
-                OnlineDevice(id: id, name: settings.trusted[id]!.name, platform: settings.trusted[id]!.platform).toJson(),
+              if (id != device.id) ?_describe(id)?.toJson(),
           ],
         });
       }

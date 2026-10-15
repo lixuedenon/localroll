@@ -356,5 +356,6 @@
   "files.sending": "Sending…",
   "files.done": "{count} sent to “{name}”",
   "files.failed": "Not sent",
-  "files.already": "{count} were already there"
+  "files.already": "{count} were already there",
+  "pclib.delete_hint": "To delete from here, allow it on “{pc}”: Family › this phone › “Can browse and delete”."
 }
