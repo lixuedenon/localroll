@@ -396,5 +396,10 @@
   "privacy.p4": "Không thống kê, không quảng cáo, không theo dõi. Mạng chỉ dùng để tìm thiết bị của bạn và gửi giữa chúng.",
   "privacy.p5": "Nhật ký chẩn đoán ở lại trên thiết bị này và không chứa ảnh; chỉ rời đi khi bạn tự xuất.",
   "privacy.p6": "Mã nguồn mở (GPL-3.0): ai cũng có thể xem mã tại github.com/lixuedenon/localroll.",
-  "privacy.perms": "Trên máy tính này: tệp nhận được chỉ nằm trong thư mục thư viện bạn chọn; quy tắc tường lửa chỉ mở cổng LocalRoll cho mạng gia đình hoặc văn phòng."
+  "privacy.perms": "Trên máy tính này: tệp nhận được chỉ nằm trong thư mục thư viện bạn chọn; quy tắc tường lửa chỉ mở cổng LocalRoll cho mạng gia đình hoặc văn phòng.",
+  "pdf.zoom_in": "Phóng to (+)",
+  "pdf.zoom_out": "Thu nhỏ (−)",
+  "pdf.prev": "Trang trước (Page Up)",
+  "pdf.next": "Trang sau (Page Down)",
+  "pdf.open_with": "Mở bằng chương trình PDF thường dùng"
 }

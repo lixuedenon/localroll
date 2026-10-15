@@ -396,5 +396,10 @@
   "privacy.p4": "Pas de statistiques, pas de pub, pas de pistage. Le réseau sert seulement à trouver vos appareils et à échanger entre eux.",
   "privacy.p5": "Le journal de diagnostic reste sur cet appareil et ne contient aucune photo ; il ne sort que si vous l’exportez.",
   "privacy.p6": "Open source (GPL-3.0) : chacun peut vérifier le code sur github.com/lixuedenon/localroll.",
-  "privacy.perms": "Sur ce PC : les fichiers reçus restent dans le dossier de bibliothèque choisi ; la règle du pare-feu n’ouvre le port de LocalRoll qu’à votre réseau domestique ou de bureau."
+  "privacy.perms": "Sur ce PC : les fichiers reçus restent dans le dossier de bibliothèque choisi ; la règle du pare-feu n’ouvre le port de LocalRoll qu’à votre réseau domestique ou de bureau.",
+  "pdf.zoom_in": "Zoom avant (+)",
+  "pdf.zoom_out": "Zoom arrière (−)",
+  "pdf.prev": "Page précédente (Pg préc)",
+  "pdf.next": "Page suivante (Pg suiv)",
+  "pdf.open_with": "Ouvrir avec le lecteur PDF habituel"
 }

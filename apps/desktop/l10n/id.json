@@ -396,5 +396,10 @@
   "privacy.p4": "Tanpa statistik, iklan, atau pelacakan. Jaringan hanya dipakai untuk menemukan perangkat Anda dan mengirim di antaranya.",
   "privacy.p5": "Log diagnostik tetap di perangkat ini dan tidak berisi foto; hanya keluar bila Anda mengekspornya.",
   "privacy.p6": "Sumber terbuka (GPL-3.0): siapa pun bisa memeriksa kodenya di github.com/lixuedenon/localroll.",
-  "privacy.perms": "Di PC ini: file yang diterima tetap di folder pustaka pilihan Anda; aturan firewall hanya membuka port LocalRoll untuk jaringan rumah atau kantor."
+  "privacy.perms": "Di PC ini: file yang diterima tetap di folder pustaka pilihan Anda; aturan firewall hanya membuka port LocalRoll untuk jaringan rumah atau kantor.",
+  "pdf.zoom_in": "Perbesar (+)",
+  "pdf.zoom_out": "Perkecil (−)",
+  "pdf.prev": "Halaman sebelumnya (Page Up)",
+  "pdf.next": "Halaman berikutnya (Page Down)",
+  "pdf.open_with": "Buka dengan program PDF biasa"
 }

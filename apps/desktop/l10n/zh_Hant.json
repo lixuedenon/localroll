@@ -396,5 +396,10 @@
   "privacy.p4": "沒有統計、沒有廣告、不追蹤。App 連網只為找到你的裝置並在它們之間傳輸。",
   "privacy.p5": "診斷日誌只保存在本機，不含照片內容；只有你主動匯出它才會離開本機。",
   "privacy.p6": "開源（GPL-3.0）：任何人都可以在 github.com/lixuedenon/localroll 查看程式碼。",
-  "privacy.perms": "在這台電腦上：收到的檔案只放在你選的媒體庫資料夾裡；防火牆規則只對家庭或辦公網路開放 LocalRoll 的連接埠。"
+  "privacy.perms": "在這台電腦上：收到的檔案只放在你選的媒體庫資料夾裡；防火牆規則只對家庭或辦公網路開放 LocalRoll 的連接埠。",
+  "pdf.zoom_in": "放大（+）",
+  "pdf.zoom_out": "縮小（−）",
+  "pdf.prev": "上一頁（Page Up）",
+  "pdf.next": "下一頁（Page Down）",
+  "pdf.open_with": "用電腦常用的 PDF 程式開啟"
 }

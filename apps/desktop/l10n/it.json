@@ -396,5 +396,10 @@
   "privacy.p4": "Niente statistiche, pubblicità o tracciamento. La rete serve solo a trovare i tuoi dispositivi e scambiare tra loro.",
   "privacy.p5": "Il registro diagnostico resta su questo dispositivo e non contiene foto; esce solo se lo esporti.",
   "privacy.p6": "Open source (GPL-3.0): chiunque può verificare il codice su github.com/lixuedenon/localroll.",
-  "privacy.perms": "Su questo PC: i file ricevuti restano nella cartella della libreria scelta; la regola del firewall apre la porta di LocalRoll solo alla rete di casa o ufficio."
+  "privacy.perms": "Su questo PC: i file ricevuti restano nella cartella della libreria scelta; la regola del firewall apre la porta di LocalRoll solo alla rete di casa o ufficio.",
+  "pdf.zoom_in": "Ingrandisci (+)",
+  "pdf.zoom_out": "Riduci (−)",
+  "pdf.prev": "Pagina precedente (Pag su)",
+  "pdf.next": "Pagina successiva (Pag giù)",
+  "pdf.open_with": "Apri con il solito programma PDF"
 }

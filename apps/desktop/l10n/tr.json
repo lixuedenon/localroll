@@ -396,5 +396,10 @@
   "privacy.p4": "İstatistik, reklam, takip yok. Ağ yalnızca cihazlarınızı bulmak ve aralarında göndermek için kullanılır.",
   "privacy.p5": "Tanılama günlüğü bu cihazda kalır ve fotoğraf içermez; yalnızca siz dışa aktarırsanız çıkar.",
   "privacy.p6": "Açık kaynak (GPL-3.0): kodu herkes github.com/lixuedenon/localroll adresinde inceleyebilir.",
-  "privacy.perms": "Bu bilgisayarda: alınan dosyalar seçtiğiniz arşiv klasöründe kalır; güvenlik duvarı kuralı LocalRoll’un bağlantı noktasını yalnızca ev veya ofis ağına açar."
+  "privacy.perms": "Bu bilgisayarda: alınan dosyalar seçtiğiniz arşiv klasöründe kalır; güvenlik duvarı kuralı LocalRoll’un bağlantı noktasını yalnızca ev veya ofis ağına açar.",
+  "pdf.zoom_in": "Yakınlaştır (+)",
+  "pdf.zoom_out": "Uzaklaştır (−)",
+  "pdf.prev": "Önceki sayfa (Page Up)",
+  "pdf.next": "Sonraki sayfa (Page Down)",
+  "pdf.open_with": "Her zamanki PDF programıyla aç"
 }

@@ -396,5 +396,10 @@
   "privacy.p4": "No statistics, no ads, no tracking. The app only uses the network to find your devices and send between them.",
   "privacy.p5": "The diagnostics log stays on this device and holds no photo contents; it leaves only if you export it.",
   "privacy.p6": "Open source (GPL-3.0): anyone can check the code at github.com/lixuedenon/localroll.",
-  "privacy.perms": "On this PC: received files stay in the library folder you chose; the firewall rule only opens LocalRoll’s port to your home or office network."
+  "privacy.perms": "On this PC: received files stay in the library folder you chose; the firewall rule only opens LocalRoll’s port to your home or office network.",
+  "pdf.zoom_in": "Zoom in (+)",
+  "pdf.zoom_out": "Zoom out (−)",
+  "pdf.prev": "Previous page (Page Up)",
+  "pdf.next": "Next page (Page Down)",
+  "pdf.open_with": "Open with the usual PDF program"
 }

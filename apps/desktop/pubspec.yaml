@@ -37,6 +37,9 @@ dependencies:
   basic_utils: ^5.7.0
   # Windows DPAPI (tokens for other PCs sealed per user).
   ffi: ^2.1.0
+  # Reading PDFs (scans, documents) inside LocalRoll. 1.x builds with the
+  # Flutter used for Windows here (2.x needs a newer one).
+  pdfrx: '>=1.0.100 <2.0.0'
 
 dev_dependencies:
   flutter_test:

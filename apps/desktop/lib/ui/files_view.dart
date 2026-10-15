@@ -10,6 +10,7 @@ import '../services/file_actions.dart';
 import '../services/network.dart';
 import 'format.dart';
 import 'theme.dart';
+import 'pdf_viewer_page.dart';
 
 /// Library tabs "Documents" / "Other": the files other PCs sent that are not
 /// photos or videos, straight from their folders (newest first).
@@ -177,8 +178,11 @@ class _FilesViewState extends State<FilesView> {
                           formatBytes(e.size),
                           if (e.isDir) tr('files.items', {'count': e.children}),
                         ].join(' · ')),
-                        // Open with the program Windows uses for it (a folder opens in Explorer).
-                        onTap: () => Process.run('explorer.exe', [e.entity.path]),
+                        // A PDF opens in LocalRoll's reader; anything else with the
+                        // program Windows uses for it (a folder in Explorer).
+                        onTap: () => !e.isDir && isPdfPath(e.entity.path)
+                            ? Navigator.of(context).push(MaterialPageRoute(builder: (_) => PdfViewerPage(path: e.entity.path)))
+                            : Process.run('explorer.exe', [e.entity.path]),
                         trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                           IconButton(
                             tooltip: tr('common.show_in_folder'),

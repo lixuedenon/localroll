@@ -396,5 +396,10 @@
   "privacy.p4": "Keine Statistik, keine Werbung, kein Tracking. Das Netz dient nur dazu, Ihre Geräte zu finden und zwischen ihnen zu senden.",
   "privacy.p5": "Das Diagnoseprotokoll bleibt auf diesem Gerät und enthält keine Fotoinhalte; es verlässt das Gerät nur, wenn Sie es exportieren.",
   "privacy.p6": "Open Source (GPL-3.0): Jeder kann den Code auf github.com/lixuedenon/localroll prüfen.",
-  "privacy.perms": "Auf diesem PC: Empfangenes bleibt im gewählten Mediathek-Ordner; die Firewall-Regel öffnet LocalRolls Port nur für Ihr Heim- oder Büronetz."
+  "privacy.perms": "Auf diesem PC: Empfangenes bleibt im gewählten Mediathek-Ordner; die Firewall-Regel öffnet LocalRolls Port nur für Ihr Heim- oder Büronetz.",
+  "pdf.zoom_in": "Vergrößern (+)",
+  "pdf.zoom_out": "Verkleinern (−)",
+  "pdf.prev": "Vorherige Seite (Bild ↑)",
+  "pdf.next": "Nächste Seite (Bild ↓)",
+  "pdf.open_with": "Mit dem üblichen PDF-Programm öffnen"
 }

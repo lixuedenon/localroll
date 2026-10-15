@@ -396,5 +396,10 @@
   "privacy.p4": "没有统计、没有广告、不追踪。App 联网只为找到你的设备并在它们之间传输。",
   "privacy.p5": "诊断日志只保存在本机，不含照片内容；只有你主动导出它才会离开本机。",
   "privacy.p6": "开源（GPL-3.0）：任何人都可以在 github.com/lixuedenon/localroll 查看代码。",
-  "privacy.perms": "在这台电脑上：收到的文件只放在你选的媒体库文件夹里；防火墙规则只对家庭或办公网络打开 LocalRoll 的端口。"
+  "privacy.perms": "在这台电脑上：收到的文件只放在你选的媒体库文件夹里；防火墙规则只对家庭或办公网络打开 LocalRoll 的端口。",
+  "pdf.zoom_in": "放大（+）",
+  "pdf.zoom_out": "缩小（−）",
+  "pdf.prev": "上一页（Page Up）",
+  "pdf.next": "下一页（Page Down）",
+  "pdf.open_with": "用电脑常用的 PDF 程序打开"
 }

@@ -71,10 +71,19 @@ class AppServices {
   Stream<PresenceEvent> get presenceEvents => _presence.stream;
   Set<String> _onlineSeen = {};
 
+  /// Right after this PC starts (or its network comes back) it finds the
+  /// devices that were already on: they are shown online, but not
+  /// announced as "came online" — they didn't, we did.
+  DateTime _quietUntil = DateTime.now().add(const Duration(seconds: 20));
+
+  /// Call when this PC (re)joins the network.
+  void settlePresence() => _quietUntil = DateTime.now().add(const Duration(seconds: 20));
+
   void _recomputePresence() {
     final now = onlineDevices;
+    final quiet = DateTime.now().isBefore(_quietUntil);
     for (final id in now.difference(_onlineSeen)) {
-      _presence.add(PresenceEvent(id, online: true));
+      if (!quiet) _presence.add(PresenceEvent(id, online: true));
     }
     for (final id in _onlineSeen.difference(now)) {
       _presence.add(PresenceEvent(id, online: false));
@@ -179,6 +188,7 @@ class AppServices {
   }
 
   Future<void> startNetworking() async {
+    settlePresence();
     await server.start();
     await refreshAddresses();
     if (server.running) {

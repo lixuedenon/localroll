@@ -52,7 +52,14 @@ class LiveService extends ChangeNotifier {
   bool get running => _running;
 
   /// App on screen: (re)connect everything, as a new visit.
+  /// Right after this phone comes on (app opened or back on screen) it
+  /// finds devices that were already on: shown online, not announced as
+  /// "came online" — they didn't, we did.
+  DateTime _quietUntil = DateTime.fromMillisecondsSinceEpoch(0);
+  bool get _quiet => DateTime.now().isBefore(_quietUntil);
+
   void start() {
+    _quietUntil = DateTime.now().add(const Duration(seconds: 15));
     _session = DateTime.now().microsecondsSinceEpoch.toRadixString(36);
     _running = true;
     sync();
@@ -114,8 +121,11 @@ class LiveService extends ChangeNotifier {
     discovery.live(pcId, up);
     if (!up) _heard.remove(pcId);
     if (was != up) DiagLog.log('live', '$name ${up ? 'linked' : 'lost'}');
-    if (was != up && _running) _events.add(PresenceEvent(pcId, name, pc: true, online: up));
-    _recompute();
+    // A PC found while we are just coming on was already there.
+    if (was != up && _running && !(up && _quiet)) _events.add(PresenceEvent(pcId, name, pc: true, online: up));
+    // Losing the link to a PC doesn't mean the devices it told us about
+    // went away: no notes for them.
+    _recompute(quiet: !up);
     notifyListeners();
   }
 
@@ -125,6 +135,10 @@ class LiveService extends ChangeNotifier {
         final f = m.family;
         if (f != null) _family(pcId, f);
         _heard[pcId] = {for (final d in m.online) d.id: d};
+        // Who was already on when we connected: shown, not announced.
+        _recompute(quiet: true);
+        notifyListeners();
+        return;
       case 'up':
         final d = m.device;
         if (d == null) break;
@@ -158,7 +172,7 @@ class LiveService extends ChangeNotifier {
 
   /// Everyone the connected PCs see (minus us and our own PCs, which have
   /// their own links); one note per device that came or went.
-  void _recompute() {
+  void _recompute({bool quiet = false}) {
     final now = <String, OnlineDevice>{};
     for (final e in _heard.entries) {
       for (final d in e.value.values) {
@@ -166,11 +180,13 @@ class LiveService extends ChangeNotifier {
         now[d.id] = d;
       }
     }
-    for (final d in now.values) {
-      if (!_others.containsKey(d.id)) _events.add(PresenceEvent(d.id, d.name, pc: d.isDesktop, online: true));
-    }
-    for (final d in _others.values) {
-      if (!now.containsKey(d.id)) _events.add(PresenceEvent(d.id, d.name, pc: d.isDesktop, online: false));
+    if (!quiet) {
+      for (final d in now.values) {
+        if (!_others.containsKey(d.id)) _events.add(PresenceEvent(d.id, d.name, pc: d.isDesktop, online: true));
+      }
+      for (final d in _others.values) {
+        if (!now.containsKey(d.id)) _events.add(PresenceEvent(d.id, d.name, pc: d.isDesktop, online: false));
+      }
     }
     _others = now;
     discovery.liveOthers(now.values.toList());
