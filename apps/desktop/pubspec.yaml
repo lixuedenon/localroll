@@ -35,6 +35,8 @@ dependencies:
   qr_flutter: ^4.1.0
   # HTTPS: this PC's own self-signed certificate (made once, pinned by phones).
   basic_utils: ^5.7.0
+  # Windows DPAPI (tokens for other PCs sealed per user).
+  ffi: ^2.1.0
 
 dev_dependencies:
   flutter_test:

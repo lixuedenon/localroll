@@ -1,4 +1,5 @@
 // packages/core/lib/src/tls.dart
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart' as crypto;
@@ -15,6 +16,20 @@ import 'package:crypto/crypto.dart' as crypto;
 
 /// Lower-case hex SHA-256 of a certificate (DER bytes).
 String certFingerprint(List<int> der) => crypto.sha256.convert(der).toString();
+
+/// What a receiver keeps of a sign-in token: its SHA-256 (hex). Enough to
+/// check a token, useless for signing in if the settings file is copied.
+String tokenHash(String token) => crypto.sha256.convert(utf8.encode(token)).toString();
+
+/// Compares two strings in time that doesn't depend on where they differ.
+bool sameSecret(String a, String b) {
+  if (a.length != b.length) return false;
+  var diff = 0;
+  for (var i = 0; i < a.length; i++) {
+    diff |= a.codeUnitAt(i) ^ b.codeUnitAt(i);
+  }
+  return diff == 0;
+}
 
 /// For people: the first 16 hex digits in groups of four ("3F2A 91C0 …").
 String shortFingerprint(String fp) {

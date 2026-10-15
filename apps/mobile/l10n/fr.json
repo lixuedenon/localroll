@@ -325,5 +325,13 @@
   "pclib.now_shared": "{count} maintenant visibles par la famille.",
   "pclib.from": "de {name}",
   "pclib.live": "Live",
-  "pclib.cant_play": "Cette vidéo ne peut pas être lue ici. Enregistrez-la sur le téléphone pour la voir."
+  "pclib.cant_play": "Cette vidéo ne peut pas être lue ici. Enregistrez-la sur le téléphone pour la voir.",
+  "privacy.title": "Confidentialité",
+  "privacy.p1": "Pas de compte, rien n’est collecté. LocalRoll n’a pas de serveurs.",
+  "privacy.p2": "Photos, vidéos et fichiers passent directement entre vos appareils sur le même réseau — jamais par internet ni un cloud.",
+  "privacy.p3": "Tout ce qui est envoyé est chiffré. À l’appairage, les deux écrans affichent les trois mêmes symboles : c’est bien votre appareil ; ensuite seul celui-ci est reconnu.",
+  "privacy.p4": "Pas de statistiques, pas de pub, pas de pistage. Le réseau sert seulement à trouver vos appareils et à échanger entre eux.",
+  "privacy.p5": "Le journal de diagnostic reste sur cet appareil et ne contient aucune photo ; il ne sort que si vous l’exportez.",
+  "privacy.p6": "Open source (GPL-3.0) : chacun peut vérifier le code sur github.com/lixuedenon/localroll.",
+  "privacy.perms": "Autorisations : Photos — sauvegarder et enregistrer ce que vous recevez ; Appareil photo — uniquement pour scanner le code d’appairage ; Réseau local — trouver votre PC et vos téléphones."
 }

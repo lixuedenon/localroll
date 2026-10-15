@@ -143,4 +143,28 @@ void main() {
     expect(Directory(root).existsSync(), isTrue);
     lib.dispose();
   });
+
+  test('tidy: old partial files and an oversized picture cache go; photos never', () async {
+    final lib = LibraryIndex(root, stateFile: state);
+    await lib.load();
+    await put(lib, '2026/10/keep.jpg', asset: 'K');
+    final sep = Platform.pathSeparator;
+    final oldPart = File('${lib.incomingDir}${sep}old.part')..writeAsBytesSync([1]);
+    final newPart = File('${lib.incomingDir}${sep}new.part')..writeAsBytesSync([1]);
+    await oldPart.setLastModified(DateTime.now().subtract(const Duration(days: 40)));
+    for (var i = 0; i < 10; i++) {
+      final f = File('${lib.cacheDir}${sep}c$i.jpg')..writeAsBytesSync(List.filled(1000, 0));
+      await f.setLastModified(DateTime.now().subtract(Duration(minutes: 10 - i)));
+    }
+    final removed = await lib.tidy(cacheMax: 5000);
+    expect(oldPart.existsSync(), isFalse);
+    expect(newPart.existsSync(), isTrue);
+    final left = Directory(lib.cacheDir).listSync().whereType<File>().map((f) => f.path.split(sep).last).toSet();
+    expect(left.length, lessThanOrEqualTo(3)); // under 3/4 of the limit
+    expect(left, contains('c9.jpg')); // the newest stay
+    expect(removed, greaterThanOrEqualTo(8));
+    expect(File(p('2026/10/keep.jpg')).existsSync(), isTrue);
+    lib.dispose();
+  });
 }
+

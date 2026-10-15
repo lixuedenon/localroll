@@ -388,5 +388,13 @@
   "settings.log_saved": "로그를 저장했습니다: {path}",
   "family.access_none": "라이브러리 보기 불가",
   "family.access_view": "라이브러리 보기 가능",
-  "family.access_manage": "보기 및 삭제 가능(휴지통으로)"
+  "family.access_manage": "보기 및 삭제 가능(휴지통으로)",
+  "privacy.title": "개인정보",
+  "privacy.p1": "계정이 필요 없고 아무것도 수집하지 않습니다. LocalRoll에는 자체 서버가 없습니다.",
+  "privacy.p2": "사진·동영상·파일은 같은 네트워크 안의 내 기기끼리 바로 오가며, 인터넷이나 클라우드를 거치지 않습니다.",
+  "privacy.p3": "전송되는 모든 내용은 암호화됩니다. 페어링할 때 양쪽 화면에 같은 기호 3개가 나타나 내 기기임을 확인할 수 있고, 이후에는 그 기기만 신뢰합니다.",
+  "privacy.p4": "통계, 광고, 추적이 없습니다. 네트워크는 기기를 찾고 서로 주고받는 데만 씁니다.",
+  "privacy.p5": "진단 로그는 이 기기에만 저장되며 사진 내용은 없습니다. 직접 내보낼 때만 기기 밖으로 나갑니다.",
+  "privacy.p6": "오픈 소스(GPL-3.0): 누구나 github.com/lixuedenon/localroll에서 코드를 확인할 수 있습니다.",
+  "privacy.perms": "이 PC에서: 받은 파일은 선택한 라이브러리 폴더에만 저장됩니다. 방화벽 규칙은 가정·사무실 네트워크에만 LocalRoll 포트를 엽니다."
 }

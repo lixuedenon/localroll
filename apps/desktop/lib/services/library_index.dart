@@ -211,6 +211,54 @@ class LibraryIndex extends ChangeNotifier {
     _startWatching();
     notifyListeners();
     unawaited(_writeBackup(force: true));
+    unawaited(tidy());
+  }
+
+  /// Housekeeping in LocalRoll's own folder (never touches the photos):
+  ///  * half-received files nobody resumed for [partsAfter] are removed;
+  ///  * the picture cache (thumbnails, previews) is kept under [cacheMax]
+  ///    by dropping what was made longest ago — it is re-made when needed.
+  /// Returns how many files were removed.
+  Future<int> tidy({Duration partsAfter = const Duration(days: 30), int cacheMax = 2 * 1024 * 1024 * 1024}) async {
+    var removed = 0;
+    final now = DateTime.now();
+    try {
+      await for (final e in Directory(incomingDir).list()) {
+        if (e is! File || !e.path.endsWith('.part')) continue;
+        try {
+          if (now.difference(await e.lastModified()) > partsAfter) {
+            await e.delete();
+            removed++;
+          }
+        } catch (_) {}
+      }
+    } catch (_) {}
+    try {
+      final files = <(File, int, DateTime)>[];
+      var total = 0;
+      await for (final e in Directory(cacheDir).list()) {
+        if (e is! File) continue;
+        try {
+          final st = await e.stat();
+          files.add((e, st.size, st.modified));
+          total += st.size;
+        } catch (_) {}
+      }
+      if (total > cacheMax) {
+        files.sort((a, b) => a.$3.compareTo(b.$3)); // oldest first
+        final target = cacheMax * 3 ~/ 4;
+        for (final (f, size, _) in files) {
+          if (total <= target) break;
+          try {
+            await f.delete();
+            total -= size;
+            removed++;
+          } catch (_) {}
+        }
+      }
+    } catch (_) {}
+    if (removed > 0) DiagLog.log('library', 'tidied: $removed old partial / cached files removed');
+    return removed;
   }
 
   /// Switches to another library folder.

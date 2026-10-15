@@ -325,5 +325,13 @@
   "pclib.now_shared": "{count} jetzt für die Familie sichtbar.",
   "pclib.from": "von {name}",
   "pclib.live": "Live",
-  "pclib.cant_play": "Dieses Video lässt sich hier nicht abspielen. Aufs Handy speichern und dort ansehen."
+  "pclib.cant_play": "Dieses Video lässt sich hier nicht abspielen. Aufs Handy speichern und dort ansehen.",
+  "privacy.title": "Datenschutz",
+  "privacy.p1": "Kein Konto, keine Datensammlung. LocalRoll hat keine eigenen Server.",
+  "privacy.p2": "Fotos, Videos und Dateien gehen direkt zwischen Ihren Geräten im selben Netz – nie übers Internet oder eine Cloud.",
+  "privacy.p3": "Alles wird verschlüsselt übertragen. Beim Koppeln zeigen beide Bildschirme dieselben drei Symbole – so wissen Sie, dass es Ihr Gerät ist; danach wird nur ihm vertraut.",
+  "privacy.p4": "Keine Statistik, keine Werbung, kein Tracking. Das Netz dient nur dazu, Ihre Geräte zu finden und zwischen ihnen zu senden.",
+  "privacy.p5": "Das Diagnoseprotokoll bleibt auf diesem Gerät und enthält keine Fotoinhalte; es verlässt das Gerät nur, wenn Sie es exportieren.",
+  "privacy.p6": "Open Source (GPL-3.0): Jeder kann den Code auf github.com/lixuedenon/localroll prüfen.",
+  "privacy.perms": "Berechtigungen: Fotos – zum Sichern und Speichern von Empfangenem; Kamera – nur zum Scannen des Kopplungscodes; Lokales Netzwerk – um PC und Handys zu finden."
 }

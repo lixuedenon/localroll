@@ -157,6 +157,7 @@ class PhoneServer extends ChangeNotifier {
       } catch (_) {}
     }
     DiagLog.log('receiver', _http == null ? 'could not listen' : 'listening on $port');
+    unawaited(_tidyInbox());
     if (_http == null) return;
     // Show up for nearby phones (PCs ignore entries marked as phones).
     if (advertise) {
@@ -347,6 +348,16 @@ class PhoneServer extends ChangeNotifier {
     _lastDecline[from.id] = reply;
     _declinedUntil[from.id] = DateTime.now().add(const Duration(minutes: 1));
     return reply;
+  }
+
+  /// Half-received files nobody resumed for a week take room for nothing.
+  Future<void> _tidyInbox() async {
+    try {
+      final now = DateTime.now();
+      await for (final e in (await _inbox()).list()) {
+        if (e is File && now.difference(await e.lastModified()) > const Duration(days: 7)) await e.delete();
+      }
+    } catch (_) {}
   }
 
   Future<Directory> _inbox() async {

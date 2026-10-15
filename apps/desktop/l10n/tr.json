@@ -388,5 +388,13 @@
   "settings.log_saved": "Günlük kaydedildi: {path}",
   "family.access_none": "Arşive göz atamaz",
   "family.access_view": "Arşive göz atabilir",
-  "family.access_manage": "Göz atabilir ve silebilir (Geri Dönüşüm Kutusu’na)"
+  "family.access_manage": "Göz atabilir ve silebilir (Geri Dönüşüm Kutusu’na)",
+  "privacy.title": "Gizlilik",
+  "privacy.p1": "Hesap yok, hiçbir şey toplanmaz. LocalRoll’un kendi sunucusu yoktur.",
+  "privacy.p2": "Fotoğraflar, videolar ve dosyalar aynı ağdaki kendi cihazlarınız arasında doğrudan gider — internetten veya buluttan asla geçmez.",
+  "privacy.p3": "Gönderilen her şey şifrelenir. Eşleştirirken iki ekranda da aynı üç simge görünür, böylece cihazın sizin olduğunu bilirsiniz; sonrasında yalnızca ona güvenilir.",
+  "privacy.p4": "İstatistik, reklam, takip yok. Ağ yalnızca cihazlarınızı bulmak ve aralarında göndermek için kullanılır.",
+  "privacy.p5": "Tanılama günlüğü bu cihazda kalır ve fotoğraf içermez; yalnızca siz dışa aktarırsanız çıkar.",
+  "privacy.p6": "Açık kaynak (GPL-3.0): kodu herkes github.com/lixuedenon/localroll adresinde inceleyebilir.",
+  "privacy.perms": "Bu bilgisayarda: alınan dosyalar seçtiğiniz arşiv klasöründe kalır; güvenlik duvarı kuralı LocalRoll’un bağlantı noktasını yalnızca ev veya ofis ağına açar."
 }

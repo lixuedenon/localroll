@@ -388,5 +388,13 @@
   "settings.log_saved": "Log disimpan: {path}",
   "family.access_none": "Tidak bisa menelusuri pustaka",
   "family.access_view": "Bisa menelusuri pustaka",
-  "family.access_manage": "Bisa menelusuri dan menghapus (ke Recycle Bin)"
+  "family.access_manage": "Bisa menelusuri dan menghapus (ke Recycle Bin)",
+  "privacy.title": "Privasi",
+  "privacy.p1": "Tanpa akun, tidak ada yang dikumpulkan. LocalRoll tidak punya server sendiri.",
+  "privacy.p2": "Foto, video, dan file langsung berpindah antar perangkat Anda di jaringan yang sama — tidak lewat internet atau cloud.",
+  "privacy.p3": "Semua yang dikirim terenkripsi. Saat memasangkan, kedua layar menampilkan tiga simbol yang sama sehingga Anda tahu itu perangkat Anda; setelah itu hanya perangkat itu yang dipercaya.",
+  "privacy.p4": "Tanpa statistik, iklan, atau pelacakan. Jaringan hanya dipakai untuk menemukan perangkat Anda dan mengirim di antaranya.",
+  "privacy.p5": "Log diagnostik tetap di perangkat ini dan tidak berisi foto; hanya keluar bila Anda mengekspornya.",
+  "privacy.p6": "Sumber terbuka (GPL-3.0): siapa pun bisa memeriksa kodenya di github.com/lixuedenon/localroll.",
+  "privacy.perms": "Di PC ini: file yang diterima tetap di folder pustaka pilihan Anda; aturan firewall hanya membuka port LocalRoll untuk jaringan rumah atau kantor."
 }

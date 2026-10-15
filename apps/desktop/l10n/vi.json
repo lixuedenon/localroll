@@ -388,5 +388,13 @@
   "settings.log_saved": "Đã lưu nhật ký: {path}",
   "family.access_none": "Không được xem thư viện",
   "family.access_view": "Được xem thư viện",
-  "family.access_manage": "Được xem và xóa (vào Thùng rác)"
+  "family.access_manage": "Được xem và xóa (vào Thùng rác)",
+  "privacy.title": "Quyền riêng tư",
+  "privacy.p1": "Không cần tài khoản, không thu thập gì. LocalRoll không có máy chủ riêng.",
+  "privacy.p2": "Ảnh, video và tệp đi thẳng giữa các thiết bị của bạn trong cùng mạng — không qua internet hay đám mây.",
+  "privacy.p3": "Mọi thứ gửi đi đều được mã hóa. Khi ghép nối, hai màn hình hiện cùng ba biểu tượng để bạn biết đó là thiết bị của mình; sau đó chỉ tin cậy thiết bị ấy.",
+  "privacy.p4": "Không thống kê, không quảng cáo, không theo dõi. Mạng chỉ dùng để tìm thiết bị của bạn và gửi giữa chúng.",
+  "privacy.p5": "Nhật ký chẩn đoán ở lại trên thiết bị này và không chứa ảnh; chỉ rời đi khi bạn tự xuất.",
+  "privacy.p6": "Mã nguồn mở (GPL-3.0): ai cũng có thể xem mã tại github.com/lixuedenon/localroll.",
+  "privacy.perms": "Trên máy tính này: tệp nhận được chỉ nằm trong thư mục thư viện bạn chọn; quy tắc tường lửa chỉ mở cổng LocalRoll cho mạng gia đình hoặc văn phòng."
 }

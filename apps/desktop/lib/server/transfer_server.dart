@@ -662,7 +662,7 @@ class TransferServer extends ChangeNotifier {
         await settings.update((s) {
           final d = s.trusted[device.id];
           if (d == null) return;
-          d.token = token;
+          d.setToken(token);
           d.secure = true;
         });
         return _json(res, 200, {'token': token});
@@ -952,12 +952,12 @@ class TransferServer extends ChangeNotifier {
     final token = req.headers.value(LrProtocol.headerToken);
     if (id == null || token == null) return null;
     var d = settings.trusted[id];
-    if (d == null || d.token != token) {
+    if (d == null || !d.signsIn(token)) {
       // The pairing may have been saved after we loaded settings.json; re-read once.
       await settings.reloadTrusted();
       d = settings.trusted[id];
     }
-    return (d != null && d.token == token) ? d : null;
+    return (d != null && d.signsIn(token)) ? d : null;
   }
 
   // --------------------------------------------------------------- handlers

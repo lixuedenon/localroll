@@ -388,5 +388,13 @@
   "settings.log_saved": "Protokoll gespeichert: {path}",
   "family.access_none": "Kann die Mediathek nicht ansehen",
   "family.access_view": "Kann die Mediathek ansehen",
-  "family.access_manage": "Kann ansehen und löschen (in den Papierkorb)"
+  "family.access_manage": "Kann ansehen und löschen (in den Papierkorb)",
+  "privacy.title": "Datenschutz",
+  "privacy.p1": "Kein Konto, keine Datensammlung. LocalRoll hat keine eigenen Server.",
+  "privacy.p2": "Fotos, Videos und Dateien gehen direkt zwischen Ihren Geräten im selben Netz – nie übers Internet oder eine Cloud.",
+  "privacy.p3": "Alles wird verschlüsselt übertragen. Beim Koppeln zeigen beide Bildschirme dieselben drei Symbole – so wissen Sie, dass es Ihr Gerät ist; danach wird nur ihm vertraut.",
+  "privacy.p4": "Keine Statistik, keine Werbung, kein Tracking. Das Netz dient nur dazu, Ihre Geräte zu finden und zwischen ihnen zu senden.",
+  "privacy.p5": "Das Diagnoseprotokoll bleibt auf diesem Gerät und enthält keine Fotoinhalte; es verlässt das Gerät nur, wenn Sie es exportieren.",
+  "privacy.p6": "Open Source (GPL-3.0): Jeder kann den Code auf github.com/lixuedenon/localroll prüfen.",
+  "privacy.perms": "Auf diesem PC: Empfangenes bleibt im gewählten Mediathek-Ordner; die Firewall-Regel öffnet LocalRolls Port nur für Ihr Heim- oder Büronetz."
 }

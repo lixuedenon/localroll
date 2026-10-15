@@ -325,5 +325,13 @@
   "pclib.now_shared": "{count} ora visibili alla famiglia.",
   "pclib.from": "da {name}",
   "pclib.live": "Live",
-  "pclib.cant_play": "Questo video non si può riprodurre qui. Salvalo sul telefono per guardarlo."
+  "pclib.cant_play": "Questo video non si può riprodurre qui. Salvalo sul telefono per guardarlo.",
+  "privacy.title": "Privacy",
+  "privacy.p1": "Nessun account, nessun dato raccolto. LocalRoll non ha server propri.",
+  "privacy.p2": "Foto, video e file passano direttamente tra i tuoi dispositivi sulla stessa rete, mai su internet o in un cloud.",
+  "privacy.p3": "Tutto ciò che viene inviato è cifrato. All’abbinamento entrambi gli schermi mostrano gli stessi tre simboli, così sai che è il tuo dispositivo; poi ci si fida solo di quello.",
+  "privacy.p4": "Niente statistiche, pubblicità o tracciamento. La rete serve solo a trovare i tuoi dispositivi e scambiare tra loro.",
+  "privacy.p5": "Il registro diagnostico resta su questo dispositivo e non contiene foto; esce solo se lo esporti.",
+  "privacy.p6": "Open source (GPL-3.0): chiunque può verificare il codice su github.com/lixuedenon/localroll.",
+  "privacy.perms": "Permessi: Foto — per il backup e per salvare ciò che ricevi; Fotocamera — solo per il codice di abbinamento; Rete locale — per trovare PC e telefoni."
 }

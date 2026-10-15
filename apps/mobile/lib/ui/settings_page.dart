@@ -163,12 +163,20 @@ class SettingsPage extends StatelessWidget {
               Text(tr('settings.log_title'), style: theme.textTheme.titleMedium),
               const SizedBox(height: 8),
               Card(
-                child: ListTile(
-                  leading: const Icon(Icons.receipt_long_outlined),
-                  title: Text(tr('settings.log_export')),
-                  subtitle: Text(tr('settings.log_hint')),
-                  onTap: () => _exportLog(context),
-                ),
+                child: Column(children: [
+                  ListTile(
+                    leading: const Icon(Icons.receipt_long_outlined),
+                    title: Text(tr('settings.log_export')),
+                    subtitle: Text(tr('settings.log_hint')),
+                    onTap: () => _exportLog(context),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.privacy_tip_outlined),
+                    title: Text(tr('privacy.title')),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () => _showPrivacy(context),
+                  ),
+                ]),
               ),
               const SizedBox(height: 24),
               Center(child: Text('LocalRoll · ${tr('settings.version', {'version': lrVersion})}', style: theme.textTheme.bodySmall)),
@@ -242,3 +250,20 @@ Future<void> _exportLog(BuildContext context) async {
     m.showSnackBar(SnackBar(content: Text(tr('settings.log_failed'))));
   }
 }
+
+/// What LocalRoll does and doesn't do with your data.
+Future<void> _showPrivacy(BuildContext context) => Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => Scaffold(
+        appBar: AppBar(title: Text(tr('privacy.title'))),
+        body: ListView(padding: const EdgeInsets.all(20), children: [
+          for (final k in ['p1', 'p2', 'p3', 'p4', 'perms', 'p5', 'p6'])
+            Padding(
+              padding: const EdgeInsets.only(bottom: 14),
+              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                const Padding(padding: EdgeInsets.only(top: 2, right: 10), child: Icon(Icons.check_circle_outline_rounded, size: 18)),
+                Expanded(child: Text(tr('privacy.$k'), style: const TextStyle(height: 1.4))),
+              ]),
+            ),
+        ]),
+      ),
+    ));

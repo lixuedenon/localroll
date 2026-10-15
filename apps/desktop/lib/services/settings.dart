@@ -7,20 +7,33 @@ import 'package:flutter/foundation.dart';
 import 'package:localroll_core/localroll_core.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'secret_box.dart';
+
 /// A phone that has paired with this PC.
 class TrustedDevice {
   TrustedDevice({
     required this.id,
     required this.name,
     required this.platform,
-    required this.token,
+    String token = '',
+    String? hashed,
     required this.pairedMs,
     this.owner,
     this.memberName,
     this.secure = false,
     this.familyMember = true,
     this.access,
-  });
+  }) : _hash = hashed ?? (token.isEmpty ? '' : tokenHash(token));
+
+  /// Only the SHA-256 of its token is kept: enough to check it, useless
+  /// to anyone who copies the settings file.
+  String _hash;
+
+  /// A new token for this device (pairing, moving to HTTPS).
+  void setToken(String token) => _hash = token.isEmpty ? '' : tokenHash(token);
+
+  /// Is [token] this device's?
+  bool signsIn(String token) => _hash.isNotEmpty && token.isNotEmpty && sameSecret(_hash, tokenHash(token));
 
   /// May it look at / manage this PC's library from afar. Null = the
   /// default: family members may look, guests may not.
@@ -35,7 +48,6 @@ class TrustedDevice {
   /// Family group (true): what it sends is received straight away — the
   /// family's backups. Guest (false): each transfer waits for "Accept" here.
   bool familyMember;
-  String token;
   final int pairedMs;
 
   /// Talks to us over HTTPS only (paired that way, or moved to it); plain
@@ -55,7 +67,7 @@ class TrustedDevice {
         'id': id,
         'name': name,
         'platform': platform,
-        'token': token,
+        'tokenHash': _hash,
         'pairedMs': pairedMs,
         if (owner != null) 'owner': owner,
         if (memberName != null) 'memberName': memberName,
@@ -68,7 +80,9 @@ class TrustedDevice {
         id: j['id'] as String,
         name: j['name'] as String? ?? 'Phone',
         platform: j['platform'] as String? ?? 'unknown',
-        token: j['token'] as String,
+        // Older settings kept the token itself: hashed now, dropped on save.
+        hashed: j['tokenHash'] as String?,
+        token: j['tokenHash'] == null ? (j['token'] as String? ?? '') : '',
         pairedMs: (j['pairedMs'] as num?)?.toInt() ?? 0,
         owner: j['owner'] as String?,
         memberName: j['memberName'] as String?,
@@ -119,7 +133,8 @@ class PeerPc {
         'name': name,
         'hosts': hosts,
         'port': port,
-        'token': token,
+        // Sealed by Windows for this account (see SecretBox).
+        'tokenSealed': SecretBox.seal(token),
         'pairedMs': pairedMs,
         if (lastHost != null) 'lastHost': lastHost,
         if (icon != null) 'icon': icon,
@@ -133,7 +148,9 @@ class PeerPc {
         name: j['name'] as String? ?? 'PC',
         hosts: (j['hosts'] as List? ?? const []).cast<String>(),
         port: (j['port'] as num?)?.toInt() ?? LrProtocol.defaultPort,
-        token: j['token'] as String,
+        // Unreadable here (settings copied from another account or PC):
+        // empty — that PC then has to be paired again.
+        token: j['tokenSealed'] is String ? (SecretBox.open(j['tokenSealed'] as String) ?? '') : (j['token'] as String? ?? ''),
         pairedMs: (j['pairedMs'] as num?)?.toInt() ?? 0,
         lastHost: j['lastHost'] as String?,
         icon: j['icon'] as String?,

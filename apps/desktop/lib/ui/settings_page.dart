@@ -163,6 +163,11 @@ class _SettingsPageState extends State<SettingsPage> {
                 icon: const Icon(Icons.download_rounded),
                 label: Text(tr('settings.log_export')),
               ),
+              OutlinedButton.icon(
+                onPressed: () => showPrivacy(context),
+                icon: const Icon(Icons.privacy_tip_outlined),
+                label: Text(tr('privacy.title')),
+              ),
             ]),
             const SizedBox(height: 28),
             Center(
@@ -235,3 +240,22 @@ class _AutoStartSwitchState extends State<_AutoStartSwitch> {
     );
   }
 }
+
+/// What LocalRoll does and doesn't do with your data.
+Future<void> showPrivacy(BuildContext context) => showDialog<void>(
+      context: context,
+      builder: (c) => AlertDialog(
+        icon: const Icon(Icons.privacy_tip_outlined, size: 32),
+        title: Text(tr('privacy.title')),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: SingleChildScrollView(
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+              for (final k in ['p1', 'p2', 'p3', 'p4', 'perms', 'p5', 'p6'])
+                Padding(padding: const EdgeInsets.only(bottom: 10), child: Text('• ${tr('privacy.$k')}')),
+            ]),
+          ),
+        ),
+        actions: [FilledButton(onPressed: () => Navigator.pop(c), child: Text(tr('common.ok')))],
+      ),
+    );

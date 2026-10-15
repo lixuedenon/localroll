@@ -388,5 +388,13 @@
   "settings.log_saved": "Journal enregistré : {path}",
   "family.access_none": "Ne peut pas parcourir la bibliothèque",
   "family.access_view": "Peut parcourir la bibliothèque",
-  "family.access_manage": "Peut parcourir et supprimer (dans la Corbeille)"
+  "family.access_manage": "Peut parcourir et supprimer (dans la Corbeille)",
+  "privacy.title": "Confidentialité",
+  "privacy.p1": "Pas de compte, rien n’est collecté. LocalRoll n’a pas de serveurs.",
+  "privacy.p2": "Photos, vidéos et fichiers passent directement entre vos appareils sur le même réseau — jamais par internet ni un cloud.",
+  "privacy.p3": "Tout ce qui est envoyé est chiffré. À l’appairage, les deux écrans affichent les trois mêmes symboles : c’est bien votre appareil ; ensuite seul celui-ci est reconnu.",
+  "privacy.p4": "Pas de statistiques, pas de pub, pas de pistage. Le réseau sert seulement à trouver vos appareils et à échanger entre eux.",
+  "privacy.p5": "Le journal de diagnostic reste sur cet appareil et ne contient aucune photo ; il ne sort que si vous l’exportez.",
+  "privacy.p6": "Open source (GPL-3.0) : chacun peut vérifier le code sur github.com/lixuedenon/localroll.",
+  "privacy.perms": "Sur ce PC : les fichiers reçus restent dans le dossier de bibliothèque choisi ; la règle du pare-feu n’ouvre le port de LocalRoll qu’à votre réseau domestique ou de bureau."
 }

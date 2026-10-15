@@ -388,5 +388,13 @@
   "settings.log_saved": "Registo guardado: {path}",
   "family.access_none": "Não pode ver a biblioteca",
   "family.access_view": "Pode ver a biblioteca",
-  "family.access_manage": "Pode ver e apagar (para a Lixeira)"
+  "family.access_manage": "Pode ver e apagar (para a Lixeira)",
+  "privacy.title": "Privacidade",
+  "privacy.p1": "Sem conta e sem recolha de dados. O LocalRoll não tem servidores próprios.",
+  "privacy.p2": "Fotos, vídeos e ficheiros vão diretamente entre os seus dispositivos na mesma rede — nunca pela internet nem por uma nuvem.",
+  "privacy.p3": "Tudo o que é enviado vai cifrado. Ao emparelhar, os dois ecrãs mostram os mesmos três símbolos, para saber que é o seu dispositivo; depois só esse é de confiança.",
+  "privacy.p4": "Sem estatísticas, sem anúncios, sem rastreio. A rede só serve para encontrar os seus dispositivos e enviar entre eles.",
+  "privacy.p5": "O registo de diagnóstico fica neste dispositivo e não contém fotos; só sai se o exportar.",
+  "privacy.p6": "Código aberto (GPL-3.0): qualquer pessoa pode verificar o código em github.com/lixuedenon/localroll.",
+  "privacy.perms": "Neste PC: o que recebe fica na pasta da biblioteca escolhida; a regra da firewall só abre a porta do LocalRoll à rede de casa ou escritório."
 }
