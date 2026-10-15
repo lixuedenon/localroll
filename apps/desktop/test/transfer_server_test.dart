@@ -233,6 +233,29 @@ void main() {
     });
   });
 
+  test('a scan (PDF) from a phone lands in the Documents folder, by its name', () async {
+    final phone = await pc.pairPhone();
+    final data = [...'%PDF-1.7'.codeUnits, ...bytesOf(4000)];
+    final offer = FileOffer(
+      id: 'f1',
+      assetId: 'file:scan1',
+      name: 'scan_2026-10-15_0930.pdf',
+      kind: MediaKind.other,
+      createdMs: 1,
+      modifiedMs: 1,
+      size: data.length,
+      target: LrProtocol.targetFiles,
+      relPath: 'scan_2026-10-15_0930.pdf',
+    );
+    final s = await phone.client.createSession(SessionRequest(files: [offer]));
+    await phone.client.putChunk(s.sessionId, 'f1', 0, data.length, data);
+    final r = await phone.client.complete(s.sessionId, 'f1', CompleteRequest(size: data.length, sha256: await sha(data)));
+    expect(r.saved, isTrue);
+    final docs = await pc.server.folderPath(document: true);
+    expect(File('$docs${Platform.pathSeparator}scan_2026-10-15_0930.pdf').readAsBytesSync(), data);
+    expect(pc.library.items, isEmpty); // not a photo
+  });
+
   group('limits', () {
     test('not enough space on the PC: refused before sending', () async {
       final phone = await pc.pairPhone();

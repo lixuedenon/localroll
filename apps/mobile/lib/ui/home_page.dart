@@ -1,7 +1,9 @@
 // apps/mobile/lib/ui/home_page.dart
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:file_picker/file_picker.dart' show FilePicker, PlatformFile;
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
@@ -20,6 +22,8 @@ import 'cleanup_page.dart';
 import 'connect_page.dart';
 import 'device_badge.dart';
 import 'incoming.dart';
+import 'document_scan_page.dart';
+import 'send_files_page.dart';
 import 'pc_library_page.dart';
 import 'presence_toasts.dart';
 import 'send_target.dart';
@@ -649,6 +653,24 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (mounted) setState(() {});
   }
 
+  /// Scan paper into a PDF, then send / share / keep it.
+  Future<void> _openScan() => Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => DocumentScanPage(settings: widget.settings, discovery: widget.discovery),
+      ));
+
+  /// Any files from Files / Download, to the PC or a nearby phone.
+  Future<void> _sendFiles() async {
+    final picked = await FilePicker.platform.pickFiles(allowMultiple: true);
+    final files = [
+      for (final f in picked?.files ?? const <PlatformFile>[])
+        if (f.path != null) File(f.path!),
+    ];
+    if (files.isEmpty || !mounted) return;
+    final sender = await pickFileTarget(context, widget.settings, widget.discovery, files);
+    if (sender == null || !mounted) return;
+    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => SendFilesPage(sender: sender)));
+  }
+
   /// The PC's library: browse it from here.
   Future<void> _openPcLibrary(PairedDesktop desktop) => Navigator.of(context).push(MaterialPageRoute(
         builder: (_) => PcLibraryPage(settings: widget.settings, discovery: widget.discovery, desktop: desktop, server: _server),
@@ -1016,6 +1038,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 _openSettings,
                 subColor: widget.settings.autoSend ? LrColors.verified : null,
               ),
+            ]),
+            const SizedBox(height: 12),
+            Row(children: [
+              tile(tr('home.tile_scan'), tr('home.tile_scan_sub'), _openScan),
+              const SizedBox(width: 12),
+              tile(tr('home.tile_files'), tr('home.tile_files_sub'), _sendFiles),
             ]),
             const SizedBox(height: 12),
             Material(
