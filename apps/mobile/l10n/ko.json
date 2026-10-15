@@ -289,5 +289,7 @@
   "send.no_phones": "찾지 못했습니다. 다른 휴대폰에서 같은 Wi-Fi로 LocalRoll을 여세요.",
   "send.phone_asks": "상대방에게 수락 여부를 묻습니다",
   "send.phone_gone": "“{name}”이(가) 응답하지 않습니다. LocalRoll이 열려 있고 같은 Wi-Fi인가요?",
-  "ios.photos_add": "LocalRoll은 받은 사진과 동영상을 사진 보관함(\"LocalRoll\" 앨범)에 저장합니다."
+  "ios.photos_add": "LocalRoll은 받은 사진과 동영상을 사진 보관함(\"LocalRoll\" 앨범)에 저장합니다.",
+  "err.disk_full": "PC에 공간이 부족합니다. 잃어버린 것은 없습니다. PC에서 공간을 확보한 뒤 다시 시도하세요.",
+  "transfer.stopped_pc_full": "중지됨: PC 공간이 부족합니다. 나머지는 보내지 않은 상태로 남습니다."
 }

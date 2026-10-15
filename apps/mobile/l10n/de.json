@@ -289,5 +289,7 @@
   "send.no_phones": "Keins gefunden. Öffne LocalRoll auf dem anderen Telefon im gleichen WLAN.",
   "send.phone_asks": "Wird um Zustimmung gefragt",
   "send.phone_gone": "„{name}“ antwortet nicht. Ist LocalRoll offen, im gleichen WLAN?",
-  "ios.photos_add": "LocalRoll speichert dir gesendete Fotos und Videos in deiner Mediathek (Album „LocalRoll“)."
+  "ios.photos_add": "LocalRoll speichert dir gesendete Fotos und Videos in deiner Mediathek (Album „LocalRoll“).",
+  "err.disk_full": "Nicht genug Speicherplatz auf dem PC. Nichts ging verloren – Platz auf dem PC schaffen und erneut versuchen.",
+  "transfer.stopped_pc_full": "Angehalten: zu wenig Platz auf dem PC. Der Rest bleibt ungesendet."
 }

@@ -378,5 +378,7 @@
   "phonefmt.as_is": "全部原樣傳送",
   "phonefmt.convert": "轉換後傳送",
   "send.phone_online_not_ready": "手機在線，但接收功能還沒準備好。在手機上把 LocalRoll 關掉再打開；如果一直這樣，請把手機上的 LocalRoll 更新到最新版。",
-  "send.converting_hw": "正在為手機轉換 {done}/{total}（顯示卡加速）"
+  "send.converting_hw": "正在為手機轉換 {done}/{total}（顯示卡加速）",
+  "send.err_disk_full": "對方電腦的硬碟空間不夠。沒有傳出半截檔案；對方騰出空間後再傳送。",
+  "send.err_too_large": "對方認為資料過大，拒絕接收。"
 }

@@ -384,6 +384,8 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.convert': 'Convert and send',
     'send.phone_online_not_ready': 'Online, but its receiver isn\'t ready. Close LocalRoll on the phone and open it again; if this stays, update LocalRoll on the phone.',
     'send.converting_hw': 'Converting for the phone {done}/{total} (graphics chip)',
+    'send.err_disk_full': 'Not enough space on the other PC. Nothing was sent half-way; free up space there and send again.',
+    'send.err_too_large': 'The other side refused it as too large.',
   },
   'zh': {
     'nav.library': '媒体库',
@@ -766,6 +768,8 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.convert': '转换后发送',
     'send.phone_online_not_ready': '手机在线，但接收功能还没准备好。在手机上把 LocalRoll 关掉再打开；如果一直这样，请把手机上的 LocalRoll 更新到最新版。',
     'send.converting_hw': '正在为手机转换 {done}/{total}（显卡加速）',
+    'send.err_disk_full': '对方电脑的硬盘空间不够。没有发出半截文件；对方腾出空间后再发送。',
+    'send.err_too_large': '对方认为数据过大，拒绝接收。',
   },
   'zh_Hant': {
     'nav.library': '媒體庫',
@@ -1148,6 +1152,8 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.convert': '轉換後傳送',
     'send.phone_online_not_ready': '手機在線，但接收功能還沒準備好。在手機上把 LocalRoll 關掉再打開；如果一直這樣，請把手機上的 LocalRoll 更新到最新版。',
     'send.converting_hw': '正在為手機轉換 {done}/{total}（顯示卡加速）',
+    'send.err_disk_full': '對方電腦的硬碟空間不夠。沒有傳出半截檔案；對方騰出空間後再傳送。',
+    'send.err_too_large': '對方認為資料過大，拒絕接收。',
   },
   'ja': {
     'nav.library': 'ライブラリ',
@@ -1530,6 +1536,8 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.convert': '変換して送る',
     'send.phone_online_not_ready': 'オンラインですが、受信の準備ができていません。スマホの LocalRoll を閉じて開き直してください。続く場合はスマホの LocalRoll を更新してください。',
     'send.converting_hw': 'スマホ用に変換中 {done}/{total}（GPU）',
+    'send.err_disk_full': '相手のパソコンの空き容量が足りません。途中までの送信はしていません。空きを増やしてから送り直してください。',
+    'send.err_too_large': 'データが大きすぎるため相手が受け取りを拒否しました。',
   },
   'ko': {
     'nav.library': '라이브러리',
@@ -1912,6 +1920,8 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.convert': '변환 후 보내기',
     'send.phone_online_not_ready': '온라인이지만 받을 준비가 되지 않았습니다. 휴대폰에서 LocalRoll을 닫았다가 다시 여세요. 계속되면 휴대폰의 LocalRoll을 업데이트하세요.',
     'send.converting_hw': '휴대폰용으로 변환 중 {done}/{total} (그래픽 가속)',
+    'send.err_disk_full': '상대 PC에 공간이 부족합니다. 중간까지 보낸 파일은 없습니다. 공간을 확보한 뒤 다시 보내세요.',
+    'send.err_too_large': '데이터가 너무 커서 상대가 거부했습니다.',
   },
   'es': {
     'nav.library': 'Biblioteca',
@@ -2294,6 +2304,8 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.convert': 'Convertir y enviar',
     'send.phone_online_not_ready': 'En línea, pero su recepción no está lista. Cierra LocalRoll en el teléfono y ábrelo de nuevo; si sigue así, actualiza LocalRoll en el teléfono.',
     'send.converting_hw': 'Convirtiendo para el teléfono {done}/{total} (gráfica)',
+    'send.err_disk_full': 'No hay espacio suficiente en el otro PC. No se envió nada a medias; libera espacio allí y vuelve a enviar.',
+    'send.err_too_large': 'El otro lado lo rechazó por ser demasiado grande.',
   },
   'fr': {
     'nav.library': 'Bibliothèque',
@@ -2676,6 +2688,8 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.convert': 'Convertir et envoyer',
     'send.phone_online_not_ready': 'En ligne, mais sa réception n\'est pas prête. Ferme LocalRoll sur le téléphone et rouvre-le ; si ça persiste, mets à jour LocalRoll sur le téléphone.',
     'send.converting_hw': 'Conversion pour le téléphone {done}/{total} (carte graphique)',
+    'send.err_disk_full': 'Pas assez de place sur l’autre PC. Rien n’a été envoyé à moitié ; libérez de l’espace là-bas et renvoyez.',
+    'send.err_too_large': 'L’autre côté l’a refusé : trop volumineux.',
   },
   'de': {
     'nav.library': 'Mediathek',
@@ -3058,6 +3072,8 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.convert': 'Umwandeln und senden',
     'send.phone_online_not_ready': 'Online, aber der Empfang ist nicht bereit. LocalRoll auf dem Handy schließen und neu öffnen; bleibt es so, LocalRoll auf dem Handy aktualisieren.',
     'send.converting_hw': 'Wird fürs Handy umgewandelt {done}/{total} (Grafikchip)',
+    'send.err_disk_full': 'Zu wenig Platz auf dem anderen PC. Nichts wurde halb gesendet; dort Platz schaffen und erneut senden.',
+    'send.err_too_large': 'Die Gegenseite hat es als zu groß abgelehnt.',
   },
   'pt': {
     'nav.library': 'Biblioteca',
@@ -3440,6 +3456,8 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.convert': 'Converter e enviar',
     'send.phone_online_not_ready': 'Online, mas a receção não está pronta. Feche o LocalRoll no telefone e abra de novo; se continuar, atualize o LocalRoll no telefone.',
     'send.converting_hw': 'A converter para o telefone {done}/{total} (placa gráfica)',
+    'send.err_disk_full': 'Espaço insuficiente no outro PC. Nada foi enviado pela metade; liberte espaço lá e envie de novo.',
+    'send.err_too_large': 'O outro lado recusou por ser grande demais.',
   },
   'ru': {
     'nav.library': 'Медиатека',
@@ -3822,6 +3840,8 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.convert': 'Преобразовать и отправить',
     'send.phone_online_not_ready': 'В сети, но приём не готов. Закройте LocalRoll на телефоне и откройте снова; если не поможет, обновите LocalRoll на телефоне.',
     'send.converting_hw': 'Преобразование для телефона {done}/{total} (видеокарта)',
+    'send.err_disk_full': 'На другом ПК мало места. Ничего не отправлено наполовину; освободите там место и отправьте снова.',
+    'send.err_too_large': 'Другая сторона отклонила: слишком большой объём.',
   },
   'it': {
     'nav.library': 'Libreria',
@@ -4204,6 +4224,8 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.convert': 'Converti e invia',
     'send.phone_online_not_ready': 'Online, ma la ricezione non è pronta. Chiudi LocalRoll sul telefono e riaprilo; se continua, aggiorna LocalRoll sul telefono.',
     'send.converting_hw': 'Conversione per il telefono {done}/{total} (scheda grafica)',
+    'send.err_disk_full': 'Spazio insufficiente sull’altro PC. Niente è stato inviato a metà; libera spazio lì e invia di nuovo.',
+    'send.err_too_large': 'L’altro lato l’ha rifiutato perché troppo grande.',
   },
   'ar': {
     'nav.library': 'المكتبة',
@@ -4586,6 +4608,8 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.convert': 'حوّل وأرسل',
     'send.phone_online_not_ready': 'متصل، لكن الاستقبال غير جاهز. أغلق LocalRoll على الهاتف وافتحه مجددًا؛ وإن استمر ذلك فحدّث LocalRoll على الهاتف.',
     'send.converting_hw': 'جارٍ التحويل للهاتف {done}/{total} (بطاقة الرسوميات)',
+    'send.err_disk_full': 'لا توجد مساحة كافية على الحاسوب الآخر. لم يُرسل شيء ناقصًا؛ أفرغ مساحة هناك وأعد الإرسال.',
+    'send.err_too_large': 'رفضه الطرف الآخر لأنه كبير جدًا.',
   },
   'hi': {
     'nav.library': 'लाइब्रेरी',
@@ -4968,6 +4992,8 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.convert': 'बदलकर भेजें',
     'send.phone_online_not_ready': 'ऑनलाइन है, पर पाने के लिए तैयार नहीं। फ़ोन पर LocalRoll बंद करके फिर खोलें; फिर भी ऐसा रहे तो फ़ोन पर LocalRoll अपडेट करें।',
     'send.converting_hw': 'फ़ोन के लिए बदल रहे हैं {done}/{total} (ग्राफ़िक्स चिप)',
+    'send.err_disk_full': 'दूसरे PC पर जगह कम है। कुछ भी आधा नहीं भेजा गया; वहाँ जगह खाली करके फिर भेजें।',
+    'send.err_too_large': 'दूसरी ओर ने इसे बहुत बड़ा मानकर मना कर दिया।',
   },
   'id': {
     'nav.library': 'Pustaka',
@@ -5350,6 +5376,8 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.convert': 'Konversi lalu kirim',
     'send.phone_online_not_ready': 'Online, tetapi penerimaannya belum siap. Tutup LocalRoll di ponsel lalu buka lagi; jika tetap begini, perbarui LocalRoll di ponsel.',
     'send.converting_hw': 'Mengonversi untuk ponsel {done}/{total} (kartu grafis)',
+    'send.err_disk_full': 'Ruang di PC lain tidak cukup. Tidak ada yang terkirim setengah; kosongkan ruang di sana lalu kirim lagi.',
+    'send.err_too_large': 'Pihak lain menolaknya karena terlalu besar.',
   },
   'vi': {
     'nav.library': 'Thư viện',
@@ -5732,6 +5760,8 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.convert': 'Chuyển đổi rồi gửi',
     'send.phone_online_not_ready': 'Đang trực tuyến nhưng chưa sẵn sàng nhận. Đóng LocalRoll trên điện thoại rồi mở lại; nếu vẫn vậy, hãy cập nhật LocalRoll trên điện thoại.',
     'send.converting_hw': 'Đang chuyển đổi cho điện thoại {done}/{total} (card đồ họa)',
+    'send.err_disk_full': 'Máy tính kia không đủ dung lượng. Không có gì bị gửi dở; hãy giải phóng dung lượng ở đó rồi gửi lại.',
+    'send.err_too_large': 'Phía bên kia từ chối vì quá lớn.',
   },
   'th': {
     'nav.library': 'คลังสื่อ',
@@ -6114,6 +6144,8 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.convert': 'แปลงแล้วส่ง',
     'send.phone_online_not_ready': 'ออนไลน์ แต่ยังไม่พร้อมรับ ปิด LocalRoll บนมือถือแล้วเปิดใหม่ หากยังเป็นอยู่ ให้อัปเดต LocalRoll บนมือถือ',
     'send.converting_hw': 'กำลังแปลงสำหรับมือถือ {done}/{total} (การ์ดจอ)',
+    'send.err_disk_full': 'พื้นที่บนคอมพิวเตอร์อีกเครื่องไม่พอ ไม่มีไฟล์ที่ส่งค้างครึ่งทาง ล้างพื้นที่ที่นั่นแล้วส่งใหม่',
+    'send.err_too_large': 'อีกฝั่งปฏิเสธเพราะข้อมูลใหญ่เกินไป',
   },
   'tr': {
     'nav.library': 'Kitaplık',
@@ -6496,5 +6528,7 @@ const Map<String, Map<String, String>> translations = {
     'phonefmt.convert': 'Dönüştür ve gönder',
     'send.phone_online_not_ready': 'Çevrimiçi, ancak alma hazır değil. Telefonda LocalRoll\'u kapatıp yeniden açın; böyle kalırsa telefondaki LocalRoll\'u güncelleyin.',
     'send.converting_hw': 'Telefon için dönüştürülüyor {done}/{total} (ekran kartı)',
+    'send.err_disk_full': 'Diğer bilgisayarda yeterli alan yok. Yarım gönderilen bir şey yok; orada yer açıp yeniden gönderin.',
+    'send.err_too_large': 'Karşı taraf çok büyük olduğu için reddetti.',
   },
 };

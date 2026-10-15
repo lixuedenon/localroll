@@ -378,5 +378,7 @@
   "phonefmt.as_is": "そのまま送る",
   "phonefmt.convert": "変換して送る",
   "send.phone_online_not_ready": "オンラインですが、受信の準備ができていません。スマホの LocalRoll を閉じて開き直してください。続く場合はスマホの LocalRoll を更新してください。",
-  "send.converting_hw": "スマホ用に変換中 {done}/{total}（GPU）"
+  "send.converting_hw": "スマホ用に変換中 {done}/{total}（GPU）",
+  "send.err_disk_full": "相手のパソコンの空き容量が足りません。途中までの送信はしていません。空きを増やしてから送り直してください。",
+  "send.err_too_large": "データが大きすぎるため相手が受け取りを拒否しました。"
 }

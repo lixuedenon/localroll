@@ -2,10 +2,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:localroll_core/localroll_core.dart';
 
+import '../services/file_actions.dart';
 import '../services/keep_awake.dart';
 import '../services/tls_identity.dart';
 import '../services/library_index.dart';
@@ -90,6 +93,11 @@ class IncomingAsk {
   final Completer<AskAnswer> answer = Completer<AskAnswer>();
 }
 
+/// A request body bigger than [TransferServer.maxJson].
+class _TooLarge implements Exception {
+  const _TooLarge();
+}
+
 class _UploadSession {
   _UploadSession(this.id, this.device, this.offers);
 
@@ -110,7 +118,41 @@ class _UploadSession {
 ///   PUT  /api/v1/sessions/S/files/F?offset=N  <bytes>  -> {offset}
 ///   POST /api/v1/sessions/S/files/F/complete {size, sha256} -> saved
 class TransferServer extends ChangeNotifier {
-  TransferServer({required this.settings, required this.library, required this.hub, this.tls});
+  TransferServer({
+    required this.settings,
+    required this.library,
+    required this.hub,
+    this.tls,
+    Future<int?> Function(String path)? freeSpace,
+  }) : _freeSpace = freeSpace ?? ((p) async => (await diskSpace(p))?.free);
+
+  /// Free bytes on the library's drive (null = can't tell; then no check).
+  final Future<int?> Function(String path) _freeSpace;
+
+  /// Largest JSON request accepted (a session of 200 files is ~60 KB).
+  static const int maxJson = 4 * 1024 * 1024;
+
+  /// Kept free on the library drive: a transfer that would leave less is
+  /// refused up front ("not enough space on the PC") instead of failing
+  /// half-way with a full disk.
+  static const int keepFree = 256 * 1024 * 1024;
+
+  /// Free space, asked at most every 20 s (on Windows it starts a process);
+  /// what was accepted since is subtracted meanwhile.
+  int? _free;
+  DateTime _freeAt = DateTime.fromMillisecondsSinceEpoch(0);
+
+  Future<int?> _freeNow() async {
+    if (DateTime.now().difference(_freeAt) > const Duration(seconds: 20)) {
+      try {
+        _free = await _freeSpace(library.rootPath);
+      } catch (_) {
+        _free = null;
+      }
+      _freeAt = DateTime.now();
+    }
+    return _free;
+  }
 
   final AppSettings settings;
   final LibraryIndex library;
@@ -553,6 +595,19 @@ class TransferServer extends ChangeNotifier {
         // Still here when it ends (unless this was its "I'm leaving").
         if (lastSeen.containsKey(device.id)) lastSeen[device.id] = DateTime.now();
       }
+    } on _TooLarge {
+      try {
+        await _json(res, 413, {'error': 'too_large'});
+      } catch (_) {}
+    } on FormatException {
+      try {
+        await _json(res, 400, {'error': 'bad_request'});
+      } catch (_) {}
+    } on TypeError {
+      // A field of the wrong type in the request.
+      try {
+        await _json(res, 400, {'error': 'bad_request'});
+      } catch (_) {}
     } catch (e, st) {
       debugPrint('request failed: $e\n$st');
       try {
@@ -892,6 +947,7 @@ class TransferServer extends ChangeNotifier {
     _sessions[sessionId] = _UploadSession(sessionId, device, offers);
 
     final results = <String, OfferResult>{};
+    var need = 0;
     for (final f in body.files) {
       // Already received in this run — and still there (if it was deleted
       // since, take it again).
@@ -911,6 +967,16 @@ class TransferServer extends ChangeNotifier {
       final part = File(_partPath(device, f));
       final offset = await part.exists() ? await part.length() : 0;
       results[f.id] = OfferResult(status: OfferStatus.ready, offset: offset);
+      need += max(0, (f.size ?? 0) - offset);
+    }
+    // Not enough room on this PC: say so now, not half-way through.
+    if (need > 0) {
+      final free = await _freeNow();
+      if (free != null && need > free - keepFree) {
+        _sessions.remove(sessionId);
+        return _json(req.response, 507, {'error': 'disk_full', 'free': max(0, free - keepFree), 'need': need});
+      }
+      if (free != null) _free = free - need;
     }
     return _json(req.response, 200, SessionResponse(sessionId: sessionId, results: results).toJson());
   }
@@ -959,11 +1025,23 @@ class TransferServer extends ChangeNotifier {
     }
     final total = int.tryParse(req.uri.queryParameters['total'] ?? '') ?? (offer.size ?? 0);
     final t = hub.track(_hubKey(device, offer), device.name, offer.name, total);
+    // Never more than the file said it is (a broken or hostile sender
+    // can't fill the disk).
+    final cap = offer.size ?? (total > 0 ? total : null);
 
     var received = current;
+    var over = false;
     final sink = part.openWrite(mode: FileMode.append);
     try {
       await for (final data in req) {
+        if (over) continue; // drain the rest
+        if (cap != null && received + data.length > cap) {
+          final fits = cap - received;
+          if (fits > 0) sink.add(data.sublist(0, fits));
+          received += max(0, fits);
+          over = true;
+          continue;
+        }
         sink.add(data);
         received += data.length;
         hub.progress(t, received);
@@ -972,6 +1050,7 @@ class TransferServer extends ChangeNotifier {
     } finally {
       await sink.close();
     }
+    if (over) return _json(req.response, 413, {'error': 'too_large', 'offset': received});
     return _json(req.response, 200, {'offset': received});
   }
 
@@ -1150,8 +1229,22 @@ class TransferServer extends ChangeNotifier {
   String _hubKey(TrustedDevice device, FileOffer offer) => '${device.id}|${offer.assetId}';
 
   Future<Map<String, dynamic>> _readJson(HttpRequest req) async {
-    final text = await utf8.decoder.bind(req).join();
-    return jsonDecode(text) as Map<String, dynamic>;
+    final declared = req.contentLength;
+    if (declared > maxJson) {
+      await req.drain<void>();
+      throw const _TooLarge();
+    }
+    final bytes = BytesBuilder(copy: false);
+    var tooBig = false;
+    await for (final data in req) {
+      if (tooBig) continue;
+      bytes.add(data);
+      if (bytes.length > maxJson) tooBig = true;
+    }
+    if (tooBig) throw const _TooLarge();
+    final j = jsonDecode(utf8.decode(bytes.takeBytes()));
+    if (j is! Map<String, dynamic>) throw const FormatException('not an object');
+    return j;
   }
 
   Future<void> _json(HttpResponse res, int status, Object body) async {

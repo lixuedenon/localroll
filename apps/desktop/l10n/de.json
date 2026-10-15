@@ -378,5 +378,7 @@
   "phonefmt.as_is": "Unverändert senden",
   "phonefmt.convert": "Umwandeln und senden",
   "send.phone_online_not_ready": "Online, aber der Empfang ist nicht bereit. LocalRoll auf dem Handy schließen und neu öffnen; bleibt es so, LocalRoll auf dem Handy aktualisieren.",
-  "send.converting_hw": "Wird fürs Handy umgewandelt {done}/{total} (Grafikchip)"
+  "send.converting_hw": "Wird fürs Handy umgewandelt {done}/{total} (Grafikchip)",
+  "send.err_disk_full": "Zu wenig Platz auf dem anderen PC. Nichts wurde halb gesendet; dort Platz schaffen und erneut senden.",
+  "send.err_too_large": "Die Gegenseite hat es als zu groß abgelehnt."
 }

@@ -289,5 +289,7 @@
   "send.no_phones": "None found. Open LocalRoll on the other phone, on the same Wi-Fi.",
   "send.phone_asks": "They will be asked to accept",
   "send.phone_gone": "“{name}” is not answering. Is LocalRoll open on it, on the same Wi-Fi?",
-  "ios.photos_add": "LocalRoll saves photos and videos sent to you into your photo library (album “LocalRoll”)."
+  "ios.photos_add": "LocalRoll saves photos and videos sent to you into your photo library (album “LocalRoll”).",
+  "err.disk_full": "Not enough space on the PC for this. Nothing was lost — free up space on the PC and try again.",
+  "transfer.stopped_pc_full": "Stopped: not enough space on the PC. The rest stay unsent."
 }

@@ -378,5 +378,7 @@
   "phonefmt.as_is": "Olduğu gibi gönder",
   "phonefmt.convert": "Dönüştür ve gönder",
   "send.phone_online_not_ready": "Çevrimiçi, ancak alma hazır değil. Telefonda LocalRoll'u kapatıp yeniden açın; böyle kalırsa telefondaki LocalRoll'u güncelleyin.",
-  "send.converting_hw": "Telefon için dönüştürülüyor {done}/{total} (ekran kartı)"
+  "send.converting_hw": "Telefon için dönüştürülüyor {done}/{total} (ekran kartı)",
+  "send.err_disk_full": "Diğer bilgisayarda yeterli alan yok. Yarım gönderilen bir şey yok; orada yer açıp yeniden gönderin.",
+  "send.err_too_large": "Karşı taraf çok büyük olduğu için reddetti."
 }

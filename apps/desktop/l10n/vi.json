@@ -378,5 +378,7 @@
   "phonefmt.as_is": "Gửi nguyên trạng",
   "phonefmt.convert": "Chuyển đổi rồi gửi",
   "send.phone_online_not_ready": "Đang trực tuyến nhưng chưa sẵn sàng nhận. Đóng LocalRoll trên điện thoại rồi mở lại; nếu vẫn vậy, hãy cập nhật LocalRoll trên điện thoại.",
-  "send.converting_hw": "Đang chuyển đổi cho điện thoại {done}/{total} (card đồ họa)"
+  "send.converting_hw": "Đang chuyển đổi cho điện thoại {done}/{total} (card đồ họa)",
+  "send.err_disk_full": "Máy tính kia không đủ dung lượng. Không có gì bị gửi dở; hãy giải phóng dung lượng ở đó rồi gửi lại.",
+  "send.err_too_large": "Phía bên kia từ chối vì quá lớn."
 }

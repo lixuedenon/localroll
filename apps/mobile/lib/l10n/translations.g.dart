@@ -291,6 +291,8 @@ const Map<String, Map<String, String>> translations = {
     'send.no_phones': 'None found. Open LocalRoll on the other phone, on the same Wi-Fi.',
     'send.phone_asks': 'They will be asked to accept',
     'send.phone_gone': '“{name}” is not answering. Is LocalRoll open on it, on the same Wi-Fi?',
+    'err.disk_full': 'Not enough space on the PC for this. Nothing was lost — free up space on the PC and try again.',
+    'transfer.stopped_pc_full': 'Stopped: not enough space on the PC. The rest stay unsent.',
   },
   'zh': {
     'common.cancel': '取消',
@@ -580,6 +582,8 @@ const Map<String, Map<String, String>> translations = {
     'send.no_phones': '没有找到。请在另一部手机上打开 LocalRoll，并连同一个 Wi-Fi。',
     'send.phone_asks': '对方会先确认是否接收',
     'send.phone_gone': '「{name}」没有回应。它打开 LocalRoll 了吗？在同一个 Wi-Fi 吗？',
+    'err.disk_full': '电脑的硬盘空间不够放这些文件。没有丢失任何东西——在电脑上腾出空间后再试。',
+    'transfer.stopped_pc_full': '已停止：电脑硬盘空间不足。剩下的保持未发送。',
   },
   'zh_Hant': {
     'common.cancel': '取消',
@@ -869,6 +873,8 @@ const Map<String, Map<String, String>> translations = {
     'send.no_phones': '沒有找到。請在另一支手機上打開 LocalRoll，並連同一個 Wi-Fi。',
     'send.phone_asks': '對方會先確認是否接收',
     'send.phone_gone': '「{name}」沒有回應。它打開 LocalRoll 了嗎？在同一個 Wi-Fi 嗎？',
+    'err.disk_full': '電腦的硬碟空間不夠放這些檔案。沒有遺失任何東西——在電腦上騰出空間後再試。',
+    'transfer.stopped_pc_full': '已停止：電腦硬碟空間不足。剩下的保持未傳送。',
   },
   'ja': {
     'common.cancel': 'キャンセル',
@@ -1158,6 +1164,8 @@ const Map<String, Map<String, String>> translations = {
     'send.no_phones': '見つかりません。相手のスマホで LocalRoll を開き、同じWi-Fiにつないでください。',
     'send.phone_asks': '相手に受け取りの確認が表示されます',
     'send.phone_gone': '「{name}」が応答しません。LocalRoll は開いていますか？同じWi-Fiですか？',
+    'err.disk_full': 'パソコンの空き容量が足りません。何も失われていません。パソコンの空きを増やしてからもう一度お試しください。',
+    'transfer.stopped_pc_full': '停止しました：パソコンの空き容量が足りません。残りは未送信のままです。',
   },
   'ko': {
     'common.cancel': '취소',
@@ -1447,6 +1455,8 @@ const Map<String, Map<String, String>> translations = {
     'send.no_phones': '찾지 못했습니다. 다른 휴대폰에서 같은 Wi-Fi로 LocalRoll을 여세요.',
     'send.phone_asks': '상대방에게 수락 여부를 묻습니다',
     'send.phone_gone': '“{name}”이(가) 응답하지 않습니다. LocalRoll이 열려 있고 같은 Wi-Fi인가요?',
+    'err.disk_full': 'PC에 공간이 부족합니다. 잃어버린 것은 없습니다. PC에서 공간을 확보한 뒤 다시 시도하세요.',
+    'transfer.stopped_pc_full': '중지됨: PC 공간이 부족합니다. 나머지는 보내지 않은 상태로 남습니다.',
   },
   'es': {
     'common.cancel': 'Cancelar',
@@ -1736,6 +1746,8 @@ const Map<String, Map<String, String>> translations = {
     'send.no_phones': 'No hay ninguno. Abre LocalRoll en el otro teléfono, en la misma Wi-Fi.',
     'send.phone_asks': 'Se le pedirá que acepte',
     'send.phone_gone': '«{name}» no responde. ¿Tiene LocalRoll abierto, en la misma Wi-Fi?',
+    'err.disk_full': 'No hay espacio suficiente en el PC. No se ha perdido nada: libera espacio en el PC y vuelve a intentarlo.',
+    'transfer.stopped_pc_full': 'Detenido: no hay espacio suficiente en el PC. El resto queda sin enviar.',
   },
   'fr': {
     'common.cancel': 'Annuler',
@@ -2025,6 +2037,8 @@ const Map<String, Map<String, String>> translations = {
     'send.no_phones': 'Aucun trouvé. Ouvre LocalRoll sur l\'autre téléphone, sur le même Wi-Fi.',
     'send.phone_asks': 'On lui demandera d\'accepter',
     'send.phone_gone': '« {name} » ne répond pas. LocalRoll est-il ouvert, sur le même Wi-Fi ?',
+    'err.disk_full': 'Pas assez de place sur le PC. Rien n’est perdu : libérez de l’espace sur le PC et réessayez.',
+    'transfer.stopped_pc_full': 'Arrêté : pas assez de place sur le PC. Le reste n’est pas envoyé.',
   },
   'de': {
     'common.cancel': 'Abbrechen',
@@ -2314,6 +2328,8 @@ const Map<String, Map<String, String>> translations = {
     'send.no_phones': 'Keins gefunden. Öffne LocalRoll auf dem anderen Telefon im gleichen WLAN.',
     'send.phone_asks': 'Wird um Zustimmung gefragt',
     'send.phone_gone': '„{name}“ antwortet nicht. Ist LocalRoll offen, im gleichen WLAN?',
+    'err.disk_full': 'Nicht genug Speicherplatz auf dem PC. Nichts ging verloren – Platz auf dem PC schaffen und erneut versuchen.',
+    'transfer.stopped_pc_full': 'Angehalten: zu wenig Platz auf dem PC. Der Rest bleibt ungesendet.',
   },
   'pt': {
     'common.cancel': 'Cancelar',
@@ -2603,6 +2619,8 @@ const Map<String, Map<String, String>> translations = {
     'send.no_phones': 'Nenhum encontrado. Abra o LocalRoll no outro celular, no mesmo Wi-Fi.',
     'send.phone_asks': 'Será pedido para aceitar',
     'send.phone_gone': '“{name}” não responde. O LocalRoll está aberto, no mesmo Wi-Fi?',
+    'err.disk_full': 'Não há espaço suficiente no PC. Nada foi perdido — liberte espaço no PC e tente de novo.',
+    'transfer.stopped_pc_full': 'Parado: espaço insuficiente no PC. O resto fica por enviar.',
   },
   'ru': {
     'common.cancel': 'Отмена',
@@ -2892,6 +2910,8 @@ const Map<String, Map<String, String>> translations = {
     'send.no_phones': 'Не найдено. Открой LocalRoll на другом телефоне в той же Wi-Fi.',
     'send.phone_asks': 'Его спросят, принять ли',
     'send.phone_gone': '«{name}» не отвечает. LocalRoll открыт, та же Wi-Fi?',
+    'err.disk_full': 'На ПК недостаточно места. Ничего не потеряно — освободите место на ПК и повторите.',
+    'transfer.stopped_pc_full': 'Остановлено: на ПК мало места. Остальное не отправлено.',
   },
   'it': {
     'common.cancel': 'Annulla',
@@ -3181,6 +3201,8 @@ const Map<String, Map<String, String>> translations = {
     'send.no_phones': 'Nessuno trovato. Apri LocalRoll sull\'altro telefono, sulla stessa Wi-Fi.',
     'send.phone_asks': 'Gli verrà chiesto di accettare',
     'send.phone_gone': '«{name}» non risponde. LocalRoll è aperto, sulla stessa Wi-Fi?',
+    'err.disk_full': 'Spazio insufficiente sul PC. Non si è perso nulla: libera spazio sul PC e riprova.',
+    'transfer.stopped_pc_full': 'Interrotto: spazio insufficiente sul PC. Il resto rimane da inviare.',
   },
   'ar': {
     'common.cancel': 'إلغاء',
@@ -3470,6 +3492,8 @@ const Map<String, Map<String, String>> translations = {
     'send.no_phones': 'لم يُعثر على شيء. افتح LocalRoll على الهاتف الآخر على نفس الواي فاي.',
     'send.phone_asks': 'سيُطلب منه القبول',
     'send.phone_gone': '"{name}" لا يستجيب. هل LocalRoll مفتوح وعلى نفس الواي فاي؟',
+    'err.disk_full': 'لا توجد مساحة كافية على الحاسوب. لم يُفقد شيء — أفرغ بعض المساحة على الحاسوب وأعد المحاولة.',
+    'transfer.stopped_pc_full': 'توقف: لا توجد مساحة كافية على الحاسوب. يبقى الباقي دون إرسال.',
   },
   'hi': {
     'common.cancel': 'रद्द करें',
@@ -3759,6 +3783,8 @@ const Map<String, Map<String, String>> translations = {
     'send.no_phones': 'कोई नहीं मिला। दूसरे फ़ोन पर उसी Wi-Fi में LocalRoll खोलें।',
     'send.phone_asks': 'उनसे स्वीकार करने को कहा जाएगा',
     'send.phone_gone': '“{name}” जवाब नहीं दे रहा। क्या उस पर LocalRoll खुला है, उसी Wi-Fi पर?',
+    'err.disk_full': 'PC पर जगह कम है। कुछ भी खोया नहीं — PC पर जगह खाली करके फिर कोशिश करें।',
+    'transfer.stopped_pc_full': 'रुक गया: PC पर जगह कम है। बाकी नहीं भेजे गए।',
   },
   'id': {
     'common.cancel': 'Batal',
@@ -4048,6 +4074,8 @@ const Map<String, Map<String, String>> translations = {
     'send.no_phones': 'Tidak ada. Buka LocalRoll di ponsel lain, di Wi-Fi yang sama.',
     'send.phone_asks': 'Mereka akan diminta menerima',
     'send.phone_gone': '“{name}” tidak menjawab. Apakah LocalRoll terbuka, di Wi-Fi yang sama?',
+    'err.disk_full': 'Ruang di PC tidak cukup. Tidak ada yang hilang — kosongkan ruang di PC lalu coba lagi.',
+    'transfer.stopped_pc_full': 'Berhenti: ruang di PC tidak cukup. Sisanya belum dikirim.',
   },
   'vi': {
     'common.cancel': 'Hủy',
@@ -4337,6 +4365,8 @@ const Map<String, Map<String, String>> translations = {
     'send.no_phones': 'Không tìm thấy. Mở LocalRoll trên điện thoại kia, cùng Wi-Fi.',
     'send.phone_asks': 'Họ sẽ được hỏi có nhận không',
     'send.phone_gone': '“{name}” không phản hồi. LocalRoll có đang mở, cùng Wi-Fi không?',
+    'err.disk_full': 'Máy tính không đủ dung lượng. Không mất gì cả — hãy giải phóng dung lượng trên máy tính rồi thử lại.',
+    'transfer.stopped_pc_full': 'Đã dừng: máy tính không đủ dung lượng. Phần còn lại chưa được gửi.',
   },
   'th': {
     'common.cancel': 'ยกเลิก',
@@ -4626,6 +4656,8 @@ const Map<String, Map<String, String>> translations = {
     'send.no_phones': 'ไม่พบ เปิด LocalRoll บนโทรศัพท์อีกเครื่องที่ใช้ Wi-Fi เดียวกัน',
     'send.phone_asks': 'อีกฝ่ายจะถูกถามก่อนว่าจะรับหรือไม่',
     'send.phone_gone': '“{name}” ไม่ตอบ เปิด LocalRoll อยู่และใช้ Wi-Fi เดียวกันหรือไม่?',
+    'err.disk_full': 'พื้นที่บนคอมพิวเตอร์ไม่พอ ไม่มีอะไรหาย ล้างพื้นที่บนคอมพิวเตอร์แล้วลองใหม่',
+    'transfer.stopped_pc_full': 'หยุดแล้ว: พื้นที่บนคอมพิวเตอร์ไม่พอ ที่เหลือยังไม่ได้ส่ง',
   },
   'tr': {
     'common.cancel': 'İptal',
@@ -4915,5 +4947,7 @@ const Map<String, Map<String, String>> translations = {
     'send.no_phones': 'Bulunamadı. Diğer telefonda aynı Wi-Fi\'da LocalRoll\'u aç.',
     'send.phone_asks': 'Kabul etmesi istenecek',
     'send.phone_gone': '“{name}” yanıt vermiyor. LocalRoll açık mı, aynı Wi-Fi\'da mı?',
+    'err.disk_full': 'Bilgisayarda yeterli alan yok. Hiçbir şey kaybolmadı — bilgisayarda yer açıp tekrar deneyin.',
+    'transfer.stopped_pc_full': 'Durdu: bilgisayarda yeterli alan yok. Kalanlar gönderilmedi.',
   },
 };

@@ -289,5 +289,7 @@
   "send.no_phones": "Không tìm thấy. Mở LocalRoll trên điện thoại kia, cùng Wi-Fi.",
   "send.phone_asks": "Họ sẽ được hỏi có nhận không",
   "send.phone_gone": "“{name}” không phản hồi. LocalRoll có đang mở, cùng Wi-Fi không?",
-  "ios.photos_add": "LocalRoll lưu ảnh và video người khác gửi cho bạn vào thư viện ảnh (album “LocalRoll”)."
+  "ios.photos_add": "LocalRoll lưu ảnh và video người khác gửi cho bạn vào thư viện ảnh (album “LocalRoll”).",
+  "err.disk_full": "Máy tính không đủ dung lượng. Không mất gì cả — hãy giải phóng dung lượng trên máy tính rồi thử lại.",
+  "transfer.stopped_pc_full": "Đã dừng: máy tính không đủ dung lượng. Phần còn lại chưa được gửi."
 }

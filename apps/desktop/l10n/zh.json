@@ -378,5 +378,7 @@
   "phonefmt.as_is": "全部原样发送",
   "phonefmt.convert": "转换后发送",
   "send.phone_online_not_ready": "手机在线，但接收功能还没准备好。在手机上把 LocalRoll 关掉再打开；如果一直这样，请把手机上的 LocalRoll 更新到最新版。",
-  "send.converting_hw": "正在为手机转换 {done}/{total}（显卡加速）"
+  "send.converting_hw": "正在为手机转换 {done}/{total}（显卡加速）",
+  "send.err_disk_full": "对方电脑的硬盘空间不够。没有发出半截文件；对方腾出空间后再发送。",
+  "send.err_too_large": "对方认为数据过大，拒绝接收。"
 }

@@ -289,5 +289,7 @@
   "send.no_phones": "Aucun trouvé. Ouvre LocalRoll sur l'autre téléphone, sur le même Wi-Fi.",
   "send.phone_asks": "On lui demandera d'accepter",
   "send.phone_gone": "« {name} » ne répond pas. LocalRoll est-il ouvert, sur le même Wi-Fi ?",
-  "ios.photos_add": "LocalRoll enregistre dans ta photothèque (album « LocalRoll ») les photos et vidéos qu'on t'envoie."
+  "ios.photos_add": "LocalRoll enregistre dans ta photothèque (album « LocalRoll ») les photos et vidéos qu'on t'envoie.",
+  "err.disk_full": "Pas assez de place sur le PC. Rien n’est perdu : libérez de l’espace sur le PC et réessayez.",
+  "transfer.stopped_pc_full": "Arrêté : pas assez de place sur le PC. Le reste n’est pas envoyé."
 }

@@ -289,5 +289,7 @@
   "send.no_phones": "Bulunamadı. Diğer telefonda aynı Wi-Fi'da LocalRoll'u aç.",
   "send.phone_asks": "Kabul etmesi istenecek",
   "send.phone_gone": "“{name}” yanıt vermiyor. LocalRoll açık mı, aynı Wi-Fi'da mı?",
-  "ios.photos_add": "LocalRoll sana gönderilen fotoğraf ve videoları fotoğraf arşivine (“LocalRoll” albümü) kaydeder."
+  "ios.photos_add": "LocalRoll sana gönderilen fotoğraf ve videoları fotoğraf arşivine (“LocalRoll” albümü) kaydeder.",
+  "err.disk_full": "Bilgisayarda yeterli alan yok. Hiçbir şey kaybolmadı — bilgisayarda yer açıp tekrar deneyin.",
+  "transfer.stopped_pc_full": "Durdu: bilgisayarda yeterli alan yok. Kalanlar gönderilmedi."
 }

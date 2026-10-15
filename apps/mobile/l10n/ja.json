@@ -289,5 +289,7 @@
   "send.no_phones": "見つかりません。相手のスマホで LocalRoll を開き、同じWi-Fiにつないでください。",
   "send.phone_asks": "相手に受け取りの確認が表示されます",
   "send.phone_gone": "「{name}」が応答しません。LocalRoll は開いていますか？同じWi-Fiですか？",
-  "ios.photos_add": "LocalRoll は送られてきた写真とビデオを写真ライブラリ（アルバム「LocalRoll」）に保存します。"
+  "ios.photos_add": "LocalRoll は送られてきた写真とビデオを写真ライブラリ（アルバム「LocalRoll」）に保存します。",
+  "err.disk_full": "パソコンの空き容量が足りません。何も失われていません。パソコンの空きを増やしてからもう一度お試しください。",
+  "transfer.stopped_pc_full": "停止しました：パソコンの空き容量が足りません。残りは未送信のままです。"
 }

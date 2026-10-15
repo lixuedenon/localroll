@@ -289,5 +289,7 @@
   "send.no_phones": "没有找到。请在另一部手机上打开 LocalRoll，并连同一个 Wi-Fi。",
   "send.phone_asks": "对方会先确认是否接收",
   "send.phone_gone": "「{name}」没有回应。它打开 LocalRoll 了吗？在同一个 Wi-Fi 吗？",
-  "ios.photos_add": "LocalRoll 把别人发给你的照片和视频存进相册（“LocalRoll”相簿）。"
+  "ios.photos_add": "LocalRoll 把别人发给你的照片和视频存进相册（“LocalRoll”相簿）。",
+  "err.disk_full": "电脑的硬盘空间不够放这些文件。没有丢失任何东西——在电脑上腾出空间后再试。",
+  "transfer.stopped_pc_full": "已停止：电脑硬盘空间不足。剩下的保持未发送。"
 }

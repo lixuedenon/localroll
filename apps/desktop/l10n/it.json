@@ -378,5 +378,7 @@
   "phonefmt.as_is": "Invia così come sono",
   "phonefmt.convert": "Converti e invia",
   "send.phone_online_not_ready": "Online, ma la ricezione non è pronta. Chiudi LocalRoll sul telefono e riaprilo; se continua, aggiorna LocalRoll sul telefono.",
-  "send.converting_hw": "Conversione per il telefono {done}/{total} (scheda grafica)"
+  "send.converting_hw": "Conversione per il telefono {done}/{total} (scheda grafica)",
+  "send.err_disk_full": "Spazio insufficiente sull’altro PC. Niente è stato inviato a metà; libera spazio lì e invia di nuovo.",
+  "send.err_too_large": "L’altro lato l’ha rifiutato perché troppo grande."
 }

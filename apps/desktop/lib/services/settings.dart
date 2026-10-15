@@ -204,8 +204,10 @@ class AppSettings extends ChangeNotifier {
   FamilyDirectory get family => FamilyDirectory(
       trusted.values.where((t) => !isDesktopPlatform(t.platform) && t.familyMember).map((t) => t.family));
 
-  static Future<AppSettings> load() async {
-    final dir = await getApplicationSupportDirectory();
+  static Future<AppSettings> load() async => loadFrom(await getApplicationSupportDirectory());
+
+  /// Settings kept in [dir] (tests use a temporary folder).
+  static Future<AppSettings> loadFrom(Directory dir) async {
     await dir.create(recursive: true);
     final s = AppSettings._(File('${dir.path}${Platform.pathSeparator}settings.json'));
     Map<String, dynamic> j = {};

@@ -378,5 +378,7 @@
   "phonefmt.as_is": "Send as they are",
   "phonefmt.convert": "Convert and send",
   "send.phone_online_not_ready": "Online, but its receiver isn't ready. Close LocalRoll on the phone and open it again; if this stays, update LocalRoll on the phone.",
-  "send.converting_hw": "Converting for the phone {done}/{total} (graphics chip)"
+  "send.converting_hw": "Converting for the phone {done}/{total} (graphics chip)",
+  "send.err_disk_full": "Not enough space on the other PC. Nothing was sent half-way; free up space there and send again.",
+  "send.err_too_large": "The other side refused it as too large."
 }
