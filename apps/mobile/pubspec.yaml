@@ -42,7 +42,8 @@ dependencies:
   # Scanning paper: the phone's own scanner (VisionKit / ML Kit), pages
   # made into one PDF here.
   cunning_document_scanner: '>=1.2.3 <3.0.0'
-  image: ^4.2.0
+  # 4.6+ needs a newer zip library than other plugins allow here.
+  image: '>=4.3.0 <4.6.0'
   pdf: ^3.11.0
   # Share sheet (mail, messages, print…) and picking any file to send.
   share_plus: '>=11.0.0 <12.0.0'
