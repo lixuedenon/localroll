@@ -148,12 +148,7 @@ class MediaSaver {
   }
 
   Future<AssetPathEntity?> _findAlbum() async {
-    // Empty albums too (one made earlier that nothing was added to yet).
-    final paths = await PhotoManager.getAssetPathList(
-      hasAll: false,
-      type: RequestType.common,
-      filterOption: FilterOptionGroup()..containsEmptyAlbum = true,
-    );
+    final paths = await PhotoManager.getAssetPathList(hasAll: false, type: RequestType.common);
     for (final p in paths) {
       if (p.name == albumName) return p;
     }
