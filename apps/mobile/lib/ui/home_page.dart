@@ -20,6 +20,7 @@ import 'cleanup_page.dart';
 import 'connect_page.dart';
 import 'device_badge.dart';
 import 'incoming.dart';
+import 'pc_library_page.dart';
 import 'presence_toasts.dart';
 import 'send_target.dart';
 import 'settings_page.dart';
@@ -648,6 +649,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (mounted) setState(() {});
   }
 
+  /// The PC's library: browse it from here.
+  Future<void> _openPcLibrary(PairedDesktop desktop) => Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => PcLibraryPage(settings: widget.settings, discovery: widget.discovery, desktop: desktop, server: _server),
+      ));
+
   Future<void> _openCleanup(PairedDesktop desktop) async {
     await Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => CleanupPage(settings: widget.settings, discovery: widget.discovery, desktop: desktop),
@@ -1001,7 +1007,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             ]),
             const SizedBox(height: 12),
             Row(children: [
-              tile(tr('home.tile_receive'), tr('home.tile_soon'), () {}),
+              tile(tr('home.tile_pc_library'), d == null ? tr('home.tile_pc_library_none') : tr('home.tile_pc_library_sub', {'pc': d.name}),
+                  d == null ? _openConnect : () => _openPcLibrary(d)),
               const SizedBox(width: 12),
               tile(
                 tr('home.auto_send'),

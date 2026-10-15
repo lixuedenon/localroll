@@ -198,6 +198,13 @@ class PhoneServer extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// This phone asked PC [id] to send something ("save to my phone" while
+  /// browsing it): take what it sends for a while without asking.
+  void expectFrom(String id, {Duration within = const Duration(minutes: 10)}) {
+    _declinedUntil.remove(id);
+    _acceptedUntil[id] = DateTime.now().add(within);
+  }
+
   void answer(IncomingAsk ask, IncomingReply reply) {
     if (!ask.answer.isCompleted) ask.answer.complete(reply);
   }

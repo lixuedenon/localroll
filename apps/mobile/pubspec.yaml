@@ -37,6 +37,8 @@ dependencies:
   flutter_secure_storage: ^9.2.2
   # This phone's own HTTPS certificate (receiving from other phones).
   basic_utils: ^5.7.0
+  # Playing videos from the PC's library (through a local relay).
+  video_player: ^2.9.2
 
 dev_dependencies:
   flutter_test:
