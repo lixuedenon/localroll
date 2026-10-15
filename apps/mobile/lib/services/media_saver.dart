@@ -152,7 +152,7 @@ class MediaSaver {
     final paths = await PhotoManager.getAssetPathList(
       hasAll: false,
       type: RequestType.common,
-      filterOption: FilterOptionGroup(containsEmptyAlbum: true),
+      filterOption: FilterOptionGroup()..containsEmptyAlbum = true,
     );
     for (final p in paths) {
       if (p.name == albumName) return p;
