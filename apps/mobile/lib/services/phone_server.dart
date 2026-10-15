@@ -156,6 +156,7 @@ class PhoneServer extends ChangeNotifier {
         break;
       } catch (_) {}
     }
+    DiagLog.log('receiver', _http == null ? 'could not listen' : 'listening on $port');
     if (_http == null) return;
     // Show up for nearby phones (PCs ignore entries marked as phones).
     if (advertise) {
@@ -264,7 +265,8 @@ class PhoneServer extends ChangeNotifier {
       try {
         await _json(res, 400, {'error': 'bad_request'});
       } catch (_) {}
-    } catch (e) {
+    } catch (e, st) {
+      DiagLog.error('receiver', e, st);
       try {
         await _json(res, 500, {'error': '$e'});
       } catch (_) {}
@@ -329,6 +331,7 @@ class PhoneServer extends ChangeNotifier {
       asks.value = asks.value.where((x) => x != ask).toList();
     }
     if (!ask.answer.isCompleted) ask.answer.complete(const IncomingReply(accept: false));
+    DiagLog.log('receiver', '${from.name}: ${reply == null ? 'no answer' : reply.accept ? 'accepted' : 'declined'}');
     if (reply == null) return const IncomingReply(accept: true); // no answer
     if (reply.accept) {
       _acceptedUntil[from.id] = DateTime.now().add(const Duration(minutes: 2));
@@ -403,6 +406,7 @@ class PhoneServer extends ChangeNotifier {
     if (length != body.size) return _json(req.response, 409, {'offset': length, 'error': 'size_mismatch'});
     if (await sha256OfFile(part) != body.sha256.toLowerCase()) {
       await part.delete();
+      DiagLog.log('receiver', '${s.from.name}: checksum mismatch, file dropped');
       return _json(req.response, 422, const CompleteResponse(saved: false, error: 'sha256_mismatch').toJson());
     }
     // Named like the original (the photo library looks at the extension).

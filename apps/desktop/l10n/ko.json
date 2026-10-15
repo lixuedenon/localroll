@@ -380,5 +380,10 @@
   "send.phone_online_not_ready": "온라인이지만 받을 준비가 되지 않았습니다. 휴대폰에서 LocalRoll을 닫았다가 다시 여세요. 계속되면 휴대폰의 LocalRoll을 업데이트하세요.",
   "send.converting_hw": "휴대폰용으로 변환 중 {done}/{total} (그래픽 가속)",
   "send.err_disk_full": "상대 PC에 공간이 부족합니다. 중간까지 보낸 파일은 없습니다. 공간을 확보한 뒤 다시 보내세요.",
-  "send.err_too_large": "데이터가 너무 커서 상대가 거부했습니다."
+  "send.err_too_large": "데이터가 너무 커서 상대가 거부했습니다.",
+  "settings.log_title": "진단 로그",
+  "settings.log_hint": "무슨 일이 있었고 무엇이 잘못됐는지 기록해 문제를 찾는 데 씁니다. 이 기기에만 저장되고 어디로도 보내지지 않으며, 사진 내용·비밀번호·코드는 들어 있지 않습니다. 도와주는 사람에게 줄 때만 내보내세요.",
+  "settings.log_export": "로그 내보내기…",
+  "settings.log_failed": "로그를 저장하지 못했습니다.",
+  "settings.log_saved": "로그를 저장했습니다: {path}"
 }

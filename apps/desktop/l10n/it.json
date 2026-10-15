@@ -380,5 +380,10 @@
   "send.phone_online_not_ready": "Online, ma la ricezione non è pronta. Chiudi LocalRoll sul telefono e riaprilo; se continua, aggiorna LocalRoll sul telefono.",
   "send.converting_hw": "Conversione per il telefono {done}/{total} (scheda grafica)",
   "send.err_disk_full": "Spazio insufficiente sull’altro PC. Niente è stato inviato a metà; libera spazio lì e invia di nuovo.",
-  "send.err_too_large": "L’altro lato l’ha rifiutato perché troppo grande."
+  "send.err_too_large": "L’altro lato l’ha rifiutato perché troppo grande.",
+  "settings.log_title": "Registro diagnostico",
+  "settings.log_hint": "Registra cosa è successo e cosa è andato storto, per trovare i problemi. Resta su questo dispositivo, non viene mai inviato; niente contenuti delle foto, password o codici. Esportalo solo per darlo a chi ti aiuta.",
+  "settings.log_export": "Esporta registro…",
+  "settings.log_failed": "Impossibile salvare il registro.",
+  "settings.log_saved": "Registro salvato: {path}"
 }

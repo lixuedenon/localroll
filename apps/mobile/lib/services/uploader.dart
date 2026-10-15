@@ -183,6 +183,10 @@ class Uploader extends ChangeNotifier {
       } catch (_) {}
       running = false;
       finished = true;
+      final errors = {for (final i in items) if (i.state == UploadState.failed && i.error != null) i.error!};
+      DiagLog.log('send', 'to ${desktop.name}${toPhone ? ' (phone)' : ''}: ${items.length} items, $doneCount sent, '
+          '$skippedCount skipped, $failedCount failed, stop: ${stopReason.name}'
+          '${errors.isEmpty ? '' : ' — ${errors.take(3).join(' / ')}'}');
       notifyListeners();
     }
   }

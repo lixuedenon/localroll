@@ -291,5 +291,11 @@
   "send.phone_gone": "“{name}” yanıt vermiyor. LocalRoll açık mı, aynı Wi-Fi'da mı?",
   "ios.photos_add": "LocalRoll sana gönderilen fotoğraf ve videoları fotoğraf arşivine (“LocalRoll” albümü) kaydeder.",
   "err.disk_full": "Bilgisayarda yeterli alan yok. Hiçbir şey kaybolmadı — bilgisayarda yer açıp tekrar deneyin.",
-  "transfer.stopped_pc_full": "Durdu: bilgisayarda yeterli alan yok. Kalanlar gönderilmedi."
+  "transfer.stopped_pc_full": "Durdu: bilgisayarda yeterli alan yok. Kalanlar gönderilmedi.",
+  "settings.log_title": "Tanılama günlüğü",
+  "settings.log_hint": "Sorunları bulmak için ne olduğunu ve neyin ters gittiğini kaydeder. Yalnızca bu cihazda kalır, hiçbir yere gönderilmez; fotoğraf içeriği, parola veya kod içermez. Yalnızca size yardım eden birine vermek istediğinizde dışa aktarın.",
+  "settings.log_export": "Günlüğü dışa aktar…",
+  "settings.log_failed": "Günlük kaydedilemedi.",
+  "settings.log_saved_ios": "Günlük Dosyalar › iPhone’umda › LocalRoll’a kaydedildi.",
+  "settings.log_saved_android": "Günlük Download/LocalRoll’a kaydedildi."
 }

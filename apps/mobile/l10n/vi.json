@@ -291,5 +291,11 @@
   "send.phone_gone": "“{name}” không phản hồi. LocalRoll có đang mở, cùng Wi-Fi không?",
   "ios.photos_add": "LocalRoll lưu ảnh và video người khác gửi cho bạn vào thư viện ảnh (album “LocalRoll”).",
   "err.disk_full": "Máy tính không đủ dung lượng. Không mất gì cả — hãy giải phóng dung lượng trên máy tính rồi thử lại.",
-  "transfer.stopped_pc_full": "Đã dừng: máy tính không đủ dung lượng. Phần còn lại chưa được gửi."
+  "transfer.stopped_pc_full": "Đã dừng: máy tính không đủ dung lượng. Phần còn lại chưa được gửi.",
+  "settings.log_title": "Nhật ký chẩn đoán",
+  "settings.log_hint": "Ghi lại những gì đã xảy ra và lỗi gì, để tìm ra vấn đề. Chỉ lưu trên thiết bị này, không gửi đi đâu; không có nội dung ảnh, mật khẩu hay mã. Chỉ xuất khi bạn muốn đưa cho người giúp mình.",
+  "settings.log_export": "Xuất nhật ký…",
+  "settings.log_failed": "Không lưu được nhật ký.",
+  "settings.log_saved_ios": "Đã lưu nhật ký vào Tệp › Trên iPhone › LocalRoll.",
+  "settings.log_saved_android": "Đã lưu nhật ký vào Download/LocalRoll."
 }

@@ -380,5 +380,10 @@
   "send.phone_online_not_ready": "Online, aber der Empfang ist nicht bereit. LocalRoll auf dem Handy schließen und neu öffnen; bleibt es so, LocalRoll auf dem Handy aktualisieren.",
   "send.converting_hw": "Wird fürs Handy umgewandelt {done}/{total} (Grafikchip)",
   "send.err_disk_full": "Zu wenig Platz auf dem anderen PC. Nichts wurde halb gesendet; dort Platz schaffen und erneut senden.",
-  "send.err_too_large": "Die Gegenseite hat es als zu groß abgelehnt."
+  "send.err_too_large": "Die Gegenseite hat es als zu groß abgelehnt.",
+  "settings.log_title": "Diagnoseprotokoll",
+  "settings.log_hint": "Hält fest, was passiert ist und was schiefging, um Probleme zu finden. Bleibt auf diesem Gerät und wird nie gesendet; keine Fotoinhalte, Passwörter oder Codes. Nur exportieren, wenn Sie es jemandem geben wollen, der hilft.",
+  "settings.log_export": "Protokoll exportieren…",
+  "settings.log_failed": "Protokoll konnte nicht gespeichert werden.",
+  "settings.log_saved": "Protokoll gespeichert: {path}"
 }

@@ -291,5 +291,11 @@
   "send.phone_gone": "« {name} » ne répond pas. LocalRoll est-il ouvert, sur le même Wi-Fi ?",
   "ios.photos_add": "LocalRoll enregistre dans ta photothèque (album « LocalRoll ») les photos et vidéos qu'on t'envoie.",
   "err.disk_full": "Pas assez de place sur le PC. Rien n’est perdu : libérez de l’espace sur le PC et réessayez.",
-  "transfer.stopped_pc_full": "Arrêté : pas assez de place sur le PC. Le reste n’est pas envoyé."
+  "transfer.stopped_pc_full": "Arrêté : pas assez de place sur le PC. Le reste n’est pas envoyé.",
+  "settings.log_title": "Journal de diagnostic",
+  "settings.log_hint": "Note ce qui s’est passé et ce qui a échoué, pour trouver les problèmes. Reste sur cet appareil, jamais envoyé ; ni contenu de photos, ni mots de passe, ni codes. Exportez-le seulement pour le donner à quelqu’un qui vous aide.",
+  "settings.log_export": "Exporter le journal…",
+  "settings.log_failed": "Impossible d’enregistrer le journal.",
+  "settings.log_saved_ios": "Journal enregistré dans Fichiers › Sur mon iPhone › LocalRoll.",
+  "settings.log_saved_android": "Journal enregistré dans Download/LocalRoll."
 }

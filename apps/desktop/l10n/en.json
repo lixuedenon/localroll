@@ -380,5 +380,10 @@
   "send.phone_online_not_ready": "Online, but its receiver isn't ready. Close LocalRoll on the phone and open it again; if this stays, update LocalRoll on the phone.",
   "send.converting_hw": "Converting for the phone {done}/{total} (graphics chip)",
   "send.err_disk_full": "Not enough space on the other PC. Nothing was sent half-way; free up space there and send again.",
-  "send.err_too_large": "The other side refused it as too large."
+  "send.err_too_large": "The other side refused it as too large.",
+  "settings.log_title": "Diagnostics log",
+  "settings.log_hint": "Records what happened and what went wrong, so problems can be found. Stays on this device, never sent anywhere; no photo contents, passwords or codes. Export it only when you want to give it to someone helping you.",
+  "settings.log_export": "Export log…",
+  "settings.log_failed": "Could not save the log.",
+  "settings.log_saved": "Log saved: {path}"
 }

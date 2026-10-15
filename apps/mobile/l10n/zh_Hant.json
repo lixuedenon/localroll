@@ -291,5 +291,11 @@
   "send.phone_gone": "「{name}」沒有回應。它打開 LocalRoll 了嗎？在同一個 Wi-Fi 嗎？",
   "ios.photos_add": "LocalRoll 把別人傳給你的照片和影片存進相簿（「LocalRoll」相簿）。",
   "err.disk_full": "電腦的硬碟空間不夠放這些檔案。沒有遺失任何東西——在電腦上騰出空間後再試。",
-  "transfer.stopped_pc_full": "已停止：電腦硬碟空間不足。剩下的保持未傳送。"
+  "transfer.stopped_pc_full": "已停止：電腦硬碟空間不足。剩下的保持未傳送。",
+  "settings.log_title": "診斷日誌",
+  "settings.log_hint": "記錄發生了什麼、哪裡出了錯，便於查找問題。只保存在本機，不會傳往任何地方；不含照片內容、密碼或配對碼。只有在你想交給幫你排查的人時才匯出。",
+  "settings.log_export": "匯出日誌…",
+  "settings.log_failed": "無法保存日誌。",
+  "settings.log_saved_ios": "日誌已保存到「檔案」› 我的 iPhone › LocalRoll。",
+  "settings.log_saved_android": "日誌已保存到 Download/LocalRoll。"
 }

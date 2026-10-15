@@ -380,5 +380,10 @@
   "send.phone_online_not_ready": "En ligne, mais sa réception n'est pas prête. Ferme LocalRoll sur le téléphone et rouvre-le ; si ça persiste, mets à jour LocalRoll sur le téléphone.",
   "send.converting_hw": "Conversion pour le téléphone {done}/{total} (carte graphique)",
   "send.err_disk_full": "Pas assez de place sur l’autre PC. Rien n’a été envoyé à moitié ; libérez de l’espace là-bas et renvoyez.",
-  "send.err_too_large": "L’autre côté l’a refusé : trop volumineux."
+  "send.err_too_large": "L’autre côté l’a refusé : trop volumineux.",
+  "settings.log_title": "Journal de diagnostic",
+  "settings.log_hint": "Note ce qui s’est passé et ce qui a échoué, pour trouver les problèmes. Reste sur cet appareil, jamais envoyé ; ni contenu de photos, ni mots de passe, ni codes. Exportez-le seulement pour le donner à quelqu’un qui vous aide.",
+  "settings.log_export": "Exporter le journal…",
+  "settings.log_failed": "Impossible d’enregistrer le journal.",
+  "settings.log_saved": "Journal enregistré : {path}"
 }

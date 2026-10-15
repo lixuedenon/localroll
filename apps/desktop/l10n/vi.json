@@ -380,5 +380,10 @@
   "send.phone_online_not_ready": "Đang trực tuyến nhưng chưa sẵn sàng nhận. Đóng LocalRoll trên điện thoại rồi mở lại; nếu vẫn vậy, hãy cập nhật LocalRoll trên điện thoại.",
   "send.converting_hw": "Đang chuyển đổi cho điện thoại {done}/{total} (card đồ họa)",
   "send.err_disk_full": "Máy tính kia không đủ dung lượng. Không có gì bị gửi dở; hãy giải phóng dung lượng ở đó rồi gửi lại.",
-  "send.err_too_large": "Phía bên kia từ chối vì quá lớn."
+  "send.err_too_large": "Phía bên kia từ chối vì quá lớn.",
+  "settings.log_title": "Nhật ký chẩn đoán",
+  "settings.log_hint": "Ghi lại những gì đã xảy ra và lỗi gì, để tìm ra vấn đề. Chỉ lưu trên thiết bị này, không gửi đi đâu; không có nội dung ảnh, mật khẩu hay mã. Chỉ xuất khi bạn muốn đưa cho người giúp mình.",
+  "settings.log_export": "Xuất nhật ký…",
+  "settings.log_failed": "Không lưu được nhật ký.",
+  "settings.log_saved": "Đã lưu nhật ký: {path}"
 }

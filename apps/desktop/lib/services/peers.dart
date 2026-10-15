@@ -894,6 +894,8 @@ class PeerSender extends ChangeNotifier {
       j
         ..current = null
         ..finished = DateTime.now();
+      DiagLog.log('send', 'to ${j.peer.name}${j.toPhone ? ' (phone)' : ''}: ${j.state.name}, ${j.sentFiles} sent, '
+          '${j.skippedFiles} already there, ${j.failedFiles} failed${j.error == null ? '' : ', ${j.error}'}');
       _tick(force: true);
     }
   }

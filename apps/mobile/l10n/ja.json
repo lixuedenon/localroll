@@ -291,5 +291,11 @@
   "send.phone_gone": "「{name}」が応答しません。LocalRoll は開いていますか？同じWi-Fiですか？",
   "ios.photos_add": "LocalRoll は送られてきた写真とビデオを写真ライブラリ（アルバム「LocalRoll」）に保存します。",
   "err.disk_full": "パソコンの空き容量が足りません。何も失われていません。パソコンの空きを増やしてからもう一度お試しください。",
-  "transfer.stopped_pc_full": "停止しました：パソコンの空き容量が足りません。残りは未送信のままです。"
+  "transfer.stopped_pc_full": "停止しました：パソコンの空き容量が足りません。残りは未送信のままです。",
+  "settings.log_title": "診断ログ",
+  "settings.log_hint": "何が起きたか・何が失敗したかを記録し、問題の原因探しに使います。この端末にだけ保存され、どこにも送られません。写真の中身、パスワード、コードは含みません。手伝ってくれる人に渡したいときだけ書き出してください。",
+  "settings.log_export": "ログを書き出す…",
+  "settings.log_failed": "ログを保存できませんでした。",
+  "settings.log_saved_ios": "ログを「ファイル」› このiPhone内 › LocalRoll に保存しました。",
+  "settings.log_saved_android": "ログを Download/LocalRoll に保存しました。"
 }

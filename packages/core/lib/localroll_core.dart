@@ -16,3 +16,4 @@ export 'src/version.dart';
 export 'src/lr_client.dart';
 export 'src/tls.dart';
 export 'src/live.dart';
+export 'src/diag_log.dart';

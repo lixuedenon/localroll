@@ -1,10 +1,12 @@
 // apps/desktop/lib/main.dart
 import 'dart:io';
+import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:localroll_core/localroll_core.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'app_services.dart';
@@ -25,6 +27,7 @@ Future<void> main(List<String> args) async {
     runApp(const _AlreadyRunningApp());
     return;
   }
+  await _startLog();
   MediaKit.ensureInitialized();
   // Our own title bar replaces the native one; closing asks first.
   await windowManager.ensureInitialized();
@@ -49,6 +52,30 @@ Future<void> main(List<String> args) async {
   final services = await AppServices.create();
   services.server.onShowRequested = _bringToFront;
   runApp(LocalRollApp(services: services));
+}
+
+/// Diagnostics log (stays on this PC; exported from Settings on purpose):
+/// app messages and errors, never photo contents.
+Future<void> _startLog() async {
+  try {
+    final dir = await getApplicationSupportDirectory();
+    await DiagLog.init(Directory('${dir.path}${Platform.pathSeparator}logs'),
+        about: 'LocalRoll $lrVersion · ${Platform.operatingSystemVersion} · ${Platform.localeName}');
+  } catch (_) {}
+  final prior = debugPrint;
+  debugPrint = (String? message, {int? wrapWidth}) {
+    if (message != null) DiagLog.log('app', message);
+    prior(message, wrapWidth: wrapWidth);
+  };
+  final flutterError = FlutterError.onError;
+  FlutterError.onError = (d) {
+    DiagLog.error('ui', d.exception, d.stack);
+    flutterError?.call(d);
+  };
+  PlatformDispatcher.instance.onError = (e, st) {
+    DiagLog.error('uncaught', e, st);
+    return false;
+  };
 }
 
 Future<void> _bringToFront() async {

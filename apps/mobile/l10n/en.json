@@ -291,5 +291,11 @@
   "send.phone_gone": "“{name}” is not answering. Is LocalRoll open on it, on the same Wi-Fi?",
   "ios.photos_add": "LocalRoll saves photos and videos sent to you into your photo library (album “LocalRoll”).",
   "err.disk_full": "Not enough space on the PC for this. Nothing was lost — free up space on the PC and try again.",
-  "transfer.stopped_pc_full": "Stopped: not enough space on the PC. The rest stay unsent."
+  "transfer.stopped_pc_full": "Stopped: not enough space on the PC. The rest stay unsent.",
+  "settings.log_title": "Diagnostics log",
+  "settings.log_hint": "Records what happened and what went wrong, so problems can be found. Stays on this device, never sent anywhere; no photo contents, passwords or codes. Export it only when you want to give it to someone helping you.",
+  "settings.log_export": "Export log…",
+  "settings.log_failed": "Could not save the log.",
+  "settings.log_saved_ios": "Log saved in Files › On My iPhone › LocalRoll.",
+  "settings.log_saved_android": "Log saved in Download/LocalRoll."
 }

@@ -1,9 +1,12 @@
 // apps/mobile/lib/ui/settings_page.dart
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:localroll_core/localroll_core.dart';
 
 import '../l10n/l10n.dart';
 import '../services/discovery.dart';
+import '../services/media_saver.dart';
 import '../services/mobile_settings.dart';
 import 'connect_page.dart';
 import 'device_badge.dart';
@@ -157,6 +160,17 @@ class SettingsPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
+              Text(tr('settings.log_title'), style: theme.textTheme.titleMedium),
+              const SizedBox(height: 8),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.receipt_long_outlined),
+                  title: Text(tr('settings.log_export')),
+                  subtitle: Text(tr('settings.log_hint')),
+                  onTap: () => _exportLog(context),
+                ),
+              ),
+              const SizedBox(height: 24),
               Center(child: Text('LocalRoll · ${tr('settings.version', {'version': lrVersion})}', style: theme.textTheme.bodySmall)),
             ],
           ),
@@ -211,4 +225,20 @@ class _LanguageTile extends StatelessWidget {
         trailing: selected ? const Icon(Icons.check_rounded, color: LrColors.safelight) : null,
         onTap: onTap,
       );
+}
+
+/// Diagnostics log → a text file in Files › LocalRoll (iPhone) or
+/// Download/LocalRoll (Android), to send to whoever helps.
+Future<void> _exportLog(BuildContext context) async {
+  final m = ScaffoldMessenger.of(context);
+  try {
+    final dir = await MediaSaver.filesFolder();
+    final d = DateTime.now();
+    final stamp = '${d.year}${d.month.toString().padLeft(2, '0')}${d.day.toString().padLeft(2, '0')}-'
+        '${d.hour.toString().padLeft(2, '0')}${d.minute.toString().padLeft(2, '0')}';
+    await File('${dir.path}/LocalRoll-log-$stamp.txt').writeAsString(await DiagLog.read());
+    m.showSnackBar(SnackBar(content: Text(tr(Platform.isIOS ? 'settings.log_saved_ios' : 'settings.log_saved_android'))));
+  } catch (_) {
+    m.showSnackBar(SnackBar(content: Text(tr('settings.log_failed'))));
+  }
 }

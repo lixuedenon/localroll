@@ -291,5 +291,11 @@
   "send.phone_gone": "„{name}“ antwortet nicht. Ist LocalRoll offen, im gleichen WLAN?",
   "ios.photos_add": "LocalRoll speichert dir gesendete Fotos und Videos in deiner Mediathek (Album „LocalRoll“).",
   "err.disk_full": "Nicht genug Speicherplatz auf dem PC. Nichts ging verloren – Platz auf dem PC schaffen und erneut versuchen.",
-  "transfer.stopped_pc_full": "Angehalten: zu wenig Platz auf dem PC. Der Rest bleibt ungesendet."
+  "transfer.stopped_pc_full": "Angehalten: zu wenig Platz auf dem PC. Der Rest bleibt ungesendet.",
+  "settings.log_title": "Diagnoseprotokoll",
+  "settings.log_hint": "Hält fest, was passiert ist und was schiefging, um Probleme zu finden. Bleibt auf diesem Gerät und wird nie gesendet; keine Fotoinhalte, Passwörter oder Codes. Nur exportieren, wenn Sie es jemandem geben wollen, der hilft.",
+  "settings.log_export": "Protokoll exportieren…",
+  "settings.log_failed": "Protokoll konnte nicht gespeichert werden.",
+  "settings.log_saved_ios": "Protokoll gespeichert in Dateien › Auf meinem iPhone › LocalRoll.",
+  "settings.log_saved_android": "Protokoll gespeichert in Download/LocalRoll."
 }

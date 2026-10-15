@@ -380,5 +380,10 @@
   "send.phone_online_not_ready": "Online, tetapi penerimaannya belum siap. Tutup LocalRoll di ponsel lalu buka lagi; jika tetap begini, perbarui LocalRoll di ponsel.",
   "send.converting_hw": "Mengonversi untuk ponsel {done}/{total} (kartu grafis)",
   "send.err_disk_full": "Ruang di PC lain tidak cukup. Tidak ada yang terkirim setengah; kosongkan ruang di sana lalu kirim lagi.",
-  "send.err_too_large": "Pihak lain menolaknya karena terlalu besar."
+  "send.err_too_large": "Pihak lain menolaknya karena terlalu besar.",
+  "settings.log_title": "Log diagnostik",
+  "settings.log_hint": "Mencatat apa yang terjadi dan apa yang gagal, untuk menemukan masalah. Tetap di perangkat ini, tidak pernah dikirim; tanpa isi foto, kata sandi, atau kode. Ekspor hanya bila ingin memberikannya kepada yang membantu Anda.",
+  "settings.log_export": "Ekspor log…",
+  "settings.log_failed": "Tidak dapat menyimpan log.",
+  "settings.log_saved": "Log disimpan: {path}"
 }

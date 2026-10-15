@@ -291,5 +291,11 @@
   "send.phone_gone": "“{name}”이(가) 응답하지 않습니다. LocalRoll이 열려 있고 같은 Wi-Fi인가요?",
   "ios.photos_add": "LocalRoll은 받은 사진과 동영상을 사진 보관함(\"LocalRoll\" 앨범)에 저장합니다.",
   "err.disk_full": "PC에 공간이 부족합니다. 잃어버린 것은 없습니다. PC에서 공간을 확보한 뒤 다시 시도하세요.",
-  "transfer.stopped_pc_full": "중지됨: PC 공간이 부족합니다. 나머지는 보내지 않은 상태로 남습니다."
+  "transfer.stopped_pc_full": "중지됨: PC 공간이 부족합니다. 나머지는 보내지 않은 상태로 남습니다.",
+  "settings.log_title": "진단 로그",
+  "settings.log_hint": "무슨 일이 있었고 무엇이 잘못됐는지 기록해 문제를 찾는 데 씁니다. 이 기기에만 저장되고 어디로도 보내지지 않으며, 사진 내용·비밀번호·코드는 들어 있지 않습니다. 도와주는 사람에게 줄 때만 내보내세요.",
+  "settings.log_export": "로그 내보내기…",
+  "settings.log_failed": "로그를 저장하지 못했습니다.",
+  "settings.log_saved_ios": "로그를 파일 › 나의 iPhone › LocalRoll에 저장했습니다.",
+  "settings.log_saved_android": "로그를 Download/LocalRoll에 저장했습니다."
 }

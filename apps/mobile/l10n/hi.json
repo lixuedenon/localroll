@@ -291,5 +291,11 @@
   "send.phone_gone": "“{name}” जवाब नहीं दे रहा। क्या उस पर LocalRoll खुला है, उसी Wi-Fi पर?",
   "ios.photos_add": "LocalRoll आपको भेजी गई फ़ोटो और वीडियो आपकी फ़ोटो लाइब्रेरी (\"LocalRoll\" एल्बम) में सहेजता है।",
   "err.disk_full": "PC पर जगह कम है। कुछ भी खोया नहीं — PC पर जगह खाली करके फिर कोशिश करें।",
-  "transfer.stopped_pc_full": "रुक गया: PC पर जगह कम है। बाकी नहीं भेजे गए।"
+  "transfer.stopped_pc_full": "रुक गया: PC पर जगह कम है। बाकी नहीं भेजे गए।",
+  "settings.log_title": "डायग्नोस्टिक लॉग",
+  "settings.log_hint": "क्या हुआ और कहाँ गड़बड़ हुई, यह दर्ज करता है ताकि समस्या मिल सके। यह इसी डिवाइस पर रहता है, कहीं नहीं भेजा जाता; इसमें फ़ोटो की सामग्री, पासवर्ड या कोड नहीं होते। केवल तब निर्यात करें जब मदद करने वाले को देना हो।",
+  "settings.log_export": "लॉग निर्यात करें…",
+  "settings.log_failed": "लॉग सहेजा नहीं जा सका।",
+  "settings.log_saved_ios": "लॉग Files › On My iPhone › LocalRoll में सहेजा गया।",
+  "settings.log_saved_android": "लॉग Download/LocalRoll में सहेजा गया।"
 }

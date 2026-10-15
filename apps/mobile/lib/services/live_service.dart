@@ -113,6 +113,7 @@ class LiveService extends ChangeNotifier {
     final was = discovery.isOnline(pcId);
     discovery.live(pcId, up);
     if (!up) _heard.remove(pcId);
+    if (was != up) DiagLog.log('live', '$name ${up ? 'linked' : 'lost'}');
     if (was != up && _running) _events.add(PresenceEvent(pcId, name, pc: true, online: up));
     _recompute();
     notifyListeners();

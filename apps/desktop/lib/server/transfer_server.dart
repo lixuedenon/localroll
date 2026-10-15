@@ -487,6 +487,9 @@ class TransferServer extends ChangeNotifier {
     }
     if (_mux == null) {
       error = tr('receive.no_port', {'ports': failures.join(', ')});
+      DiagLog.log('server', 'no port: ${failures.join(', ')}');
+    } else {
+      DiagLog.log('server', 'listening on ${_mux!.port} (https: ${tls != null})');
     }
     notifyListeners();
   }
@@ -609,6 +612,7 @@ class TransferServer extends ChangeNotifier {
         await _json(res, 400, {'error': 'bad_request'});
       } catch (_) {}
     } catch (e, st) {
+      DiagLog.error('server', e, st);
       debugPrint('request failed: $e\n$st');
       try {
         await _json(res, 500, {'error': e.toString()});
@@ -912,6 +916,7 @@ class TransferServer extends ChangeNotifier {
       });
       p.token = token;
       p.status = PairApprovalStatus.approved;
+      DiagLog.log('pair', 'allowed ${p.device.name} (${p.device.platform}, family: $family)');
     } else {
       p.status = PairApprovalStatus.denied;
     }
@@ -923,10 +928,12 @@ class TransferServer extends ChangeNotifier {
     // Library folder unreachable (external drive unplugged): don't accept
     // files we could not store; the phone shows why and keeps them queued.
     if (library.offline) {
+      DiagLog.log('receive', '${device.name}: refused, library offline');
       return _json(req.response, 503, {'error': 'library_offline'});
     }
     final refused = await _mayReceive(device, body.files);
     if (refused != null) {
+      DiagLog.log('receive', '${device.name}: ${refused.timedOut ? 'no answer' : 'declined'}');
       final reason = refused.reason?.trim();
       return _json(req.response, 403, {
         'error': refused.timedOut ? 'no_answer' : 'declined',
@@ -974,10 +981,12 @@ class TransferServer extends ChangeNotifier {
       final free = await _freeNow();
       if (free != null && need > free - keepFree) {
         _sessions.remove(sessionId);
+        DiagLog.log('receive', '${device.name}: refused, disk full (need $need, free $free)');
         return _json(req.response, 507, {'error': 'disk_full', 'free': max(0, free - keepFree), 'need': need});
       }
       if (free != null) _free = free - need;
     }
+    DiagLog.log('receive', '${device.name}: session, ${body.files.length} files, ${results.values.where((r) => r.status == OfferStatus.duplicate).length} already here');
     return _json(req.response, 200, SessionResponse(sessionId: sessionId, results: results).toJson());
   }
 
@@ -1080,6 +1089,7 @@ class TransferServer extends ChangeNotifier {
     final hash = await sha256OfFile(part);
     if (hash != body.sha256.toLowerCase()) {
       await part.delete();
+      DiagLog.log('receive', '${device.name}: checksum mismatch, file dropped (${body.size} bytes)');
       hub.setState(t, TransferState.failed, error: tr('transfer.verify_failed'));
       return _json(req.response, 422, const CompleteResponse(saved: false, error: 'sha256_mismatch').toJson());
     }

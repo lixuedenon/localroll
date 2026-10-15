@@ -291,5 +291,11 @@
   "send.phone_gone": "“{name}” tidak menjawab. Apakah LocalRoll terbuka, di Wi-Fi yang sama?",
   "ios.photos_add": "LocalRoll menyimpan foto dan video yang dikirim kepadamu ke galeri (album “LocalRoll”).",
   "err.disk_full": "Ruang di PC tidak cukup. Tidak ada yang hilang — kosongkan ruang di PC lalu coba lagi.",
-  "transfer.stopped_pc_full": "Berhenti: ruang di PC tidak cukup. Sisanya belum dikirim."
+  "transfer.stopped_pc_full": "Berhenti: ruang di PC tidak cukup. Sisanya belum dikirim.",
+  "settings.log_title": "Log diagnostik",
+  "settings.log_hint": "Mencatat apa yang terjadi dan apa yang gagal, untuk menemukan masalah. Tetap di perangkat ini, tidak pernah dikirim; tanpa isi foto, kata sandi, atau kode. Ekspor hanya bila ingin memberikannya kepada yang membantu Anda.",
+  "settings.log_export": "Ekspor log…",
+  "settings.log_failed": "Tidak dapat menyimpan log.",
+  "settings.log_saved_ios": "Log disimpan di File › Di iPhone Saya › LocalRoll.",
+  "settings.log_saved_android": "Log disimpan di Download/LocalRoll."
 }
