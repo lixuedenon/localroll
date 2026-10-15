@@ -10,6 +10,7 @@ import '../server/transfer_server.dart';
 import 'keep_awake.dart';
 import 'library_index.dart';
 import 'network.dart';
+import 'phone_formats.dart';
 import 'settings.dart';
 
 /// Another LocalRoll PC seen on the network right now.
@@ -616,12 +617,22 @@ Future<List<SendFile>> filesInFolder(String dir) async {
   return out;
 }
 
-enum SendJobState { waiting, connecting, sending, done, failed, cancelled }
+enum SendJobState { waiting, converting, connecting, sending, done, failed, cancelled }
 
 class SendJob {
-  SendJob(this.peer, this.files, this.title, {this.toPhone = false})
+  SendJob(this.peer, this.files, this.title, {this.toPhone = false, this.convert = false, this.platform = ''})
       : id = randomId(10),
         totalBytes = files.fold(0, (a, f) => a + f.size);
+
+  /// To a phone: turn what its photo app can't take into formats it can
+  /// (see PhoneFormatter). [platform]: 'ios' / 'android'.
+  final bool convert;
+  final String platform;
+
+  /// While converting: how many done, of how many, and the current one.
+  int convertDone = 0;
+  int convertTotal = 0;
+  double convertProgress = 0;
 
   final String id;
   final PeerPc peer;
@@ -633,7 +644,7 @@ class SendJob {
 
   /// What was sent ("3 files", "Trip", "12 photos").
   final String title;
-  final int totalBytes;
+  int totalBytes;
 
   SendJobState state = SendJobState.waiting;
   int sentFiles = 0;
@@ -650,7 +661,7 @@ class SendJob {
   bool _cancel = false;
 
   int get processed => sentFiles + skippedFiles + failedFiles;
-  bool get active => state == SendJobState.connecting || state == SendJobState.sending;
+  bool get active => state == SendJobState.converting || state == SendJobState.connecting || state == SendJobState.sending;
   bool get over => state == SendJobState.done || state == SendJobState.failed || state == SendJobState.cancelled;
 
   double get fraction => totalBytes == 0 ? (files.isEmpty ? 1 : processed / files.length) : (sentBytes / totalBytes).clamp(0, 1);
@@ -681,8 +692,12 @@ class PeerSender extends ChangeNotifier {
   /// Where a phone receives now, as a send target (set by AppServices).
   PeerPc? Function(String id)? phoneTarget;
 
-  SendJob add(PeerPc peer, List<SendFile> files, String title, {bool toPhone = false}) {
-    final j = SendJob(peer, files, title, toPhone: toPhone);
+  /// Converts for phones (set by AppServices).
+  PhoneFormatter? formatter;
+
+  SendJob add(PeerPc peer, List<SendFile> files, String title,
+      {bool toPhone = false, bool convert = false, String platform = ''}) {
+    final j = SendJob(peer, files, title, toPhone: toPhone, convert: convert, platform: platform);
     jobs.insert(0, j);
     while (jobs.length > 50 && jobs.last.over) {
       jobs.removeLast();
@@ -725,7 +740,7 @@ class PeerSender extends ChangeNotifier {
     if (!j.over) return;
     final peer = (j.toPhone ? phoneTarget?.call(j.peer.id) : settings.peers[j.peer.id]) ?? j.peer;
     jobs.remove(j);
-    add(peer, j.files, j.title, toPhone: j.toPhone);
+    add(peer, j.files, j.title, toPhone: j.toPhone, convert: j.convert, platform: j.platform);
   }
 
   void clearFinished() {
@@ -789,7 +804,18 @@ class PeerSender extends ChangeNotifier {
       ..error = null;
     _tick(force: true);
     LrClient? c;
+    Directory? temp;
+    var files = j.files;
     try {
+      // Phone: first make what its photo app can't take into what it can.
+      final fmt = formatter;
+      if (j.toPhone && j.convert && fmt != null) {
+        temp = Directory('${Directory.systemTemp.path}${Platform.pathSeparator}localroll_to_phone_${j.id}');
+        files = await _convertForPhone(j, fmt, temp);
+        if (j._cancel) throw const PeerError('cancelled');
+      }
+      j.state = SendJobState.connecting;
+      _tick(force: true);
       if (j.toPhone) {
         // The phone's address and certificate as it told us just now.
         final p = phoneTarget?.call(j.peer.id) ?? j.peer;
@@ -803,13 +829,13 @@ class PeerSender extends ChangeNotifier {
       j.state = SendJobState.sending;
       _tick(force: true);
       const perSession = 200;
-      for (var start = 0; start < j.files.length; start += perSession) {
+      for (var start = 0; start < files.length; start += perSession) {
         if (j._cancel) break;
-        final batch = j.files.sublist(start, min(start + perSession, j.files.length));
+        final batch = files.sublist(start, min(start + perSession, files.length));
         final offers = [for (var i = 0; i < batch.length; i++) batch[i].offer('f${start + i}')];
         // A phone asks its owner first (and wants to know who is sending).
         final request = j.toPhone
-            ? SessionRequest(files: offers, from: settings.deviceInfo, batch: j.files.length)
+            ? SessionRequest(files: offers, from: settings.deviceInfo, batch: files.length)
             : SessionRequest(files: offers);
         final session = await _retry(() => c!.createSession(request));
         for (var i = 0; i < batch.length; i++) {
@@ -839,9 +865,13 @@ class PeerSender extends ChangeNotifier {
       }
       j.state = j._cancel ? SendJobState.cancelled : (j.failedFiles > 0 ? SendJobState.failed : SendJobState.done);
     } on PeerError catch (e) {
-      j
-        ..state = SendJobState.failed
-        ..error = e.code;
+      if (e.code == 'cancelled' || j._cancel) {
+        j.state = SendJobState.cancelled;
+      } else {
+        j
+          ..state = SendJobState.failed
+          ..error = e.code;
+      }
     } on LrHttpError catch (e) {
       j
         ..state = SendJobState.failed
@@ -854,11 +884,50 @@ class PeerSender extends ChangeNotifier {
       debugPrint('send failed: $e');
     } finally {
       c?.close();
+      // Converted copies were only for this transfer.
+      try {
+        if (temp != null && await temp.exists()) await temp.delete(recursive: true);
+      } catch (_) {}
       j
         ..current = null
         ..finished = DateTime.now();
       _tick(force: true);
     }
+  }
+
+  /// Converts what the phone can't take; returns the files to send (the
+  /// original where nothing was needed or conversion failed).
+  Future<List<SendFile>> _convertForPhone(SendJob j, PhoneFormatter fmt, Directory temp) async {
+    final actions = [for (final f in j.files) await fmt.decide(f, j.platform)];
+    final todo = actions.where((a) => a != PhoneAction.asIs).length;
+    if (todo == 0) return j.files;
+    j
+      ..state = SendJobState.converting
+      ..convertTotal = todo
+      ..convertDone = 0;
+    _tick(force: true);
+    final out = <SendFile>[];
+    for (var i = 0; i < j.files.length; i++) {
+      final f = j.files[i];
+      if (j._cancel) return out;
+      if (actions[i] == PhoneAction.asIs) {
+        out.add(f);
+        continue;
+      }
+      j
+        ..current = f.relPath ?? f.name
+        ..convertProgress = 0;
+      _tick(force: true);
+      final c = await fmt.convert(f, actions[i], temp, onProgress: (p) {
+        j.convertProgress = p;
+        _tick();
+      });
+      out.add(c ?? f);
+      j.convertDone++;
+      _tick(force: true);
+    }
+    j.totalBytes = out.fold(0, (a, f) => a + f.size);
+    return out;
   }
 
   /// Network hiccups: try again a few times before giving up.

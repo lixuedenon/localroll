@@ -368,5 +368,13 @@
   "send.phones": "手机",
   "send.phone_ready": "现在可以接收——对方会先确认",
   "send.phone_closed_hint": "在手机上打开 LocalRoll 后才能发送（iPhone 只有打开 App 时才能接收）",
-  "send.err_phone_closed": "手机现在不能接收。请在手机上打开 LocalRoll，然后重新发送。"
+  "send.err_phone_closed": "手机现在不能接收。请在手机上打开 LocalRoll，然后重新发送。",
+  "send.converting": "正在为手机转换 {done}/{total}",
+  "phonefmt.title": "有 {count} 个文件需要转换，「{name}」才能显示或播放",
+  "phonefmt.jpeg": "{count} 张照片 → 高质量 JPEG（保留拍摄日期、地点和相机信息）",
+  "phonefmt.remux": "{count} 段视频 → 只换成 MP4 外壳，画面完全不变（每段几秒）",
+  "phonefmt.h264": "{count} 段视频 → MP4（H.264），画质接近原片——可能需要一些时间",
+  "phonefmt.note": "电脑上的原文件不会改动，转换的副本只用于发送。其余文件原样发送。",
+  "phonefmt.as_is": "全部原样发送",
+  "phonefmt.convert": "转换后发送"
 }

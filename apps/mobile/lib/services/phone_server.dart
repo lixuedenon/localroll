@@ -366,6 +366,12 @@ class PhoneServer extends ChangeNotifier {
   /// nothing more arrives for a few seconds.
   void _touch() {
     receiving?.last = DateTime.now();
+    // While a transfer keeps going, its "Accept" keeps holding (big files
+    // can take longer than the 2 minutes between new sessions).
+    final from = receiving?.from.id;
+    if (from != null && _acceptedUntil.containsKey(from)) {
+      _acceptedUntil[from] = DateTime.now().add(const Duration(minutes: 2));
+    }
     notifyListeners();
     _quiet?.cancel();
     _quiet = Timer(const Duration(seconds: 6), () async {

@@ -10,6 +10,7 @@ import 'services/ffmpeg.dart';
 import 'services/library_index.dart';
 import 'services/network.dart';
 import 'services/peers.dart';
+import 'services/phone_formats.dart';
 import 'services/receive_hub.dart';
 import 'services/settings.dart';
 import 'services/tls_identity.dart';
@@ -149,6 +150,7 @@ class AppServices {
     };
     server.onlineNow = () => s.onlineDevices;
     s.sender.phoneTarget = s.phoneTarget;
+    s.sender.formatter = PhoneFormatter(ffmpeg);
     // Changes are compared on every notification (each link opening or
     // closing notifies on its own), so quick off/on is not lost.
     server.addListener(s._recomputePresence);

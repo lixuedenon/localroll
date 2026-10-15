@@ -368,5 +368,13 @@
   "send.phones": "Teléfonos",
   "send.phone_ready": "Puede recibir ahora; se le pedirá que acepte",
   "send.phone_closed_hint": "Abre LocalRoll en el teléfono para enviarle (un iPhone solo recibe con la app abierta)",
-  "send.err_phone_closed": "El teléfono no está recibiendo. Abre LocalRoll en él y vuelve a enviar."
+  "send.err_phone_closed": "El teléfono no está recibiendo. Abre LocalRoll en él y vuelve a enviar.",
+  "send.converting": "Convirtiendo para el teléfono {done}/{total}",
+  "phonefmt.title": "Hay que convertir {count} archivos para que «{name}» los muestre",
+  "phonefmt.jpeg": "{count} fotos → JPEG de alta calidad (se conservan fecha, lugar y cámara)",
+  "phonefmt.remux": "{count} vídeos → MP4, imagen sin cambios (segundos cada uno)",
+  "phonefmt.h264": "{count} vídeos → MP4 (H.264), calidad casi original; puede tardar",
+  "phonefmt.note": "Los originales en este PC no cambian; las copias convertidas son solo para enviar. El resto va tal cual.",
+  "phonefmt.as_is": "Enviar tal cual",
+  "phonefmt.convert": "Convertir y enviar"
 }

@@ -368,5 +368,13 @@
   "send.phones": "휴대폰",
   "send.phone_ready": "지금 받을 수 있음 — 상대방이 수락 여부를 확인합니다",
   "send.phone_closed_hint": "휴대폰에서 LocalRoll을 열면 보낼 수 있습니다(iPhone은 앱이 열려 있을 때만 받음)",
-  "send.err_phone_closed": "휴대폰이 지금 받을 수 없습니다. LocalRoll을 열고 다시 보내세요."
+  "send.err_phone_closed": "휴대폰이 지금 받을 수 없습니다. LocalRoll을 열고 다시 보내세요.",
+  "send.converting": "휴대폰용으로 변환 중 {done}/{total}",
+  "phonefmt.title": "“{name}”에서 보려면 {count}개 파일을 변환해야 합니다",
+  "phonefmt.jpeg": "사진 {count}장 → 고화질 JPEG(날짜·위치·카메라 정보 유지)",
+  "phonefmt.remux": "동영상 {count}개 → MP4로 포장만 변경, 화질 그대로(각 몇 초)",
+  "phonefmt.h264": "동영상 {count}개 → MP4(H.264), 원본에 가까운 화질 — 시간이 걸릴 수 있음",
+  "phonefmt.note": "이 PC의 원본은 그대로이며, 변환본은 보내는 데만 씁니다. 나머지는 그대로 보냅니다.",
+  "phonefmt.as_is": "그대로 보내기",
+  "phonefmt.convert": "변환 후 보내기"
 }

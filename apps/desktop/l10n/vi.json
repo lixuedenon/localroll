@@ -368,5 +368,13 @@
   "send.phones": "Điện thoại",
   "send.phone_ready": "Có thể nhận ngay — họ sẽ được hỏi trước",
   "send.phone_closed_hint": "Mở LocalRoll trên điện thoại để gửi (iPhone chỉ nhận khi đang mở ứng dụng)",
-  "send.err_phone_closed": "Điện thoại hiện không nhận. Mở LocalRoll trên đó rồi gửi lại."
+  "send.err_phone_closed": "Điện thoại hiện không nhận. Mở LocalRoll trên đó rồi gửi lại.",
+  "send.converting": "Đang chuyển đổi cho điện thoại {done}/{total}",
+  "phonefmt.title": "Cần chuyển {count} tệp để “{name}” hiển thị được",
+  "phonefmt.jpeg": "{count} ảnh → JPEG chất lượng cao (giữ ngày, địa điểm, thông tin máy ảnh)",
+  "phonefmt.remux": "{count} video → MP4, hình giữ nguyên (vài giây mỗi video)",
+  "phonefmt.h264": "{count} video → MP4 (H.264), gần như bản gốc — có thể mất thời gian",
+  "phonefmt.note": "Bản gốc trên máy này giữ nguyên; bản chuyển đổi chỉ dùng để gửi. Phần còn lại gửi nguyên trạng.",
+  "phonefmt.as_is": "Gửi nguyên trạng",
+  "phonefmt.convert": "Chuyển đổi rồi gửi"
 }

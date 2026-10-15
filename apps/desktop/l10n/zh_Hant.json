@@ -368,5 +368,13 @@
   "send.phones": "手機",
   "send.phone_ready": "現在可以接收——對方會先確認",
   "send.phone_closed_hint": "在手機上打開 LocalRoll 後才能傳送（iPhone 只有打開 App 時才能接收）",
-  "send.err_phone_closed": "手機現在不能接收。請在手機上打開 LocalRoll，然後重新傳送。"
+  "send.err_phone_closed": "手機現在不能接收。請在手機上打開 LocalRoll，然後重新傳送。",
+  "send.converting": "正在為手機轉換 {done}/{total}",
+  "phonefmt.title": "有 {count} 個檔案需要轉換，「{name}」才能顯示或播放",
+  "phonefmt.jpeg": "{count} 張照片 → 高品質 JPEG（保留拍攝日期、地點和相機資訊）",
+  "phonefmt.remux": "{count} 段影片 → 只換成 MP4 外殼，畫面完全不變（每段幾秒）",
+  "phonefmt.h264": "{count} 段影片 → MP4（H.264），畫質接近原片——可能需要一些時間",
+  "phonefmt.note": "電腦上的原檔案不會改動，轉換的副本只用於傳送。其餘檔案原樣傳送。",
+  "phonefmt.as_is": "全部原樣傳送",
+  "phonefmt.convert": "轉換後傳送"
 }

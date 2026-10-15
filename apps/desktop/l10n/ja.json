@@ -368,5 +368,13 @@
   "send.phones": "スマホ",
   "send.phone_ready": "受信できます（相手に確認が表示されます）",
   "send.phone_closed_hint": "スマホで LocalRoll を開くと送れます（iPhone はアプリを開いている間だけ受信できます）",
-  "send.err_phone_closed": "スマホは今受信できません。LocalRoll を開いてから送り直してください。"
+  "send.err_phone_closed": "スマホは今受信できません。LocalRoll を開いてから送り直してください。",
+  "send.converting": "スマホ向けに変換中 {done}/{total}",
+  "phonefmt.title": "「{name}」で表示・再生するには {count} 件の変換が必要です",
+  "phonefmt.jpeg": "写真 {count} 枚 → 高画質 JPEG（日付・場所・カメラ情報を保持）",
+  "phonefmt.remux": "ビデオ {count} 本 → MP4 に入れ替えるだけ、画質は変わりません（数秒）",
+  "phonefmt.h264": "ビデオ {count} 本 → MP4（H.264）、元に近い画質（時間がかかることがあります）",
+  "phonefmt.note": "このPCの元ファイルはそのまま。変換したコピーは送信にだけ使います。その他はそのまま送ります。",
+  "phonefmt.as_is": "そのまま送る",
+  "phonefmt.convert": "変換して送る"
 }

@@ -1,6 +1,7 @@
 // apps/desktop/lib/ui/send_page.dart
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:localroll_core/localroll_core.dart';
 import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/peers.dart';
+import '../services/phone_formats.dart';
 import '../services/settings.dart';
 import 'app_nav.dart';
 import 'breathing.dart';
@@ -339,8 +341,13 @@ class _SendPageState extends State<SendPage> {
         ?SendFile.plain(File(x.path), x.name, toLibrary: MediaKind.fromName(x.name) != MediaKind.other),
     ];
     if (files.isEmpty) return;
-    widget.services.sender
-        .add(p, files, files.length == 1 ? files.first.name : tr('send.n_files', {'count': files.length}), toPhone: toPhone);
+    final title = files.length == 1 ? files.first.name : tr('send.n_files', {'count': files.length});
+    if (!mounted) return;
+    if (toPhone) {
+      await queueForPhone(context, widget.services, p, files, title);
+    } else {
+      widget.services.sender.add(p, files, title);
+    }
   }
 
   Future<void> _sendFolder(PeerPc p, {bool toPhone = false}) async {
@@ -353,7 +360,11 @@ class _SendPageState extends State<SendPage> {
       return;
     }
     final name = dir.replaceAll(RegExp(r'[\\/]+$'), '').split(RegExp(r'[\\/]')).last;
-    widget.services.sender.add(p, files, name, toPhone: toPhone);
+    if (toPhone) {
+      await queueForPhone(context, widget.services, p, files, name);
+    } else {
+      widget.services.sender.add(p, files, name);
+    }
   }
 
   /// Disconnect: both PCs stop sending to each other; each still sees the
@@ -453,6 +464,10 @@ class _JobTile extends StatelessWidget {
     final j = job;
     final (String status, Color color) = switch (j.state) {
       SendJobState.waiting => (tr('send.waiting'), LrColors.muted),
+      SendJobState.converting => (
+          tr('send.converting', {'done': min(j.convertDone + 1, j.convertTotal), 'total': j.convertTotal}),
+          LrColors.safelight
+        ),
       SendJobState.connecting => (tr('send.connecting'), LrColors.safelight),
       SendJobState.sending => (tr('send.sending'), LrColors.safelight),
       SendJobState.done => (tr('send.done'), LrColors.verified),
@@ -494,7 +509,11 @@ class _JobTile extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
-              value: j.state == SendJobState.connecting ? null : j.fraction,
+              value: j.state == SendJobState.connecting
+                  ? null
+                  : j.state == SendJobState.converting
+                      ? (j.convertTotal == 0 ? null : ((j.convertDone + j.convertProgress) / j.convertTotal).clamp(0.0, 1.0))
+                      : j.fraction,
               minHeight: 6,
               color: j.state == SendJobState.failed ? LrColors.danger : LrColors.verified,
               backgroundColor: LrColors.raised,
@@ -551,9 +570,60 @@ Future<void> sendToPc(BuildContext context, AppServices s, List<SendFile> files,
     ),
   );
   if (p == null || !context.mounted) return;
-  s.sender.add(p, files, title, toPhone: phones.contains(p));
+  if (phones.contains(p)) {
+    await queueForPhone(context, s, p, files, title);
+    return;
+  }
+  s.sender.add(p, files, title);
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
     content: Text(tr('send.queued', {'name': p.name})),
     action: SnackBarAction(label: tr('send.title'), onPressed: () => AppNav.instance.selectTab(AppNav.send)),
   ));
+}
+
+/// To a phone: say what will be converted so its photo app can show it, and
+/// let the user choose (convert — recommended — or send everything as it is).
+Future<void> queueForPhone(BuildContext context, AppServices s, PeerPc phone, List<SendFile> files, String title) async {
+  final platform = s.settings.trusted[phone.id]?.platform ?? '';
+  final fmt = s.sender.formatter;
+  if (fmt == null) {
+    s.sender.add(phone, files, title, toPhone: true, platform: platform);
+    return;
+  }
+  final plan = PhonePlan([for (final f in files) await fmt.decide(f, platform)]);
+  if (!context.mounted) return;
+  var convert = false;
+  if (plan.anyConversion) {
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (c) => AlertDialog(
+        icon: const Icon(Icons.auto_fix_high_rounded, size: 32),
+        title: Text(tr('phonefmt.title', {'count': plan.actions.where((a) => a != PhoneAction.asIs).length, 'name': phone.name})),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 460),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            if (plan.count(PhoneAction.toJpeg) > 0) Text('• ${tr('phonefmt.jpeg', {'count': plan.count(PhoneAction.toJpeg)})}'),
+            if (plan.count(PhoneAction.remux) > 0) Text('• ${tr('phonefmt.remux', {'count': plan.count(PhoneAction.remux)})}'),
+            if (plan.count(PhoneAction.toH264) > 0) Text('• ${tr('phonefmt.h264', {'count': plan.count(PhoneAction.toH264)})}'),
+            const SizedBox(height: 10),
+            Text(tr('phonefmt.note'), style: const TextStyle(color: LrColors.muted, fontSize: 13)),
+          ]),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c), child: Text(tr('common.cancel'))),
+          OutlinedButton(onPressed: () => Navigator.pop(c, 'asis'), child: Text(tr('phonefmt.as_is'))),
+          FilledButton(onPressed: () => Navigator.pop(c, 'convert'), child: Text(tr('phonefmt.convert'))),
+        ],
+      ),
+    );
+    if (choice == null) return;
+    convert = choice == 'convert';
+  }
+  s.sender.add(phone, files, title, toPhone: true, convert: convert, platform: platform);
+  if (context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(tr('send.queued', {'name': phone.name})),
+      action: SnackBarAction(label: tr('send.title'), onPressed: () => AppNav.instance.selectTab(AppNav.send)),
+    ));
+  }
 }

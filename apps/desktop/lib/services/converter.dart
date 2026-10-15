@@ -94,7 +94,7 @@ class ConverterService extends ChangeNotifier {
       job.outputPath = out;
       // Photos: ffmpeg drops EXIF, so lift it from the original now and put
       // it back into the JPEG afterwards (capture time, GPS, camera, lens).
-      final exif = job.item.kind == MediaKind.image ? await _readExif(src) : null;
+      final exif = job.item.kind == MediaKind.image ? await readExif(src) : null;
       final args = job.item.kind == MediaKind.video
           ? await _videoArgs(job, src, out)
           : _imageArgs(job, src, out, exif);
@@ -128,7 +128,7 @@ class ConverterService extends ChangeNotifier {
         } catch (_) {}
         throw Exception(errTail.isEmpty ? 'ffmpeg exit $code' : errTail.join('\n'));
       }
-      if (exif != null) await _writeExif(out, exif);
+      if (exif != null) await writeExif(out, exif);
       try {
         // Explorer / Photos sort by this: the capture time, like the original.
         await File(out).setLastModified(job.item.captureTime);
@@ -208,7 +208,7 @@ class ConverterService extends ChangeNotifier {
     ];
   }
 
-  static Future<Uint8List?> _readExif(String path) async {
+  static Future<Uint8List?> readExif(String path) async {
     try {
       final f = File(path);
       // EXIF sits near the start; HEIC metadata can point anywhere, so read
@@ -219,7 +219,7 @@ class ConverterService extends ChangeNotifier {
     }
   }
 
-  static Future<void> _writeExif(String jpegPath, Uint8List tiff) async {
+  static Future<void> writeExif(String jpegPath, Uint8List tiff) async {
     try {
       final f = File(jpegPath);
       final fixed = Exif.orientation(tiff) == null ? tiff : Exif.withOrientation(tiff, 1);

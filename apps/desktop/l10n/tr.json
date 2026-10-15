@@ -368,5 +368,13 @@
   "send.phones": "Telefonlar",
   "send.phone_ready": "Şimdi alabilir — kabul etmesi istenecek",
   "send.phone_closed_hint": "Göndermek için telefonda LocalRoll'u aç (iPhone yalnızca uygulama açıkken alır)",
-  "send.err_phone_closed": "Telefon şu an almıyor. Üzerinde LocalRoll'u aç ve tekrar gönder."
+  "send.err_phone_closed": "Telefon şu an almıyor. Üzerinde LocalRoll'u aç ve tekrar gönder.",
+  "send.converting": "Telefon için dönüştürülüyor {done}/{total}",
+  "phonefmt.title": "“{name}” gösterebilsin diye {count} dosya dönüştürülmeli",
+  "phonefmt.jpeg": "{count} fotoğraf → yüksek kaliteli JPEG (tarih, yer ve kamera bilgisi korunur)",
+  "phonefmt.remux": "{count} video → MP4, görüntü değişmez (her biri saniyeler)",
+  "phonefmt.h264": "{count} video → MP4 (H.264), aslına yakın kalite — biraz sürebilir",
+  "phonefmt.note": "Bu PC'deki orijinaller aynı kalır; dönüştürülen kopyalar yalnızca gönderim için. Gerisi olduğu gibi gider.",
+  "phonefmt.as_is": "Olduğu gibi gönder",
+  "phonefmt.convert": "Dönüştür ve gönder"
 }

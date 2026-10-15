@@ -368,5 +368,13 @@
   "send.phones": "الهواتف",
   "send.phone_ready": "يمكنه الاستلام الآن — سيُطلب منه القبول",
   "send.phone_closed_hint": "افتح LocalRoll على الهاتف للإرسال إليه (يستلم iPhone فقط والتطبيق مفتوح)",
-  "send.err_phone_closed": "الهاتف لا يستلم الآن. افتح LocalRoll عليه وأعد الإرسال."
+  "send.err_phone_closed": "الهاتف لا يستلم الآن. افتح LocalRoll عليه وأعد الإرسال.",
+  "send.converting": "جارٍ التحويل للهاتف {done}/{total}",
+  "phonefmt.title": "يجب تحويل {count} ملفات ليعرضها \"{name}\"",
+  "phonefmt.jpeg": "{count} صور ← JPEG عالي الجودة (مع التاريخ والمكان والكاميرا)",
+  "phonefmt.remux": "{count} فيديو ← MP4 بدون تغيير الصورة (ثوانٍ لكل منها)",
+  "phonefmt.h264": "{count} فيديو ← MP4 ‏(H.264) بجودة قريبة من الأصل — قد يستغرق وقتًا",
+  "phonefmt.note": "تبقى الأصول على هذا الكمبيوتر كما هي؛ النسخ المحوّلة للإرسال فقط. والباقي يُرسل كما هو.",
+  "phonefmt.as_is": "أرسل كما هي",
+  "phonefmt.convert": "حوّل وأرسل"
 }
