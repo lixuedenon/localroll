@@ -82,6 +82,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     _liveEvents = _live.events.listen((e) {
       if (mounted) _note(e.id, e.name, pc: e.pc, online: e.online);
     });
+    // The PC says photos were deleted there: ask it now ("not backed up any
+    // more" shows without a pull-down).
+    _live.onChanged = (pcId) {
+      if (mounted) unawaited(refreshPairedLooks(widget.settings, widget.discovery, now: true, only: pcId));
+    };
     // Every device is equal: this phone can receive while LocalRoll is open.
     // The receiver starts first, so the PCs learn where to send right away.
     widget.discovery.selfId = widget.settings.deviceId;
@@ -180,7 +185,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     };
     final before = _onlineNow;
     _onlineNow = now;
-    if (before == null) return;
+    // Just came on: what we find now was already there.
+    if (before == null || _live.quiet) return;
     for (final id in now.keys) {
       if (!before.containsKey(id) && !widget.discovery.linked(id)) _note(id, now[id]!.$1, pc: true, online: true);
     }
@@ -290,6 +296,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (_auto.state == AutoState.waiting && d != null && widget.discovery.found.any((f) => f.id == d.id)) {
       _auto.check();
     }
+  }
+
+  /// Pull-down on Home: ask the PCs what changed there now (not only once a
+  /// minute), then count again.
+  Future<void> _pullDown() async {
+    await refreshPairedLooks(widget.settings, widget.discovery, now: true);
+    await _refreshHome();
   }
 
   /// Back in the app: re-check photo access, and look for new photos to send.
@@ -596,9 +609,18 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   /// Counts for the Home tab (whole library, in the background).
+  /// Asked again while counting (e.g. the PC reported deletions): count
+  /// once more when done, so nothing is missed.
+  bool _countAgain = false;
+
   Future<void> _refreshHome() async {
+    if (!(_permission?.hasAccess ?? false)) return;
+    if (_counting) {
+      _countAgain = true;
+      if (mounted) setState(() {}); // the "not backed up any more" banner
+      return;
+    }
     final d = widget.settings.current;
-    if (_counting || !(_permission?.hasAccess ?? false)) return;
     setState(() => _counting = true);
     try {
       // No PC yet: everything is "not backed up".
@@ -613,6 +635,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     } catch (_) {
     } finally {
       if (mounted) setState(() => _counting = false);
+    }
+    if (_countAgain && mounted) {
+      _countAgain = false;
+      await _refreshHome();
     }
   }
 
@@ -932,7 +958,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: _refreshHome,
+        onRefresh: _pullDown,
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
           children: [

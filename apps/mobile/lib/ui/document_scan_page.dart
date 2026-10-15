@@ -4,7 +4,9 @@ import 'dart:io';
 
 import 'package:cunning_document_scanner/cunning_document_scanner.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:localroll_core/localroll_core.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -59,13 +61,28 @@ class _DocumentScanPageState extends State<DocumentScanPage> {
       ..showSnackBar(SnackBar(content: Text(t)));
   }
 
+  /// The system scanner is missing (Android without Google Play services):
+  /// pages are taken as photos instead.
+  bool _photoMode = false;
+
   Future<void> _scan({bool first = false}) async {
     List<String>? got;
-    try {
-      got = await CunningDocumentScanner.getPictures();
-    } catch (e) {
-      DiagLog.error('scan', e);
-      _toast(tr('scan.failed'));
+    if (_photoMode) {
+      got = await _photo();
+    } else {
+      try {
+        got = await CunningDocumentScanner.getPictures();
+      } catch (e) {
+        DiagLog.error('scan', e);
+        if (Platform.isAndroid) {
+          // No scanner on this phone: take a photo instead (now and later).
+          _photoMode = true;
+          _toast(tr('scan.photo_mode'));
+          got = await _photo();
+        } else {
+          _toast(tr('scan.failed'));
+        }
+      }
     }
     if (!mounted) return;
     final list = got ?? const <String>[];
@@ -74,6 +91,18 @@ class _DocumentScanPageState extends State<DocumentScanPage> {
       return;
     }
     setState(() => _pages.addAll(list));
+  }
+
+  /// One page as a camera photo (no edge finding).
+  Future<List<String>?> _photo() async {
+    try {
+      final x = await ImagePicker().pickImage(source: ImageSource.camera, imageQuality: 90, maxWidth: 3000, maxHeight: 3000);
+      return x == null ? null : [x.path];
+    } catch (e) {
+      DiagLog.error('scan', e);
+      _toast(tr('scan.failed'));
+      return null;
+    }
   }
 
   /// The PDF for what is on screen now (made again only when pages or the
@@ -122,14 +151,26 @@ class _DocumentScanPageState extends State<DocumentScanPage> {
       });
 
   Future<void> _keep() => _run((pdf) async {
+        final name = FileSender.nameOfPath(pdf.path);
+        if (Platform.isIOS) {
+          // iPhone: the system "Save to Files" sheet — the person picks the
+          // folder (On My iPhone, iCloud Drive…) and sees where it went.
+          final saved = await FilePicker.platform.saveFile(
+            dialogTitle: tr('scan.keep'),
+            fileName: name,
+            bytes: await pdf.readAsBytes(),
+          );
+          if (saved != null) _toast(tr('scan.kept', {'name': name}));
+          return;
+        }
         final dir = await MediaSaver.filesFolder();
-        var target = File('${dir.path}/${FileSender.nameOfPath(pdf.path)}');
+        var target = File('${dir.path}/$name');
         final base = target.path.substring(0, target.path.length - 4);
         for (var n = 1; await target.exists(); n++) {
           target = File('$base ($n).pdf');
         }
         await pdf.copy(target.path);
-        _toast(tr(Platform.isIOS ? 'scan.kept_ios' : 'scan.kept_android'));
+        _toast(tr('scan.kept_android'));
       });
 
   @override

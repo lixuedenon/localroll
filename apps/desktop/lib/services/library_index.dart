@@ -400,6 +400,7 @@ class LibraryIndex extends ChangeNotifier {
       _deleted.add(_Tombstone(i.deviceId!, i.assetId!, now, i));
       n++;
     }
+    if (n > 0) deletions.value++;
     await flush();
     await _writeBackup(force: true);
     notifyListeners();
@@ -707,7 +708,12 @@ class LibraryIndex extends ChangeNotifier {
     _byAssetCache = null;
   }
 
+  /// Goes up each time items are recorded as deleted (the server tells the
+  /// linked phones at once).
+  final ValueNotifier<int> deletions = ValueNotifier(0);
+
   void _remember(Iterable<MediaItem> items) {
+    if (items.isNotEmpty) deletions.value++;
     final now = DateTime.now().millisecondsSinceEpoch;
     for (final i in items) {
       _deleted.add(_Tombstone(i.deviceId ?? '', i.assetId ?? '', now, i));

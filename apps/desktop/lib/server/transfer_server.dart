@@ -318,6 +318,7 @@ class TransferServer extends ChangeNotifier {
     final others = onlineNow?.call() ?? {for (final id in lastSeen.keys) if (isOnline(id)) id};
     ws.add(LiveMessage.hello(
       family: device.familyMember,
+      access: device.libraryAccess,
       online: [
         for (final id in others)
           if (id != device.id) ?_describe(id),
@@ -351,7 +352,7 @@ class TransferServer extends ChangeNotifier {
   void _tellMembership(TrustedDevice d) {
     for (final c in _live[d.id] ?? const <_LiveConn>[]) {
       try {
-        c.ws.add(LiveMessage.you(family: d.familyMember));
+        c.ws.add(LiveMessage.you(family: d.familyMember, access: d.libraryAccess));
       } catch (_) {}
     }
   }
@@ -364,6 +365,39 @@ class TransferServer extends ChangeNotifier {
     if (family) {
       _acceptedUntil.remove(id);
     }
+  }
+
+  /// What a paired device may do with the library (from the UI): saved,
+  /// and the device is told at once (its delete button appears / goes).
+  Future<void> setAccess(String id, LibraryAccess? access) async {
+    await settings.update((s) => s.trusted[id]?.access = access);
+    final d = settings.trusted[id];
+    if (d != null) _tellMembership(d);
+  }
+
+  /// Photos were deleted from the library: every linked device asks for
+  /// /changes now (a phone shows "not backed up any more" without waiting).
+  /// Many deletions in a row are told once.
+  Timer? _changedSoon;
+  int _deletionsSeen = 0;
+
+  void _onLibraryDeletions() {
+    if (library.deletions.value == _deletionsSeen) return;
+    _deletionsSeen = library.deletions.value;
+    _changedSoon?.cancel();
+    _changedSoon = Timer(const Duration(milliseconds: 800), () {
+      final msg = LiveMessage.changed();
+      var n = 0;
+      for (final list in _live.values) {
+        for (final c in list) {
+          try {
+            c.ws.add(msg);
+            n++;
+          } catch (_) {}
+        }
+      }
+      if (n > 0) DiagLog.log('live', 'told $n linked device(s): library changed');
+    });
   }
 
   /// "Make me a family member" requests waiting for the user here.
@@ -477,6 +511,11 @@ class TransferServer extends ChangeNotifier {
   Future<void> start() async {
     await stop();
     _presenceTick ??= Timer.periodic(const Duration(seconds: 3), (_) => _tickPresence());
+    if (!_watchingDeletions) {
+      _watchingDeletions = true;
+      _deletionsSeen = library.deletions.value;
+      library.deletions.addListener(_onLibraryDeletions);
+    }
     final failures = <String>[];
     for (final p in _candidatePorts) {
       try {
@@ -533,9 +572,13 @@ class TransferServer extends ChangeNotifier {
     _failedPinAttempts = 0;
   }
 
+  bool _watchingDeletions = false;
+
   @override
   void dispose() {
     _presenceTick?.cancel();
+    _changedSoon?.cancel();
+    if (_watchingDeletions) library.deletions.removeListener(_onLibraryDeletions);
     stop();
     pin.dispose();
     super.dispose();
@@ -1212,8 +1255,30 @@ class TransferServer extends ChangeNotifier {
     return _json(req.response, 200, {'offset': offset});
   }
 
+  /// One writer per half-received file: a chunk is appended, or the file
+  /// checked and saved, only while no other request touches it.
+  final Map<String, Future<void>> _partLocks = {};
+
+  Future<T> _withPart<T>(String path, Future<T> Function() fn) async {
+    final prev = _partLocks[path];
+    final done = Completer<void>();
+    final mine = done.future;
+    _partLocks[path] = mine;
+    try {
+      if (prev != null) await prev;
+      return await fn();
+    } finally {
+      done.complete();
+      if (identical(_partLocks[path], mine)) _partLocks.remove(path);
+    }
+  }
+
+  /// One chunk. It is received in full first and only then appended: a
+  /// chunk cut off by a lost Wi-Fi leaves nothing behind, so a resumed send
+  /// (on a new connection) can never be mixed with the remains of the old.
   Future<void> _chunk(HttpRequest req, TrustedDevice device, FileOffer offer) async {
-    final part = File(_partPath(device, offer));
+    final path = _partPath(device, offer);
+    final part = File(path);
     final current = await part.exists() ? await part.length() : 0;
     final offset = int.tryParse(req.uri.queryParameters['offset'] ?? '') ?? -1;
     if (offset != current) {
@@ -1223,37 +1288,59 @@ class TransferServer extends ChangeNotifier {
     final total = int.tryParse(req.uri.queryParameters['total'] ?? '') ?? (offer.size ?? 0);
     final t = hub.track(_hubKey(device, offer), device.name, offer.name, total);
     // Never more than the file said it is (a broken or hostile sender
-    // can't fill the disk).
+    // can't fill the disk), and never more than two chunks in one request.
     final cap = offer.size ?? (total > 0 ? total : null);
+    final room = min(cap == null ? LrProtocol.chunkSize * 2 : cap - offset, LrProtocol.chunkSize * 2);
 
-    var received = current;
+    final buf = BytesBuilder(copy: false);
     var over = false;
-    final sink = part.openWrite(mode: FileMode.append);
     try {
       await for (final data in req) {
         if (over) continue; // drain the rest
-        if (cap != null && received + data.length > cap) {
-          final fits = cap - received;
-          if (fits > 0) sink.add(data.sublist(0, fits));
-          received += max(0, fits);
+        if (buf.length + data.length > room) {
           over = true;
           continue;
         }
-        sink.add(data);
-        received += data.length;
-        hub.progress(t, received);
+        buf.add(data);
+        hub.progress(t, offset + buf.length);
       }
-      await sink.flush();
-    } finally {
-      await sink.close();
+    } catch (e) {
+      // Connection lost in the middle: keep nothing of this chunk.
+      DiagLog.log('receive', '${device.name}: chunk at $offset cut off (${buf.length} bytes dropped)');
+      return;
     }
-    if (over) return _json(req.response, 413, {'error': 'too_large', 'offset': received});
-    return _json(req.response, 200, {'offset': received});
+    if (over) return _json(req.response, 413, {'error': 'too_large', 'offset': current});
+    final declared = req.contentLength;
+    if (declared >= 0 && buf.length != declared) {
+      return _json(req.response, 400, {'error': 'bad_request', 'offset': current});
+    }
+    final bytes = buf.takeBytes();
+    final at = await _withPart(path, () async {
+      // Another request may have written meanwhile: append only where we
+      // were told to.
+      final now = await part.exists() ? await part.length() : 0;
+      if (now != offset) return -now - 1;
+      final raf = await part.open(mode: FileMode.append);
+      try {
+        await raf.writeFrom(bytes);
+        await raf.flush();
+      } finally {
+        await raf.close();
+      }
+      return offset + bytes.length;
+    });
+    if (at < 0) return _json(req.response, 409, {'offset': -at - 1});
+    return _json(req.response, 200, {'offset': at});
   }
 
   Future<void> _complete(HttpRequest req, TrustedDevice device, FileOffer offer) async {
     final body = CompleteRequest.fromJson(await _readJson(req));
     if (library.offline) return _json(req.response, 503, {'error': 'library_offline'});
+    // Not while a chunk of the same file is being written.
+    return _withPart(_partPath(device, offer), () => _completeNow(req, device, offer, body));
+  }
+
+  Future<void> _completeNow(HttpRequest req, TrustedDevice device, FileOffer offer, CompleteRequest body) async {
     final part = File(_partPath(device, offer));
 
     if (!await part.exists()) {

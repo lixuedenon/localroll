@@ -1,7 +1,7 @@
 // apps/desktop/lib/ui/settings_page.dart
+import 'dart:async';
 import 'dart:io';
 
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:localroll_core/localroll_core.dart';
 
@@ -180,20 +180,22 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  /// Diagnostics log → a text file the user picks (to send to whoever helps).
+  /// Diagnostics log → a text file in Downloads, shown in Explorer (no
+  /// file dialog: on some PCs it hangs).
   Future<void> _exportLog() async {
     final d = DateTime.now();
     final stamp = '${d.year}${d.month.toString().padLeft(2, '0')}${d.day.toString().padLeft(2, '0')}-'
         '${d.hour.toString().padLeft(2, '0')}${d.minute.toString().padLeft(2, '0')}';
-    final where = await getSaveLocation(
-      suggestedName: 'LocalRoll-log-$stamp.txt',
-      acceptedTypeGroups: const [XTypeGroup(label: 'Text', extensions: ['txt'])],
-    );
-    if (where == null) return;
     try {
-      await File(where.path).writeAsString(await DiagLog.read());
-      _toast(tr('settings.log_saved', {'path': where.path}));
+      final home = Platform.environment['USERPROFILE'] ?? Directory.systemTemp.path;
+      final dir = Directory('$home${Platform.pathSeparator}Downloads');
+      await dir.create(recursive: true);
+      final path = '${dir.path}${Platform.pathSeparator}LocalRoll-log-$stamp.txt';
+      await File(path).writeAsString(await DiagLog.read());
+      _toast(tr('settings.log_saved', {'path': path}));
+      unawaited(revealInExplorer(path));
     } catch (e) {
+      DiagLog.error('settings', e);
       _toast(tr('settings.log_failed'));
     }
   }

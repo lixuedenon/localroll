@@ -141,6 +141,27 @@ class TestPhone {
   Future<(int, Map<String, dynamic>)> call(String method, String path, {Object? json, List<int>? bytes, Map<String, String>? query}) =>
       pc.call(method, path, json: json, bytes: bytes, query: query, id: id, token: token);
 
+  /// Opens a live link (as the phone does) and collects what the PC says.
+  Future<TestLive> live({String session = 's1'}) async {
+    final ws = await WebSocket.connect(
+      Uri(
+        scheme: 'wss',
+        host: '127.0.0.1',
+        port: pc.port,
+        path: LrProtocol.pathLive,
+        queryParameters: {'session': session},
+      ).toString(),
+      headers: {LrProtocol.headerDeviceId: id, LrProtocol.headerToken: token},
+      customClient: lrHttpClient(pin: pc.tls.fingerprint),
+    );
+    final t = TestLive(ws);
+    ws.listen((d) {
+      final m = LiveMessage.parse(d);
+      if (m != null) t.messages.add(m);
+    });
+    return t;
+  }
+
   /// Offers one file and sends it completely (as the phone does).
   Future<CompleteResponse> upload(
     String asset,
@@ -169,6 +190,15 @@ class TestPhone {
     expect(off, data.length);
     return client.complete(s.sessionId, 'f1', CompleteRequest(size: data.length, sha256: await sha(data)));
   }
+}
+
+class TestLive {
+  TestLive(this.ws);
+
+  final WebSocket ws;
+  final List<LiveMessage> messages = [];
+
+  Future<void> close() => ws.close();
 }
 
 Future<String> sha(List<int> data) async {

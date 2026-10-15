@@ -203,6 +203,58 @@ void main() {
       expect(await phone.client.status(s.sessionId, 'f1'), lessThanOrEqualTo(1000));
     });
 
+    test('a chunk cut off by a lost Wi-Fi leaves nothing; the resumed send arrives intact', () async {
+      final phone = await pc.pairPhone();
+      final data = bytesOf(300000, 9);
+      final offer = FileOffer(
+          id: 'f1', assetId: 'W1', name: 'w.jpg', kind: MediaKind.image, createdMs: 5, modifiedMs: 5, size: data.length);
+      final s = await phone.client.createSession(SessionRequest(files: [offer]));
+      // Half a chunk, then the connection is gone.
+      final http = lrHttpClient(pin: pc.tls.fingerprint);
+      final uri = Uri(
+        scheme: 'https',
+        host: '127.0.0.1',
+        port: pc.port,
+        path: LrProtocol.filePath(s.sessionId, 'f1'),
+        queryParameters: {'offset': '0', 'total': '${data.length}'},
+      );
+      final req = await http.openUrl('PUT', uri);
+      req.headers.set(LrProtocol.headerDeviceId, phone.id);
+      req.headers.set(LrProtocol.headerToken, phone.token);
+      req.contentLength = data.length;
+      req.add(data.sublist(0, 120000));
+      await req.flush();
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      req.abort();
+      http.close(force: true);
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      expect(await phone.client.status(s.sessionId, 'f1'), 0);
+      // Resumed on a new connection: the whole file, nothing mixed in.
+      expect(await phone.client.putChunk(s.sessionId, 'f1', 0, data.length, data), data.length);
+      final r = await phone.client.complete(s.sessionId, 'f1', CompleteRequest(size: data.length, sha256: await sha(data)));
+      expect(r.saved, isTrue);
+      expect(await File(pc.library.absPath(pc.library.items.single)).readAsBytes(), data);
+    });
+
+    test('photos deleted on the PC: linked phones are told at once', () async {
+      final phone = await pc.pairPhone();
+      expect((await phone.upload('D1', bytesOf(100))).saved, isTrue);
+      final link = await phone.live();
+      await eventually(() => link.messages.any((m) => m.type == 'hello'));
+      pc.library.removeItems(pc.library.items.toList());
+      await eventually(() => link.messages.any((m) => m.type == 'changed'));
+      await link.close();
+    });
+
+    test('library access changed on the PC: the phone is told at once', () async {
+      final phone = await pc.pairPhone();
+      final link = await phone.live();
+      await eventually(() => link.messages.any((m) => m.type == 'hello'));
+      await pc.server.setAccess(phone.id, LibraryAccess.manage);
+      await eventually(() => link.messages.any((m) => m.type == 'you' && m.access == LibraryAccess.manage));
+      await link.close();
+    });
+
     test('another device\'s session can\'t be used', () async {
       final a = await pc.pairPhone(id: 'phoneA');
       final b = await pc.pairPhone(id: 'phoneB');

@@ -358,53 +358,93 @@ class Uploader extends ChangeNotifier {
       notifyListeners();
 
       var retries = 0;
-      while (offset < total) {
-        if (_cancelled) throw Exception(tr(_expired ? 'err.background_expired' : 'err.cancelled'));
-        await raf.setPosition(offset);
-        final chunk = await raf.read(min(LrProtocol.chunkSize, total - offset));
-        try {
-          final newOffset = await client.putChunk(sessionId, offer.id, offset, total, chunk);
-          if (newOffset == offset + chunk.length) {
-            hasher.add(chunk);
-            offset = newOffset;
-            _bytesSent += chunk.length;
-          } else {
-            offset = newOffset;
+      var restarted = false;
+      while (true) {
+        while (offset < total) {
+          if (_cancelled) throw Exception(tr(_expired ? 'err.background_expired' : 'err.cancelled'));
+          await raf.setPosition(offset);
+          final chunk = await raf.read(min(LrProtocol.chunkSize, total - offset));
+          try {
+            final newOffset = await client.putChunk(sessionId, offer.id, offset, total, chunk);
+            if (newOffset == offset + chunk.length) {
+              hasher.add(chunk);
+              offset = newOffset;
+              _bytesSent += chunk.length;
+            } else {
+              offset = newOffset;
+              hasher = await _hashPrefix(raf, offset);
+            }
+            retries = 0;
+          } on LrHttpException catch (e) {
+            if (e.status != 409) rethrow;
+            // Out of sync (e.g. previous response lost): continue from the PC's offset.
+            offset = (e.body['offset'] as num).toInt();
+            hasher = await _hashPrefix(raf, offset);
+          } catch (e) {
+            // Network hiccup (Wi-Fi off and on again): back off, ask the PC
+            // where we are, continue. About two minutes before giving up.
+            if (++retries > _netRetries) rethrow;
+            await _backOff(retries);
+            try {
+              offset = await client.status(sessionId, offer.id);
+            } catch (_) {}
             hasher = await _hashPrefix(raf, offset);
           }
-          retries = 0;
-        } on LrHttpException catch (e) {
-          if (e.status != 409) rethrow;
-          // Out of sync (e.g. previous response lost): continue from the PC's offset.
-          offset = (e.body['offset'] as num).toInt();
-          hasher = await _hashPrefix(raf, offset);
-        } catch (e) {
-          // Network hiccup: back off, ask the PC where we are, continue.
-          if (++retries > 6) rethrow;
-          await Future<void>.delayed(Duration(seconds: 2 * retries));
-          try {
-            offset = await client.status(sessionId, offer.id);
-          } catch (_) {}
-          hasher = await _hashPrefix(raf, offset);
+          it.sent = offset;
+          notifyListeners();
+          _reportBackground(it);
         }
-        it.sent = offset;
-        notifyListeners();
-        _reportBackground(it);
-      }
 
-      it.state = UploadState.verifying;
-      notifyListeners();
-      final res = await client.complete(
-        sessionId,
-        offer.id,
-        CompleteRequest(size: total, sha256: hasher.finish()),
-      );
-      if (!res.saved) throw Exception(res.error != null ? serverErrorText(res.error!) : tr('err.save_failed'));
+        it.state = UploadState.verifying;
+        notifyListeners();
+        final CompleteResponse res;
+        try {
+          res = await client.complete(
+            sessionId,
+            offer.id,
+            CompleteRequest(size: total, sha256: hasher.finish()),
+          );
+        } on LrHttpException catch (e) {
+          final code = e.body['error'];
+          final at = (e.body['offset'] as num?)?.toInt();
+          if (e.status == 409 && at != null && at <= total && ++retries <= _netRetries) {
+            // The PC has a different amount than we sent: continue from there.
+            offset = at;
+          } else if (e.status == 422 && code == 'sha256_mismatch' && !restarted) {
+            // The PC dropped a damaged copy: send it once more from the start.
+            restarted = true;
+            offset = 0;
+          } else {
+            rethrow;
+          }
+          hasher = await _hashPrefix(raf, offset);
+          it
+            ..state = UploadState.uploading
+            ..sent = offset;
+          notifyListeners();
+          continue;
+        } catch (e) {
+          // The answer was lost (Wi-Fi): asking again is safe — the PC
+          // answers "saved" for a file it already kept.
+          // (A short copy there is answered with 409 and resumed above.)
+          if (_cancelled || ++retries > _netRetries) rethrow;
+          await _backOff(retries);
+          continue;
+        }
+        if (!res.saved) throw Exception(res.error != null ? serverErrorText(res.error!) : tr('err.save_failed'));
+        break;
+      }
       it.state = UploadState.done;
     } finally {
       await raf.close();
     }
   }
+
+  /// Network retries per file: 2, 4, … up to 15 s apart — about two minutes.
+  static const int _netRetries = 12;
+
+  static Future<void> _backOff(int attempt) =>
+      Future<void>.delayed(Duration(seconds: min(15, 2 * attempt)));
 
   void _reportBackground(UploadItem it) {
     final n = items.length;

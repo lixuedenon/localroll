@@ -216,7 +216,7 @@ class _FamilyPageState extends State<FamilyPage> {
   /// click (it was easy to miss inside the ⋮ menu).
   Widget _accessChip(TrustedDevice t) => PopupMenuButton<LibraryAccess>(
         tooltip: tr('family.access_title'),
-        onSelected: (a) => widget.services.settings.update((x) => x.trusted[t.id]?.access = a),
+        onSelected: (a) => widget.services.server.setAccess(t.id, a),
         itemBuilder: (_) => [
           for (final a in LibraryAccess.values)
             CheckedPopupMenuItem(value: a, checked: t.libraryAccess == a, child: Text(tr('family.access_${a.name}'))),
@@ -252,7 +252,7 @@ class _FamilyPageState extends State<FamilyPage> {
       ];
 
   Future<void> _setAccess(String id, String value) =>
-      widget.services.settings.update((x) => x.trusted[id]?.access = LibraryAccess.parse(value.substring('access_'.length)));
+      widget.services.server.setAccess(id, LibraryAccess.parse(value.substring('access_'.length)));
 
   /// Asks for a member name; existing members are one tap away.
   Future<String?> _askMember(String current, List<String> members) async {

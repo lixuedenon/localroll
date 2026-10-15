@@ -354,7 +354,9 @@ class _SendPageState extends State<SendPage> {
   }
 
   Future<void> _sendFiles(PeerPc p, {bool toPhone = false}) async {
+    DiagLog.log('ui', 'file dialog opened');
     final picked = await openFiles(confirmButtonText: tr('send.files'));
+    DiagLog.log('ui', 'file dialog closed (${picked.length} chosen)');
     if (picked.isEmpty) return;
     final files = [
       // Photos and videos go into the other PC's library; other files into
@@ -373,7 +375,9 @@ class _SendPageState extends State<SendPage> {
   }
 
   Future<void> _sendFolder(PeerPc p, {bool toPhone = false}) async {
+    DiagLog.log('ui', 'folder dialog opened');
     final dir = await getDirectoryPath(confirmButtonText: tr('send.folder'));
+    DiagLog.log('ui', 'folder dialog closed');
     if (dir == null) return;
     final files = await filesInFolder(dir);
     if (!mounted) return;

@@ -24,6 +24,8 @@ class MediaSaver {
   final Map<String, _Held> _held = {};
 
   AssetPathEntity? _album;
+  bool _albumOk = false;
+  PermissionState? _access;
 
   /// Saves [file] (a finished download named like the original) for [offer].
   /// [file] is moved or deleted afterwards.
@@ -127,10 +129,14 @@ class MediaSaver {
         _album ??= await _findAlbum() ?? await PhotoManager.editor.darwin.createAlbum(albumName);
         final album = _album;
         if (album == null) {
-          DiagLog.log('album', 'no "$albumName" album (could not create it)');
+          DiagLog.log('album', 'no "$albumName" album (could not create it; photo access: ${_access?.name})');
           return;
         }
         await PhotoManager.editor.copyAssetToPath(asset: asset, pathEntity: album);
+        if (!_albumOk) {
+          _albumOk = true;
+          DiagLog.log('album', 'added to "$albumName" (photo access: ${_access?.name})');
+        }
         return;
       } catch (e) {
         // In the library anyway; the album is a nicety. A stale album
@@ -142,7 +148,12 @@ class MediaSaver {
   }
 
   Future<AssetPathEntity?> _findAlbum() async {
-    final paths = await PhotoManager.getAssetPathList(hasAll: false, type: RequestType.common);
+    // Empty albums too (one made earlier that nothing was added to yet).
+    final paths = await PhotoManager.getAssetPathList(
+      hasAll: false,
+      type: RequestType.common,
+      filterOption: FilterOptionGroup(containsEmptyAlbum: true),
+    );
     for (final p in paths) {
       if (p.name == albumName) return p;
     }
@@ -152,6 +163,8 @@ class MediaSaver {
   Future<bool> _mayWriteLibrary() async {
     try {
       final p = await PhotoManager.requestPermissionExtend();
+      if (_access != p) DiagLog.log('album', 'photo access: ${p.name}');
+      _access = p;
       return p.hasAccess;
     } catch (_) {
       return false;

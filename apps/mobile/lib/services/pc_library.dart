@@ -19,7 +19,23 @@ import 'phone_server.dart';
 /// played through a small relay on this phone (127.0.0.1 only) that signs
 /// in and checks the PC's certificate — the system player can't do either.
 class PcLibrary extends ChangeNotifier {
-  PcLibrary({required this.settings, required this.discovery, required this.desktop, required this.server});
+  PcLibrary({required this.settings, required this.discovery, required this.desktop, required this.server}) {
+    discovery.addListener(_onDiscovery);
+  }
+
+  /// The PC changed what this phone may do (told over the live link): the
+  /// delete button appears / goes without a pull-down.
+  void _onDiscovery() {
+    final a = discovery.accessAt[desktop.id];
+    if (a == null || a == access) return;
+    final wasNone = access == LibraryAccess.none;
+    access = a;
+    if (a == LibraryAccess.none || wasNone) {
+      unawaited(refresh());
+    } else {
+      notifyListeners();
+    }
+  }
 
   final MobileSettings settings;
   final DesktopDiscovery discovery;
@@ -87,6 +103,7 @@ class PcLibrary extends ChangeNotifier {
       items.addAll(page.items);
       total = page.total;
       access = page.access;
+      discovery.accessAt[desktop.id] = page.access;
       _next = page.next;
       error = null;
     } catch (e) {
@@ -234,6 +251,7 @@ class PcLibrary extends ChangeNotifier {
 
   @override
   void dispose() {
+    discovery.removeListener(_onDiscovery);
     unawaited(_relay?.close(force: true));
     _relay = null;
     _drop();

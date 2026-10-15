@@ -42,6 +42,9 @@ dependencies:
   # Scanning paper: the phone's own scanner (VisionKit / ML Kit), pages
   # made into one PDF here.
   cunning_document_scanner: '>=1.2.3 <3.0.0'
+  # Android phones without Google Play services have no system scanner:
+  # pages are then taken as plain photos with the camera.
+  image_picker: '>=1.1.2 <1.3.0'
   # 4.6+ needs a newer zip library than other plugins allow here.
   image: '>=4.3.0 <4.6.0'
   pdf: ^3.11.0

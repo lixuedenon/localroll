@@ -19,7 +19,8 @@ import 'tls.dart';
 ///   {"t":"hello","family":bool,"online":[OnlineDevice…]}  right after connecting
 ///   {"t":"up","d":OnlineDevice}   another paired device came online
 ///   {"t":"down","id":"…"}         … went offline
-///   {"t":"you","family":bool}     this device was moved in / out of the family group
+///   {"t":"you","family":bool,"access":"view"}  this device's place changed (family group, library access)
+///   {"t":"changed"}               photos were deleted here: ask for /changes now
 class LiveMessage {
   const LiveMessage(this.type, this.json);
 
@@ -37,11 +38,18 @@ class LiveMessage {
     }
   }
 
-  static String hello({required bool family, required List<OnlineDevice> online}) =>
-      jsonEncode({'t': 'hello', 'family': family, 'online': [for (final d in online) d.toJson()]});
+  static String hello({required bool family, required List<OnlineDevice> online, LibraryAccess? access}) =>
+      jsonEncode({
+        't': 'hello',
+        'family': family,
+        if (access != null) 'access': access.name,
+        'online': [for (final d in online) d.toJson()],
+      });
   static String up(OnlineDevice d) => jsonEncode({'t': 'up', 'd': d.toJson()});
   static String down(String id) => jsonEncode({'t': 'down', 'id': id});
-  static String you({required bool family}) => jsonEncode({'t': 'you', 'family': family});
+  static String you({required bool family, LibraryAccess? access}) =>
+      jsonEncode({'t': 'you', 'family': family, if (access != null) 'access': access.name});
+  static String changed() => jsonEncode({'t': 'changed'});
 
   List<OnlineDevice> get online => OnlineDevice.listFrom(json);
   OnlineDevice? get device {
@@ -51,6 +59,9 @@ class LiveMessage {
 
   String? get id => json['id'] as String?;
   bool? get family => json['family'] as bool?;
+
+  /// What this device may do with the PC's library (null: older PC).
+  LibraryAccess? get access => json['access'] == null ? null : LibraryAccess.parse(json['access']);
 }
 
 /// Ping interval on both ends: a dead link (Wi-Fi gone, phone switched off)

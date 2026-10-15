@@ -117,6 +117,16 @@ class DesktopDiscovery extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Per PC: what this phone may do with its library (told over the live
+  /// link; null = not known yet).
+  final Map<String, LibraryAccess> accessAt = {};
+
+  void setAccessAt(String pcId, LibraryAccess access) {
+    if (accessAt[pcId] == access) return;
+    accessAt[pcId] = access;
+    notifyListeners();
+  }
+
   /// Has a live link (newer PC): no need for the polling check-in.
   bool linked(String id) => _liveCapable.contains(id);
 
@@ -389,7 +399,8 @@ final Map<String, DateTime> _lookChecked = {};
 /// and hear who else is online. About once a minute per PC (the light
 /// [heartbeat] runs in between); [now] skips the
 /// wait (app opened / back in front).
-Future<void> refreshPairedLooks(MobileSettings settings, DesktopDiscovery discovery, {bool now = false}) async {
+Future<void> refreshPairedLooks(MobileSettings settings, DesktopDiscovery discovery,
+    {bool now = false, String? only}) async {
   discovery
     ..myId = settings.deviceId
     ..pairedIds = {for (final d in settings.desktops) d.id};
@@ -404,6 +415,7 @@ Future<void> refreshPairedLooks(MobileSettings settings, DesktopDiscovery discov
   for (final f in all) {
     final d = settings.byId(f.id);
     if (d == null) continue;
+    if (only != null && f.id != only) continue;
     final last = _lookChecked[f.id];
     if (!now && last != null && DateTime.now().difference(last) < const Duration(seconds: 55)) continue;
     _lookChecked[f.id] = DateTime.now();

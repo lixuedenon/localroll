@@ -1,4 +1,5 @@
 // apps/desktop/lib/main.dart
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui' show PlatformDispatcher;
 
@@ -76,6 +77,15 @@ Future<void> _startLog() async {
     DiagLog.error('uncaught', e, st);
     return false;
   };
+  // "Not responding": the app's own work blocked it for a while (a file
+  // dialog open counts too). Logged when it comes back, to find the cause.
+  var last = DateTime.now();
+  Timer.periodic(const Duration(seconds: 1), (_) {
+    final now = DateTime.now();
+    final gap = now.difference(last);
+    last = now;
+    if (gap > const Duration(seconds: 5)) DiagLog.log('ui', 'not responding for ${gap.inSeconds} s');
+  });
 }
 
 Future<void> _bringToFront() async {

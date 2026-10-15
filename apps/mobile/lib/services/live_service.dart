@@ -58,6 +58,12 @@ class LiveService extends ChangeNotifier {
   DateTime _quietUntil = DateTime.fromMillisecondsSinceEpoch(0);
   bool get _quiet => DateTime.now().isBefore(_quietUntil);
 
+  /// Just came on: what is found now was already there (no notes).
+  bool get quiet => _quiet;
+
+  /// PC [pcId] says photos were deleted there: ask it for /changes now.
+  void Function(String pcId)? onChanged;
+
   void start() {
     _quietUntil = DateTime.now().add(const Duration(seconds: 15));
     _session = DateTime.now().microsecondsSinceEpoch.toRadixString(36);
@@ -134,6 +140,8 @@ class LiveService extends ChangeNotifier {
       case 'hello':
         final f = m.family;
         if (f != null) _family(pcId, f);
+        final a = m.access;
+        if (a != null) discovery.setAccessAt(pcId, a);
         _heard[pcId] = {for (final d in m.online) d.id: d};
         // Who was already on when we connected: shown, not announced.
         _recompute(quiet: true);
@@ -145,7 +153,7 @@ class LiveService extends ChangeNotifier {
         final known = _others.containsKey(d.id);
         (_heard[pcId] ??= {})[d.id] = d;
         // Already online here: it was closed and opened again.
-        if (known && d.id != settings.deviceId && settings.byId(d.id) == null) {
+        if (known && !_quiet && d.id != settings.deviceId && settings.byId(d.id) == null) {
           _events.add(PresenceEvent(d.id, d.name, pc: d.isDesktop, online: true, again: true));
         }
       case 'down':
@@ -154,6 +162,11 @@ class LiveService extends ChangeNotifier {
       case 'you':
         final f = m.family;
         if (f != null) _family(pcId, f);
+        final a = m.access;
+        if (a != null) discovery.setAccessAt(pcId, a);
+      case 'changed':
+        onChanged?.call(pcId);
+        return;
     }
     _recompute();
     notifyListeners();
@@ -180,7 +193,7 @@ class LiveService extends ChangeNotifier {
         now[d.id] = d;
       }
     }
-    if (!quiet) {
+    if (!quiet && !_quiet) {
       for (final d in now.values) {
         if (!_others.containsKey(d.id)) _events.add(PresenceEvent(d.id, d.name, pc: d.isDesktop, online: true));
       }
