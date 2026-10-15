@@ -169,7 +169,7 @@ List<int> bytesOf(int n, [int seed = 1]) => List.generate(n, (i) => (i * 31 + se
 Future<void> eventually(bool Function() check, {Duration within = const Duration(seconds: 5)}) async {
   final end = DateTime.now().add(within);
   while (!check()) {
-    if (DateTime.now().isAfter(end)) fail('condition not met within $within');
+    if (DateTime.now().isAfter(end)) throw StateError('Error: condition not met within $within');
     await Future<void>.delayed(const Duration(milliseconds: 50));
   }
 }
@@ -638,7 +638,7 @@ void main() {
       final wsA = await link(a);
       wsA.listen((d) {
         final m = LiveMessage.parse(d);
-        if (m != null && (m.type == 'up' || m.type == 'down')) heard.add('${m.type}:${m.device?.id}');
+        if (m != null && (m.type == 'up' || m.type == 'down')) heard.add('${m.type}:${m.device?.id ?? m.id}');
       });
       await eventually(() => pc.server.isOnline(a.id));
       final wsB = await link(b);
