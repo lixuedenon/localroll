@@ -6,6 +6,7 @@ import 'package:localroll_core/localroll_core.dart';
 
 import '../app_services.dart';
 import '../l10n/l10n.dart';
+import '../services/settings.dart';
 import 'breathing.dart';
 import 'format.dart';
 import 'theme.dart';
@@ -119,10 +120,13 @@ class _FamilyPageState extends State<FamilyPage> {
                 subtitle: Text([
                   widget.services.isOnline(d.id) ? tr('family.online') : tr('family.offline'),
                   tr('settings.paired_on', {'date': formatDate(DateTime.fromMillisecondsSinceEpoch(d.pairedMs))}),
+                  if (st.trusted[d.id] case final t?) tr('family.access_${t.libraryAccess.name}'),
                 ].join(' · ')),
                 trailing: PopupMenuButton<String>(
                   onSelected: (v) async {
-                    if (v == 'move') {
+                    if (v.startsWith('access_')) {
+                      await _setAccess(d.id, v);
+                    } else if (v == 'move') {
                       final name = await _askMember(member, family.members);
                       if (name != null) await st.update((x) => x.trusted[d.id]?.memberName = name);
                     } else if (v == 'guest') {
@@ -136,6 +140,7 @@ class _FamilyPageState extends State<FamilyPage> {
                     PopupMenuItem(value: 'move', child: Text(tr('family.move'))),
                     PopupMenuItem(value: 'guest', child: Text(tr('family.make_guest'))),
                     PopupMenuItem(value: 'unpair', child: Text(tr('settings.unpair'))),
+                    if (st.trusted[d.id] case final t?) ..._accessItems(t),
                   ],
                 ),
               ),
@@ -175,9 +180,11 @@ class _FamilyPageState extends State<FamilyPage> {
               subtitle: Text([
                 s.isOnline(t.id) ? tr('family.online') : tr('family.offline'),
                 tr('settings.paired_on', {'date': formatDate(DateTime.fromMillisecondsSinceEpoch(t.pairedMs))}),
+                if (!isDesktopPlatform(t.platform)) tr('family.access_${t.libraryAccess.name}'),
               ].join(' · ')),
               trailing: PopupMenuButton<String>(
                 onSelected: (v) async {
+                  if (v.startsWith('access_')) await _setAccess(t.id, v);
                   if (v == 'family') await s.server.setFamily(t.id, true);
                   if (v == 'guest') await s.server.setFamily(t.id, false);
                   if (v == 'unpair') {
@@ -192,6 +199,7 @@ class _FamilyPageState extends State<FamilyPage> {
                     PopupMenuItem(value: 'family', child: Text(tr('family.make_family'))),
                   // Other PCs are disconnected on the Send page (both sides).
                   if (!isDesktopPlatform(t.platform)) PopupMenuItem(value: 'unpair', child: Text(tr('settings.unpair'))),
+                  if (!isDesktopPlatform(t.platform)) ..._accessItems(t),
                 ],
               ),
             ),
@@ -199,6 +207,20 @@ class _FamilyPageState extends State<FamilyPage> {
         ),
     ];
   }
+
+  /// What a phone may do with this library from afar (browse / manage).
+  List<PopupMenuEntry<String>> _accessItems(TrustedDevice t) => [
+        const PopupMenuDivider(),
+        for (final a in LibraryAccess.values)
+          CheckedPopupMenuItem(
+            value: 'access_${a.name}',
+            checked: t.libraryAccess == a,
+            child: Text(tr('family.access_${a.name}')),
+          ),
+      ];
+
+  Future<void> _setAccess(String id, String value) =>
+      widget.services.settings.update((x) => x.trusted[id]?.access = LibraryAccess.parse(value.substring('access_'.length)));
 
   /// Asks for a member name; existing members are one tap away.
   Future<String?> _askMember(String current, List<String> members) async {

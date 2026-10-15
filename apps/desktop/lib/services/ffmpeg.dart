@@ -130,6 +130,26 @@ class FfmpegService extends ChangeNotifier {
     );
   }
 
+  /// A JPEG for a phone's screen (at most 2560 px on the long side), from
+  /// any photo format; videos: a still from 1 s.
+  Future<File?> display(MediaItem item) async {
+    if (item.kind == MediaKind.video) return thumbnail(item);
+    final full = await preview(item);
+    if (full == null) return null;
+    return _cached(
+      _cachePath(item, '_d'),
+      item,
+      (src, out) => [
+        '-i', src,
+        '-frames:v', '1',
+        '-vf', "scale='min(2560,iw)':'min(2560,ih)':force_original_aspect_ratio=decrease",
+        '-q:v', '3',
+        out,
+      ],
+      source: full.path,
+    );
+  }
+
   /// Full-resolution JPEG used to display formats Flutter cannot decode (HEIC, DNG…).
   Future<File?> preview(MediaItem item) =>
       _cached(_cachePath(item, '_p'), item, (src, out) => [

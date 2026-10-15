@@ -19,7 +19,14 @@ class TrustedDevice {
     this.memberName,
     this.secure = false,
     this.familyMember = true,
+    this.access,
   });
+
+  /// May it look at / manage this PC's library from afar. Null = the
+  /// default: family members may look, guests may not.
+  LibraryAccess? access;
+
+  LibraryAccess get libraryAccess => access ?? (familyMember ? LibraryAccess.view : LibraryAccess.none);
 
   final String id;
   String name;
@@ -54,6 +61,7 @@ class TrustedDevice {
         if (memberName != null) 'memberName': memberName,
         if (secure) 'secure': true,
         if (!familyMember) 'guest': true,
+        if (access != null) 'access': access!.name,
       };
 
   factory TrustedDevice.fromJson(Map<String, dynamic> j) => TrustedDevice(
@@ -67,6 +75,7 @@ class TrustedDevice {
         secure: j['secure'] == true,
         // Paired before guests existed: family.
         familyMember: j['guest'] != true,
+        access: LibraryAccess.parse(j['access']),
       );
 }
 

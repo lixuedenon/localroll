@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:localroll_core/localroll_core.dart';
 
+import 'l10n/l10n.dart';
 import 'server/transfer_server.dart';
 import 'services/converter.dart';
 import 'services/ffmpeg.dart';
@@ -151,6 +152,18 @@ class AppServices {
     server.onlineNow = () => s.onlineDevices;
     s.sender.phoneTarget = s.phoneTarget;
     s.sender.formatter = PhoneFormatter(ffmpeg);
+    // A phone browsing this library: pictures, and "save to my phone".
+    server.thumbnail = ffmpeg.thumbnail;
+    server.display = ffmpeg.display;
+    server.sendToPhone = (d, items) async {
+      final target = s.phoneTarget(d.id);
+      if (target == null) throw StateError('phone not receiving');
+      final files = [for (final i in library.withLive(items)) ?SendFile.fromLibrary(library, i)];
+      if (files.isEmpty) return 0;
+      s.sender.add(target, files, tr('send.n_items', {'count': items.length}),
+          toPhone: true, convert: true, platform: d.platform);
+      return items.length;
+    };
     // Changes are compared on every notification (each link opening or
     // closing notifies on its own), so quick off/on is not lost.
     server.addListener(s._recomputePresence);

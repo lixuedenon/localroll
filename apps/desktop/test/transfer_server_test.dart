@@ -511,4 +511,173 @@ void main() {
       expect(pc.server.isOnline(phone.id), isFalse);
     });
   });
+
+  group('browsing from a phone', () {
+    late List<List<String>> sentToPhone;
+
+    setUp(() {
+      sentToPhone = [];
+      pc.server.thumbnail = (item) async {
+        final f = File('${pc.tmp.path}${Platform.pathSeparator}thumb_${item.name}.jpg');
+        await f.writeAsBytes([0xFF, 0xD8, 0xFF, 1, 2, 3]);
+        return f;
+      };
+      pc.server.display = pc.server.thumbnail;
+      pc.server.deleter = (items) async {
+        final all = pc.library.withLive(items);
+        for (final i in all) {
+          await File(pc.library.absPath(i)).delete();
+        }
+        pc.library.removeItems(all);
+        return items.length;
+      };
+      pc.server.sendToPhone = (d, items) async {
+        sentToPhone.add([for (final i in items) i.relPath]);
+        return items.length;
+      };
+    });
+
+    Future<void> fill(TestPhone phone) async {
+      await phone.upload('P1', bytesOf(1000, 1), name: 'old.jpg', captured: DateTime(2023, 1, 1));
+      await phone.upload('P2', bytesOf(1000, 2), name: 'new.jpg', captured: DateTime(2025, 6, 1));
+      await phone.upload('V1', bytesOf(3000, 3), name: 'clip.mp4', kind: MediaKind.video, captured: DateTime(2024, 3, 1));
+    }
+
+    test('family member: the library, newest first, by kind, in pages', () async {
+      final phone = await pc.pairPhone();
+      await fill(phone);
+      final page = await phone.client.library();
+      expect(page.access, LibraryAccess.view);
+      expect(page.items.map((i) => i.name), ['new.jpg', 'clip.mp4', 'old.jpg']);
+      expect(page.items.first.mine, isTrue);
+      expect(page.total, 3);
+      expect(page.next, isNull);
+      expect((await phone.client.library(kind: MediaKind.video)).items.single.name, 'clip.mp4');
+      final first = await phone.client.library(limit: 2);
+      expect(first.items, hasLength(2));
+      expect(first.next, 2);
+      final rest = await phone.client.library(offset: first.next!, limit: 2);
+      expect(rest.items.single.name, 'old.jpg');
+      expect(rest.next, isNull);
+    });
+
+    test('a guest can\'t browse unless the PC allows it', () async {
+      final phone = await pc.pairPhone();
+      await pc.server.setFamily(phone.id, false);
+      await expectLater(phone.client.library(),
+          throwsA(isA<LrHttpError>().having((e) => e.status, 'status', 403).having((e) => e.code, 'code', 'no_access')));
+      await pc.settings.update((s) => s.trusted[phone.id]!.access = LibraryAccess.view);
+      expect((await phone.client.library()).access, LibraryAccess.view);
+    });
+
+    test('a family member can be kept out too', () async {
+      final phone = await pc.pairPhone();
+      await pc.settings.update((s) => s.trusted[phone.id]!.access = LibraryAccess.none);
+      await expectLater(phone.client.library(), throwsA(isA<LrHttpError>().having((e) => e.status, 'status', 403)));
+    });
+
+    test('someone else\'s "only me" stays hidden — in the list and by path', () async {
+      final mum = await pc.pairPhone(id: 'mum', name: 'Mum');
+      final dad = await pc.pairPhone(id: 'dad', name: 'Dad');
+      final secret = await mum.upload('S1', bytesOf(500), name: 'secret.jpg', private: true);
+      await mum.upload('S2', bytesOf(500, 2), name: 'shared.jpg');
+      expect((await dad.client.library()).items.map((i) => i.name), ['shared.jpg']);
+      await expectLater(dad.client.libraryThumb(secret.path!), throwsA(isA<LrHttpError>().having((e) => e.status, 'status', 404)));
+      final res = await dad.client.open(dad.client.libraryFileUri(secret.path!));
+      expect(res.statusCode, 404);
+      await res.drain<void>();
+      // Mum sees her own, marked as hers and private.
+      final own = (await mum.client.library()).items.firstWhere((i) => i.name == 'secret.jpg');
+      expect(own.private, isTrue);
+      expect(own.mine, isTrue);
+    });
+
+    test('only files in the library can be asked for', () async {
+      final phone = await pc.pairPhone();
+      await fill(phone);
+      for (final bad in ['../data/settings.json', '.localroll/index.json', '/etc/passwd', '']) {
+        final res = await phone.client.open(phone.client.libraryFileUri(bad));
+        expect(res.statusCode, 404, reason: bad);
+        await res.drain<void>();
+      }
+    });
+
+    test('originals: whole, or the asked-for part (video players)', () async {
+      final phone = await pc.pairPhone();
+      final data = bytesOf(3000, 9);
+      final r = await phone.upload('V9', data, name: 'v.mp4', kind: MediaKind.video);
+      final uri = phone.client.libraryFileUri(r.path!);
+      final whole = await phone.client.open(uri);
+      expect(whole.statusCode, 200);
+      expect(whole.headers.contentType?.mimeType, 'video/mp4');
+      expect(await whole.fold<List<int>>([], (a, b) => a..addAll(b)), data);
+
+      final part = await phone.client.open(uri, range: 'bytes=100-199');
+      expect(part.statusCode, 206);
+      expect(part.headers.value(HttpHeaders.contentRangeHeader), 'bytes 100-199/3000');
+      expect(await part.fold<List<int>>([], (a, b) => a..addAll(b)), data.sublist(100, 200));
+
+      final tail = await phone.client.open(uri, range: 'bytes=-50');
+      expect(tail.statusCode, 206);
+      expect(await tail.fold<List<int>>([], (a, b) => a..addAll(b)), data.sublist(2950));
+
+      final past = await phone.client.open(uri, range: 'bytes=5000-');
+      expect(past.statusCode, 416);
+      await past.drain<void>();
+    });
+
+    test('pictures for the grid and the screen', () async {
+      final phone = await pc.pairPhone();
+      final r = await phone.upload('T1', bytesOf(100), name: 't.heic');
+      expect(await phone.client.libraryThumb(r.path!), [0xFF, 0xD8, 0xFF, 1, 2, 3]);
+      expect(await phone.client.libraryView(r.path!), [0xFF, 0xD8, 0xFF, 1, 2, 3]);
+    });
+
+    test('a Live Photo is one item that knows its video', () async {
+      final phone = await pc.pairPhone();
+      final photo = await phone.upload('L1', bytesOf(400), name: 'IMG_7.HEIC');
+      final video = await phone.upload(liveCompanionId('L1'), bytesOf(900, 2), name: 'IMG_7.MOV', kind: MediaKind.video);
+      final items = (await phone.client.library()).items;
+      expect(items, hasLength(1));
+      expect(items.single.path, photo.path);
+      expect(items.single.live, video.path);
+    });
+
+    test('delete needs "manage"; then it goes, and the phone that sent it is told', () async {
+      final mum = await pc.pairPhone(id: 'mum');
+      final dad = await pc.pairPhone(id: 'dad');
+      final r = await mum.upload('D1', bytesOf(100), name: 'd.jpg');
+      await expectLater(dad.client.libraryDelete([r.path!]),
+          throwsA(isA<LrHttpError>().having((e) => e.status, 'status', 403)));
+      expect(File(pc.abs(r.path!)).existsSync(), isTrue);
+
+      await pc.settings.update((s) => s.trusted['dad']!.access = LibraryAccess.manage);
+      expect(await dad.client.libraryDelete([r.path!, 'not/there.jpg']), 1);
+      expect(File(pc.abs(r.path!)).existsSync(), isFalse);
+      expect((await dad.client.library()).items, isEmpty);
+      final (_, ch) = await mum.call('GET', LrProtocol.pathChanges, query: {'since': '0'});
+      expect(ChangesResponse.fromJson(ch).deleted, contains('D1'));
+    });
+
+    test('visibility: only of one\'s own items', () async {
+      final mum = await pc.pairPhone(id: 'mum');
+      final dad = await pc.pairPhone(id: 'dad');
+      final m = await mum.upload('M1', bytesOf(100), name: 'm.jpg');
+      final d = await dad.upload('D1', bytesOf(100, 2), name: 'd.jpg');
+      expect(await dad.client.libraryVisibility([m.path!, d.path!], private: true), 1);
+      expect(pc.library.findByAsset('mum', 'M1')!.private, isFalse);
+      expect(pc.library.findByAsset('dad', 'D1')!.private, isTrue);
+    });
+
+    test('"save to my phone": the PC queues them for that phone', () async {
+      final phone = await pc.pairPhone();
+      await fill(phone);
+      final items = (await phone.client.library()).items;
+      expect(await phone.client.librarySend([items.first.path, 'nope.jpg']), 1);
+      expect(sentToPhone.single, [items.first.path]);
+      pc.server.sendToPhone = (d, items) async => throw StateError('closed');
+      await expectLater(phone.client.librarySend([items.first.path]),
+          throwsA(isA<LrHttpError>().having((e) => e.code, 'code', 'phone_closed')));
+    });
+  });
 }

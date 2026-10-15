@@ -385,5 +385,8 @@
   "settings.log_hint": "Registra cosa è successo e cosa è andato storto, per trovare i problemi. Resta su questo dispositivo, non viene mai inviato; niente contenuti delle foto, password o codici. Esportalo solo per darlo a chi ti aiuta.",
   "settings.log_export": "Esporta registro…",
   "settings.log_failed": "Impossibile salvare il registro.",
-  "settings.log_saved": "Registro salvato: {path}"
+  "settings.log_saved": "Registro salvato: {path}",
+  "family.access_none": "Non può sfogliare la libreria",
+  "family.access_view": "Può sfogliare la libreria",
+  "family.access_manage": "Può sfogliare ed eliminare (nel Cestino)"
 }

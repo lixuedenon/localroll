@@ -385,5 +385,8 @@
   "settings.log_hint": "Sorunları bulmak için ne olduğunu ve neyin ters gittiğini kaydeder. Yalnızca bu cihazda kalır, hiçbir yere gönderilmez; fotoğraf içeriği, parola veya kod içermez. Yalnızca size yardım eden birine vermek istediğinizde dışa aktarın.",
   "settings.log_export": "Günlüğü dışa aktar…",
   "settings.log_failed": "Günlük kaydedilemedi.",
-  "settings.log_saved": "Günlük kaydedildi: {path}"
+  "settings.log_saved": "Günlük kaydedildi: {path}",
+  "family.access_none": "Arşive göz atamaz",
+  "family.access_view": "Arşive göz atabilir",
+  "family.access_manage": "Göz atabilir ve silebilir (Geri Dönüşüm Kutusu’na)"
 }

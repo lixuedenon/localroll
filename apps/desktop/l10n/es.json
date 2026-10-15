@@ -385,5 +385,8 @@
   "settings.log_hint": "Registra lo que pasó y lo que falló, para encontrar problemas. Se queda en este dispositivo y nunca se envía; sin contenido de fotos, contraseñas ni códigos. Expórtalo solo cuando quieras dárselo a quien te ayuda.",
   "settings.log_export": "Exportar registro…",
   "settings.log_failed": "No se pudo guardar el registro.",
-  "settings.log_saved": "Registro guardado: {path}"
+  "settings.log_saved": "Registro guardado: {path}",
+  "family.access_none": "No puede ver la biblioteca",
+  "family.access_view": "Puede ver la biblioteca",
+  "family.access_manage": "Puede ver y borrar (a la Papelera)"
 }

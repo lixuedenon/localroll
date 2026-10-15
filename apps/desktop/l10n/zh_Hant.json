@@ -385,5 +385,8 @@
   "settings.log_hint": "記錄發生了什麼、哪裡出了錯，便於查找問題。只保存在本機，不會傳往任何地方；不含照片內容、密碼或配對碼。只有在你想交給幫你排查的人時才匯出。",
   "settings.log_export": "匯出日誌…",
   "settings.log_failed": "無法保存日誌。",
-  "settings.log_saved": "日誌已保存：{path}"
+  "settings.log_saved": "日誌已保存：{path}",
+  "family.access_none": "不能瀏覽媒體庫",
+  "family.access_view": "可以瀏覽媒體庫",
+  "family.access_manage": "可以瀏覽和刪除（進資源回收筒）"
 }

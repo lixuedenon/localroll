@@ -385,5 +385,8 @@
   "settings.log_hint": "Regista o que aconteceu e o que falhou, para encontrar problemas. Fica neste dispositivo e nunca é enviado; sem conteúdo de fotos, palavras-passe ou códigos. Exporte só quando o quiser dar a quem o ajuda.",
   "settings.log_export": "Exportar registo…",
   "settings.log_failed": "Não foi possível guardar o registo.",
-  "settings.log_saved": "Registo guardado: {path}"
+  "settings.log_saved": "Registo guardado: {path}",
+  "family.access_none": "Não pode ver a biblioteca",
+  "family.access_view": "Pode ver a biblioteca",
+  "family.access_manage": "Pode ver e apagar (para a Lixeira)"
 }

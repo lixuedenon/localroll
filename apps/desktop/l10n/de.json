@@ -385,5 +385,8 @@
   "settings.log_hint": "Hält fest, was passiert ist und was schiefging, um Probleme zu finden. Bleibt auf diesem Gerät und wird nie gesendet; keine Fotoinhalte, Passwörter oder Codes. Nur exportieren, wenn Sie es jemandem geben wollen, der hilft.",
   "settings.log_export": "Protokoll exportieren…",
   "settings.log_failed": "Protokoll konnte nicht gespeichert werden.",
-  "settings.log_saved": "Protokoll gespeichert: {path}"
+  "settings.log_saved": "Protokoll gespeichert: {path}",
+  "family.access_none": "Kann die Mediathek nicht ansehen",
+  "family.access_view": "Kann die Mediathek ansehen",
+  "family.access_manage": "Kann ansehen und löschen (in den Papierkorb)"
 }

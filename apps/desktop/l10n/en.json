@@ -385,5 +385,8 @@
   "settings.log_hint": "Records what happened and what went wrong, so problems can be found. Stays on this device, never sent anywhere; no photo contents, passwords or codes. Export it only when you want to give it to someone helping you.",
   "settings.log_export": "Export log…",
   "settings.log_failed": "Could not save the log.",
-  "settings.log_saved": "Log saved: {path}"
+  "settings.log_saved": "Log saved: {path}",
+  "family.access_none": "Can't browse the library",
+  "family.access_view": "Can browse the library",
+  "family.access_manage": "Can browse and delete (to the Recycle Bin)"
 }

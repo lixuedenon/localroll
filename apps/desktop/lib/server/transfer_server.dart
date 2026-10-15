@@ -424,6 +424,20 @@ class TransferServer extends ChangeNotifier {
   /// Set by AppServices: every paired device online now (phones and PCs).
   Set<String> Function()? onlineNow;
 
+  // ------------------------------------------------- browsing (set by AppServices)
+
+  /// Small JPEG for the grid / JPEG for the screen (made with ffmpeg).
+  Future<File?> Function(MediaItem item)? thumbnail;
+  Future<File?> Function(MediaItem item)? display;
+
+  /// Library items to the Recycle Bin; how many are gone. Default:
+  /// [deleteItems] (Windows).
+  Future<int> Function(List<MediaItem> items)? deleter;
+
+  /// Send [items] to phone [d] the usual way (converted, it saves them);
+  /// how many were queued. Throws [StateError] when it can't receive now.
+  Future<int> Function(TrustedDevice d, List<MediaItem> items)? sendToPhone;
+
   /// Failed sign-ins per address, to slow down guessing.
   final Map<String, List<DateTime>> _failures = {};
   String? error;
@@ -732,6 +746,10 @@ class TransferServer extends ChangeNotifier {
         );
       }
 
+      if (path == LrProtocol.pathLibrary || path.startsWith('${LrProtocol.pathLibrary}/')) {
+        return await _browse(req, device, path, secure: secure);
+      }
+
       // /api/v1/sessions/{sid}/files/{fid}[/complete]
       if (segs.length >= 6 &&
           segs[0] == 'api' &&
@@ -759,6 +777,175 @@ class TransferServer extends ChangeNotifier {
       return _json(res, 404, {'error': 'not_found'});
     }
   }
+
+  // ------------------------------------------------------------- browsing
+
+  /// A phone looks at (or manages) this PC's library. Only what the PC
+  /// allows that device, only over HTTPS, and never another phone's
+  /// "only me" items.
+  Future<void> _browse(HttpRequest req, TrustedDevice device, String path, {required bool secure}) async {
+    final res = req.response;
+    if (!secure) {
+      await req.drain<void>();
+      return _json(res, 426, {'error': 'upgrade_required'});
+    }
+    final access = device.libraryAccess;
+    if (access == LibraryAccess.none) {
+      await req.drain<void>();
+      return _json(res, 403, {'error': 'no_access'});
+    }
+    if (library.offline) {
+      await req.drain<void>();
+      return _json(res, 503, {'error': 'library_offline'});
+    }
+    final get = req.method == 'GET' || req.method == 'HEAD';
+    if (get && path == LrProtocol.pathLibrary) return _libraryPage(req, device, access);
+    if (get && (path == LrProtocol.pathLibraryThumb || path == LrProtocol.pathLibraryView || path == LrProtocol.pathLibraryFile)) {
+      final item = _visibleItem(device, req.uri.queryParameters['p']);
+      if (item == null) return _json(res, 404, {'error': 'not_found'});
+      if (path == LrProtocol.pathLibraryFile) {
+        final f = File(library.absPath(item));
+        if (!await f.exists()) return _json(res, 404, {'error': 'not_found'});
+        return _serveFile(req, f, _contentType(item.name));
+      }
+      final make = path == LrProtocol.pathLibraryThumb ? thumbnail : display;
+      final f = make == null ? null : await make(item);
+      if (f == null || !await f.exists()) return _json(res, 404, {'error': 'no_picture'});
+      res.headers.set(HttpHeaders.cacheControlHeader, 'private, max-age=86400');
+      return _serveFile(req, f, 'image/jpeg');
+    }
+    if (req.method == 'POST' &&
+        (path == LrProtocol.pathLibrarySend || path == LrProtocol.pathLibraryDelete || path == LrProtocol.pathLibraryVisibility)) {
+      final body = await _readJson(req);
+      final paths = (body['paths'] as List? ?? const []).whereType<String>().take(5000).toList();
+      final items = [for (final p in paths) ?_visibleItem(device, p)];
+      if (path == LrProtocol.pathLibrarySend) {
+        final send = sendToPhone;
+        if (send == null) return _json(res, 501, {'error': 'not_supported'});
+        try {
+          final n = await send(device, items);
+          DiagLog.log('browse', '${device.name}: asked for $n items');
+          return _json(res, 200, {'queued': n});
+        } on StateError {
+          return _json(res, 409, {'error': 'phone_closed'});
+        }
+      }
+      if (path == LrProtocol.pathLibraryDelete) {
+        if (access != LibraryAccess.manage) return _json(res, 403, {'error': 'no_access'});
+        final n = items.isEmpty ? 0 : await (deleter ?? (List<MediaItem> x) => deleteItems(library, x))(items);
+        DiagLog.log('browse', '${device.name}: deleted $n of ${items.length} items (to the Recycle Bin)');
+        return _json(res, 200, {'deleted': n});
+      }
+      // Visibility: only of what this device sent itself.
+      final own = items.where((i) => i.deviceId == device.id).toList();
+      library.setPrivate(own, body['private'] == true);
+      return _json(res, 200, {'updated': own.length});
+    }
+    await req.drain<void>();
+    return _json(res, 404, {'error': 'not_found'});
+  }
+
+  /// [rel] if it is in the library and [device] may see it.
+  MediaItem? _visibleItem(TrustedDevice device, String? rel) {
+    if (rel == null || rel.isEmpty) return null;
+    final item = library.findByRel(rel);
+    if (item == null) return null;
+    if (item.private && item.deviceId != device.id) return null; // someone else's "only me"
+    return item;
+  }
+
+  Future<void> _libraryPage(HttpRequest req, TrustedDevice device, LibraryAccess access) async {
+    final q = req.uri.queryParameters;
+    final offset = max(0, int.tryParse(q['offset'] ?? '') ?? 0);
+    final limit = (int.tryParse(q['limit'] ?? '') ?? 200).clamp(1, LrProtocol.libraryPageMax);
+    final kind = q['kind'];
+    final all = [
+      for (final i in library.items)
+        if ((kind == null || i.kind.name == kind) &&
+            (i.kind == MediaKind.image || i.kind == MediaKind.video) &&
+            !(i.private && i.deviceId != device.id))
+          i,
+    ]..sort((a, b) => b.captureMs.compareTo(a.captureMs));
+    final page = all.skip(offset).take(limit);
+    final family = settings.family;
+    return _json(
+      req.response,
+      200,
+      LibraryPage(
+        items: [
+          for (final i in page)
+            RemoteItem(
+              path: i.relPath,
+              name: i.name,
+              kind: i.kind,
+              takenMs: i.captureMs,
+              size: i.size,
+              live: library.liveFor(i)?.relPath,
+              private: i.private,
+              mine: i.deviceId == device.id,
+              from: i.deviceId == null ? null : (family.labelOf(i.deviceId!) ?? i.deviceName),
+            ),
+        ],
+        total: all.length,
+        access: access,
+        next: offset + limit < all.length ? offset + limit : null,
+        library: library.libraryId.isEmpty ? null : library.libraryId,
+      ).toJson(),
+    );
+  }
+
+  /// A file, whole or the asked-for part (players read videos piece by piece).
+  Future<void> _serveFile(HttpRequest req, File f, String contentType) async {
+    final res = req.response;
+    await req.drain<void>();
+    final len = await f.length();
+    res.headers.set(HttpHeaders.acceptRangesHeader, 'bytes');
+    res.headers.contentType = ContentType.parse(contentType);
+    var start = 0;
+    var end = len - 1;
+    final range = req.headers.value(HttpHeaders.rangeHeader);
+    if (range != null) {
+      final m = RegExp(r'^bytes=(\d*)-(\d*)$').firstMatch(range.trim());
+      if (m != null && (m[1]!.isNotEmpty || m[2]!.isNotEmpty)) {
+        if (m[1]!.isEmpty) {
+          start = max(0, len - int.parse(m[2]!)); // the last N bytes
+        } else {
+          start = int.parse(m[1]!);
+          if (m[2]!.isNotEmpty) end = min(int.parse(m[2]!), len - 1);
+        }
+        if (start >= len || start > end) {
+          res
+            ..statusCode = 416
+            ..headers.set(HttpHeaders.contentRangeHeader, 'bytes */$len');
+          return res.close();
+        }
+        res
+          ..statusCode = 206
+          ..headers.set(HttpHeaders.contentRangeHeader, 'bytes $start-$end/$len');
+      }
+    }
+    res.contentLength = len == 0 ? 0 : end - start + 1;
+    if (req.method == 'HEAD' || len == 0) return res.close();
+    await res.addStream(f.openRead(start, end + 1));
+    await res.close();
+  }
+
+  static String _contentType(String name) => switch (extensionOf(name)) {
+        'jpg' || 'jpeg' => 'image/jpeg',
+        'png' => 'image/png',
+        'gif' => 'image/gif',
+        'webp' => 'image/webp',
+        'heic' => 'image/heic',
+        'heif' => 'image/heif',
+        'avif' => 'image/avif',
+        'mp4' => 'video/mp4',
+        'm4v' => 'video/x-m4v',
+        'mov' => 'video/quicktime',
+        'mkv' => 'video/x-matroska',
+        'webm' => 'video/webm',
+        'avi' => 'video/x-msvideo',
+        _ => 'application/octet-stream',
+      };
 
   Future<TrustedDevice?> _authenticate(HttpRequest req) async {
     final id = req.headers.value(LrProtocol.headerDeviceId);

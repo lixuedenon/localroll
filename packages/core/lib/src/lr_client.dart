@@ -1,7 +1,9 @@
 // packages/core/lib/src/lr_client.dart
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'media_kind.dart';
 import 'models.dart';
 import 'protocol.dart';
 import 'tls.dart';
@@ -177,4 +179,74 @@ class LrClient {
         json: request.toJson(),
         timeout: const Duration(minutes: 10),
       ));
+
+  // ------------------------------------------------------------ browsing
+
+  /// A page of the PC's library (newest first). [kind]: image / video / null.
+  Future<LibraryPage> library({int offset = 0, int limit = 200, MediaKind? kind}) async =>
+      LibraryPage.fromJson(await _send('GET', LrProtocol.pathLibrary, query: {
+        'offset': '$offset',
+        'limit': '$limit',
+        if (kind != null) 'kind': kind.name,
+      }));
+
+  /// Small picture for the grid (JPEG bytes).
+  Future<Uint8List> libraryThumb(String path) => _bytes(LrProtocol.pathLibraryThumb, path);
+
+  /// Picture for the screen (JPEG bytes, any format turned into one).
+  Future<Uint8List> libraryView(String path) =>
+      _bytes(LrProtocol.pathLibraryView, path, timeout: const Duration(minutes: 1));
+
+  /// The PC sends these to this phone (converted to what it plays), the
+  /// usual way: they arrive in the album. Returns how many were queued.
+  Future<int> librarySend(List<String> paths) async =>
+      ((await _send('POST', LrProtocol.pathLibrarySend, json: {'paths': paths}))['queued'] as num?)?.toInt() ?? 0;
+
+  /// To the PC's Recycle Bin (needs "manage"). Returns how many are gone.
+  Future<int> libraryDelete(List<String> paths) async =>
+      ((await _send('POST', LrProtocol.pathLibraryDelete, json: {'paths': paths}, timeout: const Duration(minutes: 5)))['deleted']
+              as num?)
+          ?.toInt() ??
+      0;
+
+  /// "Only me" on / off for this phone's own items. Returns how many changed.
+  Future<int> libraryVisibility(List<String> paths, {required bool private}) async =>
+      ((await _send('POST', LrProtocol.pathLibraryVisibility, json: {'paths': paths, 'private': private}))['updated'] as num?)
+          ?.toInt() ??
+      0;
+
+  /// Where an item's original can be read (for players that fetch by URL,
+  /// through a local relay that adds the sign-in and checks the certificate).
+  Uri libraryFileUri(String path) =>
+      Uri(scheme: secure ? 'https' : 'http', host: host, port: port, path: LrProtocol.pathLibraryFile, queryParameters: {'p': path});
+
+  /// Signed-in GET of [uri] with optional Range, as a streamed response.
+  Future<HttpClientResponse> open(Uri uri, {String? range}) async {
+    final req = await _http.getUrl(uri).timeout(const Duration(seconds: 20));
+    if (deviceId != null) req.headers.set(LrProtocol.headerDeviceId, deviceId!);
+    if (token != null) req.headers.set(LrProtocol.headerToken, token!);
+    if (range != null) req.headers.set(HttpHeaders.rangeHeader, range);
+    return req.close().timeout(const Duration(seconds: 20));
+  }
+
+  Future<Uint8List> _bytes(String path, String item, {Duration timeout = const Duration(seconds: 30)}) async {
+    final uri = Uri(scheme: secure ? 'https' : 'http', host: host, port: port, path: path, queryParameters: {'p': item});
+    final req = await _http.getUrl(uri).timeout(timeout);
+    if (deviceId != null) req.headers.set(LrProtocol.headerDeviceId, deviceId!);
+    if (token != null) req.headers.set(LrProtocol.headerToken, token!);
+    final res = await req.close().timeout(timeout);
+    final b = BytesBuilder(copy: false);
+    await res.forEach(b.add).timeout(timeout);
+    final bytes = b.takeBytes();
+    if (res.statusCode >= 400) {
+      Map<String, dynamic> body;
+      try {
+        body = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
+      } catch (_) {
+        body = {'error': 'HTTP ${res.statusCode}'};
+      }
+      throw LrHttpError(res.statusCode, body);
+    }
+    return bytes;
+  }
 }

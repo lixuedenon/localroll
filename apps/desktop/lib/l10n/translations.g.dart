@@ -391,6 +391,9 @@ const Map<String, Map<String, String>> translations = {
     'settings.log_export': 'Export log…',
     'settings.log_failed': 'Could not save the log.',
     'settings.log_saved': 'Log saved: {path}',
+    'family.access_none': 'Can\'t browse the library',
+    'family.access_view': 'Can browse the library',
+    'family.access_manage': 'Can browse and delete (to the Recycle Bin)',
   },
   'zh': {
     'nav.library': '媒体库',
@@ -780,6 +783,9 @@ const Map<String, Map<String, String>> translations = {
     'settings.log_export': '导出日志…',
     'settings.log_failed': '无法保存日志。',
     'settings.log_saved': '日志已保存：{path}',
+    'family.access_none': '不能浏览媒体库',
+    'family.access_view': '可以浏览媒体库',
+    'family.access_manage': '可以浏览和删除（进回收站）',
   },
   'zh_Hant': {
     'nav.library': '媒體庫',
@@ -1169,6 +1175,9 @@ const Map<String, Map<String, String>> translations = {
     'settings.log_export': '匯出日誌…',
     'settings.log_failed': '無法保存日誌。',
     'settings.log_saved': '日誌已保存：{path}',
+    'family.access_none': '不能瀏覽媒體庫',
+    'family.access_view': '可以瀏覽媒體庫',
+    'family.access_manage': '可以瀏覽和刪除（進資源回收筒）',
   },
   'ja': {
     'nav.library': 'ライブラリ',
@@ -1558,6 +1567,9 @@ const Map<String, Map<String, String>> translations = {
     'settings.log_export': 'ログを書き出す…',
     'settings.log_failed': 'ログを保存できませんでした。',
     'settings.log_saved': 'ログを保存しました：{path}',
+    'family.access_none': 'ライブラリを閲覧できない',
+    'family.access_view': 'ライブラリを閲覧できる',
+    'family.access_manage': '閲覧と削除（ごみ箱へ）ができる',
   },
   'ko': {
     'nav.library': '라이브러리',
@@ -1947,6 +1959,9 @@ const Map<String, Map<String, String>> translations = {
     'settings.log_export': '로그 내보내기…',
     'settings.log_failed': '로그를 저장하지 못했습니다.',
     'settings.log_saved': '로그를 저장했습니다: {path}',
+    'family.access_none': '라이브러리 보기 불가',
+    'family.access_view': '라이브러리 보기 가능',
+    'family.access_manage': '보기 및 삭제 가능(휴지통으로)',
   },
   'es': {
     'nav.library': 'Biblioteca',
@@ -2336,6 +2351,9 @@ const Map<String, Map<String, String>> translations = {
     'settings.log_export': 'Exportar registro…',
     'settings.log_failed': 'No se pudo guardar el registro.',
     'settings.log_saved': 'Registro guardado: {path}',
+    'family.access_none': 'No puede ver la biblioteca',
+    'family.access_view': 'Puede ver la biblioteca',
+    'family.access_manage': 'Puede ver y borrar (a la Papelera)',
   },
   'fr': {
     'nav.library': 'Bibliothèque',
@@ -2725,6 +2743,9 @@ const Map<String, Map<String, String>> translations = {
     'settings.log_export': 'Exporter le journal…',
     'settings.log_failed': 'Impossible d’enregistrer le journal.',
     'settings.log_saved': 'Journal enregistré : {path}',
+    'family.access_none': 'Ne peut pas parcourir la bibliothèque',
+    'family.access_view': 'Peut parcourir la bibliothèque',
+    'family.access_manage': 'Peut parcourir et supprimer (dans la Corbeille)',
   },
   'de': {
     'nav.library': 'Mediathek',
@@ -3114,6 +3135,9 @@ const Map<String, Map<String, String>> translations = {
     'settings.log_export': 'Protokoll exportieren…',
     'settings.log_failed': 'Protokoll konnte nicht gespeichert werden.',
     'settings.log_saved': 'Protokoll gespeichert: {path}',
+    'family.access_none': 'Kann die Mediathek nicht ansehen',
+    'family.access_view': 'Kann die Mediathek ansehen',
+    'family.access_manage': 'Kann ansehen und löschen (in den Papierkorb)',
   },
   'pt': {
     'nav.library': 'Biblioteca',
@@ -3503,6 +3527,9 @@ const Map<String, Map<String, String>> translations = {
     'settings.log_export': 'Exportar registo…',
     'settings.log_failed': 'Não foi possível guardar o registo.',
     'settings.log_saved': 'Registo guardado: {path}',
+    'family.access_none': 'Não pode ver a biblioteca',
+    'family.access_view': 'Pode ver a biblioteca',
+    'family.access_manage': 'Pode ver e apagar (para a Lixeira)',
   },
   'ru': {
     'nav.library': 'Медиатека',
@@ -3892,6 +3919,9 @@ const Map<String, Map<String, String>> translations = {
     'settings.log_export': 'Экспортировать журнал…',
     'settings.log_failed': 'Не удалось сохранить журнал.',
     'settings.log_saved': 'Журнал сохранён: {path}',
+    'family.access_none': 'Не может просматривать медиатеку',
+    'family.access_view': 'Может просматривать медиатеку',
+    'family.access_manage': 'Может просматривать и удалять (в корзину)',
   },
   'it': {
     'nav.library': 'Libreria',
@@ -4281,6 +4311,9 @@ const Map<String, Map<String, String>> translations = {
     'settings.log_export': 'Esporta registro…',
     'settings.log_failed': 'Impossibile salvare il registro.',
     'settings.log_saved': 'Registro salvato: {path}',
+    'family.access_none': 'Non può sfogliare la libreria',
+    'family.access_view': 'Può sfogliare la libreria',
+    'family.access_manage': 'Può sfogliare ed eliminare (nel Cestino)',
   },
   'ar': {
     'nav.library': 'المكتبة',
@@ -4670,6 +4703,9 @@ const Map<String, Map<String, String>> translations = {
     'settings.log_export': 'تصدير السجل…',
     'settings.log_failed': 'تعذّر حفظ السجل.',
     'settings.log_saved': 'تم حفظ السجل: {path}',
+    'family.access_none': 'لا يمكنه تصفح المكتبة',
+    'family.access_view': 'يمكنه تصفح المكتبة',
+    'family.access_manage': 'يمكنه التصفح والحذف (إلى سلة المحذوفات)',
   },
   'hi': {
     'nav.library': 'लाइब्रेरी',
@@ -5059,6 +5095,9 @@ const Map<String, Map<String, String>> translations = {
     'settings.log_export': 'लॉग निर्यात करें…',
     'settings.log_failed': 'लॉग सहेजा नहीं जा सका।',
     'settings.log_saved': 'लॉग सहेजा गया: {path}',
+    'family.access_none': 'लाइब्रेरी नहीं देख सकता',
+    'family.access_view': 'लाइब्रेरी देख सकता है',
+    'family.access_manage': 'देख और हटा सकता है (रीसायकल बिन में)',
   },
   'id': {
     'nav.library': 'Pustaka',
@@ -5448,6 +5487,9 @@ const Map<String, Map<String, String>> translations = {
     'settings.log_export': 'Ekspor log…',
     'settings.log_failed': 'Tidak dapat menyimpan log.',
     'settings.log_saved': 'Log disimpan: {path}',
+    'family.access_none': 'Tidak bisa menelusuri pustaka',
+    'family.access_view': 'Bisa menelusuri pustaka',
+    'family.access_manage': 'Bisa menelusuri dan menghapus (ke Recycle Bin)',
   },
   'vi': {
     'nav.library': 'Thư viện',
@@ -5837,6 +5879,9 @@ const Map<String, Map<String, String>> translations = {
     'settings.log_export': 'Xuất nhật ký…',
     'settings.log_failed': 'Không lưu được nhật ký.',
     'settings.log_saved': 'Đã lưu nhật ký: {path}',
+    'family.access_none': 'Không được xem thư viện',
+    'family.access_view': 'Được xem thư viện',
+    'family.access_manage': 'Được xem và xóa (vào Thùng rác)',
   },
   'th': {
     'nav.library': 'คลังสื่อ',
@@ -6226,6 +6271,9 @@ const Map<String, Map<String, String>> translations = {
     'settings.log_export': 'ส่งออกบันทึก…',
     'settings.log_failed': 'บันทึกไฟล์ไม่สำเร็จ',
     'settings.log_saved': 'บันทึกแล้ว: {path}',
+    'family.access_none': 'ดูคลังไม่ได้',
+    'family.access_view': 'ดูคลังได้',
+    'family.access_manage': 'ดูและลบได้ (ไปที่ถังรีไซเคิล)',
   },
   'tr': {
     'nav.library': 'Kitaplık',
@@ -6615,5 +6663,8 @@ const Map<String, Map<String, String>> translations = {
     'settings.log_export': 'Günlüğü dışa aktar…',
     'settings.log_failed': 'Günlük kaydedilemedi.',
     'settings.log_saved': 'Günlük kaydedildi: {path}',
+    'family.access_none': 'Arşive göz atamaz',
+    'family.access_view': 'Arşive göz atabilir',
+    'family.access_manage': 'Göz atabilir ve silebilir (Geri Dönüşüm Kutusu’na)',
   },
 };

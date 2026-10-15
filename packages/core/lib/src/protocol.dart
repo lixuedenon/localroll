@@ -75,6 +75,25 @@ class LrProtocol {
   /// to come to the front, then quits.
   static const String pathLocalShow = '/local/show';
 
+  /// Browsing the PC's library from a phone (allowed per device on the PC):
+  ///   GET  /api/v1/library?offset=&limit=&kind=     -> LibraryPage
+  ///   GET  /api/v1/library/thumb?p=<item>           -> small JPEG
+  ///   GET  /api/v1/library/view?p=<item>            -> JPEG for the screen
+  ///   GET  /api/v1/library/file?p=<item>            -> the original (Range)
+  ///   POST /api/v1/library/send   {paths}           -> PC sends them to the phone
+  ///   POST /api/v1/library/delete {paths}           -> Recycle Bin (manage only)
+  ///   POST /api/v1/library/visibility {paths, private} (own items only)
+  static const String pathLibrary = '/api/v1/library';
+  static const String pathLibraryThumb = '/api/v1/library/thumb';
+  static const String pathLibraryView = '/api/v1/library/view';
+  static const String pathLibraryFile = '/api/v1/library/file';
+  static const String pathLibrarySend = '/api/v1/library/send';
+  static const String pathLibraryDelete = '/api/v1/library/delete';
+  static const String pathLibraryVisibility = '/api/v1/library/visibility';
+
+  /// Items per page when browsing (at most).
+  static const int libraryPageMax = 500;
+
   /// Ports the PC tries, in order, if the preferred one is taken.
   static const List<int> fallbackPorts = [41530, 31530, 21530, 8530];
 

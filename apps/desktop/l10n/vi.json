@@ -385,5 +385,8 @@
   "settings.log_hint": "Ghi lại những gì đã xảy ra và lỗi gì, để tìm ra vấn đề. Chỉ lưu trên thiết bị này, không gửi đi đâu; không có nội dung ảnh, mật khẩu hay mã. Chỉ xuất khi bạn muốn đưa cho người giúp mình.",
   "settings.log_export": "Xuất nhật ký…",
   "settings.log_failed": "Không lưu được nhật ký.",
-  "settings.log_saved": "Đã lưu nhật ký: {path}"
+  "settings.log_saved": "Đã lưu nhật ký: {path}",
+  "family.access_none": "Không được xem thư viện",
+  "family.access_view": "Được xem thư viện",
+  "family.access_manage": "Được xem và xóa (vào Thùng rác)"
 }

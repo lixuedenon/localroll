@@ -385,5 +385,8 @@
   "settings.log_hint": "무슨 일이 있었고 무엇이 잘못됐는지 기록해 문제를 찾는 데 씁니다. 이 기기에만 저장되고 어디로도 보내지지 않으며, 사진 내용·비밀번호·코드는 들어 있지 않습니다. 도와주는 사람에게 줄 때만 내보내세요.",
   "settings.log_export": "로그 내보내기…",
   "settings.log_failed": "로그를 저장하지 못했습니다.",
-  "settings.log_saved": "로그를 저장했습니다: {path}"
+  "settings.log_saved": "로그를 저장했습니다: {path}",
+  "family.access_none": "라이브러리 보기 불가",
+  "family.access_view": "라이브러리 보기 가능",
+  "family.access_manage": "보기 및 삭제 가능(휴지통으로)"
 }

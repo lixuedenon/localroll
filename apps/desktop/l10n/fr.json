@@ -385,5 +385,8 @@
   "settings.log_hint": "Note ce qui s’est passé et ce qui a échoué, pour trouver les problèmes. Reste sur cet appareil, jamais envoyé ; ni contenu de photos, ni mots de passe, ni codes. Exportez-le seulement pour le donner à quelqu’un qui vous aide.",
   "settings.log_export": "Exporter le journal…",
   "settings.log_failed": "Impossible d’enregistrer le journal.",
-  "settings.log_saved": "Journal enregistré : {path}"
+  "settings.log_saved": "Journal enregistré : {path}",
+  "family.access_none": "Ne peut pas parcourir la bibliothèque",
+  "family.access_view": "Peut parcourir la bibliothèque",
+  "family.access_manage": "Peut parcourir et supprimer (dans la Corbeille)"
 }

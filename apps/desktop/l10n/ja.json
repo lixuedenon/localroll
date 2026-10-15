@@ -385,5 +385,8 @@
   "settings.log_hint": "何が起きたか・何が失敗したかを記録し、問題の原因探しに使います。この端末にだけ保存され、どこにも送られません。写真の中身、パスワード、コードは含みません。手伝ってくれる人に渡したいときだけ書き出してください。",
   "settings.log_export": "ログを書き出す…",
   "settings.log_failed": "ログを保存できませんでした。",
-  "settings.log_saved": "ログを保存しました：{path}"
+  "settings.log_saved": "ログを保存しました：{path}",
+  "family.access_none": "ライブラリを閲覧できない",
+  "family.access_view": "ライブラリを閲覧できる",
+  "family.access_manage": "閲覧と削除（ごみ箱へ）ができる"
 }

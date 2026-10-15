@@ -587,6 +587,29 @@ class LibraryIndex extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// The item at [relPath] ("2024/05/IMG_1.HEIC"), or null. Only items in
+  /// the index are found — never an arbitrary path.
+  MediaItem? findByRel(String relPath) {
+    if (_byRelRev != _rev) {
+      _byRel = {for (final i in _items) i.relPath: i};
+      _byRelRev = _rev;
+    }
+    final i = _byRel[relPath];
+    return i != null && i.relPath == relPath ? i : null;
+  }
+
+  Map<String, MediaItem> _byRel = const {};
+  int _byRelRev = -1;
+
+  /// Bumped on every change (see [notifyListeners]).
+  int _rev = 0;
+
+  @override
+  void notifyListeners() {
+    _rev++;
+    super.notifyListeners();
+  }
+
   MediaItem? findByAsset(String deviceId, String assetId) {
     final map = _byAssetCache ??= {
       for (final i in _items)

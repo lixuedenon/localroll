@@ -385,5 +385,8 @@
   "settings.log_hint": "Mencatat apa yang terjadi dan apa yang gagal, untuk menemukan masalah. Tetap di perangkat ini, tidak pernah dikirim; tanpa isi foto, kata sandi, atau kode. Ekspor hanya bila ingin memberikannya kepada yang membantu Anda.",
   "settings.log_export": "Ekspor log…",
   "settings.log_failed": "Tidak dapat menyimpan log.",
-  "settings.log_saved": "Log disimpan: {path}"
+  "settings.log_saved": "Log disimpan: {path}",
+  "family.access_none": "Tidak bisa menelusuri pustaka",
+  "family.access_view": "Bisa menelusuri pustaka",
+  "family.access_manage": "Bisa menelusuri dan menghapus (ke Recycle Bin)"
 }

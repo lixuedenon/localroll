@@ -492,3 +492,116 @@ class OnlineDevice {
           if (e is Map<String, dynamic>) OnlineDevice.fromJson(e),
       ];
 }
+
+/// What a device may do with this PC's library from afar (set on the PC).
+enum LibraryAccess {
+  /// Only transfers.
+  none,
+
+  /// Look, play, save to the phone.
+  view,
+
+  /// Also delete (to the PC's Recycle Bin).
+  manage;
+
+  static LibraryAccess? parse(Object? v) => switch (v) {
+        'none' => none,
+        'view' => view,
+        'manage' => manage,
+        _ => null,
+      };
+}
+
+/// One library item as a phone sees it when browsing the PC.
+class RemoteItem {
+  const RemoteItem({
+    required this.path,
+    required this.name,
+    required this.kind,
+    required this.takenMs,
+    required this.size,
+    this.live,
+    this.private = false,
+    this.mine = false,
+    this.from,
+  });
+
+  /// Its place in the library ("2024/05/IMG_1.HEIC"): what to ask for.
+  final String path;
+  final String name;
+  final MediaKind kind;
+  final int takenMs;
+  final int size;
+
+  /// The Live Photo video that goes with it, if any (its path).
+  final String? live;
+
+  /// "Only me" (shown only to the phone that sent it).
+  final bool private;
+
+  /// Sent by the phone asking (it may change its visibility).
+  final bool mine;
+
+  /// Who it came from (family member or device name).
+  final String? from;
+
+  Map<String, dynamic> toJson() => {
+        'p': path,
+        'n': name,
+        'k': kind.name,
+        't': takenMs,
+        's': size,
+        if (live != null) 'l': live,
+        if (private) 'x': true,
+        if (mine) 'm': true,
+        if (from != null) 'f': from,
+      };
+
+  factory RemoteItem.fromJson(Map<String, dynamic> j) => RemoteItem(
+        path: j['p'] as String,
+        name: j['n'] as String? ?? '',
+        kind: MediaKind.values.firstWhere((k) => k.name == j['k'], orElse: () => MediaKind.other),
+        takenMs: (j['t'] as num?)?.toInt() ?? 0,
+        size: (j['s'] as num?)?.toInt() ?? 0,
+        live: j['l'] as String?,
+        private: j['x'] == true,
+        mine: j['m'] == true,
+        from: j['f'] as String?,
+      );
+}
+
+/// A page of the PC's library, newest first.
+class LibraryPage {
+  const LibraryPage({required this.items, required this.total, required this.access, this.next, this.library});
+
+  final List<RemoteItem> items;
+
+  /// How many match in all.
+  final int total;
+  final LibraryAccess access;
+
+  /// Offset of the next page; null at the end.
+  final int? next;
+
+  /// The PC library's id (changes when it is made anew).
+  final String? library;
+
+  Map<String, dynamic> toJson() => {
+        'items': [for (final i in items) i.toJson()],
+        'total': total,
+        'access': access.name,
+        if (next != null) 'next': next,
+        if (library != null) 'library': library,
+      };
+
+  factory LibraryPage.fromJson(Map<String, dynamic> j) => LibraryPage(
+        items: [
+          for (final e in (j['items'] as List? ?? const []))
+            if (e is Map<String, dynamic>) RemoteItem.fromJson(e),
+        ],
+        total: (j['total'] as num?)?.toInt() ?? 0,
+        access: LibraryAccess.parse(j['access']) ?? LibraryAccess.none,
+        next: (j['next'] as num?)?.toInt(),
+        library: j['library'] as String?,
+      );
+}
