@@ -4,7 +4,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:pdfrx/pdfrx.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
@@ -109,10 +108,7 @@ class _MyLibraryPageState extends State<MyLibraryPage> {
       return;
     }
     if (!mounted) return;
-    if (i.name.toLowerCase().endsWith('.pdf')) {
-      await Navigator.of(context).push(MaterialPageRoute(builder: (_) => _PdfPage(path: path, item: i)));
-      return;
-    }
+    // Documents open in the phone's own apps (PDF viewer, Office…).
     await _shareFiles([File(path)]);
   }
 
@@ -606,43 +602,6 @@ class _VideoState extends State<_Video> {
       ]),
     );
   }
-}
-
-/// A PDF, read inside LocalRoll (pinch to zoom); share / open elsewhere.
-class _PdfPage extends StatelessWidget {
-  const _PdfPage({required this.path, required this.item});
-
-  final String path;
-  final MyItem item;
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(item.name, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 15)),
-            Text(_about(item), style: const TextStyle(fontSize: 12, color: LrColors.muted)),
-          ]),
-          actions: [
-            Builder(
-              builder: (bc) => IconButton(
-                tooltip: tr('mylib.open_with'),
-                onPressed: () {
-                  final box = bc.findRenderObject() as RenderBox?;
-                  unawaited(SharePlus.instance.share(ShareParams(
-                    files: [XFile(path, mimeType: 'application/pdf')],
-                    sharePositionOrigin: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
-                  )));
-                },
-                icon: const Icon(Icons.ios_share_rounded),
-              ),
-            ),
-          ],
-        ),
-        body: Container(
-          color: LrColors.ink,
-          child: PdfViewer.file(path, params: PdfViewerParams(backgroundColor: LrColors.ink, maxScale: 8)),
-        ),
-      );
 }
 
 /// "Recently deleted": files kept 30 days; restore or delete for good.

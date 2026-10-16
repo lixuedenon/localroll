@@ -48,8 +48,6 @@ dependencies:
   # 4.6+ needs a newer zip library than other plugins allow here.
   image: '>=4.3.0 <4.6.0'
   pdf: ^3.11.0
-  # Reading PDFs in "My files" (2.x needs a newer Flutter than Android builds with).
-  pdfrx: '>=1.0.100 <2.0.0'
   # Share sheet (mail, messages, print…) and picking any file to send.
   share_plus: '>=11.0.0 <12.0.0'
   file_picker: '>=8.1.0 <11.0.0'
