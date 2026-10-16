@@ -219,7 +219,10 @@ jobs:
       - name: Report build errors
         if: failure()
         working-directory: apps/mobile
-        run: grep -iE "error|exception|failed" build.log | tail -40 | while IFS= read -r l; do echo "::error::${l:0:900}"; done
+        run: |
+          # GitHub shows at most 10 notes per step: the last ~9000 characters
+          # of the build output, in pieces (Xcode's real error is in there).
+          tail -c 9000 build.log | tr '\n' ' ' | fold -w 900 | while IFS= read -r l; do echo "::error::$l"; done
       - name: Package unsigned IPA
         working-directory: apps/mobile/build/ios/iphoneos
         run: |
