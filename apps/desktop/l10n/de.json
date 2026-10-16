@@ -329,7 +329,7 @@
   "family.join_allow": "Erlauben",
   "home.guests_none": "Keine Gäste. Als Gast gekoppelte Geräte erscheinen hier.",
   "settings.accept_rule": "Wer „Annehmen“ braucht",
-  "settings.accept_rule_hint": "Familiengeräte kommen direkt durch (Backups), Gäste warten jedes Mal auf dich. Pro Gerät auf der Familienseite einstellen.",
+  "settings.accept_rule_hint": "Geräte der Familie senden direkt (Backups); Gäste warten jedes Mal auf deine Zustimmung. Pro Gerät auf der Seite „Geräte“ festlegen.",
   "send.their_reason": "Begründung: {reason}",
   "send.in_my_family": "In meiner Familiengruppe: Gesendetes kommt direkt an",
   "send.my_guest": "Mein Gast: Gesendetes wartet auf mich",
@@ -449,5 +449,15 @@
   "home.all_good_sub": "Was dich braucht, erscheint hier",
   "home.issues": "{count} Dinge brauchen dich",
   "home.devices_none": "Noch keine Geräte. Klicke auf „Gerät hinzufügen“.",
-  "lib.recent_chip": "{count} neu · zeigen"
+  "lib.recent_chip": "{count} neu · zeigen",
+  "library.size": "Miniaturgröße",
+  "library.size_s": "Klein",
+  "library.size_m": "Mittel",
+  "library.size_l": "Groß",
+  "jobs.hint": "Kopien, die Windows öffnen kann; die Originale bleiben immer erhalten.",
+  "jobs.go_library": "Bibliothek öffnen",
+  "jobs.ffmpeg_missing": "ffmpeg wurde nicht gefunden: Konvertieren und HEIC-Vorschauen funktionieren erst, wenn es eingerichtet ist.",
+  "settings.g_general": "Allgemein",
+  "settings.g_storage": "Speicher",
+  "settings.g_about": "Info"
 }

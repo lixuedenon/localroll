@@ -329,7 +329,7 @@
   "family.join_allow": "Đồng ý",
   "home.guests_none": "Không có khách. Thiết bị ghép nối dạng khách sẽ hiện ở đây.",
   "settings.accept_rule": "Ai cần \"Chấp nhận\"",
-  "settings.accept_rule_hint": "Thiết bị gia đình được nhận ngay (sao lưu); khách chờ bạn đồng ý mỗi lần. Đặt cho từng thiết bị ở trang Gia đình.",
+  "settings.accept_rule_hint": "Thiết bị gia đình gửi thẳng vào (sao lưu); khách phải chờ bạn đồng ý mỗi lần. Thiết lập cho từng thiết bị ở trang Thiết bị.",
   "send.their_reason": "Lý do: {reason}",
   "send.in_my_family": "Trong nhóm gia đình của tôi: gửi đến là nhận ngay",
   "send.my_guest": "Khách của tôi: gửi đến phải chờ tôi đồng ý",
@@ -449,5 +449,15 @@
   "home.all_good_sub": "Việc cần bạn xử lý sẽ hiện ở đây",
   "home.issues": "{count} việc cần xử lý",
   "home.devices_none": "Chưa có thiết bị. Bấm “Thêm thiết bị”.",
-  "lib.recent_chip": "{count} mục mới · xem"
+  "lib.recent_chip": "{count} mục mới · xem",
+  "library.size": "Kích thước hình thu nhỏ",
+  "library.size_s": "Nhỏ",
+  "library.size_m": "Vừa",
+  "library.size_l": "Lớn",
+  "jobs.hint": "Bản sao Windows mở được; bản gốc luôn được giữ lại.",
+  "jobs.go_library": "Mở thư viện",
+  "jobs.ffmpeg_missing": "Không tìm thấy ffmpeg: chuyển đổi và xem trước HEIC sẽ không hoạt động cho đến khi được thiết lập.",
+  "settings.g_general": "Chung",
+  "settings.g_storage": "Lưu trữ",
+  "settings.g_about": "Giới thiệu"
 }

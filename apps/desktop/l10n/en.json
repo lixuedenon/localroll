@@ -329,7 +329,7 @@
   "family.join_allow": "Allow",
   "home.guests_none": "No guests. Devices paired as “guest” show up here.",
   "settings.accept_rule": "Who needs “Accept”",
-  "settings.accept_rule_hint": "Family-group devices send straight in (backups); guests wait for your OK each time. Set it per device on the Family page.",
+  "settings.accept_rule_hint": "Family devices send straight in (backups); guests wait for your OK each time. Set it per device on the Devices page.",
   "send.their_reason": "Their reason: {reason}",
   "send.in_my_family": "In my family group: what it sends arrives straight away",
   "send.my_guest": "My guest: what it sends waits for my OK",
@@ -449,5 +449,15 @@
   "home.all_good_sub": "Anything that needs you shows up here",
   "home.issues": "{count} things need you",
   "home.devices_none": "No devices yet. Click “Add a device”.",
-  "lib.recent_chip": "{count} new · show"
+  "lib.recent_chip": "{count} new · show",
+  "library.size": "Thumbnail size",
+  "library.size_s": "Small",
+  "library.size_m": "Medium",
+  "library.size_l": "Large",
+  "jobs.hint": "Copies Windows can open; originals are always kept.",
+  "jobs.go_library": "Open the library",
+  "jobs.ffmpeg_missing": "ffmpeg was not found: conversion and HEIC previews won't work until it is set up.",
+  "settings.g_general": "General",
+  "settings.g_storage": "Storage",
+  "settings.g_about": "About"
 }

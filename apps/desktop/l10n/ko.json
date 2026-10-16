@@ -329,7 +329,7 @@
   "family.join_allow": "허용",
   "home.guests_none": "게스트가 없습니다. 게스트로 페어링한 기기가 여기에 표시됩니다.",
   "settings.accept_rule": "\"수락\"이 필요한 기기",
-  "settings.accept_rule_hint": "가족 그룹 기기는 바로 받고(백업), 게스트는 매번 승인합니다. \"가족\" 페이지에서 기기별로 설정하세요.",
+  "settings.accept_rule_hint": "가족 기기는 바로 보냅니다(백업). 게스트는 매번 승인을 기다립니다. \"기기\" 페이지에서 기기별로 설정하세요.",
   "send.their_reason": "상대방의 이유: {reason}",
   "send.in_my_family": "내 가족 그룹: 보낸 것을 바로 받음",
   "send.my_guest": "내 게스트: 보낸 것은 내 승인이 필요",
@@ -449,5 +449,15 @@
   "home.all_good_sub": "처리할 일이 있으면 여기에 표시됩니다",
   "home.issues": "처리할 일 {count}개",
   "home.devices_none": "기기가 없습니다. ‘기기 추가’를 클릭하세요.",
-  "lib.recent_chip": "새 항목 {count}개 · 보기"
+  "lib.recent_chip": "새 항목 {count}개 · 보기",
+  "library.size": "미리보기 크기",
+  "library.size_s": "작게",
+  "library.size_m": "보통",
+  "library.size_l": "크게",
+  "jobs.hint": "Windows에서 열 수 있는 사본을 만듭니다. 원본은 항상 보관됩니다.",
+  "jobs.go_library": "라이브러리 열기",
+  "jobs.ffmpeg_missing": "ffmpeg를 찾을 수 없습니다. 설정하기 전에는 변환과 HEIC 미리보기가 되지 않습니다.",
+  "settings.g_general": "일반",
+  "settings.g_storage": "저장",
+  "settings.g_about": "정보"
 }

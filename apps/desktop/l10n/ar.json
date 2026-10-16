@@ -329,7 +329,7 @@
   "family.join_allow": "سماح",
   "home.guests_none": "لا ضيوف. تظهر هنا الأجهزة المقترنة كضيف.",
   "settings.accept_rule": "من يحتاج إلى \"قبول\"",
-  "settings.accept_rule_hint": "أجهزة العائلة تصل مباشرة (نسخ احتياطية)، والضيوف ينتظرون موافقتك. اضبط ذلك لكل جهاز في صفحة العائلة.",
+  "settings.accept_rule_hint": "أجهزة العائلة ترسل مباشرة (نسخ احتياطية)؛ الضيوف ينتظرون موافقتك في كل مرة. اضبط ذلك لكل جهاز في صفحة الأجهزة.",
   "send.their_reason": "السبب: {reason}",
   "send.in_my_family": "في مجموعتي العائلية: ما يرسله يصل مباشرة",
   "send.my_guest": "ضيفي: ما يرسله ينتظر موافقتي",
@@ -449,5 +449,15 @@
   "home.all_good_sub": "ما يحتاج انتباهك يظهر هنا",
   "home.issues": "{count} أمور تحتاج انتباهك",
   "home.devices_none": "لا أجهزة بعد. اضغط «إضافة جهاز».",
-  "lib.recent_chip": "{count} جديدة · عرض"
+  "lib.recent_chip": "{count} جديدة · عرض",
+  "library.size": "حجم الصور المصغّرة",
+  "library.size_s": "صغير",
+  "library.size_m": "متوسط",
+  "library.size_l": "كبير",
+  "jobs.hint": "نسخ يمكن لـ Windows فتحها؛ تُحفظ الأصول دائمًا.",
+  "jobs.go_library": "فتح المكتبة",
+  "jobs.ffmpeg_missing": "لم يتم العثور على ffmpeg: لن يعمل التحويل ومعاينات HEIC حتى يتم إعداده.",
+  "settings.g_general": "عام",
+  "settings.g_storage": "التخزين",
+  "settings.g_about": "حول"
 }

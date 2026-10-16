@@ -329,7 +329,7 @@
   "family.join_allow": "同意",
   "home.guests_none": "沒有訪客。以「訪客」身分配對的裝置會顯示在這裡。",
   "settings.accept_rule": "誰需要點「接受」",
-  "settings.accept_rule_hint": "家庭組的裝置發來直接接收（用於備份）；訪客每次都要你同意。在「家庭」頁面裡逐台設定。",
+  "settings.accept_rule_hint": "家人的裝置直接傳進來（用於備份）；訪客每次都要等你確認。在「裝置」頁逐台設定。",
   "send.their_reason": "對方的理由：{reason}",
   "send.in_my_family": "在我的家庭組：它發來的直接接收",
   "send.my_guest": "我的訪客：它發來的要我同意",
@@ -449,5 +449,15 @@
   "home.all_good_sub": "有需要處理的事會顯示在這裡",
   "home.issues": "{count} 件事需要處理",
   "home.devices_none": "還沒有裝置。點「新增裝置」。",
-  "lib.recent_chip": "新收到 {count} 項 · 查看"
+  "lib.recent_chip": "新收到 {count} 項 · 查看",
+  "library.size": "縮圖大小",
+  "library.size_s": "小",
+  "library.size_m": "中",
+  "library.size_l": "大",
+  "jobs.hint": "轉換成 Windows 能直接開啟的副本；原檔始終保留。",
+  "jobs.go_library": "開啟媒體庫",
+  "jobs.ffmpeg_missing": "找不到 ffmpeg：設定好之前無法轉換，HEIC 也無法預覽。",
+  "settings.g_general": "一般",
+  "settings.g_storage": "儲存",
+  "settings.g_about": "關於"
 }

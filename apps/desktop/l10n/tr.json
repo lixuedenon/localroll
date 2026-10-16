@@ -329,7 +329,7 @@
   "family.join_allow": "İzin ver",
   "home.guests_none": "Misafir yok. Misafir olarak eşlenen cihazlar burada görünür.",
   "settings.accept_rule": "Kim için “Kabul et” gerekir",
-  "settings.accept_rule_hint": "Aile grubu doğrudan gelir (yedekler); misafirler her seferinde onayını bekler. Aile sayfasında cihaz bazında ayarla.",
+  "settings.accept_rule_hint": "Aile cihazları doğrudan gönderir (yedekler); misafirler her seferinde onayınızı bekler. Cihazlar sayfasında cihaz başına ayarlayın.",
   "send.their_reason": "Gerekçesi: {reason}",
   "send.in_my_family": "Aile grubumda: gönderdikleri doğrudan gelir",
   "send.my_guest": "Misafirim: gönderdikleri onayımı bekler",
@@ -449,5 +449,15 @@
   "home.all_good_sub": "İlgilenmeniz gerekenler burada görünür",
   "home.issues": "{count} konu ilginizi bekliyor",
   "home.devices_none": "Henüz cihaz yok. “Cihaz ekle”ye tıklayın.",
-  "lib.recent_chip": "{count} yeni · göster"
+  "lib.recent_chip": "{count} yeni · göster",
+  "library.size": "Küçük resim boyutu",
+  "library.size_s": "Küçük",
+  "library.size_m": "Orta",
+  "library.size_l": "Büyük",
+  "jobs.hint": "Windows'un açabileceği kopyalar; orijinaller her zaman saklanır.",
+  "jobs.go_library": "Kitaplığı aç",
+  "jobs.ffmpeg_missing": "ffmpeg bulunamadı: ayarlanana kadar dönüştürme ve HEIC önizlemeleri çalışmaz.",
+  "settings.g_general": "Genel",
+  "settings.g_storage": "Depolama",
+  "settings.g_about": "Hakkında"
 }

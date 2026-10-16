@@ -225,6 +225,9 @@ class AppSettings extends ChangeNotifier {
   /// <year>/<month>.
   bool folderPerMember = false;
 
+  /// Library thumbnail size: 0 small, 1 medium, 2 large.
+  int thumbSize = 1;
+
   /// Paired phones in the family group, grouped into family members.
   /// (PCs and guests are listed separately.)
   FamilyDirectory get family => FamilyDirectory(
@@ -260,6 +263,7 @@ class AppSettings extends ChangeNotifier {
     s.colorValue = (j['colorValue'] as num?)?.toInt() ?? DeviceLook.randomColor();
     s.avatarVersion = (j['avatarVersion'] as num?)?.toInt() ?? 0;
     s.folderPerMember = j['folderPerMember'] == true;
+    s.thumbSize = ((j['thumbSize'] as num?)?.toInt() ?? 1).clamp(0, 2);
     if (s.avatarVersion != 0 && !await s.avatarFile.exists()) s.avatarVersion = 0;
     for (final t in (j['trusted'] as List? ?? const [])) {
       final d = TrustedDevice.fromJson(t as Map<String, dynamic>);
@@ -305,6 +309,7 @@ class AppSettings extends ChangeNotifier {
       'colorValue': colorValue,
       'avatarVersion': avatarVersion,
       'folderPerMember': folderPerMember,
+      'thumbSize': thumbSize,
       'trusted': trusted.values.map((t) => t.toJson()).toList(),
       'peers': peers.values.map((p) => p.toJson()).toList(),
     }));

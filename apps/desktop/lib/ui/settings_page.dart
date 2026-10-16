@@ -11,6 +11,7 @@ import '../services/autostart.dart';
 import '../services/network.dart';
 import 'app_nav.dart';
 import 'identity_card.dart';
+import 'theme.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key, required this.services});
@@ -46,145 +47,154 @@ class _SettingsPageState extends State<SettingsPage> {
     return ListenableBuilder(
       listenable: Listenable.merge([s.settings, s.ffmpeg]),
       builder: (context, _) => Scaffold(
-        appBar: AppBar(title: Text(tr('nav.settings'))),
         body: ListView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.fromLTRB(28, 22, 28, 28),
           children: [
-            _section(theme, tr('settings.language')),
+            Text(tr('nav.settings'), style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700)),
+            const SizedBox(height: 18),
             Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: DropdownButton<String?>(
-                value: s.settings.language,
-                onChanged: (v) => s.settings.update((x) => x.language = v),
-                items: [
-                  DropdownMenuItem<String?>(value: null, child: Text(tr('settings.language_system'))),
-                  for (final l in supportedLanguages)
-                    DropdownMenuItem<String?>(value: l.code, child: Text(l.nativeName)),
-                ],
+              alignment: AlignmentDirectional.topStart,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 860),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  // How phones see this PC.
+                  _group(theme, tr('identity.title'), [IdentityCard(services: s)], bare: true),
+                  _group(theme, tr('settings.g_general'), [
+                    _row(
+                      Icons.translate_rounded,
+                      tr('settings.language'),
+                      trailing: DropdownButton<String?>(
+                        value: s.settings.language,
+                        underline: const SizedBox.shrink(),
+                        borderRadius: BorderRadius.circular(10),
+                        onChanged: (v) => s.settings.update((x) => x.language = v),
+                        items: [
+                          DropdownMenuItem<String?>(value: null, child: Text(tr('settings.language_system'))),
+                          for (final l in supportedLanguages)
+                            DropdownMenuItem<String?>(value: l.code, child: Text(l.nativeName)),
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    const _AutoStartSwitch(),
+                  ]),
+                  _group(theme, tr('settings.receiving'), [
+                    // Who needs "Accept" is decided per device (family / guest).
+                    _row(
+                      Icons.verified_user_outlined,
+                      tr('settings.accept_rule'),
+                      sub: tr('settings.accept_rule_hint'),
+                      trailing: OutlinedButton(
+                        onPressed: () => AppNav.instance.selectTab(AppNav.devices),
+                        child: Text(tr('nav.devices')),
+                      ),
+                    ),
+                  ]),
+                  _group(theme, tr('settings.g_storage'), [
+                    _row(Icons.photo_library_outlined, tr('settings.library_folder'), sub: tr('settings.library_hint')),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+                      child: Row(children: [
+                        Expanded(child: TextField(controller: _library)),
+                        const SizedBox(width: 12),
+                        FilledButton(
+                          onPressed: () async {
+                            final v = _library.text.trim();
+                            if (v.isEmpty) return;
+                            try {
+                              await Directory(v).create(recursive: true);
+                              await s.changeLibrary(v);
+                              _toast(tr('settings.library_switched'));
+                            } catch (e) {
+                              _toast(tr('settings.folder_error', {'error': e}));
+                            }
+                          },
+                          child: Text(tr('settings.switch')),
+                        ),
+                        const SizedBox(width: 8),
+                        OutlinedButton(
+                          onPressed: () => revealInExplorer(s.library.rootPath),
+                          child: Text(tr('common.open')),
+                        ),
+                      ]),
+                    ),
+                    const Divider(height: 1),
+                    SwitchListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                      secondary: const Icon(Icons.folder_shared_outlined),
+                      value: s.settings.folderPerMember,
+                      onChanged: (v) => s.settings.update((x) => x.folderPerMember = v),
+                      title: Text(tr('family.folder_per_member')),
+                      subtitle: Text(tr('family.folder_per_member_hint')),
+                    ),
+                    const Divider(height: 1),
+                    _row(
+                      s.ffmpeg.available ? Icons.check_circle_rounded : Icons.error_outline_rounded,
+                      tr('settings.ffmpeg_title'),
+                      iconColor: s.ffmpeg.available ? LrColors.verified : LrColors.danger,
+                      sub: s.ffmpeg.available ? (s.ffmpeg.version ?? s.ffmpeg.ffmpeg) : tr('settings.ffmpeg_missing'),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
+                      child: Row(children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _ffmpeg,
+                            decoration: InputDecoration(hintText: tr('settings.ffmpeg_field_hint')),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        FilledButton(
+                          onPressed: () async {
+                            final v = _ffmpeg.text.trim();
+                            await s.settings.update((x) => x.ffmpegPath = v.isEmpty ? null : v);
+                            await s.ffmpeg.locate();
+                            _toast(s.ffmpeg.available ? tr('settings.ffmpeg_found') : tr('settings.ffmpeg_not_here'));
+                          },
+                          child: Text(tr('settings.detect')),
+                        ),
+                      ]),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+                      child: Text(tr('settings.ffmpeg_order'), style: theme.textTheme.bodySmall),
+                    ),
+                  ]),
+                  _group(theme, tr('settings.network'), [
+                    _row(
+                      Icons.lan_outlined,
+                      tr('settings.port', {'port': s.server.port}),
+                      trailing: OutlinedButton.icon(
+                        onPressed: () async => _toast(await addFirewallRules(s.server.port)
+                            ? tr('receive.firewall_ok')
+                            : tr('settings.firewall_not_added')),
+                        icon: const Icon(Icons.shield_outlined, size: 18),
+                        label: Text(tr('settings.firewall')),
+                      ),
+                    ),
+                  ]),
+                  _group(theme, tr('settings.g_about'), [
+                    _row(Icons.description_outlined, tr('settings.log_title'), sub: tr('settings.log_hint')),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+                      child: Wrap(spacing: 12, runSpacing: 8, children: [
+                        FilledButton.tonalIcon(
+                          onPressed: _exportLog,
+                          icon: const Icon(Icons.download_rounded),
+                          label: Text(tr('settings.log_export')),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: () => showPrivacy(context),
+                          icon: const Icon(Icons.privacy_tip_outlined),
+                          label: Text(tr('privacy.title')),
+                        ),
+                      ]),
+                    ),
+                    const Divider(height: 1),
+                    _row(Icons.info_outline_rounded, 'LocalRoll · ${tr('settings.version', {'version': lrVersion})}'),
+                  ]),
+                ]),
               ),
-            ),
-            const SizedBox(height: 28),
-            _section(theme, tr('identity.title')),
-            IdentityCard(services: s),
-            const SizedBox(height: 28),
-            _section(theme, tr('settings.receiving')),
-            // Who needs "Accept" is decided per device (family / guest).
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.verified_user_outlined),
-                title: Text(tr('settings.accept_rule')),
-                subtitle: Text(tr('settings.accept_rule_hint')),
-                trailing: TextButton(
-                  onPressed: () => AppNav.instance.selectTab(AppNav.family),
-                  child: Text(tr('nav.devices')),
-                ),
-              ),
-            ),
-            const SizedBox(height: 28),
-            _section(theme, tr('settings.startup')),
-            const _AutoStartSwitch(),
-            const SizedBox(height: 28),
-            _section(theme, tr('settings.library_folder')),
-            Row(children: [
-              Expanded(child: TextField(controller: _library)),
-              const SizedBox(width: 12),
-              FilledButton(
-                onPressed: () async {
-                  final v = _library.text.trim();
-                  if (v.isEmpty) return;
-                  try {
-                    await Directory(v).create(recursive: true);
-                    await s.changeLibrary(v);
-                    _toast(tr('settings.library_switched'));
-                  } catch (e) {
-                    _toast(tr('settings.folder_error', {'error': e}));
-                  }
-                },
-                child: Text(tr('settings.switch')),
-              ),
-              const SizedBox(width: 8),
-              OutlinedButton(
-                onPressed: () => revealInExplorer(s.library.rootPath),
-                child: Text(tr('common.open')),
-              ),
-            ]),
-            const SizedBox(height: 4),
-            Text(tr('settings.library_hint'), style: theme.textTheme.bodySmall),
-            const SizedBox(height: 8),
-            // Moved here from the old Family page.
-            ListenableBuilder(
-              listenable: s.settings,
-              builder: (context, _) => SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                value: s.settings.folderPerMember,
-                onChanged: (v) => s.settings.update((x) => x.folderPerMember = v),
-                title: Text(tr('family.folder_per_member')),
-                subtitle: Text(tr('family.folder_per_member_hint')),
-              ),
-            ),
-            const SizedBox(height: 28),
-            _section(theme, tr('settings.ffmpeg_title')),
-            Text(
-              s.ffmpeg.available
-                  ? '✓ ${s.ffmpeg.version ?? s.ffmpeg.ffmpeg}\n${s.ffmpeg.ffmpeg}'
-                  : tr('settings.ffmpeg_missing'),
-              style: TextStyle(color: s.ffmpeg.available ? null : theme.colorScheme.error),
-            ),
-            const SizedBox(height: 8),
-            Row(children: [
-              Expanded(
-                child: TextField(
-                  controller: _ffmpeg,
-                  decoration: InputDecoration(hintText: tr('settings.ffmpeg_field_hint')),
-                ),
-              ),
-              const SizedBox(width: 12),
-              FilledButton(
-                onPressed: () async {
-                  final v = _ffmpeg.text.trim();
-                  await s.settings.update((x) => x.ffmpegPath = v.isEmpty ? null : v);
-                  await s.ffmpeg.locate();
-                  _toast(s.ffmpeg.available ? tr('settings.ffmpeg_found') : tr('settings.ffmpeg_not_here'));
-                },
-                child: Text(tr('settings.detect')),
-              ),
-            ]),
-            const SizedBox(height: 4),
-            Text(tr('settings.ffmpeg_order'), style: theme.textTheme.bodySmall),
-            const SizedBox(height: 28),
-            _section(theme, tr('settings.network')),
-            Text(tr('settings.port', {'port': s.server.port})),
-            const SizedBox(height: 8),
-            Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: OutlinedButton.icon(
-                onPressed: () async => _toast(await addFirewallRules(s.server.port)
-                    ? tr('receive.firewall_ok')
-                    : tr('settings.firewall_not_added')),
-                icon: const Icon(Icons.shield_outlined),
-                label: Text(tr('settings.firewall')),
-              ),
-            ),
-            const SizedBox(height: 28),
-            _section(theme, tr('settings.log_title')),
-            Text(tr('settings.log_hint'), style: theme.textTheme.bodySmall),
-            const SizedBox(height: 8),
-            Wrap(spacing: 12, runSpacing: 8, children: [
-              FilledButton.tonalIcon(
-                onPressed: _exportLog,
-                icon: const Icon(Icons.download_rounded),
-                label: Text(tr('settings.log_export')),
-              ),
-              OutlinedButton.icon(
-                onPressed: () => showPrivacy(context),
-                icon: const Icon(Icons.privacy_tip_outlined),
-                label: Text(tr('privacy.title')),
-              ),
-            ]),
-            const SizedBox(height: 28),
-            Center(
-              child: Text('LocalRoll · ${tr('settings.version', {'version': lrVersion})}',
-                  style: theme.textTheme.bodySmall),
             ),
           ],
         ),
@@ -212,9 +222,38 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  Widget _section(ThemeData theme, String title) => Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: Text(title, style: theme.textTheme.titleMedium),
+  /// One settings group: a small heading, then its rows in one box.
+  Widget _group(ThemeData theme, String title, List<Widget> rows, {bool bare = false}) => Padding(
+        padding: const EdgeInsets.only(bottom: 22),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 8),
+            child: Text(title, style: const TextStyle(color: LrColors.muted, fontSize: 13, fontWeight: FontWeight.w600)),
+          ),
+          if (bare)
+            ...rows
+          else
+            Container(
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                color: LrColors.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: LrColors.line),
+              ),
+              child: Material(
+                type: MaterialType.transparency,
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: rows),
+              ),
+            ),
+        ]),
+      );
+
+  Widget _row(IconData icon, String title, {String? sub, Widget? trailing, Color? iconColor}) => ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        leading: Icon(icon, color: iconColor),
+        title: Text(title),
+        subtitle: sub == null ? null : Text(sub),
+        trailing: trailing,
       );
 }
 
@@ -239,8 +278,9 @@ class _AutoStartSwitchState extends State<_AutoStartSwitch> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: SwitchListTile(
+    return SwitchListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+        secondary: const Icon(Icons.power_settings_new_rounded),
         value: _on ?? false,
         onChanged: _on == null
             ? null
@@ -250,7 +290,6 @@ class _AutoStartSwitchState extends State<_AutoStartSwitch> {
               },
         title: Text(tr('settings.autostart')),
         subtitle: Text(tr('settings.autostart_hint')),
-      ),
     );
   }
 }

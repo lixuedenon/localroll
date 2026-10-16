@@ -329,7 +329,7 @@
   "family.join_allow": "Consenti",
   "home.guests_none": "Nessun ospite. Qui compaiono i dispositivi associati come ospite.",
   "settings.accept_rule": "Chi richiede “Accetta”",
-  "settings.accept_rule_hint": "Il gruppo famiglia entra subito (backup); gli ospiti attendono il tuo consenso. Impostalo per dispositivo in Famiglia.",
+  "settings.accept_rule_hint": "I dispositivi della famiglia inviano direttamente (backup); gli ospiti attendono ogni volta il tuo consenso. Impostalo per ogni dispositivo nella pagina Dispositivi.",
   "send.their_reason": "Motivo: {reason}",
   "send.in_my_family": "Nel mio gruppo famiglia: ciò che invia arriva subito",
   "send.my_guest": "Mio ospite: ciò che invia attende il mio consenso",
@@ -449,5 +449,15 @@
   "home.all_good_sub": "Ciò che richiede attenzione compare qui",
   "home.issues": "{count} cose da sistemare",
   "home.devices_none": "Ancora nessun dispositivo. Fai clic su «Aggiungi dispositivo».",
-  "lib.recent_chip": "{count} nuovi · mostra"
+  "lib.recent_chip": "{count} nuovi · mostra",
+  "library.size": "Dimensione miniature",
+  "library.size_s": "Piccole",
+  "library.size_m": "Medie",
+  "library.size_l": "Grandi",
+  "jobs.hint": "Copie che Windows può aprire; gli originali vengono sempre conservati.",
+  "jobs.go_library": "Apri la libreria",
+  "jobs.ffmpeg_missing": "ffmpeg non trovato: conversione e anteprime HEIC non funzioneranno finché non è configurato.",
+  "settings.g_general": "Generale",
+  "settings.g_storage": "Archiviazione",
+  "settings.g_about": "Informazioni"
 }

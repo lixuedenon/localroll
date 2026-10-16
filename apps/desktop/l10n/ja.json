@@ -329,7 +329,7 @@
   "family.join_allow": "許可",
   "home.guests_none": "ゲストはいません。ゲストとしてペアリングしたデバイスがここに表示されます。",
   "settings.accept_rule": "「受け取る」が必要な相手",
-  "settings.accept_rule_hint": "家族グループのデバイスはそのまま受け取り（バックアップ）、ゲストは毎回確認します。「家族」ページでデバイスごとに設定します。",
+  "settings.accept_rule_hint": "家族のデバイスはそのまま送信（バックアップ用）、ゲストは毎回あなたの許可を待ちます。「デバイス」ページで個別に設定します。",
   "send.their_reason": "相手の理由：{reason}",
   "send.in_my_family": "自分の家族グループ：送られたものはすぐ受け取る",
   "send.my_guest": "自分のゲスト：送られたものは確認が必要",
@@ -449,5 +449,15 @@
   "home.all_good_sub": "対応が必要なことはここに表示されます",
   "home.issues": "対応が必要なことが {count} 件",
   "home.devices_none": "デバイスがありません。「デバイスを追加」をクリック。",
-  "lib.recent_chip": "新着 {count} 件 · 表示"
+  "lib.recent_chip": "新着 {count} 件 · 表示",
+  "library.size": "サムネイルのサイズ",
+  "library.size_s": "小",
+  "library.size_m": "中",
+  "library.size_l": "大",
+  "jobs.hint": "Windows で開けるコピーを作ります。元のファイルは常に残ります。",
+  "jobs.go_library": "ライブラリを開く",
+  "jobs.ffmpeg_missing": "ffmpeg が見つかりません。設定するまで変換も HEIC のプレビューもできません。",
+  "settings.g_general": "一般",
+  "settings.g_storage": "保存",
+  "settings.g_about": "情報"
 }

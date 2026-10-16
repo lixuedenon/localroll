@@ -329,7 +329,7 @@
   "family.join_allow": "Izinkan",
   "home.guests_none": "Tidak ada tamu. Perangkat yang dipasangkan sebagai tamu muncul di sini.",
   "settings.accept_rule": "Siapa yang perlu “Terima”",
-  "settings.accept_rule_hint": "Grup keluarga langsung diterima (cadangan); tamu menunggu persetujuanmu. Atur per perangkat di halaman Keluarga.",
+  "settings.accept_rule_hint": "Perangkat keluarga langsung mengirim (cadangan); tamu menunggu persetujuan Anda setiap kali. Atur per perangkat di halaman Perangkat.",
   "send.their_reason": "Alasannya: {reason}",
   "send.in_my_family": "Di grup keluargaku: kirimannya langsung diterima",
   "send.my_guest": "Tamuku: kirimannya menunggu persetujuanku",
@@ -449,5 +449,15 @@
   "home.all_good_sub": "Hal yang perlu Anda tangani muncul di sini",
   "home.issues": "{count} hal perlu ditangani",
   "home.devices_none": "Belum ada perangkat. Klik “Tambah perangkat”.",
-  "lib.recent_chip": "{count} baru · lihat"
+  "lib.recent_chip": "{count} baru · lihat",
+  "library.size": "Ukuran thumbnail",
+  "library.size_s": "Kecil",
+  "library.size_m": "Sedang",
+  "library.size_l": "Besar",
+  "jobs.hint": "Salinan yang bisa dibuka Windows; file asli selalu disimpan.",
+  "jobs.go_library": "Buka pustaka",
+  "jobs.ffmpeg_missing": "ffmpeg tidak ditemukan: konversi dan pratinjau HEIC tidak berfungsi sampai disiapkan.",
+  "settings.g_general": "Umum",
+  "settings.g_storage": "Penyimpanan",
+  "settings.g_about": "Tentang"
 }

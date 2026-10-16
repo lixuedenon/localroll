@@ -241,6 +241,17 @@ class _LibraryPageState extends State<LibraryPage> {
                   ],
                   child: _toolChip(Icons.sort_rounded, tr(_byReceived ? 'library.sort_received' : 'library.sort_taken')),
                 ),
+                if (!_filesTab)
+                  PopupMenuButton<int>(
+                    tooltip: tr('library.size'),
+                    initialValue: s.settings.thumbSize,
+                    onSelected: (v) => s.settings.update((x) => x.thumbSize = v),
+                    itemBuilder: (_) => [
+                      for (final (v, k) in [(0, 'library.size_s'), (1, 'library.size_m'), (2, 'library.size_l')])
+                        CheckedPopupMenuItem(value: v, checked: s.settings.thumbSize == v, child: Text(tr(k))),
+                    ],
+                    icon: const Icon(Icons.photo_size_select_large_rounded),
+                  ),
                 IconButton(
                   tooltip: tr('library.open_folder'),
                   onPressed: () => revealInExplorer(s.library.rootPath),
@@ -516,8 +527,8 @@ class _LibraryPageState extends State<LibraryPage> {
         ..add(SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           sliver: SliverGrid.builder(
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 180,
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: const [120.0, 180.0, 260.0][widget.services.settings.thumbSize],
               mainAxisSpacing: 4,
               crossAxisSpacing: 4,
             ),

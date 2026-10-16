@@ -329,7 +329,7 @@
   "family.join_allow": "Permitir",
   "home.guests_none": "Nenhum convidado. Aparelhos pareados como convidado aparecem aqui.",
   "settings.accept_rule": "Quem precisa de “Aceitar”",
-  "settings.accept_rule_hint": "O grupo familiar entra direto (backups); convidados esperam seu OK. Ajuste por aparelho em Família.",
+  "settings.accept_rule_hint": "Dispositivos da família enviam diretamente (backups); convidados aguardam sua aprovação a cada vez. Defina por dispositivo na página Dispositivos.",
   "send.their_reason": "Motivo: {reason}",
   "send.in_my_family": "No meu grupo familiar: o que envia entra direto",
   "send.my_guest": "Meu convidado: o que envia espera meu OK",
@@ -449,5 +449,15 @@
   "home.all_good_sub": "O que precisar de si aparece aqui",
   "home.issues": "{count} coisas precisam de si",
   "home.devices_none": "Ainda sem dispositivos. Clique em «Adicionar dispositivo».",
-  "lib.recent_chip": "{count} novos · ver"
+  "lib.recent_chip": "{count} novos · ver",
+  "library.size": "Tamanho das miniaturas",
+  "library.size_s": "Pequeno",
+  "library.size_m": "Médio",
+  "library.size_l": "Grande",
+  "jobs.hint": "Cópias que o Windows consegue abrir; os originais são sempre mantidos.",
+  "jobs.go_library": "Abrir a biblioteca",
+  "jobs.ffmpeg_missing": "ffmpeg não encontrado: a conversão e as pré-visualizações HEIC não funcionarão até ser configurado.",
+  "settings.g_general": "Geral",
+  "settings.g_storage": "Armazenamento",
+  "settings.g_about": "Sobre"
 }
