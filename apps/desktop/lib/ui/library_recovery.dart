@@ -1,12 +1,12 @@
 // apps/desktop/lib/ui/library_recovery.dart
 import 'dart:io';
 
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 
 import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/library_index.dart';
+import '../services/win_dialogs.dart';
 import 'theme.dart';
 
 /// The library folder can't be reached. Two cases:
@@ -47,7 +47,7 @@ class _LibraryRecoveryState extends State<LibraryRecovery> {
 
   /// "It was moved": pick where it is now (or any folder to use instead).
   Future<void> _relocate() async {
-    final dir = await getDirectoryPath(confirmButtonText: tr('recover.use_folder'));
+    final dir = await WinDialogs.pickFolder(title: tr('recover.use_folder'));
     if (dir == null || !mounted) return;
     if (!await LibraryIndex.isLibraryFolder(dir)) {
       if (!mounted) return;

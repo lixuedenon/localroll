@@ -1,5 +1,4 @@
 // apps/desktop/lib/ui/library_page.dart
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:localroll_core/localroll_core.dart';
 
@@ -10,6 +9,7 @@ import '../services/file_actions.dart';
 import '../services/library_index.dart';
 import '../services/network.dart';
 import '../services/peers.dart';
+import '../services/win_dialogs.dart';
 import 'files_view.dart';
 import 'library_recovery.dart';
 import 'media_thumb.dart';
@@ -354,7 +354,7 @@ class _LibraryPageState extends State<LibraryPage> {
   /// Copy the originals into a folder of your choice.
   Future<void> _export(List<MediaItem> items) async {
     if (items.isEmpty) return;
-    final folder = await getDirectoryPath(confirmButtonText: tr('lib.export'));
+    final folder = await WinDialogs.pickFolder(title: tr('lib.export'));
     if (folder == null) return;
     final n = await exportItems(widget.services.library, items, folder);
     if (!mounted) return;

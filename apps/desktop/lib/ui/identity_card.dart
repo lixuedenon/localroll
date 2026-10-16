@@ -1,8 +1,8 @@
 // apps/desktop/lib/ui/identity_card.dart
+import 'dart:io';
 import 'dart:math';
 import 'dart:ui' as ui;
 
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:localroll_core/localroll_core.dart';
@@ -10,6 +10,7 @@ import 'package:localroll_core/localroll_core.dart';
 import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/settings.dart';
+import '../services/win_dialogs.dart';
 import 'device_badge.dart';
 import 'theme.dart';
 
@@ -70,11 +71,13 @@ class _IdentityCardState extends State<IdentityCard> {
   }
 
   Future<void> _pickPicture() async {
-    final file = await openFile(acceptedTypeGroups: [
-      XTypeGroup(label: tr('identity.images'), extensions: const ['jpg', 'jpeg', 'png', 'webp', 'bmp', 'gif']),
-    ]);
-    if (file == null) return;
-    final png = await squareAvatarPng(await file.readAsBytes());
+    final picked = await WinDialogs.pickFiles(
+      multiple: false,
+      typeLabel: tr('identity.images'),
+      extensions: const ['jpg', 'jpeg', 'png', 'webp', 'bmp', 'gif'],
+    );
+    if (picked.isEmpty) return;
+    final png = await squareAvatarPng(await File(picked.first).readAsBytes());
     if (png == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('identity.picture_error'))));

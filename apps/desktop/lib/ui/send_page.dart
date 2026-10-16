@@ -3,7 +3,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:localroll_core/localroll_core.dart';
 
@@ -12,6 +11,7 @@ import '../l10n/l10n.dart';
 import '../services/peers.dart';
 import '../services/phone_formats.dart';
 import '../services/settings.dart';
+import '../services/win_dialogs.dart';
 import 'app_nav.dart';
 import 'breathing.dart';
 import 'device_badge.dart';
@@ -354,15 +354,13 @@ class _SendPageState extends State<SendPage> {
   }
 
   Future<void> _sendFiles(PeerPc p, {bool toPhone = false}) async {
-    DiagLog.log('ui', 'file dialog opened');
-    final picked = await openFiles(confirmButtonText: tr('send.files'));
-    DiagLog.log('ui', 'file dialog closed (${picked.length} chosen)');
+    final picked = await WinDialogs.pickFiles(title: tr('send.files'));
     if (picked.isEmpty) return;
     final files = [
       // Photos and videos go into the other PC's library; other files into
       // its "Received files" folder.
-      for (final x in picked)
-        ?SendFile.plain(File(x.path), x.name, toLibrary: MediaKind.fromName(x.name) != MediaKind.other),
+      for (final path in picked)
+        ?SendFile.plain(File(path), _baseName(path), toLibrary: MediaKind.fromName(_baseName(path)) != MediaKind.other),
     ];
     if (files.isEmpty) return;
     final title = files.length == 1 ? files.first.name : tr('send.n_files', {'count': files.length});
@@ -375,9 +373,7 @@ class _SendPageState extends State<SendPage> {
   }
 
   Future<void> _sendFolder(PeerPc p, {bool toPhone = false}) async {
-    DiagLog.log('ui', 'folder dialog opened');
-    final dir = await getDirectoryPath(confirmButtonText: tr('send.folder'));
-    DiagLog.log('ui', 'folder dialog closed');
+    final dir = await WinDialogs.pickFolder(title: tr('send.folder'));
     if (dir == null) return;
     final files = await filesInFolder(dir);
     if (!mounted) return;
@@ -663,3 +659,6 @@ Future<void> queueForPhone(BuildContext context, AppServices s, PeerPc phone, Li
     ));
   }
 }
+
+/// File name of [path] (either slash).
+String _baseName(String path) => path.split(RegExp(r'[\\/]')).last;
