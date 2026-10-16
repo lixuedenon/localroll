@@ -139,24 +139,20 @@ class SettingsPage extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // Language.
-              Text(tr('home.language'), style: theme.textTheme.titleMedium),
-              const SizedBox(height: 8),
+              // Language: one line; the list opens in a sheet.
               Card(
-                child: Column(
-                  children: [
-                    _LanguageTile(
-                      label: tr('home.language_system'),
-                      selected: settings.language == null,
-                      onTap: () => settings.setLanguage(null),
+                child: ListTile(
+                  leading: const Icon(Icons.translate_rounded),
+                  title: Text(tr('home.language')),
+                  trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                    Text(
+                      supportedLanguages.where((l) => l.code == settings.language).firstOrNull?.nativeName ??
+                          tr('home.language_system'),
+                      style: const TextStyle(color: LrColors.muted),
                     ),
-                    for (final l in supportedLanguages)
-                      _LanguageTile(
-                        label: l.nativeName,
-                        selected: settings.language == l.code,
-                        onTap: () => settings.setLanguage(l.code),
-                      ),
-                  ],
+                    const Icon(Icons.chevron_right_rounded, color: LrColors.muted),
+                  ]),
+                  onTap: () => _pickLanguage(context, settings),
                 ),
               ),
               const SizedBox(height: 24),
@@ -233,6 +229,35 @@ class _LanguageTile extends StatelessWidget {
         trailing: selected ? const Icon(Icons.check_rounded, color: LrColors.safelight) : null,
         onTap: onTap,
       );
+}
+
+/// The language list, in a sheet (system default first, a check on the one in use).
+Future<void> _pickLanguage(BuildContext context, MobileSettings settings) async {
+  final picked = await showModalBottomSheet<String>(
+    context: context,
+    showDragHandle: true,
+    isScrollControlled: true,
+    builder: (c) => SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: MediaQuery.of(c).size.height * 0.6),
+        child: ListView(shrinkWrap: true, children: [
+          _LanguageTile(
+            label: tr('home.language_system'),
+            selected: settings.language == null,
+            onTap: () => Navigator.pop(c, ''),
+          ),
+          for (final l in supportedLanguages)
+            _LanguageTile(
+              label: l.nativeName,
+              selected: settings.language == l.code,
+              onTap: () => Navigator.pop(c, l.code),
+            ),
+        ]),
+      ),
+    ),
+  );
+  if (picked == null) return;
+  await settings.setLanguage(picked.isEmpty ? null : picked);
 }
 
 /// Diagnostics log → a text file in Files › LocalRoll (iPhone) or
