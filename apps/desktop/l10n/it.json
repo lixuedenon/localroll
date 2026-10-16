@@ -448,5 +448,6 @@
   "home.all_good_short": "Tutto a posto",
   "home.all_good_sub": "Ciò che richiede attenzione compare qui",
   "home.issues": "{count} cose da sistemare",
-  "home.devices_none": "Ancora nessun dispositivo. Fai clic su «Aggiungi dispositivo»."
+  "home.devices_none": "Ancora nessun dispositivo. Fai clic su «Aggiungi dispositivo».",
+  "lib.recent_chip": "{count} nuovi · mostra"
 }

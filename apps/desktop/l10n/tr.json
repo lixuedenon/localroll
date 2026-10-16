@@ -448,5 +448,6 @@
   "home.all_good_short": "Her şey yolunda",
   "home.all_good_sub": "İlgilenmeniz gerekenler burada görünür",
   "home.issues": "{count} konu ilginizi bekliyor",
-  "home.devices_none": "Henüz cihaz yok. “Cihaz ekle”ye tıklayın."
+  "home.devices_none": "Henüz cihaz yok. “Cihaz ekle”ye tıklayın.",
+  "lib.recent_chip": "{count} yeni · göster"
 }

@@ -448,5 +448,6 @@
   "home.all_good_short": "Mọi thứ ổn",
   "home.all_good_sub": "Việc cần bạn xử lý sẽ hiện ở đây",
   "home.issues": "{count} việc cần xử lý",
-  "home.devices_none": "Chưa có thiết bị. Bấm “Thêm thiết bị”."
+  "home.devices_none": "Chưa có thiết bị. Bấm “Thêm thiết bị”.",
+  "lib.recent_chip": "{count} mục mới · xem"
 }

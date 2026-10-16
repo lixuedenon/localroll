@@ -448,5 +448,6 @@
   "home.all_good_short": "كل شيء على ما يرام",
   "home.all_good_sub": "ما يحتاج انتباهك يظهر هنا",
   "home.issues": "{count} أمور تحتاج انتباهك",
-  "home.devices_none": "لا أجهزة بعد. اضغط «إضافة جهاز»."
+  "home.devices_none": "لا أجهزة بعد. اضغط «إضافة جهاز».",
+  "lib.recent_chip": "{count} جديدة · عرض"
 }

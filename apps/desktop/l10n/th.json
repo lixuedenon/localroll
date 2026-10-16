@@ -448,5 +448,6 @@
   "home.all_good_short": "ทุกอย่างปกติ",
   "home.all_good_sub": "เรื่องที่ต้องจัดการจะแสดงที่นี่",
   "home.issues": "มี {count} เรื่องต้องจัดการ",
-  "home.devices_none": "ยังไม่มีอุปกรณ์ คลิก “เพิ่มอุปกรณ์”"
+  "home.devices_none": "ยังไม่มีอุปกรณ์ คลิก “เพิ่มอุปกรณ์”",
+  "lib.recent_chip": "ใหม่ {count} รายการ · ดู"
 }

@@ -454,6 +454,7 @@ const Map<String, Map<String, String>> translations = {
     'home.all_good_sub': 'Anything that needs you shows up here',
     'home.issues': '{count} things need you',
     'home.devices_none': 'No devices yet. Click “Add a device”.',
+    'lib.recent_chip': '{count} new · show',
   },
   'zh': {
     'nav.library': '媒体库',
@@ -906,6 +907,7 @@ const Map<String, Map<String, String>> translations = {
     'home.all_good_sub': '有需要处理的事会显示在这里',
     'home.issues': '{count} 件事需要处理',
     'home.devices_none': '还没有设备。点“添加设备”。',
+    'lib.recent_chip': '新收到 {count} 项 · 查看',
   },
   'zh_Hant': {
     'nav.library': '媒體庫',
@@ -1358,6 +1360,7 @@ const Map<String, Map<String, String>> translations = {
     'home.all_good_sub': '有需要處理的事會顯示在這裡',
     'home.issues': '{count} 件事需要處理',
     'home.devices_none': '還沒有裝置。點「新增裝置」。',
+    'lib.recent_chip': '新收到 {count} 項 · 查看',
   },
   'ja': {
     'nav.library': 'ライブラリ',
@@ -1810,6 +1813,7 @@ const Map<String, Map<String, String>> translations = {
     'home.all_good_sub': '対応が必要なことはここに表示されます',
     'home.issues': '対応が必要なことが {count} 件',
     'home.devices_none': 'デバイスがありません。「デバイスを追加」をクリック。',
+    'lib.recent_chip': '新着 {count} 件 · 表示',
   },
   'ko': {
     'nav.library': '라이브러리',
@@ -2262,6 +2266,7 @@ const Map<String, Map<String, String>> translations = {
     'home.all_good_sub': '처리할 일이 있으면 여기에 표시됩니다',
     'home.issues': '처리할 일 {count}개',
     'home.devices_none': '기기가 없습니다. ‘기기 추가’를 클릭하세요.',
+    'lib.recent_chip': '새 항목 {count}개 · 보기',
   },
   'es': {
     'nav.library': 'Biblioteca',
@@ -2714,6 +2719,7 @@ const Map<String, Map<String, String>> translations = {
     'home.all_good_sub': 'Lo que necesite tu atención aparecerá aquí',
     'home.issues': '{count} cosas necesitan tu atención',
     'home.devices_none': 'Aún no hay dispositivos. Haz clic en «Añadir dispositivo».',
+    'lib.recent_chip': '{count} nuevos · ver',
   },
   'fr': {
     'nav.library': 'Bibliothèque',
@@ -3166,6 +3172,7 @@ const Map<String, Map<String, String>> translations = {
     'home.all_good_sub': 'Ce qui demande votre attention s’affiche ici',
     'home.issues': '{count} points à régler',
     'home.devices_none': 'Aucun appareil. Cliquez sur « Ajouter un appareil ».',
+    'lib.recent_chip': '{count} nouveaux · voir',
   },
   'de': {
     'nav.library': 'Mediathek',
@@ -3618,6 +3625,7 @@ const Map<String, Map<String, String>> translations = {
     'home.all_good_sub': 'Was dich braucht, erscheint hier',
     'home.issues': '{count} Dinge brauchen dich',
     'home.devices_none': 'Noch keine Geräte. Klicke auf „Gerät hinzufügen“.',
+    'lib.recent_chip': '{count} neu · zeigen',
   },
   'pt': {
     'nav.library': 'Biblioteca',
@@ -4070,6 +4078,7 @@ const Map<String, Map<String, String>> translations = {
     'home.all_good_sub': 'O que precisar de si aparece aqui',
     'home.issues': '{count} coisas precisam de si',
     'home.devices_none': 'Ainda sem dispositivos. Clique em «Adicionar dispositivo».',
+    'lib.recent_chip': '{count} novos · ver',
   },
   'ru': {
     'nav.library': 'Медиатека',
@@ -4522,6 +4531,7 @@ const Map<String, Map<String, String>> translations = {
     'home.all_good_sub': 'Всё, что требует внимания, появится здесь',
     'home.issues': 'Требует внимания: {count}',
     'home.devices_none': 'Устройств пока нет. Нажмите «Добавить устройство».',
+    'lib.recent_chip': 'Новых: {count} · показать',
   },
   'it': {
     'nav.library': 'Libreria',
@@ -4974,6 +4984,7 @@ const Map<String, Map<String, String>> translations = {
     'home.all_good_sub': 'Ciò che richiede attenzione compare qui',
     'home.issues': '{count} cose da sistemare',
     'home.devices_none': 'Ancora nessun dispositivo. Fai clic su «Aggiungi dispositivo».',
+    'lib.recent_chip': '{count} nuovi · mostra',
   },
   'ar': {
     'nav.library': 'المكتبة',
@@ -5426,6 +5437,7 @@ const Map<String, Map<String, String>> translations = {
     'home.all_good_sub': 'ما يحتاج انتباهك يظهر هنا',
     'home.issues': '{count} أمور تحتاج انتباهك',
     'home.devices_none': 'لا أجهزة بعد. اضغط «إضافة جهاز».',
+    'lib.recent_chip': '{count} جديدة · عرض',
   },
   'hi': {
     'nav.library': 'लाइब्रेरी',
@@ -5878,6 +5890,7 @@ const Map<String, Map<String, String>> translations = {
     'home.all_good_sub': 'जिस पर ध्यान चाहिए वह यहाँ दिखेगा',
     'home.issues': '{count} बातों पर ध्यान चाहिए',
     'home.devices_none': 'अभी कोई डिवाइस नहीं। “डिवाइस जोड़ें” पर क्लिक करें।',
+    'lib.recent_chip': '{count} नए · देखें',
   },
   'id': {
     'nav.library': 'Pustaka',
@@ -6330,6 +6343,7 @@ const Map<String, Map<String, String>> translations = {
     'home.all_good_sub': 'Hal yang perlu Anda tangani muncul di sini',
     'home.issues': '{count} hal perlu ditangani',
     'home.devices_none': 'Belum ada perangkat. Klik “Tambah perangkat”.',
+    'lib.recent_chip': '{count} baru · lihat',
   },
   'vi': {
     'nav.library': 'Thư viện',
@@ -6782,6 +6796,7 @@ const Map<String, Map<String, String>> translations = {
     'home.all_good_sub': 'Việc cần bạn xử lý sẽ hiện ở đây',
     'home.issues': '{count} việc cần xử lý',
     'home.devices_none': 'Chưa có thiết bị. Bấm “Thêm thiết bị”.',
+    'lib.recent_chip': '{count} mục mới · xem',
   },
   'th': {
     'nav.library': 'คลังสื่อ',
@@ -7234,6 +7249,7 @@ const Map<String, Map<String, String>> translations = {
     'home.all_good_sub': 'เรื่องที่ต้องจัดการจะแสดงที่นี่',
     'home.issues': 'มี {count} เรื่องต้องจัดการ',
     'home.devices_none': 'ยังไม่มีอุปกรณ์ คลิก “เพิ่มอุปกรณ์”',
+    'lib.recent_chip': 'ใหม่ {count} รายการ · ดู',
   },
   'tr': {
     'nav.library': 'Kitaplık',
@@ -7686,5 +7702,6 @@ const Map<String, Map<String, String>> translations = {
     'home.all_good_sub': 'İlgilenmeniz gerekenler burada görünür',
     'home.issues': '{count} konu ilginizi bekliyor',
     'home.devices_none': 'Henüz cihaz yok. “Cihaz ekle”ye tıklayın.',
+    'lib.recent_chip': '{count} yeni · göster',
   },
 };

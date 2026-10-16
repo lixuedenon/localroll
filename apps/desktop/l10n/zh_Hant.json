@@ -448,5 +448,6 @@
   "home.all_good_short": "一切正常",
   "home.all_good_sub": "有需要處理的事會顯示在這裡",
   "home.issues": "{count} 件事需要處理",
-  "home.devices_none": "還沒有裝置。點「新增裝置」。"
+  "home.devices_none": "還沒有裝置。點「新增裝置」。",
+  "lib.recent_chip": "新收到 {count} 項 · 查看"
 }

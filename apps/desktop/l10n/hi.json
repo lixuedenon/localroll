@@ -448,5 +448,6 @@
   "home.all_good_short": "सब ठीक",
   "home.all_good_sub": "जिस पर ध्यान चाहिए वह यहाँ दिखेगा",
   "home.issues": "{count} बातों पर ध्यान चाहिए",
-  "home.devices_none": "अभी कोई डिवाइस नहीं। “डिवाइस जोड़ें” पर क्लिक करें।"
+  "home.devices_none": "अभी कोई डिवाइस नहीं। “डिवाइस जोड़ें” पर क्लिक करें।",
+  "lib.recent_chip": "{count} नए · देखें"
 }

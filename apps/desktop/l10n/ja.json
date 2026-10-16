@@ -448,5 +448,6 @@
   "home.all_good_short": "問題なし",
   "home.all_good_sub": "対応が必要なことはここに表示されます",
   "home.issues": "対応が必要なことが {count} 件",
-  "home.devices_none": "デバイスがありません。「デバイスを追加」をクリック。"
+  "home.devices_none": "デバイスがありません。「デバイスを追加」をクリック。",
+  "lib.recent_chip": "新着 {count} 件 · 表示"
 }

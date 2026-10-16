@@ -448,5 +448,6 @@
   "home.all_good_short": "모두 정상",
   "home.all_good_sub": "처리할 일이 있으면 여기에 표시됩니다",
   "home.issues": "처리할 일 {count}개",
-  "home.devices_none": "기기가 없습니다. ‘기기 추가’를 클릭하세요."
+  "home.devices_none": "기기가 없습니다. ‘기기 추가’를 클릭하세요.",
+  "lib.recent_chip": "새 항목 {count}개 · 보기"
 }

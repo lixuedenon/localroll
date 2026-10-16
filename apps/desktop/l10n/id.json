@@ -448,5 +448,6 @@
   "home.all_good_short": "Semua baik",
   "home.all_good_sub": "Hal yang perlu Anda tangani muncul di sini",
   "home.issues": "{count} hal perlu ditangani",
-  "home.devices_none": "Belum ada perangkat. Klik “Tambah perangkat”."
+  "home.devices_none": "Belum ada perangkat. Klik “Tambah perangkat”.",
+  "lib.recent_chip": "{count} baru · lihat"
 }

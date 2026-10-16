@@ -85,8 +85,9 @@ class _LibraryPageState extends State<LibraryPage> {
       ];
 
   /// Member chips + "show only-me items", shown once there is a family.
-  PreferredSizeWidget? _familyBar(List<MediaItem> all, FamilyDirectory family) {
-    // One chip per person / phone / other PC, with how many items each has.
+  /// "Everyone ▾": whose items to show (one entry per person / phone /
+  /// other PC, with how many), and whether to show "only me" items.
+  Widget? _personMenu(List<MediaItem> all, FamilyDirectory family) {
     final counts = <String, int>{};
     final pcs = <String>{};
     final st = widget.services.settings;
@@ -100,44 +101,53 @@ class _LibraryPageState extends State<LibraryPage> {
     final members = counts.keys.toList();
     final privateCount = all.where((i) => i.private).length;
     if (members.length < 2 && privateCount == 0) return null;
-    return PreferredSize(
-      preferredSize: const Size.fromHeight(52),
-      child: SizedBox(
-        height: 52,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          children: [
-            if (members.length >= 2) ...[
-              ChoiceChip(
-                avatar: const Icon(Icons.groups_rounded, size: 18),
-                label: Text(tr('family.everyone')),
-                selected: _member == null,
-                onSelected: (_) => setState(() => _member = null),
-              ),
-              for (final m in members) ...[
-                const SizedBox(width: 8),
-                ChoiceChip(
-                  avatar: pcs.contains(m) ? const Icon(Icons.computer_rounded, size: 16) : null,
-                  label: Text('$m · ${counts[m]}'),
-                  selected: _member != null && FamilyDirectory.keyOf(_member!) == FamilyDirectory.keyOf(m),
-                  onSelected: (_) => setState(() => _member = m),
-                ),
-              ],
-              const SizedBox(width: 16),
-            ],
-            if (privateCount > 0)
-              FilterChip(
-                avatar: Icon(_showPrivate ? Icons.lock_open_rounded : Icons.lock_rounded, size: 18),
-                label: Text(tr('family.show_private', {'count': privateCount})),
-                selected: _showPrivate,
-                onSelected: (v) => setState(() => _showPrivate = v),
-              ),
-          ],
-        ),
-      ),
+    return PopupMenuButton<String>(
+      tooltip: tr('family.everyone'),
+      onSelected: (v) => setState(() {
+        if (v == '\u0000private') {
+          _showPrivate = !_showPrivate;
+        } else if (v.isEmpty) {
+          _member = null;
+        } else {
+          _member = v;
+        }
+      }),
+      itemBuilder: (_) => [
+        CheckedPopupMenuItem(value: '', checked: _member == null, child: Text(tr('family.everyone'))),
+        for (final m in members)
+          CheckedPopupMenuItem(
+            value: m,
+            checked: _member != null && FamilyDirectory.keyOf(_member!) == FamilyDirectory.keyOf(m),
+            child: Row(children: [
+              if (pcs.contains(m)) const Padding(padding: EdgeInsets.only(right: 6), child: Icon(Icons.computer_rounded, size: 16)),
+              Text('$m · ${counts[m]}'),
+            ]),
+          ),
+        if (privateCount > 0) ...[
+          const PopupMenuDivider(),
+          CheckedPopupMenuItem(
+            value: '\u0000private',
+            checked: _showPrivate,
+            child: Text(tr('family.show_private', {'count': privateCount})),
+          ),
+        ],
+      ],
+      child: _toolChip(Icons.groups_rounded, _member ?? tr('family.everyone')),
     );
   }
+
+  /// A labelled dropdown-looking button for the toolbar.
+  Widget _toolChip(IconData icon, String label) => Container(
+        height: 36,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), border: Border.all(color: LrColors.line)),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(icon, size: 18, color: LrColors.muted),
+          const SizedBox(width: 6),
+          Text(label, style: const TextStyle(fontSize: 13.5)),
+          const Icon(Icons.arrow_drop_down_rounded, color: LrColors.muted),
+        ]),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +161,25 @@ class _LibraryPageState extends State<LibraryPage> {
         _selected.removeWhere((p) => !items.any((i) => i.relPath == p));
         return Scaffold(
           appBar: AppBar(
-            title: Text(_selecting ? tr('library.selected', {'count': _selected.length}) : tr('nav.library')),
+            title: _selecting
+                ? Text(tr('library.selected', {'count': _selected.length}))
+                : Row(children: [
+                    Text(tr('nav.library')),
+                    if (!_onlyRecent && _recent(all).isNotEmpty) ...[
+                      const SizedBox(width: 12),
+                      ActionChip(
+                        avatar: const Icon(Icons.fiber_new_rounded, size: 18, color: LrColors.safelight),
+                        label: Text(tr('lib.recent_chip', {'count': _recent(all).length})),
+                        onPressed: () => setState(() => _onlyRecent = true),
+                      ),
+                      IconButton(
+                        tooltip: tr('lib.recent_dismiss'),
+                        iconSize: 16,
+                        onPressed: () => s.settings.update((x) => x.recentSeenMs = DateTime.now().millisecondsSinceEpoch),
+                        icon: const Icon(Icons.close_rounded),
+                      ),
+                    ],
+                  ]),
             leading: _selecting
                 ? IconButton(icon: const Icon(Icons.close), onPressed: () => setState(_selected.clear))
                 : null,
@@ -201,15 +229,17 @@ class _LibraryPageState extends State<LibraryPage> {
                 const SizedBox(width: 8),
                 // New arrivals from a phone or PC can have old capture dates
                 // and land far down the list; "by arrival" puts them on top.
+                if (!_filesTab) ?_personMenu(all, family),
+                const SizedBox(width: 8),
                 PopupMenuButton<bool>(
                   tooltip: tr('library.sort'),
-                  icon: const Icon(Icons.sort_rounded),
                   initialValue: _byReceived,
                   onSelected: (v) => setState(() => _byReceived = v),
                   itemBuilder: (_) => [
                     CheckedPopupMenuItem(value: false, checked: !_byReceived, child: Text(tr('library.sort_taken'))),
                     CheckedPopupMenuItem(value: true, checked: _byReceived, child: Text(tr('library.sort_received'))),
                   ],
+                  child: _toolChip(Icons.sort_rounded, tr(_byReceived ? 'library.sort_received' : 'library.sort_taken')),
                 ),
                 IconButton(
                   tooltip: tr('library.open_folder'),
@@ -219,7 +249,6 @@ class _LibraryPageState extends State<LibraryPage> {
               ],
               const SizedBox(width: 8),
             ],
-            bottom: _filesTab ? null : _familyBar(all, family),
           ),
           body: Column(
             children: [
@@ -258,23 +287,10 @@ class _LibraryPageState extends State<LibraryPage> {
             ...actions,
           ]),
         );
-    final st = widget.services.settings;
-    final recent = _onlyRecent ? const <MediaItem>[] : _recent(lib.items);
-    final family = st.family;
-    final from = {for (final i in recent) _memberOf(family, i)}.take(3).join('、');
     return [
       if (_onlyRecent)
         banner(Icons.schedule_rounded, LrColors.safelight, tr('lib.recent_only'), [
           TextButton(onPressed: () => setState(() => _onlyRecent = false), child: Text(tr('lib.recent_all'))),
-        ]),
-      if (recent.isNotEmpty)
-        banner(Icons.fiber_new_rounded, LrColors.verified, tr('lib.recent', {'count': recent.length, 'from': from}), [
-          TextButton(
-            onPressed: () => st.update((s) => s.recentSeenMs = DateTime.now().millisecondsSinceEpoch),
-            child: Text(tr('lib.recent_dismiss')),
-          ),
-          const SizedBox(width: 4),
-          FilledButton(onPressed: () => setState(() => _onlyRecent = true), child: Text(tr('lib.recent_show'))),
         ]),
       // Unplugged drive / deleted or moved folder: what can be done.
       if (lib.offline) LibraryRecovery(services: widget.services),

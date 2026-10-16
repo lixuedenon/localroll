@@ -448,5 +448,6 @@
   "home.all_good_short": "All good",
   "home.all_good_sub": "Anything that needs you shows up here",
   "home.issues": "{count} things need you",
-  "home.devices_none": "No devices yet. Click “Add a device”."
+  "home.devices_none": "No devices yet. Click “Add a device”.",
+  "lib.recent_chip": "{count} new · show"
 }
