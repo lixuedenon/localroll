@@ -7,13 +7,11 @@ import '../app_services.dart';
 import '../l10n/l10n.dart';
 import 'app_nav.dart';
 import 'dashboard_page.dart';
-import 'family_page.dart';
+import 'devices_page.dart';
 import 'jobs_page.dart';
 import 'library_page.dart';
 import 'notices.dart';
 import 'pair_prompt.dart';
-import 'receive_page.dart';
-import 'send_page.dart';
 import 'settings_page.dart';
 import 'text_window.dart';
 import 'theme.dart';
@@ -83,11 +81,9 @@ class _HomeShellState extends State<HomeShell> {
     // Same order as AppNav.home … AppNav.settings.
     final pages = [
       DashboardPage(services: s),
-      ReceivePage(services: s),
-      SendPage(services: s),
+      DevicesPage(services: s),
       LibraryPage(services: s),
       JobsPage(services: s),
-      FamilyPage(services: s),
       SettingsPage(services: s),
     ];
     return Scaffold(
@@ -114,20 +110,12 @@ class _HomeShellState extends State<HomeShell> {
                       onTap: () => _nav.selectTab(AppNav.home),
                     ),
                     _RailItem(
-                      icon: Icons.phone_iphone_outlined,
-                      selectedIcon: Icons.phone_iphone_rounded,
-                      label: tr('nav.receive'),
-                      selected: _nav.tab == AppNav.receive,
-                      dot: receiving,
-                      onTap: () => _nav.selectTab(AppNav.receive),
-                    ),
-                    _RailItem(
-                      icon: Icons.send_outlined,
-                      selectedIcon: Icons.send_rounded,
-                      label: tr('nav.send'),
-                      selected: _nav.tab == AppNav.send,
-                      dot: s.sender.busy,
-                      onTap: () => _nav.selectTab(AppNav.send),
+                      icon: Icons.devices_other_outlined,
+                      selectedIcon: Icons.devices_other_rounded,
+                      label: tr('nav.devices'),
+                      selected: _nav.tab == AppNav.devices,
+                      dot: receiving || s.sender.busy,
+                      onTap: () => _nav.selectTab(AppNav.devices),
                     ),
                     _RailItem(
                       icon: Icons.photo_library_outlined,
@@ -144,13 +132,6 @@ class _HomeShellState extends State<HomeShell> {
                       selected: _nav.tab == AppNav.convert,
                       count: s.converter.pending,
                       onTap: () => _nav.selectTab(AppNav.convert),
-                    ),
-                    _RailItem(
-                      icon: Icons.groups_outlined,
-                      selectedIcon: Icons.groups_rounded,
-                      label: tr('family.title'),
-                      selected: _nav.tab == AppNav.family,
-                      onTap: () => _nav.selectTab(AppNav.family),
                     ),
                     _RailItem(
                       icon: Icons.tune_outlined,

@@ -1,6 +1,7 @@
 // apps/mobile/lib/ui/settings_page.dart
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:localroll_core/localroll_core.dart';
 
@@ -231,31 +232,55 @@ class _LanguageTile extends StatelessWidget {
       );
 }
 
-/// The language list, in a sheet (system default first, a check on the one in use).
+/// The language: on iPhone the system's own wheel picker (with "Done"),
+/// elsewhere a list in a sheet (system default first, a check on the one in use).
 Future<void> _pickLanguage(BuildContext context, MobileSettings settings) async {
-  final picked = await showModalBottomSheet<String>(
-    context: context,
-    showDragHandle: true,
-    isScrollControlled: true,
-    builder: (c) => SafeArea(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: MediaQuery.of(c).size.height * 0.6),
-        child: ListView(shrinkWrap: true, children: [
-          _LanguageTile(
-            label: tr('home.language_system'),
-            selected: settings.language == null,
-            onTap: () => Navigator.pop(c, ''),
-          ),
-          for (final l in supportedLanguages)
-            _LanguageTile(
-              label: l.nativeName,
-              selected: settings.language == l.code,
-              onTap: () => Navigator.pop(c, l.code),
+  final codes = <String>['', for (final l in supportedLanguages) l.code];
+  final names = [tr('home.language_system'), for (final l in supportedLanguages) l.nativeName];
+  final now = codes.indexOf(settings.language ?? '').clamp(0, codes.length - 1);
+  String? picked;
+  if (Platform.isIOS) {
+    var at = now;
+    picked = await showCupertinoModalPopup<String>(
+      context: context,
+      builder: (c) => Container(
+        height: 300,
+        color: LrColors.raised,
+        child: SafeArea(
+          top: false,
+          child: Column(children: [
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              CupertinoButton(onPressed: () => Navigator.pop(c), child: Text(tr('common.cancel'))),
+              CupertinoButton(onPressed: () => Navigator.pop(c, codes[at]), child: Text(tr('common.ok'))),
+            ]),
+            Expanded(
+              child: CupertinoPicker(
+                itemExtent: 36,
+                scrollController: FixedExtentScrollController(initialItem: now),
+                onSelectedItemChanged: (i) => at = i,
+                children: [for (final n in names) Center(child: Text(n))],
+              ),
             ),
-        ]),
+          ]),
+        ),
       ),
-    ),
-  );
+    );
+  } else {
+    picked = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (c) => SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(c).size.height * 0.6),
+          child: ListView(shrinkWrap: true, children: [
+            for (var i = 0; i < codes.length; i++)
+              _LanguageTile(label: names[i], selected: i == now, onTap: () => Navigator.pop(c, codes[i])),
+          ]),
+        ),
+      ),
+    );
+  }
   if (picked == null) return;
   await settings.setLanguage(picked.isEmpty ? null : picked);
 }

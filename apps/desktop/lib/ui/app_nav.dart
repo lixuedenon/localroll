@@ -11,12 +11,24 @@ class AppNav extends ChangeNotifier {
 
   /// Main sections (left rail), in order.
   static const int home = 0;
-  static const int receive = 1;
-  static const int send = 2;
-  static const int library = 3;
-  static const int convert = 4;
-  static const int family = 5;
-  static const int settings = 6;
+  static const int devices = 1;
+  static const int library = 2;
+  static const int convert = 3;
+  static const int settings = 4;
+
+  /// Receiving, sending and the family group all live on "Devices" now.
+  static const int receive = devices;
+  static const int send = devices;
+  static const int family = devices;
+
+  /// A device to show opened on the Devices page (set from Home etc.).
+  final ValueNotifier<String?> deviceFocus = ValueNotifier(null);
+
+  /// Go to Devices with [id] opened.
+  void openDevice(String id) {
+    deviceFocus.value = id;
+    selectTab(devices);
+  }
 
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   late final NavigatorObserver observer = _Observer(this);
@@ -31,7 +43,7 @@ class AppNav extends ChangeNotifier {
   bool get hasPage => _routes > 1;
 
   /// Switch section and remember where we came from.
-  static const List<String> _names = ['home', 'receive', 'send', 'library', 'convert', 'family', 'settings'];
+  static const List<String> _names = ['home', 'devices', 'library', 'convert', 'settings'];
 
   void selectTab(int i) {
     if (i == tab) return;

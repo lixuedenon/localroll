@@ -30,7 +30,7 @@ class ReceivePage extends StatelessWidget {
         children: [
           // A new PC is usually invisible to phones until the firewall lets
           // LocalRoll in — say so up front, with a one-click fix.
-          _NetworkCheck(services: s),
+          NetworkCheck(services: s),
           // Who this PC is, as phones see it: the easiest way to connect.
           ListenableBuilder(
             listenable: s.settings,
@@ -96,7 +96,7 @@ class ReceivePage extends StatelessWidget {
               children: [
                 ListenableBuilder(
                   listenable: Listenable.merge([s.server, s.server.pin, s.addresses]),
-                  builder: (context, _) => _PairingCard(services: s),
+                  builder: (context, _) => PairingPanel(services: s),
                 ),
               ],
             ),
@@ -112,8 +112,11 @@ class ReceivePage extends StatelessWidget {
   }
 }
 
-class _PairingCard extends StatelessWidget {
-  const _PairingCard({required this.services});
+class PairingPanel extends StatelessWidget {
+  const PairingPanel({super.key, required this.services, this.qrSize = 300});
+
+  /// Smaller inside the "Add a device" dialog.
+  final double qrSize;
 
   final AppServices services;
 
@@ -163,7 +166,7 @@ class _PairingCard extends StatelessWidget {
             Container(
               color: Colors.white,
               padding: const EdgeInsets.all(12),
-              child: QrImageView(data: payload, size: 300, backgroundColor: Colors.white),
+              child: QrImageView(data: payload, size: qrSize, backgroundColor: Colors.white),
             ),
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
@@ -265,7 +268,7 @@ class _TransfersCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 24),
                 child: Text(tr('receive.none')),
               ),
-            for (final t in list) _TransferTile(t: t),
+            for (final t in list) TransferTile(t: t),
           ],
         ),
       ),
@@ -273,8 +276,8 @@ class _TransfersCard extends StatelessWidget {
   }
 }
 
-class _TransferTile extends StatelessWidget {
-  const _TransferTile({required this.t});
+class TransferTile extends StatelessWidget {
+  const TransferTile({super.key, required this.t});
 
   final TransferProgress t;
 
@@ -313,16 +316,16 @@ class _TransferTile extends StatelessWidget {
   }
 }
 
-class _NetworkCheck extends StatefulWidget {
-  const _NetworkCheck({required this.services});
+class NetworkCheck extends StatefulWidget {
+  const NetworkCheck({super.key, required this.services});
 
   final AppServices services;
 
   @override
-  State<_NetworkCheck> createState() => _NetworkCheckState();
+  State<NetworkCheck> createState() => NetworkCheckState();
 }
 
-class _NetworkCheckState extends State<_NetworkCheck> {
+class NetworkCheckState extends State<NetworkCheck> {
   NetworkHealth? _health;
   bool _fixing = false;
 

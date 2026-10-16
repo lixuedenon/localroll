@@ -76,7 +76,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 subtitle: Text(tr('settings.accept_rule_hint')),
                 trailing: TextButton(
                   onPressed: () => AppNav.instance.selectTab(AppNav.family),
-                  child: Text(tr('family.title')),
+                  child: Text(tr('nav.devices')),
                 ),
               ),
             ),
@@ -110,6 +110,18 @@ class _SettingsPageState extends State<SettingsPage> {
             ]),
             const SizedBox(height: 4),
             Text(tr('settings.library_hint'), style: theme.textTheme.bodySmall),
+            const SizedBox(height: 8),
+            // Moved here from the old Family page.
+            ListenableBuilder(
+              listenable: s.settings,
+              builder: (context, _) => SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                value: s.settings.folderPerMember,
+                onChanged: (v) => s.settings.update((x) => x.folderPerMember = v),
+                title: Text(tr('family.folder_per_member')),
+                subtitle: Text(tr('family.folder_per_member_hint')),
+              ),
+            ),
             const SizedBox(height: 28),
             _section(theme, tr('settings.ffmpeg_title')),
             Text(

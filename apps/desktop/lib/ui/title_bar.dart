@@ -9,6 +9,7 @@ import '../l10n/l10n.dart';
 import '../services/receive_hub.dart';
 import 'app_nav.dart';
 import 'theme.dart';
+import 'transfers_panel.dart';
 
 /// Our own title bar (the native one is hidden): Back, app name, drag area,
 /// minimise / maximise / close. Close asks first, so a stray click on the
@@ -77,6 +78,8 @@ class _LrTitleBarState extends State<LrTitleBar> with WindowListener {
           const SizedBox(width: 10),
           Text('LocalRoll', style: Theme.of(context).textTheme.titleMedium?.copyWith(letterSpacing: 0.2)),
           const Expanded(child: DragToMoveArea(child: SizedBox.expand())),
+          TransfersButton(services: widget.services),
+          const SizedBox(width: 6),
           _BarButton(tooltip: tr('app.minimize'), icon: Icons.remove_rounded, onPressed: windowManager.minimize),
           _BarButton(
             tooltip: tr(_maximized ? 'app.restore' : 'app.maximize'),
