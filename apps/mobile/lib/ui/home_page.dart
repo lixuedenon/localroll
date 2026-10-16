@@ -12,6 +12,7 @@ import '../services/auto_sender.dart';
 import '../services/discovery.dart';
 import '../services/live_service.dart';
 import '../services/mobile_settings.dart';
+import '../services/my_library.dart';
 import '../services/phone_server.dart';
 import '../services/uploader.dart';
 import '../services/background_transfer.dart';
@@ -23,6 +24,7 @@ import 'connect_page.dart';
 import 'device_badge.dart';
 import 'incoming.dart';
 import 'lost_notice.dart';
+import 'my_library_page.dart';
 import 'document_scan_page.dart';
 import 'send_files_page.dart';
 import 'pc_library_page.dart';
@@ -94,7 +96,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     widget.discovery.selfId = widget.settings.deviceId;
     _server.asks.addListener(_onAsks);
     _receivedSub = _server.finished.listen((r) {
-      if (mounted) unawaited(showReceived(context, r));
+      if (mounted) unawaited(showReceived(context, r, onOpen: _openMyLibrary));
     });
     _live.receiveInfo = () => {
           if (_server.running) 'rport': '${_server.port}',
@@ -121,6 +123,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       }
     });
     _init();
+    unawaited(MyLibrary.instance.load().then((_) {
+      if (mounted) setState(() {});
+    }));
   }
 
   String? _lastDesktop;
@@ -718,6 +723,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (mounted) setState(() {});
   }
 
+  /// "My files": what arrived here, by sender.
+  Future<void> _openMyLibrary() async {
+    await Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => MyLibraryPage(settings: widget.settings, discovery: widget.discovery),
+    ));
+    if (mounted) setState(() {});
+  }
+
   /// Scan paper into a PDF, then send / share / keep it.
   Future<void> _openScan() => Navigator.of(context).push(MaterialPageRoute(
         builder: (_) => DocumentScanPage(settings: widget.settings, discovery: widget.discovery),
@@ -1102,6 +1115,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 widget.settings.autoSend ? tr('home.tile_auto_on') : tr('home.tile_auto_off'),
                 _openSettings,
                 subColor: widget.settings.autoSend ? LrColors.verified : null,
+              ),
+            ]),
+            const SizedBox(height: 12),
+            Row(children: [
+              tile(
+                tr('mylib.title'),
+                MyLibrary.instance.items.isEmpty
+                    ? tr('mylib.tile_empty')
+                    : tr('mylib.tile_sub', {'count': MyLibrary.instance.items.length}),
+                _openMyLibrary,
               ),
             ]),
             const SizedBox(height: 12),

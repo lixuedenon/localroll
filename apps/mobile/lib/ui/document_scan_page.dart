@@ -6,7 +6,6 @@ import 'package:cunning_document_scanner/cunning_document_scanner.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:localroll_core/localroll_core.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -15,6 +14,7 @@ import '../services/discovery.dart';
 import '../services/file_sender.dart';
 import '../services/media_saver.dart';
 import '../services/mobile_settings.dart';
+import '../services/my_library.dart';
 import '../services/scan_pdf.dart';
 import 'cleanup_page.dart' show formatSize;
 import 'send_files_page.dart';
@@ -150,27 +150,14 @@ class _DocumentScanPageState extends State<DocumentScanPage> {
         ));
       });
 
+  /// Into "My files" (LocalRoll's folder › Scans › this phone).
   Future<void> _keep() => _run((pdf) async {
-        final name = FileSender.nameOfPath(pdf.path);
-        if (Platform.isIOS) {
-          // iPhone: the system "Save to Files" sheet — the person picks the
-          // folder (On My iPhone, iCloud Drive…) and sees where it went.
-          final saved = await FilePicker.platform.saveFile(
-            dialogTitle: tr('scan.keep'),
-            fileName: name,
-            bytes: await pdf.readAsBytes(),
-          );
-          if (saved != null) _toast(tr('scan.kept', {'name': name}));
-          return;
-        }
-        final dir = await MediaSaver.filesFolder();
-        var target = File('${dir.path}/$name');
-        final base = target.path.substring(0, target.path.length - 4);
-        for (var n = 1; await target.exists(); n++) {
-          target = File('$base ($n).pdf');
-        }
+        final me = Sender(widget.settings.deviceId, tr('mylib.this_phone'));
+        final dir = await MediaSaver.folderFor(MyKind.scan, me);
+        final target = await MediaSaver.freeFile(dir, FileSender.nameOfPath(pdf.path));
         await pdf.copy(target.path);
-        _toast(tr('scan.kept_android'));
+        await MyLibrary.instance.addFile(target.path, MyKind.scan, fromId: me.id, fromName: me.name);
+        _toast(tr('scan.kept_mine'));
       });
 
   @override

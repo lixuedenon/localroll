@@ -24,7 +24,7 @@ class _FakeSaver extends MediaSaver {
   final List<(FileOffer, List<int>)> saved = [];
 
   @override
-  Future<SavedTo> save(File file, FileOffer offer) async {
+  Future<SavedTo> save(File file, FileOffer offer, {Sender from = const Sender('', '')}) async {
     saved.add((offer, await file.readAsBytes()));
     await file.delete();
     return offer.kind == MediaKind.other ? SavedTo.files : SavedTo.album;

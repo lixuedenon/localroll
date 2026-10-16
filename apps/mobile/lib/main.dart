@@ -9,13 +9,16 @@ import 'package:path_provider/path_provider.dart';
 
 import 'l10n/l10n.dart';
 import 'services/discovery.dart';
+import 'services/media_saver.dart';
 import 'services/mobile_settings.dart';
+import 'services/my_library.dart';
 import 'ui/home_page.dart';
 import 'ui/theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await _startLog();
+  MyLibrary.rootDir = MediaSaver.filesFolder;
   final settings = await MobileSettings.load();
   // Discovery starts after the photo permission prompt (see HomePage).
   final discovery = DesktopDiscovery();

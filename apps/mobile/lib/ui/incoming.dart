@@ -91,20 +91,30 @@ Future<String?> askDeclineReason(BuildContext context) {
 }
 
 /// "Received N items from X" — where to find them.
-Future<void> showReceived(BuildContext context, Receiving r) => showDialog<void>(
+Future<void> showReceived(BuildContext context, Receiving r, {VoidCallback? onOpen}) => showDialog<void>(
       context: context,
       builder: (c) => AlertDialog(
         icon: const Icon(Icons.check_circle_rounded, color: LrColors.verified, size: 44),
         title: Text(tr('received.title', {'count': r.done, 'name': r.from.name})),
         content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          if (r.toAlbum > 0) Text(tr('received.album', {'count': r.toAlbum, 'album': MediaSaver.albumName})),
+          if (r.toAlbum > 0) Text(tr('received.album', {'count': r.toAlbum, 'album': MediaSaver.albumFor(Sender(r.from.id, r.from.name))})),
           if (r.toFiles > 0) ...[
             const SizedBox(height: 6),
             Text(tr(Theme.of(c).platform == TargetPlatform.iOS ? 'received.files_ios' : 'received.files_android',
                 {'count': r.toFiles, 'folder': MediaSaver.albumName})),
           ],
         ]),
-        actions: [FilledButton(onPressed: () => Navigator.pop(c), child: Text(tr('common.ok')))],
+        actions: [
+          if (onOpen != null)
+            TextButton(
+              onPressed: () {
+                Navigator.pop(c);
+                onOpen();
+              },
+              child: Text(tr('mylib.view')),
+            ),
+          FilledButton(onPressed: () => Navigator.pop(c), child: Text(tr('common.ok'))),
+        ],
       ),
     );
 

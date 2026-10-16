@@ -430,7 +430,7 @@ class PhoneServer extends ChangeNotifier {
     // Named like the original (the photo library looks at the extension).
     final named = File('${part.parent.path}/${shortKey(part.path)}_${offer.name.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_')}');
     await part.rename(named.path);
-    final where = await saver.save(named, offer);
+    final where = await saver.save(named, offer, from: Sender(s.from.id, s.from.name));
     final r = receiving;
     if (r != null && r.from.id == s.from.id) {
       // A Live Photo's video is part of its photo: count the photo only.
