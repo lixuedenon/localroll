@@ -10,6 +10,7 @@ import 'package:photo_manager/photo_manager.dart';
 import '../l10n/l10n.dart';
 import '../services/auto_sender.dart';
 import '../services/discovery.dart';
+import '../services/file_sender.dart';
 import '../services/live_service.dart';
 import '../services/mobile_settings.dart';
 import '../services/my_library.dart';
@@ -18,10 +19,10 @@ import '../services/uploader.dart';
 import '../services/background_transfer.dart';
 import '../services/backup_plan.dart';
 import 'backup_page.dart';
-import 'breathing.dart';
 import 'cleanup_page.dart';
 import 'connect_page.dart';
 import 'device_badge.dart';
+import 'device_strip.dart';
 import 'incoming.dart';
 import 'lost_notice.dart';
 import 'my_library_page.dart';
@@ -175,14 +176,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   /// looked yet (no notes for what was already there when the app opened).
   Map<String, (String, bool)>? _onlineNow;
 
-  /// Everything online now: our paired PCs, plus the phones and PCs they
-  /// told us about.
-  Map<String, (String, bool)> _onlineDevices() => {
-        for (final d in widget.settings.desktops)
-          if (widget.discovery.isOnline(d.id)) d.id: (d.name, true),
-        for (final o in widget.discovery.others) o.id: (o.name, o.isDesktop),
-      };
-
   /// "X is online / went offline" — older PCs without live links only
   /// (compared now and then); everything else comes from [_live] events.
   void _checkPresence() {
@@ -247,59 +240,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   /// Live links to the paired PCs (online state and notes).
   late final LiveService _live = LiveService(widget.settings, widget.discovery);
   StreamSubscription<PresenceEvent>? _liveEvents;
-
-  /// Home: everything else that is online now, each in its own card like
-  /// the PC card above (that PC is already shown there).
-  Widget _onlineStrip(BuildContext context) {
-    final all = _onlineDevices();
-    final current = widget.settings.current?.id;
-    final rest = [for (final e in all.entries) if (e.key != current) e];
-    if (rest.isEmpty) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.only(top: 14),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 6),
-          child: Text(tr('home.online_now', {'count': all.length}), style: Theme.of(context).textTheme.bodySmall),
-        ),
-        for (final e in rest)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: _onlineCard(e.key, e.value.$1, pc: e.value.$2),
-          ),
-      ]),
-    );
-  }
-
-  Widget _onlineCard(String id, String name, {required bool pc}) {
-    final paired = widget.settings.byId(id);
-    // The card itself breathes (everything listed here is online).
-    return Breathing(
-      online: true,
-      child: Material(
-        type: MaterialType.transparency,
-        child: ListTile(
-        // A paired PC: tap to make it the one this phone sends to.
-        onTap: paired == null ? null : () => _selectTab(3),
-        leading: paired != null
-            ? DeviceBadge(
-                icon: paired.icon,
-                color: paired.color,
-                image: paired.avatarUrl == null ? null : NetworkImage(paired.avatarUrl!),
-                size: 40,
-              )
-            : CircleAvatar(
-                radius: 20,
-                backgroundColor: LrColors.raised,
-                child: Icon(pc ? Icons.computer_rounded : Icons.smartphone_rounded, color: LrColors.muted),
-              ),
-        title: Text(name, style: const TextStyle(fontWeight: FontWeight.w700)),
-        subtitle: Text('${tr('home.pc_online')} · ${tr(pc ? 'home.kind_pc' : 'home.kind_phone')}',
-            style: const TextStyle(color: onlineGlow)),
-        ),
-      ),
-    );
-  }
 
   void _onDiscovery() {
     _checkPresence();
@@ -687,9 +627,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   void _selectTab(int i) {
-    final from = _tab;
-    setState(() => _tab = i);
-    if (from == 2) unawaited(_reload()); // cleanup may have deleted photos
+    setState(() {
+      _tab = i;
+      if (i != 1) _sendTarget = null; // a chosen target is for this one visit
+    });
     if (i == 0) unawaited(_refreshHome());
   }
 
@@ -724,34 +665,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   /// "My files": what arrived here, by sender.
-  Future<void> _openMyLibrary() async {
-    await Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => MyLibraryPage(settings: widget.settings, discovery: widget.discovery),
-    ));
-    if (mounted) setState(() {});
-  }
+  void _openMyLibrary() => _selectTab(2);
 
   /// Scan paper into a PDF, then send / share / keep it.
   Future<void> _openScan() => Navigator.of(context).push(MaterialPageRoute(
         builder: (_) => DocumentScanPage(settings: widget.settings, discovery: widget.discovery),
-      ));
-
-  /// Any files from Files / Download, to the PC or a nearby phone.
-  Future<void> _sendFiles() async {
-    final picked = await FilePicker.platform.pickFiles(allowMultiple: true);
-    final files = [
-      for (final f in picked?.files ?? const <PlatformFile>[])
-        if (f.path != null) File(f.path!),
-    ];
-    if (files.isEmpty || !mounted) return;
-    final sender = await pickFileTarget(context, widget.settings, widget.discovery, files);
-    if (sender == null || !mounted) return;
-    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => SendFilesPage(sender: sender)));
-  }
-
-  /// The PC's library: browse it from here.
-  Future<void> _openPcLibrary(PairedDesktop desktop) => Navigator.of(context).push(MaterialPageRoute(
-        builder: (_) => PcLibraryPage(settings: widget.settings, discovery: widget.discovery, desktop: desktop, server: _server),
       ));
 
   Future<void> _openCleanup(PairedDesktop desktop) async {
@@ -809,8 +727,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     final chosen = _assets.where((a) => _selected.contains(a.id)).toList();
     if (chosen.isEmpty) return;
     NearbyPhone? phone;
-    // Phones nearby (or no PC yet): ask where to.
-    if (widget.discovery.phones.isNotEmpty || desktop == null) {
+    final preset = _sendTarget;
+    if (preset is PairedDesktop) {
+      desktop = preset;
+    } else if (preset is NearbyPhone) {
+      phone = preset;
+      desktop = PairedDesktop(id: preset.id, name: preset.name, hosts: preset.hosts, port: preset.port, token: '');
+    } else if (widget.discovery.phones.isNotEmpty || desktop == null) {
+      // Phones nearby (or no PC yet): ask where to.
       if (desktop == null && widget.discovery.phones.isEmpty) {
         await _openConnect();
         return;
@@ -835,7 +759,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         phone: phone,
       ),
     ));
-    if (finished == true && mounted) setState(_selected.clear);
+    if (finished == true && mounted) {
+      setState(() {
+        _selected.clear();
+        _sendTarget = null;
+      });
+    }
   }
 
   @override
@@ -857,6 +786,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               _browse = true;
               _onlyUnsent = true;
             }),
+            devices: DeviceStrip(
+              settings: widget.settings,
+              discovery: widget.discovery,
+              onTap: _onDevice,
+              onAdd: _openConnect,
+              big: true,
+            ),
           );
         }
         if (widget.settings.simpleMode) return _photos(context, desktop, sent, visible);
@@ -864,16 +800,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           body: switch (_tab) {
             0 => _home(context, desktop),
             1 => _photos(context, desktop, sent, visible),
-            2 => desktop == null
-                ? _needPc(context)
-                : CleanupPage(
-                    key: ValueKey('cleanup-${desktop.id}'),
-                    settings: widget.settings,
-                    discovery: widget.discovery,
-                    desktop: desktop,
-                    onDone: () => _selectTab(0),
-                  ),
-            _ => ConnectPage(settings: widget.settings, discovery: widget.discovery, onDone: () => _selectTab(0)),
+            2 => MyLibraryPage(settings: widget.settings, discovery: widget.discovery),
+            _ => _pcTabPage(context),
           },
           bottomNavigationBar: NavigationBar(
             selectedIndex: _tab,
@@ -883,14 +811,55 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               NavigationDestination(
                   icon: const Icon(Icons.photo_library_outlined), selectedIcon: const Icon(Icons.photo_library_rounded), label: tr('nav.photos')),
               NavigationDestination(
-                  icon: const Icon(Icons.cleaning_services_outlined),
-                  selectedIcon: const Icon(Icons.cleaning_services_rounded),
-                  label: tr('nav.cleanup')),
+                  icon: const Icon(Icons.folder_outlined), selectedIcon: const Icon(Icons.folder_rounded), label: tr('nav.files')),
               NavigationDestination(icon: const Icon(Icons.computer_outlined), selectedIcon: const Icon(Icons.computer_rounded), label: tr('nav.pc')),
             ],
           ),
         );
       },
+    );
+  }
+
+  /// "PC" tab: the PC's library (the backup PC, or the one picked at the
+  /// top); no PC yet: pair one.
+  Widget _pcTabPage(BuildContext context) {
+    final pcs = widget.settings.desktops;
+    final pc = (_pcTab == null ? null : widget.settings.byId(_pcTab!)) ?? widget.settings.current ?? pcs.firstOrNull;
+    if (pc == null) {
+      return ConnectPage(settings: widget.settings, discovery: widget.discovery, onDone: () => _selectTab(0));
+    }
+    return PcLibraryPage(
+      key: ValueKey('pclib-${pc.id}'),
+      settings: widget.settings,
+      discovery: widget.discovery,
+      desktop: pc,
+      server: _server,
+      onSwitch: pcs.length < 2
+          ? null
+          : () async {
+              final id = await showModalBottomSheet<String>(
+                context: context,
+                showDragHandle: true,
+                builder: (c) => SafeArea(
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    for (final d in pcs)
+                      ListTile(
+                        leading: DeviceBadge(
+                          icon: d.icon,
+                          color: d.color,
+                          image: d.avatarUrl == null ? null : NetworkImage(d.avatarUrl!),
+                          size: 36,
+                        ),
+                        title: Text(d.name),
+                        subtitle: Text(tr(widget.discovery.isOnline(d.id) ? 'home.pc_online' : 'home.pc_offline')),
+                        trailing: d.id == pc.id ? const Icon(Icons.check_rounded, color: LrColors.safelight) : null,
+                        onTap: () => Navigator.pop(c, d.id),
+                      ),
+                  ]),
+                ),
+              );
+              if (id != null && mounted) setState(() => _pcTab = id);
+            },
     );
   }
 
@@ -925,7 +894,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     ],
                     Flexible(
                       child: Text(
-                        desktop == null ? tr('home.not_connected') : tr('home.send_to', {'name': desktop.name}),
+                        switch (_sendTarget) {
+                          PairedDesktop p => tr('home.send_to', {'name': p.name}),
+                          NearbyPhone p => tr('home.send_to', {'name': p.name}),
+                          _ => desktop == null ? tr('home.not_connected') : tr('home.send_to', {'name': desktop.name}),
+                        },
                         style: Theme.of(context).textTheme.bodySmall,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -958,50 +931,35 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         );
   }
 
-  Widget _needPc(BuildContext context) => Scaffold(
-        appBar: AppBar(title: Text(tr('home.cleanup'))),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Text(tr('home.not_connected'), textAlign: TextAlign.center),
-              const SizedBox(height: 16),
-              FilledButton(onPressed: () => _selectTab(3), child: Text(tr('home.connect_pc'))),
-            ]),
-          ),
-        ),
-      );
-
-  /// Home: the PC, what still needs backing up, the main actions.
+  /// Home: the devices (one row), what still needs backing up, three
+  /// actions, notices when there are any, and what arrived lately.
   Widget _home(BuildContext context, PairedDesktop? d) {
     final theme = Theme.of(context);
-    final online = d != null && widget.discovery.isOnline(d.id);
     final last = d == null ? null : widget.settings.lastBackup(d.id);
     final pending = _pending;
-    Widget tile(String title, String sub, VoidCallback onTap, {Color? subColor}) => Expanded(
+    Widget action(IconData icon, String title, String sub, VoidCallback onTap, {Color? color}) => Expanded(
           child: Material(
             color: LrColors.surface,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: const BorderSide(color: LrColors.line),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: LrColors.line)),
             child: InkWell(
               borderRadius: BorderRadius.circular(16),
               onTap: onTap,
-              child: Container(
-                constraints: const BoxConstraints(minHeight: 92),
-                padding: const EdgeInsets.all(16),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
+                child: Column(children: [
+                  Icon(icon, color: color ?? LrColors.safelight, size: 26),
                   const SizedBox(height: 6),
-                  Text(sub, style: TextStyle(color: subColor ?? LrColors.muted, fontSize: 13)),
+                  Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 2),
+                  Text(sub,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 11.5, color: color ?? LrColors.muted)),
                 ]),
               ),
             ),
           ),
         );
-    final shareText = widget.settings.shareWithFamily ? tr('family.shared') : tr('family.only_me');
-    final who = widget.settings.ownerName.isEmpty ? tr('family.your_name_hint') : widget.settings.ownerName;
     return Scaffold(
       appBar: AppBar(
         title: const Text('LocalRoll'),
@@ -1014,45 +972,22 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
           children: [
-            // The PC: its card breathes while it is online.
-            Breathing(
-              online: online,
-              child: Material(
-                type: MaterialType.transparency,
-                child: ListTile(
-                onTap: () => _selectTab(3),
-                leading: d == null
-                    ? const Icon(Icons.add_link_rounded)
-                    : DeviceBadge(
-                        icon: d.icon,
-                        color: d.color,
-                        image: d.avatarUrl == null ? null : NetworkImage(d.avatarUrl!),
-                        size: 40,
-                      ),
-                title: Text(d?.name ?? tr('home.not_connected'), style: const TextStyle(fontWeight: FontWeight.w700)),
-                subtitle: d == null
-                    ? null
-                    : Text(online ? tr('home.pc_online') : tr('home.pc_offline'),
-                        style: TextStyle(color: online ? onlineGlow : LrColors.muted)),
-                trailing: Text(tr(d == null ? 'home.connect_pc' : 'home.change_pc'), style: const TextStyle(color: LrColors.muted)),
-              ),
-              ),
-            ),
-            _onlineStrip(context),
+            DeviceStrip(settings: widget.settings, discovery: widget.discovery, onTap: _onDevice, onAdd: _openConnect),
             ReceivingBanner(server: _server),
             _lostBanner(context),
             _autoBanner(context),
             const SizedBox(height: 14),
-            // What is not on the PC yet.
+            // What is not on the backup PC yet.
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(18, 16, 18, 6),
               decoration: BoxDecoration(
                 color: LrColors.raised,
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: LrColors.safelight.withValues(alpha: 0.55)),
+                border: Border.all(color: LrColors.line),
               ),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(tr('home.not_backed_up'), style: const TextStyle(color: LrColors.muted)),
+                Text(d == null ? tr('home.not_connected') : tr('home.not_backed_up_to', {'pc': d.name}),
+                    style: const TextStyle(color: LrColors.muted)),
                 const SizedBox(height: 6),
                 if (pending == null)
                   Row(children: [
@@ -1081,73 +1016,204 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   ),
                 ],
                 const SizedBox(height: 14),
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: FilledButton(
-                    onPressed: () async {
-                      await _backupAll();
-                      unawaited(_refreshHome());
-                    },
-                    child: Text(tr('home.backup_more'), style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+                Row(children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 50,
+                      child: FilledButton(
+                        onPressed: d == null ? _openConnect : _backupNow,
+                        child: Text(tr(d == null ? 'home.connect_pc' : 'home.backup_now'),
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                      ),
+                    ),
                   ),
+                  if (d != null) ...[
+                    const SizedBox(width: 8),
+                    SizedBox(
+                      height: 50,
+                      child: OutlinedButton(
+                        onPressed: () async {
+                          await _backupAll();
+                          unawaited(_refreshHome());
+                        },
+                        child: Text(tr('home.backup_choose')),
+                      ),
+                    ),
+                  ],
+                ]),
+                const SizedBox(height: 6),
+                const Divider(height: 18),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  value: widget.settings.autoSend,
+                  title: Text(tr('home.auto_new'), style: const TextStyle(fontSize: 14)),
+                  onChanged: d == null
+                      ? null
+                      : (on) async {
+                          await widget.settings.setAutoSend(on);
+                          await _onAutoSendChanged();
+                        },
                 ),
               ]),
             ),
             const SizedBox(height: 12),
             Row(children: [
-              tile(tr('home.tile_pick'), tr('home.tile_pick_sub'), () => _selectTab(1)),
-              const SizedBox(width: 12),
-              tile(
+              action(Icons.send_rounded, tr('home.act_send'), tr('home.act_send_sub'), () => _startSend()),
+              const SizedBox(width: 10),
+              action(Icons.document_scanner_rounded, tr('home.tile_scan'), tr('home.tile_scan_sub'), _openScan),
+              const SizedBox(width: 10),
+              action(
+                Icons.cleaning_services_rounded,
                 tr('home.cleanup'),
                 _freeable > 0 ? tr('home.tile_free_sub', {'size': formatSize(_freeable)}) : tr('home.tile_free_none'),
-                () => _selectTab(2),
-                subColor: _freeable > 0 ? LrColors.verified : null,
+                d == null ? _openConnect : () => _openCleanup(d),
+                color: _freeable > 0 ? LrColors.verified : null,
               ),
             ]),
-            const SizedBox(height: 12),
-            Row(children: [
-              tile(tr('home.tile_pc_library'), d == null ? tr('home.tile_pc_library_none') : tr('home.tile_pc_library_sub', {'pc': d.name}),
-                  d == null ? _openConnect : () => _openPcLibrary(d)),
-              const SizedBox(width: 12),
-              tile(
-                tr('home.auto_send'),
-                widget.settings.autoSend ? tr('home.tile_auto_on') : tr('home.tile_auto_off'),
-                _openSettings,
-                subColor: widget.settings.autoSend ? LrColors.verified : null,
-              ),
-            ]),
-            const SizedBox(height: 12),
-            Row(children: [
-              tile(
-                tr('mylib.title'),
-                MyLibrary.instance.items.isEmpty
-                    ? tr('mylib.tile_empty')
-                    : tr('mylib.tile_sub', {'count': MyLibrary.instance.items.length}),
-                _openMyLibrary,
-              ),
-            ]),
-            const SizedBox(height: 12),
-            Row(children: [
-              tile(tr('home.tile_scan'), tr('home.tile_scan_sub'), _openScan),
-              const SizedBox(width: 12),
-              tile(tr('home.tile_files'), tr('home.tile_files_sub'), _sendFiles),
-            ]),
-            const SizedBox(height: 12),
-            Material(
-              color: LrColors.surface,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: const BorderSide(color: LrColors.line)),
-              child: ListTile(
-                onTap: _openSettings,
-                title: Text(tr('home.family_line', {'name': who, 'share': shareText})),
-                trailing: const Icon(Icons.chevron_right_rounded),
-              ),
-            ),
+            _recentStrip(context),
           ],
         ),
       ),
     );
   }
+
+  /// "Recently received": the latest few from My files.
+  Widget _recentStrip(BuildContext context) {
+    final items = MyLibrary.instance.items.take(4).toList();
+    if (items.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 18),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Expanded(child: Text(tr('home.recent'), style: const TextStyle(fontWeight: FontWeight.w700))),
+          TextButton(onPressed: () => _selectTab(2), child: Text(tr('home.recent_all'))),
+        ]),
+        Row(children: [
+          for (var k = 0; k < 4; k++) ...[
+            if (k > 0) const SizedBox(width: 6),
+            Expanded(
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: k < items.length
+                    ? InkWell(
+                        borderRadius: BorderRadius.circular(10),
+                        onTap: () => _selectTab(2),
+                        child: ClipRRect(borderRadius: BorderRadius.circular(10), child: MyItemThumb(item: items[k])),
+                      )
+                    : const SizedBox.shrink(),
+              ),
+            ),
+          ],
+        ]),
+      ]),
+    );
+  }
+
+  /// Back up now: everything not on the backup PC yet, no questions.
+  Future<void> _backupNow() async {
+    final d = widget.settings.current;
+    final pending = _pending;
+    if (d == null) return _openConnect();
+    if (pending == null || pending.assets.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('home.all_backed_up'))));
+      return;
+    }
+    await Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => TransferPage(settings: widget.settings, discovery: widget.discovery, desktop: d, assets: pending.assets),
+    ));
+    if (mounted) unawaited(_refreshHome());
+  }
+
+  /// A device chip tapped: its card, then what was chosen.
+  Future<void> _onDevice(StripDevice dev) async {
+    final a = await showDeviceSheet(context, dev, isBackupPc: dev.id == widget.settings.current?.id);
+    if (a == null || !mounted) return;
+    final target = dev.pc ?? dev.phone;
+    switch (a) {
+      case DeviceAction.sendPhotos:
+        _sendPhotosTo(target);
+      case DeviceAction.sendFiles:
+        if (target != null) await _sendFilesTo(target);
+      case DeviceAction.browse:
+        final pc = dev.pc;
+        if (pc == null) break;
+        if (widget.settings.simpleMode) {
+          await Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => PcLibraryPage(settings: widget.settings, discovery: widget.discovery, desktop: pc, server: _server),
+          ));
+        } else {
+          setState(() => _pcTab = pc.id);
+          _selectTab(3);
+        }
+      case DeviceAction.makeBackup:
+        await widget.settings.selectDesktop(dev.id);
+        if (mounted) unawaited(_refreshHome());
+      case DeviceAction.settings:
+        await _openConnect();
+    }
+  }
+
+  /// "Send": what, then to whom.
+  Future<void> _startSend() async {
+    final r = await showSendSheet(context, widget.settings, widget.discovery);
+    if (r == null || !mounted) return;
+    final (kind, target) = r;
+    switch (kind) {
+      case SendKind.photos:
+        _sendPhotosTo(target);
+      case SendKind.files:
+        if (target != null) await _sendFilesTo(target);
+      case SendKind.scan:
+        await _openScan();
+    }
+  }
+
+  /// To the photo grid, ready to pick; "Send" there goes to [target].
+  void _sendPhotosTo(Object? target) {
+    setState(() {
+      _sendTarget = target;
+      _selected.clear();
+      if (widget.settings.simpleMode) {
+        _browse = true;
+        _onlyUnsent = false;
+      }
+    });
+    if (!widget.settings.simpleMode) _selectTab(1);
+    final name = switch (target) {
+      PairedDesktop p => p.name,
+      NearbyPhone p => p.name,
+      _ => null,
+    };
+    if (name != null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('home.pick_for', {'name': name}))));
+    }
+  }
+
+  /// Pick files, send them to [target] (a PC or a phone).
+  Future<void> _sendFilesTo(Object target) async {
+    final picked = await FilePicker.platform.pickFiles(allowMultiple: true);
+    final files = [
+      for (final f in picked?.files ?? const <PlatformFile>[])
+        if (f.path != null) File(f.path!),
+    ];
+    if (files.isEmpty || !mounted) return;
+    final sender = FileSender(
+      settings: widget.settings,
+      discovery: widget.discovery,
+      files: files,
+      desktop: target is PairedDesktop ? target : null,
+      phone: target is NearbyPhone ? target : null,
+    );
+    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => SendFilesPage(sender: sender)));
+  }
+
+  /// Chosen from a device card or the Send sheet: where the photo grid's
+  /// "Send" goes (once).
+  Object? _sendTarget;
+
+  /// The PC shown in the "PC" tab (null: the backup PC).
+  String? _pcTab;
 
   Widget _body(BuildContext context, List<AssetEntity> visible, Set<String> sent) {
     final ps = _permission;

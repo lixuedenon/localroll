@@ -17,7 +17,11 @@ class SimpleHome extends StatelessWidget {
     required this.onConnect,
     required this.onSettings,
     required this.onPick,
+    this.devices,
   });
+
+  /// The device row (as on the normal Home, bigger).
+  final Widget? devices;
 
   final MobileSettings settings;
   final AutoSender auto;
@@ -50,7 +54,10 @@ class SimpleHome extends StatelessWidget {
               final d = settings.current;
               return ListView(
                 padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-                children: d == null ? _noPc(context) : _withPc(context, d),
+                children: [
+                  if (devices != null) ...[devices!, const SizedBox(height: 16)],
+                  ...(d == null ? _noPc(context) : _withPc(context, d)),
+                ],
               );
             },
           ),

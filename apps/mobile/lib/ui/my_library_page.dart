@@ -402,6 +402,20 @@ class _MyLibraryPageState extends State<MyLibraryPage> {
   }
 }
 
+/// An item's small picture: a thumbnail, or the file's kind and name.
+class MyItemThumb extends StatelessWidget {
+  const MyItemThumb({super.key, required this.item});
+
+  final MyItem item;
+
+  @override
+  Widget build(BuildContext context) => Stack(fit: StackFit.expand, children: [
+        item.kind.isMedia ? _Thumb(item: item) : _FileTile(item: item),
+        if (item.kind == MyKind.video)
+          const Positioned(right: 4, bottom: 4, child: Icon(Icons.play_circle_fill_rounded, size: 18, color: Colors.white)),
+      ]);
+}
+
 /// A photo / video thumbnail (from the photo library).
 class _Thumb extends StatelessWidget {
   const _Thumb({required this.item});

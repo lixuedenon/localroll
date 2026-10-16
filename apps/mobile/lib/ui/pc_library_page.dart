@@ -23,7 +23,11 @@ class PcLibraryPage extends StatefulWidget {
     required this.discovery,
     required this.desktop,
     required this.server,
+    this.onSwitch,
   });
+
+  /// Shown as a tab with more than one PC: tap the title to pick another.
+  final VoidCallback? onSwitch;
 
   final MobileSettings settings;
   final DesktopDiscovery discovery;
@@ -123,9 +127,17 @@ class _PcLibraryPageState extends State<PcLibraryPage> {
         return Scaffold(
           appBar: AppBar(
             leading: selecting ? IconButton(onPressed: () => setState(_selected.clear), icon: const Icon(Icons.close_rounded)) : null,
-            title: Text(selecting
-                ? tr('pclib.selected', {'count': _selected.length})
-                : tr('pclib.title', {'pc': widget.desktop.name})),
+            title: selecting
+                ? Text(tr('pclib.selected', {'count': _selected.length}))
+                : widget.onSwitch == null
+                    ? Text(tr('pclib.title', {'pc': widget.desktop.name}))
+                    : InkWell(
+                        onTap: widget.onSwitch,
+                        child: Row(mainAxisSize: MainAxisSize.min, children: [
+                          Flexible(child: Text(tr('pclib.title', {'pc': widget.desktop.name}), overflow: TextOverflow.ellipsis)),
+                          const Icon(Icons.arrow_drop_down_rounded),
+                        ]),
+                      ),
             actions: [
               if (_busy) const Padding(padding: EdgeInsets.all(14), child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
               if (selecting) ...[
