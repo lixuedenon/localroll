@@ -1,5 +1,6 @@
 // apps/desktop/lib/ui/app_nav.dart
 import 'package:flutter/material.dart';
+import 'package:localroll_core/localroll_core.dart';
 
 /// App-wide navigation state for the title bar's Back button: pops a pushed
 /// page (viewer…) first, otherwise returns to the previously visited section.
@@ -30,8 +31,11 @@ class AppNav extends ChangeNotifier {
   bool get hasPage => _routes > 1;
 
   /// Switch section and remember where we came from.
+  static const List<String> _names = ['home', 'receive', 'send', 'library', 'convert', 'family', 'settings'];
+
   void selectTab(int i) {
     if (i == tab) return;
+    DiagLog.log('ui', 'section: ${i >= 0 && i < _names.length ? _names[i] : i}');
     _tabs.add(tab);
     if (_tabs.length > 30) _tabs.removeAt(0);
     tab = i;
@@ -70,13 +74,19 @@ class _Observer extends NavigatorObserver {
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    DiagLog.log('ui', 'open ${_what(route)}');
     if (route is PageRoute) nav._routeCount(1);
   }
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    DiagLog.log('ui', 'close ${_what(route)}');
     if (route is PageRoute) nav._routeCount(-1);
   }
+
+  /// Page, dialog or menu (for the log; no content).
+  static String _what(Route<dynamic> route) =>
+      route.settings.name ?? (route is PageRoute ? 'page' : route.runtimeType.toString().replaceAll('_', ''));
 
   @override
   void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {

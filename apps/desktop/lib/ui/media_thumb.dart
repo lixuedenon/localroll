@@ -190,6 +190,7 @@ class _ThumbLiveState extends State<_ThumbLive> {
         if (done) widget.onDone();
       });
     }
+    DiagLog.log('ui', 'video preview start');
     _player.setVolume(0);
     if (widget.loop) _player.setPlaylistMode(PlaylistMode.loop);
     _player.open(Media(widget.path));
@@ -197,6 +198,7 @@ class _ThumbLiveState extends State<_ThumbLive> {
 
   @override
   void dispose() {
+    DiagLog.log('ui', 'video preview stop');
     _sub?.cancel();
     _player.dispose();
     super.dispose();

@@ -28,6 +28,13 @@ final class DiagLog {
 
   static bool get ready => _dir != null;
 
+  /// The file being written now (null before [init]).
+  static String? get currentPath => _dir == null ? null : _current;
+
+  /// Also given every line as it is logged (the PC's watchdog keeps the
+  /// latest ones, to write them down if the app stops responding).
+  static void Function(String line)? onLine;
+
   /// Start writing into [dir]; [about] goes first (app version, system).
   static Future<void> init(Directory dir, {String about = ''}) async {
     await dir.create(recursive: true);
@@ -42,6 +49,9 @@ final class DiagLog {
     final line = '${now.toIso8601String()} [$tag] ${message.replaceAll(RegExp(r'[\r\n]+'), ' | ')}';
     if (_queue.length >= 2000) _queue.removeAt(0); // never grow without end
     _queue.add(line);
+    try {
+      onLine?.call(line);
+    } catch (_) {}
     if (_dir != null) _writing ??= _drain();
   }
 

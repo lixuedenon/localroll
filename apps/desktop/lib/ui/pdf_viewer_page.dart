@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:localroll_core/localroll_core.dart';
 import 'package:pdfrx/pdfrx.dart';
 
 import '../l10n/l10n.dart';
@@ -30,7 +31,14 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   String get _name => widget.path.split(Platform.pathSeparator).last;
 
   @override
+  void initState() {
+    super.initState();
+    DiagLog.log('ui', 'pdf reader open');
+  }
+
+  @override
   void dispose() {
+    DiagLog.log('ui', 'pdf reader closed');
     _focus.dispose();
     super.dispose();
   }
@@ -98,6 +106,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
               backgroundColor: LrColors.ink,
               maxScale: 8,
               onViewerReady: (document, controller) {
+                DiagLog.log('ui', 'pdf ready: ${document.pages.length} pages');
                 if (mounted) setState(() => _count = document.pages.length);
               },
               onPageChanged: (n) {

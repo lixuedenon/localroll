@@ -1412,7 +1412,7 @@ class TransferServer extends ChangeNotifier {
     }
     await Directory(folder).create(recursive: true);
     final dest = LibraryIndex.uniquePath(folder, fileName);
-    await part.rename(dest);
+    await _renameRetry(part, dest);
     try {
       // Explorer and Windows Photos sort by this; make it the capture time.
       await File(dest).setLastModified(captured);
@@ -1460,7 +1460,7 @@ class TransferServer extends ChangeNotifier {
     final folder = [root, ...segs.take(segs.length - 1)].join(sep);
     await Directory(folder).create(recursive: true);
     final dest = LibraryIndex.uniquePath(folder, segs.last);
-    await part.rename(dest);
+    await _renameRetry(part, dest);
     try {
       if (offer.modifiedMs > 0) await File(dest).setLastModified(DateTime.fromMillisecondsSinceEpoch(offer.modifiedMs));
     } catch (_) {}
@@ -1507,6 +1507,22 @@ class TransferServer extends ChangeNotifier {
 
   /// Partial uploads are keyed by device + asset + edit time, so an
   /// interrupted transfer resumes even from a brand-new session.
+  /// Windows may still hold the just-written file for a moment (virus
+  /// scanner, indexer): "in use by another program". Try again a few times
+  /// before giving up.
+  static Future<void> _renameRetry(File part, String dest) async {
+    for (var attempt = 1;; attempt++) {
+      try {
+        await part.rename(dest);
+        return;
+      } on FileSystemException catch (e) {
+        if (attempt >= 8) rethrow;
+        if (attempt == 1) DiagLog.log('receive', 'file busy, retrying: ${e.osError?.message ?? e.message}');
+        await Future<void>.delayed(Duration(milliseconds: 250 * attempt));
+      }
+    }
+  }
+
   String _partPath(TrustedDevice device, FileOffer offer) =>
       '${library.incomingDir}${Platform.pathSeparator}'
       '${shortKey('${device.id}|${offer.assetId}|${offer.modifiedMs}')}.part';

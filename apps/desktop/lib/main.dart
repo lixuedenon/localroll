@@ -14,6 +14,7 @@ import 'app_services.dart';
 import 'l10n/l10n.dart';
 import 'services/autostart.dart';
 import 'services/settings.dart';
+import 'services/watchdog.dart';
 import 'ui/app_nav.dart';
 import 'ui/home_shell.dart';
 import 'ui/theme.dart';
@@ -62,6 +63,7 @@ Future<void> _startLog() async {
     final dir = await getApplicationSupportDirectory();
     await DiagLog.init(Directory('${dir.path}${Platform.pathSeparator}logs'),
         about: 'LocalRoll $lrVersion · ${Platform.operatingSystemVersion} · ${Platform.localeName}');
+    await Watchdog.start();
   } catch (_) {}
   final prior = debugPrint;
   debugPrint = (String? message, {int? wrapWidth}) {

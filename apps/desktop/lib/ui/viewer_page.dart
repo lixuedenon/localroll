@@ -287,6 +287,7 @@ class _LivePlaybackState extends State<_LivePlayback> {
   @override
   void initState() {
     super.initState();
+    DiagLog.log('ui', 'live photo play');
     _sub = _player.stream.completed.listen((done) {
       if (done) widget.onDone();
     });
@@ -295,6 +296,7 @@ class _LivePlaybackState extends State<_LivePlayback> {
 
   @override
   void dispose() {
+    DiagLog.log('ui', 'live photo stop');
     _sub?.cancel();
     _player.dispose();
     super.dispose();
@@ -324,6 +326,7 @@ class _VideoViewState extends State<_VideoView> {
   @override
   void initState() {
     super.initState();
+    DiagLog.log('ui', 'video open');
     _player.open(Media(widget.path), play: widget.active);
   }
 
@@ -336,6 +339,7 @@ class _VideoViewState extends State<_VideoView> {
 
   @override
   void dispose() {
+    DiagLog.log('ui', 'video closed');
     _player.dispose();
     super.dispose();
   }

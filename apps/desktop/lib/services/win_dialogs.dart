@@ -19,6 +19,10 @@ class WinDialogs {
 
   static bool _open = false;
 
+  /// Off for now: the usual dialog (as before beta.40) while the freeze on
+  /// one PC is being tracked down — the log records each dialog either way.
+  static bool ownThread = false;
+
   /// Files chosen (empty: cancelled). [extensions] without dots limits what
   /// is shown (the user can still switch to "All files").
   static Future<List<String>> pickFiles({
@@ -27,11 +31,18 @@ class WinDialogs {
     String? typeLabel,
     List<String>? extensions,
   }) async {
-    if (!Platform.isWindows) {
+    if (!Platform.isWindows || !ownThread) {
+      DiagLog.log('ui', 'file dialog opened');
       final groups = extensions == null ? const <fs.XTypeGroup>[] : [fs.XTypeGroup(label: typeLabel, extensions: extensions)];
-      if (multiple) return [for (final x in await fs.openFiles(acceptedTypeGroups: groups)) x.path];
-      final x = await fs.openFile(acceptedTypeGroups: groups);
-      return x == null ? const [] : [x.path];
+      final List<String> r;
+      if (multiple) {
+        r = [for (final x in await fs.openFiles(acceptedTypeGroups: groups)) x.path];
+      } else {
+        final x = await fs.openFile(acceptedTypeGroups: groups);
+        r = x == null ? const [] : [x.path];
+      }
+      DiagLog.log('ui', 'file dialog closed (${r.length} chosen)');
+      return r;
     }
     final spec = extensions == null || extensions.isEmpty ? null : extensions.map((e) => '*.$e').join(';');
     return _run(folder: false, multiple: multiple, title: title, filterName: typeLabel ?? spec, filterSpec: spec);
@@ -39,7 +50,12 @@ class WinDialogs {
 
   /// A folder, or null (cancelled).
   static Future<String?> pickFolder({String? title}) async {
-    if (!Platform.isWindows) return fs.getDirectoryPath(confirmButtonText: title);
+    if (!Platform.isWindows || !ownThread) {
+      DiagLog.log('ui', 'folder dialog opened');
+      final r = await fs.getDirectoryPath(confirmButtonText: title);
+      DiagLog.log('ui', 'folder dialog closed');
+      return r;
+    }
     final r = await _run(folder: true, multiple: false, title: title, filterName: null, filterSpec: null);
     return r.isEmpty ? null : r.first;
   }
