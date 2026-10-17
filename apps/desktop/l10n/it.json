@@ -468,5 +468,9 @@
   "library.hover_hint": "Live Photo e video: passa il mouse sopra per riprodurre",
   "text.save_as": "Salva con nome…",
   "text.type_label": "File di testo",
-  "text.saved_at": "Salvato: {path}"
+  "text.saved_at": "Salvato: {path}",
+  "open.google_title": "Documento online di Google",
+  "open.google_body": "È un collegamento a un documento Google Docs, Fogli o Presentazioni; il documento è online. Servono internet e un account Google autorizzato. Per passarlo offline, prima «Scaricalo» da Google come Word o PDF e invia quello.",
+  "open.google_open": "Apri nel browser",
+  "open.google_no_link": "Questo collegamento non contiene un indirizzo utilizzabile."
 }

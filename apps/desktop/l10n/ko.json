@@ -468,5 +468,9 @@
   "library.hover_hint": "Live Photo와 동영상: 마우스를 올리면 재생",
   "text.save_as": "다른 이름으로 저장…",
   "text.type_label": "텍스트 파일",
-  "text.saved_at": "저장됨: {path}"
+  "text.saved_at": "저장됨: {path}",
+  "open.google_title": "Google 온라인 문서",
+  "open.google_body": "Google 문서·스프레드시트·프레젠테이션의 바로가기이며, 문서 자체는 온라인에 있습니다. 인터넷과 열람 권한이 있는 Google 계정이 필요합니다. 오프라인으로 전달하려면 먼저 Google에서 Word 또는 PDF로 \"다운로드\"한 뒤 보내세요.",
+  "open.google_open": "브라우저에서 열기",
+  "open.google_no_link": "이 바로가기에는 사용할 수 있는 주소가 없습니다."
 }

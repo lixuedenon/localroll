@@ -468,5 +468,9 @@
   "library.hover_hint": "Live Photos und Videos: Maus darüber halten zum Abspielen",
   "text.save_as": "Speichern unter…",
   "text.type_label": "Textdatei",
-  "text.saved_at": "Gespeichert: {path}"
+  "text.saved_at": "Gespeichert: {path}",
+  "open.google_title": "Google-Onlinedokument",
+  "open.google_body": "Das ist eine Verknüpfung zu Google Docs, Sheets oder Slides; das Dokument selbst liegt online. Nötig sind Internet und ein berechtigtes Google-Konto. Zum Offline-Weitergeben zuerst in Google als Word oder PDF „herunterladen“ und das senden.",
+  "open.google_open": "Im Browser öffnen",
+  "open.google_no_link": "Diese Verknüpfung enthält keine nutzbare Adresse."
 }

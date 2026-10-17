@@ -436,5 +436,21 @@
   "send.nobody_online": "現在沒有在線的裝置。請在對方開啟 LocalRoll，並連同一個 Wi‑Fi。",
   "send.next_photos": "下一步：挑選照片",
   "send.next_files": "下一步：挑選檔案",
-  "send.next_scan": "開始掃描"
+  "send.next_scan": "開始掃描",
+  "open.google_title": "Google 線上文件",
+  "open.google_body": "這是 Google 文件、試算表或簡報的捷徑，檔案本身在網路上。需要連網，並登入有權限的 Google 帳號才能看。如果要離線傳給別人，請先在 Google 裡「下載」為 Word 或 PDF 再傳送。",
+  "open.google_open": "在瀏覽器中開啟",
+  "open.google_no_link": "這個捷徑裡沒有可用的網址。",
+  "open.other_app": "用其他 App 開啟",
+  "open.copy_all": "全部複製",
+  "open.copied": "已複製",
+  "open.cant_here": "這支手機不能直接顯示這種檔案。可以用手機上的其他 App 開啟，或傳到電腦上查看。",
+  "open.send_pc": "傳送到電腦…",
+  "open.kind_word": "Word 文件",
+  "open.kind_excel": "Excel 試算表",
+  "open.kind_ppt": "PowerPoint 簡報",
+  "open.kind_zip": "壓縮檔",
+  "open.kind_audio": "音訊",
+  "open.kind_app": "安裝程式",
+  "open.kind_other": "檔案"
 }

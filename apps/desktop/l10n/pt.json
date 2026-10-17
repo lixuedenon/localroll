@@ -468,5 +468,9 @@
   "library.hover_hint": "Live Photos e vídeos: passe o mouse por cima para reproduzir",
   "text.save_as": "Salvar como…",
   "text.type_label": "Arquivo de texto",
-  "text.saved_at": "Salvo: {path}"
+  "text.saved_at": "Salvo: {path}",
+  "open.google_title": "Documento online do Google",
+  "open.google_body": "É um atalho para um Documento, Planilha ou Apresentação do Google; o documento está online. Precisa de internet e de uma conta Google com permissão. Para passar offline, primeiro “Baixe” no Google como Word ou PDF e envie.",
+  "open.google_open": "Abrir no navegador",
+  "open.google_no_link": "Este atalho não tem um endereço utilizável."
 }

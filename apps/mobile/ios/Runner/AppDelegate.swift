@@ -3,6 +3,7 @@ import AVFoundation
 import BackgroundTasks
 import Flutter
 import PDFKit
+import QuickLook
 import Photos
 import UIKit
 
@@ -32,6 +33,9 @@ import UIKit
     }
     if let reg = engineBridge.pluginRegistry.registrar(forPlugin: "LocalRollPdf") {
       PdfPages.register(messenger: reg.messenger())
+    }
+    if let reg = engineBridge.pluginRegistry.registrar(forPlugin: "LocalRollFiles") {
+      FilePreview.register(messenger: reg.messenger())
     }
   }
 }
@@ -359,5 +363,56 @@ enum PdfPages {
       thumb.draw(in: CGRect(origin: .zero, size: size))
     }
     return image.jpegData(compressionQuality: 0.88)
+  }
+}
+
+/// The system preview (Quick Look) inside LocalRoll: Word, Excel,
+/// PowerPoint, Pages, Numbers, Keynote, text, CSV, RTF, web pages, audio…
+/// and opening a web address. Channel: localroll/files.
+final class FilePreview: NSObject, QLPreviewControllerDataSource {
+  static let shared = FilePreview()
+  private var url: URL?
+
+  static func register(messenger: FlutterBinaryMessenger) {
+    let ch = FlutterMethodChannel(name: "localroll/files", binaryMessenger: messenger)
+    ch.setMethodCallHandler { call, result in
+      let args = call.arguments as? [String: Any] ?? [:]
+      switch call.method {
+      case "preview":
+        result(shared.show(path: args["path"] as? String ?? ""))
+      case "openUrl":
+        guard let s = args["url"] as? String, s.hasPrefix("https://"), let u = URL(string: s) else {
+          result(false)
+          return
+        }
+        UIApplication.shared.open(u, options: [:]) { ok in result(ok) }
+      default:
+        result(FlutterMethodNotImplemented)
+      }
+    }
+  }
+
+  func show(path: String) -> Bool {
+    guard !path.isEmpty else { return false }
+    let u = URL(fileURLWithPath: path)
+    guard QLPreviewController.canPreview(u as NSURL), let top = FilePreview.topController() else { return false }
+    url = u
+    let q = QLPreviewController()
+    q.dataSource = self
+    top.present(q, animated: true)
+    return true
+  }
+
+  func numberOfPreviewItems(in controller: QLPreviewController) -> Int { url == nil ? 0 : 1 }
+
+  func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> QLPreviewItem {
+    (url ?? URL(fileURLWithPath: "/")) as NSURL
+  }
+
+  static func topController() -> UIViewController? {
+    let windows = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.flatMap { $0.windows }
+    var top = (windows.first { $0.isKeyWindow } ?? windows.first)?.rootViewController
+    while let p = top?.presentedViewController { top = p }
+    return top
   }
 }

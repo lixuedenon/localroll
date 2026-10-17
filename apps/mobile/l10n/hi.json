@@ -436,5 +436,21 @@
   "send.nobody_online": "अभी कोई डिवाइस ऑनलाइन नहीं। दूसरे डिवाइस पर उसी Wi‑Fi में LocalRoll खोलें।",
   "send.next_photos": "आगे: फ़ोटो चुनें",
   "send.next_files": "आगे: फ़ाइलें चुनें",
-  "send.next_scan": "स्कैन शुरू करें"
+  "send.next_scan": "स्कैन शुरू करें",
+  "open.google_title": "Google ऑनलाइन दस्तावेज़",
+  "open.google_body": "यह Google Docs, Sheets या Slides का शॉर्टकट है; दस्तावेज़ खुद ऑनलाइन है। इंटरनेट और अनुमति वाला Google खाता चाहिए। ऑफ़लाइन देने के लिए पहले Google से Word या PDF के रूप में “डाउनलोड” करें, फिर भेजें।",
+  "open.google_open": "ब्राउज़र में खोलें",
+  "open.google_no_link": "इस शॉर्टकट में कोई उपयोगी पता नहीं है।",
+  "open.other_app": "दूसरे ऐप से खोलें",
+  "open.copy_all": "सब कॉपी करें",
+  "open.copied": "कॉपी हो गया",
+  "open.cant_here": "यह फ़ोन इस तरह की फ़ाइल खुद नहीं दिखा सकता। इसे दूसरे ऐप से खोलें या PC पर भेजकर देखें।",
+  "open.send_pc": "PC पर भेजें…",
+  "open.kind_word": "Word दस्तावेज़",
+  "open.kind_excel": "Excel शीट",
+  "open.kind_ppt": "PowerPoint प्रस्तुति",
+  "open.kind_zip": "संग्रह फ़ाइल",
+  "open.kind_audio": "ऑडियो",
+  "open.kind_app": "इंस्टॉलर",
+  "open.kind_other": "फ़ाइल"
 }

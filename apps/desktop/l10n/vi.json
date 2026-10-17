@@ -468,5 +468,9 @@
   "library.hover_hint": "Live Photos và video: rê chuột lên để phát",
   "text.save_as": "Lưu thành…",
   "text.type_label": "Tệp văn bản",
-  "text.saved_at": "Đã lưu: {path}"
+  "text.saved_at": "Đã lưu: {path}",
+  "open.google_title": "Tài liệu trực tuyến Google",
+  "open.google_body": "Đây là lối tắt tới Google Tài liệu, Trang tính hoặc Trang trình bày; bản thân tài liệu nằm trên mạng. Cần internet và tài khoản Google có quyền. Để chuyển ngoại tuyến, hãy “Tải xuống” từ Google dưới dạng Word hoặc PDF rồi gửi.",
+  "open.google_open": "Mở trong trình duyệt",
+  "open.google_no_link": "Lối tắt này không có địa chỉ dùng được."
 }

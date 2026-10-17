@@ -2,6 +2,8 @@
 package io.github.lixuedenon.localroll_mobile
 
 import android.Manifest
+import android.content.Intent
+import android.net.Uri
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.pdf.PdfRenderer
@@ -20,6 +22,28 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        // Opening files (see lib/ui/open_file.dart): Android has no system
+        // preview, so only web addresses are handled here.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "localroll/files")
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "preview" -> result.success(false)
+                    "openUrl" -> {
+                        val url = call.argument<String>("url") ?: ""
+                        if (!url.startsWith("https://")) {
+                            result.success(false)
+                        } else {
+                            try {
+                                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                                result.success(true)
+                            } catch (e: Exception) {
+                                result.success(false)
+                            }
+                        }
+                    }
+                    else -> result.notImplemented()
+                }
+            }
         // PDF pages as pictures (see lib/services/pdf_pages.dart).
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "localroll/pdf")
             .setMethodCallHandler { call, result ->

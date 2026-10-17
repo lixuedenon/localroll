@@ -468,5 +468,9 @@
   "library.hover_hint": "Live Photos と動画：マウスを重ねると再生",
   "text.save_as": "名前を付けて保存…",
   "text.type_label": "テキストファイル",
-  "text.saved_at": "保存しました：{path}"
+  "text.saved_at": "保存しました：{path}",
+  "open.google_title": "Google のオンライン文書",
+  "open.google_body": "Google ドキュメント・スプレッドシート・スライドへのショートカットで、文書本体はオンラインにあります。インターネットと、閲覧権限のある Google アカウントが必要です。オフラインで渡すには、Google で Word か PDF として「ダウンロード」してから送ってください。",
+  "open.google_open": "ブラウザで開く",
+  "open.google_no_link": "このショートカットには使えるアドレスがありません。"
 }

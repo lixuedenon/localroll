@@ -436,5 +436,21 @@
   "send.nobody_online": "现在没有在线的设备。请在对方打开 LocalRoll，并连同一个 Wi‑Fi。",
   "send.next_photos": "下一步：挑选照片",
   "send.next_files": "下一步：挑选文件",
-  "send.next_scan": "开始扫描"
+  "send.next_scan": "开始扫描",
+  "open.google_title": "Google 在线文档",
+  "open.google_body": "这是 Google 文档、表格或幻灯片的快捷方式，文件本身在网上。需要联网，并登录有权限的 Google 账号才能看。如果要离线传给别人，请先在 Google 里“下载”为 Word 或 PDF 再发送。",
+  "open.google_open": "在浏览器中打开",
+  "open.google_no_link": "这个快捷方式里没有可用的网址。",
+  "open.other_app": "用其他 App 打开",
+  "open.copy_all": "全部复制",
+  "open.copied": "已复制",
+  "open.cant_here": "这部手机不能直接显示这种文件。可以用手机上的其他 App 打开，或发到电脑上查看。",
+  "open.send_pc": "发送到电脑…",
+  "open.kind_word": "Word 文档",
+  "open.kind_excel": "Excel 表格",
+  "open.kind_ppt": "PowerPoint 演示文稿",
+  "open.kind_zip": "压缩包",
+  "open.kind_audio": "音频",
+  "open.kind_app": "安装程序",
+  "open.kind_other": "文件"
 }

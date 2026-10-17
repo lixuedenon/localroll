@@ -468,5 +468,9 @@
   "library.hover_hint": "Live Photos et vidéos : survolez avec la souris pour lire",
   "text.save_as": "Enregistrer sous…",
   "text.type_label": "Fichier texte",
-  "text.saved_at": "Enregistré : {path}"
+  "text.saved_at": "Enregistré : {path}",
+  "open.google_title": "Document en ligne Google",
+  "open.google_body": "C’est un raccourci vers un document Google Docs, Sheets ou Slides ; le document est en ligne. Il faut internet et un compte Google autorisé. Pour le transmettre hors ligne, « Téléchargez »-le d’abord depuis Google en Word ou PDF, puis envoyez-le.",
+  "open.google_open": "Ouvrir dans le navigateur",
+  "open.google_no_link": "Ce raccourci ne contient pas d’adresse utilisable."
 }

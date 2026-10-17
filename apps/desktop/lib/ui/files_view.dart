@@ -111,6 +111,7 @@ class _FilesViewState extends State<FilesView> {
     if (e.isDir) return Icons.folder_rounded;
     final ext = extensionOf(e.name);
     if (ext == 'pdf') return Icons.picture_as_pdf_rounded;
+    if (googleShortcutKinds.containsKey(ext)) return Icons.cloud_outlined;
     if (const {'doc', 'docx', 'odt', 'rtf', 'pages', 'wps'}.contains(ext)) return Icons.description_rounded;
     if (const {'xls', 'xlsx', 'ods', 'csv', 'numbers', 'et'}.contains(ext)) return Icons.table_chart_rounded;
     if (const {'ppt', 'pptx', 'odp', 'key', 'dps'}.contains(ext)) return Icons.slideshow_rounded;
@@ -119,6 +120,39 @@ class _FilesViewState extends State<FilesView> {
     if (const {'mp3', 'm4a', 'wav', 'flac', 'aac', 'ogg'}.contains(ext)) return Icons.audio_file_rounded;
     if (const {'exe', 'msi', 'apk', 'ipa'}.contains(ext)) return Icons.apps_rounded;
     return Icons.insert_drive_file_rounded;
+  }
+
+  /// A Google Docs / Sheets / Slides shortcut: the document is online.
+  Future<void> _openGoogle(_Entry e) async {
+    String? url;
+    try {
+      if (e.size <= 64 * 1024) url = googleShortcutUrl(await File(e.entity.path).readAsString(), extensionOf(e.name));
+    } catch (_) {}
+    if (!mounted) return;
+    final link = url;
+    await showDialog<void>(
+      context: context,
+      builder: (c) => AlertDialog(
+        icon: const Icon(Icons.cloud_outlined, size: 36, color: LrColors.safelight),
+        title: Text(tr('open.google_title')),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 460),
+          child: Text(link == null ? tr('open.google_no_link') : tr('open.google_body')),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c), child: Text(tr('common.close'))),
+          if (link != null)
+            FilledButton.icon(
+              onPressed: () {
+                Navigator.pop(c);
+                Process.start('explorer.exe', [link]);
+              },
+              icon: const Icon(Icons.open_in_browser_rounded),
+              label: Text(tr('open.google_open')),
+            ),
+        ],
+      ),
+    );
   }
 
   Future<void> _delete(_Entry e) async {
@@ -190,6 +224,8 @@ class _FilesViewState extends State<FilesView> {
                         onTap: () {
                           if (!e.isDir && isPdfPath(e.entity.path)) {
                             Navigator.of(context).push(MaterialPageRoute(builder: (_) => PdfViewerPage(path: e.entity.path)));
+                          } else if (!e.isDir && googleShortcutKinds.containsKey(extensionOf(e.name))) {
+                            _openGoogle(e);
                           } else if (!e.isDir && isPlainTextPath(e.entity.path) && e.size <= 4 * 1024 * 1024) {
                             showTextFile(context, widget.services, e.entity.path);
                           } else {

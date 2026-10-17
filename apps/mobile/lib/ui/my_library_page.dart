@@ -14,7 +14,7 @@ import '../services/mobile_settings.dart';
 import '../services/my_library.dart';
 import '../services/pdf_pages.dart';
 import 'cleanup_page.dart' show formatSize;
-import 'pdf_view_page.dart';
+import 'open_file.dart';
 import 'send_files_page.dart';
 import 'theme.dart';
 
@@ -110,13 +110,8 @@ class _MyLibraryPageState extends State<MyLibraryPage> {
       return;
     }
     if (!mounted) return;
-    // A PDF opens in LocalRoll's own reader; other documents in the phone's
-    // own apps (Office…).
-    if (path.toLowerCase().endsWith('.pdf')) {
-      await Navigator.of(context).push(MaterialPageRoute(builder: (_) => PdfViewPage(path: path, title: i.name)));
-      return;
-    }
-    await _shareFiles([File(path)]);
+    // Shown inside LocalRoll wherever the phone can (see open_file.dart).
+    await openDocument(context, path, name: i.name, onSend: () => _sendFiles([File(path)]));
   }
 
   Future<void> _shareFiles(List<File> files) async {
@@ -146,9 +141,13 @@ class _MyLibraryPageState extends State<MyLibraryPage> {
     final files = await _filesOf(_selection);
     if (files.isEmpty) return _toast(tr('mylib.cannot_open'));
     if (!mounted) return;
+    await _sendFiles(files, clearSelection: true);
+  }
+
+  Future<void> _sendFiles(List<File> files, {bool clearSelection = false}) async {
     final sender = await pickFileTarget(context, widget.settings, widget.discovery, files);
     if (sender == null || !mounted) return;
-    setState(_selected.clear);
+    if (clearSelection) setState(_selected.clear);
     await Navigator.of(context).push(MaterialPageRoute(builder: (_) => SendFilesPage(sender: sender)));
   }
 

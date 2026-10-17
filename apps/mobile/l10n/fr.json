@@ -436,5 +436,21 @@
   "send.nobody_online": "Aucun appareil en ligne. Ouvrez LocalRoll sur l’autre appareil, sur le même Wi‑Fi.",
   "send.next_photos": "Suivant : choisir des photos",
   "send.next_files": "Suivant : choisir des fichiers",
-  "send.next_scan": "Numériser"
+  "send.next_scan": "Numériser",
+  "open.google_title": "Document en ligne Google",
+  "open.google_body": "C’est un raccourci vers un document Google Docs, Sheets ou Slides ; le document est en ligne. Il faut internet et un compte Google autorisé. Pour le transmettre hors ligne, « Téléchargez »-le d’abord depuis Google en Word ou PDF, puis envoyez-le.",
+  "open.google_open": "Ouvrir dans le navigateur",
+  "open.google_no_link": "Ce raccourci ne contient pas d’adresse utilisable.",
+  "open.other_app": "Ouvrir avec une autre app",
+  "open.copy_all": "Tout copier",
+  "open.copied": "Copié",
+  "open.cant_here": "Ce téléphone ne peut pas afficher ce type de fichier. Ouvrez-le avec une autre app ou envoyez-le sur un PC pour le consulter.",
+  "open.send_pc": "Envoyer au PC…",
+  "open.kind_word": "Document Word",
+  "open.kind_excel": "Feuille Excel",
+  "open.kind_ppt": "Présentation PowerPoint",
+  "open.kind_zip": "Archive",
+  "open.kind_audio": "Audio",
+  "open.kind_app": "Programme d’installation",
+  "open.kind_other": "Fichier"
 }

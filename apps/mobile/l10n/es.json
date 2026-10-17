@@ -436,5 +436,21 @@
   "send.nobody_online": "No hay ningún dispositivo en línea. Abre LocalRoll en el otro, en la misma Wi‑Fi.",
   "send.next_photos": "Siguiente: elegir fotos",
   "send.next_files": "Siguiente: elegir archivos",
-  "send.next_scan": "Empezar a escanear"
+  "send.next_scan": "Empezar a escanear",
+  "open.google_title": "Documento en línea de Google",
+  "open.google_body": "Es un acceso directo a un Documento, Hoja o Presentación de Google; el documento está en línea. Necesita internet y una cuenta de Google con permiso. Para pasarlo sin conexión, primero «Descárgalo» desde Google como Word o PDF y envía eso.",
+  "open.google_open": "Abrir en el navegador",
+  "open.google_no_link": "Este acceso directo no tiene una dirección válida.",
+  "open.other_app": "Abrir con otra app",
+  "open.copy_all": "Copiar todo",
+  "open.copied": "Copiado",
+  "open.cant_here": "Este móvil no puede mostrar este tipo de archivo. Ábrelo con otra app del móvil o envíalo a un PC para verlo allí.",
+  "open.send_pc": "Enviar al PC…",
+  "open.kind_word": "Documento de Word",
+  "open.kind_excel": "Hoja de Excel",
+  "open.kind_ppt": "Presentación de PowerPoint",
+  "open.kind_zip": "Archivo comprimido",
+  "open.kind_audio": "Audio",
+  "open.kind_app": "Instalador",
+  "open.kind_other": "Archivo"
 }

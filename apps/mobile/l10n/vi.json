@@ -436,5 +436,21 @@
   "send.nobody_online": "Không có thiết bị trực tuyến. Mở LocalRoll trên thiết bị kia, cùng Wi‑Fi.",
   "send.next_photos": "Tiếp: chọn ảnh",
   "send.next_files": "Tiếp: chọn tệp",
-  "send.next_scan": "Bắt đầu quét"
+  "send.next_scan": "Bắt đầu quét",
+  "open.google_title": "Tài liệu trực tuyến Google",
+  "open.google_body": "Đây là lối tắt tới Google Tài liệu, Trang tính hoặc Trang trình bày; bản thân tài liệu nằm trên mạng. Cần internet và tài khoản Google có quyền. Để chuyển ngoại tuyến, hãy “Tải xuống” từ Google dưới dạng Word hoặc PDF rồi gửi.",
+  "open.google_open": "Mở trong trình duyệt",
+  "open.google_no_link": "Lối tắt này không có địa chỉ dùng được.",
+  "open.other_app": "Mở bằng ứng dụng khác",
+  "open.copy_all": "Sao chép tất cả",
+  "open.copied": "Đã sao chép",
+  "open.cant_here": "Điện thoại này không tự hiển thị được loại tệp này. Hãy mở bằng ứng dụng khác hoặc gửi sang máy tính để xem.",
+  "open.send_pc": "Gửi sang máy tính…",
+  "open.kind_word": "Tài liệu Word",
+  "open.kind_excel": "Bảng tính Excel",
+  "open.kind_ppt": "Bản trình bày PowerPoint",
+  "open.kind_zip": "Tệp nén",
+  "open.kind_audio": "Âm thanh",
+  "open.kind_app": "Trình cài đặt",
+  "open.kind_other": "Tệp"
 }

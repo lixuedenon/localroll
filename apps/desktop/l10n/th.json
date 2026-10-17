@@ -468,5 +468,9 @@
   "library.hover_hint": "Live Photos และวิดีโอ: วางเมาส์ไว้เพื่อเล่น",
   "text.save_as": "บันทึกเป็น…",
   "text.type_label": "ไฟล์ข้อความ",
-  "text.saved_at": "บันทึกแล้ว: {path}"
+  "text.saved_at": "บันทึกแล้ว: {path}",
+  "open.google_title": "เอกสารออนไลน์ของ Google",
+  "open.google_body": "นี่คือทางลัดไปยัง Google เอกสาร ชีต หรือสไลด์ ตัวเอกสารอยู่ออนไลน์ ต้องใช้อินเทอร์เน็ตและบัญชี Google ที่มีสิทธิ์ ถ้าจะส่งต่อแบบออฟไลน์ ให้ “ดาวน์โหลด” จาก Google เป็น Word หรือ PDF ก่อนแล้วจึงส่ง",
+  "open.google_open": "เปิดในเบราว์เซอร์",
+  "open.google_no_link": "ทางลัดนี้ไม่มีที่อยู่ที่ใช้ได้"
 }

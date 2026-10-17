@@ -436,5 +436,21 @@
   "send.nobody_online": "Gerade ist kein Gerät online. Öffne LocalRoll auf dem anderen Gerät, im selben WLAN.",
   "send.next_photos": "Weiter: Fotos wählen",
   "send.next_files": "Weiter: Dateien wählen",
-  "send.next_scan": "Scan starten"
+  "send.next_scan": "Scan starten",
+  "open.google_title": "Google-Onlinedokument",
+  "open.google_body": "Das ist eine Verknüpfung zu Google Docs, Sheets oder Slides; das Dokument selbst liegt online. Nötig sind Internet und ein berechtigtes Google-Konto. Zum Offline-Weitergeben zuerst in Google als Word oder PDF „herunterladen“ und das senden.",
+  "open.google_open": "Im Browser öffnen",
+  "open.google_no_link": "Diese Verknüpfung enthält keine nutzbare Adresse.",
+  "open.other_app": "Mit anderer App öffnen",
+  "open.copy_all": "Alles kopieren",
+  "open.copied": "Kopiert",
+  "open.cant_here": "Dieses Handy kann diese Dateiart nicht selbst anzeigen. Öffne sie mit einer anderen App oder sende sie an einen PC.",
+  "open.send_pc": "An PC senden…",
+  "open.kind_word": "Word-Dokument",
+  "open.kind_excel": "Excel-Tabelle",
+  "open.kind_ppt": "PowerPoint-Präsentation",
+  "open.kind_zip": "Archiv",
+  "open.kind_audio": "Audio",
+  "open.kind_app": "Installationsprogramm",
+  "open.kind_other": "Datei"
 }

@@ -436,5 +436,21 @@
   "send.nobody_online": "オンラインのデバイスがありません。相手側で LocalRoll を開き、同じ Wi‑Fi に接続してください。",
   "send.next_photos": "次へ：写真を選ぶ",
   "send.next_files": "次へ：ファイルを選ぶ",
-  "send.next_scan": "スキャン開始"
+  "send.next_scan": "スキャン開始",
+  "open.google_title": "Google のオンライン文書",
+  "open.google_body": "Google ドキュメント・スプレッドシート・スライドへのショートカットで、文書本体はオンラインにあります。インターネットと、閲覧権限のある Google アカウントが必要です。オフラインで渡すには、Google で Word か PDF として「ダウンロード」してから送ってください。",
+  "open.google_open": "ブラウザで開く",
+  "open.google_no_link": "このショートカットには使えるアドレスがありません。",
+  "open.other_app": "他のアプリで開く",
+  "open.copy_all": "すべてコピー",
+  "open.copied": "コピーしました",
+  "open.cant_here": "このスマホではこの種類のファイルを直接表示できません。他のアプリで開くか、PC に送って見てください。",
+  "open.send_pc": "PC に送る…",
+  "open.kind_word": "Word 文書",
+  "open.kind_excel": "Excel 表",
+  "open.kind_ppt": "PowerPoint プレゼンテーション",
+  "open.kind_zip": "圧縮ファイル",
+  "open.kind_audio": "オーディオ",
+  "open.kind_app": "インストーラー",
+  "open.kind_other": "ファイル"
 }

@@ -436,5 +436,21 @@
   "send.nobody_online": "لا يوجد جهاز متصل الآن. افتح LocalRoll على الجهاز الآخر على نفس شبكة Wi‑Fi.",
   "send.next_photos": "التالي: اختر الصور",
   "send.next_files": "التالي: اختر الملفات",
-  "send.next_scan": "ابدأ المسح"
+  "send.next_scan": "ابدأ المسح",
+  "open.google_title": "مستند Google عبر الإنترنت",
+  "open.google_body": "هذا اختصار لمستند أو جدول أو عرض تقديمي من Google؛ المستند نفسه على الإنترنت. يلزم اتصال بالإنترنت وحساب Google مسموح له. لإرساله دون اتصال، «نزّله» أولًا من Google بصيغة Word أو PDF ثم أرسله.",
+  "open.google_open": "فتح في المتصفح",
+  "open.google_no_link": "لا يحتوي هذا الاختصار على عنوان صالح.",
+  "open.other_app": "فتح بتطبيق آخر",
+  "open.copy_all": "نسخ الكل",
+  "open.copied": "تم النسخ",
+  "open.cant_here": "لا يستطيع هذا الهاتف عرض هذا النوع من الملفات بنفسه. افتحه بتطبيق آخر أو أرسله إلى كمبيوتر.",
+  "open.send_pc": "إرسال إلى الكمبيوتر…",
+  "open.kind_word": "مستند Word",
+  "open.kind_excel": "جدول Excel",
+  "open.kind_ppt": "عرض PowerPoint",
+  "open.kind_zip": "ملف مضغوط",
+  "open.kind_audio": "صوت",
+  "open.kind_app": "برنامج تثبيت",
+  "open.kind_other": "ملف"
 }

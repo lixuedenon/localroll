@@ -436,5 +436,21 @@
   "send.nobody_online": "ตอนนี้ไม่มีอุปกรณ์ออนไลน์ เปิด LocalRoll ที่อีกเครื่อง และใช้ Wi‑Fi เดียวกัน",
   "send.next_photos": "ถัดไป: เลือกรูป",
   "send.next_files": "ถัดไป: เลือกไฟล์",
-  "send.next_scan": "เริ่มสแกน"
+  "send.next_scan": "เริ่มสแกน",
+  "open.google_title": "เอกสารออนไลน์ของ Google",
+  "open.google_body": "นี่คือทางลัดไปยัง Google เอกสาร ชีต หรือสไลด์ ตัวเอกสารอยู่ออนไลน์ ต้องใช้อินเทอร์เน็ตและบัญชี Google ที่มีสิทธิ์ ถ้าจะส่งต่อแบบออฟไลน์ ให้ “ดาวน์โหลด” จาก Google เป็น Word หรือ PDF ก่อนแล้วจึงส่ง",
+  "open.google_open": "เปิดในเบราว์เซอร์",
+  "open.google_no_link": "ทางลัดนี้ไม่มีที่อยู่ที่ใช้ได้",
+  "open.other_app": "เปิดด้วยแอปอื่น",
+  "open.copy_all": "คัดลอกทั้งหมด",
+  "open.copied": "คัดลอกแล้ว",
+  "open.cant_here": "โทรศัพท์นี้แสดงไฟล์ประเภทนี้เองไม่ได้ เปิดด้วยแอปอื่น หรือส่งไปดูที่พีซี",
+  "open.send_pc": "ส่งไปพีซี…",
+  "open.kind_word": "เอกสาร Word",
+  "open.kind_excel": "ตาราง Excel",
+  "open.kind_ppt": "งานนำเสนอ PowerPoint",
+  "open.kind_zip": "ไฟล์บีบอัด",
+  "open.kind_audio": "เสียง",
+  "open.kind_app": "ตัวติดตั้ง",
+  "open.kind_other": "ไฟล์"
 }

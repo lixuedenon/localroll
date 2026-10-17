@@ -436,5 +436,21 @@
   "send.nobody_online": "Сейчас нет устройств в сети. Откройте LocalRoll на другом устройстве в той же Wi‑Fi.",
   "send.next_photos": "Далее: выбрать фото",
   "send.next_files": "Далее: выбрать файлы",
-  "send.next_scan": "Начать сканирование"
+  "send.next_scan": "Начать сканирование",
+  "open.google_title": "Онлайн-документ Google",
+  "open.google_body": "Это ярлык документа, таблицы или презентации Google; сам документ находится в интернете. Нужны интернет и аккаунт Google с доступом. Чтобы передать без интернета, сначала «Скачайте» его в Google как Word или PDF и отправьте.",
+  "open.google_open": "Открыть в браузере",
+  "open.google_no_link": "В этом ярлыке нет подходящего адреса.",
+  "open.other_app": "Открыть в другом приложении",
+  "open.copy_all": "Копировать всё",
+  "open.copied": "Скопировано",
+  "open.cant_here": "Этот телефон не может сам показать такой файл. Откройте его в другом приложении или отправьте на ПК.",
+  "open.send_pc": "Отправить на ПК…",
+  "open.kind_word": "Документ Word",
+  "open.kind_excel": "Таблица Excel",
+  "open.kind_ppt": "Презентация PowerPoint",
+  "open.kind_zip": "Архив",
+  "open.kind_audio": "Аудио",
+  "open.kind_app": "Установщик",
+  "open.kind_other": "Файл"
 }

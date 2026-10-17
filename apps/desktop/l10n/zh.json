@@ -468,5 +468,9 @@
   "library.hover_hint": "实况照片和视频：鼠标停在上面就会播放",
   "text.save_as": "另存为…",
   "text.type_label": "文本文件",
-  "text.saved_at": "已保存：{path}"
+  "text.saved_at": "已保存：{path}",
+  "open.google_title": "Google 在线文档",
+  "open.google_body": "这是 Google 文档、表格或幻灯片的快捷方式，文件本身在网上。需要联网，并登录有权限的 Google 账号才能看。如果要离线传给别人，请先在 Google 里“下载”为 Word 或 PDF 再发送。",
+  "open.google_open": "在浏览器中打开",
+  "open.google_no_link": "这个快捷方式里没有可用的网址。"
 }

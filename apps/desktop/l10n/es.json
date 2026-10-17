@@ -468,5 +468,9 @@
   "library.hover_hint": "Live Photos y vídeos: pasa el ratón por encima para reproducir",
   "text.save_as": "Guardar como…",
   "text.type_label": "Archivo de texto",
-  "text.saved_at": "Guardado: {path}"
+  "text.saved_at": "Guardado: {path}",
+  "open.google_title": "Documento en línea de Google",
+  "open.google_body": "Es un acceso directo a un Documento, Hoja o Presentación de Google; el documento está en línea. Necesita internet y una cuenta de Google con permiso. Para pasarlo sin conexión, primero «Descárgalo» desde Google como Word o PDF y envía eso.",
+  "open.google_open": "Abrir en el navegador",
+  "open.google_no_link": "Este acceso directo no tiene una dirección válida."
 }

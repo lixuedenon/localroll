@@ -468,5 +468,9 @@
   "library.hover_hint": "Live Photos dan video: arahkan mouse untuk memutar",
   "text.save_as": "Simpan sebagai…",
   "text.type_label": "File teks",
-  "text.saved_at": "Tersimpan: {path}"
+  "text.saved_at": "Tersimpan: {path}",
+  "open.google_title": "Dokumen online Google",
+  "open.google_body": "Ini pintasan ke Google Dokumen, Spreadsheet, atau Slide; dokumennya ada online. Perlu internet dan akun Google yang berizin. Untuk dikirim offline, “Unduh” dulu dari Google sebagai Word atau PDF lalu kirim.",
+  "open.google_open": "Buka di browser",
+  "open.google_no_link": "Pintasan ini tidak berisi alamat yang bisa dipakai."
 }

@@ -468,5 +468,9 @@
   "library.hover_hint": "原況照片和影片：滑鼠停在上面就會播放",
   "text.save_as": "另存新檔…",
   "text.type_label": "文字檔",
-  "text.saved_at": "已儲存：{path}"
+  "text.saved_at": "已儲存：{path}",
+  "open.google_title": "Google 線上文件",
+  "open.google_body": "這是 Google 文件、試算表或簡報的捷徑，檔案本身在網路上。需要連網，並登入有權限的 Google 帳號才能看。如果要離線傳給別人，請先在 Google 裡「下載」為 Word 或 PDF 再傳送。",
+  "open.google_open": "在瀏覽器中開啟",
+  "open.google_no_link": "這個捷徑裡沒有可用的網址。"
 }

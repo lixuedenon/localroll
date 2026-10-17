@@ -468,5 +468,9 @@
   "library.hover_hint": "लाइव फ़ोटो और वीडियो: चलाने के लिए माउस ऊपर रखें",
   "text.save_as": "इस रूप में सहेजें…",
   "text.type_label": "टेक्स्ट फ़ाइल",
-  "text.saved_at": "सहेजा गया: {path}"
+  "text.saved_at": "सहेजा गया: {path}",
+  "open.google_title": "Google ऑनलाइन दस्तावेज़",
+  "open.google_body": "यह Google Docs, Sheets या Slides का शॉर्टकट है; दस्तावेज़ खुद ऑनलाइन है। इंटरनेट और अनुमति वाला Google खाता चाहिए। ऑफ़लाइन देने के लिए पहले Google से Word या PDF के रूप में “डाउनलोड” करें, फिर भेजें।",
+  "open.google_open": "ब्राउज़र में खोलें",
+  "open.google_no_link": "इस शॉर्टकट में कोई उपयोगी पता नहीं है।"
 }

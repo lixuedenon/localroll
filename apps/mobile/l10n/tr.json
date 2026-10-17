@@ -436,5 +436,21 @@
   "send.nobody_online": "Şu an çevrimiçi cihaz yok. Diğer cihazda LocalRoll’u aynı Wi‑Fi’de açın.",
   "send.next_photos": "Sonraki: fotoğraf seç",
   "send.next_files": "Sonraki: dosya seç",
-  "send.next_scan": "Taramaya başla"
+  "send.next_scan": "Taramaya başla",
+  "open.google_title": "Google çevrimiçi belgesi",
+  "open.google_body": "Bu bir Google Dokümanlar, E-Tablolar veya Slaytlar kısayoludur; belgenin kendisi çevrimiçidir. İnternet ve yetkili bir Google hesabı gerekir. Çevrimdışı iletmek için önce Google’dan Word veya PDF olarak “İndirin” ve onu gönderin.",
+  "open.google_open": "Tarayıcıda aç",
+  "open.google_no_link": "Bu kısayolda kullanılabilir bir adres yok.",
+  "open.other_app": "Başka uygulamayla aç",
+  "open.copy_all": "Tümünü kopyala",
+  "open.copied": "Kopyalandı",
+  "open.cant_here": "Bu telefon bu tür dosyayı kendisi gösteremez. Başka bir uygulamayla açın veya bilgisayara gönderip orada bakın.",
+  "open.send_pc": "Bilgisayara gönder…",
+  "open.kind_word": "Word belgesi",
+  "open.kind_excel": "Excel tablosu",
+  "open.kind_ppt": "PowerPoint sunusu",
+  "open.kind_zip": "Arşiv",
+  "open.kind_audio": "Ses",
+  "open.kind_app": "Yükleyici",
+  "open.kind_other": "Dosya"
 }

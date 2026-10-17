@@ -436,5 +436,21 @@
   "send.nobody_online": "Tidak ada perangkat online. Buka LocalRoll di perangkat lain, di Wi‑Fi yang sama.",
   "send.next_photos": "Berikutnya: pilih foto",
   "send.next_files": "Berikutnya: pilih file",
-  "send.next_scan": "Mulai memindai"
+  "send.next_scan": "Mulai memindai",
+  "open.google_title": "Dokumen online Google",
+  "open.google_body": "Ini pintasan ke Google Dokumen, Spreadsheet, atau Slide; dokumennya ada online. Perlu internet dan akun Google yang berizin. Untuk dikirim offline, “Unduh” dulu dari Google sebagai Word atau PDF lalu kirim.",
+  "open.google_open": "Buka di browser",
+  "open.google_no_link": "Pintasan ini tidak berisi alamat yang bisa dipakai.",
+  "open.other_app": "Buka dengan aplikasi lain",
+  "open.copy_all": "Salin semua",
+  "open.copied": "Disalin",
+  "open.cant_here": "Ponsel ini tidak bisa menampilkan jenis file ini. Buka dengan aplikasi lain atau kirim ke PC untuk dilihat di sana.",
+  "open.send_pc": "Kirim ke PC…",
+  "open.kind_word": "Dokumen Word",
+  "open.kind_excel": "Lembar Excel",
+  "open.kind_ppt": "Presentasi PowerPoint",
+  "open.kind_zip": "Arsip",
+  "open.kind_audio": "Audio",
+  "open.kind_app": "Pemasang",
+  "open.kind_other": "File"
 }

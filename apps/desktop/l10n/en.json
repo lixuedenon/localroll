@@ -468,5 +468,9 @@
   "library.hover_hint": "Live Photos and videos: hover the mouse to play",
   "text.save_as": "Save as…",
   "text.type_label": "Text file",
-  "text.saved_at": "Saved: {path}"
+  "text.saved_at": "Saved: {path}",
+  "open.google_title": "Google online document",
+  "open.google_body": "This is a shortcut to a Google Doc, Sheet or Slides; the document itself is online. It needs the internet and a Google account that may open it. To pass it on offline, first “Download” it from Google as Word or PDF and send that.",
+  "open.google_open": "Open in browser",
+  "open.google_no_link": "This shortcut has no usable address."
 }

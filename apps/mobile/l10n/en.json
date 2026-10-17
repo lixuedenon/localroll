@@ -436,5 +436,21 @@
   "send.nobody_online": "No device is online right now. Open LocalRoll on the other device, on the same Wi‑Fi.",
   "send.next_photos": "Next: pick photos",
   "send.next_files": "Next: pick files",
-  "send.next_scan": "Start scanning"
+  "send.next_scan": "Start scanning",
+  "open.google_title": "Google online document",
+  "open.google_body": "This is a shortcut to a Google Doc, Sheet or Slides; the document itself is online. It needs the internet and a Google account that may open it. To pass it on offline, first “Download” it from Google as Word or PDF and send that.",
+  "open.google_open": "Open in browser",
+  "open.google_no_link": "This shortcut has no usable address.",
+  "open.other_app": "Open with another app",
+  "open.copy_all": "Copy all",
+  "open.copied": "Copied",
+  "open.cant_here": "This phone can’t show this kind of file itself. Open it with another app on the phone, or send it to a PC to look at it there.",
+  "open.send_pc": "Send to PC…",
+  "open.kind_word": "Word document",
+  "open.kind_excel": "Excel spreadsheet",
+  "open.kind_ppt": "PowerPoint presentation",
+  "open.kind_zip": "Archive",
+  "open.kind_audio": "Audio",
+  "open.kind_app": "Installer",
+  "open.kind_other": "File"
 }

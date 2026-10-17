@@ -436,5 +436,21 @@
   "send.nobody_online": "지금 온라인인 기기가 없습니다. 상대 기기에서 LocalRoll을 열고 같은 Wi‑Fi에 연결하세요.",
   "send.next_photos": "다음: 사진 고르기",
   "send.next_files": "다음: 파일 고르기",
-  "send.next_scan": "스캔 시작"
+  "send.next_scan": "스캔 시작",
+  "open.google_title": "Google 온라인 문서",
+  "open.google_body": "Google 문서·스프레드시트·프레젠테이션의 바로가기이며, 문서 자체는 온라인에 있습니다. 인터넷과 열람 권한이 있는 Google 계정이 필요합니다. 오프라인으로 전달하려면 먼저 Google에서 Word 또는 PDF로 \"다운로드\"한 뒤 보내세요.",
+  "open.google_open": "브라우저에서 열기",
+  "open.google_no_link": "이 바로가기에는 사용할 수 있는 주소가 없습니다.",
+  "open.other_app": "다른 앱으로 열기",
+  "open.copy_all": "모두 복사",
+  "open.copied": "복사됨",
+  "open.cant_here": "이 휴대폰은 이 종류의 파일을 직접 표시할 수 없습니다. 다른 앱으로 열거나 PC로 보내서 보세요.",
+  "open.send_pc": "PC로 보내기…",
+  "open.kind_word": "Word 문서",
+  "open.kind_excel": "Excel 표",
+  "open.kind_ppt": "PowerPoint 프레젠테이션",
+  "open.kind_zip": "압축 파일",
+  "open.kind_audio": "오디오",
+  "open.kind_app": "설치 파일",
+  "open.kind_other": "파일"
 }
