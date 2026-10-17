@@ -359,7 +359,14 @@ class TransferServer extends ChangeNotifier {
 
   /// Move a paired device in or out of the family group (from the UI).
   Future<void> setFamily(String id, bool family) async {
-    await settings.update((s) => s.trusted[id]?.familyMember = family);
+    // Becoming a guest also drops what it may do with the library back to
+    // the guest default (can't look); back in the family it may look again.
+    await settings.update((s) {
+      final d = s.trusted[id];
+      if (d == null) return;
+      if (!family && d.familyMember) d.access = null;
+      d.familyMember = family;
+    });
     final d = settings.trusted[id];
     if (d != null) _tellMembership(d);
     if (family) {

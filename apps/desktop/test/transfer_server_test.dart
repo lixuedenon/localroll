@@ -255,6 +255,18 @@ void main() {
       await link.close();
     });
 
+    test('family → guest: library access drops to "can\'t look"', () async {
+      final phone = await pc.pairPhone();
+      await pc.server.setFamily(phone.id, true);
+      await pc.server.setAccess(phone.id, LibraryAccess.manage);
+      final link = await phone.live();
+      await eventually(() => link.messages.any((m) => m.type == 'hello'));
+      await pc.server.setFamily(phone.id, false);
+      expect(pc.settings.trusted[phone.id]!.libraryAccess, LibraryAccess.none);
+      await eventually(() => link.messages.any((m) => m.type == 'you' && m.access == LibraryAccess.none));
+      await link.close();
+    });
+
     test('another device\'s session can\'t be used', () async {
       final a = await pc.pairPhone(id: 'phoneA');
       final b = await pc.pairPhone(id: 'phoneB');
