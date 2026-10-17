@@ -249,7 +249,7 @@
   "text.hint": "Scrivi o incolla il testo qui",
   "text.paste": "Incolla",
   "text.copy": "Copia",
-  "text.save": "Salva come file di testo",
+  "text.save": "Salva in Documenti",
   "text.clear": "Svuota",
   "text.count": "{count} caratteri",
   "text.close": "Chiudi",
@@ -465,5 +465,8 @@
   "dev.access_none_explain": "Non può vedere foto, video o file di questo PC.",
   "dev.access_view_explain": "Può guardare dal telefono foto, video e file della libreria di questo PC: solo visione, senza eliminare o modificare.",
   "dev.access_manage_explain": "Può guardare e anche eliminare (gli elementi eliminati finiscono nel Cestino di questo PC e si possono ripristinare); non può modificare nulla.",
-  "library.hover_hint": "Live Photo e video: passa il mouse sopra per riprodurre"
+  "library.hover_hint": "Live Photo e video: passa il mouse sopra per riprodurre",
+  "text.save_as": "Salva con nome…",
+  "text.type_label": "File di testo",
+  "text.saved_at": "Salvato: {path}"
 }

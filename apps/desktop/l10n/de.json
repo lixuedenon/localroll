@@ -249,7 +249,7 @@
   "text.hint": "Text hier eingeben oder einfügen",
   "text.paste": "Einfügen",
   "text.copy": "Kopieren",
-  "text.save": "Als Textdatei speichern",
+  "text.save": "In „Dokumente“ speichern",
   "text.clear": "Leeren",
   "text.count": "{count} Zeichen",
   "text.close": "Schließen",
@@ -465,5 +465,8 @@
   "dev.access_none_explain": "Es sieht keine Fotos, Videos oder Dateien auf diesem PC.",
   "dev.access_view_explain": "Es kann die Fotos, Videos und Dateien in der Bibliothek dieses PCs auf dem Handy ansehen – nur ansehen, nicht löschen oder ändern.",
   "dev.access_manage_explain": "Es kann ansehen und auch löschen (Gelöschtes landet im Papierkorb dieses PCs und lässt sich wiederherstellen); ändern kann es nichts.",
-  "library.hover_hint": "Live Photos und Videos: Maus darüber halten zum Abspielen"
+  "library.hover_hint": "Live Photos und Videos: Maus darüber halten zum Abspielen",
+  "text.save_as": "Speichern unter…",
+  "text.type_label": "Textdatei",
+  "text.saved_at": "Gespeichert: {path}"
 }

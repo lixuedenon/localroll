@@ -249,7 +249,7 @@
   "text.hint": "在这里输入或粘贴文字",
   "text.paste": "粘贴",
   "text.copy": "复制",
-  "text.save": "保存为文本文件",
+  "text.save": "存到“文档”",
   "text.clear": "清空",
   "text.count": "{count} 个字",
   "text.close": "关闭",
@@ -465,5 +465,8 @@
   "dev.access_none_explain": "它看不到这台电脑上的任何照片、视频和文件。",
   "dev.access_view_explain": "它可以在手机上查看这台电脑媒体库里的照片、视频和文件——只能看，不能删除或修改。",
   "dev.access_manage_explain": "它可以查看，也可以删除（删掉的进这台电脑的回收站，能找回）；不能修改。",
-  "library.hover_hint": "实况照片和视频：鼠标停在上面就会播放"
+  "library.hover_hint": "实况照片和视频：鼠标停在上面就会播放",
+  "text.save_as": "另存为…",
+  "text.type_label": "文本文件",
+  "text.saved_at": "已保存：{path}"
 }

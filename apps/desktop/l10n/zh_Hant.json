@@ -249,7 +249,7 @@
   "text.hint": "在這裡輸入或貼上文字",
   "text.paste": "貼上",
   "text.copy": "複製",
-  "text.save": "儲存為文字檔",
+  "text.save": "存到「文件」",
   "text.clear": "清空",
   "text.count": "{count} 個字",
   "text.close": "關閉",
@@ -465,5 +465,8 @@
   "dev.access_none_explain": "它看不到這台電腦上的任何照片、影片和檔案。",
   "dev.access_view_explain": "它可以在手機上查看這台電腦媒體庫裡的照片、影片和檔案——只能看，不能刪除或修改。",
   "dev.access_manage_explain": "它可以查看，也可以刪除（刪掉的進這台電腦的資源回收筒，能找回）；不能修改。",
-  "library.hover_hint": "原況照片和影片：滑鼠停在上面就會播放"
+  "library.hover_hint": "原況照片和影片：滑鼠停在上面就會播放",
+  "text.save_as": "另存新檔…",
+  "text.type_label": "文字檔",
+  "text.saved_at": "已儲存：{path}"
 }

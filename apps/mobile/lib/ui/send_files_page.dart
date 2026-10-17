@@ -22,7 +22,9 @@ Future<FileSender?> pickFileTarget(
 ) async {
   PairedDesktop? desktop = settings.current;
   NearbyPhone? phone;
-  if (discovery.phones.isNotEmpty || desktop == null) {
+  // Only one place it can go: straight there. More than one (two PCs, or a
+  // phone nearby): ask every time.
+  if (discovery.phones.isNotEmpty || desktop == null || settings.desktops.length > 1) {
     final t = await chooseSendTarget(context, settings, discovery);
     if (t is NearbyPhone) {
       phone = t;

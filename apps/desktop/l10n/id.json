@@ -249,7 +249,7 @@
   "text.hint": "Ketik atau tempel teks di sini",
   "text.paste": "Tempel",
   "text.copy": "Salin",
-  "text.save": "Simpan sebagai file teks",
+  "text.save": "Simpan ke Dokumen",
   "text.clear": "Hapus",
   "text.count": "{count} karakter",
   "text.close": "Tutup",
@@ -465,5 +465,8 @@
   "dev.access_none_explain": "Tidak bisa melihat foto, video, atau file apa pun di PC ini.",
   "dev.access_view_explain": "Bisa melihat foto, video, dan file di pustaka PC ini dari ponsel — hanya melihat, tidak bisa menghapus atau mengubah.",
   "dev.access_manage_explain": "Bisa melihat dan juga menghapus (yang dihapus masuk ke Recycle Bin PC ini dan bisa dipulihkan); tidak bisa mengubah.",
-  "library.hover_hint": "Live Photos dan video: arahkan mouse untuk memutar"
+  "library.hover_hint": "Live Photos dan video: arahkan mouse untuk memutar",
+  "text.save_as": "Simpan sebagai…",
+  "text.type_label": "File teks",
+  "text.saved_at": "Tersimpan: {path}"
 }

@@ -249,7 +249,7 @@
   "text.hint": "Nhập hoặc dán văn bản vào đây",
   "text.paste": "Dán",
   "text.copy": "Sao chép",
-  "text.save": "Lưu thành tệp văn bản",
+  "text.save": "Lưu vào Tài liệu",
   "text.clear": "Xóa",
   "text.count": "{count} ký tự",
   "text.close": "Đóng",
@@ -465,5 +465,8 @@
   "dev.access_none_explain": "Không xem được ảnh, video hay tệp nào trên máy tính này.",
   "dev.access_view_explain": "Có thể xem ảnh, video và tệp trong thư viện của máy tính này trên điện thoại — chỉ xem, không xóa hay sửa.",
   "dev.access_manage_explain": "Có thể xem và cũng có thể xóa (mục đã xóa vào Thùng rác của máy tính này và có thể khôi phục); không thể sửa.",
-  "library.hover_hint": "Live Photos và video: rê chuột lên để phát"
+  "library.hover_hint": "Live Photos và video: rê chuột lên để phát",
+  "text.save_as": "Lưu thành…",
+  "text.type_label": "Tệp văn bản",
+  "text.saved_at": "Đã lưu: {path}"
 }

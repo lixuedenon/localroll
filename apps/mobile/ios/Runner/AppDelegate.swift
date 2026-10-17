@@ -2,6 +2,7 @@
 import AVFoundation
 import BackgroundTasks
 import Flutter
+import PDFKit
 import Photos
 import UIKit
 
@@ -28,6 +29,9 @@ import UIKit
     }
     if let reg = engineBridge.pluginRegistry.registrar(forPlugin: "LocalRollBackground") {
       BackgroundTransfer.register(messenger: reg.messenger())
+    }
+    if let reg = engineBridge.pluginRegistry.registrar(forPlugin: "LocalRollPdf") {
+      PdfPages.register(messenger: reg.messenger())
     }
   }
 }
@@ -292,5 +296,68 @@ enum PermissionDiag {
       "cameraStatus=\(AVCaptureDevice.authorizationStatus(for: .video).rawValue)",
       "profile=\(profile)",
     ].joined(separator: "\n")
+  }
+}
+
+/// PDF pages as pictures with PDFKit (see lib/services/pdf_pages.dart).
+/// Channel: localroll/pdf.
+enum PdfPages {
+  static let queue = DispatchQueue(label: "localroll.pdf", qos: .userInitiated)
+
+  static func register(messenger: FlutterBinaryMessenger) {
+    let ch = FlutterMethodChannel(name: "localroll/pdf", binaryMessenger: messenger)
+    ch.setMethodCallHandler { call, result in
+      let args = call.arguments as? [String: Any] ?? [:]
+      guard let path = args["path"] as? String else {
+        result(FlutterError(code: "arg", message: "path missing", details: nil))
+        return
+      }
+      queue.async {
+        let doc = PDFDocument(url: URL(fileURLWithPath: path))
+        var out: Any? = nil
+        var known = true
+        switch call.method {
+        case "count":
+          out = doc?.pageCount ?? 0
+        case "render":
+          let index = args["page"] as? Int ?? 0
+          let width = CGFloat(min(max(args["width"] as? Int ?? 1080, 64), 2400))
+          if let doc = doc, doc.pageCount > 0, let page = doc.page(at: min(max(index, 0), doc.pageCount - 1)) {
+            out = render(page, width: width).map { FlutterStandardTypedData(bytes: $0) }
+          }
+        default:
+          known = false
+        }
+        DispatchQueue.main.async {
+          if !known {
+            result(FlutterMethodNotImplemented)
+          } else if let out = out {
+            result(out)
+          } else {
+            result(FlutterError(code: "pdf", message: "can't read", details: nil))
+          }
+        }
+      }
+    }
+  }
+
+  /// One page as a JPEG [width] pixels wide, upright, on white paper.
+  static func render(_ page: PDFPage, width: CGFloat) -> Data? {
+    let box = page.bounds(for: .mediaBox)
+    let turned = abs(page.rotation) % 180 == 90
+    let pw = turned ? box.height : box.width
+    let ph = turned ? box.width : box.height
+    guard pw > 0, ph > 0 else { return nil }
+    let size = CGSize(width: width, height: min(max(1, (width * ph / pw).rounded()), 6000))
+    let thumb = page.thumbnail(of: size, for: .mediaBox)
+    let format = UIGraphicsImageRendererFormat()
+    format.scale = 1
+    format.opaque = true
+    let image = UIGraphicsImageRenderer(size: size, format: format).image { ctx in
+      UIColor.white.setFill()
+      ctx.fill(CGRect(origin: .zero, size: size))
+      thumb.draw(in: CGRect(origin: .zero, size: size))
+    }
+    return image.jpegData(compressionQuality: 0.88)
   }
 }

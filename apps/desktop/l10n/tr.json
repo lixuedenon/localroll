@@ -249,7 +249,7 @@
   "text.hint": "Metni buraya yazın veya yapıştırın",
   "text.paste": "Yapıştır",
   "text.copy": "Kopyala",
-  "text.save": "Metin dosyası olarak kaydet",
+  "text.save": "Belgeler’e kaydet",
   "text.clear": "Temizle",
   "text.count": "{count} karakter",
   "text.close": "Kapat",
@@ -465,5 +465,8 @@
   "dev.access_none_explain": "Bu bilgisayardaki hiçbir fotoğrafı, videoyu veya dosyayı göremez.",
   "dev.access_view_explain": "Bu bilgisayarın kitaplığındaki fotoğraf, video ve dosyaları telefondan görebilir — yalnızca görüntüleme, silme veya değiştirme yok.",
   "dev.access_manage_explain": "Görebilir ve silebilir de (silinenler bu bilgisayarın Geri Dönüşüm Kutusu’na gider ve geri yüklenebilir); değiştiremez.",
-  "library.hover_hint": "Canlı Fotoğraflar ve videolar: oynatmak için fareyi üzerine getirin"
+  "library.hover_hint": "Canlı Fotoğraflar ve videolar: oynatmak için fareyi üzerine getirin",
+  "text.save_as": "Farklı kaydet…",
+  "text.type_label": "Metin dosyası",
+  "text.saved_at": "Kaydedildi: {path}"
 }

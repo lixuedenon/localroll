@@ -10,7 +10,9 @@ import '../services/file_actions.dart';
 import '../services/network.dart';
 import 'format.dart';
 import 'theme.dart';
+import 'pdf_thumb.dart';
 import 'pdf_viewer_page.dart';
+import 'text_window.dart';
 
 /// Library tabs "Documents" / "Other": the files other PCs sent that are not
 /// photos or videos, straight from their folders (newest first).
@@ -171,18 +173,29 @@ class _FilesViewState extends State<FilesView> {
                     itemBuilder: (context, i) {
                       final e = list[i];
                       return ListTile(
-                        leading: Icon(_icon(e), color: e.isDir ? LrColors.safelight : LrColors.muted, size: 30),
+                        leading: !e.isDir && isPdfPath(e.entity.path)
+                            ? PdfThumb(path: e.entity.path, cacheDir: widget.services.library.cacheDir)
+                            : SizedBox(
+                                width: 48,
+                                child: Icon(_icon(e), color: e.isDir ? LrColors.safelight : LrColors.muted, size: 30),
+                              ),
                         title: Text(e.name, overflow: TextOverflow.ellipsis),
                         subtitle: Text([
                           formatDate(e.modified),
                           formatBytes(e.size),
                           if (e.isDir) tr('files.items', {'count': e.children}),
                         ].join(' · ')),
-                        // A PDF opens in LocalRoll's reader; anything else with the
-                        // program Windows uses for it (a folder in Explorer).
-                        onTap: () => !e.isDir && isPdfPath(e.entity.path)
-                            ? Navigator.of(context).push(MaterialPageRoute(builder: (_) => PdfViewerPage(path: e.entity.path)))
-                            : Process.run('explorer.exe', [e.entity.path]),
+                        // A PDF opens in LocalRoll's reader, a text file in its text
+                        // window; anything else with the program Windows uses for it.
+                        onTap: () {
+                          if (!e.isDir && isPdfPath(e.entity.path)) {
+                            Navigator.of(context).push(MaterialPageRoute(builder: (_) => PdfViewerPage(path: e.entity.path)));
+                          } else if (!e.isDir && isPlainTextPath(e.entity.path) && e.size <= 4 * 1024 * 1024) {
+                            showTextFile(context, widget.services, e.entity.path);
+                          } else {
+                            Process.run('explorer.exe', [e.entity.path]);
+                          }
+                        },
                         trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                           IconButton(
                             tooltip: tr('common.show_in_folder'),

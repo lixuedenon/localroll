@@ -60,6 +60,16 @@ class WinDialogs {
     return r.isEmpty ? null : r.first;
   }
 
+  /// Where to save a file (null: cancelled). The usual Windows dialog,
+  /// logged like the others.
+  static Future<String?> saveFile({required String suggestedName, String? typeLabel, List<String>? extensions}) async {
+    DiagLog.log('ui', 'save dialog opened');
+    final groups = extensions == null ? const <fs.XTypeGroup>[] : [fs.XTypeGroup(label: typeLabel, extensions: extensions)];
+    final r = await fs.getSaveLocation(suggestedName: suggestedName, acceptedTypeGroups: groups);
+    DiagLog.log('ui', 'save dialog closed (${r == null ? 'cancelled' : 'chosen'})');
+    return r?.path;
+  }
+
   static Future<List<String>> _run({
     required bool folder,
     required bool multiple,

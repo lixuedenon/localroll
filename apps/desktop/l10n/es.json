@@ -249,7 +249,7 @@
   "text.hint": "Escribe o pega el texto aquí",
   "text.paste": "Pegar",
   "text.copy": "Copiar",
-  "text.save": "Guardar como archivo de texto",
+  "text.save": "Guardar en Documentos",
   "text.clear": "Borrar",
   "text.count": "{count} caracteres",
   "text.close": "Cerrar",
@@ -465,5 +465,8 @@
   "dev.access_none_explain": "No puede ver ninguna foto, vídeo ni archivo de este PC.",
   "dev.access_view_explain": "Puede ver desde el móvil las fotos, vídeos y archivos de la biblioteca de este PC: solo ver, sin borrar ni cambiar nada.",
   "dev.access_manage_explain": "Puede ver y también borrar (lo borrado va a la Papelera de este PC y se puede recuperar); no puede cambiar nada.",
-  "library.hover_hint": "Live Photos y vídeos: pasa el ratón por encima para reproducir"
+  "library.hover_hint": "Live Photos y vídeos: pasa el ratón por encima para reproducir",
+  "text.save_as": "Guardar como…",
+  "text.type_label": "Archivo de texto",
+  "text.saved_at": "Guardado: {path}"
 }

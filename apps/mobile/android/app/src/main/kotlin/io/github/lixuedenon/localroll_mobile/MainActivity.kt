@@ -2,6 +2,12 @@
 package io.github.lixuedenon.localroll_mobile
 
 import android.Manifest
+import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.pdf.PdfRenderer
+import android.os.ParcelFileDescriptor
+import java.io.ByteArrayOutputStream
+import java.io.File
 import android.content.pm.PackageManager
 import android.os.BatteryManager
 import android.os.Build
@@ -14,6 +20,27 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        // PDF pages as pictures (see lib/services/pdf_pages.dart).
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "localroll/pdf")
+            .setMethodCallHandler { call, result ->
+                val path = call.argument<String>("path")
+                if (path == null) {
+                    result.error("arg", "path missing", null)
+                    return@setMethodCallHandler
+                }
+                Thread {
+                    try {
+                        val out: Any? = when (call.method) {
+                            "count" -> pdfPageCount(path)
+                            "render" -> pdfRender(path, call.argument<Int>("page") ?: 0, call.argument<Int>("width") ?: 1080)
+                            else -> null
+                        }
+                        runOnUiThread { if (out == null) result.notImplemented() else result.success(out) }
+                    } catch (e: Throwable) {
+                        runOnUiThread { result.error("pdf", e.toString(), null) }
+                    }
+                }.start()
+            }
         // Background transfer (see lib/services/background_transfer.dart).
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "localroll/background")
             .setMethodCallHandler { call, result ->
@@ -58,6 +85,42 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+    }
+
+    private val pdfLock = Any()
+
+    private fun <T> withPdf(path: String, f: (PdfRenderer) -> T): T = synchronized(pdfLock) {
+        val fd = ParcelFileDescriptor.open(File(path), ParcelFileDescriptor.MODE_READ_ONLY)
+        try {
+            val r = PdfRenderer(fd)
+            try {
+                f(r)
+            } finally {
+                r.close()
+            }
+        } finally {
+            fd.close()
+        }
+    }
+
+    private fun pdfPageCount(path: String): Int = withPdf(path) { it.pageCount }
+
+    /** One page as a JPEG [width] pixels wide (white paper behind it). */
+    private fun pdfRender(path: String, index: Int, width: Int): ByteArray = withPdf(path) { r ->
+        val page = r.openPage(index.coerceIn(0, r.pageCount - 1))
+        try {
+            val w = width.coerceIn(64, 2400)
+            val h = (w.toLong() * page.height / maxOf(page.width, 1)).toInt().coerceIn(1, 6000)
+            val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+            bmp.eraseColor(Color.WHITE)
+            page.render(bmp, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+            val bos = ByteArrayOutputStream()
+            bmp.compress(Bitmap.CompressFormat.JPEG, 88, bos)
+            bmp.recycle()
+            bos.toByteArray()
+        } finally {
+            page.close()
+        }
     }
 
     /** Byte sizes from MediaStore, 500 ids per query. */

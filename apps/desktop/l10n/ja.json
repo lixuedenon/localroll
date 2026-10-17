@@ -249,7 +249,7 @@
   "text.hint": "ここに入力または貼り付け",
   "text.paste": "貼り付け",
   "text.copy": "コピー",
-  "text.save": "テキストファイルに保存",
+  "text.save": "「書類」に保存",
   "text.clear": "消去",
   "text.count": "{count} 文字",
   "text.close": "閉じる",
@@ -465,5 +465,8 @@
   "dev.access_none_explain": "このPCの写真・動画・ファイルは一切見られません。",
   "dev.access_view_explain": "このPCのライブラリの写真・動画・ファイルをスマホで見られます。見るだけで、削除や変更はできません。",
   "dev.access_manage_explain": "見ることも削除することもできます（削除したものはこのPCのごみ箱に入り、元に戻せます）。変更はできません。",
-  "library.hover_hint": "Live Photos と動画：マウスを重ねると再生"
+  "library.hover_hint": "Live Photos と動画：マウスを重ねると再生",
+  "text.save_as": "名前を付けて保存…",
+  "text.type_label": "テキストファイル",
+  "text.saved_at": "保存しました：{path}"
 }

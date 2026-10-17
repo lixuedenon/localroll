@@ -12,7 +12,9 @@ import '../l10n/l10n.dart';
 import '../services/discovery.dart';
 import '../services/mobile_settings.dart';
 import '../services/my_library.dart';
+import '../services/pdf_pages.dart';
 import 'cleanup_page.dart' show formatSize;
+import 'pdf_view_page.dart';
 import 'send_files_page.dart';
 import 'theme.dart';
 
@@ -108,7 +110,12 @@ class _MyLibraryPageState extends State<MyLibraryPage> {
       return;
     }
     if (!mounted) return;
-    // Documents open in the phone's own apps (PDF viewer, Office…).
+    // A PDF opens in LocalRoll's own reader; other documents in the phone's
+    // own apps (Office…).
+    if (path.toLowerCase().endsWith('.pdf')) {
+      await Navigator.of(context).push(MaterialPageRoute(builder: (_) => PdfViewPage(path: path, title: i.name)));
+      return;
+    }
     await _shareFiles([File(path)]);
   }
 
@@ -410,7 +417,11 @@ class MyItemThumb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Stack(fit: StackFit.expand, children: [
-        item.kind.isMedia ? _Thumb(item: item) : _FileTile(item: item),
+        item.kind.isMedia
+            ? _Thumb(item: item)
+            : item.name.toLowerCase().endsWith('.pdf')
+                ? _PdfTile(item: item)
+                : _FileTile(item: item),
         if (item.kind == MyKind.video)
           const Positioned(right: 4, bottom: 4, child: Icon(Icons.play_circle_fill_rounded, size: 18, color: Colors.white)),
       ]);
@@ -436,6 +447,45 @@ class _Thumb extends StatelessWidget {
           final b = s.data;
           if (b == null) return Container(color: LrColors.surface);
           return Image.memory(b, fit: BoxFit.cover, gaplessPlayback: true);
+        },
+      );
+}
+
+/// A PDF: its first page, its name below (the icon until the page is drawn).
+class _PdfTile extends StatelessWidget {
+  const _PdfTile({required this.item});
+
+  final MyItem item;
+
+  Future<Uint8List?> _load() async {
+    final path = await MyLibrary.instance.pathOf(item);
+    if (path == null) return null;
+    return PdfPages.thumb(path);
+  }
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<Uint8List?>(
+        future: _load(),
+        builder: (context, s) {
+          final b = s.data;
+          if (b == null) return _FileTile(item: item);
+          return Stack(fit: StackFit.expand, children: [
+            Container(
+              color: Colors.white,
+              child: Image.memory(b, fit: BoxFit.cover, alignment: Alignment.topCenter, gaplessPlayback: true),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Container(
+                color: Colors.black54,
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                child: Text(item.name,
+                    maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10, color: Colors.white)),
+              ),
+            ),
+          ]);
         },
       );
 }

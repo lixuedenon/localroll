@@ -249,7 +249,7 @@
   "text.hint": "여기에 입력하거나 붙여넣기",
   "text.paste": "붙여넣기",
   "text.copy": "복사",
-  "text.save": "텍스트 파일로 저장",
+  "text.save": "\"문서\"에 저장",
   "text.clear": "지우기",
   "text.count": "{count}자",
   "text.close": "닫기",
@@ -465,5 +465,8 @@
   "dev.access_none_explain": "이 PC의 사진, 동영상, 파일을 전혀 볼 수 없습니다.",
   "dev.access_view_explain": "휴대폰에서 이 PC 라이브러리의 사진, 동영상, 파일을 볼 수 있습니다. 보기만 가능하고 삭제나 수정은 할 수 없습니다.",
   "dev.access_manage_explain": "보기와 삭제가 가능합니다(삭제한 항목은 이 PC의 휴지통으로 가며 복원할 수 있습니다). 수정은 할 수 없습니다.",
-  "library.hover_hint": "Live Photo와 동영상: 마우스를 올리면 재생"
+  "library.hover_hint": "Live Photo와 동영상: 마우스를 올리면 재생",
+  "text.save_as": "다른 이름으로 저장…",
+  "text.type_label": "텍스트 파일",
+  "text.saved_at": "저장됨: {path}"
 }

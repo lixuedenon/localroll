@@ -85,7 +85,10 @@ class _TargetSheetState extends State<_TargetSheet> {
                       online: widget.discovery.isOnline(d.id),
                       leading: DeviceBadge(icon: d.icon, color: d.color, size: 38),
                       title: d.name,
-                      subtitle: widget.discovery.isOnline(d.id) ? tr('home.pc_online') : tr('home.pc_offline'),
+                      subtitle: [
+                        widget.discovery.isOnline(d.id) ? tr('home.pc_online') : tr('home.pc_offline'),
+                        if (d.id == widget.settings.current?.id) tr('home.backup_pc'),
+                      ].join(' · '),
                       onTap: () => Navigator.pop(context, d),
                     ),
                   const SizedBox(height: 10),

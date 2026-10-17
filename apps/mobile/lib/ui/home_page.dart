@@ -733,8 +733,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     } else if (preset is NearbyPhone) {
       phone = preset;
       desktop = PairedDesktop(id: preset.id, name: preset.name, hosts: preset.hosts, port: preset.port, token: '');
-    } else if (widget.discovery.phones.isNotEmpty || desktop == null) {
-      // Phones nearby (or no PC yet): ask where to.
+    } else if (widget.discovery.phones.isNotEmpty || desktop == null || widget.settings.desktops.length > 1) {
+      // Phones nearby, two PCs (or no PC yet): ask where to.
       if (desktop == null && widget.discovery.phones.isEmpty) {
         await _openConnect();
         return;

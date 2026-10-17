@@ -249,7 +249,7 @@
   "text.hint": "Type or paste text here",
   "text.paste": "Paste",
   "text.copy": "Copy",
-  "text.save": "Save as text file",
+  "text.save": "Save to Documents",
   "text.clear": "Clear",
   "text.count": "{count} characters",
   "text.close": "Close",
@@ -465,5 +465,8 @@
   "dev.access_none_explain": "It can’t see any photos, videos or files on this PC.",
   "dev.access_view_explain": "It can look at the photos, videos and files in this PC’s library from the phone — view only, no deleting or changing.",
   "dev.access_manage_explain": "It can look and also delete (deleted items go to this PC’s Recycle Bin and can be restored); it can’t change anything.",
-  "library.hover_hint": "Live Photos and videos: hover the mouse to play"
+  "library.hover_hint": "Live Photos and videos: hover the mouse to play",
+  "text.save_as": "Save as…",
+  "text.type_label": "Text file",
+  "text.saved_at": "Saved: {path}"
 }
