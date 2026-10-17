@@ -89,9 +89,10 @@ jobs:
       - name: core — analyze & test
         working-directory: packages/core
         run: |
+          set -o pipefail
           dart pub get
-          dart analyze --fatal-warnings
-          dart test
+          dart analyze --fatal-warnings | tee ../../apps/analyze-core.log
+          dart test 2>&1 | tee ../../apps/test-core.log
       - name: desktop — analyze & test
         working-directory: apps/desktop
         run: |
