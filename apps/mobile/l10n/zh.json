@@ -452,5 +452,11 @@
   "open.kind_zip": "压缩包",
   "open.kind_audio": "音频",
   "open.kind_app": "安装程序",
-  "open.kind_other": "文件"
+  "open.kind_other": "文件",
+  "office.simple_note": "简易预览：只显示文字、表格和图片，排版可能和原文件不同。",
+  "office.cant_read": "这个文件读不出来（可能已损坏，或是旧版 .doc / .xls / .ppt 格式）。",
+  "office.empty": "这个文件里没有可显示的内容。",
+  "office.more_rows": "只显示前 {shown} 行（共 {count} 行）。",
+  "office.slide": "第 {n} 页",
+  "pclib.cant_play_hint": "这个视频的格式手机可能不支持直接播放。点“保存到这部手机”，电脑会先转换成手机能播的格式再发过来。"
 }

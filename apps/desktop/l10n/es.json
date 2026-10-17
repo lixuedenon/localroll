@@ -472,5 +472,12 @@
   "open.google_title": "Documento en línea de Google",
   "open.google_body": "Es un acceso directo a un Documento, Hoja o Presentación de Google; el documento está en línea. Necesita internet y una cuenta de Google con permiso. Para pasarlo sin conexión, primero «Descárgalo» desde Google como Word o PDF y envía eso.",
   "open.google_open": "Abrir en el navegador",
-  "open.google_no_link": "Este acceso directo no tiene una dirección válida."
+  "open.google_no_link": "Este acceso directo no tiene una dirección válida.",
+  "office.simple_note": "Vista previa simple: solo texto, tablas e imágenes; el diseño puede diferir del original.",
+  "office.cant_read": "No se puede leer este archivo (puede estar dañado o ser un .doc / .xls / .ppt antiguo).",
+  "office.empty": "No hay nada que mostrar en este archivo.",
+  "office.more_rows": "Se muestran las primeras {shown} filas (de {count}).",
+  "office.slide": "Diapositiva {n}",
+  "office.preview": "Vista previa en LocalRoll",
+  "office.open_with": "Abrir con otro programa"
 }

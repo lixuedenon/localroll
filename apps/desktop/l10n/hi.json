@@ -472,5 +472,12 @@
   "open.google_title": "Google ऑनलाइन दस्तावेज़",
   "open.google_body": "यह Google Docs, Sheets या Slides का शॉर्टकट है; दस्तावेज़ खुद ऑनलाइन है। इंटरनेट और अनुमति वाला Google खाता चाहिए। ऑफ़लाइन देने के लिए पहले Google से Word या PDF के रूप में “डाउनलोड” करें, फिर भेजें।",
   "open.google_open": "ब्राउज़र में खोलें",
-  "open.google_no_link": "इस शॉर्टकट में कोई उपयोगी पता नहीं है।"
+  "open.google_no_link": "इस शॉर्टकट में कोई उपयोगी पता नहीं है।",
+  "office.simple_note": "सरल प्रीव्यू: सिर्फ़ टेक्स्ट, टेबल और चित्र; लेआउट मूल फ़ाइल से अलग हो सकता है।",
+  "office.cant_read": "यह फ़ाइल पढ़ी नहीं जा सकी (शायद खराब है या पुरानी .doc / .xls / .ppt फ़ाइल है)।",
+  "office.empty": "इस फ़ाइल में दिखाने को कुछ नहीं है।",
+  "office.more_rows": "पहली {shown} पंक्तियाँ दिखाई जा रही हैं ({count} में से)।",
+  "office.slide": "स्लाइड {n}",
+  "office.preview": "LocalRoll में प्रीव्यू",
+  "office.open_with": "दूसरे प्रोग्राम से खोलें"
 }

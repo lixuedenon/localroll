@@ -10,6 +10,7 @@ import '../services/file_actions.dart';
 import '../services/network.dart';
 import 'format.dart';
 import 'theme.dart';
+import 'office_view.dart';
 import 'pdf_thumb.dart';
 import 'pdf_viewer_page.dart';
 import 'text_window.dart';
@@ -122,6 +123,33 @@ class _FilesViewState extends State<FilesView> {
     return Icons.insert_drive_file_rounded;
   }
 
+  /// Word / Excel / PowerPoint: the PC's own program when it has one
+  /// (Office, WPS…), otherwise LocalRoll's simple look inside.
+  Future<void> _openOffice(_Entry e) async {
+    if (await hasProgramFor(extensionOf(e.name))) {
+      await Process.run('explorer.exe', [e.entity.path]);
+      return;
+    }
+    if (mounted) _preview(e);
+  }
+
+  void _preview(_Entry e) {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => OfficeViewPage(
+        path: e.entity.path,
+        name: e.name,
+        actions: [
+          TextButton.icon(
+            onPressed: () => Process.run('explorer.exe', [e.entity.path]),
+            icon: const Icon(Icons.open_in_new_rounded, size: 18),
+            label: Text(tr('office.open_with')),
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+    ));
+  }
+
   /// A Google Docs / Sheets / Slides shortcut: the document is online.
   Future<void> _openGoogle(_Entry e) async {
     String? url;
@@ -226,6 +254,8 @@ class _FilesViewState extends State<FilesView> {
                             Navigator.of(context).push(MaterialPageRoute(builder: (_) => PdfViewerPage(path: e.entity.path)));
                           } else if (!e.isDir && googleShortcutKinds.containsKey(extensionOf(e.name))) {
                             _openGoogle(e);
+                          } else if (!e.isDir && OfficeViewPage.canShow(e.name)) {
+                            _openOffice(e);
                           } else if (!e.isDir && isPlainTextPath(e.entity.path) && e.size <= 4 * 1024 * 1024) {
                             showTextFile(context, widget.services, e.entity.path);
                           } else {
@@ -233,6 +263,12 @@ class _FilesViewState extends State<FilesView> {
                           }
                         },
                         trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                          if (!e.isDir && OfficeViewPage.canShow(e.name))
+                            IconButton(
+                              tooltip: tr('office.preview'),
+                              icon: const Icon(Icons.visibility_outlined),
+                              onPressed: () => _preview(e),
+                            ),
                           IconButton(
                             tooltip: tr('common.show_in_folder'),
                             icon: const Icon(Icons.drive_folder_upload_rounded),

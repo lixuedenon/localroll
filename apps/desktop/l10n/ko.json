@@ -472,5 +472,12 @@
   "open.google_title": "Google 온라인 문서",
   "open.google_body": "Google 문서·스프레드시트·프레젠테이션의 바로가기이며, 문서 자체는 온라인에 있습니다. 인터넷과 열람 권한이 있는 Google 계정이 필요합니다. 오프라인으로 전달하려면 먼저 Google에서 Word 또는 PDF로 \"다운로드\"한 뒤 보내세요.",
   "open.google_open": "브라우저에서 열기",
-  "open.google_no_link": "이 바로가기에는 사용할 수 있는 주소가 없습니다."
+  "open.google_no_link": "이 바로가기에는 사용할 수 있는 주소가 없습니다.",
+  "office.simple_note": "간단 미리보기: 글자, 표, 그림만 표시하며 레이아웃은 원본과 다를 수 있습니다.",
+  "office.cant_read": "이 파일을 읽을 수 없습니다(손상되었거나 오래된 .doc / .xls / .ppt 형식일 수 있습니다).",
+  "office.empty": "표시할 내용이 없습니다.",
+  "office.more_rows": "처음 {shown}행만 표시합니다(전체 {count}행).",
+  "office.slide": "슬라이드 {n}",
+  "office.preview": "LocalRoll에서 미리보기",
+  "office.open_with": "다른 프로그램으로 열기"
 }

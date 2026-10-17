@@ -452,5 +452,11 @@
   "open.kind_zip": "圧縮ファイル",
   "open.kind_audio": "オーディオ",
   "open.kind_app": "インストーラー",
-  "open.kind_other": "ファイル"
+  "open.kind_other": "ファイル",
+  "office.simple_note": "簡易プレビュー：文字・表・画像のみ。レイアウトは元のファイルと異なる場合があります。",
+  "office.cant_read": "このファイルを読み込めません（破損しているか、古い .doc / .xls / .ppt 形式の可能性があります）。",
+  "office.empty": "表示できる内容がありません。",
+  "office.more_rows": "最初の {shown} 行を表示（全 {count} 行）。",
+  "office.slide": "スライド {n}",
+  "pclib.cant_play_hint": "この動画形式はスマホで直接再生できない可能性があります。「このスマホに保存」をタップすると、PC が再生できる形式に変換してから送ります。"
 }

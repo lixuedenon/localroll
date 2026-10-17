@@ -452,5 +452,11 @@
   "open.kind_zip": "壓縮檔",
   "open.kind_audio": "音訊",
   "open.kind_app": "安裝程式",
-  "open.kind_other": "檔案"
+  "open.kind_other": "檔案",
+  "office.simple_note": "簡易預覽：只顯示文字、表格和圖片，版面可能和原檔不同。",
+  "office.cant_read": "這個檔案讀不出來（可能已損壞，或是舊版 .doc / .xls / .ppt 格式）。",
+  "office.empty": "這個檔案裡沒有可顯示的內容。",
+  "office.more_rows": "只顯示前 {shown} 列（共 {count} 列）。",
+  "office.slide": "第 {n} 頁",
+  "pclib.cant_play_hint": "這支手機可能不支援直接播放這個影片格式。點「儲存到這支手機」，電腦會先轉換成手機能播的格式再傳過來。"
 }

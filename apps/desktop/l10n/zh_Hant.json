@@ -472,5 +472,12 @@
   "open.google_title": "Google 線上文件",
   "open.google_body": "這是 Google 文件、試算表或簡報的捷徑，檔案本身在網路上。需要連網，並登入有權限的 Google 帳號才能看。如果要離線傳給別人，請先在 Google 裡「下載」為 Word 或 PDF 再傳送。",
   "open.google_open": "在瀏覽器中開啟",
-  "open.google_no_link": "這個捷徑裡沒有可用的網址。"
+  "open.google_no_link": "這個捷徑裡沒有可用的網址。",
+  "office.simple_note": "簡易預覽：只顯示文字、表格和圖片，版面可能和原檔不同。",
+  "office.cant_read": "這個檔案讀不出來（可能已損壞，或是舊版 .doc / .xls / .ppt 格式）。",
+  "office.empty": "這個檔案裡沒有可顯示的內容。",
+  "office.more_rows": "只顯示前 {shown} 列（共 {count} 列）。",
+  "office.slide": "第 {n} 頁",
+  "office.preview": "在 LocalRoll 中預覽",
+  "office.open_with": "用其他程式開啟"
 }

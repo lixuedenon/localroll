@@ -472,5 +472,12 @@
   "open.google_title": "Google のオンライン文書",
   "open.google_body": "Google ドキュメント・スプレッドシート・スライドへのショートカットで、文書本体はオンラインにあります。インターネットと、閲覧権限のある Google アカウントが必要です。オフラインで渡すには、Google で Word か PDF として「ダウンロード」してから送ってください。",
   "open.google_open": "ブラウザで開く",
-  "open.google_no_link": "このショートカットには使えるアドレスがありません。"
+  "open.google_no_link": "このショートカットには使えるアドレスがありません。",
+  "office.simple_note": "簡易プレビュー：文字・表・画像のみ。レイアウトは元のファイルと異なる場合があります。",
+  "office.cant_read": "このファイルを読み込めません（破損しているか、古い .doc / .xls / .ppt 形式の可能性があります）。",
+  "office.empty": "表示できる内容がありません。",
+  "office.more_rows": "最初の {shown} 行を表示（全 {count} 行）。",
+  "office.slide": "スライド {n}",
+  "office.preview": "LocalRoll でプレビュー",
+  "office.open_with": "他のプログラムで開く"
 }

@@ -228,6 +228,7 @@ class PcLibrary extends ChangeNotifier {
         final c = await _connect();
         final up = await c.open(c.libraryFileUri(path), range: req.headers.value(HttpHeaders.rangeHeader));
         res.statusCode = up.statusCode;
+        if (up.statusCode >= 400) DiagLog.log('pclib', 'video relay: PC answered ${up.statusCode}');
         for (final h in [
           HttpHeaders.contentTypeHeader,
           HttpHeaders.contentRangeHeader,
@@ -240,6 +241,7 @@ class PcLibrary extends ChangeNotifier {
         await res.addStream(up);
         await res.close();
       } catch (e) {
+        DiagLog.log('pclib', 'video relay: $e');
         try {
           res.statusCode = 502;
           await res.close();

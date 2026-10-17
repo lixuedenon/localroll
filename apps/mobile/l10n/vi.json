@@ -452,5 +452,11 @@
   "open.kind_zip": "Tệp nén",
   "open.kind_audio": "Âm thanh",
   "open.kind_app": "Trình cài đặt",
-  "open.kind_other": "Tệp"
+  "open.kind_other": "Tệp",
+  "office.simple_note": "Xem trước đơn giản: chỉ chữ, bảng và hình; bố cục có thể khác bản gốc.",
+  "office.cant_read": "Không đọc được tệp này (có thể bị hỏng hoặc là tệp .doc / .xls / .ppt kiểu cũ).",
+  "office.empty": "Tệp này không có gì để hiển thị.",
+  "office.more_rows": "Đang hiển thị {shown} hàng đầu (trên {count}).",
+  "office.slide": "Trang chiếu {n}",
+  "pclib.cant_play_hint": "Điện thoại có thể không phát trực tiếp được định dạng video này. Chạm “Lưu vào điện thoại này”, máy tính sẽ chuyển sang định dạng phát được rồi mới gửi."
 }

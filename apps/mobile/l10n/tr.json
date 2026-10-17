@@ -452,5 +452,11 @@
   "open.kind_zip": "Arşiv",
   "open.kind_audio": "Ses",
   "open.kind_app": "Yükleyici",
-  "open.kind_other": "Dosya"
+  "open.kind_other": "Dosya",
+  "office.simple_note": "Basit önizleme: yalnızca metin, tablolar ve resimler; düzen orijinalden farklı olabilir.",
+  "office.cant_read": "Bu dosya okunamıyor (bozuk ya da eski .doc / .xls / .ppt biçiminde olabilir).",
+  "office.empty": "Bu dosyada gösterilecek bir şey yok.",
+  "office.more_rows": "İlk {shown} satır gösteriliyor ({count} satırdan).",
+  "office.slide": "Slayt {n}",
+  "pclib.cant_play_hint": "Telefon bu video biçimini doğrudan oynatamayabilir. “Bu telefona kaydet”e dokunun, bilgisayar önce oynatılabilir bir biçime dönüştürsün."
 }

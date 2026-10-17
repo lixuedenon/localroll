@@ -472,5 +472,12 @@
   "open.google_title": "Dokumen online Google",
   "open.google_body": "Ini pintasan ke Google Dokumen, Spreadsheet, atau Slide; dokumennya ada online. Perlu internet dan akun Google yang berizin. Untuk dikirim offline, “Unduh” dulu dari Google sebagai Word atau PDF lalu kirim.",
   "open.google_open": "Buka di browser",
-  "open.google_no_link": "Pintasan ini tidak berisi alamat yang bisa dipakai."
+  "open.google_no_link": "Pintasan ini tidak berisi alamat yang bisa dipakai.",
+  "office.simple_note": "Pratinjau sederhana: hanya teks, tabel, dan gambar; tata letak bisa berbeda dari aslinya.",
+  "office.cant_read": "File ini tidak bisa dibaca (mungkin rusak, atau format lama .doc / .xls / .ppt).",
+  "office.empty": "Tidak ada yang bisa ditampilkan di file ini.",
+  "office.more_rows": "Menampilkan {shown} baris pertama (dari {count}).",
+  "office.slide": "Slide {n}",
+  "office.preview": "Pratinjau di LocalRoll",
+  "office.open_with": "Buka dengan program lain"
 }

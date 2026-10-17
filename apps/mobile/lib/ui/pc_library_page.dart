@@ -417,7 +417,7 @@ class _ViewerState extends State<_Viewer> {
             itemBuilder: (context, i) {
               final it = items[i];
               return it.kind == MediaKind.video
-                  ? _VideoView(key: ValueKey(it.path), lib: widget.lib, path: it.path)
+                  ? _VideoView(key: ValueKey(it.path), lib: widget.lib, path: it.path, onSave: () => widget.onSave([it.path]))
                   : _PhotoView(key: ValueKey(it.path), lib: widget.lib, item: it);
             },
           ),
@@ -485,12 +485,15 @@ class _PhotoViewState extends State<_PhotoView> {
 }
 
 class _VideoView extends StatefulWidget {
-  const _VideoView({super.key, required this.lib, required this.path, this.loop = false, this.onEnd});
+  const _VideoView({super.key, required this.lib, required this.path, this.loop = false, this.onEnd, this.onSave});
 
   final PcLibrary lib;
   final String path;
   final bool loop;
   final VoidCallback? onEnd;
+
+  /// "Save to this phone" (the PC converts what the phone can't play).
+  final VoidCallback? onSave;
 
   @override
   State<_VideoView> createState() => _VideoViewState();
@@ -520,6 +523,10 @@ class _VideoViewState extends State<_VideoView> {
       setState(() => _c = c);
       await c.play();
     } catch (e) {
+      // Which file and why, for the log (a format the phone can't play,
+      // the PC not answering…).
+      final dot = widget.path.lastIndexOf('.');
+      DiagLog.log('pclib', 'video failed (${dot < 0 ? '?' : widget.path.substring(dot + 1)}): $e');
       if (mounted) setState(() => _error = e);
     }
   }
@@ -549,7 +556,26 @@ class _VideoViewState extends State<_VideoView> {
   @override
   Widget build(BuildContext context) {
     if (_error != null) {
-      return Center(child: Text(tr('pclib.cant_play'), style: const TextStyle(color: LrColors.muted)));
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const Icon(Icons.videocam_off_outlined, size: 44, color: LrColors.muted),
+            const SizedBox(height: 10),
+            Text(tr('pclib.cant_play'), style: const TextStyle(color: Colors.white, fontSize: 16)),
+            const SizedBox(height: 6),
+            Text(tr('pclib.cant_play_hint'), textAlign: TextAlign.center, style: const TextStyle(color: LrColors.muted)),
+            if (widget.onSave != null) ...[
+              const SizedBox(height: 14),
+              FilledButton.icon(
+                onPressed: widget.onSave,
+                icon: const Icon(Icons.download_rounded),
+                label: Text(tr('pclib.save')),
+              ),
+            ],
+          ]),
+        ),
+      );
     }
     final c = _c;
     if (c == null) return const Center(child: CircularProgressIndicator());

@@ -452,5 +452,11 @@
   "open.kind_zip": "Arquivo compactado",
   "open.kind_audio": "Áudio",
   "open.kind_app": "Instalador",
-  "open.kind_other": "Arquivo"
+  "open.kind_other": "Arquivo",
+  "office.simple_note": "Pré-visualização simples: só texto, tabelas e imagens; o layout pode ser diferente do original.",
+  "office.cant_read": "Não foi possível ler este arquivo (pode estar danificado ou ser um .doc / .xls / .ppt antigo).",
+  "office.empty": "Não há nada para mostrar neste arquivo.",
+  "office.more_rows": "Mostrando as primeiras {shown} linhas (de {count}).",
+  "office.slide": "Slide {n}",
+  "pclib.cant_play_hint": "O celular pode não reproduzir este formato de vídeo. Toque em “Salvar neste celular” e o PC vai convertê-lo antes para um formato que o celular reproduz."
 }

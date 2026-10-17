@@ -452,5 +452,11 @@
   "open.kind_zip": "Archivio",
   "open.kind_audio": "Audio",
   "open.kind_app": "Programma di installazione",
-  "open.kind_other": "File"
+  "open.kind_other": "File",
+  "office.simple_note": "Anteprima semplice: solo testo, tabelle e immagini; l’impaginazione può differire dall’originale.",
+  "office.cant_read": "Impossibile leggere il file (forse danneggiato o un vecchio .doc / .xls / .ppt).",
+  "office.empty": "Niente da mostrare in questo file.",
+  "office.more_rows": "Sono mostrate le prime {shown} righe (di {count}).",
+  "office.slide": "Diapositiva {n}",
+  "pclib.cant_play_hint": "Il telefono potrebbe non riprodurre questo formato video. Tocca «Salva su questo telefono» e il PC lo convertirà prima in un formato riproducibile."
 }

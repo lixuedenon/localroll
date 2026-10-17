@@ -472,5 +472,12 @@
   "open.google_title": "Documento online di Google",
   "open.google_body": "È un collegamento a un documento Google Docs, Fogli o Presentazioni; il documento è online. Servono internet e un account Google autorizzato. Per passarlo offline, prima «Scaricalo» da Google come Word o PDF e invia quello.",
   "open.google_open": "Apri nel browser",
-  "open.google_no_link": "Questo collegamento non contiene un indirizzo utilizzabile."
+  "open.google_no_link": "Questo collegamento non contiene un indirizzo utilizzabile.",
+  "office.simple_note": "Anteprima semplice: solo testo, tabelle e immagini; l’impaginazione può differire dall’originale.",
+  "office.cant_read": "Impossibile leggere il file (forse danneggiato o un vecchio .doc / .xls / .ppt).",
+  "office.empty": "Niente da mostrare in questo file.",
+  "office.more_rows": "Sono mostrate le prime {shown} righe (di {count}).",
+  "office.slide": "Diapositiva {n}",
+  "office.preview": "Anteprima in LocalRoll",
+  "office.open_with": "Apri con un altro programma"
 }

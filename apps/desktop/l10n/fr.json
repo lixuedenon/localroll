@@ -472,5 +472,12 @@
   "open.google_title": "Document en ligne Google",
   "open.google_body": "C’est un raccourci vers un document Google Docs, Sheets ou Slides ; le document est en ligne. Il faut internet et un compte Google autorisé. Pour le transmettre hors ligne, « Téléchargez »-le d’abord depuis Google en Word ou PDF, puis envoyez-le.",
   "open.google_open": "Ouvrir dans le navigateur",
-  "open.google_no_link": "Ce raccourci ne contient pas d’adresse utilisable."
+  "open.google_no_link": "Ce raccourci ne contient pas d’adresse utilisable.",
+  "office.simple_note": "Aperçu simple : texte, tableaux et images seulement ; la mise en page peut différer de l’original.",
+  "office.cant_read": "Impossible de lire ce fichier (il est peut-être endommagé ou au vieux format .doc / .xls / .ppt).",
+  "office.empty": "Rien à afficher dans ce fichier.",
+  "office.more_rows": "Affichage des {shown} premières lignes (sur {count}).",
+  "office.slide": "Diapositive {n}",
+  "office.preview": "Aperçu dans LocalRoll",
+  "office.open_with": "Ouvrir avec un autre programme"
 }

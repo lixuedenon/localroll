@@ -472,5 +472,12 @@
   "open.google_title": "Google çevrimiçi belgesi",
   "open.google_body": "Bu bir Google Dokümanlar, E-Tablolar veya Slaytlar kısayoludur; belgenin kendisi çevrimiçidir. İnternet ve yetkili bir Google hesabı gerekir. Çevrimdışı iletmek için önce Google’dan Word veya PDF olarak “İndirin” ve onu gönderin.",
   "open.google_open": "Tarayıcıda aç",
-  "open.google_no_link": "Bu kısayolda kullanılabilir bir adres yok."
+  "open.google_no_link": "Bu kısayolda kullanılabilir bir adres yok.",
+  "office.simple_note": "Basit önizleme: yalnızca metin, tablolar ve resimler; düzen orijinalden farklı olabilir.",
+  "office.cant_read": "Bu dosya okunamıyor (bozuk ya da eski .doc / .xls / .ppt biçiminde olabilir).",
+  "office.empty": "Bu dosyada gösterilecek bir şey yok.",
+  "office.more_rows": "İlk {shown} satır gösteriliyor ({count} satırdan).",
+  "office.slide": "Slayt {n}",
+  "office.preview": "LocalRoll’da önizle",
+  "office.open_with": "Başka programla aç"
 }

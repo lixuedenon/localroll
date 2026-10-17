@@ -452,5 +452,11 @@
   "open.kind_zip": "Arsip",
   "open.kind_audio": "Audio",
   "open.kind_app": "Pemasang",
-  "open.kind_other": "File"
+  "open.kind_other": "File",
+  "office.simple_note": "Pratinjau sederhana: hanya teks, tabel, dan gambar; tata letak bisa berbeda dari aslinya.",
+  "office.cant_read": "File ini tidak bisa dibaca (mungkin rusak, atau format lama .doc / .xls / .ppt).",
+  "office.empty": "Tidak ada yang bisa ditampilkan di file ini.",
+  "office.more_rows": "Menampilkan {shown} baris pertama (dari {count}).",
+  "office.slide": "Slide {n}",
+  "pclib.cant_play_hint": "Ponsel mungkin tidak bisa langsung memutar format video ini. Ketuk “Simpan ke ponsel ini” dan PC akan mengubahnya dulu ke format yang bisa diputar."
 }

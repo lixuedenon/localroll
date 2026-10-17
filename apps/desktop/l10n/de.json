@@ -472,5 +472,12 @@
   "open.google_title": "Google-Onlinedokument",
   "open.google_body": "Das ist eine Verknüpfung zu Google Docs, Sheets oder Slides; das Dokument selbst liegt online. Nötig sind Internet und ein berechtigtes Google-Konto. Zum Offline-Weitergeben zuerst in Google als Word oder PDF „herunterladen“ und das senden.",
   "open.google_open": "Im Browser öffnen",
-  "open.google_no_link": "Diese Verknüpfung enthält keine nutzbare Adresse."
+  "open.google_no_link": "Diese Verknüpfung enthält keine nutzbare Adresse.",
+  "office.simple_note": "Einfache Vorschau: nur Text, Tabellen und Bilder; das Layout kann vom Original abweichen.",
+  "office.cant_read": "Diese Datei kann nicht gelesen werden (beschädigt oder altes .doc / .xls / .ppt).",
+  "office.empty": "In dieser Datei gibt es nichts anzuzeigen.",
+  "office.more_rows": "Die ersten {shown} Zeilen werden angezeigt (von {count}).",
+  "office.slide": "Folie {n}",
+  "office.preview": "In LocalRoll ansehen",
+  "office.open_with": "Mit anderem Programm öffnen"
 }

@@ -9,6 +9,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../l10n/l10n.dart';
 import 'cleanup_page.dart' show formatSize;
+import 'office_view.dart';
 import 'pdf_view_page.dart';
 import 'theme.dart';
 
@@ -17,7 +18,8 @@ import 'theme.dart';
 ///  * Google Docs / Sheets / Slides shortcuts → a card that opens it online;
 ///  * iPhone → the system preview (Word, Excel, PowerPoint, Pages, Numbers,
 ///    Keynote, text, CSV, RTF, web pages, audio…);
-///  * Android → text and CSV shown here;
+///  * Android → Word / Excel / PowerPoint (a simple look inside), text and
+///    CSV shown here;
 ///  * anything else → a card: what it is, open with another app, send.
 Future<void> openDocument(BuildContext context, String path, {String? name, Future<void> Function()? onSend}) async {
   final shown = name ?? path.split(Platform.pathSeparator).last;
@@ -36,6 +38,12 @@ Future<void> openDocument(BuildContext context, String path, {String? name, Futu
   try {
     size = await File(path).length();
   } catch (_) {}
+  if (OfficeViewPage.canShow(shown)) {
+    await nav.push(MaterialPageRoute(
+      builder: (_) => OfficeViewPage(path: path, name: shown, actions: [_shareAction(path)]),
+    ));
+    return;
+  }
   if (textKinds.contains(ext) && size <= 4 * 1024 * 1024) {
     await nav.push(MaterialPageRoute(builder: (_) => TextViewPage(path: path, name: shown, table: ext == 'csv' || ext == 'tsv')));
     return;

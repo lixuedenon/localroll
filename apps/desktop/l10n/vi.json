@@ -472,5 +472,12 @@
   "open.google_title": "Tài liệu trực tuyến Google",
   "open.google_body": "Đây là lối tắt tới Google Tài liệu, Trang tính hoặc Trang trình bày; bản thân tài liệu nằm trên mạng. Cần internet và tài khoản Google có quyền. Để chuyển ngoại tuyến, hãy “Tải xuống” từ Google dưới dạng Word hoặc PDF rồi gửi.",
   "open.google_open": "Mở trong trình duyệt",
-  "open.google_no_link": "Lối tắt này không có địa chỉ dùng được."
+  "open.google_no_link": "Lối tắt này không có địa chỉ dùng được.",
+  "office.simple_note": "Xem trước đơn giản: chỉ chữ, bảng và hình; bố cục có thể khác bản gốc.",
+  "office.cant_read": "Không đọc được tệp này (có thể bị hỏng hoặc là tệp .doc / .xls / .ppt kiểu cũ).",
+  "office.empty": "Tệp này không có gì để hiển thị.",
+  "office.more_rows": "Đang hiển thị {shown} hàng đầu (trên {count}).",
+  "office.slide": "Trang chiếu {n}",
+  "office.preview": "Xem trước trong LocalRoll",
+  "office.open_with": "Mở bằng chương trình khác"
 }

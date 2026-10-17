@@ -472,5 +472,12 @@
   "open.google_title": "Google 在线文档",
   "open.google_body": "这是 Google 文档、表格或幻灯片的快捷方式，文件本身在网上。需要联网，并登录有权限的 Google 账号才能看。如果要离线传给别人，请先在 Google 里“下载”为 Word 或 PDF 再发送。",
   "open.google_open": "在浏览器中打开",
-  "open.google_no_link": "这个快捷方式里没有可用的网址。"
+  "open.google_no_link": "这个快捷方式里没有可用的网址。",
+  "office.simple_note": "简易预览：只显示文字、表格和图片，排版可能和原文件不同。",
+  "office.cant_read": "这个文件读不出来（可能已损坏，或是旧版 .doc / .xls / .ppt 格式）。",
+  "office.empty": "这个文件里没有可显示的内容。",
+  "office.more_rows": "只显示前 {shown} 行（共 {count} 行）。",
+  "office.slide": "第 {n} 页",
+  "office.preview": "在 LocalRoll 中预览",
+  "office.open_with": "用其他程序打开"
 }

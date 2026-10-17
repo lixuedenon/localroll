@@ -472,5 +472,12 @@
   "open.google_title": "Google online document",
   "open.google_body": "This is a shortcut to a Google Doc, Sheet or Slides; the document itself is online. It needs the internet and a Google account that may open it. To pass it on offline, first “Download” it from Google as Word or PDF and send that.",
   "open.google_open": "Open in browser",
-  "open.google_no_link": "This shortcut has no usable address."
+  "open.google_no_link": "This shortcut has no usable address.",
+  "office.simple_note": "Simple preview: text, tables and pictures only; the layout may differ from the original.",
+  "office.cant_read": "This file can’t be read (it may be damaged, or an old .doc / .xls / .ppt file).",
+  "office.empty": "Nothing to show in this file.",
+  "office.more_rows": "Showing the first {shown} rows (of {count}).",
+  "office.slide": "Slide {n}",
+  "office.preview": "Preview in LocalRoll",
+  "office.open_with": "Open with another program"
 }

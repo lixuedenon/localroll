@@ -452,5 +452,11 @@
   "open.kind_zip": "Archivo comprimido",
   "open.kind_audio": "Audio",
   "open.kind_app": "Instalador",
-  "open.kind_other": "Archivo"
+  "open.kind_other": "Archivo",
+  "office.simple_note": "Vista previa simple: solo texto, tablas e imágenes; el diseño puede diferir del original.",
+  "office.cant_read": "No se puede leer este archivo (puede estar dañado o ser un .doc / .xls / .ppt antiguo).",
+  "office.empty": "No hay nada que mostrar en este archivo.",
+  "office.more_rows": "Se muestran las primeras {shown} filas (de {count}).",
+  "office.slide": "Diapositiva {n}",
+  "pclib.cant_play_hint": "Puede que el móvil no reproduzca este formato. Pulsa «Guardar en este móvil» y el PC lo convertirá antes a un formato que el móvil pueda reproducir."
 }

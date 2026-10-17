@@ -452,5 +452,11 @@
   "open.kind_zip": "Archive",
   "open.kind_audio": "Audio",
   "open.kind_app": "Installer",
-  "open.kind_other": "File"
+  "open.kind_other": "File",
+  "office.simple_note": "Simple preview: text, tables and pictures only; the layout may differ from the original.",
+  "office.cant_read": "This file can’t be read (it may be damaged, or an old .doc / .xls / .ppt file).",
+  "office.empty": "Nothing to show in this file.",
+  "office.more_rows": "Showing the first {shown} rows (of {count}).",
+  "office.slide": "Slide {n}",
+  "pclib.cant_play_hint": "The phone may not play this video format directly. Tap “Save to this phone” and the PC will convert it to a format the phone can play first."
 }

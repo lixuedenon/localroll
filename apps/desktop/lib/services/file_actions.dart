@@ -129,3 +129,25 @@ Future<({int free, int total})?> diskSpace(String path) async {
     return null;
   }
 }
+
+final Map<String, bool> _programFor = {};
+
+/// Does Windows have a program for files ending in .[ext] (Office, WPS…)?
+Future<bool> hasProgramFor(String ext) async {
+  if (!Platform.isWindows || ext.isEmpty) return false;
+  final known = _programFor[ext];
+  if (known != null) return known;
+  var yes = false;
+  try {
+    final r = await Process.run('reg', ['query', 'HKCR\\.$ext', '/ve']).timeout(const Duration(seconds: 3));
+    if (r.exitCode == 0) {
+      final m = RegExp(r'REG_SZ\s+(\S.*)').firstMatch('${r.stdout}');
+      final progId = m?.group(1)?.trim();
+      if (progId != null && progId.isNotEmpty) {
+        final c = await Process.run('reg', ['query', 'HKCR\\$progId\\shell']).timeout(const Duration(seconds: 3));
+        yes = c.exitCode == 0;
+      }
+    }
+  } catch (_) {}
+  return _programFor[ext] = yes;
+}

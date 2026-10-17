@@ -472,5 +472,12 @@
   "open.google_title": "مستند Google عبر الإنترنت",
   "open.google_body": "هذا اختصار لمستند أو جدول أو عرض تقديمي من Google؛ المستند نفسه على الإنترنت. يلزم اتصال بالإنترنت وحساب Google مسموح له. لإرساله دون اتصال، «نزّله» أولًا من Google بصيغة Word أو PDF ثم أرسله.",
   "open.google_open": "فتح في المتصفح",
-  "open.google_no_link": "لا يحتوي هذا الاختصار على عنوان صالح."
+  "open.google_no_link": "لا يحتوي هذا الاختصار على عنوان صالح.",
+  "office.simple_note": "معاينة بسيطة: النصوص والجداول والصور فقط؛ قد يختلف التنسيق عن الأصل.",
+  "office.cant_read": "تعذّرت قراءة هذا الملف (ربما تالف أو بصيغة ‎.doc / .xls / .ppt القديمة).",
+  "office.empty": "لا يوجد ما يُعرض في هذا الملف.",
+  "office.more_rows": "عرض أول {shown} صفًا (من {count}).",
+  "office.slide": "الشريحة {n}",
+  "office.preview": "معاينة في LocalRoll",
+  "office.open_with": "فتح ببرنامج آخر"
 }

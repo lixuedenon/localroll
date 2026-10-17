@@ -472,5 +472,12 @@
   "open.google_title": "Documento online do Google",
   "open.google_body": "É um atalho para um Documento, Planilha ou Apresentação do Google; o documento está online. Precisa de internet e de uma conta Google com permissão. Para passar offline, primeiro “Baixe” no Google como Word ou PDF e envie.",
   "open.google_open": "Abrir no navegador",
-  "open.google_no_link": "Este atalho não tem um endereço utilizável."
+  "open.google_no_link": "Este atalho não tem um endereço utilizável.",
+  "office.simple_note": "Pré-visualização simples: só texto, tabelas e imagens; o layout pode ser diferente do original.",
+  "office.cant_read": "Não foi possível ler este arquivo (pode estar danificado ou ser um .doc / .xls / .ppt antigo).",
+  "office.empty": "Não há nada para mostrar neste arquivo.",
+  "office.more_rows": "Mostrando as primeiras {shown} linhas (de {count}).",
+  "office.slide": "Slide {n}",
+  "office.preview": "Visualizar no LocalRoll",
+  "office.open_with": "Abrir com outro programa"
 }
