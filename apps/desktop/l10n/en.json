@@ -408,9 +408,9 @@
   "dev.hint": "Who you send to, who can send here, who may see the library — all here.",
   "dev.add": "Add a device",
   "dev.family": "Family",
-  "dev.family_hint": "What they send arrives straight away",
+  "dev.family_hint": "Files they send come straight in",
   "dev.guests": "Guests",
-  "dev.guests_hint": "What they send needs your “Accept”",
+  "dev.guests_hint": "Files they send wait for you to click “Accept”",
   "dev.none": "None yet.",
   "dev.kind_pc": "PC",
   "dev.kind_phone": "Phone",
@@ -459,5 +459,11 @@
   "jobs.ffmpeg_missing": "ffmpeg was not found: conversion and HEIC previews won't work until it is set up.",
   "settings.g_general": "General",
   "settings.g_storage": "Storage",
-  "settings.g_about": "About"
+  "settings.g_about": "About",
+  "dev.family_explain": "When it sends files to this PC, they come straight in without asking (good for automatic backups).",
+  "dev.guest_explain": "When it sends files to this PC, a prompt appears here and nothing is saved until you click “Accept”. If you click “Decline” or ignore it, nothing is received.",
+  "dev.access_none_explain": "It can’t see any photos, videos or files on this PC.",
+  "dev.access_view_explain": "It can look at the photos, videos and files in this PC’s library from the phone — view only, no deleting or changing.",
+  "dev.access_manage_explain": "It can look and also delete (deleted items go to this PC’s Recycle Bin and can be restored); it can’t change anything.",
+  "library.hover_hint": "Live Photos and videos: hover the mouse to play"
 }

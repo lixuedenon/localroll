@@ -416,7 +416,7 @@ class _DevicesPageState extends State<DevicesPage> {
             onSelectionChanged: (v) => s.server.setFamily(d.id, v.first),
           ),
           const SizedBox(height: 6),
-          Text(tr(d.family ? 'dev.family_hint' : 'dev.guests_hint'), style: const TextStyle(color: LrColors.muted, fontSize: 12)),
+          Text(tr(d.family ? 'dev.family_explain' : 'dev.guest_explain'), style: const TextStyle(color: LrColors.muted, fontSize: 12)),
         ],
         if (t != null && !d.isPc) ...[
           _label(tr('dev.access')),
@@ -435,6 +435,8 @@ class _DevicesPageState extends State<DevicesPage> {
               },
             ),
           ),
+          const SizedBox(height: 6),
+          Text(tr('dev.access_${t.libraryAccess.name}_explain'), style: const TextStyle(color: LrColors.muted, fontSize: 12)),
           _label(tr('dev.member')),
           OutlinedButton.icon(
             style: OutlinedButton.styleFrom(alignment: Alignment.centerLeft, minimumSize: const Size.fromHeight(44)),

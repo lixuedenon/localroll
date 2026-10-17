@@ -408,9 +408,9 @@
   "dev.hint": "Kirim ke siapa, siapa boleh mengirim, siapa melihat pustaka — semua di sini.",
   "dev.add": "Tambah perangkat",
   "dev.family": "Keluarga",
-  "dev.family_hint": "Kirimannya langsung diterima",
+  "dev.family_hint": "Kiriman langsung diterima",
   "dev.guests": "Tamu",
-  "dev.guests_hint": "Kirimannya perlu Anda “Terima”",
+  "dev.guests_hint": "Kiriman menunggu Anda menekan “Terima”",
   "dev.none": "Belum ada.",
   "dev.kind_pc": "PC",
   "dev.kind_phone": "Ponsel",
@@ -459,5 +459,11 @@
   "jobs.ffmpeg_missing": "ffmpeg tidak ditemukan: konversi dan pratinjau HEIC tidak berfungsi sampai disiapkan.",
   "settings.g_general": "Umum",
   "settings.g_storage": "Penyimpanan",
-  "settings.g_about": "Tentang"
+  "settings.g_about": "Tentang",
+  "dev.family_explain": "Saat mengirim file ke PC ini, file langsung diterima tanpa ditanya (cocok untuk cadangan otomatis).",
+  "dev.guest_explain": "Saat mengirim file ke PC ini, muncul permintaan di sini dan tidak ada yang disimpan sampai Anda menekan “Terima”. Jika ditolak atau diabaikan, tidak ada yang diterima.",
+  "dev.access_none_explain": "Tidak bisa melihat foto, video, atau file apa pun di PC ini.",
+  "dev.access_view_explain": "Bisa melihat foto, video, dan file di pustaka PC ini dari ponsel — hanya melihat, tidak bisa menghapus atau mengubah.",
+  "dev.access_manage_explain": "Bisa melihat dan juga menghapus (yang dihapus masuk ke Recycle Bin PC ini dan bisa dipulihkan); tidak bisa mengubah.",
+  "library.hover_hint": "Live Photos dan video: arahkan mouse untuk memutar"
 }

@@ -408,9 +408,9 @@
   "dev.hint": "送り先、送ってくる相手、ライブラリを見られる相手はここで",
   "dev.add": "デバイスを追加",
   "dev.family": "ファミリー",
-  "dev.family_hint": "届いたものはそのまま受け取ります",
+  "dev.family_hint": "送られたファイルはそのまま受け取ります",
   "dev.guests": "ゲスト",
-  "dev.guests_hint": "届くたびに「受け入れ」が必要",
+  "dev.guests_hint": "送られたファイルは「受け入れる」を押すまで受け取りません",
   "dev.none": "まだありません。",
   "dev.kind_pc": "PC",
   "dev.kind_phone": "スマホ",
@@ -459,5 +459,11 @@
   "jobs.ffmpeg_missing": "ffmpeg が見つかりません。設定するまで変換も HEIC のプレビューもできません。",
   "settings.g_general": "一般",
   "settings.g_storage": "保存",
-  "settings.g_about": "情報"
+  "settings.g_about": "情報",
+  "dev.family_explain": "このPCにファイルを送ると、確認なしでそのまま受け取ります（自動バックアップ向け）。",
+  "dev.guest_explain": "このPCにファイルを送ると、ここに確認が表示され、「受け入れる」を押すまで保存されません。「拒否」を押すか放置すると受け取りません。",
+  "dev.access_none_explain": "このPCの写真・動画・ファイルは一切見られません。",
+  "dev.access_view_explain": "このPCのライブラリの写真・動画・ファイルをスマホで見られます。見るだけで、削除や変更はできません。",
+  "dev.access_manage_explain": "見ることも削除することもできます（削除したものはこのPCのごみ箱に入り、元に戻せます）。変更はできません。",
+  "library.hover_hint": "Live Photos と動画：マウスを重ねると再生"
 }

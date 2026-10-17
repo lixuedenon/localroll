@@ -408,9 +408,9 @@
   "dev.hint": "Wem du sendest, wer dir senden darf, wer die Mediathek sieht – alles hier.",
   "dev.add": "Gerät hinzufügen",
   "dev.family": "Familie",
-  "dev.family_hint": "Was sie senden, kommt direkt an",
+  "dev.family_hint": "Gesendetes kommt direkt an",
   "dev.guests": "Gäste",
-  "dev.guests_hint": "Was sie senden, braucht dein „Annehmen“",
+  "dev.guests_hint": "Gesendetes wartet, bis du auf „Annehmen“ klickst",
   "dev.none": "Noch keine.",
   "dev.kind_pc": "PC",
   "dev.kind_phone": "Handy",
@@ -459,5 +459,11 @@
   "jobs.ffmpeg_missing": "ffmpeg wurde nicht gefunden: Konvertieren und HEIC-Vorschauen funktionieren erst, wenn es eingerichtet ist.",
   "settings.g_general": "Allgemein",
   "settings.g_storage": "Speicher",
-  "settings.g_about": "Info"
+  "settings.g_about": "Info",
+  "dev.family_explain": "Wenn es Dateien an diesen PC sendet, kommen sie ohne Nachfrage direkt an (gut für automatische Backups).",
+  "dev.guest_explain": "Wenn es Dateien an diesen PC sendet, erscheint hier eine Nachfrage, und erst nach „Annehmen“ wird etwas gespeichert. Bei „Ablehnen“ oder ohne Antwort wird nichts empfangen.",
+  "dev.access_none_explain": "Es sieht keine Fotos, Videos oder Dateien auf diesem PC.",
+  "dev.access_view_explain": "Es kann die Fotos, Videos und Dateien in der Bibliothek dieses PCs auf dem Handy ansehen – nur ansehen, nicht löschen oder ändern.",
+  "dev.access_manage_explain": "Es kann ansehen und auch löschen (Gelöschtes landet im Papierkorb dieses PCs und lässt sich wiederherstellen); ändern kann es nichts.",
+  "library.hover_hint": "Live Photos und Videos: Maus darüber halten zum Abspielen"
 }

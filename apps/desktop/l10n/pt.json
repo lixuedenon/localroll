@@ -408,9 +408,9 @@
   "dev.hint": "A quem envia, quem lhe envia e quem vê a biblioteca: tudo aqui.",
   "dev.add": "Adicionar dispositivo",
   "dev.family": "Família",
-  "dev.family_hint": "O que enviam chega logo",
+  "dev.family_hint": "O que envia entra direto",
   "dev.guests": "Convidados",
-  "dev.guests_hint": "O que enviam precisa do seu «Aceitar»",
+  "dev.guests_hint": "O que envia aguarda você clicar em “Aceitar”",
   "dev.none": "Ainda nenhum.",
   "dev.kind_pc": "PC",
   "dev.kind_phone": "Telemóvel",
@@ -459,5 +459,11 @@
   "jobs.ffmpeg_missing": "ffmpeg não encontrado: a conversão e as pré-visualizações HEIC não funcionarão até ser configurado.",
   "settings.g_general": "Geral",
   "settings.g_storage": "Armazenamento",
-  "settings.g_about": "Sobre"
+  "settings.g_about": "Sobre",
+  "dev.family_explain": "Quando envia arquivos para este PC, eles entram direto sem perguntar (bom para backups automáticos).",
+  "dev.guest_explain": "Quando envia arquivos para este PC, aparece um aviso aqui e nada é salvo até você clicar em “Aceitar”. Se recusar ou ignorar, nada é recebido.",
+  "dev.access_none_explain": "Não consegue ver nenhuma foto, vídeo ou arquivo deste PC.",
+  "dev.access_view_explain": "Pode ver no celular as fotos, vídeos e arquivos da biblioteca deste PC — só ver, sem excluir ou alterar.",
+  "dev.access_manage_explain": "Pode ver e também excluir (o que for excluído vai para a Lixeira deste PC e pode ser restaurado); não pode alterar nada.",
+  "library.hover_hint": "Live Photos e vídeos: passe o mouse por cima para reproduzir"
 }

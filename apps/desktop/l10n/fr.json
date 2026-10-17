@@ -408,9 +408,9 @@
   "dev.hint": "À qui envoyer, qui peut vous envoyer, qui voit la bibliothèque : tout est ici.",
   "dev.add": "Ajouter un appareil",
   "dev.family": "Famille",
-  "dev.family_hint": "Ce qu’ils envoient arrive directement",
+  "dev.family_hint": "Ses envois arrivent directement",
   "dev.guests": "Invités",
-  "dev.guests_hint": "Ce qu’ils envoient attend votre « Accepter »",
+  "dev.guests_hint": "Ses envois attendent que vous cliquiez sur « Accepter »",
   "dev.none": "Aucun pour l’instant.",
   "dev.kind_pc": "PC",
   "dev.kind_phone": "Téléphone",
@@ -459,5 +459,11 @@
   "jobs.ffmpeg_missing": "ffmpeg est introuvable : la conversion et les aperçus HEIC ne fonctionneront pas tant qu'il n'est pas configuré.",
   "settings.g_general": "Général",
   "settings.g_storage": "Stockage",
-  "settings.g_about": "À propos"
+  "settings.g_about": "À propos",
+  "dev.family_explain": "Quand il envoie des fichiers à ce PC, ils arrivent directement sans demande (idéal pour les sauvegardes automatiques).",
+  "dev.guest_explain": "Quand il envoie des fichiers à ce PC, une demande s’affiche ici et rien n’est enregistré avant que vous cliquiez sur « Accepter ». Si vous refusez ou ignorez, rien n’est reçu.",
+  "dev.access_none_explain": "Il ne voit aucune photo, vidéo ni aucun fichier de ce PC.",
+  "dev.access_view_explain": "Il peut consulter depuis le téléphone les photos, vidéos et fichiers de la bibliothèque de ce PC — en lecture seule, sans supprimer ni modifier.",
+  "dev.access_manage_explain": "Il peut consulter et aussi supprimer (les éléments supprimés vont dans la Corbeille de ce PC et peuvent être restaurés) ; il ne peut rien modifier.",
+  "library.hover_hint": "Live Photos et vidéos : survolez avec la souris pour lire"
 }

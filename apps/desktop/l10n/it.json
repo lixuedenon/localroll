@@ -408,9 +408,9 @@
   "dev.hint": "A chi invii, chi può inviarti, chi vede la libreria: tutto qui.",
   "dev.add": "Aggiungi dispositivo",
   "dev.family": "Famiglia",
-  "dev.family_hint": "Quello che inviano arriva subito",
+  "dev.family_hint": "Ciò che invia arriva direttamente",
   "dev.guests": "Ospiti",
-  "dev.guests_hint": "Quello che inviano richiede il tuo «Accetta»",
+  "dev.guests_hint": "Ciò che invia attende che tu clicchi «Accetta»",
   "dev.none": "Ancora nessuno.",
   "dev.kind_pc": "PC",
   "dev.kind_phone": "Telefono",
@@ -459,5 +459,11 @@
   "jobs.ffmpeg_missing": "ffmpeg non trovato: conversione e anteprime HEIC non funzioneranno finché non è configurato.",
   "settings.g_general": "Generale",
   "settings.g_storage": "Archiviazione",
-  "settings.g_about": "Informazioni"
+  "settings.g_about": "Informazioni",
+  "dev.family_explain": "Quando invia file a questo PC, arrivano direttamente senza chiedere (ideale per i backup automatici).",
+  "dev.guest_explain": "Quando invia file a questo PC, qui compare una richiesta e nulla viene salvato finché non clicchi «Accetta». Se rifiuti o la ignori, non si riceve nulla.",
+  "dev.access_none_explain": "Non può vedere foto, video o file di questo PC.",
+  "dev.access_view_explain": "Può guardare dal telefono foto, video e file della libreria di questo PC: solo visione, senza eliminare o modificare.",
+  "dev.access_manage_explain": "Può guardare e anche eliminare (gli elementi eliminati finiscono nel Cestino di questo PC e si possono ripristinare); non può modificare nulla.",
+  "library.hover_hint": "Live Photo e video: passa il mouse sopra per riprodurre"
 }

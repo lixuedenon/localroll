@@ -408,9 +408,9 @@
   "dev.hint": "傳給誰、誰能傳過來、誰能看媒體庫，都在這裡",
   "dev.add": "新增裝置",
   "dev.family": "家人",
-  "dev.family_hint": "傳來的直接收下",
+  "dev.family_hint": "傳來的檔案直接收下，不用確認",
   "dev.guests": "訪客",
-  "dev.guests_hint": "傳來的要你點「接受」",
+  "dev.guests_hint": "傳來的檔案要你點「接受」才收下",
   "dev.none": "還沒有。",
   "dev.kind_pc": "電腦",
   "dev.kind_phone": "手機",
@@ -459,5 +459,11 @@
   "jobs.ffmpeg_missing": "找不到 ffmpeg：設定好之前無法轉換，HEIC 也無法預覽。",
   "settings.g_general": "一般",
   "settings.g_storage": "儲存",
-  "settings.g_about": "關於"
+  "settings.g_about": "關於",
+  "dev.family_explain": "它傳檔案到這台電腦時，不用你確認，直接收下（適合自動備份）。",
+  "dev.guest_explain": "它傳檔案到這台電腦時，這台電腦會跳出提示，你點「接受」才會收下；點「拒絕」或不理會，就不會收。",
+  "dev.access_none_explain": "它看不到這台電腦上的任何照片、影片和檔案。",
+  "dev.access_view_explain": "它可以在手機上查看這台電腦媒體庫裡的照片、影片和檔案——只能看，不能刪除或修改。",
+  "dev.access_manage_explain": "它可以查看，也可以刪除（刪掉的進這台電腦的資源回收筒，能找回）；不能修改。",
+  "library.hover_hint": "原況照片和影片：滑鼠停在上面就會播放"
 }

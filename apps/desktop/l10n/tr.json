@@ -408,9 +408,9 @@
   "dev.hint": "Kime gönderdiğiniz, kimin gönderebileceği, kimin kitaplığı görebileceği — hepsi burada.",
   "dev.add": "Cihaz ekle",
   "dev.family": "Aile",
-  "dev.family_hint": "Gönderdikleri doğrudan gelir",
+  "dev.family_hint": "Gönderdikleri doğrudan alınır",
   "dev.guests": "Misafirler",
-  "dev.guests_hint": "Gönderdikleri “Kabul et” bekler",
+  "dev.guests_hint": "Gönderdikleri “Kabul et”e basmanızı bekler",
   "dev.none": "Henüz yok.",
   "dev.kind_pc": "Bilgisayar",
   "dev.kind_phone": "Telefon",
@@ -459,5 +459,11 @@
   "jobs.ffmpeg_missing": "ffmpeg bulunamadı: ayarlanana kadar dönüştürme ve HEIC önizlemeleri çalışmaz.",
   "settings.g_general": "Genel",
   "settings.g_storage": "Depolama",
-  "settings.g_about": "Hakkında"
+  "settings.g_about": "Hakkında",
+  "dev.family_explain": "Bu bilgisayara dosya gönderdiğinde sormadan doğrudan alınır (otomatik yedekler için uygun).",
+  "dev.guest_explain": "Bu bilgisayara dosya gönderdiğinde burada bir istek görünür ve “Kabul et”e basana kadar hiçbir şey kaydedilmez. Reddederseniz ya da yanıtlamazsanız hiçbir şey alınmaz.",
+  "dev.access_none_explain": "Bu bilgisayardaki hiçbir fotoğrafı, videoyu veya dosyayı göremez.",
+  "dev.access_view_explain": "Bu bilgisayarın kitaplığındaki fotoğraf, video ve dosyaları telefondan görebilir — yalnızca görüntüleme, silme veya değiştirme yok.",
+  "dev.access_manage_explain": "Görebilir ve silebilir de (silinenler bu bilgisayarın Geri Dönüşüm Kutusu’na gider ve geri yüklenebilir); değiştiremez.",
+  "library.hover_hint": "Canlı Fotoğraflar ve videolar: oynatmak için fareyi üzerine getirin"
 }

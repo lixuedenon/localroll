@@ -165,6 +165,12 @@ class _LibraryPageState extends State<LibraryPage> {
                 ? Text(tr('library.selected', {'count': _selected.length}))
                 : Row(children: [
                     Text(tr('nav.library')),
+                    const SizedBox(width: 12),
+                    Flexible(
+                      child: Text(tr('library.hover_hint'),
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: LrColors.muted, fontSize: 13, fontWeight: FontWeight.w400)),
+                    ),
                     if (!_onlyRecent && _recent(all).isNotEmpty) ...[
                       const SizedBox(width: 12),
                       ActionChip(

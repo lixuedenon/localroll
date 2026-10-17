@@ -408,9 +408,9 @@
   "dev.hint": "누구에게 보내고, 누가 보낼 수 있고, 누가 라이브러리를 볼 수 있는지 여기서",
   "dev.add": "기기 추가",
   "dev.family": "가족",
-  "dev.family_hint": "보낸 것을 바로 받습니다",
+  "dev.family_hint": "보낸 파일을 바로 받습니다",
   "dev.guests": "게스트",
-  "dev.guests_hint": "보낼 때마다 ‘수락’이 필요합니다",
+  "dev.guests_hint": "보낸 파일은 \"수락\"을 눌러야 받습니다",
   "dev.none": "아직 없습니다.",
   "dev.kind_pc": "PC",
   "dev.kind_phone": "휴대폰",
@@ -459,5 +459,11 @@
   "jobs.ffmpeg_missing": "ffmpeg를 찾을 수 없습니다. 설정하기 전에는 변환과 HEIC 미리보기가 되지 않습니다.",
   "settings.g_general": "일반",
   "settings.g_storage": "저장",
-  "settings.g_about": "정보"
+  "settings.g_about": "정보",
+  "dev.family_explain": "이 PC로 파일을 보내면 확인 없이 바로 받습니다(자동 백업에 적합).",
+  "dev.guest_explain": "이 PC로 파일을 보내면 여기에 알림이 뜨고 \"수락\"을 눌러야 저장됩니다. \"거절\"을 누르거나 그냥 두면 받지 않습니다.",
+  "dev.access_none_explain": "이 PC의 사진, 동영상, 파일을 전혀 볼 수 없습니다.",
+  "dev.access_view_explain": "휴대폰에서 이 PC 라이브러리의 사진, 동영상, 파일을 볼 수 있습니다. 보기만 가능하고 삭제나 수정은 할 수 없습니다.",
+  "dev.access_manage_explain": "보기와 삭제가 가능합니다(삭제한 항목은 이 PC의 휴지통으로 가며 복원할 수 있습니다). 수정은 할 수 없습니다.",
+  "library.hover_hint": "Live Photo와 동영상: 마우스를 올리면 재생"
 }

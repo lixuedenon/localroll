@@ -408,9 +408,9 @@
   "dev.hint": "A quién envías, quién te envía y quién ve la biblioteca: todo aquí.",
   "dev.add": "Añadir dispositivo",
   "dev.family": "Familia",
-  "dev.family_hint": "Lo que envían llega directamente",
+  "dev.family_hint": "Lo que envía entra directamente",
   "dev.guests": "Invitados",
-  "dev.guests_hint": "Lo que envían necesita tu «Aceptar»",
+  "dev.guests_hint": "Lo que envía espera a que pulses «Aceptar»",
   "dev.none": "Todavía ninguno.",
   "dev.kind_pc": "PC",
   "dev.kind_phone": "Teléfono",
@@ -459,5 +459,11 @@
   "jobs.ffmpeg_missing": "No se encontró ffmpeg: la conversión y las vistas previas HEIC no funcionarán hasta configurarlo.",
   "settings.g_general": "General",
   "settings.g_storage": "Almacenamiento",
-  "settings.g_about": "Acerca de"
+  "settings.g_about": "Acerca de",
+  "dev.family_explain": "Cuando envía archivos a este PC, entran directamente sin preguntar (ideal para copias automáticas).",
+  "dev.guest_explain": "Cuando envía archivos a este PC, aparece un aviso aquí y no se guarda nada hasta que pulses «Aceptar». Si pulsas «Rechazar» o lo ignoras, no se recibe nada.",
+  "dev.access_none_explain": "No puede ver ninguna foto, vídeo ni archivo de este PC.",
+  "dev.access_view_explain": "Puede ver desde el móvil las fotos, vídeos y archivos de la biblioteca de este PC: solo ver, sin borrar ni cambiar nada.",
+  "dev.access_manage_explain": "Puede ver y también borrar (lo borrado va a la Papelera de este PC y se puede recuperar); no puede cambiar nada.",
+  "library.hover_hint": "Live Photos y vídeos: pasa el ratón por encima para reproducir"
 }

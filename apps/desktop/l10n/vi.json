@@ -408,9 +408,9 @@
   "dev.hint": "Gửi cho ai, ai được gửi tới, ai xem được thư viện — đều ở đây.",
   "dev.add": "Thêm thiết bị",
   "dev.family": "Gia đình",
-  "dev.family_hint": "Gửi tới là nhận ngay",
+  "dev.family_hint": "Tệp gửi đến được nhận ngay",
   "dev.guests": "Khách",
-  "dev.guests_hint": "Gửi tới cần bạn bấm “Chấp nhận”",
+  "dev.guests_hint": "Tệp gửi đến chờ bạn bấm “Chấp nhận”",
   "dev.none": "Chưa có.",
   "dev.kind_pc": "Máy tính",
   "dev.kind_phone": "Điện thoại",
@@ -459,5 +459,11 @@
   "jobs.ffmpeg_missing": "Không tìm thấy ffmpeg: chuyển đổi và xem trước HEIC sẽ không hoạt động cho đến khi được thiết lập.",
   "settings.g_general": "Chung",
   "settings.g_storage": "Lưu trữ",
-  "settings.g_about": "Giới thiệu"
+  "settings.g_about": "Giới thiệu",
+  "dev.family_explain": "Khi gửi tệp đến máy tính này, tệp được nhận ngay mà không cần hỏi (phù hợp để sao lưu tự động).",
+  "dev.guest_explain": "Khi gửi tệp đến máy tính này, một yêu cầu sẽ hiện ở đây và không có gì được lưu cho đến khi bạn bấm “Chấp nhận”. Nếu từ chối hoặc bỏ qua thì không nhận gì.",
+  "dev.access_none_explain": "Không xem được ảnh, video hay tệp nào trên máy tính này.",
+  "dev.access_view_explain": "Có thể xem ảnh, video và tệp trong thư viện của máy tính này trên điện thoại — chỉ xem, không xóa hay sửa.",
+  "dev.access_manage_explain": "Có thể xem và cũng có thể xóa (mục đã xóa vào Thùng rác của máy tính này và có thể khôi phục); không thể sửa.",
+  "library.hover_hint": "Live Photos và video: rê chuột lên để phát"
 }
