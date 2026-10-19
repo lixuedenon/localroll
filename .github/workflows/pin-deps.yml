@@ -1,0 +1,77 @@
+# .github/workflows/pin-deps.yml
+# Run by hand (Actions → "Pin dependencies") when dependencies should move on.
+# It makes builds repeatable:
+#   * pubspec.lock for core, desktop and mobile (exact package versions,
+#     resolved with the Flutter used for Windows and Android);
+#   * one ffmpeg for Windows: the newest release-branch build from
+#     BtbN/FFmpeg-Builds is copied into this repo's "deps" release (so it
+#     can't vanish upstream) and its SHA-256 written to scripts/ffmpeg-pin.env.
+# Both are committed to main; ci.yml then always uses exactly these.
+name: Pin dependencies
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: pin-deps
+  cancel-in-progress: false
+
+env:
+  FLUTTER_VERSION: '3.35.4'
+
+jobs:
+  pin:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Lock package versions
+        run: |
+          set -e
+          (cd packages/core && dart pub get)
+          (cd apps/desktop && flutter pub get)
+          (cd apps/mobile && flutter pub get)
+
+      - name: Copy one ffmpeg build into the "deps" release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          # Release-branch builds (e.g. ffmpeg-n7.1-latest-win64-gpl-7.1.zip), newest version.
+          asset=$(gh release view latest -R BtbN/FFmpeg-Builds --json assets \
+            --jq '.assets[].name' | grep -E '^ffmpeg-n[0-9.]+-latest-win64-gpl-[0-9.]+\.zip$' | sort -V | tail -1)
+          if [ -z "$asset" ]; then echo "::error::no release-branch win64-gpl build found"; exit 1; fi
+          ver=$(echo "$asset" | sed -E 's/^ffmpeg-n([0-9.]+)-latest.*/\1/')
+          day=$(date -u +%Y%m%d)
+          name="ffmpeg-${ver}-${day}-win64-gpl.zip"
+          gh release download latest -R BtbN/FFmpeg-Builds -p "$asset" -O "$name"
+          sha=$(sha256sum "$name" | cut -d' ' -f1)
+          # Not "latest": testers' download scripts must keep finding the app.
+          gh release view deps -R "$GITHUB_REPOSITORY" >/dev/null 2>&1 || \
+            gh release create deps -R "$GITHUB_REPOSITORY" --title "Build dependencies (not an app release)" \
+              --notes "Pinned copies of tools used by CI. Not for testers." --prerelease --latest=false
+          gh release upload deps -R "$GITHUB_REPOSITORY" "$name" --clobber
+          cat > scripts/ffmpeg-pin.env <<EOF
+          # scripts/ffmpeg-pin.env — written by .github/workflows/pin-deps.yml
+          # ffmpeg bundled with the Windows app: a copy in this repo's "deps" release.
+          FFMPEG_ASSET=$name
+          FFMPEG_SHA256=$sha
+          FFMPEG_FROM="BtbN/FFmpeg-Builds $asset ($day)"
+          EOF
+          echo "::notice::ffmpeg pinned: $name $sha"
+
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add packages/core/pubspec.lock apps/desktop/pubspec.lock apps/mobile/pubspec.lock scripts/ffmpeg-pin.env
+          if git diff --cached --quiet; then echo "::notice::nothing changed"; exit 0; fi
+          git commit -m "chore: pin package versions (pubspec.lock) and ffmpeg"
+          git push

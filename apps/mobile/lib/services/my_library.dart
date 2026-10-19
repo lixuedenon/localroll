@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:localroll_core/localroll_core.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -372,7 +373,7 @@ class MyLibrary extends ChangeNotifier {
     final assets = [for (final i in list) if (i.assetId != null) i.assetId!];
     if (assets.isNotEmpty) {
       try {
-        final gone = (await PhotoManager.editor.deleteWithIds(assets)).toSet();
+        final gone = (await removeFromPhone(assets)).ids.toSet();
         for (final i in list) {
           if (i.assetId != null && gone.contains(i.assetId)) {
             _items.remove(i);
@@ -518,4 +519,28 @@ class MyFolders {
     final s = name.trim().replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
     return s.isEmpty ? tr('mylib.unknown') : s;
   }
+}
+
+/// Removes photos / videos from this phone's library. Android 11 and later:
+/// into the system's Trash (kept 30 days, like iPhone's "Recently
+/// Deleted") — [trashed] is true. Older Android: deleted (the system asks
+/// first). iPhone: the system keeps them in "Recently Deleted" for 30 days.
+/// Returns the ids that are gone (none if the person cancelled).
+Future<({List<String> ids, bool trashed})> removeFromPhone(List<String> ids) async {
+  if (ids.isEmpty) return (ids: const <String>[], trashed: false);
+  if (Platform.isAndroid) {
+    try {
+      final assets = <AssetEntity>[];
+      for (final id in ids) {
+        final a = await AssetEntity.fromId(id);
+        if (a != null) assets.add(a);
+      }
+      if (assets.isEmpty) return (ids: const <String>[], trashed: true);
+      return (ids: await PhotoManager.editor.android.moveToTrash(assets), trashed: true);
+    } on PlatformException catch (e) {
+      // Android 10 and older have no Trash: delete as before.
+      if (!'${e.code} ${e.message}'.contains('29 or lower')) rethrow;
+    }
+  }
+  return (ids: await PhotoManager.editor.deleteWithIds(ids), trashed: false);
 }

@@ -479,5 +479,6 @@
   "office.more_rows": "Menampilkan {shown} baris pertama (dari {count}).",
   "office.slide": "Slide {n}",
   "office.preview": "Pratinjau di LocalRoll",
-  "office.open_with": "Buka dengan program lain"
+  "office.open_with": "Buka dengan program lain",
+  "send.err_phone_full": "Ponsel tidak punya cukup ruang kosong. Tidak ada yang terkirim setengah; kosongkan ruang lalu kirim lagi."
 }

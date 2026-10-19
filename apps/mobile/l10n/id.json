@@ -459,5 +459,8 @@
   "office.more_rows": "Menampilkan {shown} baris pertama (dari {count}).",
   "office.slide": "Slide {n}",
   "pclib.cant_play_hint": "Ponsel mungkin tidak bisa langsung memutar format video ini. Ketuk “Simpan ke ponsel ini” dan PC akan mengubahnya dulu ke format yang bisa diputar.",
-  "incoming.unverified": "Perangkat ini tidak dipasangkan dengan ponsel ini, jadi tidak bisa dipastikan siapa sebenarnya. Terima hanya jika Anda tahu siapa pengirimnya."
+  "incoming.unverified": "Perangkat ini tidak dipasangkan dengan ponsel ini, jadi tidak bisa dipastikan siapa sebenarnya. Terima hanya jika Anda tahu siapa pengirimnya.",
+  "cleanup.done_trash": "Ruang dikosongkan. Item yang dihapus tetap di Sampah Galeri selama 30 hari.",
+  "transfer.stopped_phone_full": "Dihentikan: ponsel lain kehabisan ruang. Sisanya belum terkirim.",
+  "err.phone_full": "Ponsel lain tidak punya cukup ruang kosong. Tidak ada yang terkirim setengah."
 }

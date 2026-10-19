@@ -1021,6 +1021,12 @@ class TransferServer extends ChangeNotifier {
   // --------------------------------------------------------------- handlers
 
   Future<void> _pair(HttpRequest req, {required bool secure, required String ip}) async {
+    // Pairing only over HTTPS (the PIN and the new token must not be seen
+    // on the Wi‑Fi). Plain only if this PC has no certificate at all.
+    if (!secure && tls != null) {
+      await req.drain<void>();
+      return _json(req.response, 426, {'error': 'upgrade_required'});
+    }
     final body = PairRequest.fromJson(await _readJson(req));
     if (_failedPinAttempts >= 5) {
       // Too many wrong guesses: invalidate the PIN on screen.
@@ -1077,6 +1083,10 @@ class TransferServer extends ChangeNotifier {
   }
 
   Future<void> _pairRequest(HttpRequest req, {required bool secure}) async {
+    if (!secure && tls != null) {
+      await req.drain<void>();
+      return _json(req.response, 426, {'error': 'upgrade_required'});
+    }
     final body = PairApprovalRequest.fromJson(await _readJson(req));
     _prunePairs();
     // A few open requests at most, so nobody can flood the screen with dialogs.

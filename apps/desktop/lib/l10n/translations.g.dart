@@ -485,6 +485,7 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'Slide {n}',
     'office.preview': 'Preview in LocalRoll',
     'office.open_with': 'Open with another program',
+    'send.err_phone_full': 'The phone doesn\'t have enough free space. Nothing was sent half-way; free up space on it and send again.',
   },
   'zh': {
     'nav.library': '媒体库',
@@ -968,6 +969,7 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': '第 {n} 页',
     'office.preview': '在 LocalRoll 中预览',
     'office.open_with': '用其他程序打开',
+    'send.err_phone_full': '对方手机空间不够。没有发出半截文件；对方腾出空间后再发送。',
   },
   'zh_Hant': {
     'nav.library': '媒體庫',
@@ -1451,6 +1453,7 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': '第 {n} 頁',
     'office.preview': '在 LocalRoll 中預覽',
     'office.open_with': '用其他程式開啟',
+    'send.err_phone_full': '對方手機空間不夠。沒有傳出半截檔案；對方騰出空間後再傳送。',
   },
   'ja': {
     'nav.library': 'ライブラリ',
@@ -1934,6 +1937,7 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'スライド {n}',
     'office.preview': 'LocalRoll でプレビュー',
     'office.open_with': '他のプログラムで開く',
+    'send.err_phone_full': 'スマホの空き容量が足りません。途中まで送られたものはありません。空きを作ってから再送してください。',
   },
   'ko': {
     'nav.library': '라이브러리',
@@ -2417,6 +2421,7 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': '슬라이드 {n}',
     'office.preview': 'LocalRoll에서 미리보기',
     'office.open_with': '다른 프로그램으로 열기',
+    'send.err_phone_full': '휴대폰에 여유 공간이 부족합니다. 중간까지 보낸 파일은 없습니다. 공간을 확보한 뒤 다시 보내세요.',
   },
   'es': {
     'nav.library': 'Biblioteca',
@@ -2900,6 +2905,7 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'Diapositiva {n}',
     'office.preview': 'Vista previa en LocalRoll',
     'office.open_with': 'Abrir con otro programa',
+    'send.err_phone_full': 'El teléfono no tiene espacio libre suficiente. No se envió nada a medias; libera espacio y vuelve a enviar.',
   },
   'fr': {
     'nav.library': 'Bibliothèque',
@@ -3383,6 +3389,7 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'Diapositive {n}',
     'office.preview': 'Aperçu dans LocalRoll',
     'office.open_with': 'Ouvrir avec un autre programme',
+    'send.err_phone_full': 'Le téléphone n\'a pas assez d\'espace libre. Rien n\'a été envoyé à moitié ; libérez de l\'espace puis renvoyez.',
   },
   'de': {
     'nav.library': 'Mediathek',
@@ -3866,6 +3873,7 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'Folie {n}',
     'office.preview': 'In LocalRoll ansehen',
     'office.open_with': 'Mit anderem Programm öffnen',
+    'send.err_phone_full': 'Auf dem Handy ist nicht genug Platz. Nichts wurde halb gesendet; Platz schaffen und erneut senden.',
   },
   'pt': {
     'nav.library': 'Biblioteca',
@@ -4349,6 +4357,7 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'Slide {n}',
     'office.preview': 'Visualizar no LocalRoll',
     'office.open_with': 'Abrir com outro programa',
+    'send.err_phone_full': 'O telefone não tem espaço livre suficiente. Nada foi enviado pela metade; libere espaço e envie de novo.',
   },
   'ru': {
     'nav.library': 'Медиатека',
@@ -4832,6 +4841,7 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'Слайд {n}',
     'office.preview': 'Просмотр в LocalRoll',
     'office.open_with': 'Открыть другой программой',
+    'send.err_phone_full': 'На телефоне недостаточно места. Ничего не отправлено наполовину; освободите место и отправьте снова.',
   },
   'it': {
     'nav.library': 'Libreria',
@@ -5315,6 +5325,7 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'Diapositiva {n}',
     'office.preview': 'Anteprima in LocalRoll',
     'office.open_with': 'Apri con un altro programma',
+    'send.err_phone_full': 'Il telefono non ha abbastanza spazio libero. Nulla è stato inviato a metà; libera spazio e invia di nuovo.',
   },
   'ar': {
     'nav.library': 'المكتبة',
@@ -5798,6 +5809,7 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'الشريحة {n}',
     'office.preview': 'معاينة في LocalRoll',
     'office.open_with': 'فتح ببرنامج آخر',
+    'send.err_phone_full': 'لا توجد مساحة كافية في الهاتف. لم يُرسل أي شيء بشكل ناقص؛ حرّر مساحة ثم أعد الإرسال.',
   },
   'hi': {
     'nav.library': 'लाइब्रेरी',
@@ -6281,6 +6293,7 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'स्लाइड {n}',
     'office.preview': 'LocalRoll में प्रीव्यू',
     'office.open_with': 'दूसरे प्रोग्राम से खोलें',
+    'send.err_phone_full': 'फ़ोन में पर्याप्त जगह नहीं है। कुछ भी आधा नहीं भेजा गया; जगह खाली करके फिर भेजें।',
   },
   'id': {
     'nav.library': 'Pustaka',
@@ -6764,6 +6777,7 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'Slide {n}',
     'office.preview': 'Pratinjau di LocalRoll',
     'office.open_with': 'Buka dengan program lain',
+    'send.err_phone_full': 'Ponsel tidak punya cukup ruang kosong. Tidak ada yang terkirim setengah; kosongkan ruang lalu kirim lagi.',
   },
   'vi': {
     'nav.library': 'Thư viện',
@@ -7247,6 +7261,7 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'Trang chiếu {n}',
     'office.preview': 'Xem trước trong LocalRoll',
     'office.open_with': 'Mở bằng chương trình khác',
+    'send.err_phone_full': 'Điện thoại không đủ dung lượng trống. Không có tệp nào bị gửi dở; giải phóng dung lượng rồi gửi lại.',
   },
   'th': {
     'nav.library': 'คลังสื่อ',
@@ -7730,6 +7745,7 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'สไลด์ {n}',
     'office.preview': 'ดูตัวอย่างใน LocalRoll',
     'office.open_with': 'เปิดด้วยโปรแกรมอื่น',
+    'send.err_phone_full': 'โทรศัพท์มีพื้นที่ว่างไม่พอ ไม่มีไฟล์ที่ส่งไปครึ่งๆ กลางๆ ล้างพื้นที่แล้วส่งใหม่',
   },
   'tr': {
     'nav.library': 'Kitaplık',
@@ -8213,5 +8229,6 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'Slayt {n}',
     'office.preview': 'LocalRoll’da önizle',
     'office.open_with': 'Başka programla aç',
+    'send.err_phone_full': 'Telefonda yeterli boş alan yok. Hiçbir şey yarım gönderilmedi; yer açıp yeniden gönder.',
   },
 };

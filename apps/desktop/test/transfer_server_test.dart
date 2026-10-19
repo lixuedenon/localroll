@@ -62,6 +62,18 @@ void main() {
       await phone.client.ping();
     });
 
+    test('pairing over plain HTTP is refused (PIN and tap-to-pair)', () async {
+      final (s1, b1) = await pc.call('POST', LrProtocol.pathPair,
+          secure: false,
+          json: PairRequest(device: const DeviceInfo(id: 'p', name: 'P', platform: 'ios'), pin: pc.server.pin.value).toJson());
+      expect(s1, 426);
+      expect(b1['error'], 'upgrade_required');
+      final (s2, _) = await pc.call('POST', LrProtocol.pathPairRequest,
+          secure: false, json: const PairApprovalRequest(device: DeviceInfo(id: 'p', name: 'P', platform: 'ios')).toJson());
+      expect(s2, 426);
+      expect(pc.settings.trusted, isEmpty);
+    });
+
     test('a device paired over HTTPS is refused over plain HTTP', () async {
       final phone = await pc.pairPhone();
       final (status, body) =

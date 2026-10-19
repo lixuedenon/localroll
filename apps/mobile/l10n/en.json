@@ -459,5 +459,8 @@
   "office.more_rows": "Showing the first {shown} rows (of {count}).",
   "office.slide": "Slide {n}",
   "pclib.cant_play_hint": "The phone may not play this video format directly. Tap “Save to this phone” and the PC will convert it to a format the phone can play first.",
-  "incoming.unverified": "This device isn't paired with this phone, so LocalRoll can't confirm who it really is. Accept only if you know who is sending."
+  "incoming.unverified": "This device isn't paired with this phone, so LocalRoll can't confirm who it really is. Accept only if you know who is sending.",
+  "cleanup.done_trash": "Space freed. The deleted items stay in the Gallery's Trash (Recycle Bin) for 30 days.",
+  "transfer.stopped_phone_full": "Stopped: the other phone is out of space. The rest stay unsent.",
+  "err.phone_full": "The other phone doesn't have enough free space for this. Nothing was sent half-way."
 }

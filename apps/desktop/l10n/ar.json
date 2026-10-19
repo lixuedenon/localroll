@@ -479,5 +479,6 @@
   "office.more_rows": "عرض أول {shown} صفًا (من {count}).",
   "office.slide": "الشريحة {n}",
   "office.preview": "معاينة في LocalRoll",
-  "office.open_with": "فتح ببرنامج آخر"
+  "office.open_with": "فتح ببرنامج آخر",
+  "send.err_phone_full": "لا توجد مساحة كافية في الهاتف. لم يُرسل أي شيء بشكل ناقص؛ حرّر مساحة ثم أعد الإرسال."
 }

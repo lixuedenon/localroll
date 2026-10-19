@@ -10,6 +10,7 @@ import 'package:localroll_core/localroll_core.dart';
 import 'package:nsd/nsd.dart' as nsd;
 import 'package:path_provider/path_provider.dart';
 
+import 'background_transfer.dart';
 import 'media_saver.dart';
 import 'tls_identity.dart';
 
@@ -93,7 +94,9 @@ class PhoneServer extends ChangeNotifier {
     Future<Directory> Function()? tempDir,
     this.advertise = true,
     List<int>? ports,
+    Future<int> Function()? freeSpace,
   })  : saver = saver ?? MediaSaver(),
+        _freeSpace = freeSpace ?? BackgroundTransfer.freeSpace,
         _dataDir = dataDir ?? getApplicationSupportDirectory,
         _tempDir = tempDir ?? getTemporaryDirectory,
         _ports = ports ?? [LrProtocol.defaultPort, ...LrProtocol.fallbackPorts, 0];
@@ -101,6 +104,12 @@ class PhoneServer extends ChangeNotifier {
   /// Where the certificate is kept / partial downloads go (tests: a temp folder).
   final Future<Directory> Function() _dataDir;
   final Future<Directory> Function() _tempDir;
+
+  /// Free bytes on this phone (-1 = can't tell; then no check).
+  final Future<int> Function() _freeSpace;
+
+  /// Kept free beyond what arrives, for the system and other apps.
+  static const int keepFree = 300 * 1024 * 1024;
 
   /// Show up for nearby phones (mDNS); off in tests.
   final bool advertise;
@@ -319,6 +328,21 @@ class PhoneServer extends ChangeNotifier {
     final from = body.from ?? DeviceInfo(id: sender, name: '?', platform: 'unknown');
     if (from.id != sender) return _json(req.response, 400, {'error': 'bad_request'});
     final key = verified ? 'pc|$sender' : '$sender|$ip';
+    // Not enough room on this phone: say so now (before anyone is asked),
+    // not half-way through filling it up.
+    var need = 0;
+    for (final f in body.files) {
+      final part = await _part(_InSession(from, const {}), f);
+      final have = await part.exists() ? await part.length() : 0;
+      need += max(0, (f.size ?? f.sizeHint ?? 0) - have);
+    }
+    if (need > 0) {
+      final free = await _freeSpace();
+      if (free >= 0 && need > free - keepFree) {
+        DiagLog.log('receiver', '${from.name}: refused, phone full (need $need, free $free)');
+        return _json(req.response, 507, {'error': 'phone_full', 'free': max(0, free - keepFree), 'need': need});
+      }
+    }
     if (!_asking.containsKey(key) && _asking.length >= maxOpenAsks && !_mayGoAhead(key, sender, verified)) {
       return _json(req.response, 429, {'error': 'too_many_attempts'});
     }
@@ -416,6 +440,26 @@ class PhoneServer extends ChangeNotifier {
   Future<File> _part(_InSession s, FileOffer f) async =>
       File('${(await _inbox()).path}/${shortKey('${s.from.id}|${f.assetId}|${f.modifiedMs}|${f.name}')}.part');
 
+  /// One writer per half-received file (see [_chunk]).
+  final Map<String, Future<void>> _partLocks = {};
+
+  Future<T> _withPart<T>(String path, Future<T> Function() fn) async {
+    final prev = _partLocks[path];
+    final done = Completer<void>();
+    final mine = done.future;
+    _partLocks[path] = mine;
+    try {
+      if (prev != null) await prev;
+      return await fn();
+    } finally {
+      done.complete();
+      if (identical(_partLocks[path], mine)) _partLocks.remove(path);
+    }
+  }
+
+  /// One chunk, received in full first and only then appended (as on the
+  /// PC): a chunk cut off by a lost Wi‑Fi leaves nothing behind, and two
+  /// requests never write the same file at once.
   Future<void> _chunk(HttpRequest req, _InSession s, FileOffer offer) async {
     final part = await _part(s, offer);
     final current = await part.exists() ? await part.length() : 0;
@@ -432,37 +476,70 @@ class PhoneServer extends ChangeNotifier {
         ..size = total;
     }
     // Never more than the file said it is (a broken or hostile sender
-    // can't fill the phone).
+    // can't fill the phone), and never more than two chunks in one request.
     final cap = offer.size ?? (total > 0 ? total : null);
-    var received = current;
+    final room = min(cap == null ? LrProtocol.chunkSize * 2 : cap - offset, LrProtocol.chunkSize * 2);
+    final buf = BytesBuilder(copy: false);
     var over = false;
-    final sink = part.openWrite(mode: FileMode.append);
     try {
       await for (final data in req) {
-        if (over) continue;
-        if (cap != null && received + data.length > cap) {
-          final fits = cap - received;
-          if (fits > 0) sink.add(data.sublist(0, fits));
-          received += max(0, fits);
+        if (over) continue; // drain the rest
+        if (buf.length + data.length > room) {
           over = true;
           continue;
         }
-        sink.add(data);
-        received += data.length;
-        if (r != null) r.bytes = received;
+        buf.add(data);
+        if (r != null) r.bytes = offset + buf.length;
         _touch();
       }
-      await sink.flush();
-    } finally {
-      await sink.close();
+    } catch (_) {
+      // Connection lost in the middle: keep nothing of this chunk.
+      DiagLog.log('receiver', '${s.from.name}: chunk at $offset cut off (${buf.length} bytes dropped)');
+      return;
     }
-    if (over) return _json(req.response, 413, {'error': 'too_large', 'offset': received});
-    return _json(req.response, 200, {'offset': received});
+    if (over) return _json(req.response, 413, {'error': 'too_large', 'offset': current});
+    final declared = req.contentLength;
+    if (declared >= 0 && buf.length != declared) {
+      return _json(req.response, 400, {'error': 'bad_request', 'offset': current});
+    }
+    final bytes = buf.takeBytes();
+    var full = false;
+    final at = await _withPart(part.path, () async {
+      final now = await part.exists() ? await part.length() : 0;
+      if (now != offset) return now;
+      final raf = await part.open(mode: FileMode.append);
+      try {
+        await raf.writeFrom(bytes);
+        await raf.flush();
+      } on FileSystemException catch (e) {
+        final code = e.osError?.errorCode;
+        if (code != 28 && code != 112) rethrow; // ENOSPC
+        try {
+          await raf.truncate(offset);
+        } catch (_) {}
+        full = true;
+        return offset;
+      } finally {
+        await raf.close();
+      }
+      return offset + bytes.length;
+    });
+    if (full) {
+      DiagLog.log('receiver', '${s.from.name}: phone full while writing ${offer.name}');
+      return _json(req.response, 507, {'error': 'phone_full', 'offset': current});
+    }
+    if (at != offset + bytes.length) return _json(req.response, 409, {'offset': at});
+    return _json(req.response, 200, {'offset': at});
   }
 
   Future<void> _complete(HttpRequest req, _InSession s, FileOffer offer) async {
     final body = CompleteRequest.fromJson(await _readJson(req));
     final part = await _part(s, offer);
+    // Not while a chunk of the same file is being written.
+    return _withPart(part.path, () => _completeNow(req, s, offer, body, part));
+  }
+
+  Future<void> _completeNow(HttpRequest req, _InSession s, FileOffer offer, CompleteRequest body, File part) async {
     if (!await part.exists()) {
       return _json(req.response, 404, const CompleteResponse(saved: false, error: 'no_data').toJson());
     }

@@ -459,5 +459,8 @@
   "office.more_rows": "Sono mostrate le prime {shown} righe (di {count}).",
   "office.slide": "Diapositiva {n}",
   "pclib.cant_play_hint": "Il telefono potrebbe non riprodurre questo formato video. Tocca «Salva su questo telefono» e il PC lo convertirà prima in un formato riproducibile.",
-  "incoming.unverified": "Questo dispositivo non è associato a questo telefono, quindi non è possibile confermare chi sia davvero. Accetta solo se sai chi sta inviando."
+  "incoming.unverified": "Questo dispositivo non è associato a questo telefono, quindi non è possibile confermare chi sia davvero. Accetta solo se sai chi sta inviando.",
+  "cleanup.done_trash": "Spazio liberato. Gli elementi eliminati restano nel Cestino della Galleria per 30 giorni.",
+  "transfer.stopped_phone_full": "Interrotto: l'altro telefono non ha spazio. Il resto resta da inviare.",
+  "err.phone_full": "L'altro telefono non ha abbastanza spazio libero. Nulla è stato inviato a metà."
 }

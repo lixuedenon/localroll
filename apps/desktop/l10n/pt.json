@@ -479,5 +479,6 @@
   "office.more_rows": "Mostrando as primeiras {shown} linhas (de {count}).",
   "office.slide": "Slide {n}",
   "office.preview": "Visualizar no LocalRoll",
-  "office.open_with": "Abrir com outro programa"
+  "office.open_with": "Abrir com outro programa",
+  "send.err_phone_full": "O telefone não tem espaço livre suficiente. Nada foi enviado pela metade; libere espaço e envie de novo."
 }

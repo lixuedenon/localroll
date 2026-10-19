@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -209,10 +210,19 @@ class PcLibrary extends ChangeNotifier {
 
   HttpServer? _relay;
 
+  /// Other apps on this phone can reach 127.0.0.1 too: only addresses
+  /// carrying this secret (made fresh each time) are served.
+  final String _relayKey = _secret();
+
+  static String _secret() {
+    final r = Random.secure();
+    return List.generate(32, (_) => r.nextInt(16).toRadixString(16)).join();
+  }
+
   /// A plain local address the system player can open for [path].
   Future<Uri> playable(String path) async {
     final r = _relay ??= await _startRelay();
-    return Uri(scheme: 'http', host: '127.0.0.1', port: r.port, path: '/v', queryParameters: {'p': path});
+    return Uri(scheme: 'http', host: '127.0.0.1', port: r.port, path: '/v/$_relayKey', queryParameters: {'p': path});
   }
 
   Future<HttpServer> _startRelay() async {
@@ -221,7 +231,7 @@ class PcLibrary extends ChangeNotifier {
       final res = req.response;
       try {
         final path = req.uri.queryParameters['p'];
-        if (path == null || req.uri.path != '/v') {
+        if (path == null || req.uri.path != '/v/$_relayKey') {
           res.statusCode = 404;
           return await res.close();
         }

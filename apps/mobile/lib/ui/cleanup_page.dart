@@ -11,6 +11,7 @@ import '../l10n/l10n.dart';
 import '../services/desktop_client.dart';
 import '../services/discovery.dart';
 import '../services/mobile_settings.dart';
+import '../services/my_library.dart' show removeFromPhone;
 import 'theme.dart';
 import 'transfer_page.dart';
 
@@ -49,6 +50,9 @@ class _CleanupPageState extends State<CleanupPage> {
   final List<AssetEntity> _lost = [];
   final Map<String, String> _lostReason = {};
   int _freed = 0;
+
+  /// Android 11+: they went to the system's Trash (kept 30 days).
+  bool _trashed = false;
   final Map<String, Future<Uint8List?>> _thumbs = {};
 
   @override
@@ -150,7 +154,9 @@ class _CleanupPageState extends State<CleanupPage> {
       final gone = <String>{};
       for (var i = 0; i < ids.length; i += batch) {
         final part = ids.sublist(i, min(i + batch, ids.length));
-        final deleted = await PhotoManager.editor.deleteWithIds(part);
+        final r = await removeFromPhone(part);
+        final deleted = r.ids;
+        if (r.trashed) _trashed = true;
         gone.addAll(deleted);
         if (deleted.isEmpty) break;
       }
@@ -239,7 +245,8 @@ class _CleanupPageState extends State<CleanupPage> {
               const SizedBox(height: 16),
               Text(formatSize(_freed), style: Theme.of(context).textTheme.headlineMedium),
               const SizedBox(height: 8),
-              Text(tr(Platform.isIOS ? 'cleanup.done_ios' : 'cleanup.done'), textAlign: TextAlign.center),
+              Text(tr(Platform.isIOS ? 'cleanup.done_ios' : (_trashed ? 'cleanup.done_trash' : 'cleanup.done')),
+                  textAlign: TextAlign.center),
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: () => widget.onDone != null ? widget.onDone!() : Navigator.of(context).pop(),

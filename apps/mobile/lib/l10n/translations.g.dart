@@ -461,6 +461,9 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'Slide {n}',
     'pclib.cant_play_hint': 'The phone may not play this video format directly. Tap “Save to this phone” and the PC will convert it to a format the phone can play first.',
     'incoming.unverified': 'This device isn\'t paired with this phone, so LocalRoll can\'t confirm who it really is. Accept only if you know who is sending.',
+    'cleanup.done_trash': 'Space freed. The deleted items stay in the Gallery\'s Trash (Recycle Bin) for 30 days.',
+    'transfer.stopped_phone_full': 'Stopped: the other phone is out of space. The rest stay unsent.',
+    'err.phone_full': 'The other phone doesn\'t have enough free space for this. Nothing was sent half-way.',
   },
   'zh': {
     'common.cancel': '取消',
@@ -920,6 +923,9 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': '第 {n} 页',
     'pclib.cant_play_hint': '这个视频的格式手机可能不支持直接播放。点“保存到这部手机”，电脑会先转换成手机能播的格式再发过来。',
     'incoming.unverified': '这台设备没有和这部手机配对，无法确认它真的是谁。只在认识对方时接受。',
+    'cleanup.done_trash': '已腾出空间。删除的项目会在相册的「回收站」里保留 30 天。',
+    'transfer.stopped_phone_full': '已停止：对方手机空间不足。剩下的保持未发送。',
+    'err.phone_full': '对方手机剩余空间不够放这些文件。没有发出半截文件。',
   },
   'zh_Hant': {
     'common.cancel': '取消',
@@ -1379,6 +1385,9 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': '第 {n} 頁',
     'pclib.cant_play_hint': '這支手機可能不支援直接播放這個影片格式。點「儲存到這支手機」，電腦會先轉換成手機能播的格式再傳過來。',
     'incoming.unverified': '這台裝置沒有和這支手機配對，無法確認它真的是誰。只在認識對方時接受。',
+    'cleanup.done_trash': '已騰出空間。刪除的項目會在相簿的「垃圾桶」裡保留 30 天。',
+    'transfer.stopped_phone_full': '已停止：對方手機空間不足。剩下的保持未傳送。',
+    'err.phone_full': '對方手機剩餘空間不夠放這些檔案。沒有傳出半截檔案。',
   },
   'ja': {
     'common.cancel': 'キャンセル',
@@ -1838,6 +1847,9 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'スライド {n}',
     'pclib.cant_play_hint': 'この動画形式はスマホで直接再生できない可能性があります。「このスマホに保存」をタップすると、PC が再生できる形式に変換してから送ります。',
     'incoming.unverified': 'この端末はこのスマホとペアリングされていないため、本当に誰なのか確認できません。相手を知っている場合のみ受け入れてください。',
+    'cleanup.done_trash': '空き容量を確保しました。削除した項目はギャラリーのゴミ箱に 30 日間残ります。',
+    'transfer.stopped_phone_full': '停止しました：相手のスマホの空き容量が足りません。残りは未送信のままです。',
+    'err.phone_full': '相手のスマホにこのための空き容量がありません。途中まで送られたものはありません。',
   },
   'ko': {
     'common.cancel': '취소',
@@ -2297,6 +2309,9 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': '슬라이드 {n}',
     'pclib.cant_play_hint': '이 동영상 형식은 휴대폰에서 바로 재생되지 않을 수 있습니다. "이 휴대폰에 저장"을 누르면 PC가 재생 가능한 형식으로 변환해서 보냅니다.',
     'incoming.unverified': '이 기기는 이 휴대폰과 페어링되지 않아 실제로 누구인지 확인할 수 없습니다. 보내는 사람을 아는 경우에만 수락하세요.',
+    'cleanup.done_trash': '공간을 확보했습니다. 삭제한 항목은 갤러리 휴지통에 30일 동안 보관됩니다.',
+    'transfer.stopped_phone_full': '중지됨: 상대 휴대폰의 공간이 부족합니다. 나머지는 보내지 않은 상태로 남습니다.',
+    'err.phone_full': '상대 휴대폰에 여유 공간이 부족합니다. 중간까지 보낸 파일은 없습니다.',
   },
   'es': {
     'common.cancel': 'Cancelar',
@@ -2756,6 +2771,9 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'Diapositiva {n}',
     'pclib.cant_play_hint': 'Puede que el móvil no reproduzca este formato. Pulsa «Guardar en este móvil» y el PC lo convertirá antes a un formato que el móvil pueda reproducir.',
     'incoming.unverified': 'Este dispositivo no está emparejado con este teléfono, así que no se puede confirmar quién es realmente. Acepta solo si sabes quién lo envía.',
+    'cleanup.done_trash': 'Espacio liberado. Lo eliminado queda en la Papelera de la Galería durante 30 días.',
+    'transfer.stopped_phone_full': 'Detenido: el otro teléfono no tiene espacio. El resto queda sin enviar.',
+    'err.phone_full': 'El otro teléfono no tiene espacio libre suficiente. No se envió nada a medias.',
   },
   'fr': {
     'common.cancel': 'Annuler',
@@ -3215,6 +3233,9 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'Diapositive {n}',
     'pclib.cant_play_hint': 'Le téléphone ne lit peut-être pas ce format vidéo. Touchez « Enregistrer sur ce téléphone » et le PC le convertira d’abord dans un format lisible.',
     'incoming.unverified': 'Cet appareil n\'est pas associé à ce téléphone : impossible de confirmer qui il est vraiment. N\'acceptez que si vous savez qui envoie.',
+    'cleanup.done_trash': 'Espace libéré. Les éléments supprimés restent 30 jours dans la corbeille de la Galerie.',
+    'transfer.stopped_phone_full': 'Arrêté : l\'autre téléphone manque d\'espace. Le reste n\'est pas envoyé.',
+    'err.phone_full': 'L\'autre téléphone n\'a pas assez d\'espace libre. Rien n\'a été envoyé à moitié.',
   },
   'de': {
     'common.cancel': 'Abbrechen',
@@ -3674,6 +3695,9 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'Folie {n}',
     'pclib.cant_play_hint': 'Das Handy spielt dieses Videoformat eventuell nicht direkt ab. Tippe auf „Auf diesem Handy speichern“, dann wandelt der PC es vorher in ein abspielbares Format um.',
     'incoming.unverified': 'Dieses Gerät ist nicht mit diesem Handy gekoppelt, daher lässt sich nicht bestätigen, wer es wirklich ist. Nur annehmen, wenn du den Absender kennst.',
+    'cleanup.done_trash': 'Speicher freigegeben. Gelöschtes bleibt 30 Tage im Papierkorb der Galerie.',
+    'transfer.stopped_phone_full': 'Angehalten: Auf dem anderen Handy ist kein Platz. Der Rest bleibt ungesendet.',
+    'err.phone_full': 'Auf dem anderen Handy ist nicht genug Platz. Nichts wurde halb gesendet.',
   },
   'pt': {
     'common.cancel': 'Cancelar',
@@ -4133,6 +4157,9 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'Slide {n}',
     'pclib.cant_play_hint': 'O celular pode não reproduzir este formato de vídeo. Toque em “Salvar neste celular” e o PC vai convertê-lo antes para um formato que o celular reproduz.',
     'incoming.unverified': 'Este dispositivo não está pareado com este telefone, então não é possível confirmar quem ele realmente é. Aceite só se souber quem está enviando.',
+    'cleanup.done_trash': 'Espaço liberado. Os itens excluídos ficam na Lixeira da Galeria por 30 dias.',
+    'transfer.stopped_phone_full': 'Parado: o outro telefone está sem espaço. O resto fica sem enviar.',
+    'err.phone_full': 'O outro telefone não tem espaço livre suficiente. Nada foi enviado pela metade.',
   },
   'ru': {
     'common.cancel': 'Отмена',
@@ -4592,6 +4619,9 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'Слайд {n}',
     'pclib.cant_play_hint': 'Телефон может не воспроизводить этот формат видео. Нажмите «Сохранить на этот телефон», и ПК сначала преобразует его в подходящий формат.',
     'incoming.unverified': 'Это устройство не сопряжено с этим телефоном, поэтому нельзя подтвердить, кто это на самом деле. Принимайте, только если знаете отправителя.',
+    'cleanup.done_trash': 'Место освобождено. Удалённое хранится в корзине галереи 30 дней.',
+    'transfer.stopped_phone_full': 'Остановлено: на другом телефоне нет места. Остальное не отправлено.',
+    'err.phone_full': 'На другом телефоне недостаточно места. Ничего не отправлено наполовину.',
   },
   'it': {
     'common.cancel': 'Annulla',
@@ -5051,6 +5081,9 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'Diapositiva {n}',
     'pclib.cant_play_hint': 'Il telefono potrebbe non riprodurre questo formato video. Tocca «Salva su questo telefono» e il PC lo convertirà prima in un formato riproducibile.',
     'incoming.unverified': 'Questo dispositivo non è associato a questo telefono, quindi non è possibile confermare chi sia davvero. Accetta solo se sai chi sta inviando.',
+    'cleanup.done_trash': 'Spazio liberato. Gli elementi eliminati restano nel Cestino della Galleria per 30 giorni.',
+    'transfer.stopped_phone_full': 'Interrotto: l\'altro telefono non ha spazio. Il resto resta da inviare.',
+    'err.phone_full': 'L\'altro telefono non ha abbastanza spazio libero. Nulla è stato inviato a metà.',
   },
   'ar': {
     'common.cancel': 'إلغاء',
@@ -5510,6 +5543,9 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'الشريحة {n}',
     'pclib.cant_play_hint': 'قد لا يشغّل الهاتف صيغة هذا الفيديو مباشرة. انقر «حفظ على هذا الهاتف» وسيحوّله الكمبيوتر أولًا إلى صيغة يمكن تشغيلها.',
     'incoming.unverified': 'هذا الجهاز غير مقترن بهذا الهاتف، لذا لا يمكن التأكد من هويته الحقيقية. اقبل فقط إذا كنت تعرف المرسل.',
+    'cleanup.done_trash': 'تم تحرير المساحة. تبقى العناصر المحذوفة في سلة مهملات المعرض لمدة 30 يومًا.',
+    'transfer.stopped_phone_full': 'توقف: لا توجد مساحة كافية في الهاتف الآخر. الباقي لم يُرسل.',
+    'err.phone_full': 'لا توجد مساحة كافية في الهاتف الآخر. لم يُرسل أي شيء بشكل ناقص.',
   },
   'hi': {
     'common.cancel': 'रद्द करें',
@@ -5969,6 +6005,9 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'स्लाइड {n}',
     'pclib.cant_play_hint': 'हो सकता है फ़ोन यह वीडियो फ़ॉर्मेट सीधे न चला पाए। “इस फ़ोन में सहेजें” दबाएँ, PC पहले इसे चलने लायक फ़ॉर्मेट में बदल देगा।',
     'incoming.unverified': 'यह डिवाइस इस फ़ोन से पेयर नहीं है, इसलिए पुष्टि नहीं हो सकती कि यह असल में कौन है। तभी स्वीकार करें जब आप भेजने वाले को जानते हों।',
+    'cleanup.done_trash': 'जगह खाली हो गई। हटाई गई चीज़ें गैलरी के ट्रैश में 30 दिन तक रहती हैं।',
+    'transfer.stopped_phone_full': 'रुक गया: दूसरे फ़ोन में जगह नहीं है। बाकी नहीं भेजा गया।',
+    'err.phone_full': 'दूसरे फ़ोन में इसके लिए पर्याप्त जगह नहीं है। कुछ भी आधा नहीं भेजा गया।',
   },
   'id': {
     'common.cancel': 'Batal',
@@ -6428,6 +6467,9 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'Slide {n}',
     'pclib.cant_play_hint': 'Ponsel mungkin tidak bisa langsung memutar format video ini. Ketuk “Simpan ke ponsel ini” dan PC akan mengubahnya dulu ke format yang bisa diputar.',
     'incoming.unverified': 'Perangkat ini tidak dipasangkan dengan ponsel ini, jadi tidak bisa dipastikan siapa sebenarnya. Terima hanya jika Anda tahu siapa pengirimnya.',
+    'cleanup.done_trash': 'Ruang dikosongkan. Item yang dihapus tetap di Sampah Galeri selama 30 hari.',
+    'transfer.stopped_phone_full': 'Dihentikan: ponsel lain kehabisan ruang. Sisanya belum terkirim.',
+    'err.phone_full': 'Ponsel lain tidak punya cukup ruang kosong. Tidak ada yang terkirim setengah.',
   },
   'vi': {
     'common.cancel': 'Hủy',
@@ -6887,6 +6929,9 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'Trang chiếu {n}',
     'pclib.cant_play_hint': 'Điện thoại có thể không phát trực tiếp được định dạng video này. Chạm “Lưu vào điện thoại này”, máy tính sẽ chuyển sang định dạng phát được rồi mới gửi.',
     'incoming.unverified': 'Thiết bị này chưa ghép đôi với điện thoại này nên không thể xác nhận thực sự là ai. Chỉ chấp nhận nếu bạn biết người gửi.',
+    'cleanup.done_trash': 'Đã giải phóng dung lượng. Mục đã xoá được giữ trong Thùng rác của Thư viện 30 ngày.',
+    'transfer.stopped_phone_full': 'Đã dừng: điện thoại kia hết dung lượng. Phần còn lại chưa gửi.',
+    'err.phone_full': 'Điện thoại kia không đủ dung lượng trống. Không có tệp nào bị gửi dở.',
   },
   'th': {
     'common.cancel': 'ยกเลิก',
@@ -7346,6 +7391,9 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'สไลด์ {n}',
     'pclib.cant_play_hint': 'โทรศัพท์อาจเล่นวิดีโอรูปแบบนี้โดยตรงไม่ได้ แตะ “บันทึกลงโทรศัพท์นี้” แล้วพีซีจะแปลงเป็นรูปแบบที่เล่นได้ก่อนส่งมา',
     'incoming.unverified': 'อุปกรณ์นี้ไม่ได้จับคู่กับโทรศัพท์เครื่องนี้ จึงยืนยันไม่ได้ว่าเป็นใครจริงๆ รับเฉพาะเมื่อคุณรู้จักผู้ส่ง',
+    'cleanup.done_trash': 'ได้พื้นที่คืนแล้ว รายการที่ลบจะอยู่ในถังขยะของแกลเลอรี 30 วัน',
+    'transfer.stopped_phone_full': 'หยุดแล้ว: โทรศัพท์อีกเครื่องพื้นที่ไม่พอ ที่เหลือยังไม่ได้ส่ง',
+    'err.phone_full': 'โทรศัพท์อีกเครื่องมีพื้นที่ว่างไม่พอ ไม่มีไฟล์ที่ส่งไปครึ่งๆ กลางๆ',
   },
   'tr': {
     'common.cancel': 'İptal',
@@ -7805,5 +7853,8 @@ const Map<String, Map<String, String>> translations = {
     'office.slide': 'Slayt {n}',
     'pclib.cant_play_hint': 'Telefon bu video biçimini doğrudan oynatamayabilir. “Bu telefona kaydet”e dokunun, bilgisayar önce oynatılabilir bir biçime dönüştürsün.',
     'incoming.unverified': 'Bu cihaz bu telefonla eşleştirilmemiş, bu yüzden gerçekte kim olduğu doğrulanamıyor. Yalnızca göndereni tanıyorsan kabul et.',
+    'cleanup.done_trash': 'Yer açıldı. Silinenler Galeri\'nin Çöp Kutusu\'nda 30 gün kalır.',
+    'transfer.stopped_phone_full': 'Durduruldu: diğer telefonda yer yok. Kalanlar gönderilmedi.',
+    'err.phone_full': 'Diğer telefonda yeterli boş alan yok. Hiçbir şey yarım gönderilmedi.',
   },
 };

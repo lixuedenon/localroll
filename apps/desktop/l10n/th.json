@@ -479,5 +479,6 @@
   "office.more_rows": "แสดง {shown} แถวแรก (จาก {count})",
   "office.slide": "สไลด์ {n}",
   "office.preview": "ดูตัวอย่างใน LocalRoll",
-  "office.open_with": "เปิดด้วยโปรแกรมอื่น"
+  "office.open_with": "เปิดด้วยโปรแกรมอื่น",
+  "send.err_phone_full": "โทรศัพท์มีพื้นที่ว่างไม่พอ ไม่มีไฟล์ที่ส่งไปครึ่งๆ กลางๆ ล้างพื้นที่แล้วส่งใหม่"
 }

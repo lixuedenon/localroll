@@ -479,5 +479,6 @@
   "office.more_rows": "只显示前 {shown} 行（共 {count} 行）。",
   "office.slide": "第 {n} 页",
   "office.preview": "在 LocalRoll 中预览",
-  "office.open_with": "用其他程序打开"
+  "office.open_with": "用其他程序打开",
+  "send.err_phone_full": "对方手机空间不够。没有发出半截文件；对方腾出空间后再发送。"
 }

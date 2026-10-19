@@ -459,5 +459,8 @@
   "office.more_rows": "Die ersten {shown} Zeilen werden angezeigt (von {count}).",
   "office.slide": "Folie {n}",
   "pclib.cant_play_hint": "Das Handy spielt dieses Videoformat eventuell nicht direkt ab. Tippe auf „Auf diesem Handy speichern“, dann wandelt der PC es vorher in ein abspielbares Format um.",
-  "incoming.unverified": "Dieses Gerät ist nicht mit diesem Handy gekoppelt, daher lässt sich nicht bestätigen, wer es wirklich ist. Nur annehmen, wenn du den Absender kennst."
+  "incoming.unverified": "Dieses Gerät ist nicht mit diesem Handy gekoppelt, daher lässt sich nicht bestätigen, wer es wirklich ist. Nur annehmen, wenn du den Absender kennst.",
+  "cleanup.done_trash": "Speicher freigegeben. Gelöschtes bleibt 30 Tage im Papierkorb der Galerie.",
+  "transfer.stopped_phone_full": "Angehalten: Auf dem anderen Handy ist kein Platz. Der Rest bleibt ungesendet.",
+  "err.phone_full": "Auf dem anderen Handy ist nicht genug Platz. Nichts wurde halb gesendet."
 }

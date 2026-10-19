@@ -342,6 +342,15 @@ class DesktopDiscovery extends ChangeNotifier {
   }
 }
 
+/// The PC answered but has no HTTPS (an old LocalRoll): pairing would send
+/// the PIN and the token readable, so it is not done.
+class _NeedsUpdate implements Exception {
+  const _NeedsUpdate();
+
+  @override
+  String toString() => tr('err.upgrade_required');
+}
+
 /// Pairs with a PC: tries each address until one answers, then sends the PIN.
 /// [fingerprint] comes from the QR code: then only that certificate is
 /// accepted. Typed PIN / address: the certificate seen first is kept.
@@ -365,9 +374,10 @@ Future<PairedDesktop> pairWithDesktop({
         probe.close();
       }
       final fp = fingerprint ?? info.fingerprint;
-      final c = fp != null
-          ? DesktopClient(host: host, port: tlsPort ?? info.tlsPort ?? port, secure: true, pin: fingerprint)
-          : DesktopClient(host: host, port: port);
+      // Pairing only over HTTPS: the PIN and the token never cross the
+      // Wi‑Fi readable. An older PC must be updated first.
+      if (fp == null) throw const _NeedsUpdate();
+      final c = DesktopClient(host: host, port: tlsPort ?? info.tlsPort ?? port, secure: true, pin: fingerprint);
       client = c;
       final res = await c.pair(settings.deviceInfo, pin);
       final d = PairedDesktop(
@@ -384,6 +394,8 @@ Future<PairedDesktop> pairWithDesktop({
     } on LrHttpException catch (e) {
       // Reached the PC but it rejected us (wrong PIN…): no point trying other IPs.
       throw Exception(e.message);
+    } on _NeedsUpdate {
+      rethrow;
     } catch (e) {
       lastError = e;
     } finally {
@@ -553,12 +565,12 @@ Future<PairedDesktop?> pairByApproval({
     var client = DesktopClient(host: host, port: port);
     try {
       final info = await client.info();
-      // Newer PC: ask over HTTPS and bind the symbols to the certificate we
-      // actually see — a device in between would make them differ.
-      if (info.fingerprint != null) {
-        client.close();
-        client = DesktopClient(host: host, port: info.tlsPort ?? port, secure: true);
-      }
+      // Ask over HTTPS and bind the symbols to the certificate we actually
+      // see — a device in between would make them differ. Older PCs
+      // without HTTPS must be updated first.
+      if (info.fingerprint == null) throw Exception(tr('err.upgrade_required'));
+      client.close();
+      client = DesktopClient(host: host, port: info.tlsPort ?? port, secure: true);
       final start = await client.requestApproval(settings.deviceInfo);
       final seen = client.secure ? client.seenFingerprint : null;
       if (client.secure && seen == null) throw const SocketException('no certificate');

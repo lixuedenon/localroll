@@ -51,8 +51,10 @@ void main() {
   late Directory tmp;
   late _FakeSaver saver;
   late PhoneServer server;
+  var phoneFree = 50 * 1024 * 1024 * 1024;
 
   setUp(() async {
+    phoneFree = 50 * 1024 * 1024 * 1024;
     tmp = await Directory.systemTemp.createTemp('lr_phone_test');
     saver = _FakeSaver();
     server = PhoneServer(
@@ -62,6 +64,7 @@ void main() {
       tempDir: () async => Directory('${tmp.path}/tmp')..createSync(recursive: true),
       advertise: false,
       ports: const [0],
+      freeSpace: () async => phoneFree,
     );
     await server.start();
     expect(server.running, isTrue);
@@ -270,6 +273,41 @@ void main() {
       throwsA(isA<LrHttpError>().having((e) => e.status, 'status', 422)),
     );
     expect(saver.saved, isEmpty);
+  });
+
+  test('not enough room on this phone: refused before anyone is asked', () async {
+    phoneFree = 400 * 1024 * 1024; // keepFree is 300 MB
+    var asked = false;
+    void listen() => asked = asked || server.asks.value.isNotEmpty;
+    server.asks.addListener(listen);
+    await expectLater(
+      sender('pc1').createSession(SessionRequest(files: [
+        const FileOffer(id: 'f1', assetId: 'BIG', name: 'big.mp4', kind: MediaKind.video, createdMs: 1, modifiedMs: 1, size: 200 * 1024 * 1024),
+      ], from: who('pc1'))),
+      throwsA(isA<LrHttpError>().having((e) => e.status, 'status', 507).having((e) => e.code, 'code', 'phone_full')),
+    );
+    server.asks.removeListener(listen);
+    expect(asked, isFalse);
+  });
+
+  test('the same chunk sent twice at once: written once, the file arrives intact', () async {
+    final stop = answering(const IncomingReply(accept: true));
+    final c = sender('pc1');
+    final data = bytesOf(60000, 9);
+    final offer =
+        FileOffer(id: 'f1', assetId: 'D', name: 'd.jpg', kind: MediaKind.image, createdMs: 1, modifiedMs: 1, size: data.length);
+    final s = await c.createSession(SessionRequest(files: [offer], from: who('pc1')));
+    stop();
+    final c2 = sender('pc1');
+    final results = await Future.wait([
+      c.putChunk(s.sessionId, 'f1', 0, data.length, data).then((o) => o, onError: (_) => -1),
+      c2.putChunk(s.sessionId, 'f1', 0, data.length, data).then((o) => o, onError: (_) => -1),
+    ]);
+    expect(results, contains(data.length));
+    expect(await c.status(s.sessionId, 'f1'), data.length);
+    final r = await c.complete(s.sessionId, 'f1', CompleteRequest(size: data.length, sha256: await sha(data)));
+    expect(r.saved, isTrue);
+    expect(saver.saved.single.$2, data);
   });
 
   test('more bytes than the file said: refused', () async {

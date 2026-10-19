@@ -352,9 +352,10 @@ class PeerDirectory extends ChangeNotifier {
         } finally {
           probe.close();
         }
-        final first = info.fingerprint != null
-            ? LrClient(host: host, port: info.tlsPort ?? pc.port, secure: true)
-            : LrClient(host: host, port: pc.port);
+        // Pairing only over HTTPS: an older PC without it must be updated
+        // (our token would otherwise cross the Wi‑Fi readable).
+        if (info.fingerprint == null || settings.tlsFingerprint == null) throw const PeerError('upgrade_required');
+        final first = LrClient(host: host, port: info.tlsPort ?? pc.port, secure: true);
         c = first;
         var st = await first.requestApproval(settings.deviceInfo, peer: grant);
         final seen = first.secure ? first.seenFingerprint : null;

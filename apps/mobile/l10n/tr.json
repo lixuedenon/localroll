@@ -459,5 +459,8 @@
   "office.more_rows": "İlk {shown} satır gösteriliyor ({count} satırdan).",
   "office.slide": "Slayt {n}",
   "pclib.cant_play_hint": "Telefon bu video biçimini doğrudan oynatamayabilir. “Bu telefona kaydet”e dokunun, bilgisayar önce oynatılabilir bir biçime dönüştürsün.",
-  "incoming.unverified": "Bu cihaz bu telefonla eşleştirilmemiş, bu yüzden gerçekte kim olduğu doğrulanamıyor. Yalnızca göndereni tanıyorsan kabul et."
+  "incoming.unverified": "Bu cihaz bu telefonla eşleştirilmemiş, bu yüzden gerçekte kim olduğu doğrulanamıyor. Yalnızca göndereni tanıyorsan kabul et.",
+  "cleanup.done_trash": "Yer açıldı. Silinenler Galeri'nin Çöp Kutusu'nda 30 gün kalır.",
+  "transfer.stopped_phone_full": "Durduruldu: diğer telefonda yer yok. Kalanlar gönderilmedi.",
+  "err.phone_full": "Diğer telefonda yeterli boş alan yok. Hiçbir şey yarım gönderilmedi."
 }

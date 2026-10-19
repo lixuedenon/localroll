@@ -459,5 +459,8 @@
   "office.more_rows": "Mostrando as primeiras {shown} linhas (de {count}).",
   "office.slide": "Slide {n}",
   "pclib.cant_play_hint": "O celular pode não reproduzir este formato de vídeo. Toque em “Salvar neste celular” e o PC vai convertê-lo antes para um formato que o celular reproduz.",
-  "incoming.unverified": "Este dispositivo não está pareado com este telefone, então não é possível confirmar quem ele realmente é. Aceite só se souber quem está enviando."
+  "incoming.unverified": "Este dispositivo não está pareado com este telefone, então não é possível confirmar quem ele realmente é. Aceite só se souber quem está enviando.",
+  "cleanup.done_trash": "Espaço liberado. Os itens excluídos ficam na Lixeira da Galeria por 30 dias.",
+  "transfer.stopped_phone_full": "Parado: o outro telefone está sem espaço. O resto fica sem enviar.",
+  "err.phone_full": "O outro telefone não tem espaço livre suficiente. Nada foi enviado pela metade."
 }

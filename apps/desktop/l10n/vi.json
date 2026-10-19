@@ -479,5 +479,6 @@
   "office.more_rows": "Đang hiển thị {shown} hàng đầu (trên {count}).",
   "office.slide": "Trang chiếu {n}",
   "office.preview": "Xem trước trong LocalRoll",
-  "office.open_with": "Mở bằng chương trình khác"
+  "office.open_with": "Mở bằng chương trình khác",
+  "send.err_phone_full": "Điện thoại không đủ dung lượng trống. Không có tệp nào bị gửi dở; giải phóng dung lượng rồi gửi lại."
 }

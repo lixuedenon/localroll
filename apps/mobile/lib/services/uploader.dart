@@ -16,7 +16,7 @@ import '../ui/cleanup_page.dart' show formatSize;
 enum UploadState { waiting, preparing, uploading, verifying, done, skipped, failed }
 
 /// Why a run ended before everything was sent.
-enum StopReason { none, user, size, time, battery, pcUnavailable, pcFull, declined, noAnswer }
+enum StopReason { none, user, size, time, battery, pcUnavailable, pcFull, phoneFull, declined, noAnswer }
 
 /// "Stop after X MB / Y minutes", "pause on low battery".
 class UploadLimits {
@@ -270,6 +270,11 @@ class Uploader extends ChangeNotifier {
       // Not enough space on the PC: stop before anything is half-sent.
       if (e is LrHttpException && e.body['error'] == 'disk_full') {
         stopReason = StopReason.pcFull;
+        _cancelled = true;
+      }
+      // The other phone has no room: stop there too.
+      if (e is LrHttpException && e.body['error'] == 'phone_full') {
+        stopReason = StopReason.phoneFull;
         _cancelled = true;
       }
       // Someone on the PC clicked "Decline": stop, the rest stay unsent.

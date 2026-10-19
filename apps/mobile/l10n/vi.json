@@ -459,5 +459,8 @@
   "office.more_rows": "Đang hiển thị {shown} hàng đầu (trên {count}).",
   "office.slide": "Trang chiếu {n}",
   "pclib.cant_play_hint": "Điện thoại có thể không phát trực tiếp được định dạng video này. Chạm “Lưu vào điện thoại này”, máy tính sẽ chuyển sang định dạng phát được rồi mới gửi.",
-  "incoming.unverified": "Thiết bị này chưa ghép đôi với điện thoại này nên không thể xác nhận thực sự là ai. Chỉ chấp nhận nếu bạn biết người gửi."
+  "incoming.unverified": "Thiết bị này chưa ghép đôi với điện thoại này nên không thể xác nhận thực sự là ai. Chỉ chấp nhận nếu bạn biết người gửi.",
+  "cleanup.done_trash": "Đã giải phóng dung lượng. Mục đã xoá được giữ trong Thùng rác của Thư viện 30 ngày.",
+  "transfer.stopped_phone_full": "Đã dừng: điện thoại kia hết dung lượng. Phần còn lại chưa gửi.",
+  "err.phone_full": "Điện thoại kia không đủ dung lượng trống. Không có tệp nào bị gửi dở."
 }

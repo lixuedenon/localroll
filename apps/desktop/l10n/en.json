@@ -479,5 +479,6 @@
   "office.more_rows": "Showing the first {shown} rows (of {count}).",
   "office.slide": "Slide {n}",
   "office.preview": "Preview in LocalRoll",
-  "office.open_with": "Open with another program"
+  "office.open_with": "Open with another program",
+  "send.err_phone_full": "The phone doesn't have enough free space. Nothing was sent half-way; free up space on it and send again."
 }

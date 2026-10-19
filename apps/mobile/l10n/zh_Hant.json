@@ -459,5 +459,8 @@
   "office.more_rows": "只顯示前 {shown} 列（共 {count} 列）。",
   "office.slide": "第 {n} 頁",
   "pclib.cant_play_hint": "這支手機可能不支援直接播放這個影片格式。點「儲存到這支手機」，電腦會先轉換成手機能播的格式再傳過來。",
-  "incoming.unverified": "這台裝置沒有和這支手機配對，無法確認它真的是誰。只在認識對方時接受。"
+  "incoming.unverified": "這台裝置沒有和這支手機配對，無法確認它真的是誰。只在認識對方時接受。",
+  "cleanup.done_trash": "已騰出空間。刪除的項目會在相簿的「垃圾桶」裡保留 30 天。",
+  "transfer.stopped_phone_full": "已停止：對方手機空間不足。剩下的保持未傳送。",
+  "err.phone_full": "對方手機剩餘空間不夠放這些檔案。沒有傳出半截檔案。"
 }

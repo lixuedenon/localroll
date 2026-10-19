@@ -229,6 +229,7 @@ class _TransferPageState extends State<TransferPage> {
                       StopReason.battery => 'transfer.stopped_battery',
                       StopReason.pcUnavailable => 'transfer.stopped_pc',
                       StopReason.pcFull => 'transfer.stopped_pc_full',
+                      StopReason.phoneFull => 'transfer.stopped_phone_full',
                       StopReason.declined => 'transfer.stopped_declined',
                       StopReason.noAnswer => 'transfer.stopped_no_answer',
                       _ => 'transfer.stopped_user',
