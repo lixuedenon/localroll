@@ -113,6 +113,12 @@ jobs:
         if: failure()
         working-directory: apps
         run: |
+          # A failing test's own lines (its name and the first lines of what
+          # it printed), whatever the error looks like.
+          for f in test-*.log; do
+            [ -f "$f" ] || continue
+            grep -n -A14 "\[E\]$" "$f" | grep -v "package:\(test_api\|stack_trace\|matcher\|flutter_test\)" | head -45 | tr '\n' '\r' | sed 's/\r/ ⏎ /g' | fold -w 900 | head -8 | while IFS= read -r l; do echo "::error::$f context: $l"; done
+          done
           for f in analyze-*.log test-*.log; do
             [ -f "$f" ] || continue
             grep -E "error •|warning •|Error:|FAILED|Expected:|Actual:|Which:|\[E\]|Exception|Bad state|test/.*_test\.dart [0-9]+:[0-9]+" "$f" | grep -v "^\s*package:" | head -40 | while IFS= read -r l; do echo "::error::$f ${l:0:800}"; done
