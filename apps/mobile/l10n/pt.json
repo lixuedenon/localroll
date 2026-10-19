@@ -458,5 +458,6 @@
   "office.empty": "Não há nada para mostrar neste arquivo.",
   "office.more_rows": "Mostrando as primeiras {shown} linhas (de {count}).",
   "office.slide": "Slide {n}",
-  "pclib.cant_play_hint": "O celular pode não reproduzir este formato de vídeo. Toque em “Salvar neste celular” e o PC vai convertê-lo antes para um formato que o celular reproduz."
+  "pclib.cant_play_hint": "O celular pode não reproduzir este formato de vídeo. Toque em “Salvar neste celular” e o PC vai convertê-lo antes para um formato que o celular reproduz.",
+  "incoming.unverified": "Este dispositivo não está pareado com este telefone, então não é possível confirmar quem ele realmente é. Aceite só se souber quem está enviando."
 }

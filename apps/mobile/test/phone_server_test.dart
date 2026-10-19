@@ -192,6 +192,63 @@ void main() {
     );
   });
 
+  test('a paired PC proves itself with the secret it was given; a look-alike can\'t', () async {
+    final secret = server.receiveTokenFor('pc1');
+    final seen = <IncomingAsk>[];
+    void listen() {
+      for (final a in server.asks.value) {
+        if (!seen.contains(a)) seen.add(a);
+        server.answer(a, const IncomingReply(accept: true));
+      }
+    }
+
+    server.asks.addListener(listen);
+    final real = LrClient(host: '127.0.0.1', port: server.port, deviceId: 'pc1', token: secret, secure: true, pin: server.fingerprint);
+    await send(real, 'pc1', 'A', bytesOf(100));
+    final fake = LrClient(host: '127.0.0.1', port: server.port, deviceId: 'pc2', token: secret, secure: true, pin: server.fingerprint);
+    await send(fake, 'pc2', 'B', bytesOf(100, 2)); // someone else's secret
+    server.asks.removeListener(listen);
+    expect(seen.map((a) => a.verified), [true, false]);
+  });
+
+  test('"save to my phone": only the real PC goes straight in; a look-alike is asked', () async {
+    final secret = server.receiveTokenFor('pc1');
+    server.expectFrom('pc1');
+    var asked = 0;
+    void listen() {
+      for (final a in server.asks.value) {
+        asked++;
+        expect(a.verified, isFalse);
+        server.answer(a, const IncomingReply(accept: false));
+      }
+    }
+
+    server.asks.addListener(listen);
+    final real = LrClient(host: '127.0.0.1', port: server.port, deviceId: 'pc1', token: secret, secure: true, pin: server.fingerprint);
+    expect((await send(real, 'pc1', 'A', bytesOf(100))).saved, isTrue);
+    // Same id, no secret (copied from the Wi‑Fi): asked, and declined here.
+    await expectLater(send(sender('pc1'), 'pc1', 'B', bytesOf(100, 2)), throwsA(isA<LrHttpError>()));
+    server.asks.removeListener(listen);
+    expect(asked, 1);
+    expect(saver.saved, hasLength(1));
+  });
+
+  test('at most $maxOpenAsks questions at once', () async {
+    final pending = <Future<void>>[];
+    for (var i = 0; i < maxOpenAsks; i++) {
+      pending.add(send(sender('x$i'), 'x$i', 'A', bytesOf(10)).then((_) {}, onError: (_) {}));
+    }
+    await eventuallyAsks(server, maxOpenAsks);
+    await expectLater(
+      send(sender('x9'), 'x9', 'A', bytesOf(10)),
+      throwsA(isA<LrHttpError>().having((e) => e.status, 'status', 429)),
+    );
+    for (final a in server.asks.value) {
+      server.answer(a, const IncomingReply(accept: false));
+    }
+    await Future.wait(pending);
+  });
+
   test('interrupted: resumes; wrong place refused; damaged data refused', () async {
     final stop = answering(const IncomingReply(accept: true));
     final c = sender('pc1');
@@ -251,4 +308,13 @@ void main() {
     expect((await send(sender('pc1'), 'pc1', 'OK', bytesOf(10))).saved, isTrue);
     stop();
   });
+}
+
+/// Waits until [n] questions are open.
+Future<void> eventuallyAsks(PhoneServer server, int n) async {
+  final end = DateTime.now().add(const Duration(seconds: 5));
+  while (server.asks.value.length < n) {
+    if (DateTime.now().isAfter(end)) throw StateError('only ${server.asks.value.length} questions open');
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+  }
 }

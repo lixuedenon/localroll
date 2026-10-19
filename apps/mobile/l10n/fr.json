@@ -458,5 +458,6 @@
   "office.empty": "Rien à afficher dans ce fichier.",
   "office.more_rows": "Affichage des {shown} premières lignes (sur {count}).",
   "office.slide": "Diapositive {n}",
-  "pclib.cant_play_hint": "Le téléphone ne lit peut-être pas ce format vidéo. Touchez « Enregistrer sur ce téléphone » et le PC le convertira d’abord dans un format lisible."
+  "pclib.cant_play_hint": "Le téléphone ne lit peut-être pas ce format vidéo. Touchez « Enregistrer sur ce téléphone » et le PC le convertira d’abord dans un format lisible.",
+  "incoming.unverified": "Cet appareil n'est pas associé à ce téléphone : impossible de confirmer qui il est vraiment. N'acceptez que si vous savez qui envoie."
 }

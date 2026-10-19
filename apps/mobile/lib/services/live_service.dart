@@ -44,7 +44,7 @@ class LiveService extends ChangeNotifier {
 
   /// Where this phone receives (port and certificate), told to each PC so
   /// it can send here.
-  Map<String, String> Function()? receiveInfo;
+  Map<String, String> Function(String pcId)? receiveInfo;
 
   /// Others online as last reported (to tell what changed).
   Map<String, OnlineDevice> _others = {};
@@ -115,7 +115,7 @@ class LiveService extends ChangeNotifier {
         onConnected: (up) => _onConnected(id, up),
       )
         ..session = _session
-        ..extraQuery = receiveInfo
+        ..extraQuery = (() => receiveInfo?.call(id) ?? const <String, String>{})
         ..target = () async {
           final pc = settings.byId(id);
           if (pc == null || pc.token.isEmpty) return null;

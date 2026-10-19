@@ -458,5 +458,6 @@
   "office.empty": "Bu dosyada gösterilecek bir şey yok.",
   "office.more_rows": "İlk {shown} satır gösteriliyor ({count} satırdan).",
   "office.slide": "Slayt {n}",
-  "pclib.cant_play_hint": "Telefon bu video biçimini doğrudan oynatamayabilir. “Bu telefona kaydet”e dokunun, bilgisayar önce oynatılabilir bir biçime dönüştürsün."
+  "pclib.cant_play_hint": "Telefon bu video biçimini doğrudan oynatamayabilir. “Bu telefona kaydet”e dokunun, bilgisayar önce oynatılabilir bir biçime dönüştürsün.",
+  "incoming.unverified": "Bu cihaz bu telefonla eşleştirilmemiş, bu yüzden gerçekte kim olduğu doğrulanamıyor. Yalnızca göndereni tanıyorsan kabul et."
 }

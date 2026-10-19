@@ -112,6 +112,7 @@ class FileOffer {
     required this.createdMs,
     required this.modifiedMs,
     this.size,
+    this.sizeHint,
     this.private = false,
     this.target,
     this.relPath,
@@ -134,8 +135,13 @@ class FileOffer {
   /// Last edit time; part of the resume key so an edited photo is re-sent.
   final int modifiedMs;
 
-  /// Byte size if already known.
+  /// Byte size if already known (exact: the receiver refuses more).
   final int? size;
+
+  /// Expected size when the exact one is not known yet (a phone's photo
+  /// before its original is exported). Only used to check for room up
+  /// front; never as a limit.
+  final int? sizeHint;
 
   /// Family group: "only me" — not shown to other family members.
   final bool private;
@@ -159,6 +165,7 @@ class FileOffer {
         'createdMs': createdMs,
         'modifiedMs': modifiedMs,
         if (size != null) 'size': size,
+        if (sizeHint != null) 'sizeHint': sizeHint,
         if (private) 'private': true,
         if (target != null) 'target': target,
         if (relPath != null) 'relPath': relPath,
@@ -172,6 +179,7 @@ class FileOffer {
         createdMs: (j['createdMs'] as num).toInt(),
         modifiedMs: (j['modifiedMs'] as num?)?.toInt() ?? 0,
         size: (j['size'] as num?)?.toInt(),
+        sizeHint: (j['sizeHint'] as num?)?.toInt(),
         private: j['private'] == true,
         target: j['target'] as String?,
         relPath: j['relPath'] as String?,

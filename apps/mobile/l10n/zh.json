@@ -458,5 +458,6 @@
   "office.empty": "这个文件里没有可显示的内容。",
   "office.more_rows": "只显示前 {shown} 行（共 {count} 行）。",
   "office.slide": "第 {n} 页",
-  "pclib.cant_play_hint": "这个视频的格式手机可能不支持直接播放。点“保存到这部手机”，电脑会先转换成手机能播的格式再发过来。"
+  "pclib.cant_play_hint": "这个视频的格式手机可能不支持直接播放。点“保存到这部手机”，电脑会先转换成手机能播的格式再发过来。",
+  "incoming.unverified": "这台设备没有和这部手机配对，无法确认它真的是谁。只在认识对方时接受。"
 }

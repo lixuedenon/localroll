@@ -102,7 +102,8 @@ class AppServices {
       name: t.name,
       hosts: [ep.host],
       port: ep.port,
-      token: '',
+      // The phone's secret (it then knows the files are really from us).
+      token: ep.token ?? '',
       pairedMs: t.pairedMs,
       lastHost: ep.host,
       fingerprint: ep.fingerprint,

@@ -35,9 +35,14 @@ class IncomingReply {
 
 /// Someone nearby wants to send: the UI asks "Accept / Decline".
 class IncomingAsk {
-  IncomingAsk(this.from, this.count);
+  IncomingAsk(this.from, this.count, {this.verified = false});
 
   final DeviceInfo from;
+
+  /// A PC paired with this phone, proven by the secret it was given over
+  /// its encrypted link. Anything else only *says* who it is (its name and
+  /// id are visible on the Wi‑Fi), so the dialog warns.
+  final bool verified;
 
   /// Items in the whole transfer (when the sender says).
   final int count;
@@ -57,6 +62,9 @@ class Receiving {
   int bytes = 0;
   int size = 0;
   DateTime last = DateTime.now();
+
+  /// Whose "Accept" this transfer runs under (kept alive while it goes on).
+  String key = '';
 }
 
 class _InSession {
@@ -65,6 +73,10 @@ class _InSession {
   final DeviceInfo from;
   final Map<String, FileOffer> offers;
 }
+
+/// Most "Accept / Decline" questions open at once (nobody can fill the
+/// screen with dialogs by sending under ever new names).
+const int maxOpenAsks = 3;
 
 /// Phones can receive too (every device is equal): while LocalRoll is open,
 /// this phone listens on the Wi-Fi (HTTPS, its own certificate) and shows
@@ -118,7 +130,28 @@ class PhoneServer extends ChangeNotifier {
   final StreamController<Receiving> _finished = StreamController.broadcast();
   Stream<Receiving> get finished => _finished.stream;
 
+  /// Accepted (until), per sender — a verified PC by its id; anyone else by
+  /// id and address, so a look-alike can't ride on someone else's "Accept".
   final Map<String, DateTime> _acceptedUntil = {};
+
+  /// PCs this phone asked to send ("save to my phone"): taken without
+  /// asking for a while — only when the PC proves who it is.
+  final Map<String, DateTime> _expected = {};
+
+  /// One secret per paired PC, handed to it over its encrypted, signed-in
+  /// live link (new each app start). A PC sending to this phone shows it.
+  final Map<String, String> _pcTokens = {};
+
+  /// The secret for PC [pcId] (made on first use).
+  String receiveTokenFor(String pcId) => _pcTokens.putIfAbsent(pcId, () => _randomId(32));
+
+  /// Does this request come from paired PC [sender] (its secret matches)?
+  bool _verified(HttpRequest req, String sender) {
+    final mine = _pcTokens[sender];
+    final theirs = req.headers.value(LrProtocol.headerToken);
+    return mine != null && theirs != null && theirs.isNotEmpty && sameSecret(mine, theirs);
+  }
+
   final Map<String, DateTime> _declinedUntil = {};
   final Map<String, IncomingReply> _lastDecline = {};
   final Map<String, IncomingAsk> _asking = {};
@@ -203,7 +236,7 @@ class PhoneServer extends ChangeNotifier {
   /// browsing it): take what it sends for a while without asking.
   void expectFrom(String id, {Duration within = const Duration(minutes: 10)}) {
     _declinedUntil.remove(id);
-    _acceptedUntil[id] = DateTime.now().add(within);
+    _expected[id] = DateTime.now().add(within);
   }
 
   void answer(IncomingAsk ask, IncomingReply reply) {
@@ -240,7 +273,7 @@ class PhoneServer extends ChangeNotifier {
         return _json(res, 401, {'error': 'not_paired'});
       }
       if (req.method == 'POST' && path == LrProtocol.pathSessions) {
-        return await _createSession(req, sender);
+        return await _createSession(req, sender, verified: _verified(req, sender), ip: remote.address);
       }
       // /api/v1/sessions/{sid}/files/{fid}[/complete]
       if (segs.length >= 6 && segs[0] == 'api' && segs[1] == 'v1' && segs[2] == 'sessions' && segs[4] == 'files') {
@@ -281,11 +314,15 @@ class PhoneServer extends ChangeNotifier {
     }
   }
 
-  Future<void> _createSession(HttpRequest req, String sender) async {
+  Future<void> _createSession(HttpRequest req, String sender, {required bool verified, required String ip}) async {
     final body = SessionRequest.fromJson(await _readJson(req));
     final from = body.from ?? DeviceInfo(id: sender, name: '?', platform: 'unknown');
     if (from.id != sender) return _json(req.response, 400, {'error': 'bad_request'});
-    final refused = await _mayReceive(from, body.batch ?? body.files.length);
+    final key = verified ? 'pc|$sender' : '$sender|$ip';
+    if (!_asking.containsKey(key) && _asking.length >= maxOpenAsks && !_mayGoAhead(key, sender, verified)) {
+      return _json(req.response, 429, {'error': 'too_many_attempts'});
+    }
+    final refused = await _mayReceive(from, body.batch ?? body.files.length, key: key, verified: verified);
     if (refused != null) {
       final reason = refused.reason?.trim();
       return _json(req.response, 403, {
@@ -299,7 +336,7 @@ class PhoneServer extends ChangeNotifier {
     if (_sessions.length > 200) _sessions.remove(_sessions.keys.first);
     final r = receiving;
     if (r == null || r.from.id != from.id) {
-      receiving = Receiving(from, body.batch ?? body.files.length);
+      receiving = Receiving(from, body.batch ?? body.files.length)..key = key;
     } else if (body.batch != null && body.batch! > r.total) {
       r.total = body.batch!;
     }
@@ -314,18 +351,26 @@ class PhoneServer extends ChangeNotifier {
 
   /// Null = go ahead. Otherwise why not: declined (with its reason) or —
   /// `accept: true` used as a marker — nobody answered.
-  Future<IncomingReply?> _mayReceive(DeviceInfo from, int count) async {
+  /// Already allowed without a question (accepted a moment ago, or asked for).
+  bool _mayGoAhead(String key, String sender, bool verified) {
     final now = DateTime.now();
-    final ok = _acceptedUntil[from.id];
-    if (ok != null && ok.isAfter(now)) {
+    final ok = _acceptedUntil[key];
+    if (ok != null && ok.isAfter(now)) return true;
+    final asked = _expected[sender];
+    return verified && asked != null && asked.isAfter(now);
+  }
+
+  Future<IncomingReply?> _mayReceive(DeviceInfo from, int count, {required String key, required bool verified}) async {
+    final now = DateTime.now();
+    if (_mayGoAhead(key, from.id, verified)) {
       // The rest of an accepted transfer (each file is its own request).
-      _acceptedUntil[from.id] = now.add(const Duration(minutes: 2));
+      _acceptedUntil[key] = now.add(const Duration(minutes: 2));
       return null;
     }
-    final no = _declinedUntil[from.id];
-    if (no != null && no.isAfter(now)) return _lastDecline[from.id] ?? const IncomingReply(accept: false);
-    final ask = _asking[from.id] ??= () {
-      final a = IncomingAsk(from, count);
+    final no = _declinedUntil[key];
+    if (no != null && no.isAfter(now)) return _lastDecline[key] ?? const IncomingReply(accept: false);
+    final ask = _asking[key] ??= () {
+      final a = IncomingAsk(from, count, verified: verified);
       asks.value = [...asks.value, a];
       return a;
     }();
@@ -335,18 +380,19 @@ class PhoneServer extends ChangeNotifier {
     } on TimeoutException {
       reply = null;
     } finally {
-      _asking.remove(from.id);
+      _asking.remove(key);
       asks.value = asks.value.where((x) => x != ask).toList();
     }
     if (!ask.answer.isCompleted) ask.answer.complete(const IncomingReply(accept: false));
-    DiagLog.log('receiver', '${from.name}: ${reply == null ? 'no answer' : reply.accept ? 'accepted' : 'declined'}');
+    DiagLog.log('receiver',
+        '${from.name}${verified ? '' : ' (not verified)'}: ${reply == null ? 'no answer' : reply.accept ? 'accepted' : 'declined'}');
     if (reply == null) return const IncomingReply(accept: true); // no answer
     if (reply.accept) {
-      _acceptedUntil[from.id] = DateTime.now().add(const Duration(minutes: 2));
+      _acceptedUntil[key] = DateTime.now().add(const Duration(minutes: 2));
       return null;
     }
-    _lastDecline[from.id] = reply;
-    _declinedUntil[from.id] = DateTime.now().add(const Duration(minutes: 1));
+    _lastDecline[key] = reply;
+    _declinedUntil[key] = DateTime.now().add(const Duration(minutes: 1));
     return reply;
   }
 
@@ -454,9 +500,9 @@ class PhoneServer extends ChangeNotifier {
     receiving?.last = DateTime.now();
     // While a transfer keeps going, its "Accept" keeps holding (big files
     // can take longer than the 2 minutes between new sessions).
-    final from = receiving?.from.id;
-    if (from != null && _acceptedUntil.containsKey(from)) {
-      _acceptedUntil[from] = DateTime.now().add(const Duration(minutes: 2));
+    final key = receiving?.key;
+    if (key != null && _acceptedUntil.containsKey(key)) {
+      _acceptedUntil[key] = DateTime.now().add(const Duration(minutes: 2));
     }
     notifyListeners();
     _quiet?.cancel();

@@ -458,5 +458,6 @@
   "office.empty": "In dieser Datei gibt es nichts anzuzeigen.",
   "office.more_rows": "Die ersten {shown} Zeilen werden angezeigt (von {count}).",
   "office.slide": "Folie {n}",
-  "pclib.cant_play_hint": "Das Handy spielt dieses Videoformat eventuell nicht direkt ab. Tippe auf „Auf diesem Handy speichern“, dann wandelt der PC es vorher in ein abspielbares Format um."
+  "pclib.cant_play_hint": "Das Handy spielt dieses Videoformat eventuell nicht direkt ab. Tippe auf „Auf diesem Handy speichern“, dann wandelt der PC es vorher in ein abspielbares Format um.",
+  "incoming.unverified": "Dieses Gerät ist nicht mit diesem Handy gekoppelt, daher lässt sich nicht bestätigen, wer es wirklich ist. Nur annehmen, wenn du den Absender kennst."
 }

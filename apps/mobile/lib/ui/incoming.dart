@@ -29,7 +29,19 @@ Future<IncomingReply> askIncoming(BuildContext context, IncomingAsk ask) async {
     builder: (c) => AlertDialog(
       icon: Icon(pc ? Icons.computer_rounded : Icons.smartphone_rounded, size: 36, color: onlineGlow),
       title: Text(tr('incoming.title', {'name': ask.from.name})),
-      content: Text(tr('incoming.body', {'count': ask.count})),
+      content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(tr('incoming.body', {'count': ask.count})),
+        // Names and ids can be copied by anyone on the Wi‑Fi: say so unless
+        // it is a PC paired with this phone that proved it.
+        if (!ask.verified) ...[
+          const SizedBox(height: 12),
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Icon(Icons.gpp_maybe_outlined, size: 20, color: LrColors.safelight),
+            const SizedBox(width: 8),
+            Expanded(child: Text(tr('incoming.unverified'), style: Theme.of(c).textTheme.bodySmall)),
+          ]),
+        ],
+      ]),
       actionsOverflowDirection: VerticalDirection.up,
       actionsOverflowButtonSpacing: 4,
       actions: [

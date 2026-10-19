@@ -1,4 +1,5 @@
 // apps/desktop/test/library_index_test.dart
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -142,6 +143,31 @@ void main() {
     expect(lib.offline, isFalse);
     expect(Directory(root).existsSync(), isTrue);
     lib.dispose();
+  });
+
+  test('index.json damaged: restored from the newest copy, the damaged file kept', () async {
+    final lib = LibraryIndex(root, stateFile: state);
+    await lib.load();
+    await put(lib, '2026/10/a.jpg', asset: 'A');
+    await lib.flush();
+    await put(lib, '2026/10/b.jpg', asset: 'B');
+    await lib.flush(); // keeps today's copy of the index before replacing it
+    lib.dispose();
+    final sep = Platform.pathSeparator;
+    final index = File('$root$sep.localroll${sep}index.json');
+    await index.writeAsString('{"items": [ {"relPath": '); // cut off mid-write
+
+    final again = LibraryIndex(root, stateFile: state);
+    await again.load();
+    // Which phone sent a.jpg is not lost (b.jpg came after the copy; it is
+    // still found in the folder).
+    expect(again.findByAsset('phone', 'A')?.relPath, '2026/10/a.jpg');
+    expect(again.items.map((i) => i.name).toSet(), {'a.jpg', 'b.jpg'});
+    final damaged = Directory('$root$sep.localroll').listSync().where((f) => f.path.contains('index.json.damaged-'));
+    expect(damaged, hasLength(1));
+    // A good index.json again.
+    expect(() => jsonDecode(index.readAsStringSync()), returnsNormally);
+    again.dispose();
   });
 
   test('tidy: old partial files and an oversized picture cache go; photos never', () async {

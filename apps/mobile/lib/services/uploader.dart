@@ -98,6 +98,10 @@ class Uploader extends ChangeNotifier {
   DateTime? _startedAt;
   int _bytesSent = 0;
 
+  /// Original sizes (photo + Live Photo video), asked once per run, so the
+  /// PC can refuse up front when its drive is too full.
+  Map<String, int> _sizeHints = const {};
+
   /// Bytes per second over this run (0 until something was sent).
   double get speed {
     final t = _startedAt;
@@ -163,6 +167,9 @@ class Uploader extends ChangeNotifier {
     );
     notifyListeners();
     try {
+      _sizeHints = await BackgroundTransfer.originalSizes([for (final i in items) i.asset.id]);
+    } catch (_) {}
+    try {
       for (var i = 0; i < items.length && !_cancelled; i++) {
         if (await _limitReached()) break;
         _current = i;
@@ -209,6 +216,8 @@ class Uploader extends ChangeNotifier {
           kind: a.type == AssetType.video ? MediaKind.video : MediaKind.image,
           createdMs: a.createDateTime.millisecondsSinceEpoch,
           modifiedMs: a.modifiedDateTime.millisecondsSinceEpoch,
+          // Photo and its Live Photo video together: the room both need.
+          sizeHint: _sizeHints[a.id],
           private: !settings.shareWithFamily,
         ),
         // Original bytes, no transcoding. Downloads from iCloud if needed.

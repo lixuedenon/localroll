@@ -99,9 +99,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     _receivedSub = _server.finished.listen((r) {
       if (mounted) unawaited(showReceived(context, r, onOpen: _openMyLibrary));
     });
-    _live.receiveInfo = () => {
+    _live.receiveInfo = (pcId) => {
           if (_server.running) 'rport': '${_server.port}',
           if (_server.fingerprint != null) 'rfp': _server.fingerprint!,
+          // The secret this PC shows when it sends here — only over an
+          // encrypted link.
+          if (_server.running && widget.settings.byId(pcId)?.fingerprint != null) 'rtk': _server.receiveTokenFor(pcId),
         };
     _queue(_comeBack);
     _lastDesktop = widget.settings.current?.id;

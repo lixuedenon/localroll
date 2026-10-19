@@ -458,5 +458,6 @@
   "office.empty": "Nothing to show in this file.",
   "office.more_rows": "Showing the first {shown} rows (of {count}).",
   "office.slide": "Slide {n}",
-  "pclib.cant_play_hint": "The phone may not play this video format directly. Tap “Save to this phone” and the PC will convert it to a format the phone can play first."
+  "pclib.cant_play_hint": "The phone may not play this video format directly. Tap “Save to this phone” and the PC will convert it to a format the phone can play first.",
+  "incoming.unverified": "This device isn't paired with this phone, so LocalRoll can't confirm who it really is. Accept only if you know who is sending."
 }

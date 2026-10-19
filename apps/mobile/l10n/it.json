@@ -458,5 +458,6 @@
   "office.empty": "Niente da mostrare in questo file.",
   "office.more_rows": "Sono mostrate le prime {shown} righe (di {count}).",
   "office.slide": "Diapositiva {n}",
-  "pclib.cant_play_hint": "Il telefono potrebbe non riprodurre questo formato video. Tocca «Salva su questo telefono» e il PC lo convertirà prima in un formato riproducibile."
+  "pclib.cant_play_hint": "Il telefono potrebbe non riprodurre questo formato video. Tocca «Salva su questo telefono» e il PC lo convertirà prima in un formato riproducibile.",
+  "incoming.unverified": "Questo dispositivo non è associato a questo telefono, quindi non è possibile confermare chi sia davvero. Accetta solo se sai chi sta inviando."
 }

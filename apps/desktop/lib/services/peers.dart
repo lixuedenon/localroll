@@ -824,7 +824,14 @@ class PeerSender extends ChangeNotifier {
         final p = phoneTarget?.call(j.peer.id) ?? j.peer;
         final host = p.lastHost;
         if (host == null || p.fingerprint == null) throw const PeerError('phone_closed');
-        c = LrClient(host: host, port: p.port, secure: true, pin: p.fingerprint, deviceId: settings.deviceId);
+        c = LrClient(
+          host: host,
+          port: p.port,
+          secure: true,
+          pin: p.fingerprint,
+          deviceId: settings.deviceId,
+          token: p.token.isEmpty ? null : p.token,
+        );
       } else {
         c = await _connect(j.peer);
       }

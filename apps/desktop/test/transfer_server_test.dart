@@ -297,6 +297,56 @@ void main() {
     });
   });
 
+  group('same photo sent again (by content)', () {
+    test('a new iPhone sends the same photos: one file kept, the new phone sees them backed up', () async {
+      final old = await pc.pairPhone(id: 'oldPhone');
+      final fresh = await pc.pairPhone(id: 'newPhone');
+      final data = bytesOf(5000, 4);
+      final first = await old.upload('OLD-ID', data, name: 'IMG_0100.HEIC');
+      // Restored from iCloud on the new phone: other id, same bytes.
+      final again = await fresh.upload('NEW-ID', data, name: 'IMG_0100.HEIC');
+      expect(again.saved, isTrue);
+      expect(again.path, first.path);
+      expect(pc.library.items, hasLength(1));
+      expect(Directory(pc.abs('2024/05')).listSync(), hasLength(1));
+      // Next time: "already have it" straight away; cleanup checks the one file.
+      final s = await fresh.client.createSession(SessionRequest(files: [
+        const FileOffer(id: 'f1', assetId: 'NEW-ID', name: 'IMG_0100.HEIC', kind: MediaKind.image, createdMs: 1, modifiedMs: 1, size: 5000),
+      ]));
+      expect(s.results['f1']!.status, OfferStatus.duplicate);
+      final (_, body) = await fresh.call('POST', LrProtocol.pathVerify, json: const VerifyRequest(assetIds: ['NEW-ID']).toJson());
+      expect(VerifyResponse.fromJson(body).items.single.ok, isTrue);
+      // Kept over a restart.
+      await pc.library.flush();
+      await pc.library.load();
+      expect(pc.library.findByAsset('newPhone', 'NEW-ID')?.relPath, first.path);
+      // Deleted on the PC: both phones are told.
+      pc.library.removeItems([pc.library.findByAsset('oldPhone', 'OLD-ID')!]);
+      expect(pc.library.deletedSince('oldPhone', 0), contains('OLD-ID'));
+      expect(pc.library.deletedSince('newPhone', 0), contains('NEW-ID'));
+    });
+
+    test('a Live Photo sent again: no new files, the photo still finds its video', () async {
+      final old = await pc.pairPhone(id: 'oldPhone');
+      final fresh = await pc.pairPhone(id: 'newPhone');
+      final still = bytesOf(4000, 5), motion = bytesOf(9000, 6);
+      await old.upload('L1', still, name: 'IMG_0042.HEIC');
+      await old.upload(liveCompanionId('L1'), motion, name: 'IMG_0042.MOV', kind: MediaKind.video);
+      await fresh.upload('L2', still, name: 'IMG_0042.HEIC');
+      await fresh.upload(liveCompanionId('L2'), motion, name: 'IMG_0042.MOV', kind: MediaKind.video);
+      expect(Directory(pc.abs('2024/05')).listSync(), hasLength(2));
+      final photo = pc.library.findByAsset('newPhone', 'L2')!;
+      expect(pc.library.liveFor(photo)?.name, 'IMG_0042.MOV');
+    });
+
+    test('different bytes: kept as two', () async {
+      final phone = await pc.pairPhone();
+      await phone.upload('A', bytesOf(100, 1), name: 'a.jpg');
+      await phone.upload('B', bytesOf(100, 2), name: 'b.jpg');
+      expect(pc.library.items, hasLength(2));
+    });
+  });
+
   test('a scan (PDF) from a phone lands in the Documents folder, by its name', () async {
     final phone = await pc.pairPhone();
     final data = [...'%PDF-1.7'.codeUnits, ...bytesOf(4000)];
@@ -333,6 +383,34 @@ void main() {
       );
       // Small enough still goes.
       expect((await phone.upload('SMALL', bytesOf(1000))).saved, isTrue);
+    });
+
+    test('a phone photo with only an expected size: still refused up front; the hint is no limit', () async {
+      final phone = await pc.pairPhone();
+      TestPc.free = 300 * 1024 * 1024;
+      await expectLater(
+        phone.client.createSession(SessionRequest(files: [
+          const FileOffer(
+              id: 'f1', assetId: 'BIG', name: 'IMG_9.HEIC', kind: MediaKind.image, createdMs: 1, modifiedMs: 1, sizeHint: 100 * 1024 * 1024),
+        ])),
+        throwsA(isA<LrHttpError>().having((e) => e.status, 'status', 507).having((e) => e.code, 'code', 'disk_full')),
+      );
+      // An estimate a little short of the real file: the file still goes in whole.
+      TestPc.free = 100 * 1024 * 1024 * 1024;
+      final data = bytesOf(5000, 3);
+      final s = await phone.client.createSession(SessionRequest(files: [
+        const FileOffer(id: 'f1', assetId: 'H1', name: 'IMG_1.HEIC', kind: MediaKind.image, createdMs: 1, modifiedMs: 1, sizeHint: 4000),
+      ]));
+      final off = await phone.client.putChunk(s.sessionId, 'f1', 0, data.length, data);
+      expect(off, data.length);
+      final r = await phone.client.complete(s.sessionId, 'f1', CompleteRequest(size: data.length, sha256: await sha(data)));
+      expect(r.saved, isTrue);
+    });
+
+    test('"disk full" errors are recognised (Windows and POSIX)', () async {
+      expect(TransferServer.isDiskFull(const FileSystemException('x', 'p', OSError('full', 112))), isTrue);
+      expect(TransferServer.isDiskFull(const FileSystemException('x', 'p', OSError('full', 28))), isTrue);
+      expect(TransferServer.isDiskFull(const FileSystemException('x', 'p', OSError('denied', 5))), isFalse);
     });
 
     test('a huge request body is refused', () async {
@@ -576,11 +654,13 @@ void main() {
 
     test('a phone\'s live link tells where it receives', () async {
       final phone = await pc.pairPhone();
-      final ws = await link(phone, extra: {'rport': '53317', 'rfp': 'cd' * 32});
+      final ws = await link(phone, extra: {'rport': '53317', 'rfp': 'cd' * 32, 'rtk': 'secret-for-this-pc'});
       await eventually(() => pc.server.phoneEndpoint(phone.id) != null);
       final ep = pc.server.phoneEndpoint(phone.id)!;
       expect(ep.port, 53317);
       expect(ep.fingerprint, 'cd' * 32);
+      // The secret to show when sending there (it proves the files are from us).
+      expect(ep.token, 'secret-for-this-pc');
       await ws.close();
       await eventually(() => pc.server.phoneEndpoint(phone.id) == null);
     });

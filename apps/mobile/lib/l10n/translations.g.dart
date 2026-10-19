@@ -460,6 +460,7 @@ const Map<String, Map<String, String>> translations = {
     'office.more_rows': 'Showing the first {shown} rows (of {count}).',
     'office.slide': 'Slide {n}',
     'pclib.cant_play_hint': 'The phone may not play this video format directly. Tap “Save to this phone” and the PC will convert it to a format the phone can play first.',
+    'incoming.unverified': 'This device isn\'t paired with this phone, so LocalRoll can\'t confirm who it really is. Accept only if you know who is sending.',
   },
   'zh': {
     'common.cancel': '取消',
@@ -918,6 +919,7 @@ const Map<String, Map<String, String>> translations = {
     'office.more_rows': '只显示前 {shown} 行（共 {count} 行）。',
     'office.slide': '第 {n} 页',
     'pclib.cant_play_hint': '这个视频的格式手机可能不支持直接播放。点“保存到这部手机”，电脑会先转换成手机能播的格式再发过来。',
+    'incoming.unverified': '这台设备没有和这部手机配对，无法确认它真的是谁。只在认识对方时接受。',
   },
   'zh_Hant': {
     'common.cancel': '取消',
@@ -1376,6 +1378,7 @@ const Map<String, Map<String, String>> translations = {
     'office.more_rows': '只顯示前 {shown} 列（共 {count} 列）。',
     'office.slide': '第 {n} 頁',
     'pclib.cant_play_hint': '這支手機可能不支援直接播放這個影片格式。點「儲存到這支手機」，電腦會先轉換成手機能播的格式再傳過來。',
+    'incoming.unverified': '這台裝置沒有和這支手機配對，無法確認它真的是誰。只在認識對方時接受。',
   },
   'ja': {
     'common.cancel': 'キャンセル',
@@ -1834,6 +1837,7 @@ const Map<String, Map<String, String>> translations = {
     'office.more_rows': '最初の {shown} 行を表示（全 {count} 行）。',
     'office.slide': 'スライド {n}',
     'pclib.cant_play_hint': 'この動画形式はスマホで直接再生できない可能性があります。「このスマホに保存」をタップすると、PC が再生できる形式に変換してから送ります。',
+    'incoming.unverified': 'この端末はこのスマホとペアリングされていないため、本当に誰なのか確認できません。相手を知っている場合のみ受け入れてください。',
   },
   'ko': {
     'common.cancel': '취소',
@@ -2292,6 +2296,7 @@ const Map<String, Map<String, String>> translations = {
     'office.more_rows': '처음 {shown}행만 표시합니다(전체 {count}행).',
     'office.slide': '슬라이드 {n}',
     'pclib.cant_play_hint': '이 동영상 형식은 휴대폰에서 바로 재생되지 않을 수 있습니다. "이 휴대폰에 저장"을 누르면 PC가 재생 가능한 형식으로 변환해서 보냅니다.',
+    'incoming.unverified': '이 기기는 이 휴대폰과 페어링되지 않아 실제로 누구인지 확인할 수 없습니다. 보내는 사람을 아는 경우에만 수락하세요.',
   },
   'es': {
     'common.cancel': 'Cancelar',
@@ -2750,6 +2755,7 @@ const Map<String, Map<String, String>> translations = {
     'office.more_rows': 'Se muestran las primeras {shown} filas (de {count}).',
     'office.slide': 'Diapositiva {n}',
     'pclib.cant_play_hint': 'Puede que el móvil no reproduzca este formato. Pulsa «Guardar en este móvil» y el PC lo convertirá antes a un formato que el móvil pueda reproducir.',
+    'incoming.unverified': 'Este dispositivo no está emparejado con este teléfono, así que no se puede confirmar quién es realmente. Acepta solo si sabes quién lo envía.',
   },
   'fr': {
     'common.cancel': 'Annuler',
@@ -3208,6 +3214,7 @@ const Map<String, Map<String, String>> translations = {
     'office.more_rows': 'Affichage des {shown} premières lignes (sur {count}).',
     'office.slide': 'Diapositive {n}',
     'pclib.cant_play_hint': 'Le téléphone ne lit peut-être pas ce format vidéo. Touchez « Enregistrer sur ce téléphone » et le PC le convertira d’abord dans un format lisible.',
+    'incoming.unverified': 'Cet appareil n\'est pas associé à ce téléphone : impossible de confirmer qui il est vraiment. N\'acceptez que si vous savez qui envoie.',
   },
   'de': {
     'common.cancel': 'Abbrechen',
@@ -3666,6 +3673,7 @@ const Map<String, Map<String, String>> translations = {
     'office.more_rows': 'Die ersten {shown} Zeilen werden angezeigt (von {count}).',
     'office.slide': 'Folie {n}',
     'pclib.cant_play_hint': 'Das Handy spielt dieses Videoformat eventuell nicht direkt ab. Tippe auf „Auf diesem Handy speichern“, dann wandelt der PC es vorher in ein abspielbares Format um.',
+    'incoming.unverified': 'Dieses Gerät ist nicht mit diesem Handy gekoppelt, daher lässt sich nicht bestätigen, wer es wirklich ist. Nur annehmen, wenn du den Absender kennst.',
   },
   'pt': {
     'common.cancel': 'Cancelar',
@@ -4124,6 +4132,7 @@ const Map<String, Map<String, String>> translations = {
     'office.more_rows': 'Mostrando as primeiras {shown} linhas (de {count}).',
     'office.slide': 'Slide {n}',
     'pclib.cant_play_hint': 'O celular pode não reproduzir este formato de vídeo. Toque em “Salvar neste celular” e o PC vai convertê-lo antes para um formato que o celular reproduz.',
+    'incoming.unverified': 'Este dispositivo não está pareado com este telefone, então não é possível confirmar quem ele realmente é. Aceite só se souber quem está enviando.',
   },
   'ru': {
     'common.cancel': 'Отмена',
@@ -4582,6 +4591,7 @@ const Map<String, Map<String, String>> translations = {
     'office.more_rows': 'Показаны первые {shown} строк (из {count}).',
     'office.slide': 'Слайд {n}',
     'pclib.cant_play_hint': 'Телефон может не воспроизводить этот формат видео. Нажмите «Сохранить на этот телефон», и ПК сначала преобразует его в подходящий формат.',
+    'incoming.unverified': 'Это устройство не сопряжено с этим телефоном, поэтому нельзя подтвердить, кто это на самом деле. Принимайте, только если знаете отправителя.',
   },
   'it': {
     'common.cancel': 'Annulla',
@@ -5040,6 +5050,7 @@ const Map<String, Map<String, String>> translations = {
     'office.more_rows': 'Sono mostrate le prime {shown} righe (di {count}).',
     'office.slide': 'Diapositiva {n}',
     'pclib.cant_play_hint': 'Il telefono potrebbe non riprodurre questo formato video. Tocca «Salva su questo telefono» e il PC lo convertirà prima in un formato riproducibile.',
+    'incoming.unverified': 'Questo dispositivo non è associato a questo telefono, quindi non è possibile confermare chi sia davvero. Accetta solo se sai chi sta inviando.',
   },
   'ar': {
     'common.cancel': 'إلغاء',
@@ -5498,6 +5509,7 @@ const Map<String, Map<String, String>> translations = {
     'office.more_rows': 'عرض أول {shown} صفًا (من {count}).',
     'office.slide': 'الشريحة {n}',
     'pclib.cant_play_hint': 'قد لا يشغّل الهاتف صيغة هذا الفيديو مباشرة. انقر «حفظ على هذا الهاتف» وسيحوّله الكمبيوتر أولًا إلى صيغة يمكن تشغيلها.',
+    'incoming.unverified': 'هذا الجهاز غير مقترن بهذا الهاتف، لذا لا يمكن التأكد من هويته الحقيقية. اقبل فقط إذا كنت تعرف المرسل.',
   },
   'hi': {
     'common.cancel': 'रद्द करें',
@@ -5956,6 +5968,7 @@ const Map<String, Map<String, String>> translations = {
     'office.more_rows': 'पहली {shown} पंक्तियाँ दिखाई जा रही हैं ({count} में से)।',
     'office.slide': 'स्लाइड {n}',
     'pclib.cant_play_hint': 'हो सकता है फ़ोन यह वीडियो फ़ॉर्मेट सीधे न चला पाए। “इस फ़ोन में सहेजें” दबाएँ, PC पहले इसे चलने लायक फ़ॉर्मेट में बदल देगा।',
+    'incoming.unverified': 'यह डिवाइस इस फ़ोन से पेयर नहीं है, इसलिए पुष्टि नहीं हो सकती कि यह असल में कौन है। तभी स्वीकार करें जब आप भेजने वाले को जानते हों।',
   },
   'id': {
     'common.cancel': 'Batal',
@@ -6414,6 +6427,7 @@ const Map<String, Map<String, String>> translations = {
     'office.more_rows': 'Menampilkan {shown} baris pertama (dari {count}).',
     'office.slide': 'Slide {n}',
     'pclib.cant_play_hint': 'Ponsel mungkin tidak bisa langsung memutar format video ini. Ketuk “Simpan ke ponsel ini” dan PC akan mengubahnya dulu ke format yang bisa diputar.',
+    'incoming.unverified': 'Perangkat ini tidak dipasangkan dengan ponsel ini, jadi tidak bisa dipastikan siapa sebenarnya. Terima hanya jika Anda tahu siapa pengirimnya.',
   },
   'vi': {
     'common.cancel': 'Hủy',
@@ -6872,6 +6886,7 @@ const Map<String, Map<String, String>> translations = {
     'office.more_rows': 'Đang hiển thị {shown} hàng đầu (trên {count}).',
     'office.slide': 'Trang chiếu {n}',
     'pclib.cant_play_hint': 'Điện thoại có thể không phát trực tiếp được định dạng video này. Chạm “Lưu vào điện thoại này”, máy tính sẽ chuyển sang định dạng phát được rồi mới gửi.',
+    'incoming.unverified': 'Thiết bị này chưa ghép đôi với điện thoại này nên không thể xác nhận thực sự là ai. Chỉ chấp nhận nếu bạn biết người gửi.',
   },
   'th': {
     'common.cancel': 'ยกเลิก',
@@ -7330,6 +7345,7 @@ const Map<String, Map<String, String>> translations = {
     'office.more_rows': 'แสดง {shown} แถวแรก (จาก {count})',
     'office.slide': 'สไลด์ {n}',
     'pclib.cant_play_hint': 'โทรศัพท์อาจเล่นวิดีโอรูปแบบนี้โดยตรงไม่ได้ แตะ “บันทึกลงโทรศัพท์นี้” แล้วพีซีจะแปลงเป็นรูปแบบที่เล่นได้ก่อนส่งมา',
+    'incoming.unverified': 'อุปกรณ์นี้ไม่ได้จับคู่กับโทรศัพท์เครื่องนี้ จึงยืนยันไม่ได้ว่าเป็นใครจริงๆ รับเฉพาะเมื่อคุณรู้จักผู้ส่ง',
   },
   'tr': {
     'common.cancel': 'İptal',
@@ -7788,5 +7804,6 @@ const Map<String, Map<String, String>> translations = {
     'office.more_rows': 'İlk {shown} satır gösteriliyor ({count} satırdan).',
     'office.slide': 'Slayt {n}',
     'pclib.cant_play_hint': 'Telefon bu video biçimini doğrudan oynatamayabilir. “Bu telefona kaydet”e dokunun, bilgisayar önce oynatılabilir bir biçime dönüştürsün.',
+    'incoming.unverified': 'Bu cihaz bu telefonla eşleştirilmemiş, bu yüzden gerçekte kim olduğu doğrulanamıyor. Yalnızca göndereni tanıyorsan kabul et.',
   },
 };

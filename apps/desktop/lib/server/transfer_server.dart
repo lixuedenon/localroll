@@ -51,13 +51,18 @@ class MembershipAsk {
 
 /// Where a linked phone receives (it listens only while LocalRoll is open).
 class PhoneEndpoint {
-  const PhoneEndpoint(this.host, this.port, this.fingerprint);
+  const PhoneEndpoint(this.host, this.port, this.fingerprint, [this.token]);
 
   final String host;
   final int port;
 
   /// Its certificate: the only one accepted when sending there.
   final String fingerprint;
+
+  /// The secret the phone gave us (over the encrypted, signed-in link):
+  /// shown when sending there, so the phone knows it is really us. Null
+  /// from older phones.
+  final String? token;
 }
 
 class _LiveConn {
@@ -285,11 +290,13 @@ class TransferServer extends ChangeNotifier {
     }
   }
 
-  Future<void> _openLive(HttpRequest req, TrustedDevice device, {required bool wasOnline}) async {
+  Future<void> _openLive(HttpRequest req, TrustedDevice device, {required bool wasOnline, required bool secure}) async {
     final session = req.uri.queryParameters['session'] ?? '';
-    // A phone says where it receives (PC → phone sending).
+    // A phone says where it receives (PC → phone sending), and — only over
+    // HTTPS — the secret to show when sending there.
     final rport = int.tryParse(req.uri.queryParameters['rport'] ?? '');
     final rfp = req.uri.queryParameters['rfp'];
+    final rtk = secure ? req.uri.queryParameters['rtk'] : null;
     final host = req.connectionInfo?.remoteAddress.address;
     final WebSocket ws;
     try {
@@ -311,7 +318,7 @@ class TransferServer extends ChangeNotifier {
     final conn = _LiveConn(ws, session);
     list.add(conn);
     if (rport != null && rfp != null && rfp.isNotEmpty && host != null && !isDesktopPlatform(device.platform)) {
-      _phoneAt[device.id] = PhoneEndpoint(host, rport, rfp);
+      _phoneAt[device.id] = PhoneEndpoint(host, rport, rfp, (rtk == null || rtk.isEmpty || rtk.length > 128) ? null : rtk);
     }
     _presenceSession[device.id] = session;
     lastSeen[device.id] = DateTime.now();
@@ -741,7 +748,7 @@ class TransferServer extends ChangeNotifier {
       }
       if (path == LrProtocol.pathLive && WebSocketTransformer.isUpgradeRequest(req)) {
         if (!secure && device.secure) return _json(res, 426, {'error': 'upgrade_required'});
-        return await _openLive(req, device, wasOnline: wasOnline);
+        return await _openLive(req, device, wasOnline: wasOnline, secure: secure);
       }
       if (req.method == 'POST' && path == LrProtocol.pathMembership) {
         return await _membership(req, device);
@@ -888,7 +895,7 @@ class TransferServer extends ChangeNotifier {
         return _json(res, 200, {'deleted': n});
       }
       // Visibility: only of what this device sent itself.
-      final own = items.where((i) => i.deviceId == device.id).toList();
+      final own = items.where((i) => i.ownedBy(device.id)).toList();
       library.setPrivate(own, body['private'] == true);
       return _json(res, 200, {'updated': own.length});
     }
@@ -901,7 +908,7 @@ class TransferServer extends ChangeNotifier {
     if (rel == null || rel.isEmpty) return null;
     final item = library.findByRel(rel);
     if (item == null) return null;
-    if (item.private && item.deviceId != device.id) return null; // someone else's "only me"
+    if (item.private && !item.ownedBy(device.id)) return null; // someone else's "only me"
     return item;
   }
 
@@ -914,7 +921,7 @@ class TransferServer extends ChangeNotifier {
       for (final i in library.items)
         if ((kind == null || i.kind.name == kind) &&
             (i.kind == MediaKind.image || i.kind == MediaKind.video) &&
-            !(i.private && i.deviceId != device.id))
+            !(i.private && !i.ownedBy(device.id)))
           i,
     ]..sort((a, b) => b.captureMs.compareTo(a.captureMs));
     final page = all.skip(offset).take(limit);
@@ -933,7 +940,7 @@ class TransferServer extends ChangeNotifier {
               size: i.size,
               live: library.liveFor(i)?.relPath,
               private: i.private,
-              mine: i.deviceId == device.id,
+              mine: i.ownedBy(device.id),
               from: i.deviceId == null ? null : (family.labelOf(i.deviceId!) ?? i.deviceName),
             ),
         ],
@@ -1212,7 +1219,9 @@ class TransferServer extends ChangeNotifier {
       final part = File(_partPath(device, f));
       final offset = await part.exists() ? await part.length() : 0;
       results[f.id] = OfferResult(status: OfferStatus.ready, offset: offset);
-      need += max(0, (f.size ?? 0) - offset);
+      // Phones send an expected size for photos (the exact one is known
+      // only once the original is exported).
+      need += max(0, (f.size ?? f.sizeHint ?? 0) - offset);
     }
     // Not enough room on this PC: say so now, not half-way through.
     if (need > 0) {
@@ -1260,6 +1269,15 @@ class TransferServer extends ChangeNotifier {
     final part = File(_partPath(device, offer));
     final offset = await part.exists() ? await part.length() : 0;
     return _json(req.response, 200, {'offset': offset});
+  }
+
+  /// [_chunk]'s answer when the drive filled up while writing.
+  static const int _diskFull = -(1 << 62);
+
+  /// "Not enough space on the disk" (Windows 112 / 39, POSIX ENOSPC 28).
+  static bool isDiskFull(FileSystemException e) {
+    final code = e.osError?.errorCode;
+    return code == 112 || code == 39 || code == 28;
   }
 
   /// One writer per half-received file: a chunk is appended, or the file
@@ -1331,11 +1349,23 @@ class TransferServer extends ChangeNotifier {
       try {
         await raf.writeFrom(bytes);
         await raf.flush();
+      } on FileSystemException catch (e) {
+        if (!isDiskFull(e)) rethrow;
+        // Cut what was half written: the file stays a clean prefix.
+        try {
+          await raf.truncate(offset);
+        } catch (_) {}
+        return _diskFull;
       } finally {
         await raf.close();
       }
       return offset + bytes.length;
     });
+    if (at == _diskFull) {
+      _freeAt = DateTime.fromMillisecondsSinceEpoch(0); // ask again next time
+      DiagLog.log('receive', '${device.name}: disk full while writing ${offer.name}');
+      return _json(req.response, 507, {'error': 'disk_full', 'offset': current});
+    }
     if (at < 0) return _json(req.response, 409, {'offset': -at - 1});
     return _json(req.response, 200, {'offset': at});
   }
@@ -1395,6 +1425,20 @@ class TransferServer extends ChangeNotifier {
       if (inFolder || srcKind == MediaKind.other) {
         return _savePlainFile(req, device, offer, part, t, name: srcName, document: !inFolder && isDoc);
       }
+    }
+
+    // Exactly these bytes are here already (sent from another phone, from
+    // a new iPhone after a restore, or sent to a phone and backed up from
+    // there): keep one file; this phone's photo now points at it.
+    final same = library.findSame(length, hash);
+    if (same != null) {
+      await part.delete();
+      library.addAlias(same, device.id, offer.assetId);
+      hub.progress(t, length);
+      t.savedPath = library.absPath(same);
+      hub.setState(t, TransferState.alreadyHad);
+      DiagLog.log('receive', '${device.name}: ${offer.name} is already here as ${same.relPath} (same content), kept once');
+      return _json(req.response, 200, CompleteResponse(saved: true, path: same.relPath).toJson());
     }
 
     final captured = DateTime.fromMillisecondsSinceEpoch(offer.createdMs);

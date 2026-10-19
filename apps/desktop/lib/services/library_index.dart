@@ -20,7 +20,8 @@ class MediaItem {
     this.deviceName,
     this.assetId,
     this.private = false,
-  });
+    List<String>? also,
+  }) : also = also ?? [];
 
   /// Path relative to the library root, always with '/' separators.
   /// Changes when the file is moved inside the library (in Explorer).
@@ -38,6 +39,15 @@ class MediaItem {
   /// Family group: "only me" — hidden from the family view.
   bool private;
 
+  /// The same photo sent again under another phone / id ("device|asset"):
+  /// a new iPhone restored from a backup, a photo sent from the PC to a
+  /// phone and backed up from there, the same picture from two family
+  /// phones. One file is kept; each of these finds it.
+  final List<String> also;
+
+  /// Sent by [id] (first, or again later as the same photo).
+  bool ownedBy(String id) => deviceId == id || also.any((k) => k.startsWith('$id|'));
+
   DateTime get captureTime => DateTime.fromMillisecondsSinceEpoch(captureMs);
   String get extension => extensionOf(name);
 
@@ -53,6 +63,7 @@ class MediaItem {
         if (deviceName != null) 'deviceName': deviceName,
         if (assetId != null) 'assetId': assetId,
         if (private) 'private': true,
+        if (also.isNotEmpty) 'also': also,
       };
 
   factory MediaItem.fromJson(Map<String, dynamic> j) => MediaItem(
@@ -67,6 +78,7 @@ class MediaItem {
         deviceName: j['deviceName'] as String?,
         assetId: j['assetId'] as String?,
         private: j['private'] == true,
+        also: [for (final k in (j['also'] as List? ?? const [])) if (k is String) k],
       );
 }
 
@@ -117,6 +129,14 @@ class LibraryIndex extends ChangeNotifier {
   /// device|assetId -> item, rebuilt whenever the list changes.
   Map<String, MediaItem>? _byAssetCache;
 
+  /// size|sha256 -> item (finding the same photo sent again).
+  Map<String, MediaItem>? _byContentCache;
+
+  void _dropCaches() {
+    _byAssetCache = null;
+    _byContentCache = null;
+  }
+
   /// The library folder can't be reached (external drive unplugged, folder
   /// moved or renamed). Nothing is received and nothing is marked deleted
   /// until it is back.
@@ -157,8 +177,18 @@ class LibraryIndex extends ChangeNotifier {
 
   /// The Live Photo video that belongs to [photo], if it was received.
   MediaItem? liveFor(MediaItem photo) {
-    if (photo.kind != MediaKind.image || photo.deviceId == null || photo.assetId == null) return null;
-    return findByAsset(photo.deviceId!, liveCompanionId(photo.assetId!));
+    if (photo.kind != MediaKind.image) return null;
+    // Its video may have come from any of the phones that sent the photo.
+    for (final key in [
+      if (photo.deviceId != null && photo.assetId != null) '${photo.deviceId}|${photo.assetId}',
+      ...photo.also,
+    ]) {
+      final bar = key.indexOf('|');
+      if (bar <= 0) continue;
+      final v = findByAsset(key.substring(0, bar), liveCompanionId(key.substring(bar + 1)));
+      if (v != null) return v;
+    }
+    return null;
   }
 
   /// [items] plus their Live Photo videos (for delete / export).
@@ -181,7 +211,7 @@ class LibraryIndex extends ChangeNotifier {
     _items.clear();
     _deleted.clear();
     pendingMissing = const [];
-    _byAssetCache = null;
+    _dropCaches();
     if (!await _rootUsable()) {
       _goOffline();
       return;
@@ -192,17 +222,24 @@ class LibraryIndex extends ChangeNotifier {
     await Directory(incomingDir).create(recursive: true);
     libraryId = await _loadLibraryId();
     await Directory(cacheDir).create(recursive: true);
+    _backupHeld = false;
     if (await _indexFile.exists()) {
       try {
-        final j = jsonDecode(await _indexFile.readAsString()) as Map<String, dynamic>;
-        for (final e in (j['items'] as List? ?? const [])) {
-          _items.add(MediaItem.fromJson(e as Map<String, dynamic>));
-        }
-        for (final e in (j['deleted'] as List? ?? const [])) {
-          _deleted.add(_Tombstone.fromJson(e as Map<String, dynamic>));
-        }
+        _readIndex(await _indexFile.readAsString());
       } catch (e) {
-        debugPrint('index.json unreadable, starting empty: $e');
+        // Damaged (power cut, disk error): never start empty — that would
+        // lose which phone each photo came from. Keep the damaged file and
+        // take the newest copy that reads.
+        DiagLog.log('library', 'index.json unreadable: $e');
+        try {
+          await _indexFile.rename('${_indexFile.path}.damaged-${DateTime.now().millisecondsSinceEpoch}');
+        } catch (_) {}
+        final from = await _recover();
+        DiagLog.log('library', from == null ? 'no copy to restore from' : 'restored ${_items.length} items from $from');
+        // Nothing could be restored: leave the copy outside the library
+        // alone (it may still help later).
+        _backupHeld = from == null;
+        await flush();
       }
     }
     _sort();
@@ -212,6 +249,91 @@ class LibraryIndex extends ChangeNotifier {
     notifyListeners();
     unawaited(_writeBackup(force: true));
     unawaited(tidy());
+  }
+
+  /// Fills the lists from index.json text; leaves them untouched if it
+  /// can't be read.
+  void _readIndex(String text) {
+    final j = jsonDecode(text) as Map<String, dynamic>;
+    final items = [for (final e in (j['items'] as List? ?? const [])) MediaItem.fromJson(e as Map<String, dynamic>)];
+    final deleted = [for (final e in (j['deleted'] as List? ?? const [])) _Tombstone.fromJson(e as Map<String, dynamic>)];
+    _items
+      ..clear()
+      ..addAll(items);
+    _deleted
+      ..clear()
+      ..addAll(deleted);
+    _dropCaches();
+  }
+
+  /// Daily copies of index.json kept next to it (newest [snapshotsKept]).
+  static const int snapshotsKept = 3;
+
+  List<File> _snapshots() {
+    try {
+      return Directory(metaDir)
+          .listSync()
+          .whereType<File>()
+          .where((f) => RegExp(r'index-\d{8}\.json$').hasMatch(f.path))
+          .toList()
+        ..sort((a, b) => b.path.compareTo(a.path)); // newest first
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// index.json is damaged: the newest copy that reads — a daily copy next
+  /// to it, or the list kept outside the library (items only). Returns
+  /// where it came from.
+  Future<String?> _recover() async {
+    final backup = _backupFile;
+    final copies = [..._snapshots(), if (backup != null && backup.existsSync()) backup];
+    DateTime when(File f) {
+      try {
+        return f.lastModifiedSync();
+      } catch (_) {
+        return DateTime.fromMillisecondsSinceEpoch(0);
+      }
+    }
+
+    copies.sort((a, b) => when(b).compareTo(when(a))); // newest first
+    for (final f in copies) {
+      try {
+        if (f.path == backup?.path) {
+          final items = await _readBackup();
+          if (items.isEmpty) continue;
+          _items
+            ..clear()
+            ..addAll(items);
+          _deleted.clear();
+          _dropCaches();
+          return 'the backup list';
+        }
+        _readIndex(await f.readAsString());
+        return f.path.substring(f.path.lastIndexOf(_sep) + 1);
+      } catch (_) {}
+    }
+    _items.clear();
+    _deleted.clear();
+    return null;
+  }
+
+  /// Once a day, before index.json is replaced: keep the old one.
+  Future<void> _snapshot() async {
+    try {
+      if (!await _indexFile.exists()) return;
+      final d = DateTime.now();
+      final name = 'index-${d.year}${d.month.toString().padLeft(2, '0')}${d.day.toString().padLeft(2, '0')}.json';
+      final f = File('$metaDir$_sep$name');
+      if (await f.exists()) return;
+      await _indexFile.copy(f.path);
+      final all = _snapshots();
+      for (final old in all.skip(snapshotsKept)) {
+        try {
+          await old.delete();
+        } catch (_) {}
+      }
+    } catch (_) {}
   }
 
   /// Housekeeping in LocalRoll's own folder (never touches the photos):
@@ -362,9 +484,17 @@ class LibraryIndex extends ChangeNotifier {
 
   DateTime _lastBackup = DateTime.fromMillisecondsSinceEpoch(0);
 
+  /// The index was damaged and nothing could be restored: the copy outside
+  /// the library is not overwritten with an empty list.
+  bool _backupHeld = false;
+
   Future<void> _writeBackup({bool force = false}) async {
     final f = _backupFile;
     if (f == null || offline) return;
+    if (_backupHeld) {
+      if (_items.isEmpty) return;
+      _backupHeld = false;
+    }
     if (!force && DateTime.now().difference(_lastBackup) < const Duration(minutes: 2)) return;
     _lastBackup = DateTime.now();
     try {
@@ -661,10 +791,35 @@ class LibraryIndex extends ChangeNotifier {
 
   MediaItem? findByAsset(String deviceId, String assetId) {
     final map = _byAssetCache ??= {
-      for (final i in _items)
+      for (final i in _items) ...{
+        for (final k in i.also) k: i,
         if (i.deviceId != null && i.assetId != null) '${i.deviceId}|${i.assetId}': i,
+      },
     };
     return map['$deviceId|$assetId'];
+  }
+
+  /// An item with exactly these bytes (same size and SHA-256) whose file is
+  /// still there, or null.
+  MediaItem? findSame(int size, String sha256) {
+    final map = _byContentCache ??= {
+      for (final i in _items)
+        if (i.sha256 != null) '${i.size}|${i.sha256}': i,
+    };
+    final i = map['$size|${sha256.toLowerCase()}'];
+    return i != null && File(absPath(i)).existsSync() ? i : null;
+  }
+
+  /// [deviceId] sent [item]'s photo again as [assetId]: remember it there
+  /// (no second file). Phones then see it as backed up, and cleanup checks
+  /// the one file.
+  void addAlias(MediaItem item, String deviceId, String assetId) {
+    final key = '$deviceId|$assetId';
+    if ((item.deviceId == deviceId && item.assetId == assetId) || item.also.contains(key)) return;
+    item.also.add(key);
+    _dropCaches();
+    _scheduleSave();
+    notifyListeners();
   }
 
   void add(MediaItem item) {
@@ -705,7 +860,7 @@ class LibraryIndex extends ChangeNotifier {
     final set = items.toSet();
     _remember(set);
     _items.removeWhere(set.contains);
-    _byAssetCache = null;
+    _dropCaches();
   }
 
   /// Goes up each time items are recorded as deleted (the server tells the
@@ -717,6 +872,12 @@ class LibraryIndex extends ChangeNotifier {
     final now = DateTime.now().millisecondsSinceEpoch;
     for (final i in items) {
       _deleted.add(_Tombstone(i.deviceId ?? '', i.assetId ?? '', now, i));
+      // The phones that sent it again are told too (the item itself is
+      // kept once, above, for a Recycle Bin restore).
+      for (final k in i.also) {
+        final bar = k.indexOf('|');
+        if (bar > 0) _deleted.add(_Tombstone(k.substring(0, bar), k.substring(bar + 1), now));
+      }
     }
     // Keep the list bounded (a year, at most 10 000 entries).
     final cutoff = now - const Duration(days: 365).inMilliseconds;
@@ -738,7 +899,7 @@ class LibraryIndex extends ChangeNotifier {
 
   void _sort() {
     _items.sort((a, b) => b.captureMs.compareTo(a.captureMs));
-    _byAssetCache = null;
+    _dropCaches();
   }
 
   void _scheduleSave() {
@@ -751,6 +912,7 @@ class LibraryIndex extends ChangeNotifier {
     _saveTimer = null;
     if (offline) return; // never write an empty index onto a missing drive
     await Directory(metaDir).create(recursive: true);
+    await _snapshot();
     final tmp = File('${_indexFile.path}.tmp');
     await tmp.writeAsString(jsonEncode({
       'version': 1,

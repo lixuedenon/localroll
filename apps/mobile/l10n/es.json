@@ -458,5 +458,6 @@
   "office.empty": "No hay nada que mostrar en este archivo.",
   "office.more_rows": "Se muestran las primeras {shown} filas (de {count}).",
   "office.slide": "Diapositiva {n}",
-  "pclib.cant_play_hint": "Puede que el móvil no reproduzca este formato. Pulsa «Guardar en este móvil» y el PC lo convertirá antes a un formato que el móvil pueda reproducir."
+  "pclib.cant_play_hint": "Puede que el móvil no reproduzca este formato. Pulsa «Guardar en este móvil» y el PC lo convertirá antes a un formato que el móvil pueda reproducir.",
+  "incoming.unverified": "Este dispositivo no está emparejado con este teléfono, así que no se puede confirmar quién es realmente. Acepta solo si sabes quién lo envía."
 }
