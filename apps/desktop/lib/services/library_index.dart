@@ -904,12 +904,25 @@ class LibraryIndex extends ChangeNotifier {
 
   void _scheduleSave() {
     _saveTimer?.cancel();
-    _saveTimer = Timer(const Duration(milliseconds: 500), flush);
+    _saveTimer = Timer(const Duration(milliseconds: 500), () {
+      // A save in the background must never take the app down (folder
+      // gone a moment ago, disk error): it is logged and tried next time.
+      flush().catchError((Object e) => DiagLog.log('library', 'saving the index failed: $e'));
+    });
   }
 
-  Future<void> flush() async {
+  /// Saves run one after another: two at once would race on index.json.tmp.
+  Future<void> _saving = Future.value();
+
+  Future<void> flush() {
     _saveTimer?.cancel();
     _saveTimer = null;
+    final next = _saving.then((_) => _flushNow());
+    _saving = next.catchError((Object _) {});
+    return next;
+  }
+
+  Future<void> _flushNow() async {
     if (offline) return; // never write an empty index onto a missing drive
     await Directory(metaDir).create(recursive: true);
     await _snapshot();
