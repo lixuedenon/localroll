@@ -1,6 +1,7 @@
 // apps/mobile/lib/ui/open_file.dart
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -73,6 +74,18 @@ class FileOpener {
     } catch (e) {
       DiagLog.log('files', 'preview failed: $e');
       return false;
+    }
+  }
+
+  /// iPhone: the system's picture of [path]'s first page (PNG, about
+  /// [size] pixels), or null (Android, or the system has none).
+  static Future<Uint8List?> thumbnail(String path, {int size = 240}) async {
+    if (!Platform.isIOS) return null;
+    try {
+      return await _ch.invokeMethod<Uint8List>('thumb', {'path': path, 'size': size.toDouble()});
+    } catch (e) {
+      DiagLog.log('files', 'thumbnail failed: $e');
+      return null;
     }
   }
 

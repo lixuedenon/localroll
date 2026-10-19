@@ -4,6 +4,7 @@ import BackgroundTasks
 import Flutter
 import PDFKit
 import QuickLook
+import QuickLookThumbnailing
 import Photos
 import UIKit
 
@@ -386,6 +387,25 @@ final class FilePreview: NSObject, QLPreviewControllerDataSource {
           return
         }
         UIApplication.shared.open(u, options: [:]) { ok in result(ok) }
+      case "thumb":
+        // The system's own picture of a file's first page (Word, Excel,
+        // PowerPoint, Pages, Numbers, Keynote, text, RTF, video…); nil if
+        // it has none (then the app draws one itself).
+        let path = args["path"] as? String ?? ""
+        let side = CGFloat(args["size"] as? Double ?? 240)
+        guard !path.isEmpty else {
+          result(nil)
+          return
+        }
+        let req = QLThumbnailGenerator.Request(
+          fileAt: URL(fileURLWithPath: path),
+          size: CGSize(width: side, height: side),
+          scale: 1,
+          representationTypes: .thumbnail)
+        QLThumbnailGenerator.shared.generateBestRepresentation(for: req) { rep, _ in
+          let png = rep?.uiImage.pngData()
+          DispatchQueue.main.async { result(png.map { FlutterStandardTypedData(bytes: $0) }) }
+        }
       default:
         result(FlutterMethodNotImplemented)
       }

@@ -15,6 +15,7 @@ import '../services/mobile_settings.dart';
 import '../services/my_library.dart';
 import '../services/pdf_pages.dart';
 import 'cleanup_page.dart' show formatSize;
+import 'first_page_view.dart';
 import 'open_file.dart';
 import 'send_files_page.dart';
 import 'theme.dart';
@@ -420,7 +421,7 @@ class MyItemThumb extends StatelessWidget {
             ? _Thumb(item: item)
             : item.name.toLowerCase().endsWith('.pdf')
                 ? _PdfTile(item: item)
-                : _FileTile(item: item),
+                : _DocTile(item: item),
         if (item.kind == MyKind.video)
           const Positioned(right: 4, bottom: 4, child: Icon(Icons.play_circle_fill_rounded, size: 18, color: Colors.white)),
       ]);
@@ -444,7 +445,7 @@ class _Thumb extends StatelessWidget {
     final id = item.assetId;
     // Kept as a file (the photo library would not take it, or no access):
     // a photo is drawn from the file; anything else shows its kind.
-    if (id == null) return item.kind == MyKind.photo ? _FilePhoto(item: item, size: 240) : _FileTile(item: item);
+    if (id == null) return item.kind == MyKind.photo ? _FilePhoto(item: item, size: 240) : _DocTile(item: item);
     return FutureBuilder<Uint8List?>(
       future: _load(id),
       builder: (context, s) {
@@ -524,6 +525,65 @@ class _PdfTile extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                 child: Text(item.name,
                     maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10, color: Colors.white)),
+              ),
+            ),
+          ]);
+        },
+      );
+}
+
+/// Any other file: its first page — the iPhone's own picture of it when the
+/// system has one (Office, iWork, text…), else drawn here (Word, Excel,
+/// PowerPoint, text, CSV); the icon for anything else. Its name below.
+class _DocTile extends StatelessWidget {
+  const _DocTile({required this.item});
+
+  final MyItem item;
+
+  /// A PNG (from the system) or a [FirstPage], per item and name.
+  static final Map<String, Future<Object?>> _cache = {};
+
+  Future<Object?> _load() => _cache.putIfAbsent('${item.id}|${item.name}', () async {
+        final path = await MyLibrary.instance.pathOf(item);
+        if (path == null) return null;
+        final png = await FileOpener.thumbnail(path);
+        if (png != null) return png;
+        return FirstPages.of(path, name: item.name);
+      });
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<Object?>(
+        future: _load(),
+        builder: (context, s) {
+          final d = s.data;
+          final Widget page;
+          if (d is Uint8List) {
+            page = Container(
+              color: Colors.white,
+              child: Image.memory(d, fit: BoxFit.cover, alignment: Alignment.topCenter, gaplessPlayback: true),
+            );
+          } else if (d is FirstPage) {
+            page = FirstPageView(page: d);
+          } else {
+            return _FileTile(item: item);
+          }
+          return Stack(fit: StackFit.expand, children: [
+            page,
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Container(
+                color: Colors.black54,
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                child: Row(children: [
+                  Icon(_FileTile.iconFor(item.name), size: 11, color: Colors.white),
+                  const SizedBox(width: 3),
+                  Expanded(
+                    child: Text(item.name,
+                        maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10, color: Colors.white)),
+                  ),
+                ]),
               ),
             ),
           ]);

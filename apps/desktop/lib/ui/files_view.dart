@@ -7,7 +7,9 @@ import 'package:localroll_core/localroll_core.dart';
 import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/file_actions.dart';
+import '../services/library_index.dart';
 import '../services/network.dart';
+import 'first_page_view.dart';
 import 'format.dart';
 import 'theme.dart';
 import 'office_view.dart';
@@ -237,9 +239,16 @@ class _FilesViewState extends State<FilesView> {
                       return ListTile(
                         leading: !e.isDir && isPdfPath(e.entity.path)
                             ? PdfThumb(path: e.entity.path, cacheDir: widget.services.library.cacheDir)
-                            : SizedBox(
-                                width: 48,
-                                child: Icon(_icon(e), color: e.isDir ? LrColors.safelight : LrColors.muted, size: 30),
+                            : _FileThumb(
+                                path: e.entity.path,
+                                size: e.size,
+                                modified: e.modified,
+                                services: widget.services,
+                                icon: SizedBox(
+                                  width: 48,
+                                  child: Icon(_icon(e), color: e.isDir ? LrColors.safelight : LrColors.muted, size: 30),
+                                ),
+                                isDir: e.isDir,
                               ),
                         title: Text(e.name, overflow: TextOverflow.ellipsis),
                         subtitle: Text([
@@ -287,3 +296,81 @@ class _FilesViewState extends State<FilesView> {
     ]);
   }
 }
+
+/// A file's first page / picture, 48 px: Word, Excel, PowerPoint, text and
+/// CSV drawn from their content; photos and videos (sent inside folders)
+/// from ffmpeg like the library's own. [icon] while it is made, and for
+/// anything else.
+class _FileThumb extends StatelessWidget {
+  const _FileThumb({
+    required this.path,
+    required this.size,
+    required this.modified,
+    required this.services,
+    required this.icon,
+    required this.isDir,
+  });
+
+  final String path;
+  final int size;
+  final DateTime modified;
+  final AppServices services;
+  final Widget icon;
+  final bool isDir;
+
+  /// A JPEG [File] (photos, videos) or a [FirstPage] (documents), per file
+  /// version.
+  static final Map<String, Future<Object?>> _cache = {};
+
+  Future<Object?> _load() => _cache.putIfAbsent('$path|$size|${modified.millisecondsSinceEpoch}', () async {
+        final name = path.split(Platform.pathSeparator).last;
+        final kind = MediaKind.fromName(name);
+        if (kind == MediaKind.image || kind == MediaKind.video) {
+          final lib = services.library;
+          final root = '${lib.rootPath}${Platform.pathSeparator}';
+          if (!services.ffmpeg.available || !path.toLowerCase().startsWith(root.toLowerCase())) return null;
+          final rel = path.substring(root.length).replaceAll(Platform.pathSeparator, '/');
+          // Not in the library list; described just enough for ffmpeg's cache.
+          return services.ffmpeg.thumbnail(MediaItem(
+            relPath: rel,
+            name: name,
+            size: size,
+            kind: kind,
+            captureMs: modified.millisecondsSinceEpoch,
+            receivedMs: 0,
+          ));
+        }
+        return FirstPages.of(path);
+      });
+
+  @override
+  Widget build(BuildContext context) {
+    if (isDir) return icon;
+    return FutureBuilder<Object?>(
+      future: _load(),
+      builder: (context, s) {
+        final d = s.data;
+        final Widget pic;
+        if (d is File) {
+          pic = Image.file(d, fit: BoxFit.cover, width: 48, height: 48, cacheWidth: 96, gaplessPlayback: true);
+        } else if (d is FirstPage) {
+          pic = FirstPageView(page: d);
+        } else {
+          return icon;
+        }
+        return SizedBox(
+          width: 48,
+          height: 48,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: DecoratedBox(
+              decoration: BoxDecoration(border: Border.all(color: LrColors.muted.withValues(alpha: 0.3))),
+              child: pic,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+

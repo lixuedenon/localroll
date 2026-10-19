@@ -19,5 +19,6 @@ export 'src/live.dart';
 export 'src/diag_log.dart';
 export 'src/google_links.dart';
 export 'src/office/office_doc.dart';
+export 'src/office/first_page.dart';
 export 'src/office/xml_lite.dart' show parseXml, XElement, unescapeXml;
 export 'src/office/zip_reader.dart';

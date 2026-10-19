@@ -1,4 +1,5 @@
 // packages/core/test/office_test.dart
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -67,4 +68,57 @@ void main() {
     expect(excelDate(45413.5), '2024-05-01 12:00');
     expect(excelDate(0.75), '18:00');
   });
+
+  group('first page (thumbnails)', () {
+    test('Word: title and text in order, its table, its picture', () {
+      final p = FirstPage.of('report.docx', fixture('sample.docx'))!;
+      expect(p.layout, FirstPageLayout.page);
+      expect(p.lines.first.text, '季度报告 Q3');
+      expect(p.lines.first.heading, 1);
+      expect(p.lines.any((l) => l.text == '普通文字，加粗 和 斜体'), isTrue);
+      expect(p.table, [
+        ['名称', '数量'],
+        ['苹果 & 梨', '3'],
+      ]);
+      expect(p.picture, isNotNull);
+    });
+
+    test('Excel: the first sheet\'s top-left cells', () {
+      final p = FirstPage.of('budget.XLSX', fixture('sample.xlsx'))!;
+      expect(p.layout, FirstPageLayout.sheet);
+      expect(p.table.first.sublist(0, 3), ['项目', '金额', '日期']);
+      expect(p.table.length, lessThanOrEqualTo(FirstPage.maxRows));
+    });
+
+    test('PowerPoint: the first slide, its title first', () {
+      final p = FirstPage.of('talk.pptx', fixture('sample.pptx'))!;
+      expect(p.layout, FirstPageLayout.slide);
+      expect(p.lines.map((l) => l.text), ['欢迎', '第一点']);
+      expect(p.lines.first.heading, 1);
+    });
+
+    test('text, Markdown headings, UTF-16, CSV', () {
+      final t = FirstPage.of('notes.md', utf8Bytes('# 标题\n\nfirst line\r\nsecond\n\n\n'))!;
+      expect(t.lines.first.text, '标题');
+      expect(t.lines.first.heading, 1);
+      expect(t.lines.last.text, 'second');
+      final u16 = Uint8List.fromList([0xFF, 0xFE, 0x2D, 0x4E, 0x87, 0x65]); // 中文
+      expect(FirstPage.of('a.txt', u16)!.lines.single.text, '中文');
+      final csv = FirstPage.of('a.csv', utf8Bytes('名字,"数量, 个"\n苹果,3\n'))!;
+      expect(csv.layout, FirstPageLayout.sheet);
+      expect(csv.table, [
+        ['名字', '数量, 个'],
+        ['苹果', '3'],
+      ]);
+    });
+
+    test('not a document / not readable: null', () {
+      expect(FirstPage.of('a.zip', Uint8List(10)), isNull);
+      expect(FirstPage.of('a.docx', Uint8List.fromList(List.filled(100, 7))), isNull);
+      expect(FirstPage.canDraw('x.PPTX'), isTrue);
+      expect(FirstPage.canDraw('x.mp4'), isFalse);
+    });
+  });
 }
+
+Uint8List utf8Bytes(String s) => Uint8List.fromList(utf8.encode(s));
