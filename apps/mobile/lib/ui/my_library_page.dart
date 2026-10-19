@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:localroll_core/localroll_core.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
@@ -398,9 +399,8 @@ class _MyLibraryPageState extends State<MyLibraryPage> {
       },
       onLongPress: () => setState(() => _selected.add(i.id)),
       child: Stack(fit: StackFit.expand, children: [
-        i.kind.isMedia ? _Thumb(item: i) : _FileTile(item: i),
-        if (i.kind == MyKind.video)
-          const Positioned(right: 4, bottom: 4, child: Icon(Icons.play_circle_fill_rounded, size: 18, color: Colors.white)),
+        // Same pictures as on the home screen (PDFs: their first page).
+        MyItemThumb(item: i),
         if (selected) Container(color: LrColors.safelight.withValues(alpha: 0.35)),
         if (selected) const Positioned(right: 4, top: 4, child: Icon(Icons.check_circle_rounded, color: LrColors.safelight)),
       ]),
@@ -434,18 +434,56 @@ class _Thumb extends StatelessWidget {
 
   static final Map<String, Future<Uint8List?>> _cache = {};
 
-  Future<Uint8List?> _load() => _cache.putIfAbsent(item.assetId!, () async {
-        final a = await AssetEntity.fromId(item.assetId!);
+  Future<Uint8List?> _load(String assetId) => _cache.putIfAbsent(assetId, () async {
+        final a = await AssetEntity.fromId(assetId);
         return a?.thumbnailDataWithSize(const ThumbnailSize.square(240), quality: 80);
       });
 
   @override
-  Widget build(BuildContext context) => FutureBuilder<Uint8List?>(
-        future: _load(),
+  Widget build(BuildContext context) {
+    final id = item.assetId;
+    // Kept as a file (the photo library would not take it, or no access):
+    // a photo is drawn from the file; anything else shows its kind.
+    if (id == null) return item.kind == MyKind.photo ? _FilePhoto(item: item, size: 240) : _FileTile(item: item);
+    return FutureBuilder<Uint8List?>(
+      future: _load(id),
+      builder: (context, s) {
+        final b = s.data;
+        if (b == null) return Container(color: LrColors.surface);
+        return Image.memory(b, fit: BoxFit.cover, gaplessPlayback: true);
+      },
+    );
+  }
+}
+
+/// A photo kept as a file in LocalRoll's folder (not in the photo
+/// library): drawn straight from the file; its name if it can't be.
+class _FilePhoto extends StatelessWidget {
+  const _FilePhoto({required this.item, this.size, this.fit = BoxFit.cover});
+
+  final MyItem item;
+
+  /// Decoded at about this width (thumbnails); null = full size.
+  final int? size;
+  final BoxFit fit;
+
+  static final Map<String, Future<String?>> _paths = {};
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<String?>(
+        future: _paths.putIfAbsent('${item.id}|${item.name}', () => MyLibrary.instance.pathOf(item)),
         builder: (context, s) {
-          final b = s.data;
-          if (b == null) return Container(color: LrColors.surface);
-          return Image.memory(b, fit: BoxFit.cover, gaplessPlayback: true);
+          final path = s.data;
+          if (path == null) {
+            return s.connectionState == ConnectionState.done ? _FileTile(item: item) : Container(color: LrColors.surface);
+          }
+          return Image.file(
+            File(path),
+            fit: fit,
+            cacheWidth: size,
+            gaplessPlayback: true,
+            errorBuilder: (_, _, _) => _FileTile(item: item),
+          );
         },
       );
 }
@@ -456,11 +494,15 @@ class _PdfTile extends StatelessWidget {
 
   final MyItem item;
 
-  Future<Uint8List?> _load() async {
-    final path = await MyLibrary.instance.pathOf(item);
-    if (path == null) return null;
-    return PdfPages.thumb(path);
-  }
+  /// Per item and name (a renamed file is drawn again): the same future on
+  /// every rebuild, so the page doesn't flicker back to the icon.
+  static final Map<String, Future<Uint8List?>> _cache = {};
+
+  Future<Uint8List?> _load() => _cache.putIfAbsent('${item.id}|${item.name}', () async {
+        final path = await MyLibrary.instance.pathOf(item);
+        if (path == null) return null;
+        return PdfPages.thumb(path);
+      });
 
   @override
   Widget build(BuildContext context) => FutureBuilder<Uint8List?>(
@@ -502,6 +544,8 @@ class _FileTile extends StatelessWidget {
     if (n.endsWith('.xls') || n.endsWith('.xlsx') || n.endsWith('.csv')) return Icons.table_chart_rounded;
     if (n.endsWith('.ppt') || n.endsWith('.pptx')) return Icons.slideshow_rounded;
     if (n.endsWith('.zip') || n.endsWith('.rar') || n.endsWith('.7z')) return Icons.folder_zip_rounded;
+    if (MediaKind.fromName(n) == MediaKind.video) return Icons.movie_rounded;
+    if (MediaKind.fromName(n) == MediaKind.image) return Icons.image_rounded;
     return Icons.insert_drive_file_rounded;
   }
 
@@ -582,7 +626,9 @@ class _Photo extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => FutureBuilder<Uint8List?>(
+  Widget build(BuildContext context) => item.assetId == null
+      ? InteractiveViewer(maxScale: 6, child: Center(child: _FilePhoto(item: item, size: 2560, fit: BoxFit.contain)))
+      : FutureBuilder<Uint8List?>(
         future: _load(),
         builder: (context, s) {
           final b = s.data;
@@ -618,8 +664,10 @@ class _VideoState extends State<_Video> {
 
   Future<void> _open() async {
     try {
-      final a = await AssetEntity.fromId(widget.item.assetId!);
-      final f = await a?.file;
+      // In the photo library, or kept as a file in LocalRoll's folder.
+      final id = widget.item.assetId;
+      final path = id == null ? await MyLibrary.instance.pathOf(widget.item) : null;
+      final f = id != null ? await (await AssetEntity.fromId(id))?.file : (path == null ? null : File(path));
       if (f == null) throw StateError('no file');
       final c = VideoPlayerController.file(f);
       await c.initialize();
