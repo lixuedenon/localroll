@@ -480,5 +480,6 @@
   "office.slide": "Diapositiva {n}",
   "office.preview": "Vista previa en LocalRoll",
   "office.open_with": "Abrir con otro programa",
-  "send.err_phone_full": "El teléfono no tiene espacio libre suficiente. No se envió nada a medias; libera espacio y vuelve a enviar."
+  "send.err_phone_full": "El teléfono no tiene espacio libre suficiente. No se envió nada a medias; libera espacio y vuelve a enviar.",
+  "library.n_files": "{count} archivos"
 }

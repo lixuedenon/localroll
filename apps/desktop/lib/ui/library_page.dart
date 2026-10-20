@@ -1,4 +1,7 @@
 // apps/desktop/lib/ui/library_page.dart
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:localroll_core/localroll_core.dart';
 
@@ -18,6 +21,17 @@ import 'theme.dart';
 import 'viewer_page.dart';
 
 enum _Filter { all, photos, videos, docs, other }
+
+/// One square on the "All" timeline: a library photo / video, or a received
+/// file (Documents / Other).
+class _Cell {
+  _Cell.media(MediaItem this.media, this.day) : file = null;
+  _Cell.file(ReceivedFile this.file) : media = null, day = file.arrived;
+
+  final MediaItem? media;
+  final ReceivedFile? file;
+  final DateTime day;
+}
 
 /// Received media grouped by capture day, newest first; All / Photos / Videos.
 class LibraryPage extends StatefulWidget {
@@ -40,6 +54,78 @@ class _LibraryPageState extends State<LibraryPage> {
   bool _showPrivate = false;
 
   bool get _selecting => _selected.isNotEmpty;
+
+  /// Received files (Documents / Other), shown on the "All" timeline by the
+  /// day they arrived.
+  List<ReceivedFile> _files = const [];
+  int _seenSaved = -1;
+  final List<StreamSubscription<FileSystemEvent>> _watches = [];
+  Timer? _filesSoon;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.services.hub.addListener(_onHub);
+    unawaited(_loadFiles());
+    unawaited(_watchFiles());
+  }
+
+  @override
+  void dispose() {
+    widget.services.hub.removeListener(_onHub);
+    for (final w in _watches) {
+      unawaited(w.cancel());
+    }
+    _filesSoon?.cancel();
+    super.dispose();
+  }
+
+  /// A file arrived: show it.
+  void _onHub() {
+    final n = widget.services.hub.savedFiles.length;
+    if (n != _seenSaved) {
+      _seenSaved = n;
+      _reloadFilesSoon();
+    }
+  }
+
+  void _reloadFilesSoon() {
+    _filesSoon?.cancel();
+    _filesSoon = Timer(const Duration(milliseconds: 800), () => unawaited(_loadFiles()));
+  }
+
+  Future<void> _loadFiles() async {
+    final f = await ReceivedFile.scan(widget.services);
+    if (mounted) setState(() => _files = f);
+  }
+
+  /// Changes made in Explorer (deleted, renamed, copied in) show up too.
+  Future<void> _watchFiles() async {
+    for (final doc in [true, false]) {
+      try {
+        final dir = await widget.services.server.folderPath(document: doc);
+        _watches.add(Directory(dir).watch(recursive: true).listen((_) => _reloadFilesSoon(), onError: (_) {}));
+      } catch (_) {}
+    }
+  }
+
+  /// Received files that belong on the "All" timeline now.
+  List<ReceivedFile> _visibleFiles() {
+    // Files carry no sender: hidden while one person is picked.
+    if (_filter != _Filter.all || _member != null) return const [];
+    if (!_onlyRecent) return _files;
+    final since = DateTime.now().subtract(const Duration(hours: 24));
+    return [for (final f in _files) if (f.arrived.isAfter(since)) f];
+  }
+
+  /// Photos / videos and received files, newest first, in one list.
+  List<_Cell> _cells(List<MediaItem> items) {
+    final out = [
+      for (final i in items) _Cell.media(i, _dayOf(i)),
+      for (final f in _visibleFiles()) _Cell.file(f),
+    ]..sort((a, b) => b.day.compareTo(a.day));
+    return out;
+  }
 
   /// Who sent [i]: the family member of its phone, or the phone's name if it
   /// is no longer paired.
@@ -274,7 +360,7 @@ class _LibraryPageState extends State<LibraryPage> {
                 child: _filesTab
                     // Documents / other files from PCs: a file list, not photos.
                     ? FilesView(services: s, document: _filter == _Filter.docs)
-                    : items.isEmpty
+                    : items.isEmpty && _visibleFiles().isEmpty
                         ? _empty(context)
                         : _grid(context, items),
               ),
@@ -491,23 +577,22 @@ class _LibraryPageState extends State<LibraryPage> {
       );
 
   Widget _grid(BuildContext context, List<MediaItem> items) {
-    // Group into days while keeping the flat index for the viewer.
+    // Group into days; photos / videos keep their index in [items] for the
+    // viewer (it pages through photos and videos only).
+    final cells = _cells(items);
+    final indexOf = {for (var k = 0; k < items.length; k++) items[k].relPath: k};
     final slivers = <Widget>[];
     var start = 0;
-    while (start < items.length) {
-      final t = _dayOf(items[start]);
+    while (start < cells.length) {
+      final t = cells[start].day;
       var end = start;
-      while (end < items.length &&
-          _dayOf(items[end]).year == t.year &&
-          _dayOf(items[end]).month == t.month &&
-          _dayOf(items[end]).day == t.day) {
+      while (end < cells.length && cells[end].day.year == t.year && cells[end].day.month == t.month && cells[end].day.day == t.day) {
         end++;
       }
-      final groupStart = start;
-      final count = end - start;
-      final day = items.sublist(start, end);
-      final photos = day.where((i) => i.kind == MediaKind.image).length;
-      final videos = day.where((i) => i.kind == MediaKind.video).length;
+      final day = cells.sublist(start, end);
+      final photos = day.where((c) => c.media?.kind == MediaKind.image).length;
+      final videos = day.where((c) => c.media?.kind == MediaKind.video).length;
+      final files = day.where((c) => c.file != null).length;
       final theme = Theme.of(context);
       slivers
         ..add(SliverToBoxAdapter(
@@ -523,6 +608,7 @@ class _LibraryPageState extends State<LibraryPage> {
                   [
                     if (photos > 0) tr('library.n_photos', {'count': photos}),
                     if (videos > 0) tr('library.n_videos', {'count': videos}),
+                    if (files > 0) tr('library.n_files', {'count': files}),
                   ].join('   '),
                   style: theme.textTheme.bodySmall,
                 ),
@@ -538,14 +624,119 @@ class _LibraryPageState extends State<LibraryPage> {
               mainAxisSpacing: 4,
               crossAxisSpacing: 4,
             ),
-            itemCount: count,
-            itemBuilder: (context, i) => _cell(context, items, groupStart + i),
+            itemCount: day.length,
+            itemBuilder: (context, i) {
+              final c = day[i];
+              final m = c.media;
+              return m != null ? _cell(context, items, indexOf[m.relPath]!) : _fileCell(context, c.file!);
+            },
           ),
         ));
       start = end;
     }
     slivers.add(const SliverToBoxAdapter(child: SizedBox(height: 24)));
     return CustomScrollView(slivers: slivers);
+  }
+
+  /// A received file on the timeline: its first page and name; opens the
+  /// way it does under Documents / Other.
+  Widget _fileCell(BuildContext context, ReceivedFile f) {
+    final s = widget.services;
+    return Tooltip(
+      message: f.name,
+      waitDuration: const Duration(milliseconds: 600),
+      child: GestureDetector(
+        onTap: _selecting ? null : () => openReceivedFile(context, s, f.path),
+        onSecondaryTapUp: (d) => _fileMenu(context, f, d.globalPosition),
+        child: Stack(fit: StackFit.expand, children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: FileThumb(
+              key: ValueKey(f.path),
+              path: f.path,
+              size: f.size,
+              modified: f.modified,
+              services: s,
+              icon: Container(
+                color: LrColors.raised,
+                alignment: Alignment.center,
+                child: Icon(_iconFor(f.name), size: 40, color: LrColors.muted),
+              ),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(4)),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+              child: Row(children: [
+                Icon(_iconFor(f.name), size: 13, color: Colors.white),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(f.name,
+                      maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: Colors.white)),
+                ),
+              ]),
+            ),
+          ),
+        ]),
+      ),
+    );
+  }
+
+  static IconData _iconFor(String name) {
+    final ext = extensionOf(name);
+    if (ext == 'pdf') return Icons.picture_as_pdf_rounded;
+    if (const {'doc', 'docx', 'odt', 'rtf', 'pages', 'wps', 'txt', 'md'}.contains(ext)) return Icons.description_rounded;
+    if (const {'xls', 'xlsx', 'ods', 'csv', 'numbers', 'et'}.contains(ext)) return Icons.table_chart_rounded;
+    if (const {'ppt', 'pptx', 'odp', 'key', 'dps'}.contains(ext)) return Icons.slideshow_rounded;
+    if (const {'zip', 'rar', '7z', 'tar', 'gz'}.contains(ext)) return Icons.folder_zip_rounded;
+    if (const {'mp3', 'm4a', 'wav', 'flac', 'aac', 'ogg'}.contains(ext)) return Icons.audio_file_rounded;
+    if (MediaKind.fromName(name) == MediaKind.image) return Icons.image_rounded;
+    if (MediaKind.fromName(name) == MediaKind.video) return Icons.movie_rounded;
+    return Icons.insert_drive_file_rounded;
+  }
+
+  /// Right-click on a received file: open, show in its folder, delete.
+  Future<void> _fileMenu(BuildContext context, ReceivedFile f, Offset at) async {
+    final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final choice = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromRect(at & const Size(1, 1), Offset.zero & overlay.size),
+      items: [
+        PopupMenuItem(value: 'open', child: _menuRow(Icons.open_in_full_rounded, tr('lib.open'))),
+        PopupMenuItem(value: 'reveal', child: _menuRow(Icons.folder_open_rounded, tr('common.show_in_folder'))),
+        const PopupMenuDivider(),
+        PopupMenuItem(value: 'delete', child: _menuRow(Icons.delete_outline_rounded, tr('lib.delete'), danger: true)),
+      ],
+    );
+    if (!mounted || choice == null) return;
+    switch (choice) {
+      case 'open':
+        await openReceivedFile(this.context, widget.services, f.path);
+      case 'reveal':
+        revealInExplorer(f.path);
+      case 'delete':
+        final ok = await showDialog<bool>(
+          context: this.context,
+          builder: (c) => AlertDialog(
+            title: Text(tr('files.delete_title', {'name': f.name})),
+            content: Text(tr('files.delete_body')),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('common.cancel'))),
+              FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(tr('lib.delete'))),
+            ],
+          ),
+        );
+        if (ok != true) return;
+        await moveToRecycleBin([f.path]);
+        await _loadFiles();
+    }
   }
 
   Widget _cell(BuildContext context, List<MediaItem> items, int index) {

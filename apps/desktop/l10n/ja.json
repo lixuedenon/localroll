@@ -480,5 +480,6 @@
   "office.slide": "スライド {n}",
   "office.preview": "LocalRoll でプレビュー",
   "office.open_with": "他のプログラムで開く",
-  "send.err_phone_full": "スマホの空き容量が足りません。途中まで送られたものはありません。空きを作ってから再送してください。"
+  "send.err_phone_full": "スマホの空き容量が足りません。途中まで送られたものはありません。空きを作ってから再送してください。",
+  "library.n_files": "ファイル {count} 件"
 }

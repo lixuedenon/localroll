@@ -480,5 +480,6 @@
   "office.slide": "슬라이드 {n}",
   "office.preview": "LocalRoll에서 미리보기",
   "office.open_with": "다른 프로그램으로 열기",
-  "send.err_phone_full": "휴대폰에 여유 공간이 부족합니다. 중간까지 보낸 파일은 없습니다. 공간을 확보한 뒤 다시 보내세요."
+  "send.err_phone_full": "휴대폰에 여유 공간이 부족합니다. 중간까지 보낸 파일은 없습니다. 공간을 확보한 뒤 다시 보내세요.",
+  "library.n_files": "파일 {count}개"
 }

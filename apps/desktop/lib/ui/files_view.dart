@@ -125,66 +125,6 @@ class _FilesViewState extends State<FilesView> {
     return Icons.insert_drive_file_rounded;
   }
 
-  /// Word / Excel / PowerPoint: the PC's own program when it has one
-  /// (Office, WPS…), otherwise LocalRoll's simple look inside.
-  Future<void> _openOffice(_Entry e) async {
-    if (await hasProgramFor(extensionOf(e.name))) {
-      await Process.run('explorer.exe', [e.entity.path]);
-      return;
-    }
-    if (mounted) _preview(e);
-  }
-
-  void _preview(_Entry e) {
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => OfficeViewPage(
-        path: e.entity.path,
-        name: e.name,
-        actions: [
-          TextButton.icon(
-            onPressed: () => Process.run('explorer.exe', [e.entity.path]),
-            icon: const Icon(Icons.open_in_new_rounded, size: 18),
-            label: Text(tr('office.open_with')),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-    ));
-  }
-
-  /// A Google Docs / Sheets / Slides shortcut: the document is online.
-  Future<void> _openGoogle(_Entry e) async {
-    String? url;
-    try {
-      if (e.size <= 64 * 1024) url = googleShortcutUrl(await File(e.entity.path).readAsString(), extensionOf(e.name));
-    } catch (_) {}
-    if (!mounted) return;
-    final link = url;
-    await showDialog<void>(
-      context: context,
-      builder: (c) => AlertDialog(
-        icon: const Icon(Icons.cloud_outlined, size: 36, color: LrColors.safelight),
-        title: Text(tr('open.google_title')),
-        content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 460),
-          child: Text(link == null ? tr('open.google_no_link') : tr('open.google_body')),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(c), child: Text(tr('common.close'))),
-          if (link != null)
-            FilledButton.icon(
-              onPressed: () {
-                Navigator.pop(c);
-                Process.start('explorer.exe', [link]);
-              },
-              icon: const Icon(Icons.open_in_browser_rounded),
-              label: Text(tr('open.google_open')),
-            ),
-        ],
-      ),
-    );
-  }
-
   Future<void> _delete(_Entry e) async {
     final ok = await showDialog<bool>(
       context: context,
@@ -237,19 +177,18 @@ class _FilesViewState extends State<FilesView> {
                     itemBuilder: (context, i) {
                       final e = list[i];
                       return ListTile(
-                        leading: !e.isDir && isPdfPath(e.entity.path)
-                            ? PdfThumb(path: e.entity.path, cacheDir: widget.services.library.cacheDir)
-                            : _FileThumb(
-                                path: e.entity.path,
-                                size: e.size,
-                                modified: e.modified,
-                                services: widget.services,
-                                icon: SizedBox(
-                                  width: 48,
-                                  child: Icon(_icon(e), color: e.isDir ? LrColors.safelight : LrColors.muted, size: 30),
-                                ),
-                                isDir: e.isDir,
-                              ),
+                        leading: FileThumb(
+                          path: e.entity.path,
+                          size: e.size,
+                          modified: e.modified,
+                          services: widget.services,
+                          box: 48,
+                          icon: SizedBox(
+                            width: 48,
+                            child: Icon(_icon(e), color: e.isDir ? LrColors.safelight : LrColors.muted, size: 30),
+                          ),
+                          isDir: e.isDir,
+                        ),
                         title: Text(e.name, overflow: TextOverflow.ellipsis),
                         subtitle: Text([
                           formatDate(e.modified),
@@ -258,25 +197,15 @@ class _FilesViewState extends State<FilesView> {
                         ].join(' · ')),
                         // A PDF opens in LocalRoll's reader, a text file in its text
                         // window; anything else with the program Windows uses for it.
-                        onTap: () {
-                          if (!e.isDir && isPdfPath(e.entity.path)) {
-                            Navigator.of(context).push(MaterialPageRoute(builder: (_) => PdfViewerPage(path: e.entity.path)));
-                          } else if (!e.isDir && googleShortcutKinds.containsKey(extensionOf(e.name))) {
-                            _openGoogle(e);
-                          } else if (!e.isDir && OfficeViewPage.canShow(e.name)) {
-                            _openOffice(e);
-                          } else if (!e.isDir && isPlainTextPath(e.entity.path) && e.size <= 4 * 1024 * 1024) {
-                            showTextFile(context, widget.services, e.entity.path);
-                          } else {
-                            Process.run('explorer.exe', [e.entity.path]);
-                          }
-                        },
+                        onTap: () => e.isDir
+                            ? Process.run('explorer.exe', [e.entity.path])
+                            : openReceivedFile(context, widget.services, e.entity.path),
                         trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                           if (!e.isDir && OfficeViewPage.canShow(e.name))
                             IconButton(
                               tooltip: tr('office.preview'),
                               icon: const Icon(Icons.visibility_outlined),
-                              onPressed: () => _preview(e),
+                              onPressed: () => previewOffice(context, e.entity.path),
                             ),
                           IconButton(
                             tooltip: tr('common.show_in_folder'),
@@ -297,18 +226,144 @@ class _FilesViewState extends State<FilesView> {
   }
 }
 
-/// A file's first page / picture, 48 px: Word, Excel, PowerPoint, text and
-/// CSV drawn from their content; photos and videos (sent inside folders)
-/// from ffmpeg like the library's own. [icon] while it is made, and for
-/// anything else.
-class _FileThumb extends StatelessWidget {
-  const _FileThumb({
+/// Opens a received file the way LocalRoll does everywhere: a PDF in its
+/// reader, a text file in its text window, Word / Excel / PowerPoint with
+/// the PC's own program (or LocalRoll's simple look inside), a Google
+/// shortcut as a link; anything else with the program Windows uses for it.
+Future<void> openReceivedFile(BuildContext context, AppServices services, String path) async {
+  final name = path.split(Platform.pathSeparator).last;
+  var size = 0;
+  try {
+    size = await File(path).length();
+  } catch (_) {}
+  if (!context.mounted) return;
+  if (isPdfPath(path)) {
+    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => PdfViewerPage(path: path)));
+  } else if (googleShortcutKinds.containsKey(extensionOf(name))) {
+    await _openGoogle(context, path, size);
+  } else if (OfficeViewPage.canShow(name)) {
+    if (await hasProgramFor(extensionOf(name))) {
+      await Process.run('explorer.exe', [path]);
+    } else if (context.mounted) {
+      previewOffice(context, path);
+    }
+  } else if (isPlainTextPath(path) && size <= 4 * 1024 * 1024) {
+    await showTextFile(context, services, path);
+  } else {
+    await Process.run('explorer.exe', [path]);
+  }
+}
+
+/// LocalRoll's simple look inside a Word / Excel / PowerPoint file.
+void previewOffice(BuildContext context, String path) {
+  Navigator.of(context).push(MaterialPageRoute(
+    builder: (_) => OfficeViewPage(
+      path: path,
+      name: path.split(Platform.pathSeparator).last,
+      actions: [
+        TextButton.icon(
+          onPressed: () => Process.run('explorer.exe', [path]),
+          icon: const Icon(Icons.open_in_new_rounded, size: 18),
+          label: Text(tr('office.open_with')),
+        ),
+        const SizedBox(width: 8),
+      ],
+    ),
+  ));
+}
+
+/// A Google Docs / Sheets / Slides shortcut: the document is online.
+Future<void> _openGoogle(BuildContext context, String path, int size) async {
+  String? url;
+  try {
+    if (size <= 64 * 1024) url = googleShortcutUrl(await File(path).readAsString(), extensionOf(path));
+  } catch (_) {}
+  if (!context.mounted) return;
+  final link = url;
+  await showDialog<void>(
+    context: context,
+    builder: (c) => AlertDialog(
+      icon: const Icon(Icons.cloud_outlined, size: 36, color: LrColors.safelight),
+      title: Text(tr('open.google_title')),
+      content: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 460),
+        child: Text(link == null ? tr('open.google_no_link') : tr('open.google_body')),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(c), child: Text(tr('common.close'))),
+        if (link != null)
+          FilledButton.icon(
+            onPressed: () {
+              Navigator.pop(c);
+              Process.start('explorer.exe', [link]);
+            },
+            icon: const Icon(Icons.open_in_browser_rounded),
+            label: Text(tr('open.google_open')),
+          ),
+      ],
+    ),
+  );
+}
+
+/// A received file (Documents / Other, at any depth), for the library's
+/// "All" timeline.
+class ReceivedFile {
+  const ReceivedFile(this.path, this.size, this.modified, this.arrived);
+
+  final String path;
+  final int size;
+  final DateTime modified;
+
+  /// When it arrived here (Windows keeps when the file was made).
+  final DateTime arrived;
+
+  String get name => path.split(Platform.pathSeparator).last;
+
+  /// Every file in the Documents and Other folders, newest arrival first.
+  static Future<List<ReceivedFile>> scan(AppServices s) async {
+    final out = <ReceivedFile>[];
+    for (final doc in [true, false]) {
+      final String dir;
+      try {
+        dir = await s.server.folderPath(document: doc);
+      } catch (_) {
+        continue;
+      }
+      try {
+        await for (final e in Directory(dir).list(recursive: true, followLinks: false)) {
+          if (e is! File) continue;
+          final rel = e.path.substring(dir.length);
+          final name = rel.split(Platform.pathSeparator).last;
+          if (rel.split(Platform.pathSeparator).any((p) => p.startsWith('.')) || name.toLowerCase() == 'desktop.ini') continue;
+          try {
+            final st = await e.stat();
+            // On Windows "changed" is when the file was created here; the
+            // modified time is the sender's.
+            out.add(ReceivedFile(e.path, st.size, st.modified, Platform.isWindows ? st.changed : st.modified));
+          } catch (_) {}
+        }
+      } catch (_) {}
+    }
+    out.sort((a, b) => b.arrived.compareTo(a.arrived));
+    return out;
+  }
+}
+
+/// A file's first page / picture: PDFs their first page; Word, Excel,
+/// PowerPoint, text and CSV drawn from their content; photos and videos
+/// (sent inside folders) from ffmpeg like the library's own. [icon] while
+/// it is made, and for anything else. [box]: a square of that size; null
+/// = fills its parent.
+class FileThumb extends StatelessWidget {
+  const FileThumb({
+    super.key,
     required this.path,
     required this.size,
     required this.modified,
     required this.services,
     required this.icon,
-    required this.isDir,
+    this.isDir = false,
+    this.box,
   });
 
   final String path;
@@ -317,13 +372,15 @@ class _FileThumb extends StatelessWidget {
   final AppServices services;
   final Widget icon;
   final bool isDir;
+  final double? box;
 
-  /// A JPEG [File] (photos, videos) or a [FirstPage] (documents), per file
-  /// version.
+  /// A picture [File] (PDFs, photos, videos) or a [FirstPage] (documents),
+  /// per file version.
   static final Map<String, Future<Object?>> _cache = {};
 
   Future<Object?> _load() => _cache.putIfAbsent('$path|$size|${modified.millisecondsSinceEpoch}', () async {
         final name = path.split(Platform.pathSeparator).last;
+        if (isPdfPath(path)) return PdfThumbs.of(path, services.library.cacheDir);
         final kind = MediaKind.fromName(name);
         if (kind == MediaKind.image || kind == MediaKind.video) {
           final lib = services.library;
@@ -352,25 +409,33 @@ class _FileThumb extends StatelessWidget {
         final d = s.data;
         final Widget pic;
         if (d is File) {
-          pic = Image.file(d, fit: BoxFit.cover, width: 48, height: 48, cacheWidth: 96, gaplessPlayback: true);
+          pic = Container(
+            color: Colors.white,
+            child: Image.file(d,
+                fit: BoxFit.cover,
+                alignment: Alignment.topCenter,
+                cacheWidth: box == null ? 360 : (box! * 2).round(),
+                gaplessPlayback: true,
+                errorBuilder: (_, _, _) => icon),
+          );
         } else if (d is FirstPage) {
           pic = FirstPageView(page: d);
         } else {
           return icon;
         }
-        return SizedBox(
-          width: 48,
-          height: 48,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: DecoratedBox(
-              decoration: BoxDecoration(border: Border.all(color: LrColors.muted.withValues(alpha: 0.3))),
-              child: pic,
+        final framed = ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: DecoratedBox(
+            position: DecorationPosition.foreground,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: LrColors.muted.withValues(alpha: 0.3)),
             ),
+            child: pic,
           ),
         );
+        return box == null ? framed : SizedBox(width: box, height: box, child: framed);
       },
     );
   }
 }
-

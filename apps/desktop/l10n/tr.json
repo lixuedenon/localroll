@@ -480,5 +480,6 @@
   "office.slide": "Slayt {n}",
   "office.preview": "LocalRoll’da önizle",
   "office.open_with": "Başka programla aç",
-  "send.err_phone_full": "Telefonda yeterli boş alan yok. Hiçbir şey yarım gönderilmedi; yer açıp yeniden gönder."
+  "send.err_phone_full": "Telefonda yeterli boş alan yok. Hiçbir şey yarım gönderilmedi; yer açıp yeniden gönder.",
+  "library.n_files": "{count} dosya"
 }

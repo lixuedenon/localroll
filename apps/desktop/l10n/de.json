@@ -480,5 +480,6 @@
   "office.slide": "Folie {n}",
   "office.preview": "In LocalRoll ansehen",
   "office.open_with": "Mit anderem Programm öffnen",
-  "send.err_phone_full": "Auf dem Handy ist nicht genug Platz. Nichts wurde halb gesendet; Platz schaffen und erneut senden."
+  "send.err_phone_full": "Auf dem Handy ist nicht genug Platz. Nichts wurde halb gesendet; Platz schaffen und erneut senden.",
+  "library.n_files": "{count} Dateien"
 }

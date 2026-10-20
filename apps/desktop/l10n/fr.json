@@ -480,5 +480,6 @@
   "office.slide": "Diapositive {n}",
   "office.preview": "Aperçu dans LocalRoll",
   "office.open_with": "Ouvrir avec un autre programme",
-  "send.err_phone_full": "Le téléphone n'a pas assez d'espace libre. Rien n'a été envoyé à moitié ; libérez de l'espace puis renvoyez."
+  "send.err_phone_full": "Le téléphone n'a pas assez d'espace libre. Rien n'a été envoyé à moitié ; libérez de l'espace puis renvoyez.",
+  "library.n_files": "{count} fichiers"
 }
