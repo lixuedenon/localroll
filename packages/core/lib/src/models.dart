@@ -474,7 +474,6 @@ class ChangesResponse {
         deleted: (j['deleted'] as List? ?? const []).cast<String>(),
         now: (j['now'] as num?)?.toInt() ?? 0,
         library: j['library'] as String?,
-        recent: (j['recent'] as num?)?.toInt() ?? 0,
       );
 }
 
@@ -654,5 +653,6 @@ class LibraryPage {
         access: LibraryAccess.parse(j['access']) ?? LibraryAccess.none,
         next: (j['next'] as num?)?.toInt(),
         library: j['library'] as String?,
+        recent: (j['recent'] as num?)?.toInt() ?? 0,
       );
 }
