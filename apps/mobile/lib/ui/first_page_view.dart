@@ -15,8 +15,9 @@ import 'package:localroll_core/localroll_core.dart';
 class FirstPages {
   FirstPages._();
 
-  static final LinkedHashMap<String, Future<FirstPage?>> _cache = LinkedHashMap();
-  static const int _keep = 300;
+  /// Remembered per file version; a failure (the file busy just after it
+  /// arrived — a virus scanner reading it) is not remembered for good.
+  static final SoftCache<FirstPage> _cache = SoftCache(max: 300);
   static int _running = 0;
   static final Queue<Completer<void>> _waiting = Queue();
 
@@ -24,7 +25,8 @@ class FirstPages {
   static const int maxOffice = 60 * 1024 * 1024;
 
   /// The first page of the file at [path] ([name]: what it is called, for
-  /// its kind; default its own name). Null if it can't be drawn.
+  /// its kind; default its own name). Null if it can't be drawn. Tried a
+  /// few times when the file can't be read yet.
   static Future<FirstPage?> of(String path, {String? name}) async {
     final shown = name ?? path.split(Platform.pathSeparator).last.split('/').last;
     if (!FirstPage.canDraw(shown)) return null;
@@ -35,20 +37,17 @@ class FirstPages {
       return null;
     }
     final key = '$path|${st.size}|${st.modified.millisecondsSinceEpoch}';
-    final hit = _cache.remove(key);
-    if (hit != null) {
-      _cache[key] = hit; // most recent last
-      return hit;
-    }
-    final f = _limited(() => Isolate.run(() => _read(path, shown)));
-    _cache[key] = f;
-    while (_cache.length > _keep) {
-      _cache.remove(_cache.keys.first);
-    }
-    return f;
+    return _cache.get(key, () => retryWhileNull(() => _readOnce(path, shown)));
   }
 
-  static FirstPage? _read(String path, String name) {
+  static Future<FirstPage?> _readOnce(String path, String name) async {
+    final (page, problem) = await _limited(() => Isolate.run(() => _read(path, name)));
+    if (problem != null) DiagLog.log('thumb', 'first page of $name not read: $problem');
+    return page;
+  }
+
+  /// The page, or why not (null, null: nothing to draw).
+  static (FirstPage?, String?) _read(String path, String name) {
     try {
       final f = File(path);
       final len = f.lengthSync();
@@ -56,7 +55,7 @@ class FirstPages {
       final ext = dot < 0 ? '' : name.substring(dot + 1).toLowerCase();
       final Uint8List data;
       if (OfficeDoc.canRead(ext)) {
-        if (len > maxOffice) return null;
+        if (len > maxOffice) return (null, null);
         data = f.readAsBytesSync();
       } else {
         final raf = f.openSync();
@@ -66,9 +65,9 @@ class FirstPages {
           raf.closeSync();
         }
       }
-      return FirstPage.of(name, data);
-    } catch (_) {
-      return null;
+      return (FirstPage.of(name, data), null);
+    } catch (e) {
+      return (null, '$e');
     }
   }
 
@@ -81,9 +80,6 @@ class FirstPages {
     _running++;
     try {
       return await task();
-    } catch (e) {
-      DiagLog.log('thumb', 'first page failed: $e');
-      rethrow;
     } finally {
       _running--;
       if (_waiting.isNotEmpty) _waiting.removeFirst().complete();

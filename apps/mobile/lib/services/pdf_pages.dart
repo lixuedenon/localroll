@@ -31,10 +31,11 @@ class PdfPages {
     }
   }
 
-  static final Map<String, Future<Uint8List?>> _thumbs = {};
+  static final SoftCache<Uint8List> _thumbs = SoftCache(max: 300);
 
-  /// The first page, small (kept in memory while the app runs).
-  static Future<Uint8List?> thumb(String path) => _thumbs.putIfAbsent(path, () => render(path, 0, 300));
+  /// The first page, small (kept in memory while the app runs). Tried again
+  /// when the file can't be read yet; a failure is not remembered for good.
+  static Future<Uint8List?> thumb(String path) => _thumbs.get(path, () => retryWhileNull(() => render(path, 0, 300)));
 
   /// Forget a thumbnail (the file was renamed / deleted).
   static void forget(String path) => _thumbs.remove(path);

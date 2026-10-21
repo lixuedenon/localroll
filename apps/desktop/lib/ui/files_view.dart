@@ -375,30 +375,34 @@ class FileThumb extends StatelessWidget {
   final double? box;
 
   /// A picture [File] (PDFs, photos, videos) or a [FirstPage] (documents),
-  /// per file version.
-  static final Map<String, Future<Object?>> _cache = {};
+  /// per file version. A file that just arrived can be busy for a moment
+  /// (a virus scanner reading it): tried again, and a failure is not
+  /// remembered for good.
+  static final SoftCache<Object> _cache = SoftCache(max: 600);
 
-  Future<Object?> _load() => _cache.putIfAbsent('$path|$size|${modified.millisecondsSinceEpoch}', () async {
-        final name = path.split(Platform.pathSeparator).last;
-        if (isPdfPath(path)) return PdfThumbs.of(path, services.library.cacheDir);
-        final kind = MediaKind.fromName(name);
-        if (kind == MediaKind.image || kind == MediaKind.video) {
-          final lib = services.library;
-          final root = '${lib.rootPath}${Platform.pathSeparator}';
-          if (!services.ffmpeg.available || !path.toLowerCase().startsWith(root.toLowerCase())) return null;
-          final rel = path.substring(root.length).replaceAll(Platform.pathSeparator, '/');
-          // Not in the library list; described just enough for ffmpeg's cache.
-          return services.ffmpeg.thumbnail(MediaItem(
-            relPath: rel,
-            name: name,
-            size: size,
-            kind: kind,
-            captureMs: modified.millisecondsSinceEpoch,
-            receivedMs: 0,
-          ));
-        }
-        return FirstPages.of(path);
-      });
+  Future<Object?> _load() => _cache.get('$path|$size|${modified.millisecondsSinceEpoch}', () => retryWhileNull(_make));
+
+  Future<Object?> _make() async {
+    final name = path.split(Platform.pathSeparator).last;
+    if (isPdfPath(path)) return PdfThumbs.of(path, services.library.cacheDir);
+    final kind = MediaKind.fromName(name);
+    if (kind == MediaKind.image || kind == MediaKind.video) {
+      final lib = services.library;
+      final root = '${lib.rootPath}${Platform.pathSeparator}';
+      if (!services.ffmpeg.available || !path.toLowerCase().startsWith(root.toLowerCase())) return null;
+      final rel = path.substring(root.length).replaceAll(Platform.pathSeparator, '/');
+      // Not in the library list; described just enough for ffmpeg's cache.
+      return services.ffmpeg.thumbnail(MediaItem(
+        relPath: rel,
+        name: name,
+        size: size,
+        kind: kind,
+        captureMs: modified.millisecondsSinceEpoch,
+        receivedMs: 0,
+      ));
+    }
+    return FirstPages.of(path);
+  }
 
   @override
   Widget build(BuildContext context) {

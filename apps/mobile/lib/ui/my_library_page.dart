@@ -496,10 +496,11 @@ class _PdfTile extends StatelessWidget {
   final MyItem item;
 
   /// Per item and name (a renamed file is drawn again): the same future on
-  /// every rebuild, so the page doesn't flicker back to the icon.
-  static final Map<String, Future<Uint8List?>> _cache = {};
+  /// every rebuild, so the page doesn't flicker back to the icon; a failure
+  /// is made again a little later.
+  static final SoftCache<Uint8List> _cache = SoftCache(max: 300);
 
-  Future<Uint8List?> _load() => _cache.putIfAbsent('${item.id}|${item.name}', () async {
+  Future<Uint8List?> _load() => _cache.get('${item.id}|${item.name}', () async {
         final path = await MyLibrary.instance.pathOf(item);
         if (path == null) return null;
         return PdfPages.thumb(path);
@@ -540,16 +541,17 @@ class _DocTile extends StatelessWidget {
 
   final MyItem item;
 
-  /// A PNG (from the system) or a [FirstPage], per item and name.
-  static final Map<String, Future<Object?>> _cache = {};
+  /// A PNG (from the system) or a [FirstPage], per item and name; tried
+  /// again when the file just arrived and can't be read yet.
+  static final SoftCache<Object> _cache = SoftCache(max: 300);
 
-  Future<Object?> _load() => _cache.putIfAbsent('${item.id}|${item.name}', () async {
+  Future<Object?> _load() => _cache.get('${item.id}|${item.name}', () => retryWhileNull(() async {
         final path = await MyLibrary.instance.pathOf(item);
         if (path == null) return null;
         final png = await FileOpener.thumbnail(path);
         if (png != null) return png;
         return FirstPages.of(path, name: item.name);
-      });
+      }));
 
   @override
   Widget build(BuildContext context) => FutureBuilder<Object?>(
