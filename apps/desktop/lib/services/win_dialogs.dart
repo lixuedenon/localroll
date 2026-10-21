@@ -237,7 +237,7 @@ List<String> _show(bool folder, bool multiple, String? title, String? filterName
           _vt<_SetFileTypesN>(dlg, 4).asFunction<_SetFileTypesD>()(dlg, 2, specs);
         }
         if (save) {
-          _vt<_SetTextN>(dlg, 15).asFunction<_SetTextD>()(dlg, saveAs!.toNativeUtf16(allocator: arena)); // SetFileName
+          _vt<_SetTextN>(dlg, 15).asFunction<_SetTextD>()(dlg, saveAs.toNativeUtf16(allocator: arena)); // SetFileName
           if (defaultExt != null) {
             _vt<_SetTextN>(dlg, 22).asFunction<_SetTextD>()(dlg, defaultExt.toNativeUtf16(allocator: arena)); // SetDefaultExtension
           }
