@@ -1,8 +1,11 @@
 // apps/desktop/lib/ui/library_page.dart
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:localroll_core/localroll_core.dart';
 
 import '../app_services.dart';
@@ -15,10 +18,14 @@ import '../services/peers.dart';
 import '../services/received_files.dart';
 import '../services/win_dialogs.dart';
 import 'files_view.dart';
+import 'format.dart';
 import 'library_recovery.dart';
 import 'media_thumb.dart';
+import 'select_by_dialog.dart';
 import 'send_page.dart';
 import 'theme.dart';
+import 'trash_actions.dart';
+import 'trash_page.dart';
 import 'viewer_page.dart';
 
 enum _Filter { all, photos, videos, docs, other }
@@ -32,6 +39,10 @@ class _Cell {
   final MediaItem? media;
   final ReceivedFile? file;
   final DateTime day;
+
+  /// Its selection key: the item's path in the library, or "f:" + the
+  /// received file's full path.
+  String get key => media?.relPath ?? _LibraryPageState.fileKey(file!.path);
 }
 
 /// Received media grouped by capture day, newest first; All / Photos / Videos.
@@ -54,7 +65,43 @@ class _LibraryPageState extends State<LibraryPage> {
   /// "Only me" items are hidden until this is switched on.
   bool _showPrivate = false;
 
-  bool get _selecting => _selected.isNotEmpty;
+  bool get _selecting => _selected.isNotEmpty || _copies.isNotEmpty;
+
+  static String fileKey(String path) => 'f:$path';
+
+  /// Converted copies picked with "Select by…" (not shown in the grid):
+  /// full path → size.
+  final Map<String, int> _copies = {};
+
+  /// Keyboard: Ctrl+A, Delete, Esc.
+  final FocusNode _focus = FocusNode(debugLabel: 'library');
+  final ScrollController _scroll = ScrollController();
+
+  /// The square under the mouse (its round "select" button shows).
+  final ValueNotifier<String?> _hovered = ValueNotifier(null);
+
+  /// Where Shift+click selects from.
+  String? _anchor;
+
+  /// Selection keys in the order shown (for Shift+click and Ctrl+A).
+  List<String> _order = const [];
+
+  /// Squares on screen now, for selecting with a box.
+  final Map<String, BuildContext> _boxes = {};
+  final GlobalKey _gridKey = GlobalKey();
+  Offset? _downAt;
+  double _downOffset = 0;
+  Offset? _dragNow;
+  bool _boxing = false;
+  Set<String> _boxBase = {};
+  final Set<String> _boxHits = {};
+  Timer? _autoScroll;
+
+  void _clearSelection() {
+    _selected.clear();
+    _copies.clear();
+    _anchor = null;
+  }
 
   /// Received files (Documents / Other), shown on the "All" timeline by the
   /// day they arrived.
@@ -78,6 +125,10 @@ class _LibraryPageState extends State<LibraryPage> {
       unawaited(w.cancel());
     }
     _filesSoon?.cancel();
+    _autoScroll?.cancel();
+    _focus.dispose();
+    _scroll.dispose();
+    _hovered.dispose();
     super.dispose();
   }
 
@@ -248,11 +299,22 @@ class _LibraryPageState extends State<LibraryPage> {
         final family = s.settings.family;
         final all = s.library.items;
         final items = _visible(all, family);
-        _selected.removeWhere((p) => !items.any((i) => i.relPath == p));
-        return Scaffold(
+        // What is no longer shown is no longer selected.
+        if (_filesTab) {
+          _clearSelection();
+        } else if (_selected.isNotEmpty) {
+          final shown = {for (final i in items) i.relPath, for (final f in _visibleFiles()) fileKey(f.path)};
+          _selected.removeWhere((k) => !shown.contains(k));
+        }
+        final chosenMedia = _selected.isEmpty ? const <MediaItem>[] : [for (final i in items) if (_selected.contains(i.relPath)) i];
+        return Focus(
+          focusNode: _focus,
+          autofocus: true,
+          onKeyEvent: (_, e) => _onKey(e, items),
+          child: Scaffold(
           appBar: AppBar(
             title: _selecting
-                ? Text(tr('library.selected', {'count': _selected.length}))
+                ? Text(tr('lib.selected_size', {'count': _selected.length + _copies.length, 'size': formatBytes(_selectedSize(chosenMedia))}))
                 : Row(children: [
                     Text(tr('nav.library')),
                     const SizedBox(width: 12),
@@ -277,31 +339,34 @@ class _LibraryPageState extends State<LibraryPage> {
                     ],
                   ]),
             leading: _selecting
-                ? IconButton(icon: const Icon(Icons.close), onPressed: () => setState(_selected.clear))
+                ? IconButton(tooltip: tr('common.cancel'), icon: const Icon(Icons.close), onPressed: () => setState(_clearSelection))
                 : null,
             actions: [
               if (_selecting) ...[
+                if (chosenMedia.isNotEmpty) ...[
                 IconButton(
                   tooltip: tr('lib.export'),
                   icon: const Icon(Icons.drive_file_move_rounded),
-                  onPressed: () => _export(items.where((i) => _selected.contains(i.relPath)).toList()),
+                  onPressed: () => _export(chosenMedia),
                 ),
                 IconButton(
                   tooltip: tr('send.to_pc'),
                   icon: const Icon(Icons.send_rounded),
-                  onPressed: () => _sendToPc(items.where((i) => _selected.contains(i.relPath)).toList()),
+                  onPressed: () => _sendToPc(chosenMedia),
                 ),
+                ],
                 IconButton(
-                  tooltip: tr('lib.delete'),
+                  tooltip: '${tr('lib.delete')} (Delete)',
                   icon: const Icon(Icons.delete_outline_rounded),
-                  onPressed: () => _delete(items.where((i) => _selected.contains(i.relPath)).toList()),
+                  onPressed: () => _deleteSelected(items),
                 ),
+                if (chosenMedia.isNotEmpty)
                 PopupMenuButton<ConvertPreset>(
                   tooltip: tr('convert.selected_tooltip'),
                   icon: const Icon(Icons.auto_fix_high),
                   onSelected: (p) {
-                    s.converter.enqueue(items.where((i) => _selected.contains(i.relPath)), p);
-                    setState(_selected.clear);
+                    s.converter.enqueue(chosenMedia, p);
+                    setState(_clearSelection);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(tr('convert.queued', {'preset': p.label}))),
                     );
@@ -348,6 +413,17 @@ class _LibraryPageState extends State<LibraryPage> {
                     ],
                     icon: const Icon(Icons.photo_size_select_large_rounded),
                   ),
+                if (!_filesTab)
+                  IconButton(
+                    tooltip: tr('pick.title'),
+                    onPressed: () => _selectBy(all, family),
+                    icon: const Icon(Icons.checklist_rounded),
+                  ),
+                IconButton(
+                  tooltip: tr('trash.title'),
+                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => TrashPage(services: s))),
+                  icon: const Icon(Icons.restore_from_trash_rounded),
+                ),
                 IconButton(
                   tooltip: tr('library.open_folder'),
                   onPressed: () => revealInExplorer(s.library.rootPath),
@@ -370,9 +446,162 @@ class _LibraryPageState extends State<LibraryPage> {
               ),
             ],
           ),
+          ),
         );
       },
     );
+  }
+
+  /// Bytes of what is selected (Live Photo videos included).
+  int _selectedSize(List<MediaItem> media) {
+    var n = 0;
+    for (final i in widget.services.library.withLive(media)) {
+      n += i.size;
+    }
+    for (final f in _files) {
+      if (_selected.contains(fileKey(f.path))) n += f.size;
+    }
+    for (final v in _copies.values) {
+      n += v;
+    }
+    return n;
+  }
+
+  KeyEventResult _onKey(KeyEvent e, List<MediaItem> items) {
+    if (e is! KeyDownEvent || _filesTab) return KeyEventResult.ignored;
+    final ctrl = HardwareKeyboard.instance.isControlPressed;
+    if (ctrl && e.logicalKey == LogicalKeyboardKey.keyA) {
+      setState(() {
+        _selected.addAll(_order);
+        if (_order.isNotEmpty) _anchor ??= _order.first;
+      });
+      return KeyEventResult.handled;
+    }
+    if (e.logicalKey == LogicalKeyboardKey.escape && _selecting) {
+      setState(_clearSelection);
+      return KeyEventResult.handled;
+    }
+    if (e.logicalKey == LogicalKeyboardKey.delete && _selecting) {
+      unawaited(_deleteSelected(items));
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
+  }
+
+  /// Click on a square: Shift = from the last one clicked to here; Ctrl, or
+  /// while selecting = this one on / off; otherwise [open] it.
+  void _tap(String key, VoidCallback open) {
+    _focus.requestFocus();
+    final kb = HardwareKeyboard.instance;
+    final from = _anchor;
+    if (kb.isShiftPressed && from != null) {
+      final a = _order.indexOf(from);
+      final b = _order.indexOf(key);
+      if (a >= 0 && b >= 0) {
+        setState(() {
+          if (!kb.isControlPressed) _selected.clear();
+          _selected.addAll(_order.sublist(min(a, b), max(a, b) + 1));
+        });
+        return;
+      }
+    }
+    if (kb.isControlPressed || kb.isShiftPressed || _selecting) {
+      _toggle(key);
+      return;
+    }
+    open();
+  }
+
+  void _toggle(String key) {
+    _focus.requestFocus();
+    setState(() {
+      if (!_selected.remove(key)) _selected.add(key);
+      _anchor = key;
+    });
+  }
+
+  /// Delete what is selected: photos / videos, received files and the
+  /// converted copies picked with "Select by…".
+  Future<void> _deleteSelected(List<MediaItem> items) async {
+    final media = [for (final i in items) if (_selected.contains(i.relPath)) i];
+    final files = [
+      for (final f in _files)
+        if (_selected.contains(fileKey(f.path))) f.path,
+      ..._copies.keys,
+    ];
+    final n = await deleteToTrash(context, widget.services, media: media, files: files);
+    if (n == 0 || !mounted) return;
+    setState(_clearSelection);
+    await _loadFiles();
+  }
+
+  /// "Select by…": everything (only-me items when shown), whatever the
+  /// filter; the page then shows all so the selection can be seen.
+  Future<void> _selectBy(List<MediaItem> all, FamilyDirectory family) async {
+    final s = widget.services;
+    final cands = <PickCandidate>[
+      for (final i in all)
+        if (_showPrivate || !i.private)
+          PickCandidate(
+            key: i.relPath,
+            size: s.library.withLive([i]).fold(0, (a, x) => a + x.size),
+            taken: i.captureTime,
+            received: DateTime.fromMillisecondsSinceEpoch(i.receivedMs),
+            type: i.kind == MediaKind.video ? PickType.video : PickType.photo,
+            from: _memberOf(family, i),
+          ),
+      for (final f in _files)
+        PickCandidate(
+          key: fileKey(f.path),
+          size: f.size,
+          taken: f.arrived,
+          received: f.arrived,
+          type: f.document ? PickType.doc : PickType.other,
+          from: f.owner == null ? null : (family.memberOf(f.owner!.deviceId) ?? f.owner!.deviceName),
+        ),
+      ...await _convertedCopies(),
+    ];
+    if (!mounted) return;
+    final picked = await showSelectByDialog(context, cands);
+    if (picked == null || !mounted) return;
+    setState(() {
+      _filter = _Filter.all;
+      _member = null;
+      _onlyRecent = false;
+      _clearSelection();
+      for (final c in picked) {
+        if (c.type == PickType.copy) {
+          _copies[c.key.substring(2)] = c.size;
+        } else {
+          _selected.add(c.key);
+        }
+      }
+    });
+    _focus.requestFocus();
+  }
+
+  /// Files in _converted (conversion results; the originals stay).
+  Future<List<PickCandidate>> _convertedCopies() async {
+    final dir = Directory('${widget.services.library.rootPath}${Platform.pathSeparator}_converted');
+    final out = <PickCandidate>[];
+    try {
+      if (!await dir.exists()) return out;
+      await for (final e in dir.list(recursive: true, followLinks: false)) {
+        if (e is! File) continue;
+        if (e.path.split(Platform.pathSeparator).last.toLowerCase() == 'desktop.ini') continue;
+        try {
+          final st = await e.stat();
+          out.add(PickCandidate(
+            key: 'c:${e.path}',
+            size: st.size,
+            taken: st.modified,
+            received: st.modified,
+            type: PickType.copy,
+          ));
+        } catch (_) {}
+      }
+    } catch (_) {}
+    return out;
   }
 
   /// Library folder unreachable, or many files vanished at once.
@@ -401,6 +630,12 @@ class _LibraryPageState extends State<LibraryPage> {
         ]),
       // Unplugged drive / deleted or moved folder: what can be done.
       if (lib.offline) LibraryRecovery(services: widget.services),
+      // Converted copies picked with "Select by…" are not in the grid.
+      if (_copies.isNotEmpty)
+        banner(Icons.auto_fix_high_rounded, LrColors.safelight,
+            tr('lib.copies_selected', {'count': _copies.length, 'size': formatBytes(_copies.values.fold(0, (a, b) => a + b))}), [
+          TextButton(onPressed: () => setState(_copies.clear), child: Text(tr('lib.copies_drop'))),
+        ]),
       if (!lib.offline && lib.pendingMissing.isNotEmpty)
         banner(Icons.help_outline_rounded, Colors.amber, tr('lib.missing_ask', {'count': lib.pendingMissing.length}), [
           TextButton(onPressed: lib.retry, child: Text(tr('lib.missing_rescan'))),
@@ -410,57 +645,11 @@ class _LibraryPageState extends State<LibraryPage> {
     ];
   }
 
-  /// Delete = move to the Windows Recycle Bin. Phones are told next time.
+  /// Delete = into "Recently deleted" (30 days, with Undo). Phones are
+  /// told next time.
   Future<void> _delete(List<MediaItem> items) async {
-    if (items.isEmpty) return;
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        icon: const Icon(Icons.delete_outline_rounded, size: 32),
-        title: Text(tr('lib.delete_title', {'count': items.length})),
-        content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: Text(tr('lib.delete_body')),
-        ),
-        actions: [
-          OutlinedButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('exit.stay'))),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('lib.delete'))),
-        ],
-      ),
-    );
-    if (ok != true || !mounted) return;
-    // Big deletions: show progress (thousands of files take a little while).
-    final progress = ValueNotifier<(int, int)>((0, items.length));
-    final showProgress = items.length >= 50;
-    if (showProgress) {
-      showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) => PopScope(
-          canPop: false,
-          child: AlertDialog(
-            content: ValueListenableBuilder<(int, int)>(
-              valueListenable: progress,
-              builder: (_, v, _) => Column(mainAxisSize: MainAxisSize.min, children: [
-                Text(tr('lib.deleting', {'done': v.$1, 'total': v.$2})),
-                const SizedBox(height: 12),
-                LinearProgressIndicator(value: v.$2 == 0 ? null : v.$1 / v.$2),
-              ]),
-            ),
-          ),
-        ),
-      );
-    }
-    final n = await deleteItems(
-      widget.services.library,
-      items,
-      onProgress: (done, total) => progress.value = (done, total),
-    );
-    if (showProgress && mounted) Navigator.of(context).pop();
-    progress.dispose();
-    if (!mounted) return;
-    setState(_selected.clear);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('lib.deleted', {'count': n}))));
+    final n = await deleteToTrash(context, widget.services, media: items);
+    if (n > 0 && mounted) setState(_clearSelection);
   }
 
   /// Send originals (with their Live Photo videos) to another PC's library.
@@ -469,7 +658,7 @@ class _LibraryPageState extends State<LibraryPage> {
     final lib = widget.services.library;
     final files = [for (final i in lib.withLive(items)) ?SendFile.fromLibrary(lib, i)];
     if (files.isEmpty) return;
-    setState(_selected.clear);
+    setState(_clearSelection);
     await sendToPc(context, widget.services, files,
         items.length == 1 ? items.first.name : tr('send.n_items', {'count': items.length}));
   }
@@ -481,7 +670,7 @@ class _LibraryPageState extends State<LibraryPage> {
     if (folder == null) return;
     final n = await exportItems(widget.services.library, items, folder);
     if (!mounted) return;
-    setState(_selected.clear);
+    setState(_clearSelection);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(tr('lib.exported', {'count': n})),
       action: SnackBarAction(label: tr('common.open'), onPressed: () => revealInExplorer(folder)),
@@ -534,7 +723,7 @@ class _LibraryPageState extends State<LibraryPage> {
           builder: (_) => ViewerPage(services: s, items: items, initialIndex: index),
         ));
       case 'select':
-        setState(() => _selected.contains(item.relPath) ? _selected.remove(item.relPath) : _selected.add(item.relPath));
+        _toggle(item.relPath);
       case 'export':
         await _export(targets);
       case 'send':
@@ -543,14 +732,14 @@ class _LibraryPageState extends State<LibraryPage> {
         revealInExplorer(s.library.absPath(item));
       case 'private' || 'shared':
         s.library.setPrivate(targets, choice == 'private');
-        setState(_selected.clear);
+        setState(_clearSelection);
       case 'delete':
         await _delete(targets);
       default:
         if (choice.startsWith('convert:')) {
           final p = ConvertPreset.values.firstWhere((x) => 'convert:${x.name}' == choice);
           s.converter.enqueue(targets, p);
-          setState(_selected.clear);
+          setState(_clearSelection);
           ScaffoldMessenger.of(this.context).showSnackBar(
             SnackBar(content: Text(tr('convert.queued', {'preset': p.label}))),
           );
@@ -584,6 +773,7 @@ class _LibraryPageState extends State<LibraryPage> {
     // Group into days; photos / videos keep their index in [items] for the
     // viewer (it pages through photos and videos only).
     final cells = _cells(items);
+    _order = [for (final c in cells) c.key];
     final indexOf = {for (var k = 0; k < items.length; k++) items[k].relPath: k};
     final slivers = <Widget>[];
     var start = 0;
@@ -597,15 +787,37 @@ class _LibraryPageState extends State<LibraryPage> {
       final photos = day.where((c) => c.media?.kind == MediaKind.image).length;
       final videos = day.where((c) => c.media?.kind == MediaKind.video).length;
       final files = day.where((c) => c.file != null).length;
+      final keys = [for (final c in day) c.key];
+      final whole = keys.every(_selected.contains);
       final theme = Theme.of(context);
       slivers
         ..add(SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 10),
+            padding: const EdgeInsets.fromLTRB(8, 20, 16, 6),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
               children: [
+                // The whole day on / off.
+                IconButton(
+                  tooltip: tr(whole ? 'lib.unselect_day' : 'lib.select_day'),
+                  iconSize: 20,
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () {
+                    _focus.requestFocus();
+                    setState(() {
+                      if (whole) {
+                        _selected.removeAll(keys);
+                      } else {
+                        _selected.addAll(keys);
+                        _anchor = keys.last;
+                      }
+                    });
+                  },
+                  icon: Icon(
+                    whole ? Icons.check_circle_rounded : Icons.check_circle_outline_rounded,
+                    color: whole ? theme.colorScheme.primary : LrColors.muted,
+                  ),
+                ),
+                const SizedBox(width: 4),
                 Text(formatDayFull(t), style: theme.textTheme.titleMedium),
                 const SizedBox(width: 12),
                 Text(
@@ -632,63 +844,237 @@ class _LibraryPageState extends State<LibraryPage> {
             itemBuilder: (context, i) {
               final c = day[i];
               final m = c.media;
-              return m != null ? _cell(context, items, indexOf[m.relPath]!) : _fileCell(context, c.file!);
+              return _Box(
+                key: ValueKey(c.key),
+                id: c.key,
+                boxes: _boxes,
+                child: m != null ? _cell(context, items, indexOf[m.relPath]!) : _fileCell(context, c.file!),
+              );
             },
           ),
         ));
       start = end;
     }
     slivers.add(const SliverToBoxAdapter(child: SizedBox(height: 24)));
-    return CustomScrollView(slivers: slivers);
+    // Drag with the mouse to select with a box (Ctrl: add to what is
+    // selected).
+    return Listener(
+      onPointerDown: _boxDown,
+      onPointerMove: _boxMove,
+      onPointerUp: (_) => _boxEnd(),
+      onPointerCancel: (_) => _boxEnd(),
+      child: Stack(key: _gridKey, children: [
+        CustomScrollView(controller: _scroll, slivers: slivers),
+        if (_boxing && _dragNow != null && _downAt != null)
+          Positioned.fill(
+            child: IgnorePointer(
+              child: CustomPaint(painter: _BoxPainter(_boxRectLocal(), Theme.of(context).colorScheme.primary)),
+            ),
+          ),
+      ]),
+    );
   }
+
+  // ------------------------------------------------------- box select
+
+  RenderBox? get _gridBox => _gridKey.currentContext?.findRenderObject() as RenderBox?;
+
+  void _boxDown(PointerDownEvent e) {
+    if (e.kind != PointerDeviceKind.mouse || e.buttons != kPrimaryMouseButton) return;
+    final g = _gridBox;
+    // Not on the scrollbar.
+    if (g != null && g.globalToLocal(e.position).dx > g.size.width - 18) return;
+    _downAt = e.position;
+    _downOffset = _scroll.hasClients ? _scroll.offset : 0;
+  }
+
+  void _boxMove(PointerMoveEvent e) {
+    final down = _downAt;
+    if (down == null) return;
+    if (!_boxing) {
+      if ((e.position - down).distance < 20) return;
+      _boxing = true;
+      _focus.requestFocus();
+      _boxBase = HardwareKeyboard.instance.isControlPressed ? {..._selected} : {};
+      _boxHits.clear();
+    }
+    _dragNow = e.position;
+    _updateBox();
+    _autoScrollIfNearEdge();
+  }
+
+  void _boxEnd() {
+    _downAt = null;
+    _autoScroll?.cancel();
+    _autoScroll = null;
+    if (_boxing) setState(() => _boxing = false);
+  }
+
+  /// The box in screen coordinates (its start moves with the scrolling).
+  Rect _boxRectGlobal() {
+    final scrolled = (_scroll.hasClients ? _scroll.offset : 0) - _downOffset;
+    final start = _downAt! - Offset(0, scrolled);
+    return Rect.fromPoints(start, _dragNow!);
+  }
+
+  Rect _boxRectLocal() {
+    final g = _gridBox;
+    final r = _boxRectGlobal();
+    if (g == null) return r;
+    return Rect.fromPoints(g.globalToLocal(r.topLeft), g.globalToLocal(r.bottomRight));
+  }
+
+  void _updateBox() {
+    final rect = _boxRectGlobal();
+    // Squares on screen: in the box or not. Those scrolled away keep what
+    // they were.
+    for (final e in _boxes.entries) {
+      final rb = e.value.findRenderObject();
+      if (rb is! RenderBox || !rb.attached || !rb.hasSize) continue;
+      final r = rb.localToGlobal(Offset.zero) & rb.size;
+      if (r.overlaps(rect)) {
+        _boxHits.add(e.key);
+      } else {
+        _boxHits.remove(e.key);
+      }
+    }
+    setState(() {
+      _selected
+        ..clear()
+        ..addAll(_boxBase)
+        ..addAll(_boxHits);
+      if (_boxHits.isNotEmpty) _anchor ??= _boxHits.first;
+    });
+  }
+
+  /// Near the top or bottom edge while dragging: scroll on.
+  void _autoScrollIfNearEdge() {
+    final g = _gridBox;
+    final at = _dragNow;
+    if (g == null || at == null || !_scroll.hasClients) return;
+    final y = g.globalToLocal(at).dy;
+    const edge = 48.0;
+    final speed = y < edge ? -(edge - y) : (y > g.size.height - edge ? y - (g.size.height - edge) : 0.0);
+    if (speed == 0) {
+      _autoScroll?.cancel();
+      _autoScroll = null;
+      return;
+    }
+    _autoScroll ??= Timer.periodic(const Duration(milliseconds: 16), (_) {
+      if (!_boxing || !_scroll.hasClients || _dragNow == null) return;
+      final y2 = g.globalToLocal(_dragNow!).dy;
+      final v = y2 < edge ? -(edge - y2) : (y2 > g.size.height - edge ? y2 - (g.size.height - edge) : 0.0);
+      if (v == 0) return;
+      final p = _scroll.position;
+      final to = (p.pixels + v * 0.5).clamp(p.minScrollExtent, p.maxScrollExtent);
+      if (to == p.pixels) return;
+      _scroll.jumpTo(to);
+      _updateBox();
+    });
+  }
+
+  // ------------------------------------------------------- squares
+
+  /// The round "select" button at the top left: on hover, or always once
+  /// selecting; ticked when selected.
+  Widget _selectButton(String key, bool selected) => Positioned(
+        left: 4,
+        top: 4,
+        child: ValueListenableBuilder<String?>(
+          valueListenable: _hovered,
+          builder: (context, hover, _) {
+            if (!selected && hover != key && !_selecting) return const SizedBox.shrink();
+            return GestureDetector(
+              onTap: () => _toggle(key),
+              child: Container(
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [BoxShadow(color: Colors.black45, blurRadius: 4)],
+                ),
+                child: Icon(
+                  selected ? Icons.check_circle : Icons.radio_button_unchecked_rounded,
+                  size: 22,
+                  color: selected ? Theme.of(context).colorScheme.primary : Colors.white,
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+  Widget _hover(String key, Widget child) => MouseRegion(
+        onEnter: (_) => _hovered.value = key,
+        onExit: (_) {
+          if (_hovered.value == key) _hovered.value = null;
+        },
+        child: child,
+      );
+
+  Widget _selectedFrame(BuildContext context) => IgnorePointer(
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: Theme.of(context).colorScheme.primary, width: 3),
+            color: Colors.black26,
+          ),
+        ),
+      );
 
   /// A received file on the timeline: its first page and name; opens the
   /// way it does under Documents / Other.
   Widget _fileCell(BuildContext context, ReceivedFile f) {
     final s = widget.services;
-    return Tooltip(
-      message: f.name,
-      waitDuration: const Duration(milliseconds: 600),
-      child: GestureDetector(
-        onTap: _selecting ? null : () => openReceivedFile(context, s, f.path),
-        onSecondaryTapUp: (d) => _fileMenu(context, f, d.globalPosition),
-        child: Stack(fit: StackFit.expand, children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: FileThumb(
-              key: ValueKey(f.path),
-              path: f.path,
-              size: f.size,
-              modified: f.modified,
-              services: s,
-              icon: Container(
-                color: LrColors.raised,
-                alignment: Alignment.center,
-                child: Icon(_iconFor(f.name), size: 40, color: LrColors.muted),
-              ),
-            ),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.black54,
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(4)),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-              child: Row(children: [
-                Icon(_iconFor(f.name), size: 13, color: Colors.white),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(f.name,
-                      maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: Colors.white)),
+    final key = fileKey(f.path);
+    final selected = _selected.contains(key);
+    return _hover(
+      key,
+      Tooltip(
+        message: f.name,
+        waitDuration: const Duration(milliseconds: 600),
+        child: GestureDetector(
+          onTap: () => _tap(key, () => openReceivedFile(context, s, f.path)),
+          onLongPress: () => _toggle(key),
+          onSecondaryTapUp: (d) => _fileMenu(context, f, d.globalPosition),
+          child: Stack(fit: StackFit.expand, children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: FileThumb(
+                key: ValueKey(f.path),
+                path: f.path,
+                size: f.size,
+                modified: f.modified,
+                services: s,
+                icon: Container(
+                  color: LrColors.raised,
+                  alignment: Alignment.center,
+                  child: Icon(_iconFor(f.name), size: 40, color: LrColors.muted),
                 ),
-              ]),
+              ),
             ),
-          ),
-        ]),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.vertical(bottom: Radius.circular(4)),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                child: Row(children: [
+                  Icon(_iconFor(f.name), size: 13, color: Colors.white),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(f.name,
+                        maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: Colors.white)),
+                  ),
+                ]),
+              ),
+            ),
+            if (selected) _selectedFrame(context),
+            _selectButton(key, selected),
+          ]),
+        ),
       ),
     );
   }
@@ -706,14 +1092,20 @@ class _LibraryPageState extends State<LibraryPage> {
     return Icons.insert_drive_file_rounded;
   }
 
-  /// Right-click on a received file: open, show in its folder, delete.
+  /// Right-click on a received file: open, select, show in its folder,
+  /// delete.
   Future<void> _fileMenu(BuildContext context, ReceivedFile f, Offset at) async {
+    final key = fileKey(f.path);
     final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
     final choice = await showMenu<String>(
       context: context,
       position: RelativeRect.fromRect(at & const Size(1, 1), Offset.zero & overlay.size),
       items: [
         PopupMenuItem(value: 'open', child: _menuRow(Icons.open_in_full_rounded, tr('lib.open'))),
+        PopupMenuItem(
+          value: 'select',
+          child: _menuRow(Icons.check_circle_outline_rounded, _selected.contains(key) ? tr('lib.unselect') : tr('lib.select')),
+        ),
         PopupMenuItem(value: 'reveal', child: _menuRow(Icons.folder_open_rounded, tr('common.show_in_folder'))),
         const PopupMenuDivider(),
         PopupMenuItem(value: 'delete', child: _menuRow(Icons.delete_outline_rounded, tr('lib.delete'), danger: true)),
@@ -723,68 +1115,114 @@ class _LibraryPageState extends State<LibraryPage> {
     switch (choice) {
       case 'open':
         await openReceivedFile(this.context, widget.services, f.path);
+      case 'select':
+        _toggle(key);
       case 'reveal':
         revealInExplorer(f.path);
       case 'delete':
-        final ok = await showDialog<bool>(
-          context: this.context,
-          builder: (c) => AlertDialog(
-            title: Text(tr('files.delete_title', {'name': f.name})),
-            content: Text(tr('files.delete_body')),
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('common.cancel'))),
-              FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(tr('lib.delete'))),
-            ],
-          ),
-        );
-        if (ok != true) return;
-        await moveToRecycleBin([f.path]);
-        widget.services.server.files.forget();
-        await _loadFiles();
+        final n = await deleteToTrash(this.context, widget.services, files: [f.path]);
+        if (n > 0 && mounted) {
+          setState(() => _selected.remove(key));
+          await _loadFiles();
+        }
     }
   }
 
   Widget _cell(BuildContext context, List<MediaItem> items, int index) {
     final s = widget.services;
     final item = items[index];
-    final selected = _selected.contains(item.relPath);
-    return GestureDetector(
-      onTap: () {
-        if (_selecting) {
-          setState(() => selected ? _selected.remove(item.relPath) : _selected.add(item.relPath));
-        } else {
-          Navigator.of(context).push(MaterialPageRoute(
+    final key = item.relPath;
+    final selected = _selected.contains(key);
+    return _hover(
+      key,
+      GestureDetector(
+        onTap: () => _tap(
+          key,
+          () => Navigator.of(context).push(MaterialPageRoute(
             builder: (_) => ViewerPage(services: s, items: items, initialIndex: index),
-          ));
-        }
-      },
-      onLongPress: () => setState(() => _selected.add(item.relPath)),
-      onSecondaryTapUp: (d) => _contextMenu(context, items, index, d.globalPosition),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: MediaThumb(
-              key: ValueKey(item.relPath),
-              item: item,
-              library: s.library,
-              ffmpeg: s.ffmpeg,
-            ),
-          ),
-          if (selected)
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: Theme.of(context).colorScheme.primary, width: 3),
-                color: Colors.black26,
+          )),
+        ),
+        onLongPress: () => _toggle(key),
+        onSecondaryTapUp: (d) => _contextMenu(context, items, index, d.globalPosition),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: MediaThumb(
+                key: ValueKey(item.relPath),
+                item: item,
+                library: s.library,
+                ffmpeg: s.ffmpeg,
               ),
-              alignment: Alignment.topRight,
-              padding: const EdgeInsets.all(4),
-              child: Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary),
             ),
-        ],
+            if (selected) _selectedFrame(context),
+            _selectButton(key, selected),
+          ],
+        ),
       ),
     );
   }
+}
+
+/// Keeps track of a square while it is on screen (for selecting with a box).
+class _Box extends StatefulWidget {
+  const _Box({super.key, required this.id, required this.boxes, required this.child});
+
+  final String id;
+  final Map<String, BuildContext> boxes;
+  final Widget child;
+
+  @override
+  State<_Box> createState() => _BoxState();
+}
+
+class _BoxState extends State<_Box> {
+  @override
+  void initState() {
+    super.initState();
+    widget.boxes[widget.id] = context;
+  }
+
+  @override
+  void didUpdateWidget(_Box old) {
+    super.didUpdateWidget(old);
+    if (old.id != widget.id) {
+      if (old.boxes[old.id] == context) old.boxes.remove(old.id);
+      widget.boxes[widget.id] = context;
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.boxes[widget.id] == context) widget.boxes.remove(widget.id);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
+/// The selection box.
+class _BoxPainter extends CustomPainter {
+  _BoxPainter(this.rect, this.color);
+
+  final Rect rect;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas
+      ..drawRect(rect, Paint()..color = color.withValues(alpha: 0.15))
+      ..drawRect(
+        rect,
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.5,
+      );
+  }
+
+  @override
+  bool shouldRepaint(_BoxPainter old) => old.rect != rect || old.color != color;
 }

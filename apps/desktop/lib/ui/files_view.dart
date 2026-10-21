@@ -16,6 +16,7 @@ import 'office_view.dart';
 import 'pdf_thumb.dart';
 import 'pdf_viewer_page.dart';
 import 'text_window.dart';
+import 'trash_actions.dart';
 
 /// Library tabs "Documents" / "Other": the files other PCs sent that are not
 /// photos or videos, straight from their folders (newest first).
@@ -126,6 +127,12 @@ class _FilesViewState extends State<FilesView> {
   }
 
   Future<void> _delete(_Entry e) async {
+    // A file: into "Recently deleted" (30 days, with Undo).
+    if (!e.isDir) {
+      final n = await deleteToTrash(context, widget.services, files: [e.entity.path]);
+      if (n > 0) await _load();
+      return;
+    }
     final ok = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(

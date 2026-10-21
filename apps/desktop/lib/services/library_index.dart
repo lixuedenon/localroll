@@ -849,6 +849,29 @@ class LibraryIndex extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Items put back (restored from LocalRoll's "Recently deleted"; the
+  /// files are already in place): in the library again, and no longer
+  /// reported to phones as deleted.
+  void undelete(List<MediaItem> items) {
+    for (final item in items) {
+      final keys = {
+        if (item.assetId != null) '${item.deviceId ?? ''}|${item.assetId}',
+        ...item.also,
+      };
+      _deleted.removeWhere((t) =>
+          (t.assetId.isNotEmpty && keys.contains('${t.deviceId}|${t.assetId}')) ||
+          (t.item != null && t.item!.relPath.toLowerCase() == item.relPath.toLowerCase() && t.item!.size == item.size));
+      bool same(MediaItem i) => i.relPath.toLowerCase() == item.relPath.toLowerCase();
+      _items.removeWhere(same);
+      pendingMissing = pendingMissing.where((i) => !same(i)).toList();
+      _items.add(item);
+    }
+    if (items.isEmpty) return;
+    _sort();
+    _scheduleSave();
+    notifyListeners();
+  }
+
   /// Removes items from the index (the caller already deleted the files).
   void removeItems(Iterable<MediaItem> items) {
     _forget(items);

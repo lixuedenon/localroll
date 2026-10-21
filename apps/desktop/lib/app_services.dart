@@ -185,6 +185,10 @@ class AppServices {
     s.peers.acquire();
     s._onlineSeen = s.onlineDevices;
     await ffmpeg.locate();
+    // "Recently deleted": what is older than 30 days goes for good (now,
+    // and every few hours while LocalRoll runs).
+    unawaited(server.trash.purgeOld());
+    Timer.periodic(const Duration(hours: 6), (_) => unawaited(server.trash.purgeOld()));
     return s;
   }
 

@@ -13,6 +13,7 @@ import '../services/keep_awake.dart';
 import '../services/tls_identity.dart';
 import '../services/library_index.dart';
 import '../services/receive_hub.dart';
+import '../services/library_trash.dart';
 import '../services/received_files.dart';
 import '../services/settings.dart';
 import '../l10n/l10n.dart';
@@ -167,6 +168,10 @@ class TransferServer extends ChangeNotifier {
   /// Documents / other files received (Documents and Other folders), and who
   /// sent each.
   late final ReceivedFiles files = ReceivedFiles(library, folderPath);
+
+  /// LocalRoll's "Recently deleted" (30 days): every deletion goes there,
+  /// from this PC or from a phone allowed to manage the library.
+  late final LibraryTrash trash = LibraryTrash(library, files);
 
   /// Something new arrived: linked phones browsing the library refresh
   /// (many arrivals in a row are told once).
@@ -503,8 +508,8 @@ class TransferServer extends ChangeNotifier {
   Future<File?> Function(MediaItem item)? thumbnail;
   Future<File?> Function(MediaItem item)? display;
 
-  /// Library items to the Recycle Bin; how many are gone. Default:
-  /// [deleteItems] (Windows).
+  /// Deletes library items; how many are gone. Default: into [trash]
+  /// ("Recently deleted", 30 days).
   Future<int> Function(List<MediaItem> items)? deleter;
 
   /// Send [items] to phone [d] the usual way (converted, it saves them);
@@ -921,7 +926,7 @@ class TransferServer extends ChangeNotifier {
       }
       if (path == LrProtocol.pathLibraryDelete) {
         if (access != LibraryAccess.manage) return _json(res, 403, {'error': 'no_access'});
-        var n = items.isEmpty ? 0 : await (deleter ?? (List<MediaItem> x) => deleteItems(library, x))(items);
+        var n = items.isEmpty ? 0 : await (deleter ?? (List<MediaItem> x) async => (await trash.putMedia(x)).length)(items);
         // Received files among them.
         final known = {for (final i in items) i.relPath};
         final gone = <String>[
@@ -929,10 +934,10 @@ class TransferServer extends ChangeNotifier {
             if (!known.contains(p)) ?(await _visibleFile(device, p))?.path,
         ];
         if (gone.isNotEmpty) {
-          n += (await (fileDeleter ?? moveToRecycleBin)(gone)).length;
+          n += (await (fileDeleter ?? (List<String> x) async => [for (final e in await trash.putFiles(x)) e.rel])(gone)).length;
           files.forget();
         }
-        DiagLog.log('browse', '${device.name}: deleted $n of ${items.length} items (to the Recycle Bin)');
+        DiagLog.log('browse', '${device.name}: deleted $n of ${items.length} items (to Recently deleted)');
         return _json(res, 200, {'deleted': n});
       }
       // Visibility: only of what this device sent itself.
@@ -947,8 +952,7 @@ class TransferServer extends ChangeNotifier {
     return _json(res, 404, {'error': 'not_found'});
   }
 
-  /// Moves received files out of the library (default: to the Recycle
-  /// Bin); returns the paths that are gone.
+  /// Deletes received files; returns what is gone. Default: into [trash].
   Future<List<String>> Function(List<String> paths)? fileDeleter;
 
   /// The received file at [rel] if [device] may see it: one it sent, or one

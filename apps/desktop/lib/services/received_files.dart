@@ -10,7 +10,10 @@ import 'library_index.dart';
 /// A received file (Documents / Other, at any depth): a document, a scan,
 /// anything that is not a library photo or video.
 class ReceivedFile {
-  const ReceivedFile(this.path, this.size, this.modified, this.arrived, {this.owner});
+  const ReceivedFile(this.path, this.size, this.modified, this.arrived, {this.owner, this.document = false});
+
+  /// In the Documents folder (false: Other files).
+  final bool document;
 
   final String path;
   final int size;
@@ -171,6 +174,7 @@ class ReceivedFiles {
               // sender's).
               at > 0 ? DateTime.fromMillisecondsSinceEpoch(at) : (Platform.isWindows ? st.changed : st.modified),
               owner: owner,
+              document: doc,
             ));
           } catch (_) {}
         }

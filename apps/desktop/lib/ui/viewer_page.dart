@@ -11,10 +11,10 @@ import 'package:media_kit_video/media_kit_video.dart';
 import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/converter.dart';
-import '../services/file_actions.dart';
 import '../services/library_index.dart';
 import '../services/network.dart';
 import 'format.dart';
+import 'trash_actions.dart';
 
 /// Full-screen viewer: originals are shown directly (no conversion needed).
 /// Videos — including HEVC, HDR and Dolby Vision — play through libmpv.
@@ -48,28 +48,10 @@ class _ViewerPageState extends State<ViewerPage> {
     super.dispose();
   }
 
-  /// Delete (to the Recycle Bin) and close the viewer.
+  /// Delete (into "Recently deleted", with Undo) and close the viewer.
   Future<void> _deleteCurrent(MediaItem item) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(tr('lib.delete_title', {'count': 1})),
-        content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: Text(tr('lib.delete_body')),
-        ),
-        actions: [
-          OutlinedButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('exit.stay'))),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('lib.delete'))),
-        ],
-      ),
-    );
-    if (ok != true || !mounted) return;
-    final n = await deleteItems(widget.services.library, [item]);
-    if (!mounted) return;
-    final messenger = ScaffoldMessenger.of(context);
-    Navigator.of(context).pop();
-    messenger.showSnackBar(SnackBar(content: Text(tr('lib.deleted', {'count': n}))));
+    final n = await deleteToTrash(context, widget.services, media: [item]);
+    if (n > 0 && mounted) Navigator.of(context).pop();
   }
 
   /// "Anna 2" (family member + device number), else the phone's name.
