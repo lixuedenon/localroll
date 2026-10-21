@@ -1,5 +1,6 @@
 // apps/desktop/lib/app_services.dart
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:localroll_core/localroll_core.dart';
@@ -15,6 +16,7 @@ import 'services/phone_formats.dart';
 import 'services/receive_hub.dart';
 import 'services/settings.dart';
 import 'services/tls_identity.dart';
+import 'ui/pdf_thumb.dart';
 
 /// A paired device came online / went offline.
 class PresenceEvent {
@@ -165,6 +167,27 @@ class AppServices {
     // A phone browsing this library: pictures, and "save to my phone".
     server.thumbnail = ffmpeg.thumbnail;
     server.display = ffmpeg.display;
+    server.fileThumbnail = (path) async {
+      final name = path.split(Platform.pathSeparator).last;
+      if (name.toLowerCase().endsWith('.pdf')) return PdfThumbs.of(path, library.cacheDir);
+      final kind = MediaKind.fromName(name);
+      final root = '${library.rootPath}${Platform.pathSeparator}';
+      if ((kind != MediaKind.image && kind != MediaKind.video) ||
+          !ffmpeg.available ||
+          !path.toLowerCase().startsWith(root.toLowerCase())) {
+        return null;
+      }
+      final st = await File(path).stat();
+      // Not in the library list; described just enough for ffmpeg's cache.
+      return ffmpeg.thumbnail(MediaItem(
+        relPath: path.substring(root.length).replaceAll(Platform.pathSeparator, '/'),
+        name: name,
+        size: st.size,
+        kind: kind,
+        captureMs: st.modified.millisecondsSinceEpoch,
+        receivedMs: 0,
+      ));
+    };
     server.sendToPhone = (d, items) async {
       final target = s.phoneTarget(d.id);
       if (target == null) throw StateError('phone not receiving');

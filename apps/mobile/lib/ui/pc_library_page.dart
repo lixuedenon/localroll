@@ -758,16 +758,37 @@ class _FileThumb extends StatelessWidget {
 
   Future<Object?> _load() {
     final n = item.name.toLowerCase();
-    final drawable = n.endsWith('.pdf') || _picture(n) || FirstPage.canDraw(n) || Platform.isIOS;
-    if (!drawable || item.size > PcLibrary.maxThumbFile) return Future.value(null);
     return _cache.get('${lib.desktop.id}|${item.path}|${item.size}|${item.receivedMs}', () => _limited<Object>(() async {
-          final path = await lib.fetch(item);
-          if (n.endsWith('.pdf')) return PdfPages.thumb(path);
-          if (_picture(n)) return File(path);
-          final png = await FileOpener.thumbnail(path);
-          if (png != null) return png;
-          return FirstPages.of(path, name: item.name);
+          // The PC's picture first (PDF first page, photo, video frame):
+          // small, nothing to download.
+          final pc = await lib.thumb(item.path);
+          if (pc != null) return pc;
+          // Office / text files: drawn here from a copy of the file.
+          final drawable = n.endsWith('.pdf') || _picture(n) || FirstPage.canDraw(n) || Platform.isIOS;
+          if (!drawable || item.size > PcLibrary.maxThumbFile) return null;
+          final String path;
+          try {
+            path = await lib.fetch(item);
+          } catch (e) {
+            DiagLog.log('pclib', 'file not fetched (${_ext(n)}): $e');
+            return null;
+          }
+          Object? page;
+          if (n.endsWith('.pdf')) {
+            page = await PdfPages.thumb(path);
+          } else if (_picture(n)) {
+            page = File(path);
+          } else {
+            page = await FileOpener.thumbnail(path) ?? await FirstPages.of(path, name: item.name);
+          }
+          if (page == null) DiagLog.log('pclib', 'no first page (${_ext(n)})');
+          return page;
         }));
+  }
+
+  static String _ext(String n) {
+    final i = n.lastIndexOf('.');
+    return i < 0 ? '?' : n.substring(i + 1);
   }
 
   static IconData iconFor(String name) {

@@ -508,6 +508,10 @@ class TransferServer extends ChangeNotifier {
   Future<File?> Function(MediaItem item)? thumbnail;
   Future<File?> Function(MediaItem item)? display;
 
+  /// Small picture of a received file (PDF first page, photo, video frame),
+  /// or null when there is none (Office files: the phone draws those).
+  Future<File?> Function(String path)? fileThumbnail;
+
   /// Deletes library items; how many are gone. Default: into [trash]
   /// ("Recently deleted", 30 days).
   Future<int> Function(List<MediaItem> items)? deleter;
@@ -894,6 +898,14 @@ class TransferServer extends ChangeNotifier {
         // phone draws its first page.
         final f = await _visibleFile(device, req.uri.queryParameters['p']);
         if (f == null) return _json(res, 404, {'error': 'not_found'});
+        if (path == LrProtocol.pathLibraryThumb) {
+          // The first page of a PDF, a frame of a video, a photo: made here.
+          final make = fileThumbnail;
+          final t = make == null ? null : await make(f.path);
+          if (t == null || !await t.exists()) return _json(res, 404, {'error': 'no_picture'});
+          res.headers.set(HttpHeaders.cacheControlHeader, 'private, max-age=86400');
+          return _serveFile(req, t, t.path.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg');
+        }
         if (path != LrProtocol.pathLibraryFile) return _json(res, 404, {'error': 'no_picture'});
         return _serveFile(req, File(f.path), _contentType(f.name));
       }

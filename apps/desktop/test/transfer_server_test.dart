@@ -903,6 +903,13 @@ void main() {
       expect(res.statusCode, 200);
       expect((await res.fold<List<int>>([], (a, b) => a..addAll(b))).take(8), '%PDF-1.7'.codeUnits);
       await expectLater(dad.client.libraryThumb(docs.items.single.path), throwsA(isA<LrHttpError>()));
+      // With a picture made on the PC (PDF first page): served.
+      pc.server.fileThumbnail = (path) async {
+        final f = File('${pc.tmp.path}${Platform.pathSeparator}page1.png');
+        await f.writeAsBytes([0x89, 0x50, 0x4E, 0x47]);
+        return path.endsWith('scan.pdf') ? f : null;
+      };
+      expect(await dad.client.libraryThumb(docs.items.single.path), [0x89, 0x50, 0x4E, 0x47]);
 
       // Mum sees her own "only me" file, and may share it.
       final mine = (await mum.client.library(kind: MediaKind.other)).items.firstWhere((i) => i.name == 'secret.txt');
