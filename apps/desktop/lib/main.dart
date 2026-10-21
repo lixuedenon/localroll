@@ -86,7 +86,10 @@ Future<void> _startLog() async {
     final now = DateTime.now();
     final gap = now.difference(last);
     last = now;
-    if (gap > const Duration(seconds: 5)) DiagLog.log('ui', 'not responding for ${gap.inSeconds} s');
+    // Hours mean the PC slept (the watchdog tells those apart).
+    if (gap > const Duration(seconds: 5) && gap < const Duration(minutes: 30)) {
+      DiagLog.log('ui', 'not responding for ${gap.inSeconds} s');
+    }
   });
 }
 

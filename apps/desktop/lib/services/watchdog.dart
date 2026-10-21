@@ -67,8 +67,17 @@ void _run(List<Object> args) {
     alive = now;
   });
 
+  var lastTick = DateTime.now();
   Timer.periodic(const Duration(seconds: 1), (_) {
     final now = DateTime.now();
+    // The watchdog itself was paused too: the PC slept, nothing hung.
+    final slept = now.difference(lastTick) > const Duration(seconds: 30);
+    lastTick = now;
+    if (slept) {
+      if (stuckSince == null) alive = now;
+      write('${stamp(now)} [watchdog] PC was asleep or paused, not counted');
+      return;
+    }
     final gap = now.difference(alive);
     if (stuckSince == null && gap > const Duration(seconds: 5)) {
       stuckSince = alive;

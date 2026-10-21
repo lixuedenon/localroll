@@ -177,30 +177,62 @@ class _ThumbLive extends StatefulWidget {
   State<_ThumbLive> createState() => _ThumbLiveState();
 }
 
+/// The one player behind every hover preview. Made once and kept: making a
+/// player and its picture surface for each hover — and throwing them away a
+/// moment later, sometimes before the surface was even ready — could take
+/// the whole app down (seen on a PC: closed itself right after quick hovers
+/// over videos). One preview plays at a time anyway.
+class _HoverPlayer {
+  _HoverPlayer._() {
+    player.setVolume(0);
+    player.stream.completed.listen((done) {
+      if (done) _onDone?.call();
+    });
+  }
+
+  static _HoverPlayer? _one;
+  static _HoverPlayer get instance => _one ??= _HoverPlayer._();
+
+  final Player player = Player();
+  late final VideoController controller = VideoController(player);
+
+  /// Who plays now (a newer preview takes over; the old one's stop does nothing).
+  Object? _owner;
+  VoidCallback? _onDone;
+
+  void play(Object owner, String path, {required bool loop, VoidCallback? onDone}) {
+    _owner = owner;
+    _onDone = loop ? null : onDone;
+    DiagLog.log('ui', 'video preview start');
+    unawaited(player.setPlaylistMode(loop ? PlaylistMode.loop : PlaylistMode.none));
+    unawaited(player.open(Media(path)));
+  }
+
+  void stop(Object owner) {
+    if (!identical(_owner, owner)) return;
+    _owner = null;
+    _onDone = null;
+    DiagLog.log('ui', 'video preview stop');
+    unawaited(player.stop());
+  }
+}
+
 class _ThumbLiveState extends State<_ThumbLive> {
-  late final Player _player = Player();
-  late final VideoController _controller = VideoController(_player);
-  StreamSubscription<bool>? _sub;
+  final _HoverPlayer _hp = _HoverPlayer.instance;
+  Player get _player => _hp.player;
+  VideoController get _controller => _hp.controller;
 
   @override
   void initState() {
     super.initState();
-    if (!widget.loop) {
-      _sub = _player.stream.completed.listen((done) {
-        if (done) widget.onDone();
-      });
-    }
-    DiagLog.log('ui', 'video preview start');
-    _player.setVolume(0);
-    if (widget.loop) _player.setPlaylistMode(PlaylistMode.loop);
-    _player.open(Media(widget.path));
+    _hp.play(this, widget.path, loop: widget.loop, onDone: () {
+      if (mounted) widget.onDone();
+    });
   }
 
   @override
   void dispose() {
-    DiagLog.log('ui', 'video preview stop');
-    _sub?.cancel();
-    _player.dispose();
+    _hp.stop(this);
     super.dispose();
   }
 
