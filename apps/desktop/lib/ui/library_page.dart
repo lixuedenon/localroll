@@ -12,6 +12,7 @@ import '../services/file_actions.dart';
 import '../services/library_index.dart';
 import '../services/network.dart';
 import '../services/peers.dart';
+import '../services/received_files.dart';
 import '../services/win_dialogs.dart';
 import 'files_view.dart';
 import 'library_recovery.dart';
@@ -91,11 +92,14 @@ class _LibraryPageState extends State<LibraryPage> {
 
   void _reloadFilesSoon() {
     _filesSoon?.cancel();
-    _filesSoon = Timer(const Duration(milliseconds: 800), () => unawaited(_loadFiles()));
+    _filesSoon = Timer(const Duration(milliseconds: 800), () {
+      widget.services.server.files.forget();
+      unawaited(_loadFiles());
+    });
   }
 
   Future<void> _loadFiles() async {
-    final f = await ReceivedFile.scan(widget.services);
+    final f = await widget.services.server.files.list();
     if (mounted) setState(() => _files = f);
   }
 
@@ -735,6 +739,7 @@ class _LibraryPageState extends State<LibraryPage> {
         );
         if (ok != true) return;
         await moveToRecycleBin([f.path]);
+        widget.services.server.files.forget();
         await _loadFiles();
     }
   }

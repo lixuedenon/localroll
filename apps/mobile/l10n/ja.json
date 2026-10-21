@@ -462,5 +462,13 @@
   "incoming.unverified": "この端末はこのスマホとペアリングされていないため、本当に誰なのか確認できません。相手を知っている場合のみ受け入れてください。",
   "cleanup.done_trash": "空き容量を確保しました。削除した項目はギャラリーのゴミ箱に 30 日間残ります。",
   "transfer.stopped_phone_full": "停止しました：相手のスマホの空き容量が足りません。残りは未送信のままです。",
-  "err.phone_full": "相手のスマホにこのための空き容量がありません。途中まで送られたものはありません。"
+  "err.phone_full": "相手のスマホにこのための空き容量がありません。途中まで送られたものはありません。",
+  "pclib.sort": "並べ替え",
+  "pclib.sort_taken": "撮影日順",
+  "pclib.sort_received": "受信日順",
+  "pclib.files": "書類",
+  "pclib.recent": "新着 {count} 件",
+  "pclib.newer": "{pc} に新しいものが届きました — タップで更新",
+  "pclib.arrived": "{when} 受信",
+  "pclib.open": "開く"
 }

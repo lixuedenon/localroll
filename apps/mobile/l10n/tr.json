@@ -462,5 +462,13 @@
   "incoming.unverified": "Bu cihaz bu telefonla eşleştirilmemiş, bu yüzden gerçekte kim olduğu doğrulanamıyor. Yalnızca göndereni tanıyorsan kabul et.",
   "cleanup.done_trash": "Yer açıldı. Silinenler Galeri'nin Çöp Kutusu'nda 30 gün kalır.",
   "transfer.stopped_phone_full": "Durduruldu: diğer telefonda yer yok. Kalanlar gönderilmedi.",
-  "err.phone_full": "Diğer telefonda yeterli boş alan yok. Hiçbir şey yarım gönderilmedi."
+  "err.phone_full": "Diğer telefonda yeterli boş alan yok. Hiçbir şey yarım gönderilmedi.",
+  "pclib.sort": "Sırala",
+  "pclib.sort_taken": "Çekim tarihine göre",
+  "pclib.sort_received": "Alınma tarihine göre",
+  "pclib.files": "Belgeler",
+  "pclib.recent": "{count} yeni",
+  "pclib.newer": "{pc} üzerinde yeni öğeler — yenilemek için dokunun",
+  "pclib.arrived": "{when} alındı",
+  "pclib.open": "Aç"
 }

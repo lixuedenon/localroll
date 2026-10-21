@@ -7,10 +7,14 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:localroll_core/localroll_core.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../l10n/l10n.dart';
 import 'discovery.dart';
+import 'live_service.dart';
+import 'media_saver.dart';
 import 'mobile_settings.dart';
+import 'my_library.dart';
 import 'phone_server.dart';
 
 /// The PC's library as seen from this phone: pages of items (newest first),
@@ -22,7 +26,37 @@ import 'phone_server.dart';
 class PcLibrary extends ChangeNotifier {
   PcLibrary({required this.settings, required this.discovery, required this.desktop, required this.server}) {
     discovery.addListener(_onDiscovery);
+    _addedSub = LiveService.added.where((id) => id == desktop.id).listen((_) => _onAdded());
   }
+
+  StreamSubscription<String>? _addedSub;
+  Timer? _addedSoon;
+
+  /// The PC got something new (told over the live link). Looking at the
+  /// top (only the first page loaded) and not holding a place: the list
+  /// is loaded again in place. Otherwise [newer] shows a "new — tap to
+  /// refresh" note, so nothing moves under the person's finger.
+  void _onAdded() {
+    _addedSoon?.cancel();
+    _addedSoon = Timer(const Duration(milliseconds: 600), () {
+      if (_disposed) return;
+      if (hold || items.length > _pageSize || loading) {
+        newer = true;
+        notifyListeners();
+      } else {
+        unawaited(reload());
+      }
+    });
+  }
+
+  /// Something new on the PC since this list was loaded.
+  bool newer = false;
+
+  /// Set while one item is open full screen (the list must not change).
+  bool hold = false;
+
+  bool _disposed = false;
+  static const int _pageSize = 300;
 
   /// The PC changed what this phone may do (told over the live link): the
   /// delete button appears / goes without a pull-down.
@@ -50,8 +84,14 @@ class PcLibrary extends ChangeNotifier {
   String? error;
   LibraryAccess access = LibraryAccess.view;
 
-  /// Shown: everything (null), photos or videos.
+  /// Shown: everything (null), photos, videos or files ([MediaKind.other]).
   MediaKind? kind;
+
+  /// Newest arrival first (false: newest taken first).
+  bool byReceived = false;
+
+  /// How many arrived on the PC in the last day (0: none, or an older PC).
+  int recent = 0;
 
   bool get hasMore => _next != null;
   bool get canDelete => access == LibraryAccess.manage;
@@ -89,8 +129,41 @@ class PcLibrary extends ChangeNotifier {
     total = 0;
     _next = 0;
     error = null;
+    newer = false;
     notifyListeners();
     await loadMore();
+  }
+
+  /// The first page again, swapped in when it arrives (no blank list in
+  /// between); on failure the old list stays.
+  Future<void> reload() async {
+    if (loading) return;
+    loading = true;
+    newer = false;
+    notifyListeners();
+    try {
+      final c = await _connect();
+      final page = await c.library(offset: 0, limit: _pageSize, kind: kind, byReceived: byReceived);
+      items
+        ..clear()
+        ..addAll(page.items);
+      _take(page);
+    } catch (_) {
+      newer = true;
+      _drop();
+    } finally {
+      loading = false;
+      if (!_disposed) notifyListeners();
+    }
+  }
+
+  void _take(LibraryPage page) {
+    total = page.total;
+    recent = page.recent;
+    access = page.access;
+    discovery.accessAt[desktop.id] = page.access;
+    _next = page.next;
+    error = null;
   }
 
   Future<void> loadMore() async {
@@ -100,19 +173,15 @@ class PcLibrary extends ChangeNotifier {
     notifyListeners();
     try {
       final c = await _connect();
-      final page = await c.library(offset: at, limit: 300, kind: kind);
+      final page = await c.library(offset: at, limit: _pageSize, kind: kind, byReceived: byReceived);
       items.addAll(page.items);
-      total = page.total;
-      access = page.access;
-      discovery.accessAt[desktop.id] = page.access;
-      _next = page.next;
-      error = null;
+      _take(page);
     } catch (e) {
       error = describe(e);
       _drop();
     } finally {
       loading = false;
-      notifyListeners();
+      if (!_disposed) notifyListeners();
     }
   }
 
@@ -162,13 +231,93 @@ class PcLibrary extends ChangeNotifier {
   /// A picture for the screen (any format, made into a JPEG on the PC).
   Future<Uint8List> view(String path) async => (await _connect()).libraryView(path);
 
+  // ---------------------------------------------------------- files
+
+  /// Largest file fetched just to draw its first page.
+  static const int maxThumbFile = 30 * 1024 * 1024;
+
+  final Map<String, Future<String>> _fetching = {};
+
+  /// A copy of the received file [item] on this phone (kept a few days in
+  /// the app's temporary folder, so it opens again at once): to draw its
+  /// first page and to open it. Only over the same signed-in HTTPS link.
+  Future<String> fetch(RemoteItem item) {
+    final key = '${item.path}|${item.size}|${item.receivedMs}';
+    return _fetching[key] ??= _fetch(item).whenComplete(() => _fetching.remove(key));
+  }
+
+  static Directory? _cacheDir;
+
+  static Future<Directory> _cache() async {
+    final known = _cacheDir;
+    if (known != null) return known;
+    final d = Directory('${(await getTemporaryDirectory()).path}/lr_pcfiles');
+    await d.create(recursive: true);
+    // Copies older than a few days go.
+    try {
+      final old = DateTime.now().subtract(const Duration(days: 3));
+      await for (final e in d.list()) {
+        try {
+          if ((await e.stat()).modified.isBefore(old)) await e.delete(recursive: true);
+        } catch (_) {}
+      }
+    } catch (_) {}
+    return _cacheDir = d;
+  }
+
+  Future<String> _fetch(RemoteItem item) async {
+    final id = Object.hash(desktop.id, item.path, item.size, item.receivedMs).toUnsigned(32).toRadixString(16);
+    final dir = Directory('${(await _cache()).path}/$id');
+    final name = item.name.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
+    final f = File('${dir.path}/${name.isEmpty ? 'file' : name}');
+    if (await f.exists() && await f.length() == item.size) return f.path;
+    await dir.create(recursive: true);
+    final c = await _connect();
+    final res = await c.open(c.libraryFileUri(item.path));
+    if (res.statusCode != 200) {
+      await res.drain<void>();
+      throw LrHttpError(res.statusCode, {'error': res.statusCode == 404 ? 'not_found' : 'HTTP ${res.statusCode}'});
+    }
+    final part = File('${f.path}.part');
+    final sink = part.openWrite();
+    try {
+      await sink.addStream(res);
+    } finally {
+      await sink.close();
+    }
+    await part.rename(f.path);
+    return f.path;
+  }
+
+  /// Into LocalRoll's own files on this phone (Documents / Other, under
+  /// the PC's name), like a file the PC sent.
+  Future<void> keepFile(RemoteItem item) async {
+    final from = await fetch(item);
+    final dir = await MediaSaver.folderFor(MyKind.ofName(item.name), Sender(desktop.id, desktop.name));
+    final target = await MediaSaver.freeFile(dir, item.name);
+    await File(from).copy(target.path);
+    await MyLibrary.instance.addFile(target.path, MyKind.ofName(item.name), fromId: desktop.id, fromName: desktop.name);
+  }
+
   // ---------------------------------------------------------- actions
 
   /// The PC sends these here, converted to what this phone plays; they
   /// arrive in the album "LocalRoll" (no "Accept" question: we asked).
   Future<int> saveToPhone(List<String> paths) async {
-    server.expectFrom(desktop.id);
-    return (await _connect()).librarySend(paths);
+    final want = paths.toSet();
+    final files = [for (final i in items) if (i.file && want.contains(i.path)) i];
+    final media = [for (final p in paths) if (!files.any((f) => f.path == p)) p];
+    var n = 0;
+    if (media.isNotEmpty) {
+      server.expectFrom(desktop.id);
+      n += await (await _connect()).librarySend(media);
+    }
+    // Files are fetched here directly.
+    for (final f in files) {
+      await keepFile(f);
+      n++;
+    }
+    return n;
   }
 
   /// To the PC's Recycle Bin (only when it allows this phone to).
@@ -199,6 +348,8 @@ class PcLibrary extends ChangeNotifier {
           private: private,
           mine: true,
           from: i.from,
+          receivedMs: i.receivedMs,
+          file: i.file,
         );
       }
     }
@@ -263,6 +414,9 @@ class PcLibrary extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
+    _addedSoon?.cancel();
+    unawaited(_addedSub?.cancel());
     discovery.removeListener(_onDiscovery);
     unawaited(_relay?.close(force: true));
     _relay = null;

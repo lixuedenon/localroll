@@ -462,5 +462,13 @@
   "incoming.unverified": "This device isn't paired with this phone, so LocalRoll can't confirm who it really is. Accept only if you know who is sending.",
   "cleanup.done_trash": "Space freed. The deleted items stay in the Gallery's Trash (Recycle Bin) for 30 days.",
   "transfer.stopped_phone_full": "Stopped: the other phone is out of space. The rest stay unsent.",
-  "err.phone_full": "The other phone doesn't have enough free space for this. Nothing was sent half-way."
+  "err.phone_full": "The other phone doesn't have enough free space for this. Nothing was sent half-way.",
+  "pclib.sort": "Sort",
+  "pclib.sort_taken": "By date taken",
+  "pclib.sort_received": "By date received",
+  "pclib.files": "Documents",
+  "pclib.recent": "{count} new",
+  "pclib.newer": "New on {pc} — tap to refresh",
+  "pclib.arrived": "received {when}",
+  "pclib.open": "Open"
 }

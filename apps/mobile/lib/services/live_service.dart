@@ -39,6 +39,11 @@ class LiveService extends ChangeNotifier {
   final StreamController<PresenceEvent> _events = StreamController.broadcast();
   Stream<PresenceEvent> get events => _events.stream;
 
+  /// A PC's library got something new (its id): an open view of that
+  /// library refreshes itself.
+  static final StreamController<String> _added = StreamController.broadcast();
+  static Stream<String> get added => _added.stream;
+
   bool _running = false;
   String _session = '';
 
@@ -198,6 +203,9 @@ class LiveService extends ChangeNotifier {
         if (a != null) discovery.setAccessAt(pcId, a);
       case 'changed':
         onChanged?.call(pcId);
+        return;
+      case 'added':
+        _added.add(pcId);
         return;
     }
     _recompute();

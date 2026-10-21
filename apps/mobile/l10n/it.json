@@ -462,5 +462,13 @@
   "incoming.unverified": "Questo dispositivo non è associato a questo telefono, quindi non è possibile confermare chi sia davvero. Accetta solo se sai chi sta inviando.",
   "cleanup.done_trash": "Spazio liberato. Gli elementi eliminati restano nel Cestino della Galleria per 30 giorni.",
   "transfer.stopped_phone_full": "Interrotto: l'altro telefono non ha spazio. Il resto resta da inviare.",
-  "err.phone_full": "L'altro telefono non ha abbastanza spazio libero. Nulla è stato inviato a metà."
+  "err.phone_full": "L'altro telefono non ha abbastanza spazio libero. Nulla è stato inviato a metà.",
+  "pclib.sort": "Ordina",
+  "pclib.sort_taken": "Per data di scatto",
+  "pclib.sort_received": "Per data di ricezione",
+  "pclib.files": "Documenti",
+  "pclib.recent": "{count} nuovi",
+  "pclib.newer": "Novità su {pc}: tocca per aggiornare",
+  "pclib.arrived": "ricevuto il {when}",
+  "pclib.open": "Apri"
 }

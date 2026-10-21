@@ -51,6 +51,9 @@ class LiveMessage {
       jsonEncode({'t': 'you', 'family': family, if (access != null) 'access': access.name});
   static String changed() => jsonEncode({'t': 'changed'});
 
+  /// Something new arrived in the PC's library (a phone browsing it shows it).
+  static String added() => jsonEncode({'t': 'added'});
+
   List<OnlineDevice> get online => OnlineDevice.listFrom(json);
   OnlineDevice? get device {
     final d = json['d'];

@@ -462,5 +462,13 @@
   "incoming.unverified": "这台设备没有和这部手机配对，无法确认它真的是谁。只在认识对方时接受。",
   "cleanup.done_trash": "已腾出空间。删除的项目会在相册的「回收站」里保留 30 天。",
   "transfer.stopped_phone_full": "已停止：对方手机空间不足。剩下的保持未发送。",
-  "err.phone_full": "对方手机剩余空间不够放这些文件。没有发出半截文件。"
+  "err.phone_full": "对方手机剩余空间不够放这些文件。没有发出半截文件。",
+  "pclib.sort": "排序",
+  "pclib.sort_taken": "按拍摄时间",
+  "pclib.sort_received": "按上传时间",
+  "pclib.files": "文档",
+  "pclib.recent": "新收到 {count} 个",
+  "pclib.newer": "{pc} 收到了新内容，点这里刷新",
+  "pclib.arrived": "{when} 收到",
+  "pclib.open": "打开"
 }

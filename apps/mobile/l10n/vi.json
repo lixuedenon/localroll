@@ -462,5 +462,13 @@
   "incoming.unverified": "Thiết bị này chưa ghép đôi với điện thoại này nên không thể xác nhận thực sự là ai. Chỉ chấp nhận nếu bạn biết người gửi.",
   "cleanup.done_trash": "Đã giải phóng dung lượng. Mục đã xoá được giữ trong Thùng rác của Thư viện 30 ngày.",
   "transfer.stopped_phone_full": "Đã dừng: điện thoại kia hết dung lượng. Phần còn lại chưa gửi.",
-  "err.phone_full": "Điện thoại kia không đủ dung lượng trống. Không có tệp nào bị gửi dở."
+  "err.phone_full": "Điện thoại kia không đủ dung lượng trống. Không có tệp nào bị gửi dở.",
+  "pclib.sort": "Sắp xếp",
+  "pclib.sort_taken": "Theo ngày chụp",
+  "pclib.sort_received": "Theo ngày nhận",
+  "pclib.files": "Tài liệu",
+  "pclib.recent": "{count} mục mới",
+  "pclib.newer": "Có nội dung mới trên {pc} — chạm để làm mới",
+  "pclib.arrived": "nhận {when}",
+  "pclib.open": "Mở"
 }

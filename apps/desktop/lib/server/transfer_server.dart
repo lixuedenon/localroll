@@ -13,6 +13,7 @@ import '../services/keep_awake.dart';
 import '../services/tls_identity.dart';
 import '../services/library_index.dart';
 import '../services/receive_hub.dart';
+import '../services/received_files.dart';
 import '../services/settings.dart';
 import '../l10n/l10n.dart';
 import 'port_mux.dart';
@@ -162,6 +163,28 @@ class TransferServer extends ChangeNotifier {
   final AppSettings settings;
   final LibraryIndex library;
   final ReceiveHub hub;
+
+  /// Documents / other files received (Documents and Other folders), and who
+  /// sent each.
+  late final ReceivedFiles files = ReceivedFiles(library, folderPath);
+
+  /// Something new arrived: linked phones browsing the library refresh
+  /// (many arrivals in a row are told once).
+  Timer? _addedSoon;
+
+  void _announceAdded() {
+    _addedSoon?.cancel();
+    _addedSoon = Timer(const Duration(milliseconds: 1500), () {
+      final msg = LiveMessage.added();
+      for (final list in _live.values) {
+        for (final c in list) {
+          try {
+            c.ws.add(msg);
+          } catch (_) {}
+        }
+      }
+    });
+  }
 
   /// This PC's certificate; null only if it could not be made (then plain
   /// HTTP only, as before).
@@ -592,6 +615,7 @@ class TransferServer extends ChangeNotifier {
   void dispose() {
     _presenceTick?.cancel();
     _changedSoon?.cancel();
+    _addedSoon?.cancel();
     if (_watchingDeletions) library.deletions.removeListener(_onLibraryDeletions);
     stop();
     pin.dispose();
@@ -860,7 +884,14 @@ class TransferServer extends ChangeNotifier {
     if (get && path == LrProtocol.pathLibrary) return _libraryPage(req, device, access);
     if (get && (path == LrProtocol.pathLibraryThumb || path == LrProtocol.pathLibraryView || path == LrProtocol.pathLibraryFile)) {
       final item = _visibleItem(device, req.uri.queryParameters['p']);
-      if (item == null) return _json(res, 404, {'error': 'not_found'});
+      if (item == null) {
+        // A received file (document, scan…): the file itself only; the
+        // phone draws its first page.
+        final f = await _visibleFile(device, req.uri.queryParameters['p']);
+        if (f == null) return _json(res, 404, {'error': 'not_found'});
+        if (path != LrProtocol.pathLibraryFile) return _json(res, 404, {'error': 'no_picture'});
+        return _serveFile(req, File(f.path), _contentType(f.name));
+      }
       if (path == LrProtocol.pathLibraryFile) {
         final f = File(library.absPath(item));
         if (!await f.exists()) return _json(res, 404, {'error': 'not_found'});
@@ -890,17 +921,45 @@ class TransferServer extends ChangeNotifier {
       }
       if (path == LrProtocol.pathLibraryDelete) {
         if (access != LibraryAccess.manage) return _json(res, 403, {'error': 'no_access'});
-        final n = items.isEmpty ? 0 : await (deleter ?? (List<MediaItem> x) => deleteItems(library, x))(items);
+        var n = items.isEmpty ? 0 : await (deleter ?? (List<MediaItem> x) => deleteItems(library, x))(items);
+        // Received files among them.
+        final known = {for (final i in items) i.relPath};
+        final gone = <String>[
+          for (final p in paths)
+            if (!known.contains(p)) ?(await _visibleFile(device, p))?.path,
+        ];
+        if (gone.isNotEmpty) {
+          n += (await (fileDeleter ?? moveToRecycleBin)(gone)).length;
+          files.forget();
+        }
         DiagLog.log('browse', '${device.name}: deleted $n of ${items.length} items (to the Recycle Bin)');
         return _json(res, 200, {'deleted': n});
       }
       // Visibility: only of what this device sent itself.
       final own = items.where((i) => i.ownedBy(device.id)).toList();
       library.setPrivate(own, body['private'] == true);
-      return _json(res, 200, {'updated': own.length});
+      final known = {for (final i in items) i.relPath};
+      final others = [for (final p in paths) if (!known.contains(p)) p];
+      final n = others.isEmpty ? 0 : await files.setPrivate(others, device.id, body['private'] == true);
+      return _json(res, 200, {'updated': own.length + n});
     }
     await req.drain<void>();
     return _json(res, 404, {'error': 'not_found'});
+  }
+
+  /// Moves received files out of the library (default: to the Recycle
+  /// Bin); returns the paths that are gone.
+  Future<List<String>> Function(List<String> paths)? fileDeleter;
+
+  /// The received file at [rel] if [device] may see it: one it sent, or one
+  /// not marked "only me" (files from before beta.59 have no sender: shown).
+  Future<ReceivedFile?> _visibleFile(TrustedDevice device, String? rel) async {
+    if (rel == null || rel.isEmpty) return null;
+    final f = await files.find(rel);
+    if (f == null) return null;
+    final o = f.owner;
+    if (o != null && o.private && o.deviceId != device.id) return null;
+    return f;
   }
 
   /// [rel] if it is in the library and [device] may see it.
@@ -917,21 +976,19 @@ class TransferServer extends ChangeNotifier {
     final offset = max(0, int.tryParse(q['offset'] ?? '') ?? 0);
     final limit = (int.tryParse(q['limit'] ?? '') ?? 200).clamp(1, LrProtocol.libraryPageMax);
     final kind = q['kind'];
-    final all = [
-      for (final i in library.items)
+    final byReceived = q['sort'] == 'received';
+    final family = settings.family;
+    // Photos / videos, then received files (documents, scans…) — newest
+    // taken (files: arrived) or newest arrival first.
+    final entries = <(int, int, RemoteItem)>[]; // (order time, arrival, item)
+    if (kind == null || kind == MediaKind.image.name || kind == MediaKind.video.name) {
+      for (final i in library.items) {
         if ((kind == null || i.kind.name == kind) &&
             (i.kind == MediaKind.image || i.kind == MediaKind.video) &&
-            !(i.private && !i.ownedBy(device.id)))
-          i,
-    ]..sort((a, b) => b.captureMs.compareTo(a.captureMs));
-    final page = all.skip(offset).take(limit);
-    final family = settings.family;
-    return _json(
-      req.response,
-      200,
-      LibraryPage(
-        items: [
-          for (final i in page)
+            !(i.private && !i.ownedBy(device.id))) {
+          entries.add((
+            byReceived ? i.receivedMs : i.captureMs,
+            i.receivedMs,
             RemoteItem(
               path: i.relPath,
               name: i.name,
@@ -942,12 +999,49 @@ class TransferServer extends ChangeNotifier {
               private: i.private,
               mine: i.ownedBy(device.id),
               from: i.deviceId == null ? null : (family.labelOf(i.deviceId!) ?? i.deviceName),
+              receivedMs: i.receivedMs,
             ),
-        ],
-        total: all.length,
+          ));
+        }
+      }
+    }
+    if (kind == null || kind == MediaKind.other.name) {
+      for (final f in await files.list()) {
+        final o = f.owner;
+        if (o != null && o.private && o.deviceId != device.id) continue;
+        final rel = files.relOf(f.path);
+        if (rel == null) continue;
+        final at = f.arrived.millisecondsSinceEpoch;
+        entries.add((
+          at,
+          at,
+          RemoteItem(
+            path: rel,
+            name: f.name,
+            kind: MediaKind.other,
+            takenMs: at,
+            size: f.size,
+            private: o?.private ?? false,
+            mine: o?.deviceId == device.id,
+            from: o == null ? null : (family.labelOf(o.deviceId) ?? o.deviceName),
+            receivedMs: at,
+            file: true,
+          ),
+        ));
+      }
+    }
+    entries.sort((a, b) => b.$1.compareTo(a.$1));
+    final since = DateTime.now().subtract(const Duration(hours: 24)).millisecondsSinceEpoch;
+    return _json(
+      req.response,
+      200,
+      LibraryPage(
+        items: [for (final e in entries.skip(offset).take(limit)) e.$3],
+        total: entries.length,
         access: access,
-        next: offset + limit < all.length ? offset + limit : null,
+        next: offset + limit < entries.length ? offset + limit : null,
         library: library.libraryId.isEmpty ? null : library.libraryId,
+        recent: entries.where((e) => e.$2 > since).length,
       ).toJson(),
     );
   }
@@ -1496,6 +1590,7 @@ class TransferServer extends ChangeNotifier {
     hub.progress(t, length);
     t.savedPath = dest;
     hub.setState(t, TransferState.saved);
+    _announceAdded();
     return _json(req.response, 200, CompleteResponse(saved: true, path: rel).toJson());
   }
 
@@ -1527,6 +1622,8 @@ class TransferServer extends ChangeNotifier {
     } catch (_) {}
     final rel = dest.substring(root.length + 1).replaceAll(sep, '/');
     _doneFiles[_hubKey(device, offer)] = dest;
+    await files.received(dest, FileOwner(device.id, device.name, private: offer.private));
+    _announceAdded();
     hub.progress(t, await File(dest).length());
     t.savedPath = dest;
     hub.setState(t, TransferState.saved);

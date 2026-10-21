@@ -74,6 +74,8 @@ class FileSender extends ChangeNotifier {
           createdMs: mtime,
           modifiedMs: mtime,
           size: st.size,
+          // Family group: like photos, "only me" unless shared.
+          private: !settings.shareWithFamily,
           target: LrProtocol.targetFiles,
           relPath: name,
         ));

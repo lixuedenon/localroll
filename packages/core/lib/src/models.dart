@@ -474,6 +474,7 @@ class ChangesResponse {
         deleted: (j['deleted'] as List? ?? const []).cast<String>(),
         now: (j['now'] as num?)?.toInt() ?? 0,
         library: j['library'] as String?,
+        recent: (j['recent'] as num?)?.toInt() ?? 0,
       );
 }
 
@@ -556,6 +557,8 @@ class RemoteItem {
     this.private = false,
     this.mine = false,
     this.from,
+    this.receivedMs = 0,
+    this.file = false,
   });
 
   /// Its place in the library ("2024/05/IMG_1.HEIC"): what to ask for.
@@ -577,6 +580,14 @@ class RemoteItem {
   /// Who it came from (family member or device name).
   final String? from;
 
+  /// When it arrived on the PC (0: unknown, older PC).
+  final int receivedMs;
+
+  /// A received file (a document, a scan, anything that is not a library
+  /// photo / video): [kind] is [MediaKind.other]; the PC has no picture of
+  /// it, the phone draws its first page itself.
+  final bool file;
+
   Map<String, dynamic> toJson() => {
         'p': path,
         'n': name,
@@ -587,6 +598,8 @@ class RemoteItem {
         if (private) 'x': true,
         if (mine) 'm': true,
         if (from != null) 'f': from,
+        if (receivedMs > 0) 'r': receivedMs,
+        if (file) 'd': true,
       };
 
   factory RemoteItem.fromJson(Map<String, dynamic> j) => RemoteItem(
@@ -599,12 +612,17 @@ class RemoteItem {
         private: j['x'] == true,
         mine: j['m'] == true,
         from: j['f'] as String?,
+        receivedMs: (j['r'] as num?)?.toInt() ?? 0,
+        file: j['d'] == true,
       );
 }
 
 /// A page of the PC's library, newest first.
 class LibraryPage {
-  const LibraryPage({required this.items, required this.total, required this.access, this.next, this.library});
+  const LibraryPage({required this.items, required this.total, required this.access, this.next, this.library, this.recent = 0});
+
+  /// How many of all that match arrived in the last 24 hours.
+  final int recent;
 
   final List<RemoteItem> items;
 
@@ -624,6 +642,7 @@ class LibraryPage {
         'access': access.name,
         if (next != null) 'next': next,
         if (library != null) 'library': library,
+        if (recent > 0) 'recent': recent,
       };
 
   factory LibraryPage.fromJson(Map<String, dynamic> j) => LibraryPage(

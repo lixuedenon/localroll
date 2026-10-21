@@ -182,12 +182,15 @@ class LrClient {
 
   // ------------------------------------------------------------ browsing
 
-  /// A page of the PC's library (newest first). [kind]: image / video / null.
-  Future<LibraryPage> library({int offset = 0, int limit = 200, MediaKind? kind}) async =>
+  /// One page of the PC's library. [kind]: photos / videos / received files
+  /// ([MediaKind.other]); null = everything. [byReceived]: newest arrival
+  /// first (default: newest taken first).
+  Future<LibraryPage> library({int offset = 0, int limit = 200, MediaKind? kind, bool byReceived = false}) async =>
       LibraryPage.fromJson(await _send('GET', LrProtocol.pathLibrary, query: {
         'offset': '$offset',
         'limit': '$limit',
         if (kind != null) 'kind': kind.name,
+        if (byReceived) 'sort': 'received',
       }));
 
   /// Small picture for the grid (JPEG bytes).

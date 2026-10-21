@@ -462,5 +462,13 @@
   "incoming.unverified": "Perangkat ini tidak dipasangkan dengan ponsel ini, jadi tidak bisa dipastikan siapa sebenarnya. Terima hanya jika Anda tahu siapa pengirimnya.",
   "cleanup.done_trash": "Ruang dikosongkan. Item yang dihapus tetap di Sampah Galeri selama 30 hari.",
   "transfer.stopped_phone_full": "Dihentikan: ponsel lain kehabisan ruang. Sisanya belum terkirim.",
-  "err.phone_full": "Ponsel lain tidak punya cukup ruang kosong. Tidak ada yang terkirim setengah."
+  "err.phone_full": "Ponsel lain tidak punya cukup ruang kosong. Tidak ada yang terkirim setengah.",
+  "pclib.sort": "Urutkan",
+  "pclib.sort_taken": "Menurut tanggal diambil",
+  "pclib.sort_received": "Menurut tanggal diterima",
+  "pclib.files": "Dokumen",
+  "pclib.recent": "{count} baru",
+  "pclib.newer": "Ada yang baru di {pc} — ketuk untuk memuat ulang",
+  "pclib.arrived": "diterima {when}",
+  "pclib.open": "Buka"
 }

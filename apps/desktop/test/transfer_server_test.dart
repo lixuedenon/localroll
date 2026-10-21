@@ -857,6 +857,66 @@ void main() {
       expect(ChangesResponse.fromJson(ch).deleted, contains('D1'));
     });
 
+    Future<void> sendFile(TestPhone phone, String name, List<int> data, {bool private = false}) async {
+      final offer = FileOffer(
+        id: 'f1',
+        assetId: 'file:$name',
+        name: name,
+        kind: MediaKind.other,
+        createdMs: 1,
+        modifiedMs: 1,
+        size: data.length,
+        private: private,
+        target: LrProtocol.targetFiles,
+        relPath: name,
+      );
+      final s = await phone.client.createSession(SessionRequest(files: [offer]));
+      await phone.client.putChunk(s.sessionId, 'f1', 0, data.length, data);
+      final r = await phone.client.complete(s.sessionId, 'f1', CompleteRequest(size: data.length, sha256: await sha(data)));
+      expect(r.saved, isTrue);
+    }
+
+    test('received files (documents, scans) are listed too; newest arrival first; "only me" kept', () async {
+      final mum = await pc.pairPhone(id: 'mum', name: 'Mum');
+      final dad = await pc.pairPhone(id: 'dad', name: 'Dad');
+      final link = await dad.live();
+      await eventually(() => link.messages.any((m) => m.type == 'hello'));
+      await fill(mum);
+      await sendFile(mum, 'scan.pdf', [...'%PDF-1.7'.codeUnits, ...bytesOf(300)]);
+      await sendFile(mum, 'secret.txt', bytesOf(50, 4), private: true);
+      // Whoever is looking is told something arrived.
+      await eventually(() => link.messages.any((m) => m.type == 'added'));
+      await link.close();
+
+      final all = await dad.client.library(byReceived: true);
+      expect(all.items.first.name, 'scan.pdf'); // arrived last (of what Dad may see)
+      expect(all.items.first.file, isTrue);
+      expect(all.items.first.kind, MediaKind.other);
+      expect(all.items.map((i) => i.name), isNot(contains('secret.txt')));
+      expect(all.total, 4);
+      expect(all.recent, 4);
+      final docs = await dad.client.library(kind: MediaKind.other);
+      expect(docs.items.map((i) => i.name), ['scan.pdf']);
+
+      // The file itself; no picture of it (the phone draws its first page).
+      final res = await dad.client.open(dad.client.libraryFileUri(docs.items.single.path));
+      expect(res.statusCode, 200);
+      expect((await res.fold<List<int>>([], (a, b) => a..addAll(b))).take(8), '%PDF-1.7'.codeUnits);
+      await expectLater(dad.client.libraryThumb(docs.items.single.path), throwsA(isA<LrHttpError>()));
+
+      // Mum sees her own "only me" file, and may share it.
+      final mine = (await mum.client.library(kind: MediaKind.other)).items.firstWhere((i) => i.name == 'secret.txt');
+      expect(mine.private, isTrue);
+      expect(mine.mine, isTrue);
+      expect(await dad.client.libraryVisibility([mine.path], private: false), 0);
+      final hidden = await dad.client.open(dad.client.libraryFileUri(mine.path));
+      expect(hidden.statusCode, 404);
+      await hidden.drain<void>();
+      expect(await mum.client.libraryVisibility([mine.path], private: false), 1);
+      pc.server.files.forget();
+      expect((await dad.client.library(kind: MediaKind.other)).items.map((i) => i.name), containsAll(['scan.pdf', 'secret.txt']));
+    });
+
     test('visibility: only of one\'s own items', () async {
       final mum = await pc.pairPhone(id: 'mum');
       final dad = await pc.pairPhone(id: 'dad');

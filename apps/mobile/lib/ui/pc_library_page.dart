@@ -1,5 +1,7 @@
 // apps/mobile/lib/ui/pc_library_page.dart
 import 'dart:async';
+import 'dart:collection';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -10,7 +12,11 @@ import '../l10n/l10n.dart';
 import '../services/discovery.dart';
 import '../services/mobile_settings.dart';
 import '../services/pc_library.dart';
+import '../services/pdf_pages.dart';
 import '../services/phone_server.dart';
+import 'cleanup_page.dart' show formatSize;
+import 'first_page_view.dart';
+import 'open_file.dart';
 import 'theme.dart';
 
 /// The PC's library on this phone: browse by day, open, play, save to this
@@ -114,6 +120,59 @@ class _PcLibraryPageState extends State<PcLibraryPage> {
         setState(_selected.clear);
       });
 
+  /// A received file: fetched (a moment, shown), then opened here.
+  Future<void> _openFile(RemoteItem item) async {
+    final nav = Navigator.of(context);
+    var shown = false;
+    final wait = Timer(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+      shown = true;
+      unawaited(showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(child: CircularProgressIndicator()),
+      ));
+    });
+    String? path;
+    Object? problem;
+    try {
+      path = await lib.fetch(item);
+    } catch (e) {
+      problem = e;
+    }
+    wait.cancel();
+    if (shown && mounted) nav.pop();
+    if (!mounted) return;
+    if (path == null) {
+      _toast(lib.describe(problem ?? 'not_found'));
+      return;
+    }
+    lib.hold = true;
+    try {
+      await openDocument(context, path, name: item.name, onSend: () => _save([item.path]));
+    } finally {
+      lib.hold = false;
+    }
+  }
+
+  Future<void> _openViewer(int index) async {
+    lib.hold = true;
+    try {
+      await Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => _Viewer(lib: lib, start: index, onSave: _save, onDelete: _delete, onVisibility: _visibility, onOpenFile: _openFile),
+      ));
+    } finally {
+      lib.hold = false;
+    }
+  }
+
+  void _sortBy(bool received) {
+    if (lib.byReceived == received) return;
+    lib.byReceived = received;
+    _selected.clear();
+    unawaited(lib.refresh());
+  }
+
   List<RemoteItem> get _chosen => [for (final i in lib.items) if (_selected.contains(i.path)) i];
 
   @override
@@ -139,6 +198,16 @@ class _PcLibraryPageState extends State<PcLibraryPage> {
                         ]),
                       ),
             actions: [
+              if (!selecting)
+                PopupMenuButton<bool>(
+                  tooltip: tr('pclib.sort'),
+                  icon: const Icon(Icons.sort_rounded),
+                  onSelected: _sortBy,
+                  itemBuilder: (_) => [
+                    CheckedPopupMenuItem(value: false, checked: !lib.byReceived, child: Text(tr('pclib.sort_taken'))),
+                    CheckedPopupMenuItem(value: true, checked: lib.byReceived, child: Text(tr('pclib.sort_received'))),
+                  ],
+                ),
               if (_busy) const Padding(padding: EdgeInsets.all(14), child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
               if (selecting) ...[
                 IconButton(
@@ -173,7 +242,9 @@ class _PcLibraryPageState extends State<PcLibraryPage> {
                     ButtonSegment(value: null, label: Text(tr('pclib.all'))),
                     ButtonSegment(value: MediaKind.image, label: Text(tr('pclib.photos'))),
                     ButtonSegment(value: MediaKind.video, label: Text(tr('pclib.videos'))),
+                    ButtonSegment(value: MediaKind.other, label: Text(tr('pclib.files'))),
                   ],
+                  showSelectedIcon: false,
                   selected: {lib.kind},
                   onSelectionChanged: (v) {
                     lib.kind = v.first;
@@ -212,10 +283,12 @@ class _PcLibraryPageState extends State<PcLibraryPage> {
           ),
       ]);
     }
-    // By day, newest first (the PC sends them in that order).
+    // By day, newest first (the PC sends them in that order): the day
+    // taken, or the day it arrived.
     final days = <DateTime, List<int>>{};
     for (var k = 0; k < lib.items.length; k++) {
-      final t = DateTime.fromMillisecondsSinceEpoch(lib.items[k].takenMs);
+      final i = lib.items[k];
+      final t = DateTime.fromMillisecondsSinceEpoch(lib.byReceived && i.receivedMs > 0 ? i.receivedMs : i.takenMs);
       (days[DateTime(t.year, t.month, t.day)] ??= []).add(k);
     }
     final loc = MaterialLocalizations.of(context);
@@ -230,9 +303,46 @@ class _PcLibraryPageState extends State<PcLibraryPage> {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-              child: Text(tr('pclib.count', {'count': lib.total}), style: theme.textTheme.bodySmall?.copyWith(color: LrColors.muted)),
+              child: Row(children: [
+                Expanded(
+                  child: Text(
+                    '${tr('pclib.count', {'count': lib.total})} · ${tr(lib.byReceived ? 'pclib.sort_received' : 'pclib.sort_taken')}',
+                    style: theme.textTheme.bodySmall?.copyWith(color: LrColors.muted),
+                  ),
+                ),
+                // Arrived in the last day: one tap shows them first.
+                if (lib.recent > 0 && !lib.byReceived)
+                  ActionChip(
+                    avatar: const Icon(Icons.fiber_new_rounded, size: 18, color: LrColors.verified),
+                    label: Text(tr('pclib.recent', {'count': lib.recent})),
+                    onPressed: () => _sortBy(true),
+                  ),
+              ]),
             ),
           ),
+          // The PC got something new while this list was being looked at.
+          if (lib.newer)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                child: Material(
+                  color: LrColors.raised,
+                  borderRadius: BorderRadius.circular(12),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () => unawaited(lib.reload()),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(children: [
+                        const Icon(Icons.refresh_rounded, size: 18, color: LrColors.verified),
+                        const SizedBox(width: 10),
+                        Expanded(child: Text(tr('pclib.newer', {'pc': widget.desktop.name}), style: theme.textTheme.bodySmall)),
+                      ]),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           // Selecting, but this PC doesn't let this phone delete: say where
           // that is turned on (people looked for a delete button).
           if (_selected.isNotEmpty && !lib.canDelete)
@@ -294,15 +404,15 @@ class _PcLibraryPageState extends State<PcLibraryPage> {
       onTap: () {
         if (_selected.isNotEmpty) {
           setState(() => selected ? _selected.remove(item.path) : _selected.add(item.path));
+        } else if (item.file) {
+          unawaited(_openFile(item));
         } else {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => _Viewer(lib: lib, start: index, onSave: _save, onDelete: _delete, onVisibility: _visibility),
-          ));
+          unawaited(_openViewer(index));
         }
       },
       onLongPress: () => setState(() => _selected.add(item.path)),
       child: Stack(fit: StackFit.expand, children: [
-        _Thumb(lib: lib, path: item.path),
+        if (item.file) _FileThumb(lib: lib, item: item) else _Thumb(lib: lib, path: item.path),
         if (item.kind == MediaKind.video)
           const Positioned(right: 4, bottom: 4, child: Icon(Icons.play_circle_fill_rounded, color: Colors.white, size: 20)),
         if (item.live != null)
@@ -344,13 +454,21 @@ class _Thumb extends StatelessWidget {
 
 /// One item at a time, swipe for the next.
 class _Viewer extends StatefulWidget {
-  const _Viewer({required this.lib, required this.start, required this.onSave, required this.onDelete, required this.onVisibility});
+  const _Viewer({
+    required this.lib,
+    required this.start,
+    required this.onSave,
+    required this.onDelete,
+    required this.onVisibility,
+    required this.onOpenFile,
+  });
 
   final PcLibrary lib;
   final int start;
   final Future<void> Function(List<String>) onSave;
   final Future<void> Function(List<String>) onDelete;
   final Future<void> Function(List<String>, bool) onVisibility;
+  final Future<void> Function(RemoteItem) onOpenFile;
 
   @override
   State<_Viewer> createState() => _ViewerState();
@@ -376,6 +494,9 @@ class _ViewerState extends State<_Viewer> {
         if (_at >= items.length) _at = items.length - 1;
         final item = items[_at];
         final taken = DateTime.fromMillisecondsSinceEpoch(item.takenMs);
+        final arrived = item.receivedMs > 0 && item.receivedMs != item.takenMs
+            ? DateTime.fromMillisecondsSinceEpoch(item.receivedMs)
+            : null;
         final loc = MaterialLocalizations.of(context);
         return Scaffold(
           backgroundColor: Colors.black,
@@ -384,7 +505,12 @@ class _ViewerState extends State<_Viewer> {
             title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text('${loc.formatMediumDate(taken)} ${TimeOfDay.fromDateTime(taken).format(context)}',
                   style: const TextStyle(fontSize: 15)),
-              Text([item.name, if (item.from != null) tr('pclib.from', {'name': item.from})].join(' · '),
+              Text(
+                  [
+                    item.name,
+                    if (item.from != null) tr('pclib.from', {'name': item.from}),
+                    if (arrived != null) tr('pclib.arrived', {'when': loc.formatShortDate(arrived)}),
+                  ].join(' · '),
                   style: const TextStyle(fontSize: 12, color: LrColors.muted), overflow: TextOverflow.ellipsis),
             ]),
             actions: [
@@ -416,6 +542,9 @@ class _ViewerState extends State<_Viewer> {
             },
             itemBuilder: (context, i) {
               final it = items[i];
+              if (it.file) {
+                return _FilePage(key: ValueKey(it.path), lib: widget.lib, item: it, onOpen: () => widget.onOpenFile(it));
+              }
               return it.kind == MediaKind.video
                   ? _VideoView(key: ValueKey(it.path), lib: widget.lib, path: it.path, onSave: () => widget.onSave([it.path]))
                   : _PhotoView(key: ValueKey(it.path), lib: widget.lib, item: it);
@@ -593,4 +722,141 @@ class _VideoViewState extends State<_VideoView> {
       ]),
     );
   }
+}
+
+/// A received file's first page, drawn on this phone from a copy of the
+/// file (PDF: its first page; iPhone: the system's picture; Office / text:
+/// drawn from its contents). Its kind and name until then, or if it can't.
+class _FileThumb extends StatelessWidget {
+  const _FileThumb({required this.lib, required this.item});
+
+  final PcLibrary lib;
+  final RemoteItem item;
+
+  /// Per file version; a failure is tried again later, not kept for good.
+  static final SoftCache<Object> _cache = SoftCache(max: 300);
+  static int _running = 0;
+  static final Queue<Completer<void>> _waiting = Queue();
+
+  /// Three files fetched at a time.
+  static Future<T?> _limited<T>(Future<T?> Function() task) async {
+    while (_running >= 3) {
+      final c = Completer<void>();
+      _waiting.add(c);
+      await c.future;
+    }
+    _running++;
+    try {
+      return await task();
+    } finally {
+      _running--;
+      if (_waiting.isNotEmpty) _waiting.removeFirst().complete();
+    }
+  }
+
+  static bool _picture(String name) => MediaKind.fromName(name.toLowerCase()) == MediaKind.image;
+
+  Future<Object?> _load() {
+    final n = item.name.toLowerCase();
+    final drawable = n.endsWith('.pdf') || _picture(n) || FirstPage.canDraw(n) || Platform.isIOS;
+    if (!drawable || item.size > PcLibrary.maxThumbFile) return Future.value(null);
+    return _cache.get('${lib.desktop.id}|${item.path}|${item.size}|${item.receivedMs}', () => _limited<Object>(() async {
+          final path = await lib.fetch(item);
+          if (n.endsWith('.pdf')) return PdfPages.thumb(path);
+          if (_picture(n)) return File(path);
+          final png = await FileOpener.thumbnail(path);
+          if (png != null) return png;
+          return FirstPages.of(path, name: item.name);
+        }));
+  }
+
+  static IconData iconFor(String name) {
+    final n = name.toLowerCase();
+    if (n.endsWith('.pdf')) return Icons.picture_as_pdf_rounded;
+    if (n.endsWith('.doc') || n.endsWith('.docx') || n.endsWith('.txt') || n.endsWith('.rtf')) return Icons.description_rounded;
+    if (n.endsWith('.xls') || n.endsWith('.xlsx') || n.endsWith('.csv')) return Icons.table_chart_rounded;
+    if (n.endsWith('.ppt') || n.endsWith('.pptx')) return Icons.slideshow_rounded;
+    if (n.endsWith('.zip') || n.endsWith('.rar') || n.endsWith('.7z')) return Icons.folder_zip_rounded;
+    if (MediaKind.fromName(n) == MediaKind.video) return Icons.movie_rounded;
+    if (MediaKind.fromName(n) == MediaKind.image) return Icons.image_rounded;
+    return Icons.insert_drive_file_rounded;
+  }
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<Object?>(
+        future: _load(),
+        builder: (context, s) {
+          final d = s.data;
+          final Widget page;
+          if (d is Uint8List) {
+            page = Container(
+              color: Colors.white,
+              child: Image.memory(d, fit: BoxFit.cover, alignment: Alignment.topCenter, gaplessPlayback: true, cacheWidth: 300),
+            );
+          } else if (d is File) {
+            page = Image.file(d, fit: BoxFit.cover, gaplessPlayback: true, cacheWidth: 300,
+                errorBuilder: (_, _, _) => _plain());
+          } else if (d is FirstPage) {
+            page = FirstPageView(page: d);
+          } else {
+            return _plain();
+          }
+          return Stack(fit: StackFit.expand, children: [page, _label()]);
+        },
+      );
+
+  Widget _label() => Positioned(
+        left: 0,
+        right: 0,
+        bottom: 0,
+        child: Container(
+          color: Colors.black54,
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          child: Row(children: [
+            Icon(iconFor(item.name), size: 11, color: Colors.white),
+            const SizedBox(width: 3),
+            Expanded(
+              child: Text(item.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10, color: Colors.white)),
+            ),
+          ]),
+        ),
+      );
+
+  Widget _plain() => Container(
+        color: LrColors.surface,
+        padding: const EdgeInsets.all(6),
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Icon(iconFor(item.name), size: 30, color: LrColors.safelight),
+          const SizedBox(height: 6),
+          Text(item.name, maxLines: 2, textAlign: TextAlign.center, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10)),
+        ]),
+      );
+}
+
+/// A received file in the full-screen view: its first page and "Open".
+class _FilePage extends StatelessWidget {
+  const _FilePage({super.key, required this.lib, required this.item, required this.onOpen});
+
+  final PcLibrary lib;
+  final RemoteItem item;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) => Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 240, maxHeight: 320),
+              child: AspectRatio(aspectRatio: 210 / 297, child: _FileThumb(lib: lib, item: item)),
+            ),
+            const SizedBox(height: 16),
+            Text(item.name, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 15)),
+            const SizedBox(height: 4),
+            Text(formatSize(item.size), style: const TextStyle(color: LrColors.muted, fontSize: 12)),
+            const SizedBox(height: 16),
+            FilledButton.icon(onPressed: onOpen, icon: const Icon(Icons.open_in_new_rounded), label: Text(tr('pclib.open'))),
+          ]),
+        ),
+      );
 }

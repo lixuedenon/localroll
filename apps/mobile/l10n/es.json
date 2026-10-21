@@ -462,5 +462,13 @@
   "incoming.unverified": "Este dispositivo no está emparejado con este teléfono, así que no se puede confirmar quién es realmente. Acepta solo si sabes quién lo envía.",
   "cleanup.done_trash": "Espacio liberado. Lo eliminado queda en la Papelera de la Galería durante 30 días.",
   "transfer.stopped_phone_full": "Detenido: el otro teléfono no tiene espacio. El resto queda sin enviar.",
-  "err.phone_full": "El otro teléfono no tiene espacio libre suficiente. No se envió nada a medias."
+  "err.phone_full": "El otro teléfono no tiene espacio libre suficiente. No se envió nada a medias.",
+  "pclib.sort": "Ordenar",
+  "pclib.sort_taken": "Por fecha de captura",
+  "pclib.sort_received": "Por fecha de recepción",
+  "pclib.files": "Documentos",
+  "pclib.recent": "{count} nuevos",
+  "pclib.newer": "Hay novedades en {pc}: toca para actualizar",
+  "pclib.arrived": "recibido el {when}",
+  "pclib.open": "Abrir"
 }

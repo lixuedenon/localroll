@@ -305,50 +305,6 @@ Future<void> _openGoogle(BuildContext context, String path, int size) async {
   );
 }
 
-/// A received file (Documents / Other, at any depth), for the library's
-/// "All" timeline.
-class ReceivedFile {
-  const ReceivedFile(this.path, this.size, this.modified, this.arrived);
-
-  final String path;
-  final int size;
-  final DateTime modified;
-
-  /// When it arrived here (Windows keeps when the file was made).
-  final DateTime arrived;
-
-  String get name => path.split(Platform.pathSeparator).last;
-
-  /// Every file in the Documents and Other folders, newest arrival first.
-  static Future<List<ReceivedFile>> scan(AppServices s) async {
-    final out = <ReceivedFile>[];
-    for (final doc in [true, false]) {
-      final String dir;
-      try {
-        dir = await s.server.folderPath(document: doc);
-      } catch (_) {
-        continue;
-      }
-      try {
-        await for (final e in Directory(dir).list(recursive: true, followLinks: false)) {
-          if (e is! File) continue;
-          final rel = e.path.substring(dir.length);
-          final name = rel.split(Platform.pathSeparator).last;
-          if (rel.split(Platform.pathSeparator).any((p) => p.startsWith('.')) || name.toLowerCase() == 'desktop.ini') continue;
-          try {
-            final st = await e.stat();
-            // On Windows "changed" is when the file was created here; the
-            // modified time is the sender's.
-            out.add(ReceivedFile(e.path, st.size, st.modified, Platform.isWindows ? st.changed : st.modified));
-          } catch (_) {}
-        }
-      } catch (_) {}
-    }
-    out.sort((a, b) => b.arrived.compareTo(a.arrived));
-    return out;
-  }
-}
-
 /// A file's first page / picture: PDFs their first page; Word, Excel,
 /// PowerPoint, text and CSV drawn from their content; photos and videos
 /// (sent inside folders) from ffmpeg like the library's own. [icon] while
