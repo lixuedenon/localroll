@@ -485,5 +485,7 @@
   "phone.use_own": "फ़ोन का अपना नाम ({name})",
   "phone.shown_as": "ऐसे दिखेगा: {name}",
   "phone.first_hint": "इस फ़ोन का नाम “{name}” है। PC पर आसानी से पहचानने के लिए नाम बदल सकते हैं।",
-  "phone.rename": "नाम बदलें"
+  "phone.rename": "नाम बदलें",
+  "pclib.search_hint": "PC की फ़ोटो और फ़ाइलों में शब्द खोजें",
+  "pclib.search_none": "“{q}” नहीं मिला। जो शब्द PC ने अभी नहीं पढ़े, वे नहीं मिलेंगे।"
 }

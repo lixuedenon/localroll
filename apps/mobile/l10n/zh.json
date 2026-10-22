@@ -485,5 +485,7 @@
   "phone.use_own": "用手机原名（{name}）",
   "phone.shown_as": "显示为：{name}",
   "phone.first_hint": "这部手机现在叫“{name}”，可以改个名字，方便在电脑上认出来。",
-  "phone.rename": "改名"
+  "phone.rename": "改名",
+  "pclib.search_hint": "搜索电脑上照片和文件里的文字",
+  "pclib.search_none": "没有找到“{q}”。电脑还没识别到的文字暂时搜不出来。"
 }

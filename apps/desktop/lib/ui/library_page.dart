@@ -16,6 +16,8 @@ import '../services/library_index.dart';
 import '../services/network.dart';
 import '../services/peers.dart';
 import '../services/received_files.dart';
+import '../services/text_index.dart';
+import '../services/text_indexer.dart';
 import '../services/win_dialogs.dart';
 import 'app_nav.dart';
 import 'files_view.dart';
@@ -96,6 +98,25 @@ class _LibraryPageState extends State<LibraryPage> {
   final Set<String> _boxHits = {};
   Timer? _autoScroll;
 
+  /// Search box: words found in photos / files (and their names).
+  final TextEditingController _searchCtrl = TextEditingController();
+  SearchQuery _search = SearchQuery('');
+
+  void _onSearch(String v) {
+    unawaited(widget.services.server.textIndex.load());
+    setState(() {
+      _search = SearchQuery(v);
+      // Results come from everything: photos, videos and files.
+      if (!_search.isEmpty && _filesTab) _filter = _Filter.all;
+      _clearSelection();
+    });
+  }
+
+  void _clearSearch() {
+    _searchCtrl.clear();
+    _onSearch('');
+  }
+
   void _clearSelection() {
     _selected.clear();
     _copies.clear();
@@ -133,6 +154,7 @@ class _LibraryPageState extends State<LibraryPage> {
     _autoScroll?.cancel();
     _focus.dispose();
     _scroll.dispose();
+    _searchCtrl.dispose();
     _hovered.dispose();
     super.dispose();
   }
@@ -189,9 +211,20 @@ class _LibraryPageState extends State<LibraryPage> {
   List<ReceivedFile> _visibleFiles() {
     // Files carry no sender: hidden while one person is picked.
     if (_filter != _Filter.all || _member != null) return const [];
-    if (!_onlyRecent) return _files;
-    final since = DateTime.now().subtract(const Duration(hours: 24));
-    return [for (final f in _files) if (f.arrived.isAfter(since)) f];
+    var list = _files;
+    if (_onlyRecent) {
+      final since = DateTime.now().subtract(const Duration(hours: 24));
+      list = [for (final f in list) if (f.arrived.isAfter(since)) f];
+    }
+    if (!_search.isEmpty) {
+      final idx = widget.services.server.textIndex;
+      final files = widget.services.server.files;
+      list = [
+        for (final f in list)
+          if (idx.matches(TextIndex.fileKey(files.relOf(f.path) ?? f.path, f.size), f.name, _search)) f,
+      ];
+    }
+    return list;
   }
 
   /// Photos / videos and received files, newest first, in one list.
@@ -231,6 +264,10 @@ class _LibraryPageState extends State<LibraryPage> {
     if (_onlyRecent) {
       final since = DateTime.now().subtract(const Duration(hours: 24)).millisecondsSinceEpoch;
       list = [for (final i in list) if (i.receivedMs > since) i];
+    }
+    if (!_search.isEmpty) {
+      final idx = widget.services.server.textIndex;
+      list = [for (final i in list) if (idx.matches(TextIndex.mediaKey(i), i.name, _search)) i];
     }
     if (_byReceived) list.sort((a, b) => b.receivedMs.compareTo(a.receivedMs));
     return list;
@@ -302,7 +339,7 @@ class _LibraryPageState extends State<LibraryPage> {
   Widget build(BuildContext context) {
     final s = widget.services;
     return ListenableBuilder(
-      listenable: Listenable.merge([s.library, s.settings]),
+      listenable: Listenable.merge([s.library, s.settings, s.server.textIndex]),
       builder: (context, _) {
         final family = s.settings.family;
         final all = s.library.items;
@@ -384,6 +421,8 @@ class _LibraryPageState extends State<LibraryPage> {
                   ],
                 ),
               ] else ...[
+                _searchBox(),
+                const SizedBox(width: 8),
                 SegmentedButton<_Filter>(
                   segments: [
                     ButtonSegment(value: _Filter.all, label: Text(tr('library.filter_all'))),
@@ -443,13 +482,13 @@ class _LibraryPageState extends State<LibraryPage> {
           ),
           body: Column(
             children: [
-              ..._banners(context),
+              ..._banners(context, items.length + _visibleFiles().length),
               Expanded(
                 child: _filesTab
                     // Documents / other files from PCs: a file list, not photos.
                     ? FilesView(services: s, document: _filter == _Filter.docs)
                     : items.isEmpty && _visibleFiles().isEmpty
-                        ? _empty(context)
+                        ? (_search.isEmpty ? _empty(context) : _noResults(context))
                         : _grid(context, items),
               ),
             ],
@@ -612,7 +651,57 @@ class _LibraryPageState extends State<LibraryPage> {
   }
 
   /// Library folder unreachable, or many files vanished at once.
-  List<Widget> _banners(BuildContext context) {
+  /// The search box in the toolbar.
+  Widget _searchBox() => SizedBox(
+        width: 230,
+        height: 38,
+        child: TextField(
+          controller: _searchCtrl,
+          onChanged: _onSearch,
+          textInputAction: TextInputAction.search,
+          style: const TextStyle(fontSize: 13.5),
+          decoration: InputDecoration(
+            isDense: true,
+            hintText: tr('search.hint'),
+            prefixIcon: const Icon(Icons.search_rounded, size: 18),
+            prefixIconConstraints: const BoxConstraints(minWidth: 34),
+            suffixIcon: _search.isEmpty && _searchCtrl.text.isEmpty
+                ? null
+                : IconButton(
+                    tooltip: tr('search.clear'),
+                    iconSize: 16,
+                    onPressed: _clearSearch,
+                    icon: const Icon(Icons.close_rounded),
+                  ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        ),
+      );
+
+  /// While text is still being read: how far, and that the rest isn't found yet.
+  String _searchNote() {
+    final p = widget.services.textIndexer.progress.value;
+    return switch (p.state) {
+      IndexState.working || IndexState.paused || IndexState.starting when p.total > 0 =>
+        tr('search.progress_note', {'done': p.done, 'total': p.total}),
+      IndexState.off => tr('search.off_note'),
+      IndexState.noOcr => tr('search.no_ocr_note'),
+      _ => '',
+    };
+  }
+
+  Widget _noResults(BuildContext context) => Center(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Icon(Icons.search_off_rounded, size: 56, color: Theme.of(context).colorScheme.outline),
+          const SizedBox(height: 10),
+          Text(tr('search.none', {'q': _searchCtrl.text.trim()})),
+          const SizedBox(height: 4),
+          Text(_searchNote(), textAlign: TextAlign.center, style: const TextStyle(color: LrColors.muted, fontSize: 12.5)),
+        ]),
+      );
+
+  List<Widget> _banners(BuildContext context, int found) {
     final lib = widget.services.library;
     final theme = Theme.of(context);
     Widget banner(IconData icon, Color color, String text, List<Widget> actions) => Container(
@@ -631,6 +720,11 @@ class _LibraryPageState extends State<LibraryPage> {
           ]),
         );
     return [
+      if (!_search.isEmpty)
+        banner(Icons.search_rounded, Theme.of(context).colorScheme.primary,
+            [tr('search.results', {'q': _searchCtrl.text.trim(), 'count': found}), _searchNote()].where((t) => t.isNotEmpty).join('  ·  '), [
+          TextButton(onPressed: _clearSearch, child: Text(tr('search.clear'))),
+        ]),
       if (_onlyRecent)
         banner(Icons.schedule_rounded, LrColors.safelight, tr('lib.recent_only'), [
           TextButton(onPressed: () => setState(() => _onlyRecent = false), child: Text(tr('lib.recent_all'))),
@@ -1028,7 +1122,10 @@ class _LibraryPageState extends State<LibraryPage> {
     return _hover(
       key,
       Tooltip(
-        message: f.name,
+        message: [
+          f.name,
+          if (!_search.isEmpty) ?s.server.textIndex.snippet(TextIndex.fileKey(s.server.files.relOf(f.path) ?? f.path, f.size), _search),
+        ].join('\n'),
         waitDuration: const Duration(milliseconds: 600),
         child: GestureDetector(
           onTap: () => _tap(key, () => openReceivedFile(context, s, f.path)),
@@ -1152,9 +1249,13 @@ class _LibraryPageState extends State<LibraryPage> {
     final item = items[index];
     final key = item.relPath;
     final selected = _selected.contains(key);
+    final found = _search.isEmpty ? null : s.server.textIndex.snippet(TextIndex.mediaKey(item), _search);
     return _hover(
       key,
-      GestureDetector(
+      Tooltip(
+        message: found ?? '',
+        waitDuration: const Duration(milliseconds: 400),
+        child: GestureDetector(
         onTap: () => _tap(
           key,
           () => Navigator.of(context).push(MaterialPageRoute(
@@ -1192,6 +1293,7 @@ class _LibraryPageState extends State<LibraryPage> {
             _selectButton(key, selected),
           ],
         ),
+      ),
       ),
     );
   }

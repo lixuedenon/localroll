@@ -150,6 +150,19 @@ class FfmpegService extends ChangeNotifier {
     );
   }
 
+  /// A JPEG of [src] for text recognition (HEIC, RAW, WebP…), at most
+  /// 2560 pixels a side, written to [out]. Not kept in the picture cache.
+  Future<bool> ocrPicture(String src, String out) async {
+    if (!available) return false;
+    return _limited(() => _run([
+          '-i', src,
+          '-frames:v', '1',
+          '-vf', "scale='min(2560,iw)':'min(2560,ih)':force_original_aspect_ratio=decrease",
+          '-q:v', '3',
+          out,
+        ]));
+  }
+
   /// Full-resolution JPEG used to display formats Flutter cannot decode (HEIC, DNG…).
   Future<File?> preview(MediaItem item) =>
       _cached(_cachePath(item, '_p'), item, (src, out) => [

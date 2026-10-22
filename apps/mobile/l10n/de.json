@@ -485,5 +485,7 @@
   "phone.use_own": "Name des Handys ({name})",
   "phone.shown_as": "Wird angezeigt als: {name}",
   "phone.first_hint": "Dieses Handy heißt jetzt „{name}“. Du kannst es umbenennen, damit man es am PC leicht erkennt.",
-  "phone.rename": "Umbenennen"
+  "phone.rename": "Umbenennen",
+  "pclib.search_hint": "Text in Fotos und Dateien auf dem PC suchen",
+  "pclib.search_none": "Nichts gefunden für „{q}“. Text, den der PC noch nicht gelesen hat, wird nicht gefunden."
 }

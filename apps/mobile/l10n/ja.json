@@ -485,5 +485,7 @@
   "phone.use_own": "スマホの名前（{name}）",
   "phone.shown_as": "表示名：{name}",
   "phone.first_hint": "このスマホの名前は「{name}」です。PC で見分けやすいように名前を変えられます。",
-  "phone.rename": "名前を変更"
+  "phone.rename": "名前を変更",
+  "pclib.search_hint": "PC の写真やファイルの文字を検索",
+  "pclib.search_none": "「{q}」は見つかりませんでした。PC がまだ読み取っていない文字は見つかりません。"
 }

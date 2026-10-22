@@ -15,6 +15,7 @@ import '../services/library_index.dart';
 import '../services/receive_hub.dart';
 import '../services/library_trash.dart';
 import '../services/received_files.dart';
+import '../services/text_index.dart';
 import '../services/settings.dart';
 import '../l10n/l10n.dart';
 import 'port_mux.dart';
@@ -172,6 +173,9 @@ class TransferServer extends ChangeNotifier {
   /// LocalRoll's "Recently deleted" (30 days): every deletion goes there,
   /// from this PC or from a phone allowed to manage the library.
   late final LibraryTrash trash = LibraryTrash(library, files);
+
+  /// The text found in photos and files (searching here and from phones).
+  late final TextIndex textIndex = TextIndex(library);
 
   /// Something new arrived: linked phones browsing the library refresh
   /// (many arrivals in a row are told once).
@@ -1052,6 +1056,9 @@ class TransferServer extends ChangeNotifier {
     final limit = (int.tryParse(q['limit'] ?? '') ?? 200).clamp(1, LrProtocol.libraryPageMax);
     final kind = q['kind'];
     final byReceived = q['sort'] == 'received';
+    // Search: the text found in photos / files, and their names.
+    final search = SearchQuery(q['q'] ?? '');
+    if (!search.isEmpty) await textIndex.load();
     final family = settings.family;
     // Photos / videos, then received files (documents, scans…) — newest
     // taken (files: arrived) or newest arrival first.
@@ -1060,7 +1067,8 @@ class TransferServer extends ChangeNotifier {
       for (final i in library.items) {
         if ((kind == null || i.kind.name == kind) &&
             (i.kind == MediaKind.image || i.kind == MediaKind.video) &&
-            !(i.private && !i.ownedBy(device.id))) {
+            !(i.private && !i.ownedBy(device.id)) &&
+            (search.isEmpty || textIndex.matches(TextIndex.mediaKey(i), i.name, search))) {
           entries.add((
             byReceived ? i.receivedMs : i.captureMs,
             i.receivedMs,
@@ -1086,6 +1094,7 @@ class TransferServer extends ChangeNotifier {
         if (o != null && o.private && o.deviceId != device.id) continue;
         final rel = files.relOf(f.path);
         if (rel == null) continue;
+        if (!search.isEmpty && !textIndex.matches(TextIndex.fileKey(rel, f.size), f.name, search)) continue;
         final at = f.arrived.millisecondsSinceEpoch;
         entries.add((
           at,

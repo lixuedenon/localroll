@@ -485,5 +485,7 @@
   "phone.use_own": "Phone's own name ({name})",
   "phone.shown_as": "Shown as: {name}",
   "phone.first_hint": "This phone is called “{name}”. You can rename it so it’s easy to tell apart on the PC.",
-  "phone.rename": "Rename"
+  "phone.rename": "Rename",
+  "pclib.search_hint": "Search text in the PC’s photos and files",
+  "pclib.search_none": "Nothing found for “{q}”. Text the PC hasn’t read yet can’t be found."
 }

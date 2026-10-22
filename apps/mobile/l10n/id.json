@@ -485,5 +485,7 @@
   "phone.use_own": "Nama ponsel ({name})",
   "phone.shown_as": "Tampil sebagai: {name}",
   "phone.first_hint": "Ponsel ini bernama “{name}”. Anda bisa menggantinya agar mudah dikenali di PC.",
-  "phone.rename": "Ganti nama"
+  "phone.rename": "Ganti nama",
+  "pclib.search_hint": "Cari teks di foto dan file PC",
+  "pclib.search_none": "Tidak ada hasil untuk “{q}”. Teks yang belum dibaca PC belum bisa ditemukan."
 }

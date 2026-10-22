@@ -485,5 +485,7 @@
   "phone.use_own": "Telefonun adı ({name})",
   "phone.shown_as": "Görünecek ad: {name}",
   "phone.first_hint": "Bu telefonun adı “{name}”. Bilgisayarda kolay tanımak için adını değiştirebilirsiniz.",
-  "phone.rename": "Yeniden adlandır"
+  "phone.rename": "Yeniden adlandır",
+  "pclib.search_hint": "Bilgisayardaki fotoğraf ve dosyalarda metin ara",
+  "pclib.search_none": "“{q}” için sonuç yok. Bilgisayarın henüz okumadığı metin bulunamaz."
 }

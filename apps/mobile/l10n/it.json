@@ -485,5 +485,7 @@
   "phone.use_own": "Nome del telefono ({name})",
   "phone.shown_as": "Verrà mostrato come: {name}",
   "phone.first_hint": "Questo telefono si chiama «{name}». Puoi rinominarlo per riconoscerlo facilmente sul PC.",
-  "phone.rename": "Rinomina"
+  "phone.rename": "Rinomina",
+  "pclib.search_hint": "Cerca testo in foto e file del PC",
+  "pclib.search_none": "Nessun risultato per «{q}». Il testo non ancora letto dal PC non si trova."
 }

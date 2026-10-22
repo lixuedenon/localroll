@@ -11,6 +11,7 @@ import '../services/autostart.dart';
 import '../services/network.dart';
 import 'app_nav.dart';
 import 'identity_card.dart';
+import 'search_settings.dart';
 import 'theme.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -90,6 +91,8 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     ),
                   ]),
+                  // Text in photos and files, for the search box.
+                  _group(theme, tr('search.title'), [SearchSettings(services: s)]),
                   _group(theme, tr('settings.g_storage'), [
                     _row(Icons.photo_library_outlined, tr('settings.library_folder'), sub: tr('settings.library_hint')),
                     Padding(

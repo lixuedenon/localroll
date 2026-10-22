@@ -485,5 +485,7 @@
   "phone.use_own": "Tên gốc của máy ({name})",
   "phone.shown_as": "Hiển thị: {name}",
   "phone.first_hint": "Điện thoại này tên là “{name}”. Bạn có thể đổi tên để dễ nhận ra trên máy tính.",
-  "phone.rename": "Đổi tên"
+  "phone.rename": "Đổi tên",
+  "pclib.search_hint": "Tìm chữ trong ảnh và tệp trên máy tính",
+  "pclib.search_none": "Không tìm thấy “{q}”. Chữ máy tính chưa đọc thì chưa tìm được."
 }

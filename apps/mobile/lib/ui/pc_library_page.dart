@@ -54,6 +54,20 @@ class _PcLibraryPageState extends State<PcLibraryPage> {
   final Set<String> _selected = {};
   bool _busy = false;
 
+  /// Search: words in photos / files (read on the PC) and their names.
+  final TextEditingController _searchCtrl = TextEditingController();
+  Timer? _searchSoon;
+
+  void _onSearch(String v) {
+    _searchSoon?.cancel();
+    _searchSoon = Timer(const Duration(milliseconds: 450), () {
+      if (!mounted || lib.query == v.trim()) return;
+      lib.query = v.trim();
+      setState(_selected.clear);
+      unawaited(lib.refresh());
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -62,6 +76,8 @@ class _PcLibraryPageState extends State<PcLibraryPage> {
 
   @override
   void dispose() {
+    _searchSoon?.cancel();
+    _searchCtrl.dispose();
     lib.dispose();
     super.dispose();
   }
@@ -234,10 +250,39 @@ class _PcLibraryPageState extends State<PcLibraryPage> {
               ],
             ],
             bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(52),
+              preferredSize: const Size.fromHeight(104),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-                child: SegmentedButton<MediaKind?>(
+                child: Column(children: [
+                  SizedBox(
+                    height: 42,
+                    child: TextField(
+                      controller: _searchCtrl,
+                      onChanged: _onSearch,
+                      textInputAction: TextInputAction.search,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        hintText: tr('pclib.search_hint'),
+                        prefixIcon: const Icon(Icons.search_rounded, size: 20),
+                        suffixIcon: ValueListenableBuilder(
+                          valueListenable: _searchCtrl,
+                          builder: (_, v, _) => v.text.isEmpty
+                              ? const SizedBox.shrink()
+                              : IconButton(
+                                  icon: const Icon(Icons.close_rounded, size: 18),
+                                  onPressed: () {
+                                    _searchCtrl.clear();
+                                    _onSearch('');
+                                  },
+                                ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SegmentedButton<MediaKind?>(
                   segments: [
                     ButtonSegment(value: null, label: Text(tr('pclib.all'))),
                     ButtonSegment(value: MediaKind.image, label: Text(tr('pclib.photos'))),
@@ -251,7 +296,8 @@ class _PcLibraryPageState extends State<PcLibraryPage> {
                     _selected.clear();
                     unawaited(lib.refresh());
                   },
-                ),
+                  ),
+                ]),
               ),
             ),
           ),
@@ -274,7 +320,8 @@ class _PcLibraryPageState extends State<PcLibraryPage> {
             child: Column(children: [
               Icon(lib.error == null ? Icons.photo_library_outlined : Icons.cloud_off_rounded, size: 48, color: LrColors.muted),
               const SizedBox(height: 12),
-              Text(lib.error ?? tr('pclib.empty'), textAlign: TextAlign.center),
+              Text(lib.error ?? (lib.query.isEmpty ? tr('pclib.empty') : tr('pclib.search_none', {'q': lib.query})),
+                  textAlign: TextAlign.center),
               if (lib.error != null) ...[
                 const SizedBox(height: 16),
                 FilledButton(onPressed: lib.refresh, child: Text(tr('common.retry'))),

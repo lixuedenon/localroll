@@ -102,6 +102,9 @@ class PcLibrary extends ChangeNotifier {
   /// Newest arrival first (false: newest taken first).
   bool byReceived = false;
 
+  /// Only what has these words in its text (read on the PC) or name.
+  String query = '';
+
   /// How many arrived on the PC in the last day (0: none, or an older PC).
   int recent = 0;
 
@@ -161,7 +164,7 @@ class PcLibrary extends ChangeNotifier {
       final c = await _connect();
       // [keep]: as many as are loaded now, so the list doesn't jump.
       final limit = keep ? items.length.clamp(_pageSize, LrProtocol.libraryPageMax) : _pageSize;
-      final page = await c.library(offset: 0, limit: limit, kind: kind, byReceived: byReceived);
+      final page = await c.library(offset: 0, limit: limit, kind: kind, byReceived: byReceived, query: query);
       items
         ..clear()
         ..addAll(page.items);
@@ -191,7 +194,7 @@ class PcLibrary extends ChangeNotifier {
     notifyListeners();
     try {
       final c = await _connect();
-      final page = await c.library(offset: at, limit: _pageSize, kind: kind, byReceived: byReceived);
+      final page = await c.library(offset: at, limit: _pageSize, kind: kind, byReceived: byReceived, query: query);
       items.addAll(page.items);
       _take(page);
     } catch (e) {

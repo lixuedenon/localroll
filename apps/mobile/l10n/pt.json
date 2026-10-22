@@ -485,5 +485,7 @@
   "phone.use_own": "Nome do telemóvel ({name})",
   "phone.shown_as": "Aparece como: {name}",
   "phone.first_hint": "Este telemóvel chama-se «{name}». Pode mudar o nome para o reconhecer facilmente no PC.",
-  "phone.rename": "Mudar o nome"
+  "phone.rename": "Mudar o nome",
+  "pclib.search_hint": "Procurar texto nas fotos e ficheiros do PC",
+  "pclib.search_none": "Nada encontrado para «{q}». Texto que o PC ainda não leu não aparece."
 }

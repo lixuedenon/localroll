@@ -10,6 +10,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:localroll_core/localroll_core.dart';
 import 'package:localroll_desktop/server/transfer_server.dart';
+import 'package:localroll_desktop/services/text_index.dart';
 
 import 'support/harness.dart';
 
@@ -922,6 +923,23 @@ void main() {
       expect(await mum.client.libraryVisibility([mine.path], private: false), 1);
       pc.server.files.forget();
       expect((await dad.client.library(kind: MediaKind.other)).items.map((i) => i.name), containsAll(['scan.pdf', 'secret.txt']));
+    });
+
+    test('search from a phone: text found in photos / files, and names; "only me" still hidden', () async {
+      final mum = await pc.pairPhone(id: 'mum', name: 'Mum');
+      final dad = await pc.pairPhone(id: 'dad', name: 'Dad');
+      final r = await mum.upload('R1', bytesOf(100), name: 'IMG_1.jpg');
+      await mum.upload('R2', bytesOf(100, 2), name: 'IMG_2.jpg', private: true);
+      await sendFile(mum, 'contract.pdf', [...'%PDF-1.7'.codeUnits, ...bytesOf(50)]);
+      final idx = pc.server.textIndex;
+      await idx.load();
+      idx.put(TextIndex.mediaKey(pc.library.findByRel(r.path!)!), const TextEntry('收据 合计 128元'));
+      idx.put(TextIndex.mediaKey(pc.library.findByAsset('mum', 'R2')!), const TextEntry('收据 私人'));
+      expect((await dad.client.library(query: '收据')).items.map((i) => i.name), ['IMG_1.jpg']);
+      expect((await mum.client.library(query: '收据')).items.map((i) => i.name), containsAll(['IMG_1.jpg', 'IMG_2.jpg']));
+      expect((await dad.client.library(query: 'contract')).items.single.name, 'contract.pdf');
+      expect((await dad.client.library(query: '没有这个')).items, isEmpty);
+      expect((await dad.client.library()).total, 2); // no query: everything Dad may see
     });
 
     test('"everything I sent": only me / shared at once, and browsing phones are told', () async {

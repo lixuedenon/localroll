@@ -487,6 +487,8 @@ const Map<String, Map<String, String>> translations = {
     'phone.shown_as': 'Shown as: {name}',
     'phone.first_hint': 'This phone is called “{name}”. You can rename it so it’s easy to tell apart on the PC.',
     'phone.rename': 'Rename',
+    'pclib.search_hint': 'Search text in the PC’s photos and files',
+    'pclib.search_none': 'Nothing found for “{q}”. Text the PC hasn’t read yet can’t be found.',
   },
   'zh': {
     'common.cancel': '取消',
@@ -972,6 +974,8 @@ const Map<String, Map<String, String>> translations = {
     'phone.shown_as': '显示为：{name}',
     'phone.first_hint': '这部手机现在叫“{name}”，可以改个名字，方便在电脑上认出来。',
     'phone.rename': '改名',
+    'pclib.search_hint': '搜索电脑上照片和文件里的文字',
+    'pclib.search_none': '没有找到“{q}”。电脑还没识别到的文字暂时搜不出来。',
   },
   'zh_Hant': {
     'common.cancel': '取消',
@@ -1457,6 +1461,8 @@ const Map<String, Map<String, String>> translations = {
     'phone.shown_as': '顯示為：{name}',
     'phone.first_hint': '這支手機現在叫「{name}」，可以改個名字，方便在電腦上認出來。',
     'phone.rename': '改名',
+    'pclib.search_hint': '搜尋電腦上照片和檔案裡的文字',
+    'pclib.search_none': '沒有找到「{q}」。電腦還沒辨識到的文字暫時搜不出來。',
   },
   'ja': {
     'common.cancel': 'キャンセル',
@@ -1942,6 +1948,8 @@ const Map<String, Map<String, String>> translations = {
     'phone.shown_as': '表示名：{name}',
     'phone.first_hint': 'このスマホの名前は「{name}」です。PC で見分けやすいように名前を変えられます。',
     'phone.rename': '名前を変更',
+    'pclib.search_hint': 'PC の写真やファイルの文字を検索',
+    'pclib.search_none': '「{q}」は見つかりませんでした。PC がまだ読み取っていない文字は見つかりません。',
   },
   'ko': {
     'common.cancel': '취소',
@@ -2427,6 +2435,8 @@ const Map<String, Map<String, String>> translations = {
     'phone.shown_as': '표시 이름: {name}',
     'phone.first_hint': '이 휴대폰 이름은 \'{name}\'입니다. PC에서 알아보기 쉽게 이름을 바꿀 수 있습니다.',
     'phone.rename': '이름 바꾸기',
+    'pclib.search_hint': 'PC 사진과 파일 속 글자 검색',
+    'pclib.search_none': '\'{q}\'에 대한 결과가 없습니다. PC가 아직 읽지 않은 글자는 찾을 수 없습니다.',
   },
   'es': {
     'common.cancel': 'Cancelar',
@@ -2912,6 +2922,8 @@ const Map<String, Map<String, String>> translations = {
     'phone.shown_as': 'Se verá como: {name}',
     'phone.first_hint': 'Este móvil se llama «{name}». Puedes cambiarle el nombre para reconocerlo fácilmente en el PC.',
     'phone.rename': 'Cambiar nombre',
+    'pclib.search_hint': 'Buscar texto en fotos y archivos del PC',
+    'pclib.search_none': 'No se encontró «{q}». El texto que el PC aún no ha leído no aparece.',
   },
   'fr': {
     'common.cancel': 'Annuler',
@@ -3397,6 +3409,8 @@ const Map<String, Map<String, String>> translations = {
     'phone.shown_as': 'Affiché comme : {name}',
     'phone.first_hint': 'Ce téléphone s\'appelle « {name} ». Vous pouvez le renommer pour le reconnaître facilement sur le PC.',
     'phone.rename': 'Renommer',
+    'pclib.search_hint': 'Rechercher du texte dans les photos et fichiers du PC',
+    'pclib.search_none': 'Rien trouvé pour « {q} ». Le texte pas encore lu par le PC n\'est pas trouvé.',
   },
   'de': {
     'common.cancel': 'Abbrechen',
@@ -3882,6 +3896,8 @@ const Map<String, Map<String, String>> translations = {
     'phone.shown_as': 'Wird angezeigt als: {name}',
     'phone.first_hint': 'Dieses Handy heißt jetzt „{name}“. Du kannst es umbenennen, damit man es am PC leicht erkennt.',
     'phone.rename': 'Umbenennen',
+    'pclib.search_hint': 'Text in Fotos und Dateien auf dem PC suchen',
+    'pclib.search_none': 'Nichts gefunden für „{q}“. Text, den der PC noch nicht gelesen hat, wird nicht gefunden.',
   },
   'pt': {
     'common.cancel': 'Cancelar',
@@ -4367,6 +4383,8 @@ const Map<String, Map<String, String>> translations = {
     'phone.shown_as': 'Aparece como: {name}',
     'phone.first_hint': 'Este telemóvel chama-se «{name}». Pode mudar o nome para o reconhecer facilmente no PC.',
     'phone.rename': 'Mudar o nome',
+    'pclib.search_hint': 'Procurar texto nas fotos e ficheiros do PC',
+    'pclib.search_none': 'Nada encontrado para «{q}». Texto que o PC ainda não leu não aparece.',
   },
   'ru': {
     'common.cancel': 'Отмена',
@@ -4852,6 +4870,8 @@ const Map<String, Map<String, String>> translations = {
     'phone.shown_as': 'Будет видно как: {name}',
     'phone.first_hint': 'Этот телефон называется «{name}». Можно переименовать, чтобы легко узнавать его на ПК.',
     'phone.rename': 'Переименовать',
+    'pclib.search_hint': 'Поиск текста в фото и файлах ПК',
+    'pclib.search_none': 'По запросу «{q}» ничего нет. Текст, который ПК ещё не распознал, не находится.',
   },
   'it': {
     'common.cancel': 'Annulla',
@@ -5337,6 +5357,8 @@ const Map<String, Map<String, String>> translations = {
     'phone.shown_as': 'Verrà mostrato come: {name}',
     'phone.first_hint': 'Questo telefono si chiama «{name}». Puoi rinominarlo per riconoscerlo facilmente sul PC.',
     'phone.rename': 'Rinomina',
+    'pclib.search_hint': 'Cerca testo in foto e file del PC',
+    'pclib.search_none': 'Nessun risultato per «{q}». Il testo non ancora letto dal PC non si trova.',
   },
   'ar': {
     'common.cancel': 'إلغاء',
@@ -5822,6 +5844,8 @@ const Map<String, Map<String, String>> translations = {
     'phone.shown_as': 'سيظهر باسم: {name}',
     'phone.first_hint': 'اسم هذا الهاتف الآن «{name}». يمكنك تغييره ليسهل التعرّف عليه على الكمبيوتر.',
     'phone.rename': 'إعادة التسمية',
+    'pclib.search_hint': 'ابحث في نص الصور والملفات على الكمبيوتر',
+    'pclib.search_none': 'لم يُعثر على «{q}». النص الذي لم يقرأه الكمبيوتر بعد لا يظهر.',
   },
   'hi': {
     'common.cancel': 'रद्द करें',
@@ -6307,6 +6331,8 @@ const Map<String, Map<String, String>> translations = {
     'phone.shown_as': 'ऐसे दिखेगा: {name}',
     'phone.first_hint': 'इस फ़ोन का नाम “{name}” है। PC पर आसानी से पहचानने के लिए नाम बदल सकते हैं।',
     'phone.rename': 'नाम बदलें',
+    'pclib.search_hint': 'PC की फ़ोटो और फ़ाइलों में शब्द खोजें',
+    'pclib.search_none': '“{q}” नहीं मिला। जो शब्द PC ने अभी नहीं पढ़े, वे नहीं मिलेंगे।',
   },
   'id': {
     'common.cancel': 'Batal',
@@ -6792,6 +6818,8 @@ const Map<String, Map<String, String>> translations = {
     'phone.shown_as': 'Tampil sebagai: {name}',
     'phone.first_hint': 'Ponsel ini bernama “{name}”. Anda bisa menggantinya agar mudah dikenali di PC.',
     'phone.rename': 'Ganti nama',
+    'pclib.search_hint': 'Cari teks di foto dan file PC',
+    'pclib.search_none': 'Tidak ada hasil untuk “{q}”. Teks yang belum dibaca PC belum bisa ditemukan.',
   },
   'vi': {
     'common.cancel': 'Hủy',
@@ -7277,6 +7305,8 @@ const Map<String, Map<String, String>> translations = {
     'phone.shown_as': 'Hiển thị: {name}',
     'phone.first_hint': 'Điện thoại này tên là “{name}”. Bạn có thể đổi tên để dễ nhận ra trên máy tính.',
     'phone.rename': 'Đổi tên',
+    'pclib.search_hint': 'Tìm chữ trong ảnh và tệp trên máy tính',
+    'pclib.search_none': 'Không tìm thấy “{q}”. Chữ máy tính chưa đọc thì chưa tìm được.',
   },
   'th': {
     'common.cancel': 'ยกเลิก',
@@ -7762,6 +7792,8 @@ const Map<String, Map<String, String>> translations = {
     'phone.shown_as': 'แสดงเป็น: {name}',
     'phone.first_hint': 'โทรศัพท์นี้ชื่อ “{name}” เปลี่ยนชื่อได้เพื่อให้จำง่ายบนพีซี',
     'phone.rename': 'เปลี่ยนชื่อ',
+    'pclib.search_hint': 'ค้นหาข้อความในรูปและไฟล์บนพีซี',
+    'pclib.search_none': 'ไม่พบ “{q}” ข้อความที่พีซียังไม่ได้อ่านจะยังค้นไม่เจอ',
   },
   'tr': {
     'common.cancel': 'İptal',
@@ -8247,5 +8279,7 @@ const Map<String, Map<String, String>> translations = {
     'phone.shown_as': 'Görünecek ad: {name}',
     'phone.first_hint': 'Bu telefonun adı “{name}”. Bilgisayarda kolay tanımak için adını değiştirebilirsiniz.',
     'phone.rename': 'Yeniden adlandır',
+    'pclib.search_hint': 'Bilgisayardaki fotoğraf ve dosyalarda metin ara',
+    'pclib.search_none': '“{q}” için sonuç yok. Bilgisayarın henüz okumadığı metin bulunamaz.',
   },
 };

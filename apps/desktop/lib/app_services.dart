@@ -11,10 +11,12 @@ import 'services/converter.dart';
 import 'services/ffmpeg.dart';
 import 'services/library_index.dart';
 import 'services/network.dart';
+import 'services/pdf_text.dart';
 import 'services/peers.dart';
 import 'services/phone_formats.dart';
 import 'services/receive_hub.dart';
 import 'services/settings.dart';
+import 'services/text_indexer.dart';
 import 'services/tls_identity.dart';
 import 'ui/pdf_thumb.dart';
 
@@ -51,6 +53,21 @@ class AppServices {
   /// Other PCs: finding, pairing, sending.
   late final PeerDirectory peers = PeerDirectory(settings: settings, server: server);
   late final PeerSender sender = PeerSender(settings: settings, peers: peers);
+
+  /// Reads the text in photos and files in the background, for searching.
+  late final TextIndexer textIndexer = TextIndexer(
+    library: library,
+    files: server.files,
+    index: server.textIndex,
+    enabled: () => settings.textSearch,
+    // Quiet only: not while files go in or out, or videos are converted.
+    busy: () =>
+        hub.transfers.any((t) => t.state == TransferState.receiving || t.state == TransferState.verifying) ||
+        sender.busy ||
+        converter.pending > 0,
+    convert: ffmpeg.ocrPicture,
+    readPdf: PdfText.read,
+  );
 
   /// A paired phone or PC is reachable right now: it said "I'm here" or
   /// checked in within the last ~2.5 min (devices do every minute while
@@ -211,6 +228,7 @@ class AppServices {
     // "Recently deleted": what is older than 30 days goes for good (now,
     // and every few hours while LocalRoll runs).
     unawaited(server.trash.purgeOld());
+    s.textIndexer.start();
     Timer.periodic(const Duration(hours: 6), (_) => unawaited(server.trash.purgeOld()));
     return s;
   }
