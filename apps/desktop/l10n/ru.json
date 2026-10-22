@@ -516,5 +516,14 @@
   "pick.any_size": "Любой",
   "pick.at_least": "≥ {size}",
   "pick.result": "Подходит: {count} шт., {size}",
-  "pick.select": "Выбрать"
+  "pick.select": "Выбрать",
+  "family.private_chip": "Только я · {count}",
+  "family.private_chip_tip": "Элементы «Только я» здесь скрыты; нажмите, чтобы показать",
+  "family.made_private_hidden": "{count} теперь «Только я» и скрыты — кнопка «Только я» вверху покажет их",
+  "family.made_private": "{count} теперь «Только я»",
+  "family.made_shared": "{count} теперь видны семье",
+  "files.rename": "Переименовать",
+  "files.rename_bad": "Такое имя нельзя использовать",
+  "files.rename_taken": "Файл с таким именем уже есть",
+  "files.rename_failed": "Не удалось переименовать (возможно, файл открыт)"
 }

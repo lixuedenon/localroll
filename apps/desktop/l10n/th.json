@@ -516,5 +516,14 @@
   "pick.any_size": "ทุกขนาด",
   "pick.at_least": "≥ {size}",
   "pick.result": "ตรงเงื่อนไข: {count} รายการ {size}",
-  "pick.select": "เลือก"
+  "pick.select": "เลือก",
+  "family.private_chip": "เฉพาะฉัน · {count}",
+  "family.private_chip_tip": "รายการ \"เฉพาะฉัน\" ถูกซ่อนไว้ คลิกเพื่อแสดง",
+  "family.made_private_hidden": "{count} รายการเป็น \"เฉพาะฉัน\" และถูกซ่อน — กด \"เฉพาะฉัน\" ด้านบนเพื่อแสดง",
+  "family.made_private": "{count} รายการเป็น \"เฉพาะฉัน\" แล้ว",
+  "family.made_shared": "{count} รายการครอบครัวเห็นแล้ว",
+  "files.rename": "เปลี่ยนชื่อ",
+  "files.rename_bad": "ใช้ชื่อนี้ไม่ได้",
+  "files.rename_taken": "มีไฟล์ชื่อนี้อยู่แล้ว",
+  "files.rename_failed": "เปลี่ยนชื่อไม่ได้ (ไฟล์อาจเปิดอยู่)"
 }

@@ -516,5 +516,14 @@
   "pick.any_size": "Mọi dung lượng",
   "pick.at_least": "≥ {size}",
   "pick.result": "Khớp: {count} mục, {size}",
-  "pick.select": "Chọn"
+  "pick.select": "Chọn",
+  "family.private_chip": "Chỉ mình tôi · {count}",
+  "family.private_chip_tip": "Mục \"Chỉ mình tôi\" đang ẩn ở đây; bấm để hiện",
+  "family.made_private_hidden": "{count} mục giờ là \"Chỉ mình tôi\" và đã ẩn — bấm \"Chỉ mình tôi\" ở trên để hiện",
+  "family.made_private": "{count} mục giờ là \"Chỉ mình tôi\"",
+  "family.made_shared": "{count} mục giờ gia đình xem được",
+  "files.rename": "Đổi tên",
+  "files.rename_bad": "Không dùng được tên này",
+  "files.rename_taken": "Đã có tệp trùng tên",
+  "files.rename_failed": "Không đổi tên được (có thể tệp đang mở)"
 }

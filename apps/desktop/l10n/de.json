@@ -516,5 +516,14 @@
   "pick.any_size": "Beliebig",
   "pick.at_least": "≥ {size}",
   "pick.result": "Passend: {count} Elemente, {size}",
-  "pick.select": "Auswählen"
+  "pick.select": "Auswählen",
+  "family.private_chip": "Nur ich · {count}",
+  "family.private_chip_tip": "„Nur ich“-Elemente sind hier ausgeblendet; klicken zum Anzeigen",
+  "family.made_private_hidden": "{count} jetzt „Nur ich“ und hier ausgeblendet – oben „Nur ich“ zeigt sie",
+  "family.made_private": "{count} jetzt „Nur ich“",
+  "family.made_shared": "{count} jetzt für die Familie sichtbar",
+  "files.rename": "Umbenennen",
+  "files.rename_bad": "Dieser Name geht nicht",
+  "files.rename_taken": "Es gibt schon eine Datei mit diesem Namen",
+  "files.rename_failed": "Umbenennen ging nicht (vielleicht geöffnet)"
 }

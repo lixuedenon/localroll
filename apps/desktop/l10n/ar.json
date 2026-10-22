@@ -516,5 +516,14 @@
   "pick.any_size": "أي حجم",
   "pick.at_least": "≥ {size}",
   "pick.result": "المطابق: {count} عنصرًا، {size}",
-  "pick.select": "تحديدها"
+  "pick.select": "تحديدها",
+  "family.private_chip": "لي فقط · {count}",
+  "family.private_chip_tip": "العناصر «لي فقط» مخفية هنا؛ انقر لإظهارها",
+  "family.made_private_hidden": "{count} الآن «لي فقط» ومخفية هنا — زر «لي فقط» في الأعلى يُظهرها",
+  "family.made_private": "{count} الآن «لي فقط»",
+  "family.made_shared": "{count} مرئية الآن للعائلة",
+  "files.rename": "إعادة التسمية",
+  "files.rename_bad": "لا يمكن استخدام هذا الاسم",
+  "files.rename_taken": "يوجد ملف بهذا الاسم بالفعل",
+  "files.rename_failed": "تعذّرت إعادة التسمية (ربما الملف مفتوح)"
 }

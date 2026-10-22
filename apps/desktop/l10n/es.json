@@ -516,5 +516,14 @@
   "pick.any_size": "Cualquiera",
   "pick.at_least": "≥ {size}",
   "pick.result": "Coinciden: {count} elementos, {size}",
-  "pick.select": "Seleccionarlos"
+  "pick.select": "Seleccionarlos",
+  "family.private_chip": "Solo yo · {count}",
+  "family.private_chip_tip": "Los elementos «Solo yo» están ocultos aquí; haz clic para verlos",
+  "family.made_private_hidden": "{count} ahora son «Solo yo» y están ocultos aquí: «Solo yo» arriba los muestra",
+  "family.made_private": "{count} ahora son «Solo yo»",
+  "family.made_shared": "{count} ahora visibles para la familia",
+  "files.rename": "Cambiar nombre",
+  "files.rename_bad": "Ese nombre no se puede usar",
+  "files.rename_taken": "Ya hay un archivo con ese nombre",
+  "files.rename_failed": "No se pudo cambiar el nombre (quizá está abierto)"
 }

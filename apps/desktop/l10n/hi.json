@@ -516,5 +516,14 @@
   "pick.any_size": "कोई भी",
   "pick.at_least": "≥ {size}",
   "pick.result": "मेल खाते: {count} आइटम, {size}",
-  "pick.select": "इन्हें चुनें"
+  "pick.select": "इन्हें चुनें",
+  "family.private_chip": "सिर्फ़ मैं · {count}",
+  "family.private_chip_tip": "“सिर्फ़ मैं” वाले यहाँ छिपे हैं; दिखाने के लिए क्लिक करें",
+  "family.made_private_hidden": "{count} अब “सिर्फ़ मैं” और यहाँ छिपे — ऊपर “सिर्फ़ मैं” से दिखेंगे",
+  "family.made_private": "{count} अब “सिर्फ़ मैं”",
+  "family.made_shared": "{count} अब परिवार को दिखेंगे",
+  "files.rename": "नाम बदलें",
+  "files.rename_bad": "यह नाम नहीं चल सकता",
+  "files.rename_taken": "इस नाम की फ़ाइल पहले से है",
+  "files.rename_failed": "नाम नहीं बदला (शायद फ़ाइल खुली है)"
 }

@@ -516,5 +516,14 @@
   "pick.any_size": "Qualquer",
   "pick.at_least": "≥ {size}",
   "pick.result": "Correspondem: {count} itens, {size}",
-  "pick.select": "Selecioná-los"
+  "pick.select": "Selecioná-los",
+  "family.private_chip": "Só eu · {count}",
+  "family.private_chip_tip": "Os itens «Só eu» estão ocultos aqui; clique para mostrar",
+  "family.made_private_hidden": "{count} agora «Só eu» e ocultos aqui — «Só eu» no topo mostra-os",
+  "family.made_private": "{count} agora «Só eu»",
+  "family.made_shared": "{count} agora visíveis para a família",
+  "files.rename": "Mudar o nome",
+  "files.rename_bad": "Esse nome não pode ser usado",
+  "files.rename_taken": "Já existe um ficheiro com esse nome",
+  "files.rename_failed": "Não foi possível mudar o nome (talvez esteja aberto)"
 }

@@ -516,5 +516,14 @@
   "pick.any_size": "Her boyut",
   "pick.at_least": "≥ {size}",
   "pick.result": "Eşleşen: {count} öğe, {size}",
-  "pick.select": "Seç"
+  "pick.select": "Seç",
+  "family.private_chip": "Yalnızca ben · {count}",
+  "family.private_chip_tip": "\"Yalnızca ben\" öğeleri burada gizli; göstermek için tıklayın",
+  "family.made_private_hidden": "{count} öğe artık \"Yalnızca ben\" ve gizli — üstteki \"Yalnızca ben\" gösterir",
+  "family.made_private": "{count} öğe artık \"Yalnızca ben\"",
+  "family.made_shared": "{count} öğe artık aileye görünür",
+  "files.rename": "Yeniden adlandır",
+  "files.rename_bad": "Bu ad kullanılamaz",
+  "files.rename_taken": "Bu adda bir dosya zaten var",
+  "files.rename_failed": "Yeniden adlandırılamadı (dosya açık olabilir)"
 }

@@ -516,5 +516,14 @@
   "pick.any_size": "Semua ukuran",
   "pick.at_least": "≥ {size}",
   "pick.result": "Cocok: {count} item, {size}",
-  "pick.select": "Pilih"
+  "pick.select": "Pilih",
+  "family.private_chip": "Hanya saya · {count}",
+  "family.private_chip_tip": "Item \"Hanya saya\" disembunyikan di sini; klik untuk menampilkan",
+  "family.made_private_hidden": "{count} sekarang \"Hanya saya\" dan disembunyikan — \"Hanya saya\" di atas menampilkannya",
+  "family.made_private": "{count} sekarang \"Hanya saya\"",
+  "family.made_shared": "{count} sekarang terlihat oleh keluarga",
+  "files.rename": "Ganti nama",
+  "files.rename_bad": "Nama itu tidak bisa dipakai",
+  "files.rename_taken": "Sudah ada file dengan nama itu",
+  "files.rename_failed": "Gagal ganti nama (mungkin file sedang dibuka)"
 }

@@ -516,5 +516,14 @@
   "pick.any_size": "すべて",
   "pick.at_least": "{size} 以上",
   "pick.result": "該当：{count} 件、{size}",
-  "pick.select": "選択する"
+  "pick.select": "選択する",
+  "family.private_chip": "自分だけ · {count}",
+  "family.private_chip_tip": "「自分だけ」の項目はここでは隠れています。クリックで表示",
+  "family.made_private_hidden": "{count} 件を「自分だけ」にして隠しました。上の「自分だけ」で表示できます",
+  "family.made_private": "{count} 件を「自分だけ」にしました",
+  "family.made_shared": "{count} 件を家族に見えるようにしました",
+  "files.rename": "名前を変更",
+  "files.rename_bad": "その名前は使えません",
+  "files.rename_taken": "同じ名前のファイルがすでにあります",
+  "files.rename_failed": "名前を変更できませんでした（ファイルが開いているかもしれません）"
 }

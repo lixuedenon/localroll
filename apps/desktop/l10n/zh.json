@@ -516,5 +516,14 @@
   "pick.any_size": "不限",
   "pick.at_least": "≥ {size}",
   "pick.result": "符合条件：{count} 项，共 {size}",
-  "pick.select": "选中这些"
+  "pick.select": "选中这些",
+  "family.private_chip": "仅本人可见 · {count}",
+  "family.private_chip_tip": "仅本人可见的在这里先隐藏了，点一下显示",
+  "family.made_private_hidden": "{count} 项已设为仅本人可见，这里先隐藏了。点上方的“仅本人可见”可以显示",
+  "family.made_private": "{count} 项已设为仅本人可见",
+  "family.made_shared": "{count} 项已设为家人可见",
+  "files.rename": "重命名",
+  "files.rename_bad": "这个名字不能用（不能含 \\ / : * ? \" < > |）",
+  "files.rename_taken": "已经有同名文件了",
+  "files.rename_failed": "改名失败（文件可能正被打开）"
 }

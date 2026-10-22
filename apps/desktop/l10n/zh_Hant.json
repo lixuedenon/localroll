@@ -516,5 +516,14 @@
   "pick.any_size": "不限",
   "pick.at_least": "≥ {size}",
   "pick.result": "符合條件：{count} 項，共 {size}",
-  "pick.select": "選取這些"
+  "pick.select": "選取這些",
+  "family.private_chip": "僅本人可見 · {count}",
+  "family.private_chip_tip": "僅本人可見的在這裡先隱藏了，點一下顯示",
+  "family.made_private_hidden": "{count} 項已設為僅本人可見，這裡先隱藏了。點上方的「僅本人可見」可以顯示",
+  "family.made_private": "{count} 項已設為僅本人可見",
+  "family.made_shared": "{count} 項已設為家人可見",
+  "files.rename": "重新命名",
+  "files.rename_bad": "這個名字不能用（不能含 \\ / : * ? \" < > |）",
+  "files.rename_taken": "已經有同名檔案了",
+  "files.rename_failed": "改名失敗（檔案可能正被開啟）"
 }

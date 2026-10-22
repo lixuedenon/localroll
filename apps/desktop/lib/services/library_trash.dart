@@ -270,7 +270,7 @@ class LibraryTrash extends ChangeNotifier {
       }
       onProgress?.call(++done, paths.length);
     }
-    files.forget();
+    files.changed();
     await _save();
     notifyListeners();
     return out;
@@ -314,7 +314,7 @@ class LibraryTrash extends ChangeNotifier {
       }
     }
     if (back.isNotEmpty) library.undelete(back);
-    files.forget();
+    files.changed();
     _entries.removeWhere(done.contains);
     await _save();
     notifyListeners();

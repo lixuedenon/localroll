@@ -516,5 +516,14 @@
   "pick.any_size": "Toutes",
   "pick.at_least": "≥ {size}",
   "pick.result": "Correspondants : {count} éléments, {size}",
-  "pick.select": "Les sélectionner"
+  "pick.select": "Les sélectionner",
+  "family.private_chip": "Moi seul · {count}",
+  "family.private_chip_tip": "Les éléments « Moi seul » sont masqués ici ; cliquez pour les afficher",
+  "family.made_private_hidden": "{count} maintenant « Moi seul » et masqués ici — « Moi seul » en haut les affiche",
+  "family.made_private": "{count} maintenant « Moi seul »",
+  "family.made_shared": "{count} maintenant visibles par la famille",
+  "files.rename": "Renommer",
+  "files.rename_bad": "Ce nom n'est pas possible",
+  "files.rename_taken": "Un fichier porte déjà ce nom",
+  "files.rename_failed": "Renommage impossible (fichier peut-être ouvert)"
 }

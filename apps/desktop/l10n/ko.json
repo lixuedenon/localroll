@@ -516,5 +516,14 @@
   "pick.any_size": "전체",
   "pick.at_least": "{size} 이상",
   "pick.result": "해당: {count}개, {size}",
-  "pick.select": "선택"
+  "pick.select": "선택",
+  "family.private_chip": "나만 보기 · {count}",
+  "family.private_chip_tip": "'나만 보기' 항목은 여기서 숨겨집니다. 클릭하면 보입니다",
+  "family.made_private_hidden": "{count}개를 '나만 보기'로 바꾸고 숨겼습니다. 위의 '나만 보기'로 볼 수 있습니다",
+  "family.made_private": "{count}개를 '나만 보기'로 바꿨습니다",
+  "family.made_shared": "{count}개가 이제 가족에게 보입니다",
+  "files.rename": "이름 바꾸기",
+  "files.rename_bad": "그 이름은 쓸 수 없습니다",
+  "files.rename_taken": "같은 이름의 파일이 이미 있습니다",
+  "files.rename_failed": "이름을 바꾸지 못했습니다(파일이 열려 있을 수 있음)"
 }

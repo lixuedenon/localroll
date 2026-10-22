@@ -214,6 +214,14 @@ class _FilesViewState extends State<FilesView> {
                               icon: const Icon(Icons.visibility_outlined),
                               onPressed: () => previewOffice(context, e.entity.path),
                             ),
+                          if (!e.isDir)
+                            IconButton(
+                              tooltip: tr('files.rename'),
+                              icon: const Icon(Icons.drive_file_rename_outline_rounded),
+                              onPressed: () async {
+                                if (await renameReceivedFile(context, widget.services, e.entity.path) != null) await _load();
+                              },
+                            ),
                           IconButton(
                             tooltip: tr('common.show_in_folder'),
                             icon: const Icon(Icons.drive_folder_upload_rounded),
@@ -237,6 +245,57 @@ class _FilesViewState extends State<FilesView> {
 /// reader, a text file in its text window, Word / Excel / PowerPoint with
 /// the PC's own program (or LocalRoll's simple look inside), a Google
 /// shortcut as a link; anything else with the program Windows uses for it.
+/// Asks for a new name for the received file at [path] and renames it
+/// (who sent it and "only me" stay). Returns the new path, or null.
+Future<String?> renameReceivedFile(BuildContext context, AppServices services, String path) async {
+  final sep = Platform.pathSeparator;
+  final old = path.split(sep).last;
+  final dot = old.lastIndexOf('.');
+  final ctrl = TextEditingController(text: old)
+    ..selection = TextSelection(baseOffset: 0, extentOffset: dot > 0 ? dot : old.length);
+  String? error;
+  final messenger = ScaffoldMessenger.of(context);
+  final name = await showDialog<String>(
+    context: context,
+    builder: (c) => StatefulBuilder(
+      builder: (c, set) => AlertDialog(
+        title: Text(tr('files.rename')),
+        content: SizedBox(
+          width: 420,
+          child: TextField(
+            controller: ctrl,
+            autofocus: true,
+            decoration: InputDecoration(errorText: error),
+            onSubmitted: (v) => Navigator.pop(c, v),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c), child: Text(tr('common.cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(c, ctrl.text), child: Text(tr('files.rename'))),
+        ],
+      ),
+    ),
+  );
+  ctrl.dispose();
+  if (name == null || name.trim() == old) return null;
+  // Keep the kind: "scan" for "scan.pdf" stays a PDF.
+  var want = name.trim();
+  final oldExt = dot > 0 ? old.substring(dot) : '';
+  if (oldExt.isNotEmpty && !want.contains('.')) want = '$want$oldExt';
+  try {
+    final to = await services.server.files.rename(path, want);
+    return to;
+  } on ArgumentError {
+    messenger.showSnackBar(SnackBar(content: Text(tr('files.rename_bad'))));
+  } on StateError {
+    messenger.showSnackBar(SnackBar(content: Text(tr('files.rename_taken'))));
+  } catch (e) {
+    DiagLog.log('files', 'rename failed: $e');
+    messenger.showSnackBar(SnackBar(content: Text(tr('files.rename_failed'))));
+  }
+  return null;
+}
+
 Future<void> openReceivedFile(BuildContext context, AppServices services, String path) async {
   final name = path.split(Platform.pathSeparator).last;
   var size = 0;

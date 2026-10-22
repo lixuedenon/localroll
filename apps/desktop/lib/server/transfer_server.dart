@@ -579,6 +579,8 @@ class TransferServer extends ChangeNotifier {
       _deletionsSeen = library.deletions.value;
       library.deletions.addListener(_onLibraryDeletions);
       library.visibility.addListener(_announceLibrary);
+      // Renamed, deleted, restored received files: browsing phones too.
+      files.changes.addListener(_announceLibrary);
     }
     final failures = <String>[];
     for (final p in _candidatePorts) {
@@ -647,6 +649,7 @@ class TransferServer extends ChangeNotifier {
     if (_watchingDeletions) {
       library.deletions.removeListener(_onLibraryDeletions);
       library.visibility.removeListener(_announceLibrary);
+      files.changes.removeListener(_announceLibrary);
     }
     stop();
     pin.dispose();

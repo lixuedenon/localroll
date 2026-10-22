@@ -134,4 +134,28 @@ void main() {
     expect(File(pc.abs(r.path!)).existsSync(), isFalse);
     expect(pc.server.trash.entries.single.rel, r.path);
   });
+
+  test('renaming a received file keeps who sent it and "only me" (here and in Explorer)', () async {
+    final mum = await pc.pairPhone(id: 'mum', name: 'Mum');
+    await sendFile(mum, 'scan.pdf', [...'%PDF-1.7'.codeUnits, ...bytesOf(200)]);
+    final files = pc.server.files;
+    final f = (await files.list()).single;
+    expect(await files.setPrivate([files.relOf(f.path)!], 'mum', true), 1);
+
+    final to = await files.rename(f.path, 'Contract 2026.pdf');
+    expect(to.endsWith('Contract 2026.pdf'), isTrue);
+    var again = (await files.list()).single;
+    expect(again.owner?.deviceId, 'mum');
+    expect(again.owner?.private, isTrue);
+    await expectLater(files.rename(to, 'bad/name.pdf'), throwsArgumentError);
+
+    // Renamed in Explorer: found again by its size.
+    final sep = Platform.pathSeparator;
+    final moved = '${to.substring(0, to.lastIndexOf(sep))}${sep}renamed.pdf';
+    await File(to).rename(moved);
+    files.forget();
+    again = (await files.list()).single;
+    expect(again.path, moved);
+    expect(again.owner?.private, isTrue);
+  });
 }

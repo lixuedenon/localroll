@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:localroll_core/localroll_core.dart';
 
 import 'library_index.dart';
@@ -30,7 +31,7 @@ class ReceivedFile {
 
 /// Who sent a received file, and whether only they may see it remotely.
 class FileOwner {
-  const FileOwner(this.deviceId, this.deviceName, {this.private = false, this.arrivedMs = 0});
+  const FileOwner(this.deviceId, this.deviceName, {this.private = false, this.arrivedMs = 0, this.size = 0});
 
   final String deviceId;
   final String deviceName;
@@ -39,13 +40,27 @@ class FileOwner {
   /// When it arrived (0: not recorded).
   final int arrivedMs;
 
-  Map<String, dynamic> toJson() => {'d': deviceId, 'n': deviceName, if (private) 'x': true, if (arrivedMs > 0) 'a': arrivedMs};
+  /// Its size when it arrived: finds it again after it was renamed or moved
+  /// in Explorer (0: not recorded).
+  final int size;
+
+  FileOwner copyWith({bool? private, int? size}) =>
+      FileOwner(deviceId, deviceName, private: private ?? this.private, arrivedMs: arrivedMs, size: size ?? this.size);
+
+  Map<String, dynamic> toJson() => {
+        'd': deviceId,
+        'n': deviceName,
+        if (private) 'x': true,
+        if (arrivedMs > 0) 'a': arrivedMs,
+        if (size > 0) 's': size,
+      };
 
   factory FileOwner.fromJson(Map<String, dynamic> j) => FileOwner(
         j['d'] as String? ?? '',
         j['n'] as String? ?? '',
         private: j['x'] == true,
         arrivedMs: (j['a'] as num?)?.toInt() ?? 0,
+        size: (j['s'] as num?)?.toInt() ?? 0,
       );
 }
 
@@ -97,9 +112,16 @@ class ReceivedFiles {
     final rel = relOf(path);
     if (rel == null) return;
     final m = await _loadOwners();
-    m[rel.toLowerCase()] = owner.arrivedMs > 0
-        ? owner
-        : FileOwner(owner.deviceId, owner.deviceName, private: owner.private, arrivedMs: DateTime.now().millisecondsSinceEpoch);
+    var size = owner.size;
+    if (size == 0) {
+      try {
+        size = await File(path).length();
+      } catch (_) {}
+    }
+    m[rel.toLowerCase()] = FileOwner(owner.deviceId, owner.deviceName,
+        private: owner.private,
+        arrivedMs: owner.arrivedMs > 0 ? owner.arrivedMs : DateTime.now().millisecondsSinceEpoch,
+        size: size);
     await _saveOwners(m);
   }
 
@@ -111,7 +133,7 @@ class ReceivedFiles {
     for (final r in rels) {
       final o = m[r.toLowerCase()];
       if (o == null || o.deviceId != deviceId) continue;
-      m[r.toLowerCase()] = FileOwner(o.deviceId, o.deviceName, private: private, arrivedMs: o.arrivedMs);
+      m[r.toLowerCase()] = o.copyWith(private: private);
       n++;
     }
     if (n > 0) await _saveOwners(m);
@@ -128,7 +150,47 @@ class ReceivedFiles {
     return rels.isEmpty ? 0 : setPrivate(rels, deviceId, private);
   }
 
+  /// Goes up whenever the list or who sent what changes (arrived,
+  /// renamed, deleted, restored, "only me"): pages showing files reload.
+  final ValueNotifier<int> changes = ValueNotifier(0);
+
+  /// Files were added / removed by LocalRoll itself: list again, and tell.
+  void changed() {
+    _list = null;
+    changes.value++;
+  }
+
+  /// Renames the received file at [path] to [newName] (same folder); who
+  /// sent it and "only me" stay. Returns the new path. Throws
+  /// [ArgumentError] for a name that can't be used, [StateError] if taken.
+  Future<String> rename(String path, String newName) async {
+    final name = newName.trim();
+    if (name.isEmpty ||
+        name.startsWith('.') ||
+        name.contains(RegExp(r'[\\/:*?"<>|]')) ||
+        name.toLowerCase() == 'desktop.ini' ||
+        name.endsWith('.') ||
+        name.endsWith(' ')) {
+      throw ArgumentError.value(newName, 'newName');
+    }
+    final oldRel = relOf(path);
+    if (oldRel == null) throw ArgumentError.value(path, 'path');
+    final folder = path.substring(0, path.lastIndexOf(_sep));
+    final to = '$folder$_sep$name';
+    if (to == path) return path;
+    final sameButCase = to.toLowerCase() == path.toLowerCase();
+    if (!sameButCase && FileSystemEntity.typeSync(to) != FileSystemEntityType.notFound) throw StateError('taken');
+    await File(path).rename(to);
+    final m = await _loadOwners();
+    final o = m.remove(oldRel.toLowerCase());
+    final newRel = relOf(to);
+    if (o != null && newRel != null) m[newRel.toLowerCase()] = o;
+    await _saveOwners(m);
+    return to;
+  }
+
   Future<void> _saveOwners(Map<String, FileOwner> m) {
+    changes.value++;
     _list = null;
     return _saving = _saving.then((_) => _writeOwners(m));
   }
@@ -186,6 +248,30 @@ class ReceivedFiles {
           } catch (_) {}
         }
       } catch (_) {}
+    }
+    // Renamed or moved in Explorer: who sent it goes with it (same size,
+    // and only one such file), so an "only me" file never becomes visible
+    // to everyone just by a new name.
+    final seen = {for (final f in out) ?relOf(f.path)?.toLowerCase()};
+    final lost = [for (final e in owners.entries) if (e.value.size > 0 && !seen.contains(e.key)) e];
+    if (lost.isNotEmpty) {
+      var moved = false;
+      for (var k = 0; k < out.length; k++) {
+        final f = out[k];
+        if (f.owner != null) continue;
+        final same = lost.where((e) => e.value.size == f.size).toList();
+        final rel = relOf(f.path);
+        if (same.length != 1 || rel == null) continue;
+        final e = same.single;
+        owners.remove(e.key);
+        owners[rel.toLowerCase()] = e.value;
+        lost.remove(e);
+        out[k] = ReceivedFile(f.path, f.size, f.modified,
+            e.value.arrivedMs > 0 ? DateTime.fromMillisecondsSinceEpoch(e.value.arrivedMs) : f.arrived,
+            owner: e.value, document: f.document);
+        moved = true;
+      }
+      if (moved) unawaited(_saveOwners(owners));
     }
     out.sort((a, b) => b.arrived.compareTo(a.arrived));
     _list = out;

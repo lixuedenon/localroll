@@ -107,6 +107,7 @@ class _LibraryPageState extends State<LibraryPage> {
   /// day they arrived.
   List<ReceivedFile> _files = const [];
   int _seenSaved = -1;
+  String? _lastSaved;
   final List<StreamSubscription<FileSystemEvent>> _watches = [];
   Timer? _filesSoon;
 
@@ -114,6 +115,7 @@ class _LibraryPageState extends State<LibraryPage> {
   void initState() {
     super.initState();
     widget.services.hub.addListener(_onHub);
+    widget.services.server.files.changes.addListener(_reloadFilesSoon);
     unawaited(_loadFiles());
     unawaited(_watchFiles());
   }
@@ -121,6 +123,7 @@ class _LibraryPageState extends State<LibraryPage> {
   @override
   void dispose() {
     widget.services.hub.removeListener(_onHub);
+    widget.services.server.files.changes.removeListener(_reloadFilesSoon);
     for (final w in _watches) {
       unawaited(w.cancel());
     }
@@ -134,9 +137,12 @@ class _LibraryPageState extends State<LibraryPage> {
 
   /// A file arrived: show it.
   void _onHub() {
-    final n = widget.services.hub.savedFiles.length;
-    if (n != _seenSaved) {
-      _seenSaved = n;
+    // The list keeps the last 200: compare the newest, not the count.
+    final saved = widget.services.hub.savedFiles;
+    final last = saved.isEmpty ? null : saved.last;
+    if (saved.length != _seenSaved || last != _lastSaved) {
+      _seenSaved = saved.length;
+      _lastSaved = last;
       _reloadFilesSoon();
     }
   }
@@ -391,6 +397,18 @@ class _LibraryPageState extends State<LibraryPage> {
                 // New arrivals from a phone or PC can have old capture dates
                 // and land far down the list; "by arrival" puts them on top.
                 if (!_filesTab) ?_personMenu(all, family),
+                // "Only me" items are hidden here: say so, one click shows them.
+                if (!_filesTab && all.any((i) => i.private)) ...[
+                  const SizedBox(width: 8),
+                  FilterChip(
+                    avatar: Icon(_showPrivate ? Icons.lock_open_rounded : Icons.lock_rounded, size: 16),
+                    label: Text(tr('family.private_chip', {'count': all.where((i) => i.private).length})),
+                    selected: _showPrivate,
+                    showCheckmark: false,
+                    tooltip: tr('family.private_chip_tip'),
+                    onSelected: (v) => setState(() => _showPrivate = v),
+                  ),
+                ],
                 const SizedBox(width: 8),
                 PopupMenuButton<bool>(
                   tooltip: tr('library.sort'),
@@ -731,8 +749,26 @@ class _LibraryPageState extends State<LibraryPage> {
       case 'reveal':
         revealInExplorer(s.library.absPath(item));
       case 'private' || 'shared':
-        s.library.setPrivate(targets, choice == 'private');
+        final private = choice == 'private';
+        final was = {for (final i in targets) i: i.private};
+        s.library.setPrivate(targets, private);
         setState(_clearSelection);
+        // Hidden here at once: say where they went, and offer to undo.
+        ScaffoldMessenger.of(this.context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(
+            duration: const Duration(seconds: 8),
+            content: Text(tr(private && !_showPrivate ? 'family.made_private_hidden' : (private ? 'family.made_private' : 'family.made_shared'),
+                {'count': targets.length})),
+            action: SnackBarAction(
+              label: tr('trash.undo'),
+              onPressed: () {
+                for (final e in was.entries) {
+                  s.library.setPrivate([e.key], e.value);
+                }
+              },
+            ),
+          ));
       case 'delete':
         await _delete(targets);
       default:
@@ -1106,6 +1142,7 @@ class _LibraryPageState extends State<LibraryPage> {
           value: 'select',
           child: _menuRow(Icons.check_circle_outline_rounded, _selected.contains(key) ? tr('lib.unselect') : tr('lib.select')),
         ),
+        PopupMenuItem(value: 'rename', child: _menuRow(Icons.drive_file_rename_outline_rounded, tr('files.rename'))),
         PopupMenuItem(value: 'reveal', child: _menuRow(Icons.folder_open_rounded, tr('common.show_in_folder'))),
         const PopupMenuDivider(),
         PopupMenuItem(value: 'delete', child: _menuRow(Icons.delete_outline_rounded, tr('lib.delete'), danger: true)),
@@ -1115,6 +1152,11 @@ class _LibraryPageState extends State<LibraryPage> {
     switch (choice) {
       case 'open':
         await openReceivedFile(this.context, widget.services, f.path);
+      case 'rename':
+        if (await renameReceivedFile(this.context, widget.services, f.path) != null && mounted) {
+          setState(() => _selected.remove(key));
+          await _loadFiles();
+        }
       case 'select':
         _toggle(key);
       case 'reveal':
@@ -1156,6 +1198,12 @@ class _LibraryPageState extends State<LibraryPage> {
                 ffmpeg: s.ffmpeg,
               ),
             ),
+            if (item.private)
+              const Positioned(
+                right: 4,
+                top: 4,
+                child: Icon(Icons.lock_rounded, size: 16, color: Colors.white, shadows: [Shadow(color: Colors.black54, blurRadius: 4)]),
+              ),
             if (selected) _selectedFrame(context),
             _selectButton(key, selected),
           ],
