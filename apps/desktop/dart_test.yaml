@@ -1,0 +1,5 @@
+# apps/desktop/dart_test.yaml
+# Making a test certificate in pure Dart can take long on a slow CI machine
+# (RSA keys; tests reuse two per file). The first setUp of a file makes
+# them, so the default 30 s was sometimes not enough (peer_sender_test).
+timeout: 2m
