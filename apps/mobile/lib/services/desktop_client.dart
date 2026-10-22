@@ -102,6 +102,18 @@ class DesktopClient {
         json: VisibilityRequest(assetIds: assetIds, private: private).toJson(),
       );
 
+  /// Family group: everything this phone ever sent (photos, videos, files)
+  /// visible to the family or "only me". Returns how many changed (older
+  /// PCs: 0).
+  Future<int> setVisibilityAll({required bool private}) async {
+    final r = await _send(
+      'POST',
+      LrProtocol.pathVisibility,
+      json: VisibilityRequest(assetIds: const [], private: private, all: true).toJson(),
+    );
+    return (r['updated'] as num?)?.toInt() ?? 0;
+  }
+
   /// Assets of this phone deleted on the PC since [sinceMs].
   Future<ChangesResponse> changes(int sinceMs) async => ChangesResponse.fromJson(
       await _send('GET', LrProtocol.pathChanges, query: {'since': '$sinceMs'}, timeout: const Duration(seconds: 5)));

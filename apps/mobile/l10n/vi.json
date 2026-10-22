@@ -470,5 +470,13 @@
   "pclib.recent": "{count} mục mới",
   "pclib.newer": "Có nội dung mới trên {pc} — chạm để làm mới",
   "pclib.arrived": "nhận {when}",
-  "pclib.open": "Mở"
+  "pclib.open": "Mở",
+  "family.all_private_title": "Đổi thành \"Chỉ mình tôi\"?",
+  "family.all_shared_title": "Cho gia đình xem?",
+  "family.all_body": "Áp dụng cho cả những gì điện thoại này đã gửi tới máy tính? Máy đang bật đổi ngay, máy khác đổi khi kết nối lại.",
+  "family.only_new": "Chỉ cái mới",
+  "family.everything": "Tất cả",
+  "family.all_now_private": "Mọi thứ bạn gửi giờ là \"Chỉ mình tôi\"",
+  "family.all_now_shared": "Mọi thứ bạn gửi giờ gia đình đều xem được",
+  "family.all_later": "{count} máy tính chưa kết nối được: sẽ đổi khi kết nối lại"
 }

@@ -6,6 +6,7 @@ import 'package:localroll_core/localroll_core.dart';
 
 import 'discovery.dart';
 import 'mobile_settings.dart';
+import 'visibility_sync.dart';
 
 /// Someone came online / went offline (as this phone sees it).
 class PresenceEvent {
@@ -43,6 +44,11 @@ class LiveService extends ChangeNotifier {
   /// library refreshes itself.
   static final StreamController<String> _added = StreamController.broadcast();
   static Stream<String> get added => _added.stream;
+
+  /// A PC's library changed in a way an open view must show at once (who
+  /// may see what, deletions): that view loads it again.
+  static final StreamController<String> _changedLib = StreamController.broadcast();
+  static Stream<String> get libraryChanged => _changedLib.stream;
 
   bool _running = false;
   String _session = '';
@@ -172,6 +178,8 @@ class LiveService extends ChangeNotifier {
   void _onMessage(String pcId, LiveMessage m) {
     switch (m.type) {
       case 'hello':
+        // A change of "who can see what I sent" made while this PC was off.
+        unawaited(VisibilitySync.push(settings, discovery, pcId));
         final f = m.family;
         if (f != null) _family(pcId, f);
         final a = m.access;
@@ -203,6 +211,10 @@ class LiveService extends ChangeNotifier {
         if (a != null) discovery.setAccessAt(pcId, a);
       case 'changed':
         onChanged?.call(pcId);
+        _changedLib.add(pcId);
+        return;
+      case 'lib':
+        _changedLib.add(pcId);
         return;
       case 'added':
         _added.add(pcId);

@@ -470,5 +470,13 @@
   "pclib.recent": "{count} novos",
   "pclib.newer": "Novidades em {pc} — toque para atualizar",
   "pclib.arrived": "recebido em {when}",
-  "pclib.open": "Abrir"
+  "pclib.open": "Abrir",
+  "family.all_private_title": "Mudar para «Só eu»?",
+  "family.all_shared_title": "Tornar visível para a família?",
+  "family.all_body": "Também para tudo o que este telemóvel já enviou para PCs? Muda logo nos PCs ligados e nos outros na próxima ligação.",
+  "family.only_new": "Só os novos",
+  "family.everything": "Tudo",
+  "family.all_now_private": "Tudo o que enviou é agora «Só eu»",
+  "family.all_now_shared": "Tudo o que enviou é agora visível para a família",
+  "family.all_later": "{count} PC não acessíveis agora: mudam na próxima ligação"
 }

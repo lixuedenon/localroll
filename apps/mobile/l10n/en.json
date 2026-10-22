@@ -470,5 +470,13 @@
   "pclib.recent": "{count} new",
   "pclib.newer": "New on {pc} — tap to refresh",
   "pclib.arrived": "received {when}",
-  "pclib.open": "Open"
+  "pclib.open": "Open",
+  "family.all_private_title": "Make it \"Only me\"?",
+  "family.all_shared_title": "Make it visible to family?",
+  "family.all_body": "Also for everything this phone already sent to PCs? It changes at once on PCs that are on, and on the others when they next connect.",
+  "family.only_new": "Only new ones",
+  "family.everything": "Everything",
+  "family.all_now_private": "Everything you sent is now \"Only me\"",
+  "family.all_now_shared": "Everything you sent is now visible to family",
+  "family.all_later": "{count} PC(s) not reachable now: they change when they next connect"
 }

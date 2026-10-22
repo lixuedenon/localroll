@@ -470,5 +470,13 @@
   "pclib.recent": "새 항목 {count}개",
   "pclib.newer": "{pc}에 새 항목 — 탭하여 새로고침",
   "pclib.arrived": "{when} 받음",
-  "pclib.open": "열기"
+  "pclib.open": "열기",
+  "family.all_private_title": "'나만 보기'로 바꿀까요?",
+  "family.all_shared_title": "가족에게 보이게 할까요?",
+  "family.all_body": "이 휴대폰이 이미 PC로 보낸 것도 모두 바꿀까요? 켜져 있는 PC는 바로, 나머지는 다음 연결 때 바뀝니다.",
+  "family.only_new": "새로 보낼 것만",
+  "family.everything": "전부",
+  "family.all_now_private": "보낸 것이 모두 '나만 보기'가 되었습니다",
+  "family.all_now_shared": "보낸 것이 모두 가족에게 보입니다",
+  "family.all_later": "PC {count}대에 지금 연결할 수 없습니다. 다음 연결 때 바뀝니다"
 }

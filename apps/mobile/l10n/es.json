@@ -470,5 +470,13 @@
   "pclib.recent": "{count} nuevos",
   "pclib.newer": "Hay novedades en {pc}: toca para actualizar",
   "pclib.arrived": "recibido el {when}",
-  "pclib.open": "Abrir"
+  "pclib.open": "Abrir",
+  "family.all_private_title": "¿Cambiar a «Solo yo»?",
+  "family.all_shared_title": "¿Hacerlo visible para la familia?",
+  "family.all_body": "¿También para todo lo que este móvil ya envió a los PC? Cambia al instante en los PC encendidos y en los demás cuando se conecten.",
+  "family.only_new": "Solo los nuevos",
+  "family.everything": "Todo",
+  "family.all_now_private": "Todo lo que enviaste es ahora «Solo yo»",
+  "family.all_now_shared": "Todo lo que enviaste es ahora visible para la familia",
+  "family.all_later": "{count} PC no disponibles ahora: cambiarán cuando se conecten"
 }

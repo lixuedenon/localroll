@@ -246,16 +246,21 @@ class SessionRequest {
 /// Phone -> PC: change who may see items this phone sent ("only me" or
 /// the whole family). Live Photo videos follow their photo.
 class VisibilityRequest {
-  const VisibilityRequest({required this.assetIds, required this.private});
+  const VisibilityRequest({required this.assetIds, required this.private, this.all = false});
 
   final List<String> assetIds;
   final bool private;
 
-  Map<String, dynamic> toJson() => {'assetIds': assetIds, 'private': private};
+  /// Everything this phone ever sent (photos, videos and files), not just
+  /// [assetIds] (PCs before beta.61 ignore it).
+  final bool all;
+
+  Map<String, dynamic> toJson() => {'assetIds': assetIds, 'private': private, if (all) 'all': true};
 
   factory VisibilityRequest.fromJson(Map<String, dynamic> j) => VisibilityRequest(
-        assetIds: (j['assetIds'] as List).cast<String>(),
+        assetIds: (j['assetIds'] as List? ?? const []).whereType<String>().toList(),
         private: j['private'] == true,
+        all: j['all'] == true,
       );
 }
 

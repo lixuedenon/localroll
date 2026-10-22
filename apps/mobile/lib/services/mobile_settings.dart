@@ -135,6 +135,10 @@ class MobileSettings extends ChangeNotifier implements PhoneIdentity {
   /// "only me" (false). Each item can be changed later.
   bool shareWithFamily = true;
 
+  /// PCs still to be told "everything I sent: [shareWithFamily]" (they
+  /// were off when it was changed); told when they are linked again.
+  final Set<String> visibilityPending = {};
+
   /// Simple mode for elders: big text, one big "send" button, auto-send on.
   bool simpleMode = false;
 
@@ -159,6 +163,7 @@ class MobileSettings extends ChangeNotifier implements PhoneIdentity {
     s.autoSendSinceMs = prefs.getInt('autoSendSinceMs') ?? 0;
     s.ownerName = prefs.getString('ownerName') ?? '';
     s.shareWithFamily = prefs.getBool('shareWithFamily') ?? true;
+    s.visibilityPending.addAll(prefs.getStringList('visibilityPending') ?? const []);
     s.simpleMode = prefs.getBool('simpleMode') ?? false;
     try {
       final raw = prefs.getString('backupFilter');
@@ -274,10 +279,22 @@ class MobileSettings extends ChangeNotifier implements PhoneIdentity {
     notifyListeners();
   }
 
-  Future<void> setShareWithFamily(bool share) async {
+  /// [everything]: also what was sent already, on every paired PC (see
+  /// [visibilityPending]).
+  Future<void> setShareWithFamily(bool share, {bool everything = false}) async {
     shareWithFamily = share;
+    if (everything) {
+      visibilityPending
+        ..clear()
+        ..addAll(desktops.map((d) => d.id));
+    }
     await _save();
     notifyListeners();
+  }
+
+  /// A PC was told the new visibility of everything.
+  Future<void> visibilityDone(String pcId) async {
+    if (visibilityPending.remove(pcId)) await _save();
   }
 
   Future<void> setBackupFilter(BackupFilter f) async {
@@ -460,6 +477,7 @@ class MobileSettings extends ChangeNotifier implements PhoneIdentity {
     await _prefs.setInt('autoSendSinceMs', autoSendSinceMs);
     await _prefs.setString('ownerName', ownerName);
     await _prefs.setBool('shareWithFamily', shareWithFamily);
+    await _prefs.setStringList('visibilityPending', visibilityPending.toList());
     await _prefs.setBool('simpleMode', simpleMode);
     await _prefs.setString('backupFilter', jsonEncode(backupFilter.toJson()));
     if (language == null) {

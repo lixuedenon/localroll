@@ -470,5 +470,13 @@
   "pclib.recent": "{count} nouveaux",
   "pclib.newer": "Nouveautés sur {pc} — touchez pour actualiser",
   "pclib.arrived": "reçu le {when}",
-  "pclib.open": "Ouvrir"
+  "pclib.open": "Ouvrir",
+  "family.all_private_title": "Passer à « Moi seul » ?",
+  "family.all_shared_title": "Rendre visible pour la famille ?",
+  "family.all_body": "Aussi pour tout ce que ce téléphone a déjà envoyé aux PC ? Immédiat sur les PC allumés, à la prochaine connexion pour les autres.",
+  "family.only_new": "Seulement les nouveaux",
+  "family.everything": "Tout",
+  "family.all_now_private": "Tout ce que vous avez envoyé est maintenant « Moi seul »",
+  "family.all_now_shared": "Tout ce que vous avez envoyé est maintenant visible par la famille",
+  "family.all_later": "{count} PC injoignables : ils changeront à la prochaine connexion"
 }

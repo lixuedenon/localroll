@@ -924,6 +924,31 @@ void main() {
       expect((await dad.client.library(kind: MediaKind.other)).items.map((i) => i.name), containsAll(['scan.pdf', 'secret.txt']));
     });
 
+    test('"everything I sent": only me / shared at once, and browsing phones are told', () async {
+      final mum = await pc.pairPhone(id: 'mum', name: 'Mum');
+      final dad = await pc.pairPhone(id: 'dad', name: 'Dad');
+      await mum.upload('M1', bytesOf(100), name: 'm1.jpg');
+      await mum.upload('M2', bytesOf(100, 2), name: 'm2.jpg');
+      await sendFile(mum, 'mum.pdf', [...'%PDF-1.7'.codeUnits, ...bytesOf(50)]);
+      await dad.upload('D1', bytesOf(100, 3), name: 'd.jpg');
+      final link = await dad.live();
+      await eventually(() => link.messages.any((m) => m.type == 'hello'));
+      expect((await dad.client.library()).total, 4);
+
+      final (code, r) = await mum.call('POST', LrProtocol.pathVisibility,
+          json: const VisibilityRequest(assetIds: [], private: true, all: true).toJson());
+      expect(code, 200);
+      expect(r['updated'], 3);
+      await eventually(() => link.messages.any((m) => m.type == 'lib'));
+      await link.close();
+      expect((await dad.client.library()).items.map((i) => i.name), ['d.jpg']);
+      expect((await mum.client.library()).total, 4); // her own: still hers
+
+      await mum.call('POST', LrProtocol.pathVisibility,
+          json: const VisibilityRequest(assetIds: [], private: false, all: true).toJson());
+      expect((await dad.client.library()).total, 4);
+    });
+
     test('visibility: only of one\'s own items', () async {
       final mum = await pc.pairPhone(id: 'mum');
       final dad = await pc.pairPhone(id: 'dad');

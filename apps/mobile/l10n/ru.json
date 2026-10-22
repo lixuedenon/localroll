@@ -470,5 +470,13 @@
   "pclib.recent": "Новых: {count}",
   "pclib.newer": "На {pc} появилось новое — нажмите, чтобы обновить",
   "pclib.arrived": "получено {when}",
-  "pclib.open": "Открыть"
+  "pclib.open": "Открыть",
+  "family.all_private_title": "Сделать «Только я»?",
+  "family.all_shared_title": "Сделать видимым для семьи?",
+  "family.all_body": "Также для всего, что этот телефон уже отправил на ПК? На включённых ПК сразу, на остальных — при следующем подключении.",
+  "family.only_new": "Только новые",
+  "family.everything": "Всё",
+  "family.all_now_private": "Всё отправленное теперь «Только я»",
+  "family.all_now_shared": "Всё отправленное теперь видно семье",
+  "family.all_later": "Недоступно ПК: {count}. Изменится при следующем подключении"
 }

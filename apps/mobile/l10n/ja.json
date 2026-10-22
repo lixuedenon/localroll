@@ -470,5 +470,13 @@
   "pclib.recent": "新着 {count} 件",
   "pclib.newer": "{pc} に新しいものが届きました — タップで更新",
   "pclib.arrived": "{when} 受信",
-  "pclib.open": "開く"
+  "pclib.open": "開く",
+  "family.all_private_title": "「自分だけ」にしますか？",
+  "family.all_shared_title": "家族に見えるようにしますか？",
+  "family.all_body": "このスマホがすでに PC に送ったものもすべて変えますか？電源が入っている PC ではすぐに、ほかの PC は次の接続時に変わります。",
+  "family.only_new": "これからのものだけ",
+  "family.everything": "すべて",
+  "family.all_now_private": "送ったものはすべて「自分だけ」になりました",
+  "family.all_now_shared": "送ったものはすべて家族に見えるようになりました",
+  "family.all_later": "{count} 台の PC に今はつながりません。次の接続時に変わります"
 }

@@ -845,6 +845,7 @@ class LibraryIndex extends ChangeNotifier {
     for (final i in withLive(items)) {
       i.private = value;
     }
+    visibility.value++;
     _scheduleSave();
     notifyListeners();
   }
@@ -867,6 +868,7 @@ class LibraryIndex extends ChangeNotifier {
       _items.add(item);
     }
     if (items.isEmpty) return;
+    visibility.value++;
     _sort();
     _scheduleSave();
     notifyListeners();
@@ -885,6 +887,10 @@ class LibraryIndex extends ChangeNotifier {
     _items.removeWhere(set.contains);
     _dropCaches();
   }
+
+  /// Goes up each time who may see items changes ("only me" on / off, an
+  /// item restored): phones browsing the library load it again.
+  final ValueNotifier<int> visibility = ValueNotifier(0);
 
   /// Goes up each time items are recorded as deleted (the server tells the
   /// linked phones at once).

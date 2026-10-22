@@ -177,6 +177,23 @@ class TransferServer extends ChangeNotifier {
   /// (many arrivals in a row are told once).
   Timer? _addedSoon;
 
+  /// Who may see what changed: browsing phones load the library again.
+  Timer? _librarySoon;
+
+  void _announceLibrary() {
+    _librarySoon?.cancel();
+    _librarySoon = Timer(const Duration(milliseconds: 400), () {
+      final msg = LiveMessage.library();
+      for (final list in _live.values) {
+        for (final c in list) {
+          try {
+            c.ws.add(msg);
+          } catch (_) {}
+        }
+      }
+    });
+  }
+
   void _announceAdded() {
     _addedSoon?.cancel();
     _addedSoon = Timer(const Duration(milliseconds: 1500), () {
@@ -561,6 +578,7 @@ class TransferServer extends ChangeNotifier {
       _watchingDeletions = true;
       _deletionsSeen = library.deletions.value;
       library.deletions.addListener(_onLibraryDeletions);
+      library.visibility.addListener(_announceLibrary);
     }
     final failures = <String>[];
     for (final p in _candidatePorts) {
@@ -625,7 +643,11 @@ class TransferServer extends ChangeNotifier {
     _presenceTick?.cancel();
     _changedSoon?.cancel();
     _addedSoon?.cancel();
-    if (_watchingDeletions) library.deletions.removeListener(_onLibraryDeletions);
+    _librarySoon?.cancel();
+    if (_watchingDeletions) {
+      library.deletions.removeListener(_onLibraryDeletions);
+      library.visibility.removeListener(_announceLibrary);
+    }
     stop();
     pin.dispose();
     super.dispose();
@@ -818,11 +840,18 @@ class TransferServer extends ChangeNotifier {
       }
       if (req.method == 'POST' && path == LrProtocol.pathVisibility) {
         final body = VisibilityRequest.fromJson(await _readJson(req));
-        final items = [
-          for (final id in body.assetIds) ?library.findByAsset(device.id, id),
-        ];
+        // "All I ever sent" (the phone's setting changed), or these ones.
+        final items = body.all
+            ? [for (final i in library.items) if (i.deviceId == device.id) i]
+            : [for (final id in body.assetIds) ?library.findByAsset(device.id, id)];
         library.setPrivate(items, body.private);
-        return _json(res, 200, {'updated': items.length});
+        var n = items.length;
+        if (body.all) {
+          n += await files.setAllPrivate(device.id, body.private);
+          _announceLibrary();
+        }
+        DiagLog.log('family', '${device.name}: ${body.private ? 'only me' : 'shared'} for $n${body.all ? ' (everything)' : ''}');
+        return _json(res, 200, {'updated': n});
       }
       if (req.method == 'GET' && path == LrProtocol.pathChanges) {
         final since = int.tryParse(req.uri.queryParameters['since'] ?? '') ?? 0;
@@ -958,6 +987,7 @@ class TransferServer extends ChangeNotifier {
       final known = {for (final i in items) i.relPath};
       final others = [for (final p in paths) if (!known.contains(p)) p];
       final n = others.isEmpty ? 0 : await files.setPrivate(others, device.id, body['private'] == true);
+      if (n > 0) _announceLibrary();
       return _json(res, 200, {'updated': own.length + n});
     }
     await req.drain<void>();

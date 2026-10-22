@@ -470,5 +470,13 @@
   "pclib.recent": "新收到 {count} 個",
   "pclib.newer": "{pc} 收到了新內容，點這裡重新整理",
   "pclib.arrived": "{when} 收到",
-  "pclib.open": "打開"
+  "pclib.open": "打開",
+  "family.all_private_title": "改成「僅自己可見」？",
+  "family.all_shared_title": "改成「家人可見」？",
+  "family.all_body": "已經傳到電腦上的照片、影片和檔案也一起改嗎？開著的電腦馬上生效，其他電腦下次連上時生效。",
+  "family.only_new": "只改以後的",
+  "family.everything": "全部都改",
+  "family.all_now_private": "已傳送的全部改成了僅自己可見",
+  "family.all_now_shared": "已傳送的全部改成了家人可見",
+  "family.all_later": "有 {count} 台電腦現在連不上，下次連上時自動改"
 }

@@ -470,5 +470,13 @@
   "pclib.recent": "{count} yeni",
   "pclib.newer": "{pc} üzerinde yeni öğeler — yenilemek için dokunun",
   "pclib.arrived": "{when} alındı",
-  "pclib.open": "Aç"
+  "pclib.open": "Aç",
+  "family.all_private_title": "\"Yalnızca ben\" yapılsın mı?",
+  "family.all_shared_title": "Aileye görünür yapılsın mı?",
+  "family.all_body": "Bu telefonun bilgisayarlara zaten gönderdiği her şey için de mi? Açık bilgisayarlarda hemen, diğerlerinde bir sonraki bağlantıda değişir.",
+  "family.only_new": "Yalnızca yeniler",
+  "family.everything": "Hepsi",
+  "family.all_now_private": "Gönderdiğiniz her şey artık \"Yalnızca ben\"",
+  "family.all_now_shared": "Gönderdiğiniz her şey artık aileye görünür",
+  "family.all_later": "{count} bilgisayara şu an ulaşılamıyor: bir sonraki bağlantıda değişecek"
 }

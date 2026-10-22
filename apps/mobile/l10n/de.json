@@ -470,5 +470,13 @@
   "pclib.recent": "{count} neu",
   "pclib.newer": "Neues auf {pc} – zum Aktualisieren tippen",
   "pclib.arrived": "Eingang {when}",
-  "pclib.open": "Öffnen"
+  "pclib.open": "Öffnen",
+  "family.all_private_title": "Auf „Nur ich“ stellen?",
+  "family.all_shared_title": "Für die Familie sichtbar machen?",
+  "family.all_body": "Auch für alles, was dieses Handy schon an PCs geschickt hat? Auf eingeschalteten PCs sofort, auf den anderen beim nächsten Verbinden.",
+  "family.only_new": "Nur neue",
+  "family.everything": "Alles",
+  "family.all_now_private": "Alles Gesendete ist jetzt „Nur ich“",
+  "family.all_now_shared": "Alles Gesendete ist jetzt für die Familie sichtbar",
+  "family.all_later": "{count} PC(s) gerade nicht erreichbar: dort ändert es sich beim nächsten Verbinden"
 }

@@ -9,6 +9,7 @@ import '../l10n/l10n.dart';
 import '../services/discovery.dart';
 import '../services/media_saver.dart';
 import '../services/mobile_settings.dart';
+import '../services/visibility_sync.dart';
 import 'connect_page.dart';
 import 'device_badge.dart';
 import 'theme.dart';
@@ -25,6 +26,33 @@ class SettingsPage extends StatelessWidget {
   final MobileSettings settings;
   final DesktopDiscovery discovery;
   final Future<void> Function() onAutoSendChanged;
+
+  /// New default for what this phone sends; asked whether what was sent
+  /// already changes too (it does at once on every PC that is on).
+  Future<void> _changeVisibility(BuildContext context, bool share) async {
+    if (share == settings.shareWithFamily) return;
+    final everything = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text(tr(share ? 'family.all_shared_title' : 'family.all_private_title')),
+        content: Text(tr('family.all_body')),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('family.only_new'))),
+          FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(tr('family.everything'))),
+        ],
+      ),
+    );
+    if (everything == null) return;
+    await settings.setShareWithFamily(share, everything: everything);
+    if (!everything) return;
+    final left = await VisibilitySync.pushAll(settings, discovery);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(left == 0
+          ? tr(share ? 'family.all_now_shared' : 'family.all_now_private')
+          : tr('family.all_later', {'count': left})),
+    ));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -115,7 +143,7 @@ class SettingsPage extends StatelessWidget {
                             ButtonSegment(value: false, icon: const Icon(Icons.lock_rounded), label: Text(tr('family.only_me'))),
                           ],
                           selected: {settings.shareWithFamily},
-                          onSelectionChanged: (v) => settings.setShareWithFamily(v.first),
+                          onSelectionChanged: (v) => _changeVisibility(context, v.first),
                         ),
                       ),
                     ),

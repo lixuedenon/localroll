@@ -121,6 +121,13 @@ class ReceivedFiles {
   /// One save at a time (they share the temporary file).
   Future<void> _saving = Future.value();
 
+  /// "Only me" on / off for every file [deviceId] sent; how many changed.
+  Future<int> setAllPrivate(String deviceId, bool private) async {
+    final m = await _loadOwners();
+    final rels = [for (final e in m.entries) if (e.value.deviceId == deviceId && e.value.private != private) e.key];
+    return rels.isEmpty ? 0 : setPrivate(rels, deviceId, private);
+  }
+
   Future<void> _saveOwners(Map<String, FileOwner> m) {
     _list = null;
     return _saving = _saving.then((_) => _writeOwners(m));

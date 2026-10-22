@@ -470,5 +470,13 @@
   "pclib.recent": "جديد: {count}",
   "pclib.newer": "وصل جديد إلى {pc} — اضغط للتحديث",
   "pclib.arrived": "وصل {when}",
-  "pclib.open": "فتح"
+  "pclib.open": "فتح",
+  "family.all_private_title": "جعلها «لي فقط»؟",
+  "family.all_shared_title": "جعلها «مرئية للعائلة»؟",
+  "family.all_body": "هل ينطبق ذلك أيضًا على كل ما أرسله هذا الهاتف إلى أجهزة الكمبيوتر؟ يتغيّر فورًا على أجهزة الكمبيوتر المتصلة، وعلى الأخرى عند اتصالها التالي.",
+  "family.only_new": "الجديدة فقط",
+  "family.everything": "الكل",
+  "family.all_now_private": "كل ما أرسلته الآن «لي فقط»",
+  "family.all_now_shared": "كل ما أرسلته الآن مرئي للعائلة",
+  "family.all_later": "{count} من أجهزة الكمبيوتر غير متصلة الآن: سيتغيّر عند اتصالها"
 }

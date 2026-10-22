@@ -470,5 +470,13 @@
   "pclib.recent": "{count} baru",
   "pclib.newer": "Ada yang baru di {pc} — ketuk untuk memuat ulang",
   "pclib.arrived": "diterima {when}",
-  "pclib.open": "Buka"
+  "pclib.open": "Buka",
+  "family.all_private_title": "Ubah ke \"Hanya saya\"?",
+  "family.all_shared_title": "Tampilkan untuk keluarga?",
+  "family.all_body": "Juga untuk semua yang sudah dikirim ponsel ini ke PC? Langsung berubah di PC yang menyala, yang lain saat terhubung lagi.",
+  "family.only_new": "Hanya yang baru",
+  "family.everything": "Semua",
+  "family.all_now_private": "Semua yang Anda kirim sekarang \"Hanya saya\"",
+  "family.all_now_shared": "Semua yang Anda kirim sekarang terlihat oleh keluarga",
+  "family.all_later": "{count} PC tidak terjangkau: akan berubah saat terhubung lagi"
 }

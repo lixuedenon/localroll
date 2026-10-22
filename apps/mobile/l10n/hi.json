@@ -470,5 +470,13 @@
   "pclib.recent": "{count} नए",
   "pclib.newer": "{pc} पर नया आया — रीफ़्रेश करने के लिए टैप करें",
   "pclib.arrived": "{when} को मिला",
-  "pclib.open": "खोलें"
+  "pclib.open": "खोलें",
+  "family.all_private_title": "“सिर्फ़ मैं” करें?",
+  "family.all_shared_title": "परिवार को दिखाएँ?",
+  "family.all_body": "क्या यह फ़ोन जो पहले ही PC पर भेज चुका है, उस पर भी? चालू PC पर तुरंत, बाकी पर अगली बार जुड़ने पर।",
+  "family.only_new": "सिर्फ़ नए",
+  "family.everything": "सब",
+  "family.all_now_private": "आपका भेजा सब अब “सिर्फ़ मैं” है",
+  "family.all_now_shared": "आपका भेजा सब अब परिवार को दिखता है",
+  "family.all_later": "{count} PC अभी नहीं मिले: अगली बार जुड़ने पर बदलेंगे"
 }

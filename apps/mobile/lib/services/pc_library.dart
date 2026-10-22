@@ -27,9 +27,21 @@ class PcLibrary extends ChangeNotifier {
   PcLibrary({required this.settings, required this.discovery, required this.desktop, required this.server}) {
     discovery.addListener(_onDiscovery);
     _addedSub = LiveService.added.where((id) => id == desktop.id).listen((_) => _onAdded());
+    _changedSub = LiveService.libraryChanged.where((id) => id == desktop.id).listen((_) => _onChanged());
   }
 
   StreamSubscription<String>? _addedSub;
+  StreamSubscription<String>? _changedSub;
+  Timer? _changedSoon;
+
+  /// Who may see what changed, or something was deleted: loaded again at
+  /// once, wherever the person is (hidden items must not stay on screen).
+  void _onChanged() {
+    _changedSoon?.cancel();
+    _changedSoon = Timer(const Duration(milliseconds: 300), () {
+      if (!_disposed) unawaited(reload(keep: true));
+    });
+  }
   Timer? _addedSoon;
 
   /// The PC got something new (told over the live link). Looking at the
@@ -136,14 +148,20 @@ class PcLibrary extends ChangeNotifier {
 
   /// The first page again, swapped in when it arrives (no blank list in
   /// between); on failure the old list stays.
-  Future<void> reload() async {
-    if (loading) return;
+  Future<void> reload({bool keep = false}) async {
+    if (loading) {
+      // Asked again when the page being loaded is in.
+      if (keep) _onChanged();
+      return;
+    }
     loading = true;
     newer = false;
     notifyListeners();
     try {
       final c = await _connect();
-      final page = await c.library(offset: 0, limit: _pageSize, kind: kind, byReceived: byReceived);
+      // [keep]: as many as are loaded now, so the list doesn't jump.
+      final limit = keep ? items.length.clamp(_pageSize, LrProtocol.libraryPageMax) : _pageSize;
+      final page = await c.library(offset: 0, limit: limit, kind: kind, byReceived: byReceived);
       items
         ..clear()
         ..addAll(page.items);
@@ -416,7 +434,9 @@ class PcLibrary extends ChangeNotifier {
   void dispose() {
     _disposed = true;
     _addedSoon?.cancel();
+    _changedSoon?.cancel();
     unawaited(_addedSub?.cancel());
+    unawaited(_changedSub?.cancel());
     discovery.removeListener(_onDiscovery);
     unawaited(_relay?.close(force: true));
     _relay = null;
