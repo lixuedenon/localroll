@@ -14,6 +14,7 @@ import '../services/file_sender.dart';
 import '../services/live_service.dart';
 import '../services/mobile_settings.dart';
 import '../services/phone_names.dart';
+import 'phone_name_dialog.dart';
 import '../services/my_library.dart';
 import '../services/phone_server.dart';
 import '../services/uploader.dart';
@@ -82,8 +83,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // Still just "iPhone" / "Android": a pleasant name of its own.
-    WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(PhoneNames.nameIfPlain(widget.settings, widget.discovery)));
+    // First start: the phone's own name, and a word that it can be renamed.
+    WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_firstName()));
     widget.discovery.addListener(_onDiscovery);
     widget.settings.addListener(_onSettings);
     _liveEvents = _live.events.listen((e) {
@@ -155,6 +156,18 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       _lastLost = lost;
       unawaited(_refreshHome());
     }
+  }
+
+  Future<void> _firstName() async {
+    if (!await PhoneNames.firstStart(widget.settings, widget.discovery) || !mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      duration: const Duration(seconds: 10),
+      content: Text(tr('phone.first_hint', {'name': widget.settings.deviceName})),
+      action: SnackBarAction(
+        label: tr('phone.rename'),
+        onPressed: () => unawaited(editPhoneName(context, widget.settings, widget.discovery)),
+      ),
+    ));
   }
 
   @override

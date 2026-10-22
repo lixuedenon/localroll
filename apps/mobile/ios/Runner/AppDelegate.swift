@@ -379,6 +379,10 @@ final class FilePreview: NSObject, QLPreviewControllerDataSource {
     ch.setMethodCallHandler { call, result in
       let args = call.arguments as? [String: Any] ?? [:]
       switch call.method {
+      case "deviceName":
+        // The phone's own name (iOS 16+ gives just "iPhone" without a
+        // special entitlement — that is fine, it is used as it comes).
+        result(UIDevice.current.name)
       case "preview":
         result(shared.show(path: args["path"] as? String ?? ""))
       case "openUrl":

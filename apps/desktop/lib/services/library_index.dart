@@ -257,6 +257,11 @@ class LibraryIndex extends ChangeNotifier {
     final j = jsonDecode(text) as Map<String, dynamic>;
     final items = [for (final e in (j['items'] as List? ?? const [])) MediaItem.fromJson(e as Map<String, dynamic>)];
     final deleted = [for (final e in (j['deleted'] as List? ?? const [])) _Tombstone.fromJson(e as Map<String, dynamic>)];
+    // Only a phone can make what it sent "sender only"; anything without a
+    // sender (copied in on this PC) is open to every phone allowed to look.
+    for (final i in items) {
+      if (i.deviceId == null && i.private) i.private = false;
+    }
     _items
       ..clear()
       ..addAll(items);

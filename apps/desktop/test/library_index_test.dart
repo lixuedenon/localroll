@@ -192,5 +192,20 @@ void main() {
     expect(File(p('2026/10/keep.jpg')).existsSync(), isTrue);
     lib.dispose();
   });
-}
 
+  test('only a phone can hide what it sent: items without a sender are open again', () async {
+    final lib = LibraryIndex(root, stateFile: state);
+    await lib.load();
+    final mine = await put(lib, '2026/10/phone.jpg', asset: 'P');
+    final copied = await put(lib, '2026/10/copied.jpg');
+    lib.setPrivate([mine, copied], true);
+    await lib.flush();
+    lib.dispose();
+
+    final again = LibraryIndex(root, stateFile: state);
+    await again.load();
+    expect(again.findByRel('2026/10/phone.jpg')!.private, isTrue);
+    expect(again.findByRel('2026/10/copied.jpg')!.private, isFalse);
+    again.dispose();
+  });
+}

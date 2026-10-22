@@ -1,4 +1,7 @@
 // apps/desktop/lib/ui/dashboard_page.dart
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:localroll_core/localroll_core.dart';
 
@@ -7,14 +10,20 @@ import '../l10n/l10n.dart';
 import '../services/file_actions.dart';
 import '../services/library_index.dart';
 import '../services/network.dart';
+import '../services/peers.dart';
+import '../services/received_files.dart';
 import 'add_device_dialog.dart';
 import 'app_nav.dart';
 import 'breathing.dart';
 import 'device_badge.dart';
+import 'files_view.dart';
 import 'format.dart';
 import 'library_recovery.dart';
 import 'media_thumb.dart';
+import 'send_page.dart';
 import 'theme.dart';
+import 'trash_actions.dart';
+import 'viewer_page.dart';
 
 /// Home: this PC at a glance — status, the main actions, what came in
 /// last, the family, disk space, and anything that needs attention.
@@ -31,18 +40,29 @@ class _DashboardPageState extends State<DashboardPage> {
   ({int free, int total})? _disk;
   NetworkHealth? _net;
 
+  /// Received files (documents, scans…), for "Recently received".
+  List<ReceivedFile> _files = const [];
+
   @override
   void initState() {
     super.initState();
     _refresh();
     // Re-check whenever the user comes back to Home.
     AppNav.instance.addListener(_onNav);
+    widget.services.server.files.changes.addListener(_loadFiles);
+    unawaited(_loadFiles());
   }
 
   @override
   void dispose() {
     AppNav.instance.removeListener(_onNav);
+    widget.services.server.files.changes.removeListener(_loadFiles);
     super.dispose();
+  }
+
+  Future<void> _loadFiles() async {
+    final f = await widget.services.server.files.list();
+    if (mounted) setState(() => _files = f);
   }
 
   void _onNav() {
@@ -311,27 +331,46 @@ class _DashboardPageState extends State<DashboardPage> {
         ]),
       );
 
+  /// What came in last: photos, videos and received files, newest first.
+  /// A photo / video opens in the viewer (paging through these), a file
+  /// opens the way it does in the library; right-click for more.
   Widget _recent(BuildContext context, List<MediaItem> items) {
     final s = widget.services;
-    if (items.isEmpty) {
+    final latest = <(int, MediaItem?, ReceivedFile?)>[
+      for (final i in items) (i.receivedMs, i, null),
+      for (final f in _files) (f.arrived.millisecondsSinceEpoch, null, f),
+    ]..sort((a, b) => b.$1.compareTo(a.$1));
+    if (latest.isEmpty) {
       return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         _title(tr('home.recent')),
         Text(tr('home.recent_none'), style: const TextStyle(color: LrColors.muted)),
       ]);
     }
-    final byReceived = List.of(items)..sort((a, b) => b.receivedMs.compareTo(a.receivedMs));
-    final last = byReceived.first;
-    // The last batch: same phone, within an hour of the newest.
-    final batch = byReceived
-        .where((i) => i.deviceId == last.deviceId && last.receivedMs - i.receivedMs < const Duration(hours: 1).inMilliseconds)
+    final shown = latest.take(6).toList();
+    final media = [for (final e in shown) ?e.$2];
+    final (lastMs, lastItem, lastFile) = shown.first;
+    // The last batch: same sender, within an hour of the newest.
+    final lastFrom = lastItem?.deviceId ?? lastFile?.owner?.deviceId;
+    final batch = latest
+        .where((e) => (e.$2?.deviceId ?? e.$3?.owner?.deviceId) == lastFrom && lastMs - e.$1 < const Duration(hours: 1).inMilliseconds)
         .length;
-    final from = (last.deviceId == null ? null : s.settings.family.labelOf(last.deviceId!)) ?? last.deviceName;
-    final when = formatDate(DateTime.fromMillisecondsSinceEpoch(last.receivedMs));
+    final from = lastFrom == null
+        ? (lastItem?.deviceName ?? lastFile?.owner?.deviceName)
+        : (s.settings.family.labelOf(lastFrom) ?? lastItem?.deviceName ?? lastFile?.owner?.deviceName);
+    final when = formatDate(DateTime.fromMillisecondsSinceEpoch(lastMs));
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _title(
-        tr('home.recent'),
-        from == null ? '$when · ${tr('home.items', {'count': batch})}' : tr('home.recent_from', {'when': when, 'from': from, 'count': batch}),
-      ),
+      Row(children: [
+        Expanded(
+          child: _title(
+            tr('home.recent'),
+            from == null ? '$when · ${tr('home.items', {'count': batch})}' : tr('home.recent_from', {'when': when, 'from': from, 'count': batch}),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: TextButton(onPressed: AppNav.instance.openLibraryRecent, child: Text(tr('home.see_all'))),
+        ),
+      ]),
       Row(children: [
         for (var i = 0; i < 6; i++) ...[
           if (i > 0) const SizedBox(width: 8),
@@ -340,18 +379,106 @@ class _DashboardPageState extends State<DashboardPage> {
               aspectRatio: 1,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: i < byReceived.length
-                    ? GestureDetector(
-                        onTap: () => AppNav.instance.selectTab(AppNav.library),
-                        child: MediaThumb(item: byReceived[i], library: s.library, ffmpeg: s.ffmpeg),
-                      )
-                    : Container(color: LrColors.raised),
+                child: i < shown.length ? _recentTile(context, shown[i].$2, shown[i].$3, media) : Container(color: LrColors.raised),
               ),
             ),
           ),
         ],
       ]),
     ]);
+  }
+
+  Widget _recentTile(BuildContext context, MediaItem? item, ReceivedFile? file, List<MediaItem> media) {
+    final s = widget.services;
+    if (item != null) {
+      return Tooltip(
+        message: item.name,
+        waitDuration: const Duration(milliseconds: 600),
+        child: GestureDetector(
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => ViewerPage(services: s, items: media, initialIndex: media.indexOf(item)),
+          )),
+          onSecondaryTapUp: (d) => _recentMenu(context, d.globalPosition, item: item),
+          child: MediaThumb(item: item, library: s.library, ffmpeg: s.ffmpeg),
+        ),
+      );
+    }
+    final f = file!;
+    return Tooltip(
+      message: f.name,
+      waitDuration: const Duration(milliseconds: 600),
+      child: GestureDetector(
+        onTap: () => openReceivedFile(context, s, f.path),
+        onSecondaryTapUp: (d) => _recentMenu(context, d.globalPosition, file: f),
+        child: Stack(fit: StackFit.expand, children: [
+          FileThumb(
+            key: ValueKey(f.path),
+            path: f.path,
+            size: f.size,
+            modified: f.modified,
+            services: s,
+            icon: Container(
+              color: LrColors.raised,
+              alignment: Alignment.center,
+              child: const Icon(Icons.insert_drive_file_rounded, size: 32, color: LrColors.muted),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              color: Colors.black54,
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+              child: Text(f.name,
+                  maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: Colors.white)),
+            ),
+          ),
+        ]),
+      ),
+    );
+  }
+
+  /// Right-click on a recent item: open, send, show in its folder, delete.
+  Future<void> _recentMenu(BuildContext context, Offset at, {MediaItem? item, ReceivedFile? file}) async {
+    final s = widget.services;
+    final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    Widget row(IconData icon, String text, {bool danger = false}) {
+      final color = danger ? Theme.of(context).colorScheme.error : null;
+      return Row(children: [Icon(icon, size: 18, color: color), const SizedBox(width: 12), Text(text, style: TextStyle(color: color))]);
+    }
+
+    final choice = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromRect(at & const Size(1, 1), Offset.zero & overlay.size),
+      items: [
+        PopupMenuItem(value: 'open', child: row(Icons.open_in_full_rounded, tr('lib.open'))),
+        PopupMenuItem(value: 'send', child: row(Icons.send_rounded, tr('send.to_pc'))),
+        PopupMenuItem(value: 'reveal', child: row(Icons.folder_open_rounded, tr('common.show_in_folder'))),
+        const PopupMenuDivider(),
+        PopupMenuItem(value: 'delete', child: row(Icons.delete_outline_rounded, tr('lib.delete'), danger: true)),
+      ],
+    );
+    if (!mounted || choice == null) return;
+    final ctx = this.context;
+    final path = item != null ? s.library.absPath(item) : file!.path;
+    switch (choice) {
+      case 'open':
+        if (item != null) {
+          await Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => ViewerPage(services: s, items: [item], initialIndex: 0)));
+        } else {
+          await openReceivedFile(ctx, s, path);
+        }
+      case 'send':
+        final files = item != null
+            ? [for (final i in s.library.withLive([item])) ?SendFile.fromLibrary(s.library, i)]
+            : [?SendFile.plain(File(path), file!.name)];
+        if (files.isNotEmpty) await sendToPc(ctx, s, files, item?.name ?? file!.name);
+      case 'reveal':
+        revealInExplorer(path);
+      case 'delete':
+        await deleteToTrash(ctx, s, media: [?item], files: [if (file != null) file.path]);
+    }
   }
 
   List<(IconData, String, VoidCallback?)> _issues() {

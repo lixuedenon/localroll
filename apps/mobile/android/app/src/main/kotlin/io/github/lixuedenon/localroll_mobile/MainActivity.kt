@@ -27,6 +27,16 @@ class MainActivity : FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "localroll/files")
             .setMethodCallHandler { call, result ->
                 when (call.method) {
+                    // The phone's own name from its settings ("Device name"),
+                    // else maker and model.
+                    "deviceName" -> {
+                        val set = try {
+                            android.provider.Settings.Global.getString(contentResolver, "device_name")
+                        } catch (e: Exception) { null }
+                        val model = if (Build.MODEL.startsWith(Build.MANUFACTURER, ignoreCase = true)) Build.MODEL
+                            else "${Build.MANUFACTURER.replaceFirstChar { it.uppercase() }} ${Build.MODEL}"
+                        result.success(if (set.isNullOrBlank()) model else set)
+                    }
                     "preview" -> result.success(false)
                     "openUrl" -> {
                         val url = call.argument<String>("url") ?: ""

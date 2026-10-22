@@ -17,6 +17,7 @@ import '../services/network.dart';
 import '../services/peers.dart';
 import '../services/received_files.dart';
 import '../services/win_dialogs.dart';
+import 'app_nav.dart';
 import 'files_view.dart';
 import 'format.dart';
 import 'library_recovery.dart';
@@ -62,8 +63,6 @@ class _LibraryPageState extends State<LibraryPage> {
   /// Family group: show one member only (null = everyone).
   String? _member;
 
-  /// "Only me" items are hidden until this is switched on.
-  bool _showPrivate = false;
 
   bool get _selecting => _selected.isNotEmpty || _copies.isNotEmpty;
 
@@ -116,6 +115,8 @@ class _LibraryPageState extends State<LibraryPage> {
     super.initState();
     widget.services.hub.addListener(_onHub);
     widget.services.server.files.changes.addListener(_reloadFilesSoon);
+    AppNav.instance.libraryRecent.addListener(_showRecent);
+    if (AppNav.instance.takeLibraryRecent()) _byReceived = true;
     unawaited(_loadFiles());
     unawaited(_watchFiles());
   }
@@ -124,6 +125,7 @@ class _LibraryPageState extends State<LibraryPage> {
   void dispose() {
     widget.services.hub.removeListener(_onHub);
     widget.services.server.files.changes.removeListener(_reloadFilesSoon);
+    AppNav.instance.libraryRecent.removeListener(_showRecent);
     for (final w in _watches) {
       unawaited(w.cancel());
     }
@@ -133,6 +135,19 @@ class _LibraryPageState extends State<LibraryPage> {
     _scroll.dispose();
     _hovered.dispose();
     super.dispose();
+  }
+
+  /// "See all" on Home: everything, newest arrival first, from the top.
+  void _showRecent() {
+    if (!mounted || !AppNav.instance.takeLibraryRecent()) return;
+    setState(() {
+      _filter = _Filter.all;
+      _member = null;
+      _onlyRecent = false;
+      _byReceived = true;
+      _clearSelection();
+    });
+    if (_scroll.hasClients) _scroll.jumpTo(0);
   }
 
   /// A file arrived: show it.
@@ -226,7 +241,6 @@ class _LibraryPageState extends State<LibraryPage> {
           if ((_filter == _Filter.all ||
                   (_filter == _Filter.photos && i.kind == MediaKind.image) ||
                   (_filter == _Filter.videos && i.kind == MediaKind.video)) &&
-              (_showPrivate || !i.private) &&
               (_member == null || FamilyDirectory.keyOf(_memberOf(family, i)) == FamilyDirectory.keyOf(_member!)))
             i,
       ];
@@ -239,21 +253,17 @@ class _LibraryPageState extends State<LibraryPage> {
     final pcs = <String>{};
     final st = widget.services.settings;
     for (final i in all) {
-      if (i.private && !_showPrivate) continue;
       final m = _memberOf(family, i);
       counts[m] = (counts[m] ?? 0) + 1;
       final t = i.deviceId == null ? null : st.trusted[i.deviceId!];
       if (t != null && isDesktopPlatform(t.platform)) pcs.add(m);
     }
     final members = counts.keys.toList();
-    final privateCount = all.where((i) => i.private).length;
-    if (members.length < 2 && privateCount == 0) return null;
+    if (members.length < 2) return null;
     return PopupMenuButton<String>(
       tooltip: tr('family.everyone'),
       onSelected: (v) => setState(() {
-        if (v == '\u0000private') {
-          _showPrivate = !_showPrivate;
-        } else if (v.isEmpty) {
+        if (v.isEmpty) {
           _member = null;
         } else {
           _member = v;
@@ -270,14 +280,6 @@ class _LibraryPageState extends State<LibraryPage> {
               Text('$m · ${counts[m]}'),
             ]),
           ),
-        if (privateCount > 0) ...[
-          const PopupMenuDivider(),
-          CheckedPopupMenuItem(
-            value: '\u0000private',
-            checked: _showPrivate,
-            child: Text(tr('family.show_private', {'count': privateCount})),
-          ),
-        ],
       ],
       child: _toolChip(Icons.groups_rounded, _member ?? tr('family.everyone')),
     );
@@ -397,18 +399,6 @@ class _LibraryPageState extends State<LibraryPage> {
                 // New arrivals from a phone or PC can have old capture dates
                 // and land far down the list; "by arrival" puts them on top.
                 if (!_filesTab) ?_personMenu(all, family),
-                // "Only me" items are hidden here: say so, one click shows them.
-                if (!_filesTab && all.any((i) => i.private)) ...[
-                  const SizedBox(width: 8),
-                  FilterChip(
-                    avatar: Icon(_showPrivate ? Icons.lock_open_rounded : Icons.lock_rounded, size: 16),
-                    label: Text(tr('family.private_chip', {'count': all.where((i) => i.private).length})),
-                    selected: _showPrivate,
-                    showCheckmark: false,
-                    tooltip: tr('family.private_chip_tip'),
-                    onSelected: (v) => setState(() => _showPrivate = v),
-                  ),
-                ],
                 const SizedBox(width: 8),
                 PopupMenuButton<bool>(
                   tooltip: tr('library.sort'),
@@ -559,7 +549,6 @@ class _LibraryPageState extends State<LibraryPage> {
     final s = widget.services;
     final cands = <PickCandidate>[
       for (final i in all)
-        if (_showPrivate || !i.private)
           PickCandidate(
             key: i.relPath,
             size: s.library.withLive([i]).fold(0, (a, x) => a + x.size),
@@ -719,11 +708,6 @@ class _LibraryPageState extends State<LibraryPage> {
         PopupMenuItem(value: 'send', child: _menuRow(Icons.send_rounded, tr('send.to_pc'))),
         if (targets.length == 1)
           PopupMenuItem(value: 'reveal', child: _menuRow(Icons.folder_open_rounded, tr('common.show_in_folder'))),
-        // Family group: who may see it.
-        if (targets.any((i) => !i.private))
-          PopupMenuItem(value: 'private', child: _menuRow(Icons.lock_rounded, tr('family.make_private'))),
-        if (targets.any((i) => i.private))
-          PopupMenuItem(value: 'shared', child: _menuRow(Icons.groups_rounded, tr('family.make_shared'))),
         const PopupMenuDivider(),
         PopupMenuItem(
           value: 'delete',
@@ -748,27 +732,6 @@ class _LibraryPageState extends State<LibraryPage> {
         await _sendToPc(targets);
       case 'reveal':
         revealInExplorer(s.library.absPath(item));
-      case 'private' || 'shared':
-        final private = choice == 'private';
-        final was = {for (final i in targets) i: i.private};
-        s.library.setPrivate(targets, private);
-        setState(_clearSelection);
-        // Hidden here at once: say where they went, and offer to undo.
-        ScaffoldMessenger.of(this.context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(SnackBar(
-            duration: const Duration(seconds: 8),
-            content: Text(tr(private && !_showPrivate ? 'family.made_private_hidden' : (private ? 'family.made_private' : 'family.made_shared'),
-                {'count': targets.length})),
-            action: SnackBarAction(
-              label: tr('trash.undo'),
-              onPressed: () {
-                for (final e in was.entries) {
-                  s.library.setPrivate([e.key], e.value);
-                }
-              },
-            ),
-          ));
       case 'delete':
         await _delete(targets);
       default:
@@ -1213,14 +1176,12 @@ class _LibraryPageState extends State<LibraryPage> {
               ),
             ),
             // "Sender only": hover the lock to see who that is.
-            if (item.private)
+            if (item.private && item.deviceId != null)
               Positioned(
                 right: 2,
                 top: 2,
                 child: Tooltip(
-                  message: item.deviceId == null
-                      ? tr('family.no_sender_tip')
-                      : tr('family.sender_tip', {'name': _memberOf(s.settings.family, item)}),
+                  message: tr('family.sender_tip', {'name': _memberOf(s.settings.family, item)}),
                   child: const Padding(
                     padding: EdgeInsets.all(2),
                     child: Icon(Icons.lock_rounded, size: 16, color: Colors.white, shadows: [Shadow(color: Colors.black54, blurRadius: 4)]),

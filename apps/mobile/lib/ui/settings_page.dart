@@ -13,6 +13,7 @@ import '../services/phone_names.dart';
 import '../services/visibility_sync.dart';
 import 'connect_page.dart';
 import 'device_badge.dart';
+import 'phone_name_dialog.dart';
 import 'theme.dart';
 
 /// Phone settings: auto-send, language, PCs.
@@ -225,43 +226,7 @@ class SettingsPage extends StatelessWidget {
 }
 
 extension on SettingsPage {
-  Future<void> _editPhoneName(BuildContext context) async {
-    final ctrl = TextEditingController(text: settings.deviceName);
-    final name = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(tr('phone.name_title')),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: ctrl,
-              autofocus: true,
-              maxLength: 40,
-              textCapitalization: TextCapitalization.words,
-              onSubmitted: (v) => Navigator.pop(ctx, v),
-              decoration: InputDecoration(
-                suffixIcon: IconButton(
-                  tooltip: tr('phone.name_random'),
-                  icon: const Icon(Icons.casino_rounded),
-                  onPressed: () => ctrl.text = PhoneNames.random(not: ctrl.text),
-                ),
-              ),
-            ),
-            Text(tr('phone.name_explain'), style: Theme.of(ctx).textTheme.bodySmall),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('common.cancel'))),
-          FilledButton(onPressed: () => Navigator.pop(ctx, ctrl.text), child: Text(tr('common.ok'))),
-        ],
-      ),
-    );
-    ctrl.dispose();
-    if (name == null || name.trim().isEmpty) return;
-    await PhoneNames.rename(settings, discovery, name);
-  }
+  Future<void> _editPhoneName(BuildContext context) => editPhoneName(context, settings, discovery);
 
   Future<void> _editName(BuildContext context) async {
     final ctrl = TextEditingController(text: settings.ownerName);
@@ -293,7 +258,7 @@ extension on SettingsPage {
     if (name != null) {
       await settings.setOwnerName(name);
       // Shown on the PCs at once (sent with the phone's name).
-      await PhoneNames.rename(settings, discovery, settings.deviceName);
+      await PhoneNames.tellPcs(settings, discovery);
     }
   }
 }

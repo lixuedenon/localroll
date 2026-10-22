@@ -25,6 +25,25 @@ class AppNav extends ChangeNotifier {
   final ValueNotifier<String?> deviceFocus = ValueNotifier(null);
 
   /// Go to Devices with [id] opened.
+  /// The library, newest arrival first (from "See all" on Home): the
+  /// library page switches its order when this goes up.
+  final ValueNotifier<int> libraryRecent = ValueNotifier(0);
+
+  bool _recentAsked = false;
+
+  void openLibraryRecent() {
+    _recentAsked = true;
+    selectTab(library);
+    libraryRecent.value++;
+  }
+
+  /// Asked for and not yet shown (the library page may be built only now).
+  bool takeLibraryRecent() {
+    final r = _recentAsked;
+    _recentAsked = false;
+    return r;
+  }
+
   void openDevice(String id) {
     deviceFocus.value = id;
     selectTab(devices);

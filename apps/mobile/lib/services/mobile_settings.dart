@@ -164,6 +164,7 @@ class MobileSettings extends ChangeNotifier implements PhoneIdentity {
     s.ownerName = prefs.getString('ownerName') ?? '';
     s.shareWithFamily = prefs.getBool('shareWithFamily') ?? true;
     s.visibilityPending.addAll(prefs.getStringList('visibilityPending') ?? const []);
+    s.nameSettled = prefs.getBool('nameSettled') ?? false;
     s.simpleMode = prefs.getBool('simpleMode') ?? false;
     try {
       final raw = prefs.getString('backupFilter');
@@ -286,6 +287,15 @@ class MobileSettings extends ChangeNotifier implements PhoneIdentity {
 
   /// Still the plain name it started with ("iPhone" / "Android").
   bool get hasPlainName => deviceName == 'iPhone' || deviceName == 'Android';
+
+  /// The phone's name was looked at on first start (its own name taken,
+  /// the person told they can rename it): done once.
+  bool nameSettled = false;
+
+  Future<void> settleName() async {
+    nameSettled = true;
+    await _save();
+  }
 
   Future<void> setOwnerName(String name) async {
     ownerName = name.trim();
@@ -492,6 +502,7 @@ class MobileSettings extends ChangeNotifier implements PhoneIdentity {
     await _prefs.setString('ownerName', ownerName);
     await _prefs.setBool('shareWithFamily', shareWithFamily);
     await _prefs.setStringList('visibilityPending', visibilityPending.toList());
+    await _prefs.setBool('nameSettled', nameSettled);
     await _prefs.setBool('simpleMode', simpleMode);
     await _prefs.setString('backupFilter', jsonEncode(backupFilter.toJson()));
     if (language == null) {
