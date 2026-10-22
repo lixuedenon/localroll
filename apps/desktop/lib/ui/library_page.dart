@@ -1107,6 +1107,20 @@ class _LibraryPageState extends State<LibraryPage> {
                 ]),
               ),
             ),
+            if (f.owner?.private ?? false)
+              Positioned(
+                right: 2,
+                top: 2,
+                child: Tooltip(
+                  message: tr('family.sender_tip', {
+                    'name': s.settings.family.memberOf(f.owner!.deviceId) ?? f.owner!.deviceName,
+                  }),
+                  child: const Padding(
+                    padding: EdgeInsets.all(2),
+                    child: Icon(Icons.lock_rounded, size: 16, color: Colors.white, shadows: [Shadow(color: Colors.black54, blurRadius: 4)]),
+                  ),
+                ),
+              ),
             if (selected) _selectedFrame(context),
             _selectButton(key, selected),
           ]),
@@ -1198,11 +1212,20 @@ class _LibraryPageState extends State<LibraryPage> {
                 ffmpeg: s.ffmpeg,
               ),
             ),
+            // "Sender only": hover the lock to see who that is.
             if (item.private)
-              const Positioned(
-                right: 4,
-                top: 4,
-                child: Icon(Icons.lock_rounded, size: 16, color: Colors.white, shadows: [Shadow(color: Colors.black54, blurRadius: 4)]),
+              Positioned(
+                right: 2,
+                top: 2,
+                child: Tooltip(
+                  message: item.deviceId == null
+                      ? tr('family.no_sender_tip')
+                      : tr('family.sender_tip', {'name': _memberOf(s.settings.family, item)}),
+                  child: const Padding(
+                    padding: EdgeInsets.all(2),
+                    child: Icon(Icons.lock_rounded, size: 16, color: Colors.white, shadows: [Shadow(color: Colors.black54, blurRadius: 4)]),
+                  ),
+                ),
               ),
             if (selected) _selectedFrame(context),
             _selectButton(key, selected),
