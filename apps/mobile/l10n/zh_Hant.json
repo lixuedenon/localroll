@@ -478,5 +478,10 @@
   "family.everything": "全部都改",
   "family.all_now_private": "已傳送的全部改成了僅自己可見",
   "family.all_now_shared": "已傳送的全部改成了家人可見",
-  "family.all_later": "有 {count} 台電腦現在連不上，下次連上時自動改"
+  "family.all_later": "有 {count} 台電腦現在連不上，下次連上時自動改",
+  "phone.name_title": "這支手機的名字",
+  "phone.name_random": "隨機取一個",
+  "phone.name_explain": "電腦和其他手機上都顯示這個名字。點骰子隨機取一個。",
+  "phone.name_pattern": "{word}的{device}",
+  "phone.words": "晨光,星河,青竹,遠山,海風,白鷺,螢火,雲朵,松果,麥穗,月牙,晴空,春溪,雪松,風鈴,銀杏"
 }

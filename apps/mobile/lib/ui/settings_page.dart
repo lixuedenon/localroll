@@ -9,6 +9,7 @@ import '../l10n/l10n.dart';
 import '../services/discovery.dart';
 import '../services/media_saver.dart';
 import '../services/mobile_settings.dart';
+import '../services/phone_names.dart';
 import '../services/visibility_sync.dart';
 import 'connect_page.dart';
 import 'device_badge.dart';
@@ -118,6 +119,16 @@ class SettingsPage extends StatelessWidget {
               Card(
                 child: Column(
                   children: [
+                    // This phone's own name (like a PC's): its own, or a
+                    // pleasant random one.
+                    ListTile(
+                      leading: Icon(Platform.isIOS ? Icons.phone_iphone_rounded : Icons.phone_android_rounded),
+                      title: Text(tr('phone.name_title')),
+                      subtitle: Text(settings.deviceName),
+                      trailing: const Icon(Icons.edit_rounded, size: 20),
+                      onTap: () => _editPhoneName(context),
+                    ),
+                    const Divider(height: 1),
                     ListTile(
                       leading: const Icon(Icons.badge_rounded),
                       title: Text(tr('family.your_name')),
@@ -214,6 +225,44 @@ class SettingsPage extends StatelessWidget {
 }
 
 extension on SettingsPage {
+  Future<void> _editPhoneName(BuildContext context) async {
+    final ctrl = TextEditingController(text: settings.deviceName);
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr('phone.name_title')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: ctrl,
+              autofocus: true,
+              maxLength: 40,
+              textCapitalization: TextCapitalization.words,
+              onSubmitted: (v) => Navigator.pop(ctx, v),
+              decoration: InputDecoration(
+                suffixIcon: IconButton(
+                  tooltip: tr('phone.name_random'),
+                  icon: const Icon(Icons.casino_rounded),
+                  onPressed: () => ctrl.text = PhoneNames.random(not: ctrl.text),
+                ),
+              ),
+            ),
+            Text(tr('phone.name_explain'), style: Theme.of(ctx).textTheme.bodySmall),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('common.cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, ctrl.text), child: Text(tr('common.ok'))),
+        ],
+      ),
+    );
+    ctrl.dispose();
+    if (name == null || name.trim().isEmpty) return;
+    await PhoneNames.rename(settings, discovery, name);
+  }
+
   Future<void> _editName(BuildContext context) async {
     final ctrl = TextEditingController(text: settings.ownerName);
     final name = await showDialog<String>(
@@ -241,7 +290,11 @@ extension on SettingsPage {
       ),
     );
     ctrl.dispose();
-    if (name != null) await settings.setOwnerName(name);
+    if (name != null) {
+      await settings.setOwnerName(name);
+      // Shown on the PCs at once (sent with the phone's name).
+      await PhoneNames.rename(settings, discovery, settings.deviceName);
+    }
   }
 }
 

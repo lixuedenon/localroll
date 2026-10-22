@@ -478,5 +478,10 @@
   "family.everything": "Semua",
   "family.all_now_private": "Semua yang Anda kirim sekarang \"Hanya saya\"",
   "family.all_now_shared": "Semua yang Anda kirim sekarang terlihat oleh keluarga",
-  "family.all_later": "{count} PC tidak terjangkau: akan berubah saat terhubung lagi"
+  "family.all_later": "{count} PC tidak terjangkau: akan berubah saat terhubung lagi",
+  "phone.name_title": "Nama ponsel ini",
+  "phone.name_random": "Nama acak",
+  "phone.name_explain": "Tampil di PC dan ponsel lain. Ketuk dadu untuk nama acak.",
+  "phone.name_pattern": "{device} {word}",
+  "phone.words": "Mentari,Embun,Pelangi,Melati,Samudra,Senja,Bintang,Kenari,Angin,Purnama,Teratai,Cendana,Fajar,Kejora,Ombak,Rimba"
 }

@@ -478,5 +478,10 @@
   "family.everything": "Tout",
   "family.all_now_private": "Tout ce que vous avez envoyé est maintenant « Moi seul »",
   "family.all_now_shared": "Tout ce que vous avez envoyé est maintenant visible par la famille",
-  "family.all_later": "{count} PC injoignables : ils changeront à la prochaine connexion"
+  "family.all_later": "{count} PC injoignables : ils changeront à la prochaine connexion",
+  "phone.name_title": "Nom de ce téléphone",
+  "phone.name_random": "Nom au hasard",
+  "phone.name_explain": "C'est ce que voient les PC et les autres téléphones. Touchez le dé pour un nom au hasard.",
+  "phone.name_pattern": "{device} {word}",
+  "phone.words": "Aurore,Brise,Lavande,Comète,Prairie,Mésange,Olivier,Étoile,Coquelicot,Lilas,Rivière,Cerisier,Écume,Mistral,Lune,Tilleul"
 }

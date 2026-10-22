@@ -13,6 +13,7 @@ import '../services/discovery.dart';
 import '../services/file_sender.dart';
 import '../services/live_service.dart';
 import '../services/mobile_settings.dart';
+import '../services/phone_names.dart';
 import '../services/my_library.dart';
 import '../services/phone_server.dart';
 import '../services/uploader.dart';
@@ -81,6 +82,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // Still just "iPhone" / "Android": a pleasant name of its own.
+    WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(PhoneNames.nameIfPlain(widget.settings, widget.discovery)));
     widget.discovery.addListener(_onDiscovery);
     widget.settings.addListener(_onSettings);
     _liveEvents = _live.events.listen((e) {

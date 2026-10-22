@@ -478,5 +478,10 @@
   "family.everything": "すべて",
   "family.all_now_private": "送ったものはすべて「自分だけ」になりました",
   "family.all_now_shared": "送ったものはすべて家族に見えるようになりました",
-  "family.all_later": "{count} 台の PC に今はつながりません。次の接続時に変わります"
+  "family.all_later": "{count} 台の PC に今はつながりません。次の接続時に変わります",
+  "phone.name_title": "このスマホの名前",
+  "phone.name_random": "ランダムな名前",
+  "phone.name_explain": "PC やほかのスマホにはこの名前で表示されます。サイコロでランダムな名前に。",
+  "phone.name_pattern": "{word}の{device}",
+  "phone.words": "そよ風,夕焼け,朝露,星空,若葉,桜,月光,青空,虹,小鳥,ひまわり,こもれび,流れ星,海風,もみじ,白雲"
 }

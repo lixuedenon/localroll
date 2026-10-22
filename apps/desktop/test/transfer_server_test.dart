@@ -970,4 +970,15 @@ void main() {
           throwsA(isA<LrHttpError>().having((e) => e.code, 'code', 'phone_closed')));
     });
   });
+
+  test('a phone renamed on the phone is shown with its new name at once', () async {
+    final phone = await pc.pairPhone(id: 'p1', name: 'iPhone');
+    final (code, _) = await phone.call('POST', LrProtocol.pathPresence, json: {'online': true, 'name': '  星河的iPhone ', 'owner': 'Mum'});
+    expect(code, 200);
+    expect(pc.settings.trusted['p1']!.name, '星河的iPhone');
+    expect(pc.settings.trusted['p1']!.owner, 'Mum');
+    // Nothing sent: names stay.
+    await phone.call('POST', LrProtocol.pathPresence, json: {'online': true});
+    expect(pc.settings.trusted['p1']!.name, '星河的iPhone');
+  });
 }

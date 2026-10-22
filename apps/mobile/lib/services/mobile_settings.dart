@@ -273,6 +273,20 @@ class MobileSettings extends ChangeNotifier implements PhoneIdentity {
     notifyListeners();
   }
 
+  /// This phone's own name (shown on PCs and other phones).
+  Future<void> setDeviceName(String name) async {
+    final t = name.trim();
+    if (t.isEmpty || t == deviceName) {
+      return;
+    }
+    deviceName = t.length > 40 ? t.substring(0, 40) : t;
+    await _save();
+    notifyListeners();
+  }
+
+  /// Still the plain name it started with ("iPhone" / "Android").
+  bool get hasPlainName => deviceName == 'iPhone' || deviceName == 'Android';
+
   Future<void> setOwnerName(String name) async {
     ownerName = name.trim();
     await _save();

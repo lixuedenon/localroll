@@ -121,14 +121,18 @@ class DesktopClient {
   /// "I'm here" ([online]) or "I'm leaving". Returns the other devices the
   /// PC sees online (older PCs: an empty list).
   /// [session] is new each time the app opens (or returns after leaving).
+  /// [name] / [owner]: this phone's name and its person's name now (the PC
+  /// shows a rename at once).
   Future<List<OnlineDevice>> presence({
     required bool online,
     String? session,
+    String? name,
+    String? owner,
     Duration timeout = const Duration(seconds: 5),
   }) async {
     try {
       return OnlineDevice.listFrom(await _send('POST', LrProtocol.pathPresence,
-          json: {'online': online, 'session': ?session}, timeout: timeout));
+          json: {'online': online, 'session': ?session, 'name': ?name, 'owner': ?owner}, timeout: timeout));
     } on LrHttpException catch (e) {
       if (e.status == 404) return const [];
       rethrow;

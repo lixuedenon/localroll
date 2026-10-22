@@ -463,7 +463,10 @@ Future<void> _pullDeletions(
   try {
     c = await openDesktop(settings, d, host, port, info);
     try {
-      discovery.relayed(d.id, await c.presence(online: true, session: discovery.session));
+      discovery.relayed(
+          d.id,
+          await c.presence(
+              online: true, session: discovery.session, name: settings.deviceName, owner: settings.ownerName.trim()));
     } catch (_) {}
     final r = await c.changes(d.changesSinceMs);
     if (r.deleted.isNotEmpty) {

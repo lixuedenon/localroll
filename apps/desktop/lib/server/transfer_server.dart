@@ -814,6 +814,9 @@ class TransferServer extends ChangeNotifier {
       if (req.method == 'POST' && path == LrProtocol.pathPresence) {
         final body = await _readJson(req);
         final online = body['online'] != false;
+        // The phone's name and its person's name, as set on the phone now
+        // (renamed there: shown here at once).
+        await _rename(device, body['name'], body['owner']);
         final session = body['session'];
         if (session is String) {
           final before = _presenceSession[device.id];
@@ -995,6 +998,29 @@ class TransferServer extends ChangeNotifier {
     }
     await req.drain<void>();
     return _json(res, 404, {'error': 'not_found'});
+  }
+
+  /// The phone was renamed (or its person's name changed) on the phone.
+  Future<void> _rename(TrustedDevice device, Object? name, Object? owner) async {
+    String? clean(Object? v) {
+      if (v is! String) return null;
+      final t = v.replaceAll(RegExp(r'[\u0000-\u001f]'), '').trim();
+      return t.length > 40 ? t.substring(0, 40) : t;
+    }
+
+    final n = clean(name);
+    final o = clean(owner);
+    final newName = n != null && n.isNotEmpty && n != device.name ? n : null;
+    final newOwner = o != null && o != (device.owner ?? '') ? o : null;
+    if (newName == null && newOwner == null) return;
+    DiagLog.log('pair', 'renamed: ${device.name} → ${newName ?? device.name}');
+    await settings.update((s) {
+      final t = s.trusted[device.id];
+      if (t == null) return;
+      if (newName != null) t.name = newName;
+      if (newOwner != null) t.owner = newOwner.isEmpty ? null : newOwner;
+    });
+    notifyListeners();
   }
 
   /// Deletes received files; returns what is gone. Default: into [trash].

@@ -478,5 +478,10 @@
   "family.everything": "Tutto",
   "family.all_now_private": "Tutto ciò che hai inviato ora è «Solo io»",
   "family.all_now_shared": "Tutto ciò che hai inviato ora è visibile alla famiglia",
-  "family.all_later": "{count} PC non raggiungibili: cambieranno alla prossima connessione"
+  "family.all_later": "{count} PC non raggiungibili: cambieranno alla prossima connessione",
+  "phone.name_title": "Nome di questo telefono",
+  "phone.name_random": "Nome a caso",
+  "phone.name_explain": "È il nome che vedono PC e altri telefoni. Tocca il dado per un nome a caso.",
+  "phone.name_pattern": "{device} {word}",
+  "phone.words": "Aurora,Brezza,Cometa,Lavanda,Ulivo,Stella,Rondine,Girasole,Gelsomino,Prato,Marea,Luna,Alba,Cipresso,Corallo,Ciliegio"
 }

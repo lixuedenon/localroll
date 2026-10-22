@@ -478,5 +478,10 @@
   "family.everything": "सब",
   "family.all_now_private": "आपका भेजा सब अब “सिर्फ़ मैं” है",
   "family.all_now_shared": "आपका भेजा सब अब परिवार को दिखता है",
-  "family.all_later": "{count} PC अभी नहीं मिले: अगली बार जुड़ने पर बदलेंगे"
+  "family.all_later": "{count} PC अभी नहीं मिले: अगली बार जुड़ने पर बदलेंगे",
+  "phone.name_title": "इस फ़ोन का नाम",
+  "phone.name_random": "कोई भी नाम",
+  "phone.name_explain": "PC और दूसरे फ़ोन पर यही दिखेगा। कोई भी नाम पाने के लिए पासा दबाएँ।",
+  "phone.name_pattern": "{word} {device}",
+  "phone.words": "चाँदनी,सितारा,बादल,पवन,कमल,मोर,सागर,धूप,झरना,गुलमोहर,इंद्रधनुष,तितली,सुबह,पीपल,नदी,चमेली"
 }

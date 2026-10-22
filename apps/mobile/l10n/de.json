@@ -478,5 +478,10 @@
   "family.everything": "Alles",
   "family.all_now_private": "Alles Gesendete ist jetzt „Nur ich“",
   "family.all_now_shared": "Alles Gesendete ist jetzt für die Familie sichtbar",
-  "family.all_later": "{count} PC(s) gerade nicht erreichbar: dort ändert es sich beim nächsten Verbinden"
+  "family.all_later": "{count} PC(s) gerade nicht erreichbar: dort ändert es sich beim nächsten Verbinden",
+  "phone.name_title": "Name dieses Handys",
+  "phone.name_random": "Zufälliger Name",
+  "phone.name_explain": "So heißt es auf PCs und anderen Handys. Würfel tippen für einen zufälligen Namen.",
+  "phone.name_pattern": "{word}-{device}",
+  "phone.words": "Morgenrot,Sternschnuppe,Bergwind,Kiefer,Lavendel,Seerose,Abendstern,Bergsee,Lerche,Birke,Sonnenblume,Nordlicht,Kirschblüte,Regenbogen,Fuchs,Kastanie"
 }

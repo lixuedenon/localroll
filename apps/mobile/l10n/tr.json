@@ -478,5 +478,10 @@
   "family.everything": "Hepsi",
   "family.all_now_private": "Gönderdiğiniz her şey artık \"Yalnızca ben\"",
   "family.all_now_shared": "Gönderdiğiniz her şey artık aileye görünür",
-  "family.all_later": "{count} bilgisayara şu an ulaşılamıyor: bir sonraki bağlantıda değişecek"
+  "family.all_later": "{count} bilgisayara şu an ulaşılamıyor: bir sonraki bağlantıda değişecek",
+  "phone.name_title": "Bu telefonun adı",
+  "phone.name_random": "Rastgele ad",
+  "phone.name_explain": "Bilgisayarlarda ve diğer telefonlarda böyle görünür. Rastgele ad için zara dokunun.",
+  "phone.name_pattern": "{word} {device}",
+  "phone.words": "Şafak,Meltem,Yıldız,Lale,Martı,Gökkuşağı,Ay ışığı,Çınar,Deniz,Papatya,Bulut,Yakamoz,Kartal,Zeytin,Lavanta,Rüzgar"
 }

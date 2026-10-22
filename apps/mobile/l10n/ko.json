@@ -478,5 +478,10 @@
   "family.everything": "전부",
   "family.all_now_private": "보낸 것이 모두 '나만 보기'가 되었습니다",
   "family.all_now_shared": "보낸 것이 모두 가족에게 보입니다",
-  "family.all_later": "PC {count}대에 지금 연결할 수 없습니다. 다음 연결 때 바뀝니다"
+  "family.all_later": "PC {count}대에 지금 연결할 수 없습니다. 다음 연결 때 바뀝니다",
+  "phone.name_title": "이 휴대폰 이름",
+  "phone.name_random": "무작위 이름",
+  "phone.name_explain": "PC와 다른 휴대폰에 이 이름으로 보입니다. 주사위를 누르면 무작위 이름이 나옵니다.",
+  "phone.name_pattern": "{word} {device}",
+  "phone.words": "햇살,바람,은하수,별빛,구름,새벽,무지개,솔잎,파도,달빛,꽃잎,이슬,노을,단풍,들꽃,하늘"
 }

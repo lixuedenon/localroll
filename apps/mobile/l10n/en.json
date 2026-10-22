@@ -478,5 +478,10 @@
   "family.everything": "Everything",
   "family.all_now_private": "Everything you sent is now \"Only me\"",
   "family.all_now_shared": "Everything you sent is now visible to family",
-  "family.all_later": "{count} PC(s) not reachable now: they change when they next connect"
+  "family.all_later": "{count} PC(s) not reachable now: they change when they next connect",
+  "phone.name_title": "This phone's name",
+  "phone.name_random": "Random name",
+  "phone.name_explain": "Shown on PCs and other phones. Tap the dice for a random name.",
+  "phone.name_pattern": "{word} {device}",
+  "phone.words": "Willow,Maple,Aurora,Comet,Meadow,Harbor,Juniper,Sparrow,Cedar,Lotus,River,Saffron,Starling,Clover,Ember,Breeze"
 }

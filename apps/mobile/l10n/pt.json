@@ -478,5 +478,10 @@
   "family.everything": "Tudo",
   "family.all_now_private": "Tudo o que enviou é agora «Só eu»",
   "family.all_now_shared": "Tudo o que enviou é agora visível para a família",
-  "family.all_later": "{count} PC não acessíveis agora: mudam na próxima ligação"
+  "family.all_later": "{count} PC não acessíveis agora: mudam na próxima ligação",
+  "phone.name_title": "Nome deste telemóvel",
+  "phone.name_random": "Nome aleatório",
+  "phone.name_explain": "É o nome que os PCs e outros telemóveis veem. Toque no dado para um nome aleatório.",
+  "phone.name_pattern": "{device} {word}",
+  "phone.words": "Aurora,Brisa,Cometa,Oliveira,Jasmim,Beija-flor,Maré,Lavanda,Girassol,Estrela,Luar,Alecrim,Orvalho,Cerejeira,Prado,Coral"
 }

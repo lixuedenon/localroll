@@ -478,5 +478,10 @@
   "family.everything": "Todo",
   "family.all_now_private": "Todo lo que enviaste es ahora «Solo yo»",
   "family.all_now_shared": "Todo lo que enviaste es ahora visible para la familia",
-  "family.all_later": "{count} PC no disponibles ahora: cambiarán cuando se conecten"
+  "family.all_later": "{count} PC no disponibles ahora: cambiarán cuando se conecten",
+  "phone.name_title": "Nombre de este móvil",
+  "phone.name_random": "Nombre al azar",
+  "phone.name_explain": "Así aparece en los PC y en otros móviles. Toca el dado para un nombre al azar.",
+  "phone.name_pattern": "{device} {word}",
+  "phone.words": "Aurora,Brisa,Lucero,Olivo,Jazmín,Colibrí,Arrecife,Pradera,Lavanda,Cometa,Girasol,Alba,Marea,Romero,Luna,Cedro"
 }

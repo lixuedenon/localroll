@@ -478,5 +478,10 @@
   "family.everything": "Tất cả",
   "family.all_now_private": "Mọi thứ bạn gửi giờ là \"Chỉ mình tôi\"",
   "family.all_now_shared": "Mọi thứ bạn gửi giờ gia đình đều xem được",
-  "family.all_later": "{count} máy tính chưa kết nối được: sẽ đổi khi kết nối lại"
+  "family.all_later": "{count} máy tính chưa kết nối được: sẽ đổi khi kết nối lại",
+  "phone.name_title": "Tên điện thoại này",
+  "phone.name_random": "Tên ngẫu nhiên",
+  "phone.name_explain": "Máy tính và điện thoại khác sẽ thấy tên này. Chạm xúc xắc để lấy tên ngẫu nhiên.",
+  "phone.name_pattern": "{device} {word}",
+  "phone.words": "Bình minh,Gió mát,Sao băng,Hoa sen,Trăng rằm,Mây trắng,Cầu vồng,Sương mai,Biển xanh,Hoa mai,Chim sẻ,Đồi thông,Suối nhỏ,Hoàng hôn,Lá thu,Nắng hạ"
 }
