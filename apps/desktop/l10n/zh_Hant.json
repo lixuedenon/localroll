@@ -548,5 +548,19 @@
   "search.step2": "在「慣用語言」旁邊點「新增語言」。",
   "search.step3": "搜尋「中文」，選「中文(简体，中国)」，點「下一步」。",
   "search.step4": "保留勾選「光學字元辨識」；不想把 Windows 介面改成中文的話，取消勾選「設定為我的 Windows 顯示語言」；點「安裝」。",
-  "search.step5": "裝好後回到這裡，點「重新檢查」。"
+  "search.step5": "裝好後回到這裡，點「重新檢查」。",
+  "search.group_text": "文字裡有「{q}」",
+  "search.group_picture": "畫面像「{q}」（越像越靠前）",
+  "search.picture_progress_note": "畫面辨識已處理 {done} / {total}",
+  "search.picture_download_failed": "畫面辨識模型沒下載成功，請檢查網路後重試。",
+  "search.picture_offer": "想按畫面內容搜尋嗎？開啟後，輸入「海邊」「狗」「生日蛋糕」這類詞，就能找到畫面裡有這些東西的照片和影片，不用事先加標籤。需要下載一個辨識模型（約 {size}，只下載一次，來自 LocalRoll 自己的發布頁），之後全部在這台電腦上計算，照片不會上傳。不下載也沒關係：文字搜尋和其他所有功能都照常使用，只是不能按畫面搜。以後也可以在「設定 › 文字搜尋」裡開啟。",
+  "search.picture_later": "以後再說",
+  "search.picture_enable": "開啟並下載",
+  "search.picture_downloading": "正在下載畫面辨識模型：{done} / {total}",
+  "search.picture_title": "按畫面內容搜尋",
+  "search.picture_explain": "輸入「海邊」「狗」這類詞，找到畫面裡有這些東西的照片和影片。需要下載一次辨識模型（約 {size}），全部在這台電腦上計算，照片不會上傳。不開啟也不影響文字搜尋和其他任何功能。",
+  "search.picture_not_downloaded": "模型還沒下載",
+  "search.picture_remove": "從這台電腦刪除模型（騰出 {size}）",
+  "search.picture_working": "正在辨識畫面：{done} / {total}",
+  "search.picture_done": "畫面全部辨識完了（{count} 項）"
 }

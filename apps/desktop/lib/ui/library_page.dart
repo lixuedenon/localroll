@@ -15,6 +15,7 @@ import '../services/file_actions.dart';
 import '../services/library_index.dart';
 import '../services/network.dart';
 import '../services/peers.dart';
+import '../services/picture_model.dart';
 import '../services/received_files.dart';
 import '../services/text_index.dart';
 import '../services/text_indexer.dart';
@@ -106,10 +107,42 @@ class _LibraryPageState extends State<LibraryPage> {
     unawaited(widget.services.server.textIndex.load());
     setState(() {
       _search = SearchQuery(v);
+      _findPictures(v);
       // Results come from everything: photos, videos and files.
       if (!_search.isEmpty && _filesTab) _filter = _Filter.all;
       _clearSelection();
     });
+  }
+
+  /// Search by picture: items that look like the words (key → how alike).
+  Map<String, double> _picHits = const {};
+  Timer? _picSoon;
+
+  void _findPictures(String q) {
+    _picSoon?.cancel();
+    final ix = widget.services.pictureIndexer;
+    if (q.trim().isEmpty || !ix.ready) {
+      _picHits = const {};
+      return;
+    }
+    _picSoon = Timer(const Duration(milliseconds: 400), () async {
+      final hits = await ix.find(q);
+      if (!mounted || _searchCtrl.text != q) return;
+      setState(() => _picHits = {for (final (k, sc) in hits) k: sc});
+    });
+  }
+
+  String _searchKey(_Cell c) {
+    final m = c.media;
+    if (m != null) return TextIndex.mediaKey(m);
+    final f = c.file!;
+    return TextIndex.fileKey(widget.services.server.files.relOf(f.path) ?? f.path, f.size);
+  }
+
+  /// Found only because it looks like the words (not by its text / name).
+  bool _onlyPicture(_Cell c) {
+    final name = c.media?.name ?? c.file!.name;
+    return !widget.services.server.textIndex.matches(_searchKey(c), name, _search);
   }
 
   void _clearSearch() {
@@ -155,6 +188,7 @@ class _LibraryPageState extends State<LibraryPage> {
     _focus.dispose();
     _scroll.dispose();
     _searchCtrl.dispose();
+    _picSoon?.cancel();
     _hovered.dispose();
     super.dispose();
   }
@@ -221,7 +255,9 @@ class _LibraryPageState extends State<LibraryPage> {
       final files = widget.services.server.files;
       list = [
         for (final f in list)
-          if (idx.matches(TextIndex.fileKey(files.relOf(f.path) ?? f.path, f.size), f.name, _search)) f,
+          if (idx.matches(TextIndex.fileKey(files.relOf(f.path) ?? f.path, f.size), f.name, _search) ||
+              _picHits.containsKey(TextIndex.fileKey(files.relOf(f.path) ?? f.path, f.size)))
+            f,
       ];
     }
     return list;
@@ -267,7 +303,10 @@ class _LibraryPageState extends State<LibraryPage> {
     }
     if (!_search.isEmpty) {
       final idx = widget.services.server.textIndex;
-      list = [for (final i in list) if (idx.matches(TextIndex.mediaKey(i), i.name, _search)) i];
+      list = [
+        for (final i in list)
+          if (idx.matches(TextIndex.mediaKey(i), i.name, _search) || _picHits.containsKey(TextIndex.mediaKey(i))) i,
+      ];
     }
     if (_byReceived) list.sort((a, b) => b.receivedMs.compareTo(a.receivedMs));
     return list;
@@ -339,7 +378,7 @@ class _LibraryPageState extends State<LibraryPage> {
   Widget build(BuildContext context) {
     final s = widget.services;
     return ListenableBuilder(
-      listenable: Listenable.merge([s.library, s.settings, s.server.textIndex]),
+      listenable: Listenable.merge([s.library, s.settings, s.server.textIndex, s.pictureModel]),
       builder: (context, _) {
         final family = s.settings.family;
         final all = s.library.items;
@@ -681,14 +720,35 @@ class _LibraryPageState extends State<LibraryPage> {
 
   /// While text is still being read: how far, and that the rest isn't found yet.
   String _searchNote() {
-    final p = widget.services.textIndexer.progress.value;
-    return switch (p.state) {
+    final s = widget.services;
+    final pic = s.pictureIndexer.progress.value;
+    final picNote = s.settings.pictureSearch && (pic.state == IndexState.working || pic.state == IndexState.paused) && pic.total > 0
+        ? tr('search.picture_progress_note', {'done': pic.done, 'total': pic.total})
+        : '';
+    final p = s.textIndexer.progress.value;
+    final textNote = switch (p.state) {
       IndexState.working || IndexState.paused || IndexState.starting when p.total > 0 =>
         tr('search.progress_note', {'done': p.done, 'total': p.total}),
       IndexState.off => tr('search.off_note'),
       IndexState.noOcr => tr('search.no_ocr_note'),
       _ => '',
     };
+    return [textNote, picNote].where((t) => t.isNotEmpty).join('  ·  ');
+  }
+
+  /// Turn picture search on: download the model (once), then read.
+  Future<void> _enablePictures() async {
+    final s = widget.services;
+    await s.settings.update((x) {
+      x.pictureSearch = true;
+      x.pictureAsked = true;
+    });
+    final ok = await s.pictureModel.download();
+    if (ok) {
+      s.pictureIndexer.wake();
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('search.picture_download_failed'))));
+    }
   }
 
   Widget _noResults(BuildContext context) => Center(
@@ -719,7 +779,24 @@ class _LibraryPageState extends State<LibraryPage> {
             ...actions,
           ]),
         );
+    final s = widget.services;
+    final dl = s.pictureModel.downloading;
     return [
+      // Searching for the first time: offer picture search, saying plainly
+      // what the download is for and that nothing else depends on it.
+      if (!_search.isEmpty && !s.settings.pictureSearch && !s.settings.pictureAsked)
+        banner(Icons.image_search_rounded, LrColors.verified,
+            tr('search.picture_offer', {'size': formatBytes(PictureModel.downloadSize)}), [
+          TextButton(
+            onPressed: () => s.settings.update((x) => x.pictureAsked = true),
+            child: Text(tr('search.picture_later')),
+          ),
+          const SizedBox(width: 4),
+          FilledButton(onPressed: _enablePictures, child: Text(tr('search.picture_enable'))),
+        ]),
+      if (dl != null)
+        banner(Icons.downloading_rounded, LrColors.verified,
+            tr('search.picture_downloading', {'done': formatBytes(dl.$1), 'total': formatBytes(dl.$2)}), const []),
       if (!_search.isEmpty)
         banner(Icons.search_rounded, Theme.of(context).colorScheme.primary,
             [tr('search.results', {'q': _searchCtrl.text.trim(), 'count': found}), _searchNote()].where((t) => t.isNotEmpty).join('  ·  '), [
@@ -866,17 +943,32 @@ class _LibraryPageState extends State<LibraryPage> {
     // Group into days; photos / videos keep their index in [items] for the
     // viewer (it pages through photos and videos only).
     final cells = _cells(items);
-    _order = [for (final c in cells) c.key];
     final indexOf = {for (var k = 0; k < items.length; k++) items[k].relPath: k};
-    final slivers = <Widget>[];
-    var start = 0;
-    while (start < cells.length) {
-      final t = cells[start].day;
-      var end = start;
-      while (end < cells.length && cells[end].day.year == t.year && cells[end].day.month == t.month && cells[end].day.day == t.day) {
-        end++;
+    // Groups: days — or, while searching, "the text has it" and "it looks
+    // like it" (most alike first).
+    final groups = <(String, List<_Cell>)>[];
+    if (_search.isEmpty) {
+      var start = 0;
+      while (start < cells.length) {
+        final t = cells[start].day;
+        var end = start;
+        while (end < cells.length && cells[end].day.year == t.year && cells[end].day.month == t.month && cells[end].day.day == t.day) {
+          end++;
+        }
+        groups.add((formatDayFull(t), cells.sublist(start, end)));
+        start = end;
       }
-      final day = cells.sublist(start, end);
+    } else {
+      final q = _searchCtrl.text.trim();
+      final byText = [for (final c in cells) if (!_onlyPicture(c)) c];
+      final byPicture = [for (final c in cells) if (_onlyPicture(c)) c]
+        ..sort((a, b) => (_picHits[_searchKey(b)] ?? 0).compareTo(_picHits[_searchKey(a)] ?? 0));
+      if (byText.isNotEmpty) groups.add((tr('search.group_text', {'q': q}), byText));
+      if (byPicture.isNotEmpty) groups.add((tr('search.group_picture', {'q': q}), byPicture));
+    }
+    _order = [for (final g in groups) for (final c in g.$2) c.key];
+    final slivers = <Widget>[];
+    for (final (title, day) in groups) {
       final photos = day.where((c) => c.media?.kind == MediaKind.image).length;
       final videos = day.where((c) => c.media?.kind == MediaKind.video).length;
       final files = day.where((c) => c.file != null).length;
@@ -911,7 +1003,7 @@ class _LibraryPageState extends State<LibraryPage> {
                   ),
                 ),
                 const SizedBox(width: 4),
-                Text(formatDayFull(t), style: theme.textTheme.titleMedium),
+                Text(title, style: theme.textTheme.titleMedium),
                 const SizedBox(width: 12),
                 Text(
                   [
@@ -946,7 +1038,6 @@ class _LibraryPageState extends State<LibraryPage> {
             },
           ),
         ));
-      start = end;
     }
     slivers.add(const SliverToBoxAdapter(child: SizedBox(height: 24)));
     // Drag with the mouse to select with a box (Ctrl: add to what is

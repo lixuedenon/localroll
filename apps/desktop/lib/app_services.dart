@@ -13,6 +13,8 @@ import 'services/library_index.dart';
 import 'services/network.dart';
 import 'services/pdf_text.dart';
 import 'services/peers.dart';
+import 'services/picture_index.dart';
+import 'services/picture_model.dart';
 import 'services/phone_formats.dart';
 import 'services/receive_hub.dart';
 import 'services/settings.dart';
@@ -67,6 +69,22 @@ class AppServices {
         converter.pending > 0,
     convert: ffmpeg.ocrPicture,
     readPdf: PdfText.read,
+  );
+
+  /// Search by what pictures show: the model (downloaded when the person
+  /// turns it on) and the background reading.
+  late final PictureModel pictureModel = PictureModel(settings.dataDir);
+  late final PictureIndexer pictureIndexer = PictureIndexer(
+    library: library,
+    files: server.files,
+    index: server.pictureIndex,
+    model: pictureModel,
+    enabled: () => settings.pictureSearch,
+    busy: () =>
+        hub.transfers.any((t) => t.state == TransferState.receiving || t.state == TransferState.verifying) ||
+        sender.busy ||
+        converter.pending > 0,
+    rgb: ffmpeg.rgb224,
   );
 
   /// A paired phone or PC is reachable right now: it said "I'm here" or
@@ -229,6 +247,8 @@ class AppServices {
     // and every few hours while LocalRoll runs).
     unawaited(server.trash.purgeOld());
     s.textIndexer.start();
+    s.pictureIndexer.start();
+    server.pictureSearch = s.pictureIndexer.find;
     Timer.periodic(const Duration(hours: 6), (_) => unawaited(server.trash.purgeOld()));
     return s;
   }

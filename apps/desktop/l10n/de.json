@@ -548,5 +548,19 @@
   "search.step2": "Neben „Bevorzugte Sprachen“ auf „Sprache hinzufügen“ klicken.",
   "search.step3": "„Chinesisch“ suchen, „中文(简体，中国)“ wählen, „Weiter“.",
   "search.step4": "„Optische Zeichenerkennung“ angehakt lassen, „Als Windows-Anzeigesprache festlegen“ abhaken, falls nicht gewünscht, dann „Installieren“.",
-  "search.step5": "Danach hierher zurückkehren und „Erneut prüfen“ klicken."
+  "search.step5": "Danach hierher zurückkehren und „Erneut prüfen“ klicken.",
+  "search.group_text": "Text enthält „{q}“",
+  "search.group_picture": "Sieht aus wie „{q}“ (Ähnlichstes zuerst)",
+  "search.picture_progress_note": "Bilder {done} von {total} angesehen",
+  "search.picture_download_failed": "Das Bildmodell konnte nicht geladen werden. Internet prüfen und erneut versuchen.",
+  "search.picture_offer": "Nach Bildinhalt suchen? Dann findest du mit Wörtern wie „Strand“, „Hund“ oder „Geburtstagstorte“ Fotos und Videos, auf denen das zu sehen ist – ohne vorher etwas zu markieren. Dafür wird einmal ein Erkennungsmodell geladen (etwa {size}, von LocalRolls eigener Release-Seite); danach läuft alles auf diesem PC, Fotos werden nicht hochgeladen. Ohne Download ist alles gut: Textsuche und alle anderen Funktionen arbeiten wie gewohnt, nur die Suche nach Bildinhalt fehlt. Später einschaltbar unter Einstellungen › Textsuche.",
+  "search.picture_later": "Später",
+  "search.picture_enable": "Einschalten und laden",
+  "search.picture_downloading": "Bildmodell wird geladen: {done} / {total}",
+  "search.picture_title": "Nach Bildinhalt suchen",
+  "search.picture_explain": "„Strand“ oder „Hund“ eingeben und Fotos und Videos finden, auf denen das zu sehen ist. Braucht einmal ein Erkennungsmodell (etwa {size}); alles läuft auf diesem PC, Fotos werden nicht hochgeladen. Ausgeschaltet ändert sich an Textsuche und allen anderen Funktionen nichts.",
+  "search.picture_not_downloaded": "Modell noch nicht geladen",
+  "search.picture_remove": "Modell von diesem PC entfernen (gibt {size} frei)",
+  "search.picture_working": "Bilder werden angesehen: {done} / {total}",
+  "search.picture_done": "Alle Bilder angesehen ({count})"
 }

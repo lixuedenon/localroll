@@ -149,6 +149,14 @@ jobs:
         shell: bash
         run: |
           grep -iE "error|fatal|exception|failed" build.log | grep -viE "warning|0 error" | tail -40 | while IFS= read -r l; do echo "::error::${l:0:900}"; done
+      - name: Check onnxruntime.dll
+        shell: pwsh
+        run: |
+          # Picture search: must be Microsoft's official onnxruntime 1.15.1 (win-x64), unchanged.
+          $dll = "apps/desktop/build/windows/x64/runner/Release/onnxruntime.dll"
+          if (-not (Test-Path $dll)) { Write-Output "::error::onnxruntime.dll missing from the build"; exit 1 }
+          $sha = (Get-FileHash $dll -Algorithm SHA256).Hash.ToLower()
+          if ($sha -ne "bb090dd258282c1d7f7a41a83492ba07bc4fe65d75259435587350e1fa66f1bc") { Write-Output "::error::onnxruntime.dll SHA-256 $sha is not the official 1.15.1"; exit 1 }
       - name: Bundle ffmpeg
         shell: pwsh
         run: |

@@ -548,5 +548,19 @@
   "search.step2": "'기본 설정 언어' 옆의 '언어 추가'를 클릭합니다.",
   "search.step3": "'중국어'를 검색해 '中文(简体，中国)'을 고르고 '다음'.",
   "search.step4": "'광학 문자 인식'은 체크한 채로, 표시 언어를 바꾸지 않으려면 'Windows 표시 언어로 설정'을 해제하고 '설치'.",
-  "search.step5": "설치가 끝나면 여기로 돌아와 '다시 확인'을 누릅니다."
+  "search.step5": "설치가 끝나면 여기로 돌아와 '다시 확인'을 누릅니다.",
+  "search.group_text": "글자에 '{q}' 포함",
+  "search.group_picture": "'{q}'처럼 보이는 것(비슷한 순)",
+  "search.picture_progress_note": "화면 읽기 {done} / {total}",
+  "search.picture_download_failed": "화면 인식 모델을 내려받지 못했습니다. 인터넷 연결을 확인하고 다시 시도하세요.",
+  "search.picture_offer": "화면 내용으로 검색할까요? 켜면 '해변', '강아지', '생일 케이크' 같은 말로 그것이 찍힌 사진과 동영상을 찾을 수 있습니다. 미리 태그를 달 필요가 없습니다. 인식 모델(약 {size}, LocalRoll 자체 릴리스 페이지에서 한 번만)을 내려받아야 하며, 이후에는 모두 이 PC에서 처리하고 사진은 업로드되지 않습니다. 내려받지 않아도 괜찮습니다. 글자 검색과 다른 모든 기능은 그대로 쓸 수 있고 화면으로만 검색할 수 없습니다. 나중에 설정 › 글자 검색에서 켤 수 있습니다.",
+  "search.picture_later": "나중에",
+  "search.picture_enable": "켜고 내려받기",
+  "search.picture_downloading": "화면 인식 모델 내려받는 중: {done} / {total}",
+  "search.picture_title": "화면 내용으로 검색",
+  "search.picture_explain": "'해변', '강아지'라고 입력하면 그것이 찍힌 사진과 동영상을 찾습니다. 인식 모델(약 {size})을 한 번 내려받아야 하며 모두 이 PC에서 처리합니다. 사진은 업로드되지 않습니다. 꺼 두어도 글자 검색이나 다른 기능에는 영향이 없습니다.",
+  "search.picture_not_downloaded": "모델을 아직 내려받지 않았습니다",
+  "search.picture_remove": "이 PC에서 모델 삭제({size} 확보)",
+  "search.picture_working": "화면 읽는 중: {done} / {total}",
+  "search.picture_done": "모든 화면을 읽었습니다({count})"
 }

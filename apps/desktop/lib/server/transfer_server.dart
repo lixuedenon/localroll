@@ -15,6 +15,7 @@ import '../services/library_index.dart';
 import '../services/receive_hub.dart';
 import '../services/library_trash.dart';
 import '../services/received_files.dart';
+import '../services/picture_index.dart';
 import '../services/text_index.dart';
 import '../services/settings.dart';
 import '../l10n/l10n.dart';
@@ -176,6 +177,13 @@ class TransferServer extends ChangeNotifier {
 
   /// The text found in photos and files (searching here and from phones).
   late final TextIndex textIndex = TextIndex(library);
+
+  /// What photos / videos look like (searching by picture).
+  late final PictureIndex pictureIndex = PictureIndex(library);
+
+  /// Items that look like a search (keys, best first); null: picture search
+  /// is off or not here.
+  Future<List<(String, double)>> Function(String query)? pictureSearch;
 
   /// Something new arrived: linked phones browsing the library refresh
   /// (many arrivals in a row are told once).
@@ -1058,7 +1066,23 @@ class TransferServer extends ChangeNotifier {
     final byReceived = q['sort'] == 'received';
     // Search: the text found in photos / files, and their names.
     final search = SearchQuery(q['q'] ?? '');
-    if (!search.isEmpty) await textIndex.load();
+    // Searching: text matches first (newest first), then what looks like
+    // it (most alike first).
+    var pics = const <String, double>{};
+    if (!search.isEmpty) {
+      await textIndex.load();
+      final find = pictureSearch;
+      if (find != null) {
+        try {
+          pics = {for (final (k, sc) in await find(q['q']!)) k: sc};
+        } catch (e) {
+          DiagLog.log('search', 'picture search failed: $e');
+        }
+      }
+    }
+    int order(String key, String name, int time) =>
+        search.isEmpty ? time : (textIndex.matches(key, name, search) ? 1000000000000000 + time : ((pics[key] ?? 0) * 1e12).round());
+    bool found(String key, String name) => search.isEmpty || textIndex.matches(key, name, search) || pics.containsKey(key);
     final family = settings.family;
     // Photos / videos, then received files (documents, scans…) — newest
     // taken (files: arrived) or newest arrival first.
@@ -1068,9 +1092,9 @@ class TransferServer extends ChangeNotifier {
         if ((kind == null || i.kind.name == kind) &&
             (i.kind == MediaKind.image || i.kind == MediaKind.video) &&
             !(i.private && !i.ownedBy(device.id)) &&
-            (search.isEmpty || textIndex.matches(TextIndex.mediaKey(i), i.name, search))) {
+            found(TextIndex.mediaKey(i), i.name)) {
           entries.add((
-            byReceived ? i.receivedMs : i.captureMs,
+            order(TextIndex.mediaKey(i), i.name, byReceived ? i.receivedMs : i.captureMs),
             i.receivedMs,
             RemoteItem(
               path: i.relPath,
@@ -1094,10 +1118,10 @@ class TransferServer extends ChangeNotifier {
         if (o != null && o.private && o.deviceId != device.id) continue;
         final rel = files.relOf(f.path);
         if (rel == null) continue;
-        if (!search.isEmpty && !textIndex.matches(TextIndex.fileKey(rel, f.size), f.name, search)) continue;
+        if (!found(TextIndex.fileKey(rel, f.size), f.name)) continue;
         final at = f.arrived.millisecondsSinceEpoch;
         entries.add((
-          at,
+          order(TextIndex.fileKey(rel, f.size), f.name, at),
           at,
           RemoteItem(
             path: rel,

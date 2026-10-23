@@ -548,5 +548,19 @@
   "search.step2": "Di samping “Bahasa pilihan”, klik “Tambahkan bahasa”.",
   "search.step3": "Cari “Chinese”, pilih “中文(简体，中国)”, lalu “Berikutnya”.",
   "search.step4": "Biarkan “Pengenalan karakter optik” dicentang, hapus centang “Atur sebagai bahasa tampilan” jika tidak ingin, lalu “Pasang”.",
-  "search.step5": "Setelah terpasang, kembali ke sini dan klik “Periksa lagi”."
+  "search.step5": "Setelah terpasang, kembali ke sini dan klik “Periksa lagi”.",
+  "search.group_text": "Teks berisi “{q}”",
+  "search.group_picture": "Mirip “{q}” (paling mirip dulu)",
+  "search.picture_progress_note": "gambar {done} dari {total} dilihat",
+  "search.picture_download_failed": "Model gambar gagal diunduh. Periksa internet lalu coba lagi.",
+  "search.picture_offer": "Cari berdasarkan isi gambar? Kata seperti “pantai”, “anjing”, atau “kue ulang tahun” akan menemukan foto dan video yang memperlihatkannya — tanpa memberi tag dulu. Perlu model pengenal (sekitar {size}, diunduh sekali dari halaman rilis LocalRoll sendiri); setelah itu semua berjalan di PC ini dan tak ada foto yang diunggah. Tidak mengunduh juga tidak apa-apa: pencarian teks dan fitur lain tetap berjalan, hanya tidak bisa cari berdasarkan gambar. Bisa diaktifkan nanti di Pengaturan › Pencarian teks.",
+  "search.picture_later": "Nanti",
+  "search.picture_enable": "Aktifkan dan unduh",
+  "search.picture_downloading": "Mengunduh model gambar: {done} / {total}",
+  "search.picture_title": "Cari berdasarkan isi gambar",
+  "search.picture_explain": "Ketik “pantai” atau “anjing” untuk menemukan foto dan video yang memperlihatkannya. Perlu model pengenal sekali (sekitar {size}); semua berjalan di PC ini, tidak ada foto yang diunggah. Dibiarkan mati tidak mengubah pencarian teks atau fitur lain.",
+  "search.picture_not_downloaded": "Model belum diunduh",
+  "search.picture_remove": "Hapus model dari PC ini (membebaskan {size})",
+  "search.picture_working": "Melihat gambar: {done} / {total}",
+  "search.picture_done": "Semua gambar sudah dilihat ({count})"
 }

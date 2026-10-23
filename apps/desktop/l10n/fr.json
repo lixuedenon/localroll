@@ -548,5 +548,19 @@
   "search.step2": "À côté de « Langues favorites », cliquez sur « Ajouter une langue ».",
   "search.step3": "Cherchez « chinois », choisissez « 中文(简体，中国) », puis « Suivant ».",
   "search.step4": "Laissez « Reconnaissance optique de caractères » cochée, décochez « Définir comme langue d'affichage » si vous ne le voulez pas, puis « Installer ».",
-  "search.step5": "Une fois installé, revenez ici et cliquez sur « Vérifier à nouveau »."
+  "search.step5": "Une fois installé, revenez ici et cliquez sur « Vérifier à nouveau ».",
+  "search.group_text": "Le texte contient « {q} »",
+  "search.group_picture": "Ressemble à « {q} » (le plus proche d'abord)",
+  "search.picture_progress_note": "images {done} sur {total} vues",
+  "search.picture_download_failed": "Le modèle d'images n'a pas pu être téléchargé. Vérifiez la connexion et réessayez.",
+  "search.picture_offer": "Rechercher selon ce que montrent les images ? Des mots comme « plage », « chien » ou « gâteau d'anniversaire » trouveront les photos et vidéos qui les montrent, sans étiquetage. Il faut un modèle de reconnaissance (environ {size}, téléchargé une seule fois depuis la page de versions de LocalRoll) ; ensuite tout se fait sur ce PC et aucune photo n'est envoyée. Sans téléchargement, aucun souci : la recherche de texte et tout le reste fonctionnent comme d'habitude, seule la recherche par image manque. Activable plus tard dans Paramètres › Recherche de texte.",
+  "search.picture_later": "Plus tard",
+  "search.picture_enable": "Activer et télécharger",
+  "search.picture_downloading": "Téléchargement du modèle d'images : {done} / {total}",
+  "search.picture_title": "Rechercher par le contenu des images",
+  "search.picture_explain": "Tapez « plage » ou « chien » pour trouver les photos et vidéos qui les montrent. Nécessite une fois un modèle de reconnaissance (environ {size}) ; tout se fait sur ce PC, aucune photo n'est envoyée. Le laisser désactivé ne change rien à la recherche de texte ni au reste.",
+  "search.picture_not_downloaded": "Le modèle n'est pas encore téléchargé",
+  "search.picture_remove": "Retirer le modèle de ce PC (libère {size})",
+  "search.picture_working": "Examen des images : {done} / {total}",
+  "search.picture_done": "Toutes les images examinées ({count})"
 }

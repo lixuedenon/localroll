@@ -548,5 +548,19 @@
   "search.step2": "Next to “Preferred languages”, click “Add a language”.",
   "search.step3": "Search “Chinese”, choose “中文(简体，中国)”, then “Next”.",
   "search.step4": "Keep “Optical character recognition” ticked, untick “Set as my Windows display language” if you don’t want that, then “Install”.",
-  "search.step5": "When it’s installed, come back here and click “Check again”."
+  "search.step5": "When it’s installed, come back here and click “Check again”.",
+  "search.group_text": "Text contains “{q}”",
+  "search.group_picture": "Looks like “{q}” (closest first)",
+  "search.picture_progress_note": "pictures {done} of {total} looked at",
+  "search.picture_download_failed": "The picture model could not be downloaded. Check the internet connection and try again.",
+  "search.picture_offer": "Search by what pictures show? Then words like “beach”, “dog” or “birthday cake” find the photos and videos that show them — no tagging needed. It needs a recognition model (about {size}, downloaded once from LocalRoll’s own release page); after that everything runs on this PC and no photo is uploaded. Not downloading it is fine: text search and everything else work as usual, you just can’t search by picture. You can turn it on later in Settings › Text search.",
+  "search.picture_later": "Later",
+  "search.picture_enable": "Turn on and download",
+  "search.picture_downloading": "Downloading the picture model: {done} / {total}",
+  "search.picture_title": "Search by what pictures show",
+  "search.picture_explain": "Type “beach” or “dog” to find the photos and videos that show it. Needs a recognition model once (about {size}); everything runs on this PC and no photo is uploaded. Leaving it off changes nothing for text search or anything else.",
+  "search.picture_not_downloaded": "The model isn’t downloaded yet",
+  "search.picture_remove": "Remove the model from this PC (frees {size})",
+  "search.picture_working": "Looking at pictures: {done} / {total}",
+  "search.picture_done": "All pictures looked at ({count})"
 }

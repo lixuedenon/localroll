@@ -46,7 +46,8 @@ class ClipTokenizer {
   static const String _space = '▁'; // ▁
 
   /// Full-width letters / digits made plain, odd spaces made ordinary, runs
-  /// of spaces made one (what the model's own normalizer mostly does).
+  /// of spaces made one, none at the ends (what the model's own normalizer
+  /// does).
   static String normalize(String s) {
     final b = StringBuffer();
     for (final r in s.runes) {
@@ -56,7 +57,7 @@ class ClipTokenizer {
       if (c < 0x20) continue;
       b.writeCharCode(c);
     }
-    return b.toString().replaceAll(RegExp(' {2,}'), ' ');
+    return b.toString().replaceAll(RegExp(' {2,}'), ' ').trim();
   }
 
   /// The ids of [text]: <s> pieces </s>, without padding.

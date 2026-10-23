@@ -548,5 +548,19 @@
   "search.step2": "「優先する言語」の横の「言語の追加」をクリック。",
   "search.step3": "「中国語」を検索し「中文(简体，中国)」を選んで「次へ」。",
   "search.step4": "「光学式文字認識」はチェックしたまま、表示言語を変えたくなければ「Windows の表示言語として設定する」を外して「インストール」。",
-  "search.step5": "インストールが終わったらここに戻り「もう一度確認」をクリック。"
+  "search.step5": "インストールが終わったらここに戻り「もう一度確認」をクリック。",
+  "search.group_text": "文字に「{q}」がある",
+  "search.group_picture": "「{q}」に似た画面（近い順）",
+  "search.picture_progress_note": "画面の読み取り {done} / {total}",
+  "search.picture_download_failed": "画面認識モデルをダウンロードできませんでした。インターネット接続を確認してもう一度お試しください。",
+  "search.picture_offer": "画面の内容で検索しますか？オンにすると「海辺」「犬」「誕生日ケーキ」などの言葉で、それが写っている写真や動画を探せます。タグ付けは不要です。認識モデル（約 {size}、LocalRoll 自身のリリースページから一度だけ）をダウンロードする必要があり、その後はすべてこの PC 上で処理し、写真はアップロードされません。ダウンロードしなくても問題ありません。文字検索やほかの機能はそのまま使え、画面での検索ができないだけです。あとから「設定 › 文字検索」でオンにできます。",
+  "search.picture_later": "あとで",
+  "search.picture_enable": "オンにしてダウンロード",
+  "search.picture_downloading": "画面認識モデルをダウンロード中：{done} / {total}",
+  "search.picture_title": "画面の内容で検索",
+  "search.picture_explain": "「海辺」「犬」などと入力すると、それが写っている写真や動画が見つかります。認識モデル（約 {size}）を一度だけダウンロードし、すべてこの PC 上で処理します。写真はアップロードされません。オフのままでも文字検索やほかの機能には影響しません。",
+  "search.picture_not_downloaded": "モデルはまだダウンロードされていません",
+  "search.picture_remove": "この PC からモデルを削除（{size} 空きます）",
+  "search.picture_working": "画面を読み取り中：{done} / {total}",
+  "search.picture_done": "すべての画面を読み取りました（{count}）"
 }

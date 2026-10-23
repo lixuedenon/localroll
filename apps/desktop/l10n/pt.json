@@ -548,5 +548,19 @@
   "search.step2": "Ao lado de «Idiomas preferidos», clique em «Adicionar um idioma».",
   "search.step3": "Pesquise «chinês», escolha «中文(简体，中国)» e «Seguinte».",
   "search.step4": "Mantenha «Reconhecimento ótico de caracteres» marcado, desmarque «Definir como idioma de apresentação» se não quiser e clique em «Instalar».",
-  "search.step5": "Quando terminar, volte aqui e clique em «Verificar de novo»."
+  "search.step5": "Quando terminar, volte aqui e clique em «Verificar de novo».",
+  "search.group_text": "O texto contém «{q}»",
+  "search.group_picture": "Parece «{q}» (mais parecidos primeiro)",
+  "search.picture_progress_note": "imagens {done} de {total} vistas",
+  "search.picture_download_failed": "Não foi possível transferir o modelo de imagens. Verifique a ligação e tente de novo.",
+  "search.picture_offer": "Pesquisar pelo que as imagens mostram? Palavras como «praia», «cão» ou «bolo de aniversário» encontram as fotos e vídeos onde aparecem, sem etiquetas. É preciso um modelo de reconhecimento (cerca de {size}, transferido uma vez da página de versões do próprio LocalRoll); depois tudo acontece neste PC e nenhuma foto é enviada. Se não o transferir não faz mal: a pesquisa de texto e tudo o resto funcionam como sempre, só não pode pesquisar por imagem. Pode ativar mais tarde em Definições › Pesquisa de texto.",
+  "search.picture_later": "Mais tarde",
+  "search.picture_enable": "Ativar e transferir",
+  "search.picture_downloading": "A transferir o modelo de imagens: {done} / {total}",
+  "search.picture_title": "Pesquisar pelo que as imagens mostram",
+  "search.picture_explain": "Escreva «praia» ou «cão» para encontrar as fotos e vídeos onde aparecem. Precisa uma vez de um modelo de reconhecimento (cerca de {size}); tudo acontece neste PC e nenhuma foto é enviada. Deixá-lo desligado não muda nada na pesquisa de texto nem no resto.",
+  "search.picture_not_downloaded": "O modelo ainda não foi transferido",
+  "search.picture_remove": "Remover o modelo deste PC (liberta {size})",
+  "search.picture_working": "A ver imagens: {done} / {total}",
+  "search.picture_done": "Todas as imagens vistas ({count})"
 }

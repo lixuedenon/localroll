@@ -548,5 +548,19 @@
   "search.step2": "Cạnh “Ngôn ngữ ưu tiên”, bấm “Thêm ngôn ngữ”.",
   "search.step3": "Tìm “Trung”, chọn “中文(简体，中国)”, rồi “Tiếp”.",
   "search.step4": "Giữ chọn “Nhận dạng ký tự quang học”, bỏ chọn “Đặt làm ngôn ngữ hiển thị” nếu không muốn, rồi bấm “Cài đặt”.",
-  "search.step5": "Cài xong thì quay lại đây và bấm “Kiểm tra lại”."
+  "search.step5": "Cài xong thì quay lại đây và bấm “Kiểm tra lại”.",
+  "search.group_text": "Chữ có “{q}”",
+  "search.group_picture": "Trông giống “{q}” (giống nhất trước)",
+  "search.picture_progress_note": "đã xem ảnh {done}/{total}",
+  "search.picture_download_failed": "Không tải được mô hình nhận dạng ảnh. Kiểm tra mạng rồi thử lại.",
+  "search.picture_offer": "Tìm theo nội dung ảnh? Khi bật, gõ các từ như “bãi biển”, “con chó”, “bánh sinh nhật” sẽ tìm được ảnh và video có những thứ đó — không cần gắn thẻ trước. Cần tải một mô hình nhận dạng (khoảng {size}, tải một lần từ trang phát hành của chính LocalRoll); sau đó mọi thứ chạy trên máy này, không tải ảnh lên đâu cả. Không tải cũng không sao: tìm chữ và mọi tính năng khác vẫn dùng bình thường, chỉ không tìm theo ảnh được. Có thể bật sau ở Cài đặt › Tìm chữ.",
+  "search.picture_later": "Để sau",
+  "search.picture_enable": "Bật và tải về",
+  "search.picture_downloading": "Đang tải mô hình nhận dạng ảnh: {done} / {total}",
+  "search.picture_title": "Tìm theo nội dung ảnh",
+  "search.picture_explain": "Gõ “bãi biển” hay “con chó” để tìm ảnh và video có những thứ đó. Cần tải mô hình nhận dạng một lần (khoảng {size}); mọi thứ chạy trên máy này, không tải ảnh lên. Để tắt cũng không ảnh hưởng tìm chữ hay tính năng khác.",
+  "search.picture_not_downloaded": "Chưa tải mô hình",
+  "search.picture_remove": "Xóa mô hình khỏi máy này (giải phóng {size})",
+  "search.picture_working": "Đang xem ảnh: {done} / {total}",
+  "search.picture_done": "Đã xem hết ảnh ({count})"
 }

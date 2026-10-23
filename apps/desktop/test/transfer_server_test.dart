@@ -942,6 +942,22 @@ void main() {
       expect((await dad.client.library()).total, 2); // no query: everything Dad may see
     });
 
+    test('search from a phone: text matches first, then what looks like it (closest first)', () async {
+      final mum = await pc.pairPhone(id: 'mum', name: 'Mum');
+      final a = await mum.upload('A', bytesOf(100), name: 'IMG_A.jpg');
+      final b = await mum.upload('B', bytesOf(100, 2), name: 'IMG_B.jpg');
+      final c = await mum.upload('C', bytesOf(100, 3), name: 'note.jpg');
+      final keyOf = (String rel) => TextIndex.mediaKey(pc.library.findByRel(rel)!);
+      final idx = pc.server.textIndex;
+      await idx.load();
+      idx.put(keyOf(c.path!), const TextEntry('beach party 7pm'));
+      pc.server.pictureSearch = (q) async => q == 'beach' ? [(keyOf(b.path!), 0.31), (keyOf(a.path!), 0.27)] : const [];
+      expect((await mum.client.library(query: 'beach')).items.map((i) => i.name), ['note.jpg', 'IMG_B.jpg', 'IMG_A.jpg']);
+      pc.server.pictureSearch = (q) async => throw StateError('model gone');
+      expect((await mum.client.library(query: 'beach')).items.map((i) => i.name), ['note.jpg']);
+      pc.server.pictureSearch = null;
+    });
+
     test('"everything I sent": only me / shared at once, and browsing phones are told', () async {
       final mum = await pc.pairPhone(id: 'mum', name: 'Mum');
       final dad = await pc.pairPhone(id: 'dad', name: 'Dad');

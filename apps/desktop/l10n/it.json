@@ -548,5 +548,19 @@
   "search.step2": "Accanto a «Lingue preferite», fai clic su «Aggiungi una lingua».",
   "search.step3": "Cerca «cinese», scegli «中文(简体，中国)» e poi «Avanti».",
   "search.step4": "Lascia selezionato «Riconoscimento ottico dei caratteri», togli «Imposta come lingua di visualizzazione» se non vuoi, poi «Installa».",
-  "search.step5": "Al termine torna qui e fai clic su «Ricontrolla»."
+  "search.step5": "Al termine torna qui e fai clic su «Ricontrolla».",
+  "search.group_text": "Il testo contiene «{q}»",
+  "search.group_picture": "Somiglia a «{q}» (più simili prima)",
+  "search.picture_progress_note": "immagini {done} di {total} viste",
+  "search.picture_download_failed": "Impossibile scaricare il modello per le immagini. Controlla la connessione e riprova.",
+  "search.picture_offer": "Cercare in base a ciò che mostrano le immagini? Parole come «spiaggia», «cane» o «torta di compleanno» troveranno foto e video che le mostrano, senza etichette. Serve un modello di riconoscimento (circa {size}, scaricato una volta dalla pagina delle versioni di LocalRoll); poi tutto avviene su questo PC e nessuna foto viene caricata. Se non lo scarichi va bene lo stesso: la ricerca di testo e tutto il resto funzionano come sempre, solo non puoi cercare per immagine. Puoi attivarla in seguito in Impostazioni › Ricerca testo.",
+  "search.picture_later": "Più tardi",
+  "search.picture_enable": "Attiva e scarica",
+  "search.picture_downloading": "Download del modello per le immagini: {done} / {total}",
+  "search.picture_title": "Cerca per contenuto delle immagini",
+  "search.picture_explain": "Scrivi «spiaggia» o «cane» per trovare foto e video che li mostrano. Serve una volta un modello di riconoscimento (circa {size}); tutto avviene su questo PC e nessuna foto viene caricata. Lasciarla spenta non cambia nulla per la ricerca di testo o il resto.",
+  "search.picture_not_downloaded": "Il modello non è ancora scaricato",
+  "search.picture_remove": "Rimuovi il modello da questo PC (libera {size})",
+  "search.picture_working": "Analisi immagini: {done} / {total}",
+  "search.picture_done": "Tutte le immagini analizzate ({count})"
 }

@@ -217,6 +217,13 @@ class AppSettings extends ChangeNotifier {
   /// Read the text in photos and files (on this PC only) so it can be searched.
   bool textSearch = true;
 
+  /// Search by what pictures show (needs the downloaded model; off until
+  /// the person turns it on).
+  bool pictureSearch = false;
+
+  /// The person was asked once about picture search (yes or "later").
+  bool pictureAsked = false;
+
   /// Library: arrivals up to this time were already looked at ("Just
   /// received" banner hidden for them).
   int recentSeenMs = 0;
@@ -258,6 +265,8 @@ class AppSettings extends ChangeNotifier {
     s.recentSeenMs = (j['recentSeenMs'] as num?)?.toInt() ?? 0;
     s.autoAccept = j['autoAccept'] != false;
     s.textSearch = j['textSearch'] != false;
+    s.pictureSearch = j['pictureSearch'] == true;
+    s.pictureAsked = j['pictureAsked'] == true;
     s.hiddenPeers.addAll((j['hiddenPeers'] as List? ?? const []).cast<String>());
     s.port = (j['port'] as num?)?.toInt() ?? LrProtocol.defaultPort;
     s.ffmpegPath = j['ffmpegPath'] as String?;
@@ -307,6 +316,8 @@ class AppSettings extends ChangeNotifier {
       'recentSeenMs': recentSeenMs,
       'autoAccept': autoAccept,
       'textSearch': textSearch,
+      'pictureSearch': pictureSearch,
+      'pictureAsked': pictureAsked,
       'port': port,
       'ffmpegPath': ffmpegPath,
       'language': language,

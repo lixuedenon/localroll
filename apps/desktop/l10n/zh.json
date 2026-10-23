@@ -548,5 +548,19 @@
   "search.step2": "在“首选语言”旁边点“添加语言”。",
   "search.step3": "搜索“中文”，选“中文(简体，中国)”，点“下一步”。",
   "search.step4": "保留勾选“光学字符识别”；不想把 Windows 界面改成中文的话，取消勾选“设置为我的 Windows 显示语言”；点“安装”。",
-  "search.step5": "装好后回到这里，点“重新检查”。"
+  "search.step5": "装好后回到这里，点“重新检查”。",
+  "search.group_text": "文字里有“{q}”",
+  "search.group_picture": "画面像“{q}”（越像越靠前）",
+  "search.picture_progress_note": "画面识别已处理 {done} / {total}",
+  "search.picture_download_failed": "画面识别模型没下载成功，请检查网络后重试。",
+  "search.picture_offer": "想按画面内容搜索吗？开启后，输入“海边”“狗”“生日蛋糕”这类词，就能找到画面里有这些东西的照片和视频，不用事先打标签。需要下载一个识别模型（约 {size}，只下载一次，来自 LocalRoll 自己的发布页），之后全部在这台电脑上计算，照片不会上传。不下载也没关系：文字搜索和其他所有功能都照常使用，只是不能按画面搜。以后也可以在“设置 › 文字搜索”里开启。",
+  "search.picture_later": "以后再说",
+  "search.picture_enable": "开启并下载",
+  "search.picture_downloading": "正在下载画面识别模型：{done} / {total}",
+  "search.picture_title": "按画面内容搜索",
+  "search.picture_explain": "输入“海边”“狗”这类词，找到画面里有这些东西的照片和视频。需要下载一次识别模型（约 {size}），全部在这台电脑上计算，照片不会上传。不开启也不影响文字搜索和其他任何功能。",
+  "search.picture_not_downloaded": "模型还没下载",
+  "search.picture_remove": "从这台电脑删除模型（腾出 {size}）",
+  "search.picture_working": "正在识别画面：{done} / {total}",
+  "search.picture_done": "画面全部识别完了（{count} 项）"
 }

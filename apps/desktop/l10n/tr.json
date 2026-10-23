@@ -548,5 +548,19 @@
   "search.step2": "“Tercih edilen diller”in yanında “Dil ekle”ye tıklayın.",
   "search.step3": "“Çince” arayın, “中文(简体，中国)”u seçin, “İleri”.",
   "search.step4": "“Optik karakter tanıma”yı işaretli bırakın, istemiyorsanız “Windows görüntüleme dilim olarak ayarla”nın işaretini kaldırın, sonra “Yükle”.",
-  "search.step5": "Yüklenince buraya dönüp “Yeniden denetle”ye tıklayın."
+  "search.step5": "Yüklenince buraya dönüp “Yeniden denetle”ye tıklayın.",
+  "search.group_text": "Metinde “{q}” var",
+  "search.group_picture": "“{q}” gibi görünen (en benzer önce)",
+  "search.picture_progress_note": "resimler {done} / {total} incelendi",
+  "search.picture_download_failed": "Resim modeli indirilemedi. İnternet bağlantısını denetleyip yeniden deneyin.",
+  "search.picture_offer": "Resimlerde görünene göre aramak ister misiniz? “Plaj”, “köpek” ya da “doğum günü pastası” gibi sözcükler bunların göründüğü fotoğraf ve videoları bulur — önceden etiket gerekmez. Bir tanıma modeli gerekir (yaklaşık {size}, LocalRoll'un kendi sürüm sayfasından bir kez indirilir); sonra her şey bu bilgisayarda olur, fotoğraf yüklenmez. İndirmezseniz sorun yok: metin araması ve diğer her şey her zamanki gibi çalışır, yalnızca resme göre arama olmaz. Daha sonra Ayarlar › Metin arama'dan açabilirsiniz.",
+  "search.picture_later": "Sonra",
+  "search.picture_enable": "Aç ve indir",
+  "search.picture_downloading": "Resim modeli indiriliyor: {done} / {total}",
+  "search.picture_title": "Resimde görünene göre ara",
+  "search.picture_explain": "“Plaj” ya da “köpek” yazarak bunların göründüğü fotoğraf ve videoları bulun. Bir kez tanıma modeli gerekir (yaklaşık {size}); her şey bu bilgisayarda olur, fotoğraf yüklenmez. Kapalı bırakmak metin aramasını ya da başka bir şeyi etkilemez.",
+  "search.picture_not_downloaded": "Model henüz indirilmedi",
+  "search.picture_remove": "Modeli bu bilgisayardan kaldır ({size} boşalır)",
+  "search.picture_working": "Resimlere bakılıyor: {done} / {total}",
+  "search.picture_done": "Tüm resimlere bakıldı ({count})"
 }
