@@ -163,6 +163,36 @@ class FfmpegService extends ChangeNotifier {
         ]));
   }
 
+  /// The picture (a video: its middle frame) as 224×224 RGB bytes for
+  /// picture search: shortest side to 224, centre cut, like the model was
+  /// trained. Null if it can't be read.
+  Future<Uint8List?> rgb224(String src, {bool video = false}) async {
+    if (!available) return null;
+    var seek = <String>[];
+    if (video) {
+      final d = (await probe(src)).durationSec;
+      seek = ['-ss', (d == null || d <= 0 ? 1.0 : d / 2).toStringAsFixed(2)];
+    }
+    return _limited(() async {
+      try {
+        final r = await Process.run(
+          ffmpeg!,
+          [
+            '-hide_banner', '-loglevel', 'error', ...seek, '-i', src, '-frames:v', '1',
+            '-vf', 'scale=224:224:force_original_aspect_ratio=increase:flags=bicubic,crop=224:224',
+            '-f', 'rawvideo', '-pix_fmt', 'rgb24', 'pipe:1',
+          ],
+          stdoutEncoding: null,
+        );
+        final out = r.stdout;
+        if (r.exitCode != 0 || out is! List<int> || out.length != 224 * 224 * 3) return null;
+        return Uint8List.fromList(out);
+      } catch (_) {
+        return null;
+      }
+    });
+  }
+
   /// Full-resolution JPEG used to display formats Flutter cannot decode (HEIC, DNG…).
   Future<File?> preview(MediaItem item) =>
       _cached(_cachePath(item, '_p'), item, (src, out) => [

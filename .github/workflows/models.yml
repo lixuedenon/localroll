@@ -27,7 +27,13 @@ jobs:
           pip install --index-url https://download.pytorch.org/whl/cpu torch==2.3.1
           pip install open_clip_torch==2.26.1 transformers==4.44.2 onnx==1.16.2 onnxruntime==1.15.1 sentencepiece numpy==1.26.4
       - name: Export
-        run: python scripts/models/export_clip.py out
+        run: |
+          set -o pipefail
+          python scripts/models/export_clip.py out 2>&1 | tee export.log || {
+            # The logs can't be read from outside: the end of it as annotations.
+            grep -v "^\s*$" export.log | tail -25 | while IFS= read -r l; do echo "::error::${l:0:600}"; done
+            exit 1
+          }
       - name: Report
         run: |
           echo "::notice::$(python -c "import json;r=json.load(open('out/report.json'));print(json.dumps({k:v for k,v in r.items() if k!='preprocess'}, ensure_ascii=False))")"
