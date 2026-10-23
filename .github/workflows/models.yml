@@ -31,7 +31,8 @@ jobs:
           set -o pipefail
           python scripts/models/export_clip.py out 2>&1 | tee export.log || {
             # The logs can't be read from outside: the end of it as annotations.
-            grep -v "^\s*$" export.log | tail -25 | while IFS= read -r l; do echo "::error::${l:0:600}"; done
+            # (GitHub keeps only 10 annotations per step: the last 9 real lines.)
+            grep -v -e "^\s*$" -e "Warning" -e "warnings.warn" export.log | tail -9 | while IFS= read -r l; do echo "::error::${l:0:900}"; done
             exit 1
           }
       - name: Report
