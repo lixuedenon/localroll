@@ -184,9 +184,10 @@ jobs:
           flutter test test/models_load_test.dart --reporter expanded 2>&1 | Tee-Object -FilePath models.log
           # The test prints this line only when the models really answered
           # (flutter's own exit code on Windows here is not reliable).
-          if (-not (Select-String -Path models.log -Pattern 'face models: ok' -Quiet)) {
-            # The last lines, a few joined per annotation (GitHub shows 10 per step).
-            $lines = @(Get-Content models.log | Where-Object { $_.Trim() -ne '' } | Select-Object -Last 72)
+          $steps = if (Test-Path models-steps.txt) { Get-Content models-steps.txt } else { @() }
+          if (-not ($steps | Select-String -Pattern 'face models: ok' -Quiet)) {
+            # The steps reached, then the last lines (a few per annotation).
+            $lines = @($steps) + @(Get-Content models.log | Where-Object { $_.Trim() -ne '' } | Select-Object -Last 56)
             for ($i = 0; $i -lt $lines.Count; $i += 8) {
               $chunk = ($lines[$i..([Math]::Min($i + 7, $lines.Count - 1))] -join ' || ')
               if ($chunk.Length -gt 3000) { $chunk = $chunk.Substring(0, 3000) }
