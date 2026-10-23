@@ -61,10 +61,10 @@ with torch.no_grad():
                       dynamic_axes={"ids": {0: "n"}, "embedding": {0: "n"}}, opset_version=17)
 
 for n in ["picture", "text"]:
-    # Only the matrix products (nearly all the weights): 8-bit convolutions
+    # Matrix products and the word table (nearly all the weights); 8-bit convolutions
     # have no CPU implementation in ONNX Runtime 1.15.
     quantize_dynamic(f"{OUT}/{n}_fp32.onnx", f"{OUT}/clip-{n}.onnx", weight_type=QuantType.QInt8,
-                     op_types_to_quantize=["MatMul", "Gemm"])
+                     op_types_to_quantize=["MatMul", "Gemm", "Gather"])
 
 # How close 8-bit is to the original, and how fast (this runner's CPU).
 report = {}
