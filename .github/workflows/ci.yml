@@ -181,7 +181,7 @@ jobs:
           # can't be opened failed silently on a real PC once).
           $release = (Resolve-Path "build/windows/x64/runner/Release").Path
           $env:PATH = "$release;$env:PATH"
-          flutter test test/models_load_test.dart 2>&1 | Tee-Object -FilePath models.log
+          flutter test test/models_load_test.dart --reporter expanded 2>&1 | Tee-Object -FilePath models.log
           # The test prints this line only when the models really answered
           # (flutter's own exit code on Windows here is not reliable).
           if (-not (Select-String -Path models.log -Pattern 'face models: ok' -Quiet)) {
