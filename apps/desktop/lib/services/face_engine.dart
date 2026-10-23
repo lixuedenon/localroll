@@ -139,8 +139,10 @@ void _worker(List<Object> args) {
     final opts = OrtSessionOptions()
       ..setIntraOpNumThreads(2)
       ..setInterOpNumThreads(1);
-    detect = OrtSession.fromFile(File(args[1] as String), opts);
-    reader = OrtSession.fromFile(File(args[2] as String), opts);
+    // From memory: the plugin's fromFile hands Windows the path in the
+    // wrong encoding ("File doesn't exist").
+    detect = OrtSession.fromBuffer(File(args[1] as String).readAsBytesSync(), opts);
+    reader = OrtSession.fromBuffer(File(args[2] as String).readAsBytesSync(), opts);
     outNames = detect.outputNames;
   } catch (e) {
     broken = 'models not loaded: $e';

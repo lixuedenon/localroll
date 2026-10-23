@@ -173,6 +173,17 @@ jobs:
             $sha = (Get-FileHash "$models/$name" -Algorithm SHA256).Hash.ToLower()
             if ($sha -ne $want[$name]) { Write-Output "::error::$name SHA-256 $sha does not match"; exit 1 }
           }
+      - name: Check the face models load
+        working-directory: apps/desktop
+        shell: pwsh
+        run: |
+          # Through onnxruntime.dll, the way the app runs them (a model that
+          # can't be opened failed silently on a real PC once).
+          $release = (Resolve-Path "build/windows/x64/runner/Release").Path
+          $env:PATH = "$release;$env:PATH"
+          $env:LR_MODELS_DIR = "$release\models"
+          flutter test test/models_load_test.dart
+          if ($LASTEXITCODE -ne 0) { Write-Output "::error::the face models did not load on Windows"; exit 1 }
       - name: Bundle ffmpeg
         shell: pwsh
         run: |

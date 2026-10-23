@@ -240,7 +240,9 @@ void _worker(List<Object> args) {
     opts = OrtSessionOptions()
       ..setIntraOpNumThreads(2)
       ..setInterOpNumThreads(1);
-    picture = OrtSession.fromFile(File(args[1] as String), opts);
+    // From memory: the plugin's fromFile hands Windows the path in the
+    // wrong encoding ("File doesn't exist").
+    picture = OrtSession.fromBuffer(File(args[1] as String).readAsBytesSync(), opts);
   } catch (e) {
     broken = 'model not loaded: $e';
   }
@@ -262,7 +264,7 @@ void _worker(List<Object> args) {
         session = pic;
         name = 'pixels';
       } else {
-        text ??= OrtSession.fromFile(File(args[2] as String), o);
+        text ??= OrtSession.fromBuffer(File(args[2] as String).readAsBytesSync(), o);
         final ids = data.asInt64List();
         input = OrtValueTensor.createTensorWithDataList(ids, [1, ids.length]);
         session = text!;
