@@ -2,7 +2,7 @@
 # Run by hand (Actions → "Picture search model"). Makes the picture-search
 # model files (scripts/models/export_clip.py) and copies them into this
 # repo's "deps" release, where the app downloads them from (checked by
-# SHA-256). Prints how close 8-bit is to the original and how fast it is.
+# SHA-256). Uses the ONNX Runtime version the app ships (1.15.1). Prints how close 8-bit is to the original and how fast it is.
 name: Picture search model
 
 on:
@@ -25,7 +25,7 @@ jobs:
       - name: Tools
         run: |
           pip install --index-url https://download.pytorch.org/whl/cpu torch==2.3.1
-          pip install open_clip_torch==2.26.1 transformers==4.44.2 onnx==1.16.2 onnxruntime==1.18.1 sentencepiece numpy==1.26.4
+          pip install open_clip_torch==2.26.1 transformers==4.44.2 onnx==1.16.2 onnxruntime==1.15.1 sentencepiece numpy==1.26.4
       - name: Export
         run: python scripts/models/export_clip.py out
       - name: Report
