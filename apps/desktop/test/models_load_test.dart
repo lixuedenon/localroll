@@ -10,7 +10,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:localroll_desktop/services/face_engine.dart';
 
 void main() {
-  final dir = Platform.environment['LR_MODELS_DIR'];
+  const defined = String.fromEnvironment('LR_MODELS_DIR');
+  final dir = defined.isNotEmpty ? defined : Platform.environment['LR_MODELS_DIR'];
   test('face models load and read a picture', () async {
     if (dir == null || dir.isEmpty) {
       markTestSkipped('only on the Windows build machine');
