@@ -1,6 +1,6 @@
 // apps/desktop/test/models_load_test.dart
 //
-// On the Windows build machine only (LR_MODELS_DIR set by CI): the bundled
+// On the Windows build machine only (after `flutter build windows`): the bundled
 // face models really load and answer through onnxruntime.dll, the way the
 // app runs them. Elsewhere: skipped.
 import 'dart:io';
@@ -10,8 +10,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:localroll_desktop/services/face_engine.dart';
 
 void main() {
-  const defined = String.fromEnvironment('LR_MODELS_DIR');
-  final dir = defined.isNotEmpty ? defined : Platform.environment['LR_MODELS_DIR'];
+  // The Windows build's own models folder (only there after a Windows build).
+  final built = Directory('build${Platform.pathSeparator}windows${Platform.pathSeparator}x64${Platform.pathSeparator}runner'
+      '${Platform.pathSeparator}Release${Platform.pathSeparator}models');
+  final dir = Platform.isWindows && built.existsSync() ? built.absolute.path : null;
+  // ignore: avoid_print
+  print('face models folder: ${dir ?? 'none (skipped)'}');
   test('face models load and read a picture', () async {
     if (dir == null || dir.isEmpty) {
       markTestSkipped('only on the Windows build machine');
