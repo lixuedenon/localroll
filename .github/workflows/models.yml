@@ -1,0 +1,43 @@
+# .github/workflows/models.yml
+# Run by hand (Actions → "Picture search model"). Makes the picture-search
+# model files (scripts/models/export_clip.py) and copies them into this
+# repo's "deps" release, where the app downloads them from (checked by
+# SHA-256). Prints how close 8-bit is to the original and how fast it is.
+name: Picture search model
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: models
+  cancel-in-progress: false
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Tools
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch==2.3.1
+          pip install open_clip_torch==2.26.1 transformers==4.44.2 onnx==1.16.2 onnxruntime==1.18.1 sentencepiece numpy==1.26.4
+      - name: Export
+        run: python scripts/models/export_clip.py out
+      - name: Report
+        run: |
+          echo "::notice::$(python -c "import json;r=json.load(open('out/report.json'));print(json.dumps({k:v for k,v in r.items() if k!='preprocess'}, ensure_ascii=False))")"
+      - name: Upload to the "deps" release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          gh release view deps -R "$GITHUB_REPOSITORY" >/dev/null 2>&1 || \
+            gh release create deps -R "$GITHUB_REPOSITORY" --title "Build dependencies (not an app release)" \
+              --notes "Pinned copies of tools used by CI. Not for testers." --prerelease --latest=false
+          gh release upload deps -R "$GITHUB_REPOSITORY" out/clip-picture.onnx out/clip-text.onnx out/clip-vocab.json \
+            out/clip-token-samples.json out/report.json --clobber
