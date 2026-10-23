@@ -369,7 +369,7 @@ class _LibraryPageState extends State<LibraryPage> {
     final members = counts.keys.toList();
     if (members.length < 2) return null;
     return PopupMenuButton<String>(
-      tooltip: tr('family.everyone'),
+      tooltip: tr('lib.senders_tip'),
       onSelected: (v) => setState(() {
         if (v.isEmpty) {
           _member = null;
@@ -385,11 +385,11 @@ class _LibraryPageState extends State<LibraryPage> {
             checked: _member != null && FamilyDirectory.keyOf(_member!) == FamilyDirectory.keyOf(m),
             child: Row(children: [
               if (pcs.contains(m)) const Padding(padding: EdgeInsets.only(right: 6), child: Icon(Icons.computer_rounded, size: 16)),
-              Text('$m · ${counts[m]}'),
+              Text('${senderLabel(m)} · ${counts[m]}'),
             ]),
           ),
       ],
-      child: _toolChip(Icons.groups_rounded, _member ?? tr('family.everyone')),
+      child: _toolChip(Icons.groups_rounded, _member == null ? tr('family.everyone') : senderLabel(_member!)),
     );
   }
 
@@ -462,18 +462,17 @@ class _LibraryPageState extends State<LibraryPage> {
                 : null,
             actions: [
               if (_selecting) ...[
-                if (chosenMedia.isNotEmpty) ...[
+                // Photos / videos and files alike.
                 IconButton(
                   tooltip: tr('lib.export'),
                   icon: const Icon(Icons.drive_file_move_rounded),
-                  onPressed: () => _export(chosenMedia),
+                  onPressed: () => _export(chosenMedia, _chosenFiles()),
                 ),
                 IconButton(
                   tooltip: tr('send.to_pc'),
                   icon: const Icon(Icons.send_rounded),
-                  onPressed: () => _sendToPc(chosenMedia),
+                  onPressed: () => _sendToPc(chosenMedia, _chosenFiles()),
                 ),
-                ],
                 if (_person != null)
                   IconButton(
                     tooltip: tr('people.not_this'),
@@ -490,11 +489,16 @@ class _LibraryPageState extends State<LibraryPage> {
                   tooltip: tr('convert.selected_tooltip'),
                   icon: const Icon(Icons.auto_fix_high),
                   onSelected: (p) {
+                    // Documents and other files have nothing to convert.
+                    final skipped = _files.where((f) => _selected.contains(fileKey(f.path))).length;
                     s.converter.enqueue(chosenMedia, p);
                     setState(_clearSelection);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(tr('convert.queued', {'preset': p.label}))),
-                    );
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text([
+                        tr('convert.queued', {'preset': p.label}),
+                        if (skipped > 0) tr('convert.skipped_files', {'count': skipped}),
+                      ].join('  ')),
+                    ));
                   },
                   itemBuilder: (_) => [
                     for (final p in ConvertPreset.values) PopupMenuItem(value: p, child: Text(tr('convert.to', {'preset': p.label}))),
@@ -779,7 +783,15 @@ class _LibraryPageState extends State<LibraryPage> {
       IndexState.noOcr => tr('search.no_ocr_note'),
       _ => '',
     };
-    return [textNote, picNote].where((t) => t.isNotEmpty).join('  ·  ');
+    final f = s.faceIndexer.progress.value;
+    final faceNote = s.settings.faces && (f.state == IndexState.working || f.state == IndexState.paused) && f.total > 0
+        ? tr('people.working', {'done': f.done, 'total': f.total})
+        : '';
+    final notes = [textNote, picNote, faceNote].where((t) => t.isNotEmpty).toList();
+    // Still reading: where to follow it.
+    final textReading = textNote.isNotEmpty && p.state != IndexState.off && p.state != IndexState.noOcr;
+    if (textReading || picNote.isNotEmpty || faceNote.isNotEmpty) notes.add(tr('search.progress_where'));
+    return notes.join('  ·  ');
   }
 
   /// Turn picture search on: download the model (once), then read.
@@ -921,22 +933,41 @@ class _LibraryPageState extends State<LibraryPage> {
   }
 
   /// Send originals (with their Live Photo videos) to another PC's library.
-  Future<void> _sendToPc(List<MediaItem> items) async {
-    if (items.isEmpty) return;
+  /// Selected received files and converted copies (full paths).
+  List<String> _chosenFiles() => [
+        for (final f in _files)
+          if (_selected.contains(fileKey(f.path))) f.path,
+        ..._copies.keys,
+      ];
+
+  /// Send originals (with their Live Photo videos) and files to another
+  /// PC or a phone.
+  Future<void> _sendToPc(List<MediaItem> items, [List<String> paths = const []]) async {
     final lib = widget.services.library;
-    final files = [for (final i in lib.withLive(items)) ?SendFile.fromLibrary(lib, i)];
+    final sep = Platform.pathSeparator;
+    final files = [
+      for (final i in lib.withLive(items)) ?SendFile.fromLibrary(lib, i),
+      for (final p in paths) ?SendFile.plain(File(p), p.split(sep).last),
+    ];
     if (files.isEmpty) return;
+    final count = items.length + paths.length;
     setState(_clearSelection);
     await sendToPc(context, widget.services, files,
-        items.length == 1 ? items.first.name : tr('send.n_items', {'count': items.length}));
+        count == 1 ? (items.isNotEmpty ? items.first.name : paths.first.split(sep).last) : tr('send.n_items', {'count': count}));
   }
 
-  /// Copy the originals into a folder of your choice.
-  Future<void> _export(List<MediaItem> items) async {
-    if (items.isEmpty) return;
+  /// Copy the originals (and files) into a folder of your choice.
+  Future<void> _export(List<MediaItem> items, [List<String> paths = const []]) async {
+    if (items.isEmpty && paths.isEmpty) return;
     final folder = await WinDialogs.pickFolder(title: tr('lib.export'));
     if (folder == null) return;
-    final n = await exportItems(widget.services.library, items, folder);
+    var n = await exportItems(widget.services.library, items, folder);
+    for (final p in paths) {
+      try {
+        await File(p).copy(LibraryIndex.uniquePath(folder, p.split(Platform.pathSeparator).last));
+        n++;
+      } catch (_) {}
+    }
     if (!mounted) return;
     setState(_clearSelection);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -1397,6 +1428,8 @@ class _LibraryPageState extends State<LibraryPage> {
           value: 'select',
           child: _menuRow(Icons.check_circle_outline_rounded, _selected.contains(key) ? tr('lib.unselect') : tr('lib.select')),
         ),
+        PopupMenuItem(value: 'export', child: _menuRow(Icons.drive_file_move_rounded, tr('lib.export'))),
+        PopupMenuItem(value: 'send', child: _menuRow(Icons.send_rounded, tr('send.to_pc'))),
         PopupMenuItem(value: 'rename', child: _menuRow(Icons.drive_file_rename_outline_rounded, tr('files.rename'))),
         PopupMenuItem(value: 'reveal', child: _menuRow(Icons.folder_open_rounded, tr('common.show_in_folder'))),
         const PopupMenuDivider(),
@@ -1407,6 +1440,10 @@ class _LibraryPageState extends State<LibraryPage> {
     switch (choice) {
       case 'open':
         await openReceivedFile(this.context, widget.services, f.path);
+      case 'export':
+        await _export(const [], _selected.contains(key) ? _chosenFiles() : [f.path]);
+      case 'send':
+        await _sendToPc(const [], _selected.contains(key) ? _chosenFiles() : [f.path]);
       case 'rename':
         if (await renameReceivedFile(this.context, widget.services, f.path) != null && mounted) {
           setState(() => _selected.remove(key));

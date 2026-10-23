@@ -260,10 +260,12 @@ class _MyLibraryPageState extends State<MyLibraryPage> {
                     }),
                     icon: Icon(_searching ? Icons.close_rounded : Icons.search_rounded),
                   ),
-                  IconButton(
-                    tooltip: tr('mylib.trash'),
+                  // "Recently deleted" (to get things back), said in words: a
+                  // bin alone reads as "delete".
+                  TextButton.icon(
                     onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const _TrashPage())),
-                    icon: const Icon(Icons.delete_outline_rounded),
+                    icon: const Icon(Icons.history_rounded, size: 20),
+                    label: Text(tr('mylib.trash')),
                   ),
                 ],
         ),
@@ -472,7 +474,7 @@ class _FilePhoto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => FutureBuilder<String?>(
-        future: _paths.putIfAbsent('${item.id}|${item.name}', () => MyLibrary.instance.pathOf(item)),
+        future: _paths.putIfAbsent('${item.id}|${item.name}|${item.deletedMs != null}', () => MyLibrary.instance.pathOf(item)),
         builder: (context, s) {
           final path = s.data;
           if (path == null) {
@@ -500,7 +502,7 @@ class _PdfTile extends StatelessWidget {
   /// is made again a little later.
   static final SoftCache<Uint8List> _cache = SoftCache(max: 300);
 
-  Future<Uint8List?> _load() => _cache.get('${item.id}|${item.name}', () async {
+  Future<Uint8List?> _load() => _cache.get('${item.id}|${item.name}|${item.deletedMs != null}', () async {
         final path = await MyLibrary.instance.pathOf(item);
         if (path == null) return null;
         return PdfPages.thumb(path);
@@ -545,7 +547,7 @@ class _DocTile extends StatelessWidget {
   /// again when the file just arrived and can't be read yet.
   static final SoftCache<Object> _cache = SoftCache(max: 300);
 
-  Future<Object?> _load() => _cache.get('${item.id}|${item.name}', () => retryWhileNull(() async {
+  Future<Object?> _load() => _cache.get('${item.id}|${item.name}|${item.deletedMs != null}', () => retryWhileNull(() async {
         final path = await MyLibrary.instance.pathOf(item);
         if (path == null) return null;
         final png = await FileOpener.thumbnail(path);
@@ -840,7 +842,11 @@ class _TrashPageState extends State<_TrashPage> {
               ),
               for (final i in list)
                 ListTile(
-                  leading: Icon(_FileTile.iconFor(i.name)),
+                  // What it looks like, to tell whether to keep it.
+                  leading: SizedBox.square(
+                    dimension: 52,
+                    child: ClipRRect(borderRadius: BorderRadius.circular(6), child: MyItemThumb(item: i)),
+                  ),
                   title: Text(i.name, overflow: TextOverflow.ellipsis),
                   subtitle: Text(tr('mylib.days_left', {
                     'days': (30 - (now - (i.deletedMs ?? now)) ~/ Duration.millisecondsPerDay).clamp(0, 30),

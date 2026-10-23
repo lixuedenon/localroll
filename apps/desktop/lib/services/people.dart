@@ -451,6 +451,17 @@ class PeopleIndex extends ChangeNotifier {
     try {
       final d = Directory(_dir);
       if (await d.exists()) await d.delete(recursive: true);
+      // The faces cut out for the People page go too.
+      final cache = Directory(library.cacheDir);
+      if (await cache.exists()) {
+        await for (final e in cache.list(followLinks: false)) {
+          if (e is File && e.path.endsWith('_f.jpg')) {
+            try {
+              await e.delete();
+            } catch (_) {}
+          }
+        }
+      }
     } catch (e) {
       DiagLog.log('people', 'people not removed: $e');
     }

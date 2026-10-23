@@ -136,7 +136,7 @@
   "family.member_name": "Name der Person",
   "family.folder_per_member": "Ein Ordner pro Person",
   "family.folder_per_member_hint": "Neue Fotos werden unter Name/Jahr/Monat gespeichert. Bereits empfangene bleiben, wo sie sind. Tipp: Mit eigenem Windows-Konto pro Person lässt sich auch festlegen, wer welchen Ordner öffnen darf.",
-  "family.everyone": "Alle",
+  "family.everyone": "Alle Absender",
   "lib.offline": "Der Mediathek-Ordner ist nicht erreichbar ({path}) – externe Festplatte abgezogen oder Ordner verschoben? Der Empfang ist pausiert, und nichts wird als gelöscht markiert. Es geht automatisch weiter, sobald der Ordner wieder da ist.",
   "lib.missing_ask": "{count} Dateien sind nicht mehr im Mediathek-Ordner (im Explorer gelöscht oder verschoben?). Wenn du sie absichtlich gelöscht hast, bestätige es – die Handys zeigen sie dann als nicht mehr gesichert an.",
   "lib.missing_rescan": "Erneut suchen",
@@ -205,7 +205,7 @@
   "send.job_title": "{what} → {name}",
   "send.choose_pc": "{what} senden an",
   "send.queued": "Wird an „{name}“ gesendet",
-  "send.to_pc": "An PC senden…",
+  "send.to_pc": "An Gerät senden…",
   "send.n_items": "{count} Objekte",
   "send.err_other": "Fehler ({code})",
   "send.err_peer_offline": "Der andere PC ist nicht erreichbar. Ist er an und LocalRoll geöffnet?",
@@ -595,5 +595,11 @@
   "people.everyone": "Alle Personen",
   "people.show_all_photos": "Alle Fotos zeigen",
   "people.not_this": "Nicht diese Person",
-  "people.removed": "{count} von dieser Person entfernt"
+  "people.removed": "{count} von dieser Person entfernt",
+  "pick.choose_dates": "Daten wählen…",
+  "pick.when_hint": "Ohne Daten: jederzeit. Zuerst wählen, welches Datum zählt.",
+  "lib.senders_tip": "Geräte, die etwas hierher gesendet haben; die Namen sind die auf den Handys eingestellten",
+  "lib.from_this_pc": "Dieser PC (direkt hineinkopiert)",
+  "search.progress_where": "Fortschritt von Text-, Bild- und Personenerkennung: Einstellungen › Textsuche",
+  "convert.skipped_files": "{count} Dokumente/Dateien müssen nicht umgewandelt werden, übersprungen."
 }

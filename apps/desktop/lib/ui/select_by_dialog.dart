@@ -36,6 +36,9 @@ class PickCandidate {
 Future<List<PickCandidate>?> showSelectByDialog(BuildContext context, List<PickCandidate> all) =>
     showDialog<List<PickCandidate>>(context: context, builder: (_) => _SelectByDialog(all: all));
 
+/// How a sender is shown: items copied in on this PC have none ("?").
+String senderLabel(String m) => m == '?' ? tr('lib.from_this_pc') : m;
+
 class _SelectByDialog extends StatefulWidget {
   const _SelectByDialog({required this.all});
 
@@ -117,21 +120,21 @@ class _SelectByDialogState extends State<_SelectByDialog> {
         child: SingleChildScrollView(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             label(tr('pick.when')),
+            // One line: which date counts, and the dates (none: any time).
             Wrap(spacing: 8, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
-              SegmentedButton<bool>(
-                showSelectedIcon: false,
-                segments: [
-                  ButtonSegment(value: false, label: Text(tr('library.sort_taken'))),
-                  ButtonSegment(value: true, label: Text(tr('library.sort_received'))),
+              DropdownButton<bool>(
+                value: _byReceived,
+                onChanged: (v) => setState(() => _byReceived = v ?? false),
+                items: [
+                  DropdownMenuItem(value: false, child: Text(tr('library.sort_taken'))),
+                  DropdownMenuItem(value: true, child: Text(tr('library.sort_received'))),
                 ],
-                selected: {_byReceived},
-                onSelectionChanged: (v) => setState(() => _byReceived = v.first),
               ),
               OutlinedButton.icon(
                 onPressed: _pickRange,
                 icon: const Icon(Icons.date_range_rounded, size: 18),
                 label: Text(_range == null
-                    ? tr('pick.any_time')
+                    ? tr('pick.choose_dates')
                     : '${loc.formatMediumDate(_range!.start)} – ${loc.formatMediumDate(_range!.end)}'),
               ),
               if (_range != null)
@@ -141,6 +144,11 @@ class _SelectByDialogState extends State<_SelectByDialog> {
                   icon: const Icon(Icons.close_rounded, size: 18),
                 ),
             ]),
+            if (_range == null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(tr('pick.when_hint'), style: theme.textTheme.bodySmall?.copyWith(color: LrColors.muted)),
+              ),
             if (_senders.isNotEmpty) ...[
               label(tr('pick.from')),
               DropdownButton<String?>(
@@ -148,7 +156,7 @@ class _SelectByDialogState extends State<_SelectByDialog> {
                 onChanged: (v) => setState(() => _from = v),
                 items: [
                   DropdownMenuItem(value: null, child: Text(tr('family.everyone'))),
-                  for (final s in _senders) DropdownMenuItem(value: s, child: Text(s)),
+                  for (final s in _senders) DropdownMenuItem(value: s, child: Text(senderLabel(s))),
                 ],
               ),
             ],

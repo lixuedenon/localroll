@@ -136,7 +136,7 @@
   "family.member_name": "사용자 이름",
   "family.folder_per_member": "사람마다 폴더 따로",
   "family.folder_per_member_hint": "새 사진은 이름/연도/월 폴더에 저장됩니다. 이미 받은 사진은 그대로입니다. 팁: 사람마다 Windows 계정이 있으면 각 폴더를 열 수 있는 사람을 제한할 수도 있습니다.",
-  "family.everyone": "모두",
+  "family.everyone": "모든 보낸 사람",
   "lib.offline": "라이브러리 폴더({path})에 접근할 수 없습니다. 외장 드라이브가 빠졌거나 폴더가 옮겨졌나요? 수신은 일시 중지되며 아무것도 삭제된 것으로 처리하지 않습니다. 폴더가 돌아오면 자동으로 다시 시작합니다.",
   "lib.missing_ask": "{count}개 파일이 라이브러리 폴더에 없습니다(탐색기에서 삭제하거나 옮겼나요?). 일부러 삭제했다면 확인하세요. 그러면 휴대폰에 백업이 없다고 표시됩니다.",
   "lib.missing_rescan": "다시 찾기",
@@ -205,7 +205,7 @@
   "send.job_title": "{what} → {name}",
   "send.choose_pc": "{what} 보낼 곳",
   "send.queued": "“{name}”(으)로 보내는 중",
-  "send.to_pc": "PC로 보내기…",
+  "send.to_pc": "기기로 보내기…",
   "send.n_items": "{count}개 항목",
   "send.err_other": "실패({code})",
   "send.err_peer_offline": "다른 PC에 연결할 수 없습니다. 켜져 있고 LocalRoll이 열려 있나요?",
@@ -595,5 +595,11 @@
   "people.everyone": "모든 인물",
   "people.show_all_photos": "모든 사진 보기",
   "people.not_this": "이 사람이 아님",
-  "people.removed": "이 사람에게서 {count}개를 뺐습니다"
+  "people.removed": "이 사람에게서 {count}개를 뺐습니다",
+  "pick.choose_dates": "날짜 선택…",
+  "pick.when_hint": "날짜를 고르지 않으면 전체 기간입니다. 먼저 어떤 날짜로 셀지 고르세요.",
+  "lib.senders_tip": "여기로 보낸 적 있는 기기. 이름은 휴대폰에서 정한 것입니다",
+  "lib.from_this_pc": "이 PC(직접 복사한 것)",
+  "search.progress_where": "글자·화면·인물 인식 진행 상황은 설정 › 글자 검색에서 볼 수 있습니다",
+  "convert.skipped_files": "문서/파일 {count}개는 변환할 필요가 없어 건너뛰었습니다."
 }

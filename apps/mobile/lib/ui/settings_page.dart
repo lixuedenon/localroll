@@ -125,7 +125,8 @@ class SettingsPage extends StatelessWidget {
                     ListTile(
                       leading: Icon(Platform.isIOS ? Icons.phone_iphone_rounded : Icons.phone_android_rounded),
                       title: Text(tr('phone.name_title')),
-                      subtitle: Text(settings.deviceName),
+                      subtitle: Text('${settings.deviceName}\n${tr('phone.name_what')}'),
+                      isThreeLine: true,
                       trailing: const Icon(Icons.edit_rounded, size: 20),
                       onTap: () => _editPhoneName(context),
                     ),
@@ -133,7 +134,8 @@ class SettingsPage extends StatelessWidget {
                     ListTile(
                       leading: const Icon(Icons.badge_rounded),
                       title: Text(tr('family.your_name')),
-                      subtitle: Text(settings.ownerName.isEmpty ? tr('family.your_name_hint') : settings.ownerName),
+                      subtitle: Text('${settings.ownerName.isEmpty ? tr('family.your_name_hint') : settings.ownerName}\n${tr('family.your_name_explain')}'),
+                      isThreeLine: true,
                       trailing: const Icon(Icons.edit_rounded, size: 20),
                       onTap: () => _editName(context),
                     ),

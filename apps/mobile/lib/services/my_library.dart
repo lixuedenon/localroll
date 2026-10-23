@@ -247,8 +247,11 @@ class MyLibrary extends ChangeNotifier {
     return path.substring(r.length + 1);
   }
 
-  /// Full path of a file item (null for photos / videos).
+  /// Full path of a file item (null for photos / videos); in "Recently
+  /// deleted": where it waits there.
   Future<String?> pathOf(MyItem i) async {
+    final t = i.trash;
+    if (i.deletedMs != null && t != null) return '${(await _trashDir()).path}/$t';
     final rel = i.rel;
     if (rel == null) return null;
     return '${(await root()).path}/$rel';
