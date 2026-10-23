@@ -185,8 +185,12 @@ jobs:
           # The test prints this line only when the models really answered
           # (flutter's own exit code on Windows here is not reliable).
           if (-not (Select-String -Path models.log -Pattern 'face models: ok' -Quiet)) {
-            Get-Content models.log | Where-Object { $_.Trim() -ne '' } | Select-Object -Last 9 | ForEach-Object {
-              $l = $_; if ($l.Length -gt 900) { $l = $l.Substring(0, 900) }; Write-Output "::error::$l"
+            # The last lines, a few joined per annotation (GitHub shows 10 per step).
+            $lines = @(Get-Content models.log | Where-Object { $_.Trim() -ne '' } | Select-Object -Last 72)
+            for ($i = 0; $i -lt $lines.Count; $i += 8) {
+              $chunk = ($lines[$i..([Math]::Min($i + 7, $lines.Count - 1))] -join ' || ')
+              if ($chunk.Length -gt 3000) { $chunk = $chunk.Substring(0, 3000) }
+              Write-Output "::error::$chunk"
             }
             exit 1
           }
