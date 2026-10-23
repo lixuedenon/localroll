@@ -24,8 +24,10 @@ jobs:
           python-version: '3.11'
       - name: Tools
         run: |
-          pip install --index-url https://download.pytorch.org/whl/cpu torch==2.3.1
-          pip install open_clip_torch==2.26.1 transformers==4.44.2 onnx==1.16.2 onnxruntime==1.15.1 sentencepiece numpy==1.26.4
+          # One install, everything pinned (torchvision unpinned pulls a newer torch).
+          pip install --extra-index-url https://download.pytorch.org/whl/cpu torch==2.3.1+cpu torchvision==0.18.1+cpu \
+            open_clip_torch==2.26.1 timm==1.0.9 transformers==4.44.2 onnx==1.16.2 onnxruntime==1.15.1 sentencepiece numpy==1.26.4
+          python -c "import torch, onnxruntime; print('torch', torch.__version__, 'ort', onnxruntime.__version__); assert torch.__version__.startswith('2.3.1')"
       - name: Export
         run: |
           set -o pipefail
