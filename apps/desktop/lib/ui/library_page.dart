@@ -125,7 +125,10 @@ class _LibraryPageState extends State<LibraryPage> {
       _who = null;
       if (s.settings.faces) {
         final split = s.server.people.split(v);
-        if (split != null) (_who, words) = split;
+        if (split != null) {
+          _who = split.$1;
+          words = split.$2;
+        }
       }
       _search = SearchQuery(words);
       _findPictures(words);
