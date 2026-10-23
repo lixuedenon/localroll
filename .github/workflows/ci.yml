@@ -157,6 +157,22 @@ jobs:
           if (-not (Test-Path $dll)) { Write-Output "::error::onnxruntime.dll missing from the build"; exit 1 }
           $sha = (Get-FileHash $dll -Algorithm SHA256).Hash.ToLower()
           if ($sha -ne "bb090dd258282c1d7f7a41a83492ba07bc4fe65d75259435587350e1fa66f1bc") { Write-Output "::error::onnxruntime.dll SHA-256 $sha is not the official 1.15.1"; exit 1 }
+      - name: Bundle the face models
+        shell: pwsh
+        run: |
+          # "People": YuNet (MIT) finds faces, SFace (Apache 2.0) reads them.
+          # Copied into the "deps" release by faces.yml; checked here.
+          $models = "apps/desktop/build/windows/x64/runner/Release/models"
+          New-Item -ItemType Directory -Force -Path $models | Out-Null
+          $want = @{
+            "face-detect.onnx" = "8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4";
+            "face-id.onnx" = "0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79"
+          }
+          foreach ($name in $want.Keys) {
+            Invoke-WebRequest -Uri "https://github.com/$env:GITHUB_REPOSITORY/releases/download/deps/$name" -OutFile "$models/$name"
+            $sha = (Get-FileHash "$models/$name" -Algorithm SHA256).Hash.ToLower()
+            if ($sha -ne $want[$name]) { Write-Output "::error::$name SHA-256 $sha does not match"; exit 1 }
+          }
       - name: Bundle ffmpeg
         shell: pwsh
         run: |

@@ -224,6 +224,10 @@ class AppSettings extends ChangeNotifier {
   /// The person was asked once about picture search (yes or "later").
   bool pictureAsked = false;
 
+  /// "People": faces in photos grouped by person, on this PC only (off
+  /// until the person turns it on).
+  bool faces = false;
+
   /// Library: arrivals up to this time were already looked at ("Just
   /// received" banner hidden for them).
   int recentSeenMs = 0;
@@ -267,6 +271,7 @@ class AppSettings extends ChangeNotifier {
     s.textSearch = j['textSearch'] != false;
     s.pictureSearch = j['pictureSearch'] == true;
     s.pictureAsked = j['pictureAsked'] == true;
+    s.faces = j['faces'] == true;
     s.hiddenPeers.addAll((j['hiddenPeers'] as List? ?? const []).cast<String>());
     s.port = (j['port'] as num?)?.toInt() ?? LrProtocol.defaultPort;
     s.ffmpegPath = j['ffmpegPath'] as String?;
@@ -318,6 +323,7 @@ class AppSettings extends ChangeNotifier {
       'textSearch': textSearch,
       'pictureSearch': pictureSearch,
       'pictureAsked': pictureAsked,
+      'faces': faces,
       'port': port,
       'ffmpegPath': ffmpegPath,
       'language': language,

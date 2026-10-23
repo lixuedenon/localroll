@@ -15,6 +15,7 @@ import '../services/library_index.dart';
 import '../services/receive_hub.dart';
 import '../services/library_trash.dart';
 import '../services/received_files.dart';
+import '../services/people.dart';
 import '../services/picture_index.dart';
 import '../services/text_index.dart';
 import '../services/settings.dart';
@@ -180,6 +181,9 @@ class TransferServer extends ChangeNotifier {
 
   /// What photos / videos look like (searching by picture).
   late final PictureIndex pictureIndex = PictureIndex(library);
+
+  /// Who is in which photo (named people can be searched by name).
+  late final PeopleIndex people = PeopleIndex(library);
 
   /// Items that look like a search (keys, best first); null: picture search
   /// is off or not here.
@@ -1064,8 +1068,16 @@ class TransferServer extends ChangeNotifier {
     final limit = (int.tryParse(q['limit'] ?? '') ?? 200).clamp(1, LrProtocol.libraryPageMax);
     final kind = q['kind'];
     final byReceived = q['sort'] == 'received';
-    // Search: the text found in photos / files, and their names.
-    final search = SearchQuery(q['q'] ?? '');
+    // Search: the text found in photos / files, their names, what the
+    // pictures show — and people by the names given to them ("Mum beach").
+    var words = q['q'] ?? '';
+    Set<String>? who;
+    if (settings.faces && words.trim().isNotEmpty) {
+      await people.load();
+      final split = people.split(words);
+      if (split != null) (who, words) = split;
+    }
+    final search = SearchQuery(words);
     // Searching: text matches first (newest first), then what looks like
     // it (most alike first).
     var pics = const <String, double>{};
@@ -1074,7 +1086,7 @@ class TransferServer extends ChangeNotifier {
       final find = pictureSearch;
       if (find != null) {
         try {
-          pics = {for (final (k, sc) in await find(q['q']!)) k: sc};
+          pics = {for (final (k, sc) in await find(words)) k: sc};
         } catch (e) {
           DiagLog.log('search', 'picture search failed: $e');
         }
@@ -1082,7 +1094,8 @@ class TransferServer extends ChangeNotifier {
     }
     int order(String key, String name, int time) =>
         search.isEmpty ? time : (textIndex.matches(key, name, search) ? 1000000000000000 + time : ((pics[key] ?? 0) * 1e12).round());
-    bool found(String key, String name) => search.isEmpty || textIndex.matches(key, name, search) || pics.containsKey(key);
+    bool found(String key, String name) =>
+        (who == null || who.contains(key)) && (search.isEmpty || textIndex.matches(key, name, search) || pics.containsKey(key));
     final family = settings.family;
     // Photos / videos, then received files (documents, scans…) — newest
     // taken (files: arrived) or newest arrival first.

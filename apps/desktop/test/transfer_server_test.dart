@@ -6,10 +6,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:localroll_core/localroll_core.dart';
 import 'package:localroll_desktop/server/transfer_server.dart';
+import 'package:localroll_desktop/services/face_engine.dart';
 import 'package:localroll_desktop/services/text_index.dart';
 
 import 'support/harness.dart';
@@ -956,6 +958,27 @@ void main() {
       pc.server.pictureSearch = (q) async => throw StateError('model gone');
       expect((await mum.client.library(query: 'beach')).items.map((i) => i.name), ['note.jpg']);
       pc.server.pictureSearch = null;
+    });
+
+    test('search from a phone by a person\'s name (People on); "only me" still hidden', () async {
+      final mum = await pc.pairPhone(id: 'mum', name: 'Mum');
+      final dad = await pc.pairPhone(id: 'dad', name: 'Dad');
+      final a = await mum.upload('A', bytesOf(100), name: 'IMG_A.jpg');
+      final b = await mum.upload('B', bytesOf(100, 2), name: 'IMG_B.jpg', private: true);
+      await mum.upload('C', bytesOf(100, 3), name: 'IMG_C.jpg');
+      final keyOf = (String rel) => TextIndex.mediaKey(pc.library.findByRel(rel)!);
+      final people = pc.server.people;
+      await people.load();
+      final v = Float32List(128)..[7] = 1;
+      people.put(keyOf(a.path!), [FaceRead(0.9, 0.1, 0.1, 0.2, 0.2, v)]);
+      people.put(keyOf(b.path!), [FaceRead(0.9, 0.1, 0.1, 0.2, 0.2, v)]);
+      people.rename(people.people().single.person.id, 'Grandma');
+      // Off: a name is just a word.
+      expect((await mum.client.library(query: 'grandma')).items, isEmpty);
+      pc.settings.faces = true;
+      expect((await mum.client.library(query: 'grandma')).items.map((i) => i.name), unorderedEquals(['IMG_A.jpg', 'IMG_B.jpg']));
+      expect((await dad.client.library(query: 'Grandma')).items.map((i) => i.name), ['IMG_A.jpg']);
+      pc.settings.faces = false;
     });
 
     test('"everything I sent": only me / shared at once, and browsing phones are told', () async {

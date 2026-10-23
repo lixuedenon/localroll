@@ -13,6 +13,8 @@ import 'services/library_index.dart';
 import 'services/network.dart';
 import 'services/pdf_text.dart';
 import 'services/peers.dart';
+import 'services/face_engine.dart';
+import 'services/face_indexer.dart';
 import 'services/picture_index.dart';
 import 'services/picture_model.dart';
 import 'services/phone_formats.dart';
@@ -85,6 +87,23 @@ class AppServices {
         sender.busy ||
         converter.pending > 0,
     rgb: ffmpeg.rgb224,
+  );
+
+  /// "People": faces found in photos, grouped by person (the models come
+  /// with LocalRoll; off until the person turns it on).
+  late final FaceIndexer faceIndexer = FaceIndexer(
+    library: library,
+    files: server.files,
+    people: server.people,
+    engine: FaceEngine(),
+    enabled: () => settings.faces,
+    // Also not while pictures are being read for picture search.
+    busy: () =>
+        hub.transfers.any((t) => t.state == TransferState.receiving || t.state == TransferState.verifying) ||
+        sender.busy ||
+        converter.pending > 0 ||
+        pictureIndexer.progress.value.state == IndexState.working,
+    picture: ffmpeg.facePicture,
   );
 
   /// A paired phone or PC is reachable right now: it said "I'm here" or
@@ -248,6 +267,7 @@ class AppServices {
     unawaited(server.trash.purgeOld());
     s.textIndexer.start();
     s.pictureIndexer.start();
+    s.faceIndexer.start();
     server.pictureSearch = s.pictureIndexer.find;
     Timer.periodic(const Duration(hours: 6), (_) => unawaited(server.trash.purgeOld()));
     return s;

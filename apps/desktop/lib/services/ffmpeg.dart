@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:localroll_core/localroll_core.dart';
 
+import 'face_math.dart';
 import 'library_index.dart';
 import 'settings.dart';
 
@@ -173,25 +174,87 @@ class FfmpegService extends ChangeNotifier {
       final d = (await probe(src)).durationSec;
       seek = ['-ss', (d == null || d <= 0 ? 1.0 : d / 2).toStringAsFixed(2)];
     }
-    return _limited(() async {
+    return _viaJpeg(src, video, (from) async {
+      final out = await _raw([
+        ...seek, '-i', from, '-frames:v', '1',
+        '-vf', 'scale=224:224:force_original_aspect_ratio=increase:flags=bicubic,crop=224:224',
+        '-f', 'rawvideo', '-pix_fmt', 'rgb24', 'pipe:1',
+      ]);
+      return out != null && out.length == 224 * 224 * 3 ? out : null;
+    });
+  }
+
+  /// A photo for finding faces: at most 1280 on its long side, RGB bytes
+  /// with its size. Null if it can't be read.
+  Future<(int, int, Uint8List)?> facePicture(String src) async {
+    if (!available) return null;
+    return _viaJpeg(src, false, (from) async {
+      final out = await _raw([
+        '-i', from, '-frames:v', '1',
+        '-vf', "scale='min(1280,iw)':'min(1280,ih)':force_original_aspect_ratio=decrease:flags=bicubic",
+        '-f', 'image2pipe', '-vcodec', 'ppm', '-pix_fmt', 'rgb24', 'pipe:1',
+      ]);
+      return out == null ? null : FaceMath.readPpm(out);
+    });
+  }
+
+  /// A face cut out of [src] (x, y, w, h: 0–1 of the picture), with some
+  /// room around it, 160×160, kept in the thumbnail cache.
+  Future<File?> faceCrop(String src, String key, double x, double y, double w, double h) {
+    final outPath = '${library.cacheDir}${Platform.pathSeparator}'
+        '${shortKey('face|$key|${x.toStringAsFixed(4)}|${y.toStringAsFixed(4)}')}_f.jpg';
+    return _inflight.putIfAbsent(outPath, () async {
       try {
-        final r = await Process.run(
-          ffmpeg!,
-          [
-            '-hide_banner', '-loglevel', 'error', ...seek, '-i', src, '-frames:v', '1',
-            '-vf', 'scale=224:224:force_original_aspect_ratio=increase:flags=bicubic,crop=224:224',
-            '-f', 'rawvideo', '-pix_fmt', 'rgb24', 'pipe:1',
-          ],
-          stdoutEncoding: null,
-        );
-        final out = r.stdout;
-        if (r.exitCode != 0 || out is! List<int> || out.length != 224 * 224 * 3) return null;
-        return Uint8List.fromList(out);
-      } catch (_) {
-        return null;
+        final out = File(outPath);
+        if (await out.exists() && await out.length() > 0) return out;
+        if (!available) return null;
+        // A square around the face, a quarter bigger, kept inside the picture.
+        const side = 1.25;
+        final cx = x + w / 2, cy = y + h / 2;
+        String f(double v) => v.toStringAsFixed(5);
+        final sq = 'min(min(iw,ih),max(iw*${f(w * side)},ih*${f(h * side)}))';
+        final crop = "crop='$sq':'$sq'"
+            ":'max(0,min(iw-ow,iw*${f(cx)}-ow/2))':'max(0,min(ih-oh,ih*${f(cy)}-oh/2))',scale=160:160";
+        final ok = await _viaJpeg(src, false, (from) async {
+          final r = await _limited(() => _run(['-i', from, '-frames:v', '1', '-vf', crop, '-q:v', '3', outPath]));
+          return r ? true : null;
+        });
+        return ok == true && await out.exists() ? out : null;
+      } finally {
+        _inflight.remove(outPath);
       }
     });
   }
+
+  /// Runs [read] on [src]; if that fails for a still picture (HEIC is a
+  /// tile grid ffmpeg stitches itself, and a filter on top of it fails),
+  /// once more on a plain JPEG made from it first.
+  Future<T?> _viaJpeg<T>(String src, bool video, Future<T?> Function(String from) read) async {
+    final direct = await read(src);
+    if (direct != null || video) return direct;
+    final tmp = File('${Directory.systemTemp.path}${Platform.pathSeparator}lr_${shortKey(src)}_${DateTime.now().microsecondsSinceEpoch}.jpg');
+    try {
+      final ok = await _limited(() => _run(['-i', src, '-frames:v', '1', '-q:v', '2', tmp.path]));
+      if (!ok || !await tmp.exists()) return null;
+      return await read(tmp.path);
+    } finally {
+      try {
+        if (await tmp.exists()) await tmp.delete();
+      } catch (_) {}
+    }
+  }
+
+  /// ffmpeg's output bytes (null on failure), at most [_maxParallel] at once.
+  Future<Uint8List?> _raw(List<String> args) => _limited(() async {
+        try {
+          final r = await Process.run(ffmpeg!, ['-hide_banner', '-loglevel', 'error', ...args], stdoutEncoding: null);
+          final out = r.stdout;
+          if (r.exitCode != 0 || out is! List<int> || out.isEmpty) return null;
+          return Uint8List.fromList(out);
+        } catch (_) {
+          return null;
+        }
+      });
 
   /// Full-resolution JPEG used to display formats Flutter cannot decode (HEIC, DNG…).
   Future<File?> preview(MediaItem item) =>

@@ -25,6 +25,7 @@ import 'files_view.dart';
 import 'format.dart';
 import 'library_recovery.dart';
 import 'media_thumb.dart';
+import 'people_page.dart';
 import 'select_by_dialog.dart';
 import 'send_page.dart';
 import 'theme.dart';
@@ -103,13 +104,33 @@ class _LibraryPageState extends State<LibraryPage> {
   final TextEditingController _searchCtrl = TextEditingController();
   SearchQuery _search = SearchQuery('');
 
+  /// A search naming people ("Mum beach"): their photos (the rest of the
+  /// words search as usual). Null: no name in it.
+  Set<String>? _who;
+
+  /// Showing one person's photos (from the People page).
+  int? _person;
+  Set<String> _personItems = const {};
+
+  bool get _searching => _searchCtrl.text.trim().isNotEmpty;
+
+  /// In the person / named people being shown (always true when none).
+  bool _keepKey(String key) => (_person == null || _personItems.contains(key)) && (_who == null || _who!.contains(key));
+
   void _onSearch(String v) {
-    unawaited(widget.services.server.textIndex.load());
+    final s = widget.services;
+    unawaited(s.server.textIndex.load());
     setState(() {
-      _search = SearchQuery(v);
-      _findPictures(v);
+      var words = v;
+      _who = null;
+      if (s.settings.faces) {
+        final split = s.server.people.split(v);
+        if (split != null) (_who, words) = split;
+      }
+      _search = SearchQuery(words);
+      _findPictures(words);
       // Results come from everything: photos, videos and files.
-      if (!_search.isEmpty && _filesTab) _filter = _Filter.all;
+      if (_searching && _filesTab) _filter = _Filter.all;
       _clearSelection();
     });
   }
@@ -117,9 +138,11 @@ class _LibraryPageState extends State<LibraryPage> {
   /// Search by picture: items that look like the words (key → how alike).
   Map<String, double> _picHits = const {};
   Timer? _picSoon;
+  String _picQuery = '';
 
   void _findPictures(String q) {
     _picSoon?.cancel();
+    _picQuery = q;
     final ix = widget.services.pictureIndexer;
     if (q.trim().isEmpty || !ix.ready) {
       _picHits = const {};
@@ -127,7 +150,7 @@ class _LibraryPageState extends State<LibraryPage> {
     }
     _picSoon = Timer(const Duration(milliseconds: 400), () async {
       final hits = await ix.find(q);
-      if (!mounted || _searchCtrl.text != q) return;
+      if (!mounted || _picQuery != q) return;
       setState(() => _picHits = {for (final (k, sc) in hits) k: sc});
     });
   }
@@ -171,6 +194,7 @@ class _LibraryPageState extends State<LibraryPage> {
     widget.services.server.files.changes.addListener(_reloadFilesSoon);
     AppNav.instance.libraryRecent.addListener(_showRecent);
     if (AppNav.instance.takeLibraryRecent()) _byReceived = true;
+    unawaited(widget.services.server.people.load());
     unawaited(_loadFiles());
     unawaited(_watchFiles());
   }
@@ -260,6 +284,10 @@ class _LibraryPageState extends State<LibraryPage> {
             f,
       ];
     }
+    if (_person != null || _who != null) {
+      final files = widget.services.server.files;
+      list = [for (final f in list) if (_keepKey(TextIndex.fileKey(files.relOf(f.path) ?? f.path, f.size))) f];
+    }
     return list;
   }
 
@@ -308,6 +336,7 @@ class _LibraryPageState extends State<LibraryPage> {
           if (idx.matches(TextIndex.mediaKey(i), i.name, _search) || _picHits.containsKey(TextIndex.mediaKey(i))) i,
       ];
     }
+    if (_person != null || _who != null) list = [for (final i in list) if (_keepKey(TextIndex.mediaKey(i))) i];
     if (_byReceived) list.sort((a, b) => b.receivedMs.compareTo(a.receivedMs));
     return list;
   }
@@ -378,9 +407,12 @@ class _LibraryPageState extends State<LibraryPage> {
   Widget build(BuildContext context) {
     final s = widget.services;
     return ListenableBuilder(
-      listenable: Listenable.merge([s.library, s.settings, s.server.textIndex, s.pictureModel]),
+      listenable: Listenable.merge([s.library, s.settings, s.server.textIndex, s.pictureModel, s.server.people]),
       builder: (context, _) {
         final family = s.settings.family;
+        // The person shown was merged away / People switched off.
+        if (_person != null && (!s.settings.faces || s.server.people.person(_person!) == null)) _person = null;
+        _personItems = _person == null ? const {} : s.server.people.itemsOf(_person!);
         final all = s.library.items;
         final items = _visible(all, family);
         // What is no longer shown is no longer selected.
@@ -439,6 +471,12 @@ class _LibraryPageState extends State<LibraryPage> {
                   onPressed: () => _sendToPc(chosenMedia),
                 ),
                 ],
+                if (_person != null)
+                  IconButton(
+                    tooltip: tr('people.not_this'),
+                    icon: const Icon(Icons.person_remove_rounded),
+                    onPressed: () => _notThisPerson(items),
+                  ),
                 IconButton(
                   tooltip: '${tr('lib.delete')} (Delete)',
                   icon: const Icon(Icons.delete_outline_rounded),
@@ -506,6 +544,11 @@ class _LibraryPageState extends State<LibraryPage> {
                     icon: const Icon(Icons.checklist_rounded),
                   ),
                 IconButton(
+                  tooltip: tr('people.title'),
+                  onPressed: _openPeople,
+                  icon: const Icon(Icons.face_rounded),
+                ),
+                IconButton(
                   tooltip: tr('trash.title'),
                   onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => TrashPage(services: s))),
                   icon: const Icon(Icons.restore_from_trash_rounded),
@@ -527,7 +570,7 @@ class _LibraryPageState extends State<LibraryPage> {
                     // Documents / other files from PCs: a file list, not photos.
                     ? FilesView(services: s, document: _filter == _Filter.docs)
                     : items.isEmpty && _visibleFiles().isEmpty
-                        ? (_search.isEmpty ? _empty(context) : _noResults(context))
+                        ? (_searching ? _noResults(context) : _empty(context))
                         : _grid(context, items),
               ),
             ],
@@ -751,6 +794,49 @@ class _LibraryPageState extends State<LibraryPage> {
     }
   }
 
+  /// People: pick a person to see only their photos.
+  Future<void> _openPeople() async {
+    final id = await Navigator.of(context).push<int>(MaterialPageRoute(builder: (_) => PeoplePage(services: widget.services)));
+    if (id == null || !mounted) return;
+    setState(() {
+      _person = id;
+      _filter = _Filter.all;
+      _member = null;
+      _onlyRecent = false;
+      _clearSelection();
+    });
+    if (_scroll.hasClients) _scroll.jumpTo(0);
+  }
+
+  Widget _personBanner(BuildContext context, Widget Function(IconData, Color, String, List<Widget>) banner, int found) {
+    final s = widget.services;
+    final p = s.server.people.person(_person!)!;
+    return banner(Icons.face_rounded, LrColors.verified, tr('people.showing', {'name': personLabel(p), 'count': found}), [
+      TextButton(onPressed: () => namePerson(context, s, p.id), child: Text(tr(p.name == null ? 'people.name' : 'people.rename'))),
+      const SizedBox(width: 4),
+      TextButton(onPressed: _openPeople, child: Text(tr('people.everyone'))),
+      const SizedBox(width: 4),
+      TextButton(onPressed: () => setState(() => _person = null), child: Text(tr('people.show_all_photos'))),
+    ]);
+  }
+
+  /// "Not this person": the selected photos come off the person shown.
+  void _notThisPerson(List<MediaItem> items) {
+    final s = widget.services;
+    final id = _person;
+    if (id == null) return;
+    final keys = <String>[
+      for (final i in items)
+        if (_selected.contains(i.relPath)) TextIndex.mediaKey(i),
+      for (final f in _files)
+        if (_selected.contains(fileKey(f.path))) TextIndex.fileKey(s.server.files.relOf(f.path) ?? f.path, f.size),
+    ];
+    if (keys.isEmpty) return;
+    s.server.people.notThisPerson(id, keys);
+    setState(_clearSelection);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('people.removed', {'count': keys.length}))));
+  }
+
   Widget _noResults(BuildContext context) => Center(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Icon(Icons.search_off_rounded, size: 56, color: Theme.of(context).colorScheme.outline),
@@ -797,7 +883,8 @@ class _LibraryPageState extends State<LibraryPage> {
       if (dl != null)
         banner(Icons.downloading_rounded, LrColors.verified,
             tr('search.picture_downloading', {'done': formatBytes(dl.$1), 'total': formatBytes(dl.$2)}), const []),
-      if (!_search.isEmpty)
+      if (_person != null) _personBanner(context, banner, found),
+      if (_searching)
         banner(Icons.search_rounded, Theme.of(context).colorScheme.primary,
             [tr('search.results', {'q': _searchCtrl.text.trim(), 'count': found}), _searchNote()].where((t) => t.isNotEmpty).join('  ·  '), [
           TextButton(onPressed: _clearSearch, child: Text(tr('search.clear'))),

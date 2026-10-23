@@ -8,6 +8,7 @@ import 'package:localroll_core/localroll_core.dart';
 import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/picture_model.dart';
+import 'people_page.dart' show clearPeople, peopleState;
 import '../services/text_indexer.dart';
 import '../services/windows_ocr.dart';
 import 'format.dart';
@@ -34,6 +35,7 @@ class _SearchSettingsState extends State<SearchSettings> {
   void initState() {
     super.initState();
     if (_ix.languages.value == null && WindowsOcr.supported) unawaited(_ix.checkLanguages());
+    unawaited(widget.services.server.people.load());
   }
 
   Future<void> _recheck() async {
@@ -75,7 +77,7 @@ class _SearchSettingsState extends State<SearchSettings> {
     final s = widget.services;
     final theme = Theme.of(context);
     return ListenableBuilder(
-      listenable: Listenable.merge([s.settings, _ix.progress, _ix.languages, s.pictureModel, s.pictureIndexer.progress]),
+      listenable: Listenable.merge([s.settings, _ix.progress, _ix.languages, s.pictureModel, s.pictureIndexer.progress, s.faceIndexer.progress, s.server.people]),
       builder: (context, _) {
         final on = s.settings.textSearch;
         final p = _ix.progress.value;
@@ -112,6 +114,8 @@ class _SearchSettingsState extends State<SearchSettings> {
           ],
           const Divider(height: 1),
           ..._pictures(theme),
+          const Divider(height: 1),
+          ..._people(theme),
         ]);
       },
     );
@@ -180,6 +184,50 @@ class _SearchSettingsState extends State<SearchSettings> {
               onPressed: model.remove,
               icon: const Icon(Icons.delete_outline_rounded, size: 18),
               label: Text(tr('search.picture_remove', {'size': size})),
+            ),
+          ),
+        ),
+    ];
+  }
+
+  /// People: what it does, that it stays on this PC, and how to take every
+  /// face off again.
+  List<Widget> _people(ThemeData theme) {
+    final s = widget.services;
+    final on = s.settings.faces;
+    final p = s.faceIndexer.progress.value;
+    return [
+      SwitchListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+        secondary: const Icon(Icons.face_retouching_natural_rounded),
+        value: on,
+        onChanged: (v) async {
+          await s.settings.update((x) => x.faces = v);
+          s.faceIndexer.wake();
+        },
+        title: Text(tr('people.settings_title')),
+        subtitle: Text(tr('people.explain')),
+      ),
+      if (on) ...[
+        const Divider(height: 1),
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+          leading: Icon(
+            p.state == IndexState.done ? Icons.check_circle_outline_rounded : Icons.hourglass_top_rounded,
+            color: p.state == IndexState.done ? LrColors.verified : LrColors.muted,
+          ),
+          title: Text(peopleState(p)),
+        ),
+      ],
+      if (s.server.people.photosRead > 0)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton.icon(
+              onPressed: () => clearPeople(context, s),
+              icon: const Icon(Icons.delete_outline_rounded, size: 18),
+              label: Text(tr('people.clear')),
             ),
           ),
         ),
