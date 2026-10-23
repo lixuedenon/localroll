@@ -610,5 +610,14 @@
   "send.queued_held": "{name} đang ngoại tuyến: sẽ gửi ngay khi trực tuyến.",
   "send.held": "Đang chờ {name} trực tuyến",
   "send.gone_n": "{count} bị xóa hoặc thay đổi trong lúc chờ",
-  "send.err_expired": "Đã chờ 7 ngày mà thiết bị không trực tuyến: đã hủy"
+  "send.err_expired": "Đã chờ 7 ngày mà thiết bị không trực tuyến: đã hủy",
+  "library.title_tip": "Live Photos và video: tự phát khi để chuột lên trên.\nChọn: để chuột lên ảnh, góc trên bên trái hiện vòng tròn — bấm vào. Ctrl+bấm để thêm từng ảnh, Shift+bấm để chọn một dải, hoặc kéo chuột thành khung.",
+  "lib.senders_tip_long": "Lọc theo người gửi: chỉ xem những gì một thiết bị đã gửi.\nTên là tên đặt trên điện thoại hoặc máy tính; các điện thoại của một người đặt cùng tên được tính là một người. “Máy này” là những gì chép thẳng vào thư viện.",
+  "library.sort_tip": "Thứ tự:\nTheo ngày chụp — ngày chụp ảnh, ảnh cũ ở dưới;\nTheo ngày nhận — lúc đến máy này, mới nhất ở trên; tiện để tìm “cái vừa tới”.",
+  "library.sort_received_short": "Theo ngày nhận",
+  "people.tip": "Người: gom ảnh của cùng một người; có thể đặt tên, gộp, đặt tên rồi tìm theo tên trong ô tìm kiếm. Mọi thứ tính trên máy này, không tải lên.",
+  "pick.tip": "Chọn theo điều kiện: theo thời gian, người gửi, loại và kích thước, chọn một lúc thật nhiều, rồi cùng xuất, gửi, chuyển đổi hoặc xóa.",
+  "library.size_tip": "Cỡ ảnh thu nhỏ: nhỏ / vừa / lớn — nhỏ xem được nhiều, lớn nhìn rõ hơn.",
+  "trash.tip": "Đã xóa gần đây: ảnh và tệp đã xóa nằm đây 30 ngày — có thể khôi phục hoặc xóa vĩnh viễn.",
+  "library.open_folder_tip": "Mở thư mục thư viện: trong File Explorer; ảnh nằm trong thư mục theo năm / tháng."
 }

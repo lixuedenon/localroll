@@ -610,5 +610,14 @@
   "send.queued_held": "{name} no está conectado: se enviará en cuanto se conecte.",
   "send.held": "Esperando a que {name} se conecte",
   "send.gone_n": "{count} borrados o cambiados mientras esperaba",
-  "send.err_expired": "Esperó 7 días sin que el dispositivo se conectara: cancelado"
+  "send.err_expired": "Esperó 7 días sin que el dispositivo se conectara: cancelado",
+  "library.title_tip": "Live Photos y vídeos: se reproducen al dejar el ratón encima.\nSeleccionar: deja el ratón sobre una foto y aparece un círculo arriba a la izquierda; haz clic. Ctrl+clic añade de una en una, Mayús+clic elige un tramo, o arrastra un recuadro con el ratón.",
+  "lib.senders_tip_long": "Filtrar por remitente: ver solo lo que envió un dispositivo.\nLos nombres son los puestos en los teléfonos o PC; los teléfonos de una persona con el mismo nombre cuentan como una. «Este PC» es lo copiado directamente en la biblioteca.",
+  "library.sort_tip": "Orden:\nPor fecha de captura: el día en que se hizo la foto, las antiguas más abajo;\nPor fecha de recepción: cuándo llegó a este PC, lo más nuevo primero; útil para «lo que acaba de llegar».",
+  "library.sort_received_short": "Por recepción",
+  "people.tip": "Personas: las fotos de una misma persona juntas; puedes ponerles nombre y unirlas, y con nombre buscarlas en el buscador. Todo en este PC, nada se sube.",
+  "pick.tip": "Seleccionar por condiciones: por fecha, remitente, tipo y tamaño, elige un lote grande de una vez y luego expórtalo, envíalo, conviértelo o bórralo junto.",
+  "library.size_tip": "Tamaño de miniaturas: pequeño / mediano / grande; pequeño muestra más a la vez, grande se ve mejor.",
+  "trash.tip": "Eliminado recientemente: las fotos y archivos borrados quedan aquí 30 días; puedes restaurarlos o borrarlos para siempre.",
+  "library.open_folder_tip": "Abrir la carpeta de la biblioteca: en el Explorador; las fotos están en carpetas por año / mes."
 }

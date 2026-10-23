@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart' show FilePicker, PlatformFile;
 import 'package:flutter/material.dart';
+import 'package:localroll_core/localroll_core.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../l10n/l10n.dart';
@@ -28,6 +29,7 @@ import 'device_strip.dart';
 import 'incoming.dart';
 import 'lost_notice.dart';
 import 'my_library_page.dart';
+import 'phone_photo_viewer.dart';
 import 'document_scan_page.dart';
 import 'send_files_page.dart';
 import 'pc_library_page.dart';
@@ -898,8 +900,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('LocalRoll'),
-                Row(
+                Text(widget.settings.simpleMode ? 'LocalRoll' : tr('photos.title')),
+                // Simple mode picks photos to send: where to stays in sight.
+                if (widget.settings.simpleMode || _sendTarget != null) Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (desktop != null) ...[
@@ -927,6 +930,20 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               ],
             ),
             actions: [
+              if (!widget.settings.simpleMode && _selected.isEmpty)
+                TextButton(onPressed: () => setState(() => _choosing = true), child: Text(tr('photos.select'))),
+              if (!widget.settings.simpleMode)
+                PopupMenuButton<String>(
+                  onSelected: (v) {
+                    if (v == 'deleted') _whereDeleted();
+                  },
+                  itemBuilder: (_) => [
+                    PopupMenuItem(
+                      value: 'deleted',
+                      child: ListTile(leading: const Icon(Icons.history_rounded), title: Text(tr('photos.find_deleted'))),
+                    ),
+                  ],
+                ),
               IconButton(
                 tooltip: tr('settings.title'),
                 onPressed: _openSettings,
@@ -946,9 +963,61 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             ],
           ),
           body: _body(context, visible, sent),
-          bottomNavigationBar: _assets.isEmpty ? null : _bottomBar(context, visible, sent),
+          // Browsing: the bar comes when something is chosen.
+          bottomNavigationBar: _assets.isEmpty || (!widget.settings.simpleMode && _selected.isEmpty && !_choosing)
+              ? null
+              : _bottomBar(context, visible, sent),
         );
   }
+
+  /// "Select" pressed on the Photos tab: a tap chooses until done.
+  bool _choosing = false;
+
+  /// Full screen: swipe through; send or delete from there.
+  Future<void> _view(List<AssetEntity> visible, int index, Set<String> sent) async {
+    final r = await Navigator.of(context).push<(PhotoAction, String)>(MaterialPageRoute(
+      builder: (_) => PhonePhotoViewer(assets: visible, start: index, sent: sent),
+    ));
+    if (r == null || !mounted) return;
+    final (action, id) = r;
+    if (action == PhotoAction.send) {
+      setState(() => _selected
+        ..clear()
+        ..add(id));
+      await _send();
+    } else {
+      await _deletePhotos([id]);
+    }
+  }
+
+  /// Deletes from this phone's photos (the system asks first); they go to
+  /// the system's own "Recently Deleted".
+  Future<void> _deletePhotos(List<String> ids) async {
+    if (ids.isEmpty) return;
+    try {
+      final gone = (await removeFromPhone(ids)).ids;
+      if (!mounted || gone.isEmpty) return;
+      setState(() {
+        _selected.removeAll(gone);
+        if (_selected.isEmpty) _choosing = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('photos.deleted_hint', {'count': gone.length}))));
+      await _reload();
+    } catch (e) {
+      DiagLog.error('photos', e);
+    }
+  }
+
+  /// Where deleted photos are, in the system's own app.
+  void _whereDeleted() => showDialog<void>(
+        context: context,
+        builder: (c) => AlertDialog(
+          icon: const Icon(Icons.history_rounded),
+          title: Text(tr('photos.find_deleted')),
+          content: Text(tr(Platform.isIOS ? 'photos.find_deleted_ios' : 'photos.find_deleted_android')),
+          actions: [FilledButton(onPressed: () => Navigator.pop(c), child: Text(tr('common.ok')))],
+        ),
+      );
 
   /// Home: the devices (one row), what still needs backing up, three
   /// actions, notices when there are any, and what arrived lately.
@@ -1039,7 +1108,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   Expanded(
                     child: SizedBox(
                       height: 50,
+                      // The height is set here: no padding of its own on top
+                      // (iPhone's Chinese font is taller and was cut off).
                       child: FilledButton(
+                        style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 12)),
                         onPressed: d == null ? _openConnect : _backupNow,
                         child: Text(tr(d == null ? 'home.connect_pc' : 'home.backup_now'),
                             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
@@ -1051,6 +1123,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     SizedBox(
                       height: 50,
                       child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 14)),
                         onPressed: () async {
                           await _backupAll();
                           unawaited(_refreshHome());
@@ -1328,7 +1401,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   crossAxisSpacing: 2,
                 ),
                 itemCount: visible.length,
-                itemBuilder: (context, i) => _tile(visible[i], sent.contains(visible[i].id)),
+                itemBuilder: (context, i) => _tile(visible[i], sent.contains(visible[i].id), () => _view(visible, i, sent)),
               ),
             ),
           ),
@@ -1337,11 +1410,19 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     );
   }
 
-  Widget _tile(AssetEntity a, bool alreadySent) {
+  Widget _tile(AssetEntity a, bool alreadySent, VoidCallback open) {
     final selected = _selected.contains(a.id);
     final scheme = Theme.of(context).colorScheme;
+    void toggle() => setState(() {
+          selected ? _selected.remove(a.id) : _selected.add(a.id);
+          if (_selected.isEmpty) _choosing = false;
+        });
+    // Tap: look at it (choosing: pick it). Long press: start choosing.
+    // Simple mode picks photos to send: a tap picks.
+    final picking = widget.settings.simpleMode || _choosing || _selected.isNotEmpty;
     return GestureDetector(
-      onTap: () => setState(() => selected ? _selected.remove(a.id) : _selected.add(a.id)),
+      onTap: picking ? toggle : open,
+      onLongPress: toggle,
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -1384,8 +1465,19 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
         child: Row(
           children: [
-            if (_selected.isNotEmpty)
-              TextButton(onPressed: () => setState(_selected.clear), child: Text(tr('home.clear_selection'))),
+            if (_selected.isNotEmpty || _choosing)
+              TextButton(
+                  onPressed: () => setState(() {
+                        _selected.clear();
+                        _choosing = false;
+                      }),
+                  child: Text(tr('home.clear_selection'))),
+            if (!widget.settings.simpleMode && _selected.isNotEmpty)
+              IconButton(
+                tooltip: tr('photos.delete'),
+                onPressed: () => _deletePhotos(_selected.toList()),
+                icon: const Icon(Icons.delete_outline_rounded),
+              ),
             // Family group: already-sent items can be made "only me" / shared.
             if (_selected.any(sent.contains))
               PopupMenuButton<bool>(
@@ -1407,13 +1499,24 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             FilledButton.icon(
               onPressed: _selected.isEmpty ? null : _send,
               icon: const Icon(Icons.send),
-              label: Text(_selected.isEmpty ? tr('home.pick') : tr('home.send_n', {'count': _selected.length})),
+              label: Text(_selected.isEmpty
+                  ? tr('home.pick')
+                  : _targetName() == null
+                      ? tr('home.send_n', {'count': _selected.length})
+                      : tr('photos.send_n_to', {'count': _selected.length, 'name': _targetName()!})),
             ),
           ],
         ),
       ),
     );
   }
+
+  /// Where "Send" goes now (the PC, or the phone chosen for this visit).
+  String? _targetName() => switch (_sendTarget) {
+        PairedDesktop p => p.name,
+        NearbyPhone p => p.name,
+        _ => widget.settings.current?.name,
+      };
 
   static String _duration(Duration d) {
     final m = d.inMinutes;

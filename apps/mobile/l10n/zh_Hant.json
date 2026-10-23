@@ -492,5 +492,16 @@
   "mylib.purge_everything": "全部徹底刪除",
   "mylib.trash_hint_more": "保留 30 天，之後徹底刪除。點一下查看，長按可以多選。存進系統相簿的照片刪除後，在系統「照片」的「最近刪除」裡。",
   "pclib.pc_reading": "電腦還在辨識照片，結果可能不全。",
-  "pclib.slow": "{pc} 沒有及時回應。請確認電腦開著、LocalRoll 也開著，然後重試。"
+  "pclib.slow": "{pc} 沒有及時回應。請確認電腦開著、LocalRoll 也開著，然後重試。",
+  "photos.title": "手機相簿",
+  "photos.select": "選擇",
+  "photos.find_deleted": "在系統相簿裡找回刪除的照片",
+  "photos.find_deleted_ios": "在這裡刪除的照片會進 iPhone 內建的「照片」App：相簿 › 最近刪除。在那裡保留 30 天，可以從那裡復原。",
+  "photos.find_deleted_android": "在這裡刪除的照片會進手機內建「相簿 / 圖庫」App 的回收桶（一般叫「最近刪除」或「垃圾桶」）。在那裡保留約 30 天，可以從那裡復原。較舊的手機（Android 10 及以前）會直接刪除。",
+  "photos.deleted_hint": "已刪除 {count} 項，已移到系統相簿的「最近刪除」，30 天內可以在「照片」App 裡復原。",
+  "photos.send_n_to": "傳送 {count} 項到 {name}",
+  "photos.backed_up": "已備份到電腦",
+  "photos.not_backed_up": "還沒備份",
+  "photos.send": "傳送到…",
+  "photos.delete": "刪除"
 }

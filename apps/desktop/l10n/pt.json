@@ -610,5 +610,14 @@
   "send.queued_held": "{name} está offline: será enviado assim que ficar online.",
   "send.held": "À espera de que {name} fique online",
   "send.gone_n": "{count} apagados ou alterados durante a espera",
-  "send.err_expired": "Esperou 7 dias e o dispositivo não ficou online: cancelado"
+  "send.err_expired": "Esperou 7 dias e o dispositivo não ficou online: cancelado",
+  "library.title_tip": "Live Photos e vídeos: reproduzem quando o rato fica por cima.\nSelecionar: rato numa foto, aparece um círculo em cima à esquerda — clique. Ctrl+clique adiciona uma a uma, Shift+clique escolhe um intervalo, ou arraste uma caixa com o rato.",
+  "lib.senders_tip_long": "Filtrar por remetente: ver só o que um dispositivo enviou.\nOs nomes são os definidos nos telemóveis ou PCs; os telemóveis da mesma pessoa com o mesmo nome contam como uma. «Este PC» é o que foi copiado diretamente para a biblioteca.",
+  "library.sort_tip": "Ordem:\nPor data de captura — o dia em que a foto foi tirada, as antigas mais abaixo;\nPor data de receção — quando chegou a este PC, as mais recentes primeiro; útil para «o que acabou de chegar».",
+  "library.sort_received_short": "Por receção",
+  "people.tip": "Pessoas: as fotos da mesma pessoa juntas; dê-lhes nome e junte-as, e com nome pesquise-as na caixa de pesquisa. Tudo neste PC, nada é enviado.",
+  "pick.tip": "Selecionar por condições: por data, remetente, tipo e tamanho, escolha um lote grande de uma vez e depois exporte, envie, converta ou apague-o junto.",
+  "library.size_tip": "Tamanho das miniaturas: pequeno / médio / grande; pequeno mostra mais de uma vez, grande vê-se melhor.",
+  "trash.tip": "Apagados recentemente: as fotos e ficheiros apagados ficam aqui 30 dias; pode restaurá-los ou apagá-los de vez.",
+  "library.open_folder_tip": "Abrir a pasta da biblioteca: no Explorador; as fotos estão em pastas por ano / mês."
 }

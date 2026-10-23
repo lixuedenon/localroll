@@ -610,5 +610,14 @@
   "send.queued_held": "{name} offline: akan dikirim begitu online.",
   "send.held": "Menunggu {name} online",
   "send.gone_n": "{count} dihapus atau diubah selama menunggu",
-  "send.err_expired": "Sudah menunggu 7 hari, perangkat tak pernah online: dibatalkan"
+  "send.err_expired": "Sudah menunggu 7 hari, perangkat tak pernah online: dibatalkan",
+  "library.title_tip": "Live Photos dan video: diputar saat mouse diam di atasnya.\nMemilih: arahkan mouse ke foto, muncul lingkaran di kiri atas — klik. Ctrl+klik menambah satu per satu, Shift+klik memilih satu rentang, atau seret kotak dengan mouse.",
+  "lib.senders_tip_long": "Saring menurut pengirim: tampilkan hanya kiriman satu perangkat.\nNama sesuai yang diatur di ponsel atau PC; ponsel satu orang dengan nama sama dihitung satu orang. “PC ini” = yang disalin langsung ke pustaka.",
+  "library.sort_tip": "Urutan:\nMenurut tanggal diambil — hari foto diambil, yang lama di bawah;\nMenurut tanggal diterima — saat sampai di PC ini, terbaru di atas; cocok untuk “yang baru masuk”.",
+  "library.sort_received_short": "Diterima",
+  "people.tip": "Orang: foto orang yang sama dikumpulkan; beri nama dan gabungkan, lalu cari dengan nama di kotak pencarian. Semua dihitung di PC ini, tidak diunggah.",
+  "pick.tip": "Pilih menurut syarat: menurut waktu, pengirim, jenis, dan ukuran, pilih banyak sekaligus, lalu ekspor, kirim, konversi, atau hapus bersama.",
+  "library.size_tip": "Ukuran gambar kecil: kecil / sedang / besar — kecil memuat lebih banyak, besar lebih jelas.",
+  "trash.tip": "Baru dihapus: foto dan file yang dihapus disimpan di sini 30 hari — pulihkan atau hapus permanen.",
+  "library.open_folder_tip": "Buka folder pustaka: di File Explorer; foto ada di folder per tahun / bulan."
 }

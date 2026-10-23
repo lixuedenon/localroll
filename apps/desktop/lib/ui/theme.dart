@@ -119,6 +119,7 @@ ThemeData buildLrTheme() {
       behavior: SnackBarBehavior.floating,
     ),
     tooltipTheme: TooltipThemeData(
+      waitDuration: const Duration(milliseconds: 250),
       decoration: BoxDecoration(color: LrColors.raised, borderRadius: BorderRadius.circular(6)),
       textStyle: const TextStyle(color: LrColors.text, fontSize: 12),
     ),

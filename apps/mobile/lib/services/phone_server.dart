@@ -327,7 +327,9 @@ class PhoneServer extends ChangeNotifier {
     final body = SessionRequest.fromJson(await _readJson(req));
     final from = body.from ?? DeviceInfo(id: sender, name: '?', platform: 'unknown');
     if (from.id != sender) return _json(req.response, 400, {'error': 'bad_request'});
-    final key = verified ? 'pc|$sender' : '$sender|$ip';
+    // Asked once per transfer: a new transfer from the same PC asks again.
+    final t = body.transfer;
+    final key = (verified ? 'pc|$sender' : '$sender|$ip') + (t == null || t.isEmpty ? '' : '|${t.length > 40 ? t.substring(0, 40) : t}');
     // Not enough room on this phone: say so now (before anyone is asked),
     // not half-way through filling it up.
     var need = 0;

@@ -492,5 +492,16 @@
   "mylib.purge_everything": "Delete all for good",
   "mylib.trash_hint_more": "Kept 30 days, then deleted for good. Tap to look, long-press to pick several. Photos kept in the Photos app go to its own “Recently Deleted” when deleted.",
   "pclib.pc_reading": "The PC is still reading its photos; not everything may be found yet.",
-  "pclib.slow": "{pc} didn't answer in time. Check it's on with LocalRoll open, then try again."
+  "pclib.slow": "{pc} didn't answer in time. Check it's on with LocalRoll open, then try again.",
+  "photos.title": "Phone photos",
+  "photos.select": "Select",
+  "photos.find_deleted": "Get deleted photos back",
+  "photos.find_deleted_ios": "Photos deleted here go to the iPhone's Photos app: Albums › Recently Deleted. They stay there 30 days and can be restored from there.",
+  "photos.find_deleted_android": "Photos deleted here go to the trash of your phone's gallery app (usually “Recently deleted” or “Trash”). They stay there about 30 days and can be restored from there. On older phones (Android 10 and before) they are deleted at once.",
+  "photos.deleted_hint": "{count} deleted — in the system album's “Recently Deleted” for 30 days, restorable from the Photos app.",
+  "photos.send_n_to": "Send {count} to {name}",
+  "photos.backed_up": "Backed up to the PC",
+  "photos.not_backed_up": "Not backed up yet",
+  "photos.send": "Send to…",
+  "photos.delete": "Delete"
 }

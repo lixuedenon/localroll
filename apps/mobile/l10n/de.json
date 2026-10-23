@@ -492,5 +492,16 @@
   "mylib.purge_everything": "Alle endgültig löschen",
   "mylib.trash_hint_more": "30 Tage aufbewahrt, dann endgültig gelöscht. Antippen zum Ansehen, lange drücken für mehrere. Fotos aus der Fotos-App landen beim Löschen in deren „Zuletzt gelöscht“.",
   "pclib.pc_reading": "Der PC liest die Fotos noch – es kann noch nicht alles gefunden werden.",
-  "pclib.slow": "{pc} hat nicht rechtzeitig geantwortet. Prüfen, ob er an ist und LocalRoll läuft, dann erneut versuchen."
+  "pclib.slow": "{pc} hat nicht rechtzeitig geantwortet. Prüfen, ob er an ist und LocalRoll läuft, dann erneut versuchen.",
+  "photos.title": "Handy-Fotos",
+  "photos.select": "Auswählen",
+  "photos.find_deleted": "Gelöschte Fotos zurückholen",
+  "photos.find_deleted_ios": "Hier gelöschte Fotos landen in der Fotos-App des iPhone: Alben › Zuletzt gelöscht. Dort 30 Tage, von dort wiederherstellbar.",
+  "photos.find_deleted_android": "Hier gelöschte Fotos landen im Papierkorb der Galerie-App (meist „Zuletzt gelöscht“ oder „Papierkorb“). Dort etwa 30 Tage, von dort wiederherstellbar. Auf älteren Handys (Android 10 und älter) werden sie sofort gelöscht.",
+  "photos.deleted_hint": "{count} gelöscht – 30 Tage in „Zuletzt gelöscht“ der Fotos-App, dort wiederherstellbar.",
+  "photos.send_n_to": "{count} an {name} senden",
+  "photos.backed_up": "Auf dem PC gesichert",
+  "photos.not_backed_up": "Noch nicht gesichert",
+  "photos.send": "Senden an…",
+  "photos.delete": "Löschen"
 }

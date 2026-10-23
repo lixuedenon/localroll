@@ -1038,7 +1038,7 @@ class PeerSender extends ChangeNotifier {
         final offers = [for (var i = 0; i < batch.length; i++) batch[i].offer('f${start + i}')];
         // A phone asks its owner first (and wants to know who is sending).
         final request = j.toPhone
-            ? SessionRequest(files: offers, from: settings.deviceInfo, batch: files.length)
+            ? SessionRequest(files: offers, from: settings.deviceInfo, batch: files.length, transfer: j.id)
             : SessionRequest(files: offers);
         final session = await _retry(() => c!.createSession(request));
         for (var i = 0; i < batch.length; i++) {

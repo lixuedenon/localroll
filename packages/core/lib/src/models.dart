@@ -1,4 +1,6 @@
 // packages/core/lib/src/models.dart
+import 'dart:math';
+
 import 'media_kind.dart';
 import 'protocol.dart';
 
@@ -211,8 +213,15 @@ class OfferResult {
       );
 }
 
+/// A fresh id for one transfer (see [SessionRequest.transfer]).
+String randomTransferId() {
+  final r = Random.secure();
+  const abc = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  return String.fromCharCodes([for (var i = 0; i < 16; i++) abc.codeUnitAt(r.nextInt(abc.length))]);
+}
+
 class SessionRequest {
-  const SessionRequest({required this.files, this.owner, this.from, this.batch});
+  const SessionRequest({required this.files, this.owner, this.from, this.batch, this.transfer});
 
   final List<FileOffer> files;
 
@@ -226,11 +235,16 @@ class SessionRequest {
   /// How many items this whole transfer has (each file is its own session).
   final int? batch;
 
+  /// The same for every session of one transfer: a phone asks "Accept?"
+  /// once per transfer (a new one asks again).
+  final String? transfer;
+
   Map<String, dynamic> toJson() => {
         'files': files.map((f) => f.toJson()).toList(),
         if (owner != null) 'owner': owner,
         if (from != null) 'from': from!.toJson(),
         if (batch != null) 'batch': batch,
+        if (transfer != null) 'transfer': transfer,
       };
 
   factory SessionRequest.fromJson(Map<String, dynamic> j) => SessionRequest(
@@ -240,6 +254,7 @@ class SessionRequest {
         owner: j['owner'] as String?,
         from: j['from'] is Map<String, dynamic> ? DeviceInfo.fromJson(j['from'] as Map<String, dynamic>) : null,
         batch: (j['batch'] as num?)?.toInt(),
+        transfer: j['transfer'] as String?,
       );
 }
 

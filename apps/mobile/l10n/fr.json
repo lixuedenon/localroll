@@ -492,5 +492,16 @@
   "mylib.purge_everything": "Tout supprimer définitivement",
   "mylib.trash_hint_more": "Gardés 30 jours puis supprimés. Touchez pour voir, appui long pour en choisir plusieurs. Les photos gardées dans l'app Photos vont dans son propre « Supprimés récemment ».",
   "pclib.pc_reading": "Le PC lit encore ses photos ; tout n'est peut-être pas encore trouvé.",
-  "pclib.slow": "{pc} n'a pas répondu à temps. Vérifiez qu'il est allumé avec LocalRoll ouvert, puis réessayez."
+  "pclib.slow": "{pc} n'a pas répondu à temps. Vérifiez qu'il est allumé avec LocalRoll ouvert, puis réessayez.",
+  "photos.title": "Photos du téléphone",
+  "photos.select": "Sélectionner",
+  "photos.find_deleted": "Récupérer les photos supprimées",
+  "photos.find_deleted_ios": "Les photos supprimées ici vont dans l'app Photos de l'iPhone : Albums › Supprimés récemment. Elles y restent 30 jours, restaurables depuis là.",
+  "photos.find_deleted_android": "Les photos supprimées ici vont dans la corbeille de la galerie du téléphone (souvent « Supprimés récemment » ou « Corbeille »). Elles y restent environ 30 jours, restaurables depuis là. Sur les anciens téléphones (Android 10 et avant), elles sont supprimées tout de suite.",
+  "photos.deleted_hint": "{count} supprimées — 30 jours dans « Supprimés récemment » de l'album système, restaurables depuis l'app Photos.",
+  "photos.send_n_to": "Envoyer {count} à {name}",
+  "photos.backed_up": "Sauvegardée sur le PC",
+  "photos.not_backed_up": "Pas encore sauvegardée",
+  "photos.send": "Envoyer à…",
+  "photos.delete": "Supprimer"
 }

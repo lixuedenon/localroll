@@ -492,5 +492,16 @@
   "mylib.purge_everything": "Xóa vĩnh viễn tất cả",
   "mylib.trash_hint_more": "Giữ 30 ngày rồi xóa vĩnh viễn. Chạm để xem, nhấn giữ để chọn nhiều. Ảnh lưu trong ứng dụng Ảnh khi xóa sẽ vào “Đã xóa gần đây” của ứng dụng đó.",
   "pclib.pc_reading": "Máy tính vẫn đang đọc ảnh; có thể chưa tìm thấy hết.",
-  "pclib.slow": "{pc} không phản hồi kịp. Kiểm tra máy đang bật và LocalRoll đang mở, rồi thử lại."
+  "pclib.slow": "{pc} không phản hồi kịp. Kiểm tra máy đang bật và LocalRoll đang mở, rồi thử lại.",
+  "photos.title": "Album điện thoại",
+  "photos.select": "Chọn",
+  "photos.find_deleted": "Lấy lại ảnh đã xóa",
+  "photos.find_deleted_ios": "Ảnh xóa ở đây vào ứng dụng Ảnh của iPhone: Album › Đã xóa gần đây. Ở đó 30 ngày và có thể khôi phục từ đó.",
+  "photos.find_deleted_android": "Ảnh xóa ở đây vào thùng rác của ứng dụng Thư viện (thường là “Đã xóa gần đây” hoặc “Thùng rác”). Ở đó khoảng 30 ngày và có thể khôi phục. Trên điện thoại cũ (Android 10 trở xuống) sẽ bị xóa ngay.",
+  "photos.deleted_hint": "Đã xóa {count} — nằm trong “Đã xóa gần đây” của album hệ thống 30 ngày, khôi phục được từ ứng dụng Ảnh.",
+  "photos.send_n_to": "Gửi {count} tới {name}",
+  "photos.backed_up": "Đã sao lưu lên máy tính",
+  "photos.not_backed_up": "Chưa sao lưu",
+  "photos.send": "Gửi tới…",
+  "photos.delete": "Xóa"
 }

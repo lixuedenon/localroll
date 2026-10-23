@@ -610,5 +610,14 @@
   "send.queued_held": "{name} è offline: verrà inviato appena torna online.",
   "send.held": "In attesa che {name} torni online",
   "send.gone_n": "{count} eliminati o modificati nell'attesa",
-  "send.err_expired": "Attesi 7 giorni senza che il dispositivo tornasse online: annullato"
+  "send.err_expired": "Attesi 7 giorni senza che il dispositivo tornasse online: annullato",
+  "library.title_tip": "Live Photo e video: partono quando il mouse resta sopra.\nSelezionare: mouse su una foto, in alto a sinistra compare un cerchio: cliccalo. Ctrl+clic aggiunge una alla volta, Maiusc+clic sceglie una serie, oppure trascina un riquadro col mouse.",
+  "lib.senders_tip_long": "Filtra per mittente: mostra solo ciò che ha inviato un dispositivo.\nI nomi sono quelli impostati su telefoni o PC; i telefoni di una persona con lo stesso nome contano come una. «Questo PC» sono i file copiati direttamente nella libreria.",
+  "library.sort_tip": "Ordine:\nPer data di scatto — il giorno della foto, le vecchie più in basso;\nPer data di ricezione — quando è arrivata su questo PC, le più recenti prima; utile per «ciò che è appena arrivato».",
+  "library.sort_received_short": "Per ricezione",
+  "people.tip": "Persone: le foto della stessa persona insieme; puoi darle un nome e unirle, e con il nome cercarle nella ricerca. Tutto su questo PC, nulla viene caricato.",
+  "pick.tip": "Seleziona per condizioni: per data, mittente, tipo e dimensione, scegli un grosso gruppo in una volta, poi esportalo, invialo, convertilo o eliminalo insieme.",
+  "library.size_tip": "Dimensione miniature: piccola / media / grande; piccola ne mostra di più, grande si vede meglio.",
+  "trash.tip": "Eliminati di recente: foto e file eliminati restano qui 30 giorni; puoi ripristinarli o eliminarli definitivamente.",
+  "library.open_folder_tip": "Apri la cartella della libreria: in Esplora file; le foto sono in cartelle per anno / mese."
 }

@@ -182,8 +182,13 @@ jobs:
           $release = (Resolve-Path "build/windows/x64/runner/Release").Path
           $env:PATH = "$release;$env:PATH"
           $env:LR_MODELS_DIR = "$release\models"
-          flutter test test/models_load_test.dart
-          if ($LASTEXITCODE -ne 0) { Write-Output "::error::the face models did not load on Windows"; exit 1 }
+          flutter test test/models_load_test.dart 2>&1 | Tee-Object -FilePath models.log
+          if ($LASTEXITCODE -ne 0) {
+            Get-Content models.log | Where-Object { $_.Trim() -ne '' } | Select-Object -Last 9 | ForEach-Object {
+              $l = $_; if ($l.Length -gt 900) { $l = $l.Substring(0, 900) }; Write-Output "::error::$l"
+            }
+            exit 1
+          }
       - name: Bundle ffmpeg
         shell: pwsh
         run: |

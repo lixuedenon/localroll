@@ -610,5 +610,14 @@
   "send.queued_held": "{name} est hors ligne : l'envoi partira dès son retour.",
   "send.held": "En attente du retour de {name}",
   "send.gone_n": "{count} supprimés ou modifiés pendant l'attente",
-  "send.err_expired": "7 jours d'attente sans retour de l'appareil : annulé"
+  "send.err_expired": "7 jours d'attente sans retour de l'appareil : annulé",
+  "library.title_tip": "Live Photos et vidéos : elles se lisent quand la souris reste dessus.\nSélectionner : souris sur une photo, un cercle apparaît en haut à gauche, cliquez-le. Ctrl+clic ajoute une à une, Maj+clic prend une série, ou tracez un cadre à la souris.",
+  "lib.senders_tip_long": "Filtrer par expéditeur : ne voir que ce qu'un appareil a envoyé.\nLes noms sont ceux réglés sur les téléphones ou PC ; les téléphones d'une même personne avec le même nom comptent pour une. « Ce PC » : ce qui a été copié directement dans la bibliothèque.",
+  "library.sort_tip": "Tri :\nPar date de prise de vue — le jour de la photo, les anciennes plus bas ;\nPar date de réception — quand elle est arrivée sur ce PC, la plus récente d'abord ; pratique pour « ce qui vient d'arriver ».",
+  "library.sort_received_short": "Par réception",
+  "people.tip": "Personnes : les photos d'une même personne regroupées ; nommez-les, fusionnez-les, et une fois nommées, cherchez-les par leur nom. Tout se fait sur ce PC, rien n'est envoyé.",
+  "pick.tip": "Sélectionner par critères : par date, expéditeur, type et taille, choisissez un grand lot d'un coup, puis exportez, envoyez, convertissez ou supprimez-le ensemble.",
+  "library.size_tip": "Taille des vignettes : petite / moyenne / grande ; petite en montre plus, grande se voit mieux.",
+  "trash.tip": "Supprimés récemment : les photos et fichiers supprimés restent ici 30 jours ; restaurez-les ou supprimez-les définitivement.",
+  "library.open_folder_tip": "Ouvrir le dossier de la bibliothèque : dans l'Explorateur ; les photos sont rangées par année / mois."
 }

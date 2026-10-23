@@ -492,5 +492,16 @@
   "mylib.purge_everything": "すべて完全に削除",
   "mylib.trash_hint_more": "30 日間保管され、その後完全に削除されます。タップで表示、長押しで複数選択。写真アプリに保存した写真は、削除するとそのアプリの「最近削除した項目」に入ります。",
   "pclib.pc_reading": "PC はまだ写真を読み取り中です。まだすべては見つからないかもしれません。",
-  "pclib.slow": "{pc} から時間内に応答がありません。電源が入り LocalRoll が開いているか確認して、もう一度お試しください。"
+  "pclib.slow": "{pc} から時間内に応答がありません。電源が入り LocalRoll が開いているか確認して、もう一度お試しください。",
+  "photos.title": "スマホのアルバム",
+  "photos.select": "選択",
+  "photos.find_deleted": "削除した写真を戻す",
+  "photos.find_deleted_ios": "ここで削除した写真は iPhone の「写真」アプリの「アルバム › 最近削除した項目」に入ります。30 日間残り、そこから復元できます。",
+  "photos.find_deleted_android": "ここで削除した写真は、スマホのギャラリーアプリのごみ箱（「最近削除した項目」「ゴミ箱」など）に入ります。約 30 日間残り、そこから復元できます。古いスマホ（Android 10 以前）ではすぐに削除されます。",
+  "photos.deleted_hint": "{count} 件を削除しました。システムのアルバムの「最近削除した項目」に 30 日間残り、写真アプリから復元できます。",
+  "photos.send_n_to": "{count} 件を {name} に送る",
+  "photos.backed_up": "PC にバックアップ済み",
+  "photos.not_backed_up": "まだバックアップしていません",
+  "photos.send": "送る…",
+  "photos.delete": "削除"
 }

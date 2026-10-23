@@ -492,5 +492,16 @@
   "mylib.purge_everything": "Elimina tutto definitivamente",
   "mylib.trash_hint_more": "Conservati 30 giorni, poi eliminati. Tocca per vedere, tieni premuto per sceglierne più d'uno. Le foto salvate nell'app Foto finiscono nel suo «Eliminati di recente».",
   "pclib.pc_reading": "Il PC sta ancora leggendo le foto; potrebbe non trovare ancora tutto.",
-  "pclib.slow": "{pc} non ha risposto in tempo. Controlla che sia acceso con LocalRoll aperto e riprova."
+  "pclib.slow": "{pc} non ha risposto in tempo. Controlla che sia acceso con LocalRoll aperto e riprova.",
+  "photos.title": "Foto del telefono",
+  "photos.select": "Seleziona",
+  "photos.find_deleted": "Recuperare le foto eliminate",
+  "photos.find_deleted_ios": "Le foto eliminate qui vanno nell'app Foto dell'iPhone: Album › Eliminati di recente. Restano lì 30 giorni e si ripristinano da lì.",
+  "photos.find_deleted_android": "Le foto eliminate qui vanno nel cestino della galleria del telefono (di solito «Eliminati di recente» o «Cestino»). Restano lì circa 30 giorni e si ripristinano da lì. Sui telefoni più vecchi (Android 10 e precedenti) vengono eliminate subito.",
+  "photos.deleted_hint": "{count} eliminate: 30 giorni in «Eliminati di recente» dell'album di sistema, ripristinabili dall'app Foto.",
+  "photos.send_n_to": "Invia {count} a {name}",
+  "photos.backed_up": "Salvata sul PC",
+  "photos.not_backed_up": "Non ancora salvata",
+  "photos.send": "Invia a…",
+  "photos.delete": "Elimina"
 }

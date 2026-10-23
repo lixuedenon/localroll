@@ -80,6 +80,9 @@ class Uploader extends ChangeNotifier {
   bool finished = false;
   bool _cancelled = false;
 
+  /// One id for this whole transfer (the other phone asks once for it).
+  final String _transfer = randomTransferId();
+
   /// iOS took the background time back; the rest can be resumed later.
   bool _expired = false;
 
@@ -303,7 +306,7 @@ class Uploader extends ChangeNotifier {
   Future<bool> _sendFile(UploadItem it, FileOffer offer, Future<File?> Function() open) async {
     // Ask first: if the PC already has it we skip without reading the file.
     final session = await client.createSession(toPhone
-        ? SessionRequest(files: [offer], from: settings.deviceInfo, batch: items.length)
+        ? SessionRequest(files: [offer], from: settings.deviceInfo, batch: items.length, transfer: _transfer)
         : SessionRequest(files: [offer], owner: settings.ownerName));
     final result = session.results[offer.id] ?? const OfferResult(status: OfferStatus.ready);
     if (result.status == OfferStatus.duplicate) return false;

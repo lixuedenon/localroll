@@ -492,5 +492,16 @@
   "mylib.purge_everything": "Borrar todo para siempre",
   "mylib.trash_hint_more": "Se guardan 30 días y luego se borran. Toca para ver, mantén pulsado para elegir varios. Las fotos guardadas en la app Fotos van a su propio «Eliminado» al borrarlas.",
   "pclib.pc_reading": "El PC todavía está leyendo las fotos; puede que aún no aparezca todo.",
-  "pclib.slow": "{pc} no respondió a tiempo. Comprueba que esté encendido con LocalRoll abierto y vuelve a intentarlo."
+  "pclib.slow": "{pc} no respondió a tiempo. Comprueba que esté encendido con LocalRoll abierto y vuelve a intentarlo.",
+  "photos.title": "Fotos del teléfono",
+  "photos.select": "Seleccionar",
+  "photos.find_deleted": "Recuperar fotos borradas",
+  "photos.find_deleted_ios": "Las fotos borradas aquí van a la app Fotos del iPhone: Álbumes › Eliminado. Siguen ahí 30 días y se pueden restaurar desde ahí.",
+  "photos.find_deleted_android": "Las fotos borradas aquí van a la papelera de la galería del teléfono (suele llamarse «Eliminado recientemente» o «Papelera»). Siguen ahí unos 30 días y se pueden restaurar. En teléfonos antiguos (Android 10 o anterior) se borran al instante.",
+  "photos.deleted_hint": "{count} borradas: 30 días en «Eliminado» del álbum del sistema, se pueden restaurar desde la app Fotos.",
+  "photos.send_n_to": "Enviar {count} a {name}",
+  "photos.backed_up": "Copiada en el PC",
+  "photos.not_backed_up": "Aún sin copia",
+  "photos.send": "Enviar a…",
+  "photos.delete": "Borrar"
 }

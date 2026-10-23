@@ -492,5 +492,16 @@
   "mylib.purge_everything": "Hapus semua permanen",
   "mylib.trash_hint_more": "Disimpan 30 hari lalu dihapus permanen. Ketuk untuk melihat, tekan lama untuk memilih beberapa. Foto di aplikasi Foto masuk ke “Baru Dihapus” milik aplikasi itu.",
   "pclib.pc_reading": "PC masih membaca fotonya; belum semua bisa ditemukan.",
-  "pclib.slow": "{pc} tidak menjawab tepat waktu. Pastikan menyala dan LocalRoll terbuka, lalu coba lagi."
+  "pclib.slow": "{pc} tidak menjawab tepat waktu. Pastikan menyala dan LocalRoll terbuka, lalu coba lagi.",
+  "photos.title": "Album ponsel",
+  "photos.select": "Pilih",
+  "photos.find_deleted": "Kembalikan foto yang dihapus",
+  "photos.find_deleted_ios": "Foto yang dihapus di sini masuk ke app Foto iPhone: Album › Baru Dihapus. Tersimpan 30 hari dan bisa dipulihkan dari sana.",
+  "photos.find_deleted_android": "Foto yang dihapus di sini masuk ke tempat sampah app Galeri (biasanya “Baru dihapus” atau “Sampah”). Tersimpan sekitar 30 hari dan bisa dipulihkan. Di ponsel lama (Android 10 ke bawah) langsung terhapus.",
+  "photos.deleted_hint": "{count} dihapus — 30 hari di “Baru Dihapus” album sistem, bisa dipulihkan dari app Foto.",
+  "photos.send_n_to": "Kirim {count} ke {name}",
+  "photos.backed_up": "Sudah dicadangkan ke PC",
+  "photos.not_backed_up": "Belum dicadangkan",
+  "photos.send": "Kirim ke…",
+  "photos.delete": "Hapus"
 }

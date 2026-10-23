@@ -93,6 +93,7 @@ class FileSender extends ChangeNotifier {
         owner: p == null ? settings.ownerName : null,
         from: p == null ? null : settings.deviceInfo,
         batch: p == null ? null : offers.length,
+        transfer: p == null ? null : randomTransferId(),
       ));
       for (var i = 0; i < files.length; i++) {
         if (_cancel) break;

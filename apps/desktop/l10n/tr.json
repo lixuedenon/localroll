@@ -610,5 +610,14 @@
   "send.queued_held": "{name} çevrimdışı: çevrimiçi olur olmaz gönderilecek.",
   "send.held": "{name} çevrimiçi olması bekleniyor",
   "send.gone_n": "Beklerken {count} silindi veya değişti",
-  "send.err_expired": "7 gün beklendi, cihaz çevrimiçi olmadı: iptal"
+  "send.err_expired": "7 gün beklendi, cihaz çevrimiçi olmadı: iptal",
+  "library.title_tip": "Live Photos ve videolar: fare üzerinde durunca oynar.\nSeçmek: fareyi bir fotoğrafa getirin, sol üstte bir daire çıkar — tıklayın. Ctrl+tık tek tek ekler, Shift+tık bir aralık seçer, ya da fareyle bir çerçeve çizin.",
+  "lib.senders_tip_long": "Gönderene göre süz: yalnızca bir cihazın gönderdiklerini göster.\nAdlar telefonlarda ya da bilgisayarlarda ayarlananlardır; bir kişinin aynı adlı telefonları tek kişi sayılır. “Bu bilgisayar”: kitaplığa doğrudan kopyalananlar.",
+  "library.sort_tip": "Sıralama:\nÇekim tarihine göre — fotoğrafın çekildiği gün, eskiler aşağıda;\nAlınma tarihine göre — bu bilgisayara geldiği an, en yeni en üstte; “az önce gelenleri” bulmak için iyi.",
+  "library.sort_received_short": "Alınmaya göre",
+  "people.tip": "Kişiler: aynı kişinin fotoğrafları bir arada; ad verip birleştirebilirsiniz, ad verince arama kutusunda adla bulursunuz. Hepsi bu bilgisayarda, hiçbir şey yüklenmez.",
+  "pick.tip": "Koşula göre seç: zamana, gönderene, türe ve boyuta göre bir kerede çok sayıda seçip birlikte dışa aktarın, gönderin, dönüştürün ya da silin.",
+  "library.size_tip": "Küçük resim boyutu: küçük / orta / büyük — küçük bir ekranda çok gösterir, büyük daha net.",
+  "trash.tip": "Son silinenler: silinen fotoğraf ve dosyalar 30 gün burada kalır; geri yükleyin ya da kalıcı silin.",
+  "library.open_folder_tip": "Kitaplık klasörünü aç: Dosya Gezgini'nde; fotoğraflar yıl / ay klasörlerinde."
 }

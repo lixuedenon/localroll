@@ -492,5 +492,16 @@
   "mylib.purge_everything": "Apagar tudo de vez",
   "mylib.trash_hint_more": "Guardados 30 dias e depois apagados. Toque para ver, mantenha premido para escolher vários. As fotos guardadas na app Fotos vão para o seu «Apagados recentemente».",
   "pclib.pc_reading": "O PC ainda está a ler as fotos; pode não encontrar tudo ainda.",
-  "pclib.slow": "{pc} não respondeu a tempo. Verifique se está ligado com o LocalRoll aberto e tente de novo."
+  "pclib.slow": "{pc} não respondeu a tempo. Verifique se está ligado com o LocalRoll aberto e tente de novo.",
+  "photos.title": "Fotos do telemóvel",
+  "photos.select": "Selecionar",
+  "photos.find_deleted": "Recuperar fotos apagadas",
+  "photos.find_deleted_ios": "As fotos apagadas aqui vão para a app Fotos do iPhone: Álbuns › Apagados recentemente. Ficam lá 30 dias e podem ser restauradas de lá.",
+  "photos.find_deleted_android": "As fotos apagadas aqui vão para o lixo da galeria do telemóvel (normalmente «Apagados recentemente» ou «Lixo»). Ficam lá cerca de 30 dias e podem ser restauradas. Em telemóveis antigos (Android 10 ou anterior) são apagadas logo.",
+  "photos.deleted_hint": "{count} apagadas — 30 dias em «Apagados recentemente» do álbum do sistema, restauráveis na app Fotos.",
+  "photos.send_n_to": "Enviar {count} para {name}",
+  "photos.backed_up": "Com cópia no PC",
+  "photos.not_backed_up": "Ainda sem cópia",
+  "photos.send": "Enviar para…",
+  "photos.delete": "Apagar"
 }

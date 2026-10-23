@@ -22,8 +22,10 @@ void main() {
     final rgb = Uint8List(320 * 240 * 3)..fillRange(0, 320 * 240 * 3, 128);
     final faces = await engine.read(rgb, 320, 240);
     engine.close();
-    expect(engine.lastError, isNull);
-    expect(faces, isNotNull);
+    // ignore: avoid_print
+    print('face models: ${faces == null ? 'no answer: ${engine.lastError}' : 'ok, ${faces.length} faces'}');
+    expect(engine.lastError, isNull, reason: engine.lastError);
+    expect(faces, isNotNull, reason: engine.lastError);
     expect(faces, isEmpty);
   }, timeout: const Timeout(Duration(minutes: 2)));
 }

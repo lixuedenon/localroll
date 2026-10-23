@@ -610,5 +610,14 @@
   "send.queued_held": "{name} ist offline: wird automatisch gesendet, sobald es online ist.",
   "send.held": "Wartet, bis {name} online ist",
   "send.gone_n": "{count} beim Warten gelöscht oder geändert",
-  "send.err_expired": "7 Tage gewartet, das Gerät kam nicht online: abgebrochen"
+  "send.err_expired": "7 Tage gewartet, das Gerät kam nicht online: abgebrochen",
+  "library.title_tip": "Live Photos und Videos: spielen ab, wenn die Maus darauf ruht.\nAuswählen: Maus auf ein Foto, oben links erscheint ein Kreis – anklicken. Strg+Klick fügt einzeln hinzu, Umschalt+Klick wählt einen Bereich, oder mit der Maus einen Rahmen ziehen.",
+  "lib.senders_tip_long": "Nach Absender filtern: nur zeigen, was ein bestimmtes Gerät geschickt hat.\nDie Namen sind die auf den Handys / PCs eingestellten; mehrere Handys einer Person mit demselben Namen zählen als eine Person. „Dieser PC“ sind direkt in die Mediathek kopierte Dateien.",
+  "library.sort_tip": "Sortieren:\nNach Aufnahmedatum – der Tag, an dem das Foto gemacht wurde, alte weiter unten;\nNach Empfangsdatum – wann es auf diesen PC kam, Neues zuerst, gut für „gerade angekommen“.",
+  "library.sort_received_short": "Nach Empfang",
+  "people.tip": "Personen: Fotos derselben Person zusammen; benennen und zusammenführen möglich, mit Namen im Suchfeld auffindbar. Alles auf diesem PC, nichts wird hochgeladen.",
+  "pick.tip": "Nach Bedingungen auswählen: nach Zeit, Absender, Art und Größe eine große Menge auf einmal wählen, dann gemeinsam exportieren, senden, umwandeln oder löschen.",
+  "library.size_tip": "Vorschaugröße: klein / mittel / groß – klein zeigt mehr auf einmal, groß zeigt deutlicher.",
+  "trash.tip": "Zuletzt gelöscht: Gelöschte Fotos und Dateien bleiben hier 30 Tage – wiederherstellen oder endgültig löschen.",
+  "library.open_folder_tip": "Mediathek-Ordner öffnen: im Explorer; die Fotos liegen in Ordnern nach Jahr / Monat."
 }

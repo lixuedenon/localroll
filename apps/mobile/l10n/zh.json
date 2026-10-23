@@ -492,5 +492,16 @@
   "mylib.purge_everything": "全部彻底删除",
   "mylib.trash_hint_more": "保留 30 天，之后彻底删除。点一下查看，长按可以多选。存进系统相册的照片删除后，在系统“照片”的“最近删除”里。",
   "pclib.pc_reading": "电脑还在识别照片，结果可能不全。",
-  "pclib.slow": "{pc} 没有及时回应。请确认电脑开着、LocalRoll 也开着，然后重试。"
+  "pclib.slow": "{pc} 没有及时回应。请确认电脑开着、LocalRoll 也开着，然后重试。",
+  "photos.title": "手机相册",
+  "photos.select": "选择",
+  "photos.find_deleted": "在系统相册里找回删除的照片",
+  "photos.find_deleted_ios": "在这里删除的照片会进 iPhone 自带的“照片”App：相簿 › 最近删除。在那里保留 30 天，可以从那里恢复。",
+  "photos.find_deleted_android": "在这里删除的照片会进手机自带“相册 / 图库”App 的回收站（一般叫“最近删除”或“回收站”）。在那里保留约 30 天，可以从那里恢复。较老的手机（Android 10 及以前）会直接删除。",
+  "photos.deleted_hint": "已删除 {count} 项，已移到系统相册的“最近删除”，30 天内可以在“照片”App 里恢复。",
+  "photos.send_n_to": "发送 {count} 项到 {name}",
+  "photos.backed_up": "已备份到电脑",
+  "photos.not_backed_up": "还没备份",
+  "photos.send": "发送到…",
+  "photos.delete": "删除"
 }

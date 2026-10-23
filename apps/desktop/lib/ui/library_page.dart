@@ -23,6 +23,7 @@ import '../services/win_dialogs.dart';
 import 'app_nav.dart';
 import 'files_view.dart';
 import 'format.dart';
+import 'hover_tip.dart';
 import 'library_recovery.dart';
 import 'media_thumb.dart';
 import 'people_page.dart';
@@ -368,8 +369,10 @@ class _LibraryPageState extends State<LibraryPage> {
     }
     final members = counts.keys.toList();
     if (members.length < 2) return null;
-    return PopupMenuButton<String>(
-      tooltip: tr('lib.senders_tip'),
+    return HoverTip(
+      text: tr('lib.senders_tip_long'),
+      child: PopupMenuButton<String>(
+      tooltip: '',
       onSelected: (v) => setState(() {
         if (v.isEmpty) {
           _member = null;
@@ -389,22 +392,10 @@ class _LibraryPageState extends State<LibraryPage> {
             ]),
           ),
       ],
-      child: _toolChip(Icons.groups_rounded, _member == null ? tr('family.everyone') : senderLabel(_member!)),
+      child: ToolIcon(icon: Icons.groups_rounded, color: ToolColors.senders, label: _member == null ? null : senderLabel(_member!)),
+      ),
     );
   }
-
-  /// A labelled dropdown-looking button for the toolbar.
-  Widget _toolChip(IconData icon, String label) => Container(
-        height: 36,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), border: Border.all(color: LrColors.line)),
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(icon, size: 18, color: LrColors.muted),
-          const SizedBox(width: 6),
-          Text(label, style: const TextStyle(fontSize: 13.5)),
-          const Icon(Icons.arrow_drop_down_rounded, color: LrColors.muted),
-        ]),
-      );
 
   @override
   Widget build(BuildContext context) {
@@ -435,13 +426,8 @@ class _LibraryPageState extends State<LibraryPage> {
             title: _selecting
                 ? Text(tr('lib.selected_size', {'count': _selected.length + _copies.length, 'size': formatBytes(_selectedSize(chosenMedia))}))
                 : Row(children: [
-                    Text(tr('nav.library')),
-                    const SizedBox(width: 12),
-                    Flexible(
-                      child: Text(tr('library.hover_hint'),
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: LrColors.muted, fontSize: 13, fontWeight: FontWeight.w400)),
-                    ),
+                    // Rest the mouse on it: how to use the library.
+                    TipTitle(text: tr('nav.library'), tip: tr('library.title_tip')),
                     if (!_onlyRecent && _recent(all).isNotEmpty) ...[
                       const SizedBox(width: 12),
                       ActionChip(
@@ -523,47 +509,66 @@ class _LibraryPageState extends State<LibraryPage> {
                 // and land far down the list; "by arrival" puts them on top.
                 if (!_filesTab) ?_personMenu(all, family),
                 const SizedBox(width: 8),
-                PopupMenuButton<bool>(
-                  tooltip: tr('library.sort'),
-                  initialValue: _byReceived,
-                  onSelected: (v) => setState(() => _byReceived = v),
-                  itemBuilder: (_) => [
-                    CheckedPopupMenuItem(value: false, checked: !_byReceived, child: Text(tr('library.sort_taken'))),
-                    CheckedPopupMenuItem(value: true, checked: _byReceived, child: Text(tr('library.sort_received'))),
-                  ],
-                  child: _toolChip(Icons.sort_rounded, tr(_byReceived ? 'library.sort_received' : 'library.sort_taken')),
-                ),
-                if (!_filesTab)
-                  PopupMenuButton<int>(
-                    tooltip: tr('library.size'),
-                    initialValue: s.settings.thumbSize,
-                    onSelected: (v) => s.settings.update((x) => x.thumbSize = v),
+                HoverTip(
+                  text: tr('library.sort_tip'),
+                  child: PopupMenuButton<bool>(
+                    tooltip: '',
+                    initialValue: _byReceived,
+                    onSelected: (v) => setState(() => _byReceived = v),
                     itemBuilder: (_) => [
-                      for (final (v, k) in [(0, 'library.size_s'), (1, 'library.size_m'), (2, 'library.size_l')])
-                        CheckedPopupMenuItem(value: v, checked: s.settings.thumbSize == v, child: Text(tr(k))),
+                      CheckedPopupMenuItem(value: false, checked: !_byReceived, child: Text(tr('library.sort_taken'))),
+                      CheckedPopupMenuItem(value: true, checked: _byReceived, child: Text(tr('library.sort_received'))),
                     ],
-                    icon: const Icon(Icons.photo_size_select_large_rounded),
+                    child: ToolIcon(
+                      icon: Icons.swap_vert_rounded,
+                      color: ToolColors.sort,
+                      label: _byReceived ? tr('library.sort_received_short') : null,
+                    ),
+                  ),
+                ),
+                if (!_filesTab)
+                  HoverTip(
+                    text: tr('people.tip'),
+                    child: IconButton(
+                      onPressed: _openPeople,
+                      icon: const Icon(Icons.face_retouching_natural_rounded, color: ToolColors.people),
+                    ),
                   ),
                 if (!_filesTab)
-                  IconButton(
-                    tooltip: tr('pick.title'),
-                    onPressed: () => _selectBy(all, family),
-                    icon: const Icon(Icons.checklist_rounded),
+                  HoverTip(
+                    text: tr('pick.tip'),
+                    child: IconButton(
+                      onPressed: () => _selectBy(all, family),
+                      icon: const Icon(Icons.checklist_rounded, color: ToolColors.select),
+                    ),
                   ),
-                IconButton(
-                  tooltip: tr('people.title'),
-                  onPressed: _openPeople,
-                  icon: const Icon(Icons.face_rounded),
+                if (!_filesTab)
+                  HoverTip(
+                    text: tr('library.size_tip'),
+                    child: PopupMenuButton<int>(
+                      tooltip: '',
+                      initialValue: s.settings.thumbSize,
+                      onSelected: (v) => s.settings.update((x) => x.thumbSize = v),
+                      itemBuilder: (_) => [
+                        for (final (v, k) in [(0, 'library.size_s'), (1, 'library.size_m'), (2, 'library.size_l')])
+                          CheckedPopupMenuItem(value: v, checked: s.settings.thumbSize == v, child: Text(tr(k))),
+                      ],
+                      icon: const Icon(Icons.photo_size_select_large_rounded, color: ToolColors.size),
+                    ),
+                  ),
+                HoverTip(
+                  text: tr('trash.tip'),
+                  child: IconButton(
+                    onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => TrashPage(services: s))),
+                    icon: const Icon(Icons.history_rounded, color: ToolColors.trash),
+                  ),
                 ),
-                IconButton(
-                  tooltip: tr('trash.title'),
-                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => TrashPage(services: s))),
-                  icon: const Icon(Icons.restore_from_trash_rounded),
-                ),
-                IconButton(
-                  tooltip: tr('library.open_folder'),
-                  onPressed: () => revealInExplorer(s.library.rootPath),
-                  icon: const Icon(Icons.folder_open),
+                HoverTip(
+                  text: tr('library.open_folder_tip'),
+                  child: IconButton(
+                    onPressed: () => revealInExplorer(s.library.rootPath),
+                    icon: const Icon(Icons.folder_open_rounded, color: ToolColors.plain),
+                  ),
                 ),
               ],
               const SizedBox(width: 8),

@@ -492,5 +492,16 @@
   "mylib.purge_everything": "모두 완전히 삭제",
   "mylib.trash_hint_more": "30일 동안 보관한 뒤 완전히 삭제됩니다. 탭하면 보고, 길게 누르면 여러 개를 고릅니다. 사진 앱에 저장된 사진은 삭제하면 그 앱의 '최근 삭제된 항목'으로 갑니다.",
   "pclib.pc_reading": "PC가 아직 사진을 읽는 중이라 아직 다 찾지 못할 수 있습니다.",
-  "pclib.slow": "{pc}이(가) 제때 응답하지 않았습니다. 켜져 있고 LocalRoll이 열려 있는지 확인한 뒤 다시 시도하세요."
+  "pclib.slow": "{pc}이(가) 제때 응답하지 않았습니다. 켜져 있고 LocalRoll이 열려 있는지 확인한 뒤 다시 시도하세요.",
+  "photos.title": "휴대폰 앨범",
+  "photos.select": "선택",
+  "photos.find_deleted": "삭제한 사진 되찾기",
+  "photos.find_deleted_ios": "여기서 삭제한 사진은 iPhone '사진' 앱의 앨범 › 최근 삭제된 항목으로 갑니다. 30일 동안 남아 있고 거기서 복원할 수 있습니다.",
+  "photos.find_deleted_android": "여기서 삭제한 사진은 휴대폰 갤러리 앱의 휴지통('최근 삭제된 항목' 또는 '휴지통')으로 갑니다. 약 30일 동안 남아 있고 거기서 복원할 수 있습니다. 오래된 휴대폰(Android 10 이하)에서는 바로 삭제됩니다.",
+  "photos.deleted_hint": "{count}개를 삭제했습니다. 시스템 앨범의 '최근 삭제된 항목'에 30일 동안 남아 사진 앱에서 복원할 수 있습니다.",
+  "photos.send_n_to": "{count}개를 {name}에 보내기",
+  "photos.backed_up": "PC에 백업됨",
+  "photos.not_backed_up": "아직 백업 안 됨",
+  "photos.send": "보내기…",
+  "photos.delete": "삭제"
 }

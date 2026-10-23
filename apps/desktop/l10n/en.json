@@ -610,5 +610,14 @@
   "send.queued_held": "{name} is offline: it will be sent as soon as it comes online.",
   "send.held": "Waiting for {name} to come online",
   "send.gone_n": "{count} deleted or changed while waiting",
-  "send.err_expired": "Waited 7 days and the device never came online: cancelled"
+  "send.err_expired": "Waited 7 days and the device never came online: cancelled",
+  "library.title_tip": "Live Photos and videos: they play when the mouse rests on them.\nSelecting: rest the mouse on a photo and a circle appears top left — click it. Ctrl+click adds one at a time, Shift+click picks a run, or drag a box with the mouse.",
+  "lib.senders_tip_long": "Filter by sender: show only what one device sent.\nNames are the ones set on the phones or PCs; one person's phones with the same name count as one person. “This PC” is what was copied into the library directly.",
+  "library.sort_tip": "Order:\nBy date taken — the day the photo was taken, older ones further down;\nBy date received — when it reached this PC, newest first; handy for “what just came in”.",
+  "library.sort_received_short": "By received",
+  "people.tip": "People: photos of the same person together; name and merge them, and once named, find them by name in the search box. All worked out on this PC, nothing uploaded.",
+  "pick.tip": "Select by conditions: by time, sender, type and size, pick a big batch at once, then export, send, convert or delete them together.",
+  "library.size_tip": "Thumbnail size: small / medium / large — small shows more at once, large shows more clearly.",
+  "trash.tip": "Recently deleted: deleted photos and files wait here 30 days — restore them or delete them for good.",
+  "library.open_folder_tip": "Open the library folder: in File Explorer; photos are in folders by year / month."
 }

@@ -492,5 +492,16 @@
   "mylib.purge_everything": "Tümünü kalıcı sil",
   "mylib.trash_hint_more": "30 gün saklanır, sonra kalıcı silinir. Görmek için dokunun, birkaç tane seçmek için basılı tutun. Fotoğraflar uygulamasındaki fotoğraflar silinince onun “Son Silinenler”ine gider.",
   "pclib.pc_reading": "Bilgisayar fotoğrafları hâlâ okuyor; henüz her şey bulunmayabilir.",
-  "pclib.slow": "{pc} zamanında yanıt vermedi. Açık olduğunu ve LocalRoll'un çalıştığını denetleyip yeniden deneyin."
+  "pclib.slow": "{pc} zamanında yanıt vermedi. Açık olduğunu ve LocalRoll'un çalıştığını denetleyip yeniden deneyin.",
+  "photos.title": "Telefon albümü",
+  "photos.select": "Seç",
+  "photos.find_deleted": "Silinen fotoğrafları geri al",
+  "photos.find_deleted_ios": "Burada silinen fotoğraflar iPhone'un Fotoğraflar uygulamasına gider: Albümler › Son Silinenler. Orada 30 gün kalır, oradan geri yüklenebilir.",
+  "photos.find_deleted_android": "Burada silinen fotoğraflar telefonun galeri uygulamasının çöp kutusuna gider (genelde “Son silinenler” ya da “Çöp kutusu”). Orada yaklaşık 30 gün kalır, oradan geri yüklenebilir. Eski telefonlarda (Android 10 ve öncesi) hemen silinir.",
+  "photos.deleted_hint": "{count} silindi — sistem albümünün “Son Silinenler”inde 30 gün, Fotoğraflar uygulamasından geri yüklenebilir.",
+  "photos.send_n_to": "{count} öğeyi {name} cihazına gönder",
+  "photos.backed_up": "Bilgisayara yedeklendi",
+  "photos.not_backed_up": "Henüz yedeklenmedi",
+  "photos.send": "Gönder…",
+  "photos.delete": "Sil"
 }
