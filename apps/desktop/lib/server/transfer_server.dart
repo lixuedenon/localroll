@@ -1091,10 +1091,17 @@ class TransferServer extends ChangeNotifier {
         try {
           // Not more than a few seconds: the text results come anyway (the
           // picture model may still be loading; it is ready next time).
-          final hits = await find(words).timeout(const Duration(seconds: 3), onTimeout: () {
-            DiagLog.log('search', 'picture search slow: text results only');
-            return const [];
-          });
+          const none = <(String, double)>[];
+          final hits = await Future.any([
+            Future(() => find(words)).catchError((Object e) {
+              DiagLog.log('search', 'picture search failed: $e');
+              return none;
+            }),
+            Future.delayed(const Duration(seconds: 3), () {
+              DiagLog.log('search', 'picture search slow: text results only');
+              return none;
+            }),
+          ]);
           pics = {for (final (k, sc) in hits) k: sc};
         } catch (e) {
           DiagLog.log('search', 'picture search failed: $e');
