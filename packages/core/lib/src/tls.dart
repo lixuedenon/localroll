@@ -45,7 +45,9 @@ String shortFingerprint(String fp) {
 /// accepted and reported to [onCertificate], so the caller can show it in
 /// the pairing check and remember it.
 HttpClient lrHttpClient({String? pin, void Function(String fingerprint)? onCertificate}) {
-  final c = HttpClient()
+  // No public roots: every certificate goes through the check below, so a
+  // certificate some public authority signed is not taken instead of the pin.
+  final c = HttpClient(context: SecurityContext(withTrustedRoots: false))
     ..connectionTimeout = const Duration(seconds: 4)
     ..idleTimeout = const Duration(seconds: 30);
   c.badCertificateCallback = (X509Certificate cert, String host, int port) {
