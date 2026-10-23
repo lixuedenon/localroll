@@ -13,6 +13,7 @@ import 'package:window_manager/window_manager.dart';
 import 'app_services.dart';
 import 'l10n/l10n.dart';
 import 'services/autostart.dart';
+import 'services/face_engine.dart';
 import 'services/settings.dart';
 import 'services/watchdog.dart';
 import 'ui/app_nav.dart';
@@ -21,6 +22,11 @@ import 'ui/theme.dart';
 import 'ui/title_bar.dart';
 
 Future<void> main(List<String> args) async {
+  // Build check (CI): the bundled face models load and answer here, the
+  // way the app runs them; the result goes to the file given, then exit.
+  if (args.length == 2 && args.first == '--check-models') {
+    exit(await checkModels(args[1]));
+  }
   WidgetsFlutterBinding.ensureInitialized();
   if (!await AppSettings.acquireInstanceLock()) {
     // Already running: bring that window to the front and quit quietly.
@@ -194,5 +200,26 @@ class _AlreadyRunningApp extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Loads the face models next to LocalRoll.exe and reads a plain picture;
+/// writes "face models: ok …" or why not to [out]. 0 when it worked.
+Future<int> checkModels(String out) async {
+  final f = File(out);
+  try {
+    final engine = FaceEngine();
+    if (!engine.available) {
+      f.writeAsStringSync('face models: missing in ${engine.folder}\n');
+      return 2;
+    }
+    final rgb = Uint8List(320 * 240 * 3)..fillRange(0, 320 * 240 * 3, 128);
+    final faces = await engine.read(rgb, 320, 240);
+    engine.close();
+    f.writeAsStringSync(faces == null ? 'face models: no answer: ${engine.lastError}\n' : 'face models: ok, ${faces.length} faces\n');
+    return faces == null ? 1 : 0;
+  } catch (e) {
+    f.writeAsStringSync('face models: failed: $e\n');
+    return 1;
   }
 }

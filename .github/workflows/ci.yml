@@ -174,27 +174,18 @@ jobs:
             if ($sha -ne $want[$name]) { Write-Output "::error::$name SHA-256 $sha does not match"; exit 1 }
           }
       - name: Check the face models load
-        working-directory: apps/desktop
         shell: pwsh
         run: |
-          # Through onnxruntime.dll, the way the app runs them (a model that
-          # can't be opened failed silently on a real PC once).
-          $release = (Resolve-Path "build/windows/x64/runner/Release").Path
-          $env:PATH = "$release;$env:PATH"
-          flutter test test/models_load_test.dart --reporter expanded 2>&1 | Tee-Object -FilePath models.log
-          # The test prints this line only when the models really answered
-          # (flutter's own exit code on Windows here is not reliable).
-          $steps = if (Test-Path models-steps.txt) { Get-Content models-steps.txt } else { @() }
-          if (-not ($steps | Select-String -Pattern 'face models: ok' -Quiet)) {
-            # The steps reached, then the last lines (a few per annotation).
-            $lines = @($steps) + @(Get-Content models.log | Where-Object { $_.Trim() -ne '' } | Select-Object -Last 56)
-            for ($i = 0; $i -lt $lines.Count; $i += 8) {
-              $chunk = ($lines[$i..([Math]::Min($i + 7, $lines.Count - 1))] -join ' || ')
-              if ($chunk.Length -gt 3000) { $chunk = $chunk.Substring(0, 3000) }
-              Write-Output "::error::$chunk"
-            }
-            exit 1
-          }
+          # The built app itself loads the face models the way it runs them
+          # and reads a plain picture (a model that couldn't be opened failed
+          # silently on a real PC once).
+          $release = (Resolve-Path "apps/desktop/build/windows/x64/runner/Release").Path
+          $out = Join-Path $env:RUNNER_TEMP "models-check.txt"
+          $p = Start-Process -FilePath "$release\localroll_desktop.exe" -ArgumentList @('--check-models', $out) -PassThru
+          if (-not $p.WaitForExit(120000)) { $p.Kill(); Write-Output "::error::model check gave no answer in 2 minutes"; exit 1 }
+          $r = if (Test-Path $out) { (Get-Content $out) -join ' ' } else { "no result (exit $($p.ExitCode))" }
+          if ($r -notmatch 'face models: ok') { Write-Output "::error::$r"; exit 1 }
+          Write-Output "::notice::$r"
       - name: Bundle ffmpeg
         shell: pwsh
         run: |
