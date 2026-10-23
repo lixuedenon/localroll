@@ -488,5 +488,9 @@
   "phone.rename": "Cambiar nombre",
   "pclib.search_hint": "Buscar texto en fotos y archivos del PC",
   "pclib.search_none": "No se encontró «{q}». El texto que el PC aún no ha leído no aparece.",
-  "phone.name_what": "Aparece en la lista de dispositivos del PC, para reconocer este teléfono"
+  "phone.name_what": "Aparece en la lista de dispositivos del PC, para reconocer este teléfono",
+  "mylib.purge_everything": "Borrar todo para siempre",
+  "mylib.trash_hint_more": "Se guardan 30 días y luego se borran. Toca para ver, mantén pulsado para elegir varios. Las fotos guardadas en la app Fotos van a su propio «Eliminado» al borrarlas.",
+  "pclib.pc_reading": "El PC todavía está leyendo las fotos; puede que aún no aparezca todo.",
+  "pclib.slow": "{pc} no respondió a tiempo. Comprueba que esté encendido con LocalRoll abierto y vuelve a intentarlo."
 }

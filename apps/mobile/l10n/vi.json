@@ -488,5 +488,9 @@
   "phone.rename": "Đổi tên",
   "pclib.search_hint": "Tìm chữ trong ảnh và tệp trên máy tính",
   "pclib.search_none": "Không tìm thấy “{q}”. Chữ máy tính chưa đọc thì chưa tìm được.",
-  "phone.name_what": "Hiện trong danh sách thiết bị trên máy tính, để nhận ra điện thoại này"
+  "phone.name_what": "Hiện trong danh sách thiết bị trên máy tính, để nhận ra điện thoại này",
+  "mylib.purge_everything": "Xóa vĩnh viễn tất cả",
+  "mylib.trash_hint_more": "Giữ 30 ngày rồi xóa vĩnh viễn. Chạm để xem, nhấn giữ để chọn nhiều. Ảnh lưu trong ứng dụng Ảnh khi xóa sẽ vào “Đã xóa gần đây” của ứng dụng đó.",
+  "pclib.pc_reading": "Máy tính vẫn đang đọc ảnh; có thể chưa tìm thấy hết.",
+  "pclib.slow": "{pc} không phản hồi kịp. Kiểm tra máy đang bật và LocalRoll đang mở, rồi thử lại."
 }

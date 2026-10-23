@@ -488,5 +488,9 @@
   "phone.rename": "Umbenennen",
   "pclib.search_hint": "Text in Fotos und Dateien auf dem PC suchen",
   "pclib.search_none": "Nichts gefunden für „{q}“. Text, den der PC noch nicht gelesen hat, wird nicht gefunden.",
-  "phone.name_what": "Steht in der Geräteliste des PCs, um dieses Handy zu erkennen"
+  "phone.name_what": "Steht in der Geräteliste des PCs, um dieses Handy zu erkennen",
+  "mylib.purge_everything": "Alle endgültig löschen",
+  "mylib.trash_hint_more": "30 Tage aufbewahrt, dann endgültig gelöscht. Antippen zum Ansehen, lange drücken für mehrere. Fotos aus der Fotos-App landen beim Löschen in deren „Zuletzt gelöscht“.",
+  "pclib.pc_reading": "Der PC liest die Fotos noch – es kann noch nicht alles gefunden werden.",
+  "pclib.slow": "{pc} hat nicht rechtzeitig geantwortet. Prüfen, ob er an ist und LocalRoll läuft, dann erneut versuchen."
 }

@@ -155,13 +155,17 @@ class FfmpegService extends ChangeNotifier {
   /// 2560 pixels a side, written to [out]. Not kept in the picture cache.
   Future<bool> ocrPicture(String src, String out) async {
     if (!available) return false;
-    return _limited(() => _run([
+    final ok = await _limited(() => _run([
           '-i', src,
           '-frames:v', '1',
           '-vf', "scale='min(2560,iw)':'min(2560,ih)':force_original_aspect_ratio=decrease",
           '-q:v', '3',
           out,
         ]));
+    if (ok) return true;
+    // HEIC is a tile grid ffmpeg stitches itself: no filter of our own on
+    // top; full size is fine (Windows reads up to 10000 pixels).
+    return _limited(() => _run(['-i', src, '-frames:v', '1', '-q:v', '3', out]));
   }
 
   /// The picture (a video: its middle frame) as 224×224 RGB bytes for

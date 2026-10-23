@@ -16,6 +16,7 @@ String peopleState(IndexProgress p) => switch (p.state) {
       IndexState.working => tr('people.working', {'done': p.done, 'total': p.total}),
       IndexState.paused => tr('search.state_paused', {'done': p.done, 'total': p.total}),
       IndexState.done => tr('people.done', {'count': p.total}),
+      IndexState.failed => tr('search.state_failed'),
       _ => tr('search.state_starting'),
     };
 
@@ -193,7 +194,9 @@ class _PeoplePageState extends State<PeoplePage> {
               if (on) ...[
                 const SizedBox(width: 12),
                 Flexible(
-                  child: Text(peopleState(s.faceIndexer.progress.value),
+                  child: Text(
+                      '${peopleState(s.faceIndexer.progress.value)}  ·  '
+                      '${tr('people.stats', {'photos': _people.photosRead, 'faces': _people.facesFound})}',
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(color: LrColors.muted, fontSize: 13, fontWeight: FontWeight.w400)),
                 ),

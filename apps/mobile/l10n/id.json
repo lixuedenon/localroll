@@ -488,5 +488,9 @@
   "phone.rename": "Ganti nama",
   "pclib.search_hint": "Cari teks di foto dan file PC",
   "pclib.search_none": "Tidak ada hasil untuk “{q}”. Teks yang belum dibaca PC belum bisa ditemukan.",
-  "phone.name_what": "Tampil di daftar perangkat PC, untuk mengenali ponsel ini"
+  "phone.name_what": "Tampil di daftar perangkat PC, untuk mengenali ponsel ini",
+  "mylib.purge_everything": "Hapus semua permanen",
+  "mylib.trash_hint_more": "Disimpan 30 hari lalu dihapus permanen. Ketuk untuk melihat, tekan lama untuk memilih beberapa. Foto di aplikasi Foto masuk ke “Baru Dihapus” milik aplikasi itu.",
+  "pclib.pc_reading": "PC masih membaca fotonya; belum semua bisa ditemukan.",
+  "pclib.slow": "{pc} tidak menjawab tepat waktu. Pastikan menyala dan LocalRoll terbuka, lalu coba lagi."
 }

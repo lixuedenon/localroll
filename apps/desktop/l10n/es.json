@@ -180,7 +180,7 @@
   "send.transfers": "Transferencias",
   "send.clear": "Borrar transferencias terminadas",
   "send.online": "En línea",
-  "send.offline": "No encontrado",
+  "send.offline": "sin conexión",
   "send.files": "Enviar archivos…",
   "send.folder": "Enviar carpeta…",
   "send.forget": "Olvidar",
@@ -601,5 +601,14 @@
   "lib.senders_tip": "Dispositivos que enviaron contenido aquí; los nombres son los puestos en los teléfonos",
   "lib.from_this_pc": "Este PC (copiado directamente)",
   "search.progress_where": "El progreso de texto, imágenes y personas está en Ajustes › Búsqueda de texto",
-  "convert.skipped_files": "{count} documentos/archivos no necesitan conversión; se omitieron."
+  "convert.skipped_files": "{count} documentos/archivos no necesitan conversión; se omitieron.",
+  "search.ocr_broken_title": "El reconocimiento de texto de Windows no funciona en este PC",
+  "search.ocr_broken_body": "Se puede buscar en nombres y documentos; las fotos esperan. Se reintenta cada media hora, o pulsa «Comprobar de nuevo». Lo que dijo Windows:",
+  "search.state_failed": "En pausa: el modelo no respondió (nuevo intento en 30 min; detalles en el registro de diagnóstico)",
+  "people.stats": "Fotos vistas: {photos} · caras: {faces}",
+  "send.offline_hint": "También puedes elegir dispositivos sin conexión: empieza solo cuando se conecten (hasta 7 días).",
+  "send.queued_held": "{name} no está conectado: se enviará en cuanto se conecte.",
+  "send.held": "Esperando a que {name} se conecte",
+  "send.gone_n": "{count} borrados o cambiados mientras esperaba",
+  "send.err_expired": "Esperó 7 días sin que el dispositivo se conectara: cancelado"
 }

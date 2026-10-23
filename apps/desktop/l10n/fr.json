@@ -180,7 +180,7 @@
   "send.transfers": "Transferts",
   "send.clear": "Effacer les transferts terminés",
   "send.online": "En ligne",
-  "send.offline": "Introuvable",
+  "send.offline": "hors ligne",
   "send.files": "Envoyer des fichiers…",
   "send.folder": "Envoyer un dossier…",
   "send.forget": "Oublier",
@@ -601,5 +601,14 @@
   "lib.senders_tip": "Appareils ayant envoyé du contenu ici ; les noms sont ceux réglés sur les téléphones",
   "lib.from_this_pc": "Ce PC (copié directement)",
   "search.progress_where": "L'avancement du texte, des images et des personnes est dans Paramètres › Recherche de texte",
-  "convert.skipped_files": "{count} documents/fichiers n'ont pas besoin de conversion, ignorés."
+  "convert.skipped_files": "{count} documents/fichiers n'ont pas besoin de conversion, ignorés.",
+  "search.ocr_broken_title": "La reconnaissance de texte de Windows ne fonctionne pas sur ce PC",
+  "search.ocr_broken_body": "Les noms de fichiers et documents sont cherchables ; les photos attendent. Nouvel essai toutes les 30 minutes, ou appuyez sur « Vérifier à nouveau ». Ce que Windows a dit :",
+  "search.state_failed": "En pause : le modèle n'a pas répondu (nouvel essai dans 30 min ; détails dans le journal de diagnostic)",
+  "people.stats": "Photos vues : {photos} · visages : {faces}",
+  "send.offline_hint": "Les appareils hors ligne peuvent aussi être choisis : l'envoi démarre tout seul à leur retour (jusqu'à 7 jours).",
+  "send.queued_held": "{name} est hors ligne : l'envoi partira dès son retour.",
+  "send.held": "En attente du retour de {name}",
+  "send.gone_n": "{count} supprimés ou modifiés pendant l'attente",
+  "send.err_expired": "7 jours d'attente sans retour de l'appareil : annulé"
 }

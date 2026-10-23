@@ -307,10 +307,21 @@ class _PcLibraryPageState extends State<PcLibraryPage> {
     );
   }
 
+  /// The PC hasn't read everything yet: results may be incomplete.
+  Widget _readingNote() => Padding(
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+        child: Row(children: [
+          const Icon(Icons.hourglass_top_rounded, size: 16, color: LrColors.muted),
+          const SizedBox(width: 8),
+          Expanded(child: Text(tr('pclib.pc_reading'), style: const TextStyle(color: LrColors.muted, fontSize: 13))),
+        ]),
+      );
+
   Widget _body(BuildContext context) {
     final theme = Theme.of(context);
     if (lib.items.isEmpty) {
       return ListView(children: [
+        if (lib.query.isNotEmpty && lib.reading) _readingNote(),
         const SizedBox(height: 120),
         if (lib.loading)
           const Center(child: CircularProgressIndicator())
@@ -367,6 +378,7 @@ class _PcLibraryPageState extends State<PcLibraryPage> {
               ]),
             ),
           ),
+          if (lib.query.isNotEmpty && lib.reading) SliverToBoxAdapter(child: _readingNote()),
           // The PC got something new while this list was being looked at.
           if (lib.newer)
             SliverToBoxAdapter(

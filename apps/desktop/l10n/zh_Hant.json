@@ -180,7 +180,7 @@
   "send.transfers": "傳輸記錄",
   "send.clear": "清除已完成的傳輸記錄",
   "send.online": "線上",
-  "send.offline": "未找到",
+  "send.offline": "離線",
   "send.files": "傳送檔案…",
   "send.folder": "傳送資料夾…",
   "send.forget": "忘記",
@@ -601,5 +601,14 @@
   "lib.senders_tip": "傳送過內容的裝置；名字是手機裡設定的",
   "lib.from_this_pc": "這台電腦（直接拷進來的）",
   "search.progress_where": "文字、畫面、人物的辨識進度可以在 設定 › 文字搜尋 裡查看",
-  "convert.skipped_files": "其中 {count} 個文件不需要轉換，已略過。"
+  "convert.skipped_files": "其中 {count} 個文件不需要轉換，已略過。",
+  "search.ocr_broken_title": "這台電腦上 Windows 的文字辨識沒有執行起來",
+  "search.ocr_broken_body": "檔名和文件照常能搜，照片先等著。每半小時自動再試一次，也可以按「重新檢查」。Windows 給出的原因：",
+  "search.state_failed": "暫停：模型沒有回應（30 分鐘後再試，詳情見診斷記錄）",
+  "people.stats": "已看 {photos} 張照片，找到 {faces} 張臉",
+  "send.offline_hint": "離線的裝置也可以選：等它上線會自動開始傳送（最多等 7 天）。",
+  "send.queued_held": "{name} 不在線，等它上線會自動傳送。",
+  "send.held": "等待 {name} 上線",
+  "send.gone_n": "等待期間有 {count} 個被刪或改了，已略過",
+  "send.err_expired": "等了 7 天對方都沒上線，已取消"
 }

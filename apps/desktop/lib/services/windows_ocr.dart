@@ -1,6 +1,5 @@
 // apps/desktop/lib/services/windows_ocr.dart
 import 'dart:async';
-import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
@@ -10,9 +9,9 @@ import 'package:localroll_core/localroll_core.dart';
 /// process that stays open: a picture in, its lines of text out. Nothing
 /// leaves this PC; nothing to install (the languages are Windows' own).
 const String _ocrScript = r"""
+param([string]$In)
 $ErrorActionPreference = 'Stop'
-[Console]::InputEncoding = New-Object System.Text.UTF8Encoding $false
-[Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false
+try { [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false } catch {}
 Add-Type -AssemblyName System.Runtime.WindowsRuntime
 $asTask = ([System.WindowsRuntimeSystemExtensions].GetMethods() | Where-Object {
   $_.Name -eq 'AsTask' -and $_.GetParameters().Count -eq 1 -and $_.GetParameters()[0].ParameterType.Name -eq 'IAsyncOperation`1'
@@ -37,9 +36,9 @@ function Engine([string]$tag) {
   }
   $engines[$tag]
 }
-while ($true) {
-  $line = [Console]::In.ReadLine()
-  if ($null -eq $line) { break }
+# One request per line in the file given; one answer per line, in order.
+foreach ($line in [System.IO.File]::ReadAllLines($In, [System.Text.Encoding]::UTF8)) {
+  if (-not $line.Trim()) { continue }
   $out = @{}
   try {
     $req = $line | ConvertFrom-Json
@@ -62,7 +61,7 @@ while ($true) {
       }
     }
   } catch {
-    $out.error = "$($_.Exception.Message)"
+    $out.error = "$($_.Exception.GetBaseException().Message)"
   }
   [Console]::Out.WriteLine(($out | ConvertTo-Json -Compress -Depth 3))
   [Console]::Out.Flush()
@@ -102,121 +101,160 @@ class OcrLanguages {
   }
 }
 
-/// Text recognition with Windows' own engine (Windows only).
+/// Text recognition with Windows' own engine (Windows only). Each batch is
+/// one short PowerShell run: the requests go in a file, the answers come
+/// back one per line and PowerShell ends. (A PowerShell kept open and
+/// talked to through its input never answered when started from LocalRoll
+/// on some PCs, while the very same script answered at once when run like
+/// this.)
 class WindowsOcr {
-  Process? _p;
-  final Queue<Completer<Map<String, dynamic>>> _waiting = Queue();
-  StreamSubscription<String>? _out;
-  Future<void> _chain = Future.value();
-
   static bool get supported => Platform.isWindows;
 
-  Future<Process> _start() async {
-    final known = _p;
-    if (known != null) return known;
-    final script = File('${Directory.systemTemp.path}${Platform.pathSeparator}localroll-ocr.ps1');
-    await script.writeAsString(_ocrScript);
-    final p = await Process.start('powershell', [
-      '-NoProfile',
-      '-NonInteractive',
-      '-ExecutionPolicy',
-      'Bypass',
-      '-File',
-      script.path,
-    ]);
-    _out = p.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
-      if (_waiting.isEmpty) return;
-      Map<String, dynamic> j;
-      try {
-        final v = jsonDecode(line.trim());
-        j = v is Map<String, dynamic> ? v : {'error': 'bad answer'};
-      } catch (_) {
-        j = {'error': 'bad answer: ${line.length > 80 ? line.substring(0, 80) : line}'};
-      }
-      _waiting.removeFirst().complete(j);
-    });
-    p.stderr.transform(utf8.decoder).listen((e) {
-      if (e.trim().isNotEmpty) DiagLog.log('ocr', 'stderr: ${e.trim()}');
-    });
-    unawaited(p.exitCode.then((code) {
-      DiagLog.log('ocr', 'recognizer stopped ($code)');
-      if (identical(_p, p)) _p = null;
-      while (_waiting.isNotEmpty) {
-        _waiting.removeFirst().complete({'error': 'stopped'});
-      }
-    }));
-    return _p = p;
-  }
+  /// Why reading doesn't work on this PC (null: it does, or not known yet).
+  String? problem;
 
-  /// One request at a time, with a time limit (a stuck picture can't hold
-  /// the rest up: the process is started again).
-  Future<Map<String, dynamic>> _ask(Map<String, dynamic> req, {Duration limit = const Duration(seconds: 60)}) {
-    final next = _chain.then((_) async {
-      final p = await _start();
-      final c = Completer<Map<String, dynamic>>();
-      _waiting.add(c);
-      p.stdin.add(utf8.encode('${jsonEncode(req)}\n'));
-      await p.stdin.flush();
-      return c.future.timeout(limit, onTimeout: () {
-        DiagLog.log('ocr', 'no answer in ${limit.inSeconds}s: restarting');
-        _waiting.remove(c);
-        close();
-        return {'error': 'timeout'};
-      });
-    });
+  Future<void> _chain = Future.value();
+  final Set<Process> _running = {};
+  int _n = 0;
+
+  /// Runs [reqs] (one at a time per PC); null if PowerShell gave no usable
+  /// answer in time.
+  Future<List<Map<String, dynamic>>?> _run(List<Map<String, dynamic>> reqs, {Duration? limit}) {
+    final next = _chain.then((_) => _runNow(reqs, limit ?? Duration(seconds: 40 + 20 * reqs.length)));
     _chain = next.then((_) {}, onError: (_) {});
     return next;
+  }
+
+  Future<List<Map<String, dynamic>>?> _runNow(List<Map<String, dynamic>> reqs, Duration limit) async {
+    final sep = Platform.pathSeparator;
+    final tmp = Directory.systemTemp.path;
+    final script = File('$tmp${sep}localroll-ocr.ps1');
+    final input = File('$tmp${sep}localroll-ocr-${pid}_${_n++}.txt');
+    final out = StringBuffer();
+    final err = StringBuffer();
+    Process? p;
+    try {
+      if (!await script.exists() || await script.readAsString() != _ocrScript) await script.writeAsString(_ocrScript);
+      await input.writeAsString('${reqs.map(jsonEncode).join('\n')}\n', encoding: utf8);
+      p = await Process.start('powershell', [
+        '-NoProfile',
+        '-NonInteractive',
+        '-ExecutionPolicy',
+        'Bypass',
+        '-File',
+        script.path,
+        '-In',
+        input.path,
+      ]);
+      _running.add(p);
+      // Nothing comes on its input: closed right away.
+      unawaited(p.stdin.close().catchError((_) {}));
+      final o = p.stdout.transform(utf8.decoder).forEach(out.write);
+      final e = p.stderr.transform(utf8.decoder).forEach(err.write);
+      final code = await p.exitCode.timeout(limit, onTimeout: () {
+        p?.kill();
+        return -999;
+      });
+      await Future.wait([o, e]).timeout(const Duration(seconds: 5), onTimeout: () => const []);
+      final lines = [for (final l in const LineSplitter().convert(out.toString())) if (l.trim().isNotEmpty) l.trim()];
+      if (code == -999 || lines.length < reqs.length) {
+        final why = code == -999 ? 'no answer in ${limit.inSeconds}s' : 'ended ($code)';
+        DiagLog.log('ocr', '$why; answers ${lines.length}/${reqs.length}; '
+            'output: ${_short(out.toString())}; errors: ${_short(err.toString())}');
+        problem = err.toString().trim().isNotEmpty ? _short(err.toString()) : why;
+        return null;
+      }
+      problem = null;
+      return [
+        for (final l in lines.take(reqs.length))
+          () {
+            try {
+              final v = jsonDecode(l);
+              return v is Map<String, dynamic> ? v : <String, dynamic>{'error': 'bad answer'};
+            } catch (_) {
+              return <String, dynamic>{'error': 'bad answer: ${_short(l)}'};
+            }
+          }(),
+      ];
+    } catch (e) {
+      DiagLog.log('ocr', 'could not run PowerShell: $e');
+      problem = '$e';
+      return null;
+    } finally {
+      if (p != null) _running.remove(p);
+      try {
+        await input.delete();
+      } catch (_) {}
+    }
+  }
+
+  static String _short(String s) {
+    final t = s.trim().replaceAll(RegExp(r'\s+'), ' ');
+    return t.length > 300 ? '${t.substring(0, 300)}…' : t;
   }
 
   OcrLanguages? _langs;
 
   /// The languages Windows can read (asked once; [refresh] asks again,
-  /// e.g. after a language was installed).
+  /// e.g. after a language was installed). Also the check that reading
+  /// works on this PC at all ([problem] says why not).
   Future<OcrLanguages> languages({bool refresh = false}) async {
     if (!supported) return const OcrLanguages([]);
-    if (refresh) close();
     final known = _langs;
     if (known != null && !refresh) return known;
-    try {
-      final r = await _ask({'cmd': 'langs'}, limit: const Duration(seconds: 30));
-      if (r['error'] != null) {
-        DiagLog.log('ocr', 'languages: ${r['error']}');
-        return const OcrLanguages([]);
-      }
-      final list = r['available'];
-      return _langs = OcrLanguages(
-        <String>[if (list is List) ...list.whereType<String>() else if (list is String) list],
-        maxDimension: (r['max'] as num?)?.toInt() ?? 0,
-      );
-    } catch (e) {
-      DiagLog.log('ocr', 'languages: $e');
+    final r = await _run([
+      {'cmd': 'langs'},
+    ], limit: const Duration(seconds: 60));
+    if (r == null) return const OcrLanguages([]);
+    final a = r.first;
+    if (a['error'] != null) {
+      DiagLog.log('ocr', 'languages: ${a['error']}');
+      problem = '${a['error']}';
       return const OcrLanguages([]);
     }
+    final list = a['available'];
+    final l = OcrLanguages(
+      <String>[if (list is List) ...list.whereType<String>() else if (list is String) list],
+      maxDimension: (a['max'] as num?)?.toInt() ?? 0,
+    );
+    DiagLog.log('ocr', 'ready: ${l.available.join(', ')}');
+    return _langs = l;
   }
 
-  /// The text in the picture at [imagePath] (lines joined), '' if none; null
-  /// if it could not be read.
-  Future<String?> read(String imagePath) async {
+  /// The text in each picture (lines joined; '' if none; null for one that
+  /// could not be read). Null: nothing could be read at all (PowerShell gave
+  /// no answer; see [problem]).
+  Future<List<String?>?> readMany(List<String> imagePaths) async {
+    if (imagePaths.isEmpty) return const [];
     final langs = await languages();
     if (!langs.any) return null;
-    final r = await _ask({'cmd': 'ocr', 'path': imagePath, 'lang': langs.preferred ?? ''});
-    final err = r['error'];
-    if (err != null) {
-      DiagLog.log('ocr', 'not read: $err');
-      return null;
-    }
-    final lines = r['lines'];
-    final text = lines is List ? lines.whereType<String>().join('\n') : (lines is String ? lines : '');
-    return tidyOcrText(text);
+    final r = await _run([
+      for (final p in imagePaths) {'cmd': 'ocr', 'path': p, 'lang': langs.preferred ?? ''},
+    ]);
+    if (r == null) return null;
+    return [
+      for (var i = 0; i < imagePaths.length; i++)
+        () {
+          final a = r[i];
+          final err = a['error'];
+          if (err != null) {
+            DiagLog.log('ocr', 'not read: $err');
+            return null;
+          }
+          final lines = a['lines'];
+          return tidyOcrText(lines is List ? lines.whereType<String>().join('\n') : (lines is String ? lines : ''));
+        }(),
+    ];
   }
 
+  /// One picture (see [readMany]).
+  Future<String?> read(String imagePath) async => (await readMany([imagePath]))?.first;
+
   void close() {
-    final p = _p;
-    _p = null;
     _langs = null;
-    unawaited(_out?.cancel());
-    _out = null;
-    p?.kill();
+    for (final p in _running.toList()) {
+      p.kill();
+    }
   }
 }
 

@@ -182,6 +182,9 @@ class TransferServer extends ChangeNotifier {
   /// What photos / videos look like (searching by picture).
   late final PictureIndex pictureIndex = PictureIndex(library);
 
+  /// Text / pictures / faces still being read (searches may miss some).
+  bool Function()? indexing;
+
   /// Who is in which photo (named people can be searched by name).
   late final PeopleIndex people = PeopleIndex(library);
 
@@ -1086,7 +1089,13 @@ class TransferServer extends ChangeNotifier {
       final find = pictureSearch;
       if (find != null) {
         try {
-          pics = {for (final (k, sc) in await find(words)) k: sc};
+          // Not more than a few seconds: the text results come anyway (the
+          // picture model may still be loading; it is ready next time).
+          final hits = await find(words).timeout(const Duration(seconds: 3), onTimeout: () {
+            DiagLog.log('search', 'picture search slow: text results only');
+            return const [];
+          });
+          pics = {for (final (k, sc) in hits) k: sc};
         } catch (e) {
           DiagLog.log('search', 'picture search failed: $e');
         }
@@ -1163,6 +1172,7 @@ class TransferServer extends ChangeNotifier {
         next: offset + limit < entries.length ? offset + limit : null,
         library: library.libraryId.isEmpty ? null : library.libraryId,
         recent: entries.where((e) => e.$2 > since).length,
+        reading: !search.isEmpty && (indexing?.call() ?? false),
       ).toJson(),
     );
   }

@@ -787,8 +787,46 @@ class _TrashPage extends StatefulWidget {
   State<_TrashPage> createState() => _TrashPageState();
 }
 
+/// Days left before [i] goes for good.
+int _daysLeft(MyItem i) {
+  final now = DateTime.now().millisecondsSinceEpoch;
+  return (30 - (now - (i.deletedMs ?? now)) ~/ Duration.millisecondsPerDay).clamp(0, 30);
+}
+
+/// Puts [items] back; says how it went.
+Future<void> _restore(BuildContext context, List<MyItem> items) async {
+  var ok = 0;
+  for (final i in items) {
+    if (await MyLibrary.instance.restore(i)) ok++;
+  }
+  if (!context.mounted) return;
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    content: Text(ok == items.length ? tr('mylib.restored') : tr('mylib.cannot_open')),
+  ));
+}
+
+/// Deletes [items] for good, after asking.
+Future<bool> _purge(BuildContext context, List<MyItem> items) async {
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (c) => AlertDialog(
+      title: Text(tr('mylib.purge_all', {'count': items.length})),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('common.cancel'))),
+        FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(tr('mylib.purge'))),
+      ],
+    ),
+  );
+  if (ok != true) return false;
+  await MyLibrary.instance.purge(items);
+  return true;
+}
+
 class _TrashPageState extends State<_TrashPage> {
   final MyLibrary lib = MyLibrary.instance;
+
+  /// Long press: choose several (ids).
+  final Set<String> _selected = {};
 
   @override
   void initState() {
@@ -809,59 +847,177 @@ class _TrashPageState extends State<_TrashPage> {
   @override
   Widget build(BuildContext context) {
     final list = lib.trash;
-    final now = DateTime.now().millisecondsSinceEpoch;
+    _selected.removeWhere((id) => !list.any((i) => i.id == id));
+    final chosen = [for (final i in list) if (_selected.contains(i.id)) i];
+    final selecting = _selected.isNotEmpty;
     return Scaffold(
       appBar: AppBar(
-        title: Text(tr('mylib.trash')),
+        leading: selecting ? IconButton(onPressed: () => setState(_selected.clear), icon: const Icon(Icons.close_rounded)) : null,
+        title: Text(selecting ? tr('mylib.selected', {'count': _selected.length}) : tr('mylib.trash')),
         actions: [
-          if (list.isNotEmpty)
+          if (selecting) ...[
             TextButton(
               onPressed: () async {
-                final ok = await showDialog<bool>(
-                  context: context,
-                  builder: (c) => AlertDialog(
-                    title: Text(tr('mylib.purge_all', {'count': list.length})),
-                    actions: [
-                      TextButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('common.cancel'))),
-                      FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(tr('mylib.purge'))),
-                    ],
-                  ),
-                );
-                if (ok == true) await lib.purge(list);
+                await _restore(context, chosen);
+                if (mounted) setState(_selected.clear);
+              },
+              child: Text(tr('mylib.restore')),
+            ),
+            TextButton(
+              onPressed: () async {
+                if (await _purge(context, chosen) && mounted) setState(_selected.clear);
               },
               child: Text(tr('mylib.purge')),
             ),
+          ] else if (list.isNotEmpty)
+            TextButton(onPressed: () => _purge(context, list), child: Text(tr('mylib.purge_everything'))),
         ],
       ),
       body: list.isEmpty
           ? Center(child: Text(tr('mylib.trash_empty'), style: const TextStyle(color: LrColors.muted)))
-          : ListView(children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                child: Text(tr('mylib.trash_hint'), style: const TextStyle(color: LrColors.muted, fontSize: 13)),
-              ),
-              for (final i in list)
-                ListTile(
-                  // What it looks like, to tell whether to keep it.
-                  leading: SizedBox.square(
-                    dimension: 52,
-                    child: ClipRRect(borderRadius: BorderRadius.circular(6), child: MyItemThumb(item: i)),
-                  ),
-                  title: Text(i.name, overflow: TextOverflow.ellipsis),
-                  subtitle: Text(tr('mylib.days_left', {
-                    'days': (30 - (now - (i.deletedMs ?? now)) ~/ Duration.millisecondsPerDay).clamp(0, 30),
-                  })),
-                  trailing: TextButton(
-                    onPressed: () async {
-                      final ok = await lib.restore(i);
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(tr(ok ? 'mylib.restored' : 'mylib.cannot_open'))));
-                    },
-                    child: Text(tr('mylib.restore')),
-                  ),
+          : CustomScrollView(slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  child: Text(tr('mylib.trash_hint_more'), style: const TextStyle(color: LrColors.muted, fontSize: 13)),
                 ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                sliver: SliverGrid.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    mainAxisSpacing: 4,
+                    crossAxisSpacing: 4,
+                  ),
+                  itemCount: list.length,
+                  itemBuilder: (context, k) {
+                    final i = list[k];
+                    final on = _selected.contains(i.id);
+                    return GestureDetector(
+                      onTap: () {
+                        if (selecting) {
+                          setState(() => on ? _selected.remove(i.id) : _selected.add(i.id));
+                        } else {
+                          Navigator.of(context).push(MaterialPageRoute(builder: (_) => _TrashViewer(items: list, start: k)));
+                        }
+                      },
+                      onLongPress: () => setState(() => on ? _selected.remove(i.id) : _selected.add(i.id)),
+                      child: Stack(fit: StackFit.expand, children: [
+                        MyItemThumb(item: i),
+                        Positioned(
+                          left: 4,
+                          top: 4,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(8)),
+                            child: Text(tr('mylib.days_left', {'days': _daysLeft(i)}),
+                                style: const TextStyle(fontSize: 10.5, color: Colors.white)),
+                          ),
+                        ),
+                        if (on) Container(color: LrColors.safelight.withValues(alpha: 0.35)),
+                        if (on) const Positioned(right: 4, top: 4, child: Icon(Icons.check_circle_rounded, color: LrColors.safelight)),
+                      ]),
+                    );
+                  },
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 24)),
             ]),
+    );
+  }
+}
+
+/// One deleted item at a time, big: swipe through them; restore it or
+/// delete it for good.
+class _TrashViewer extends StatefulWidget {
+  const _TrashViewer({required this.items, required this.start});
+
+  final List<MyItem> items;
+  final int start;
+
+  @override
+  State<_TrashViewer> createState() => _TrashViewerState();
+}
+
+class _TrashViewerState extends State<_TrashViewer> {
+  late final List<MyItem> _items = List.of(widget.items);
+  late final PageController _pages = PageController(initialPage: widget.start);
+  late int _at = widget.start;
+
+  @override
+  void dispose() {
+    _pages.dispose();
+    super.dispose();
+  }
+
+  /// Restored / deleted: off the list; the last one closes the viewer.
+  void _done(MyItem i) {
+    if (!mounted) return;
+    setState(() {
+      _items.remove(i);
+      if (_at >= _items.length) _at = _items.length - 1;
+    });
+    if (_items.isEmpty) Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_items.isEmpty) return const Scaffold(backgroundColor: Colors.black);
+    final i = _items[_at.clamp(0, _items.length - 1)];
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(i.name, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 15)),
+          Text(tr('mylib.days_left', {'days': _daysLeft(i)}), style: const TextStyle(fontSize: 12, color: LrColors.muted)),
+        ]),
+      ),
+      body: PageView.builder(
+        controller: _pages,
+        itemCount: _items.length,
+        onPageChanged: (n) => setState(() => _at = n),
+        itemBuilder: (context, k) {
+          final it = _items[k];
+          if (it.kind == MyKind.video) return _Video(key: ValueKey(it.id), item: it, active: k == _at);
+          if (it.kind == MyKind.photo) return _Photo(item: it);
+          // Documents: their first page, big.
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: AspectRatio(aspectRatio: 0.75, child: MyItemThumb(key: ValueKey(it.id), item: it)),
+            ),
+          );
+        },
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+          child: Row(children: [
+            Expanded(
+              child: FilledButton.icon(
+                onPressed: () async {
+                  await _restore(context, [i]);
+                  _done(i);
+                },
+                icon: const Icon(Icons.restore_rounded),
+                label: Text(tr('mylib.restore')),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () async {
+                  if (await _purge(context, [i])) _done(i);
+                },
+                icon: const Icon(Icons.delete_forever_rounded),
+                label: Text(tr('mylib.purge')),
+              ),
+            ),
+          ]),
+        ),
+      ),
     );
   }
 }

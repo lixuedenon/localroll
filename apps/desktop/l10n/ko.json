@@ -180,7 +180,7 @@
   "send.transfers": "전송",
   "send.clear": "완료된 전송 기록 지우기",
   "send.online": "온라인",
-  "send.offline": "찾을 수 없음",
+  "send.offline": "오프라인",
   "send.files": "파일 보내기…",
   "send.folder": "폴더 보내기…",
   "send.forget": "연결 해제",
@@ -601,5 +601,14 @@
   "lib.senders_tip": "여기로 보낸 적 있는 기기. 이름은 휴대폰에서 정한 것입니다",
   "lib.from_this_pc": "이 PC(직접 복사한 것)",
   "search.progress_where": "글자·화면·인물 인식 진행 상황은 설정 › 글자 검색에서 볼 수 있습니다",
-  "convert.skipped_files": "문서/파일 {count}개는 변환할 필요가 없어 건너뛰었습니다."
+  "convert.skipped_files": "문서/파일 {count}개는 변환할 필요가 없어 건너뛰었습니다.",
+  "search.ocr_broken_title": "이 PC에서 Windows 글자 인식이 작동하지 않습니다",
+  "search.ocr_broken_body": "파일 이름과 문서는 검색됩니다. 사진은 대기 중입니다. 30분마다 다시 시도하며, '다시 확인'을 눌러도 됩니다. Windows가 알려 준 내용:",
+  "search.state_failed": "일시 중지: 모델이 응답하지 않음(30분 후 다시 시도, 자세한 내용은 진단 로그)",
+  "people.stats": "본 사진 {photos}장 · 찾은 얼굴 {faces}",
+  "send.offline_hint": "오프라인 기기도 고를 수 있습니다. 온라인이 되면 자동으로 시작합니다(최대 7일).",
+  "send.queued_held": "{name}이(가) 오프라인입니다. 온라인이 되면 바로 보냅니다.",
+  "send.held": "{name} 온라인 대기 중",
+  "send.gone_n": "대기 중 {count}개가 삭제되거나 바뀜",
+  "send.err_expired": "7일 동안 온라인이 되지 않아 취소했습니다"
 }

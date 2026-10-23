@@ -180,7 +180,7 @@
   "send.transfers": "Übertragungen",
   "send.clear": "Abgeschlossene Übertragungen entfernen",
   "send.online": "Online",
-  "send.offline": "Nicht gefunden",
+  "send.offline": "offline",
   "send.files": "Dateien senden…",
   "send.folder": "Ordner senden…",
   "send.forget": "Entfernen",
@@ -601,5 +601,14 @@
   "lib.senders_tip": "Geräte, die etwas hierher gesendet haben; die Namen sind die auf den Handys eingestellten",
   "lib.from_this_pc": "Dieser PC (direkt hineinkopiert)",
   "search.progress_where": "Fortschritt von Text-, Bild- und Personenerkennung: Einstellungen › Textsuche",
-  "convert.skipped_files": "{count} Dokumente/Dateien müssen nicht umgewandelt werden, übersprungen."
+  "convert.skipped_files": "{count} Dokumente/Dateien müssen nicht umgewandelt werden, übersprungen.",
+  "search.ocr_broken_title": "Die Texterkennung von Windows läuft auf diesem PC nicht",
+  "search.ocr_broken_body": "Dateinamen und Dokumente sind durchsuchbar, Fotos warten. Alle 30 Minuten wird es erneut versucht, oder „Erneut prüfen“ drücken. Grund laut Windows:",
+  "search.state_failed": "Pausiert: keine Antwort vom Modell (neuer Versuch in 30 Min.; Details im Diagnoseprotokoll)",
+  "people.stats": "Fotos angesehen: {photos} · Gesichter: {faces}",
+  "send.offline_hint": "Auch Geräte offline sind wählbar: Es startet von selbst, sobald sie online sind (bis zu 7 Tage).",
+  "send.queued_held": "{name} ist offline: wird automatisch gesendet, sobald es online ist.",
+  "send.held": "Wartet, bis {name} online ist",
+  "send.gone_n": "{count} beim Warten gelöscht oder geändert",
+  "send.err_expired": "7 Tage gewartet, das Gerät kam nicht online: abgebrochen"
 }

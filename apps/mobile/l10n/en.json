@@ -488,5 +488,9 @@
   "phone.rename": "Rename",
   "pclib.search_hint": "Search text in the PC’s photos and files",
   "pclib.search_none": "Nothing found for “{q}”. Text the PC hasn’t read yet can’t be found.",
-  "phone.name_what": "Shown in the PC's device list, to recognise this phone"
+  "phone.name_what": "Shown in the PC's device list, to recognise this phone",
+  "mylib.purge_everything": "Delete all for good",
+  "mylib.trash_hint_more": "Kept 30 days, then deleted for good. Tap to look, long-press to pick several. Photos kept in the Photos app go to its own “Recently Deleted” when deleted.",
+  "pclib.pc_reading": "The PC is still reading its photos; not everything may be found yet.",
+  "pclib.slow": "{pc} didn't answer in time. Check it's on with LocalRoll open, then try again."
 }

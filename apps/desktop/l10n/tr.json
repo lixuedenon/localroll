@@ -180,7 +180,7 @@
   "send.transfers": "Aktarımlar",
   "send.clear": "Biten aktarımları temizle",
   "send.online": "Çevrimiçi",
-  "send.offline": "Bulunamadı",
+  "send.offline": "çevrimdışı",
   "send.files": "Dosya gönder…",
   "send.folder": "Klasör gönder…",
   "send.forget": "Unut",
@@ -601,5 +601,14 @@
   "lib.senders_tip": "Buraya bir şey göndermiş cihazlar; adlar telefonlarda ayarlananlardır",
   "lib.from_this_pc": "Bu bilgisayar (doğrudan kopyalanan)",
   "search.progress_where": "Metin, resim ve kişi okumasının ilerlemesi: Ayarlar › Metin arama",
-  "convert.skipped_files": "{count} belge/dosyanın dönüştürülmesi gerekmiyor, atlandı."
+  "convert.skipped_files": "{count} belge/dosyanın dönüştürülmesi gerekmiyor, atlandı.",
+  "search.ocr_broken_title": "Windows metin tanıma bu bilgisayarda çalışmıyor",
+  "search.ocr_broken_body": "Dosya adları ve belgeler aranabilir; fotoğraflar bekliyor. Her yarım saatte bir yeniden denenir ya da “Yeniden denetle”ye basın. Windows'un söylediği:",
+  "search.state_failed": "Duraklatıldı: model yanıt vermedi (30 dk sonra yeniden; ayrıntılar tanılama günlüğünde)",
+  "people.stats": "Bakılan fotoğraf: {photos} · bulunan yüz: {faces}",
+  "send.offline_hint": "Çevrimdışı cihazlar da seçilebilir: çevrimiçi olunca kendiliğinden başlar (7 güne kadar).",
+  "send.queued_held": "{name} çevrimdışı: çevrimiçi olur olmaz gönderilecek.",
+  "send.held": "{name} çevrimiçi olması bekleniyor",
+  "send.gone_n": "Beklerken {count} silindi veya değişti",
+  "send.err_expired": "7 gün beklendi, cihaz çevrimiçi olmadı: iptal"
 }

@@ -180,7 +180,7 @@
   "send.transfers": "Truyền tệp",
   "send.clear": "Xóa các lượt truyền đã xong",
   "send.online": "Trực tuyến",
-  "send.offline": "Không tìm thấy",
+  "send.offline": "ngoại tuyến",
   "send.files": "Gửi tệp…",
   "send.folder": "Gửi thư mục…",
   "send.forget": "Quên",
@@ -601,5 +601,14 @@
   "lib.senders_tip": "Các thiết bị đã gửi nội dung đến đây; tên là tên đặt trên điện thoại",
   "lib.from_this_pc": "Máy này (chép vào trực tiếp)",
   "search.progress_where": "Xem tiến độ đọc chữ, ảnh và người ở Cài đặt › Tìm chữ",
-  "convert.skipped_files": "{count} tài liệu/tệp không cần chuyển đổi, đã bỏ qua."
+  "convert.skipped_files": "{count} tài liệu/tệp không cần chuyển đổi, đã bỏ qua.",
+  "search.ocr_broken_title": "Nhận dạng chữ của Windows không chạy trên máy này",
+  "search.ocr_broken_body": "Vẫn tìm được tên tệp và tài liệu; ảnh đang chờ. Cứ nửa giờ sẽ thử lại, hoặc bấm “Kiểm tra lại”. Windows báo:",
+  "search.state_failed": "Tạm dừng: mô hình không phản hồi (thử lại sau 30 phút; chi tiết trong nhật ký chẩn đoán)",
+  "people.stats": "Đã xem {photos} ảnh · tìm thấy {faces} khuôn mặt",
+  "send.offline_hint": "Có thể chọn cả thiết bị ngoại tuyến: sẽ tự gửi khi chúng trực tuyến (tối đa 7 ngày).",
+  "send.queued_held": "{name} đang ngoại tuyến: sẽ gửi ngay khi trực tuyến.",
+  "send.held": "Đang chờ {name} trực tuyến",
+  "send.gone_n": "{count} bị xóa hoặc thay đổi trong lúc chờ",
+  "send.err_expired": "Đã chờ 7 ngày mà thiết bị không trực tuyến: đã hủy"
 }

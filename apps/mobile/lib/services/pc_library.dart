@@ -108,6 +108,14 @@ class PcLibrary extends ChangeNotifier {
   /// How many arrived on the PC in the last day (0: none, or an older PC).
   int recent = 0;
 
+  /// The PC is still reading its photos: a search may not find all yet.
+  bool reading = false;
+
+  /// Bumped by [refresh] (a new search / filter): answers to older asks
+  /// are dropped, and don't hold the new one up.
+  int _gen = 0;
+  int _loadingGen = -1;
+
   bool get hasMore => _next != null;
   bool get canDelete => access == LibraryAccess.manage;
 
@@ -140,6 +148,8 @@ class PcLibrary extends ChangeNotifier {
 
   /// From the top again (after a filter change or a pull-down).
   Future<void> refresh() async {
+    _gen++;
+    loading = false;
     items.clear();
     total = 0;
     _next = 0;
@@ -157,6 +167,8 @@ class PcLibrary extends ChangeNotifier {
       if (keep) _onChanged();
       return;
     }
+    final gen = _gen;
+    _loadingGen = gen;
     loading = true;
     newer = false;
     notifyListeners();
@@ -165,16 +177,20 @@ class PcLibrary extends ChangeNotifier {
       // [keep]: as many as are loaded now, so the list doesn't jump.
       final limit = keep ? items.length.clamp(_pageSize, LrProtocol.libraryPageMax) : _pageSize;
       final page = await c.library(offset: 0, limit: limit, kind: kind, byReceived: byReceived, query: query);
+      if (gen != _gen) return;
       items
         ..clear()
         ..addAll(page.items);
       _take(page);
     } catch (_) {
+      if (gen != _gen) return;
       newer = true;
       _drop();
     } finally {
-      loading = false;
-      if (!_disposed) notifyListeners();
+      if (gen == _gen) {
+        loading = false;
+        if (!_disposed) notifyListeners();
+      }
     }
   }
 
@@ -184,25 +200,32 @@ class PcLibrary extends ChangeNotifier {
     access = page.access;
     discovery.accessAt[desktop.id] = page.access;
     _next = page.next;
+    reading = page.reading;
     error = null;
   }
 
   Future<void> loadMore() async {
     final at = _next;
-    if (loading || at == null) return;
+    final gen = _gen;
+    if ((loading && _loadingGen == gen) || at == null) return;
+    _loadingGen = gen;
     loading = true;
     notifyListeners();
     try {
       final c = await _connect();
       final page = await c.library(offset: at, limit: _pageSize, kind: kind, byReceived: byReceived, query: query);
+      if (gen != _gen) return; // a newer search took over
       items.addAll(page.items);
       _take(page);
     } catch (e) {
+      if (gen != _gen) return;
       error = describe(e);
       _drop();
     } finally {
-      loading = false;
-      if (!_disposed) notifyListeners();
+      if (gen == _gen) {
+        loading = false;
+        if (!_disposed) notifyListeners();
+      }
     }
   }
 
@@ -220,6 +243,8 @@ class PcLibrary extends ChangeNotifier {
         _ => serverError(e.code),
       };
     }
+    // The PC took too long or can't be reached: said plainly ("Retry" is shown).
+    if (e is TimeoutException || e is SocketException || e is HttpException) return tr('pclib.slow', {'pc': desktop.name});
     final s = e.toString();
     return s.startsWith('Exception: ') ? s.substring(11) : s;
   }

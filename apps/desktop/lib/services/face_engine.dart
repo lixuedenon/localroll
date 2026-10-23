@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'package:localroll_core/localroll_core.dart';
 import 'package:onnxruntime/onnxruntime.dart';
 
 import 'face_math.dart';
@@ -39,6 +40,9 @@ class FaceEngine {
   /// At most this many faces per photo (big group photos).
   static const int maxFaces = 20;
 
+  /// The last error from the models (null: none yet).
+  String? lastError;
+
   SendPort? _to;
   Isolate? _isolate;
   ReceivePort? _from;
@@ -52,13 +56,21 @@ class FaceEngine {
         from.listen((m) {
           if (m is SendPort) {
             ready.complete(m);
-          } else if (m is List && m.length == 2) {
+          } else if (m is List && m.length == 2 && m[0] is String) {
+            // The isolate itself failed.
+            lastError = '${m[0]}';
+            DiagLog.log('people', 'face reader stopped: ${m[0]}');
+          } else if (m is List && m.length >= 2 && m[0] is int) {
             final c = _waiting.remove(m[0] as int);
             final v = m[1];
+            if (m.length > 2 && m[2] != null) {
+              lastError = '${m[2]}';
+              DiagLog.log('people', 'face reading failed: ${m[2]}');
+            }
             c?.complete(v is TransferableTypedData ? _faces(v.materialize().asFloat32List()) : null);
           }
         });
-        _isolate = await Isolate.spawn(_worker, [from.sendPort, _detect, _read]);
+        _isolate = await Isolate.spawn(_worker, [from.sendPort, _detect, _read], onError: from.sendPort, errorsAreFatal: false);
         _to = await ready.future;
       }();
 
@@ -117,23 +129,37 @@ void _worker(List<Object> args) {
   final reply = args[0] as SendPort;
   final inbox = ReceivePort();
   reply.send(inbox.sendPort);
-  OrtEnv.instance.init();
-  final opts = OrtSessionOptions()
-    ..setIntraOpNumThreads(2)
-    ..setInterOpNumThreads(1);
-  final detect = OrtSession.fromFile(File(args[1] as String), opts);
-  final reader = OrtSession.fromFile(File(args[2] as String), opts);
-  final outNames = detect.outputNames;
+  // Loading the models can fail (a missing / blocked onnxruntime.dll…):
+  // then every request is answered at once with why.
+  OrtSession? detect, reader;
+  var outNames = const <String>[];
+  String? broken;
+  try {
+    OrtEnv.instance.init();
+    final opts = OrtSessionOptions()
+      ..setIntraOpNumThreads(2)
+      ..setInterOpNumThreads(1);
+    detect = OrtSession.fromFile(File(args[1] as String), opts);
+    reader = OrtSession.fromFile(File(args[2] as String), opts);
+    outNames = detect.outputNames;
+  } catch (e) {
+    broken = 'models not loaded: $e';
+  }
   inbox.listen((m) {
     final msg = m as List;
     final id = msg[0] as int;
+    final d = detect, r = reader;
+    if (broken != null || d == null || r == null) {
+      reply.send([id, null, broken]);
+      return;
+    }
     try {
       final rgb = (msg[1] as TransferableTypedData).materialize().asUint8List();
       final w = msg[2] as int, h = msg[3] as int;
       final (input, scale) = FaceMath.detectInput(rgb, w, h);
       final t = OrtValueTensor.createTensorWithDataList(input, [1, 3, FaceMath.detectSize, FaceMath.detectSize]);
       final run = OrtRunOptions();
-      final outs = detect.run(run, {'input': t});
+      final outs = d.run(run, {'input': t});
       final named = <String, Float32List>{};
       for (var i = 0; i < outs.length && i < outNames.length; i++) {
         named[outNames[i]] = _flat(outs[i]?.value);
@@ -148,7 +174,7 @@ void _worker(List<Object> args) {
       for (final f in found) {
         final up = FaceMath.upright(rgb, w, h, FaceMath.similarity(f.points));
         final ft = OrtValueTensor.createTensorWithDataList(up, [1, 3, FaceMath.faceSize, FaceMath.faceSize]);
-        final o = reader.run(run, {'data': ft});
+        final o = r.run(run, {'data': ft});
         final v = FaceMath.unit(_flat(o.first?.value));
         for (final x in o) {
           x?.release();
@@ -162,7 +188,7 @@ void _worker(List<Object> args) {
       run.release();
       reply.send([id, TransferableTypedData.fromList([Float32List.fromList(result)])]);
     } catch (e) {
-      reply.send([id, null]);
+      reply.send([id, null, '$e']);
     }
   });
 }

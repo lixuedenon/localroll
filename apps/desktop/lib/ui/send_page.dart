@@ -25,6 +25,7 @@ String peerErrorText(String? code) {
 /// What a transfer is doing now, and its colour.
 (String, Color) jobStatus(SendJob j) => switch (j.state) {
       SendJobState.waiting => (tr('send.waiting'), LrColors.muted),
+      SendJobState.held => (tr('send.held', {'name': j.peer.name}), LrColors.muted),
       SendJobState.converting => (
           [
             tr(j.convertHw ? 'send.converting_hw' : 'send.converting',
@@ -69,6 +70,7 @@ class JobTile extends StatelessWidget {
       if (j.active && j.speed > 0) '${formatBytes(j.speed.round())}/s',
       if (j.skippedFiles > 0) tr('send.skipped', {'count': j.skippedFiles}),
       if (j.failedFiles > 0) tr('send.failed_n', {'count': j.failedFiles}),
+      if (j.goneFiles > 0) tr('send.gone_n', {'count': j.goneFiles}),
     ];
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
@@ -111,69 +113,104 @@ class JobTile extends StatelessWidget {
   }
 }
 
-/// Library → another PC: choose which one, then queue the items.
-Future<void> sendToPc(BuildContext context, AppServices s, List<SendFile> files, String title) async {
-  final peers = s.settings.peers.values.toList();
-  final phones = [for (final t in s.phones) ?s.phoneTarget(t.id)];
-  if (peers.isEmpty && phones.isEmpty) {
+/// Library → another PC or a phone: choose which one (the list follows who
+/// comes online or goes, live), then queue the items. Offline ones can be
+/// chosen too: it waits for them. True when queued (false: cancelled).
+Future<bool> sendToPc(BuildContext context, AppServices s, List<SendFile> files, String title) async {
+  if (s.settings.peers.isEmpty && s.phones.isEmpty) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(tr('send.no_paired')),
       action: SnackBarAction(label: tr('nav.devices'), onPressed: () => AppNav.instance.selectTab(AppNav.devices)),
     ));
-    return;
+    return false;
   }
-  final p = await showDialog<PeerPc>(
+  final picked = await showDialog<(String, bool)>(
     context: context,
-    builder: (ctx) => SimpleDialog(
-      title: Text(tr('send.choose_pc', {'what': title})),
-      children: [
-        // Phones with LocalRoll open (they ask their owner first).
-        for (final p in phones)
-          SimpleDialogOption(
-            onPressed: () => Navigator.pop(ctx, p),
-            child: Row(children: [
-              const CircleAvatar(radius: 16, backgroundColor: LrColors.raised, child: Icon(Icons.smartphone_rounded, size: 18)),
-              const SizedBox(width: 12),
-              Expanded(child: Text(p.name)),
-              const Icon(Icons.circle, size: 10, color: onlineGlow),
-            ]),
-          ),
-        for (final p in peers)
-          SimpleDialogOption(
-            onPressed: () => Navigator.pop(ctx, p),
-            child: Row(children: [
-              DeviceBadge(icon: p.icon, color: p.color, size: 32),
-              const SizedBox(width: 12),
-              Expanded(child: Text(p.name)),
-              if (s.isOnline(p.id)) const Icon(Icons.circle, size: 10, color: onlineGlow),
-            ]),
-          ),
-      ],
+    builder: (ctx) => ListenableBuilder(
+      listenable: Listenable.merge([s.server, s.peers, s.settings]),
+      builder: (ctx, _) {
+        final phones = s.phones;
+        final peers = s.settings.peers.values.toList()
+          ..sort((a, b) => (s.isOnline(b.id) ? 1 : 0) - (s.isOnline(a.id) ? 1 : 0));
+        Widget state(bool on) => on
+            ? const Icon(Icons.circle, size: 10, color: onlineGlow)
+            : Text(tr('send.offline'), style: const TextStyle(color: LrColors.muted, fontSize: 12));
+        return SimpleDialog(
+          title: Text(tr('send.choose_pc', {'what': title})),
+          children: [
+            // Phones: online while LocalRoll is open on them.
+            for (final t in phones)
+              SimpleDialogOption(
+                onPressed: () => Navigator.pop(ctx, (t.id, true)),
+                child: Opacity(
+                  opacity: s.phoneTarget(t.id) != null ? 1 : 0.55,
+                  child: Row(children: [
+                    const CircleAvatar(radius: 16, backgroundColor: LrColors.raised, child: Icon(Icons.smartphone_rounded, size: 18)),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(t.name)),
+                    state(s.phoneTarget(t.id) != null),
+                  ]),
+                ),
+              ),
+            for (final p in peers)
+              SimpleDialogOption(
+                onPressed: () => Navigator.pop(ctx, (p.id, false)),
+                child: Opacity(
+                  opacity: s.isOnline(p.id) ? 1 : 0.55,
+                  child: Row(children: [
+                    DeviceBadge(icon: p.icon, color: p.color, size: 32),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(p.name)),
+                    state(s.isOnline(p.id)),
+                  ]),
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+              child: Text(tr('send.offline_hint'), style: const TextStyle(color: LrColors.muted, fontSize: 12)),
+            ),
+          ],
+        );
+      },
     ),
   );
-  if (p == null || !context.mounted) return;
-  if (phones.contains(p)) {
-    await queueForPhone(context, s, p, files, title);
-    return;
+  if (picked == null || !context.mounted) return false;
+  final (id, phone) = picked;
+  if (phone) {
+    final t = s.settings.trusted[id];
+    final target = s.phoneTarget(id) ??
+        (t == null ? null : PeerPc(id: id, name: t.name, hosts: const [], port: 0, token: '', pairedMs: t.pairedMs));
+    if (target == null) return false;
+    return queueForPhone(context, s, target, files, title);
   }
+  final p = s.settings.peers[id];
+  if (p == null) return false;
   s.sender.add(p, files, title);
+  _queuedNote(context, s, p);
+  return true;
+}
+
+/// "Queued" — or "waits for it to come online".
+void _queuedNote(BuildContext context, AppServices s, PeerPc p) {
+  if (!context.mounted) return;
+  final online = s.sender.isOnline?.call(p.id) ?? true;
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-    content: Text(tr('send.queued', {'name': p.name})),
+    content: Text(tr(online ? 'send.queued' : 'send.queued_held', {'name': p.name})),
     action: SnackBarAction(label: tr('xfer.title'), onPressed: () => showTransfers(context, s)),
   ));
 }
 
 /// To a phone: say what will be converted so its photo app can show it, and
 /// let the user choose (convert — recommended — or send everything as it is).
-Future<void> queueForPhone(BuildContext context, AppServices s, PeerPc phone, List<SendFile> files, String title) async {
+Future<bool> queueForPhone(BuildContext context, AppServices s, PeerPc phone, List<SendFile> files, String title) async {
   final platform = s.settings.trusted[phone.id]?.platform ?? '';
   final fmt = s.sender.formatter;
   if (fmt == null) {
     s.sender.add(phone, files, title, toPhone: true, platform: platform);
-    return;
+    return true;
   }
   final plan = PhonePlan([for (final f in files) await fmt.decide(f, platform)]);
-  if (!context.mounted) return;
+  if (!context.mounted) return false;
   var convert = false;
   if (plan.anyConversion) {
     final choice = await showDialog<String>(
@@ -198,16 +235,12 @@ Future<void> queueForPhone(BuildContext context, AppServices s, PeerPc phone, Li
         ],
       ),
     );
-    if (choice == null) return;
+    if (choice == null) return false;
     convert = choice == 'convert';
   }
   s.sender.add(phone, files, title, toPhone: true, convert: convert, platform: platform);
-  if (context.mounted) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(tr('send.queued', {'name': phone.name})),
-      action: SnackBarAction(label: tr('xfer.title'), onPressed: () => showTransfers(context, s)),
-    ));
-  }
+  if (context.mounted) _queuedNote(context, s, phone);
+  return true;
 }
 
 /// File name of [path] (either slash).

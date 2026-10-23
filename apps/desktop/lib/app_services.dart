@@ -140,6 +140,8 @@ class AppServices {
     final quiet = DateTime.now().isBefore(_quietUntil);
     for (final id in now.difference(_onlineSeen)) {
       if (!quiet) _presence.add(PresenceEvent(id, online: true));
+      // What waited for it goes now.
+      sender.online(id);
     }
     for (final id in _onlineSeen.difference(now)) {
       _presence.add(PresenceEvent(id, online: false));
@@ -218,6 +220,9 @@ class AppServices {
     server.onlineNow = () => s.onlineDevices;
     s.sender.phoneTarget = s.phoneTarget;
     s.sender.formatter = PhoneFormatter(ffmpeg);
+    // A phone can be sent to while LocalRoll is open on it; a PC while it answers.
+    s.sender.isOnline = (id) => s.settings.peers.containsKey(id) ? s.isOnline(id) : s.phoneTarget(id) != null;
+    await s.sender.loadHeld();
     // A phone browsing this library: pictures, and "save to my phone".
     server.thumbnail = ffmpeg.thumbnail;
     server.display = ffmpeg.display;
@@ -269,6 +274,8 @@ class AppServices {
     s.pictureIndexer.start();
     s.faceIndexer.start();
     server.pictureSearch = s.pictureIndexer.find;
+    server.indexing = () => [s.textIndexer.progress, s.pictureIndexer.progress, s.faceIndexer.progress]
+        .any((p) => p.value.state == IndexState.working || p.value.state == IndexState.paused);
     Timer.periodic(const Duration(hours: 6), (_) => unawaited(server.trash.purgeOld()));
     return s;
   }

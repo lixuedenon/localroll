@@ -623,7 +623,19 @@ class RemoteItem {
 
 /// A page of the PC's library, newest first.
 class LibraryPage {
-  const LibraryPage({required this.items, required this.total, required this.access, this.next, this.library, this.recent = 0});
+  const LibraryPage({
+    required this.items,
+    required this.total,
+    required this.access,
+    this.next,
+    this.library,
+    this.recent = 0,
+    this.reading = false,
+  });
+
+  /// The PC is still reading text / pictures / faces: a search may not
+  /// find everything yet.
+  final bool reading;
 
   /// How many of all that match arrived in the last 24 hours.
   final int recent;
@@ -647,6 +659,7 @@ class LibraryPage {
         if (next != null) 'next': next,
         if (library != null) 'library': library,
         if (recent > 0) 'recent': recent,
+        if (reading) 'reading': true,
       };
 
   factory LibraryPage.fromJson(Map<String, dynamic> j) => LibraryPage(
@@ -659,5 +672,6 @@ class LibraryPage {
         next: (j['next'] as num?)?.toInt(),
         library: j['library'] as String?,
         recent: (j['recent'] as num?)?.toInt() ?? 0,
+        reading: j['reading'] == true,
       );
 }

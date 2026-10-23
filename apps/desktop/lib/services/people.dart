@@ -101,11 +101,16 @@ class PeopleIndex extends ChangeNotifier {
 
   String get _sep => Platform.pathSeparator;
   String get _dir => '${library.metaDir}${_sep}people';
-  File get _facesFile => File('$_dir${_sep}faces-v1.bin');
+  /// v2: beta.70 — before it, a face reader that failed to start marked
+  /// photos as "nobody here"; read again.
+  File get _facesFile => File('$_dir${_sep}faces-v2.bin');
   File get _peopleFile => File('$_dir${_sep}people.json');
 
   bool has(String item) => _items.containsKey(item);
   int get photosRead => _items.length;
+
+  /// Faces found in all of them.
+  int get facesFound => _items.values.fold(0, (a, f) => a + f.length);
 
   Future<void> load() {
     if (_loadedFor != library.rootPath) _loading = null;
@@ -121,6 +126,8 @@ class PeopleIndex extends ChangeNotifier {
     _not.clear();
     _nextId = 1;
     try {
+      final old = File('$_dir${_sep}faces-v1.bin');
+      if (await old.exists()) await old.delete();
       if (await _peopleFile.exists()) {
         final j = jsonDecode(await _peopleFile.readAsString()) as Map<String, dynamic>;
         _nextId = (j['next'] as num?)?.toInt() ?? 1;

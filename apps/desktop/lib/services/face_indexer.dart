@@ -39,6 +39,7 @@ class FaceIndexer {
   final ValueNotifier<IndexProgress> progress = ValueNotifier(const IndexProgress(IndexState.off));
   bool _running = false;
   bool _stopped = false;
+  int _failures = 0;
   Completer<void>? _wake;
   Timer? _wakeSoon;
 
@@ -102,14 +103,28 @@ class FaceIndexer {
           if (_stopped || !ready) break;
           progress.value = IndexProgress(IndexState.working, done: done, total: todo.length);
           final px = await picture(path);
-          final faces = px == null ? null : await engine.read(px.$3, px.$1, px.$2);
-          // Not readable: marked as read with nobody, so it isn't tried
-          // again and again.
-          people.put(key, faces ?? const []);
+          final faces = px == null ? const <FaceRead>[] : await engine.read(px.$3, px.$1, px.$2);
+          if (faces == null) {
+            // The models gave no answer: not marked as read (tried again
+            // later); after a few in a row, stop and say so.
+            if (++_failures >= 3) break;
+            continue;
+          }
+          _failures = 0;
+          // Not readable as a picture: marked as read with nobody, so it
+          // isn't tried again and again.
+          people.put(key, faces);
           done++;
           await Future<void>.delayed(const Duration(milliseconds: 100));
         }
         await people.save();
+        if (_failures >= 3) {
+          _failures = 0;
+          progress.value = const IndexProgress(IndexState.failed);
+          DiagLog.log('people', 'face reading paused for 30 min: ${engine.lastError}');
+          engine.close();
+          await _sleep(const Duration(minutes: 30));
+        }
       } catch (e, st) {
         DiagLog.log('people', 'face reading stopped: $e\n$st');
         await _sleep(const Duration(minutes: 2));

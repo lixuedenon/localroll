@@ -138,6 +138,9 @@ class PictureEncoder {
   PictureEncoder(this.model);
 
   final PictureModel model;
+  /// The last error from the model (null: none yet).
+  String? lastError;
+
   SendPort? _to;
   Isolate? _isolate;
   ClipTokenizer? _tokenizer;
@@ -155,13 +158,21 @@ class PictureEncoder {
         from.listen((m) {
           if (m is SendPort) {
             ready.complete(m);
-          } else if (m is List && m.length == 2) {
+          } else if (m is List && m.length == 2 && m[0] is String) {
+            lastError = '${m[0]}';
+            DiagLog.log('search', 'picture reader stopped: ${m[0]}');
+          } else if (m is List && m.length >= 2 && m[0] is int) {
             final c = _waiting.remove(m[0] as int);
             final v = m[1];
+            if (m.length > 2 && m[2] != null) {
+              lastError = '${m[2]}';
+              DiagLog.log('search', 'picture reading failed: ${m[2]}');
+            }
             c?.complete(v is TransferableTypedData ? v.materialize().asFloat32List() : null);
           }
         });
-        _isolate = await Isolate.spawn(_worker, [from.sendPort, model.path('clip-picture.onnx'), model.path('clip-text.onnx')]);
+        _isolate = await Isolate.spawn(_worker, [from.sendPort, model.path('clip-picture.onnx'), model.path('clip-text.onnx')],
+            onError: from.sendPort, errorsAreFatal: false);
         _to = await ready.future;
       }();
 
@@ -220,15 +231,27 @@ void _worker(List<Object> args) {
   final reply = args[0] as SendPort;
   final inbox = ReceivePort();
   reply.send(inbox.sendPort);
-  OrtEnv.instance.init();
-  final opts = OrtSessionOptions()
-    ..setIntraOpNumThreads(2)
-    ..setInterOpNumThreads(1);
-  final picture = OrtSession.fromFile(File(args[1] as String), opts);
+  OrtSessionOptions? opts;
+  OrtSession? picture;
   OrtSession? text; // loaded when first searched
+  String? broken;
+  try {
+    OrtEnv.instance.init();
+    opts = OrtSessionOptions()
+      ..setIntraOpNumThreads(2)
+      ..setInterOpNumThreads(1);
+    picture = OrtSession.fromFile(File(args[1] as String), opts);
+  } catch (e) {
+    broken = 'model not loaded: $e';
+  }
   inbox.listen((m) {
     final msg = m as List;
     final id = msg[0] as int;
+    final pic = picture, o = opts;
+    if (broken != null || pic == null || o == null) {
+      reply.send([id, null, broken]);
+      return;
+    }
     try {
       final data = (msg[2] as TransferableTypedData).materialize();
       final OrtValueTensor input;
@@ -236,10 +259,10 @@ void _worker(List<Object> args) {
       final String name;
       if (msg[1] == 'p') {
         input = OrtValueTensor.createTensorWithDataList(data.asFloat32List(), [1, 3, 224, 224]);
-        session = picture;
+        session = pic;
         name = 'pixels';
       } else {
-        text ??= OrtSession.fromFile(File(args[2] as String), opts);
+        text ??= OrtSession.fromFile(File(args[2] as String), o);
         final ids = data.asInt64List();
         input = OrtValueTensor.createTensorWithDataList(ids, [1, ids.length]);
         session = text!;
@@ -257,7 +280,7 @@ void _worker(List<Object> args) {
       final emb = Float32List.fromList([for (final x in row) (x as num).toDouble()]);
       reply.send([id, TransferableTypedData.fromList([emb])]);
     } catch (e) {
-      reply.send([id, null]);
+      reply.send([id, null, '$e']);
     }
   });
 }

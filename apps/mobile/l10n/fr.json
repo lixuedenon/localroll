@@ -488,5 +488,9 @@
   "phone.rename": "Renommer",
   "pclib.search_hint": "Rechercher du texte dans les photos et fichiers du PC",
   "pclib.search_none": "Rien trouvé pour « {q} ». Le texte pas encore lu par le PC n'est pas trouvé.",
-  "phone.name_what": "Affiché dans la liste des appareils du PC, pour reconnaître ce téléphone"
+  "phone.name_what": "Affiché dans la liste des appareils du PC, pour reconnaître ce téléphone",
+  "mylib.purge_everything": "Tout supprimer définitivement",
+  "mylib.trash_hint_more": "Gardés 30 jours puis supprimés. Touchez pour voir, appui long pour en choisir plusieurs. Les photos gardées dans l'app Photos vont dans son propre « Supprimés récemment ».",
+  "pclib.pc_reading": "Le PC lit encore ses photos ; tout n'est peut-être pas encore trouvé.",
+  "pclib.slow": "{pc} n'a pas répondu à temps. Vérifiez qu'il est allumé avec LocalRoll ouvert, puis réessayez."
 }

@@ -180,7 +180,7 @@
   "send.transfers": "Transfers",
   "send.clear": "Clear finished transfers",
   "send.online": "Online",
-  "send.offline": "Not found",
+  "send.offline": "offline",
   "send.files": "Send files…",
   "send.folder": "Send folder…",
   "send.forget": "Forget",
@@ -601,5 +601,14 @@
   "lib.senders_tip": "Devices that sent things here; the names are the ones set on the phones",
   "lib.from_this_pc": "This PC (copied in directly)",
   "search.progress_where": "See how far text, pictures and people have been read in Settings › Text search",
-  "convert.skipped_files": "{count} documents/files need no converting, skipped."
+  "convert.skipped_files": "{count} documents/files need no converting, skipped.",
+  "search.ocr_broken_title": "Windows text recognition isn't working on this PC",
+  "search.ocr_broken_body": "File names and documents can be searched; photos wait. It is tried again every half hour, or press “Check again”. What Windows said:",
+  "search.state_failed": "Paused: no answer from the model (tried again in 30 min; details in the diagnostics log)",
+  "people.stats": "Photos looked at: {photos} · faces found: {faces}",
+  "send.offline_hint": "Offline devices can be chosen too: it starts by itself when they come online (up to 7 days).",
+  "send.queued_held": "{name} is offline: it will be sent as soon as it comes online.",
+  "send.held": "Waiting for {name} to come online",
+  "send.gone_n": "{count} deleted or changed while waiting",
+  "send.err_expired": "Waited 7 days and the device never came online: cancelled"
 }

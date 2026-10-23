@@ -1,5 +1,6 @@
 // apps/desktop/lib/services/peers.dart
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -531,6 +532,39 @@ class SendFile {
   final String? relPath;
   final bool private;
 
+  Map<String, dynamic> toJson() => {
+        'path': path,
+        'name': name,
+        'assetId': assetId,
+        'kind': kind.name,
+        'createdMs': createdMs,
+        'modifiedMs': modifiedMs,
+        'size': size,
+        if (target != null) 'target': target,
+        if (relPath != null) 'relPath': relPath,
+        if (private) 'private': true,
+      };
+
+  static SendFile? fromJson(Object? j) {
+    if (j is! Map) return null;
+    try {
+      return SendFile(
+        path: j['path'] as String,
+        name: j['name'] as String,
+        assetId: j['assetId'] as String,
+        kind: MediaKind.values.firstWhere((k) => k.name == j['kind'], orElse: () => MediaKind.other),
+        createdMs: (j['createdMs'] as num).toInt(),
+        modifiedMs: (j['modifiedMs'] as num).toInt(),
+        size: (j['size'] as num).toInt(),
+        target: j['target'] as String?,
+        relPath: j['relPath'] as String?,
+        private: j['private'] == true,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
   FileOffer offer(String id) => FileOffer(
         id: id,
         assetId: assetId,
@@ -618,7 +652,9 @@ Future<List<SendFile>> filesInFolder(String dir) async {
   return out;
 }
 
-enum SendJobState { waiting, converting, connecting, sending, done, failed, cancelled }
+/// [held]: the other device is not online; starts by itself when it is
+/// (kept across restarts; cancelled after [PeerSender.holdFor]).
+enum SendJobState { waiting, held, converting, connecting, sending, done, failed, cancelled }
 
 class SendJob {
   SendJob(this.peer, this.files, this.title, {this.toPhone = false, this.convert = false, this.platform = ''})
@@ -639,12 +675,18 @@ class SendJob {
   bool convertHw = false;
 
   final String id;
-  final PeerPc peer;
+  PeerPc peer;
+
+  /// Since when it waits for the other device to come online.
+  DateTime? heldSince;
+
+  /// Files deleted or changed while it waited: left out.
+  int goneFiles = 0;
 
   /// To a phone (it asks its owner first; address and certificate come
   /// from its live link — see [PhoneEndpoint]).
   final bool toPhone;
-  final List<SendFile> files;
+  List<SendFile> files;
 
   /// What was sent ("3 files", "Trip", "12 photos").
   final String title;
@@ -682,7 +724,17 @@ class SendJob {
 /// Sends files to paired PCs, one job at a time, with resume: an interrupted
 /// file continues from what the other PC already has.
 class PeerSender extends ChangeNotifier {
-  PeerSender({required this.settings, required this.peers});
+  PeerSender({required this.settings, required this.peers}) {
+    _check = Timer.periodic(const Duration(minutes: 1), (_) => _checkHeld());
+  }
+
+  /// How long a transfer waits for its device to come online.
+  static const Duration holdFor = Duration(days: 7);
+
+  /// Is this device online now (set by AppServices).
+  bool Function(String id)? isOnline;
+
+  Timer? _check;
 
   final AppSettings settings;
   final PeerDirectory peers;
@@ -702,22 +754,143 @@ class PeerSender extends ChangeNotifier {
   SendJob add(PeerPc peer, List<SendFile> files, String title,
       {bool toPhone = false, bool convert = false, String platform = ''}) {
     final j = SendJob(peer, files, title, toPhone: toPhone, convert: convert, platform: platform);
+    // Not online: waits for it (nothing is copied; the files stay where they are).
+    if (!(isOnline?.call(peer.id) ?? true)) _hold(j);
     jobs.insert(0, j);
     while (jobs.length > 50 && jobs.last.over) {
       jobs.removeLast();
     }
     notifyListeners();
+    unawaited(_saveHeld());
     unawaited(_pump());
     return j;
   }
 
+  void _hold(SendJob j) {
+    j
+      ..state = SendJobState.held
+      ..heldSince ??= DateTime.now()
+      ..error = null;
+  }
+
   void cancel(SendJob j) {
     j._cancel = true;
-    if (j.state == SendJobState.waiting) {
+    if (j.state == SendJobState.waiting || j.state == SendJobState.held) {
       j.state = SendJobState.cancelled;
       j.finished = DateTime.now();
     }
     notifyListeners();
+    unawaited(_saveHeld());
+  }
+
+  /// [id] came online: what waits for it starts.
+  void online(String id) {
+    var any = false;
+    for (final j in jobs) {
+      if (j.state != SendJobState.held || j.peer.id != id) continue;
+      final fresh = j.toPhone ? phoneTarget?.call(id) : settings.peers[id];
+      if (fresh != null) j.peer = fresh;
+      j.state = SendJobState.waiting;
+      any = true;
+    }
+    if (!any) return;
+    DiagLog.log('send', '${deviceName(id)} is online: sending what waited for it');
+    notifyListeners();
+    unawaited(_saveHeld());
+    unawaited(_pump());
+  }
+
+  String deviceName(String id) => settings.peers[id]?.name ?? settings.trusted[id]?.name ?? id;
+
+  /// Every minute: online again (missed the moment)? Waited too long?
+  void _checkHeld() {
+    final now = DateTime.now();
+    var changed = false;
+    for (final j in jobs) {
+      if (j.state != SendJobState.held) continue;
+      final since = j.heldSince ?? now;
+      if (now.difference(since) > holdFor) {
+        j
+          ..state = SendJobState.failed
+          ..error = 'expired'
+          ..finished = now;
+        DiagLog.log('send', 'to ${j.peer.name}: waited ${holdFor.inDays} days, cancelled');
+        changed = true;
+      } else if (isOnline?.call(j.peer.id) ?? false) {
+        online(j.peer.id);
+      }
+    }
+    if (changed) {
+      notifyListeners();
+      unawaited(_saveHeld());
+    }
+  }
+
+  File get _heldFile => File('${settings.dataDir.path}${Platform.pathSeparator}send_waiting.json');
+  Future<void> _savingHeld = Future.value();
+
+  /// What waits for a device, kept across restarts.
+  Future<void> _saveHeld() => _savingHeld = _savingHeld.then((_) async {
+        final held = [for (final j in jobs) if (j.state == SendJobState.held) j];
+        try {
+          if (held.isEmpty) {
+            if (await _heldFile.exists()) await _heldFile.delete();
+            return;
+          }
+          final tmp = File('${_heldFile.path}.tmp');
+          await tmp.writeAsString(jsonEncode([
+            for (final j in held)
+              {
+                'peer': j.peer.id,
+                'title': j.title,
+                'toPhone': j.toPhone,
+                'convert': j.convert,
+                'platform': j.platform,
+                'since': j.heldSince?.millisecondsSinceEpoch,
+                'files': [for (final f in j.files) f.toJson()],
+              },
+          ]));
+          await tmp.rename(_heldFile.path);
+        } catch (e) {
+          DiagLog.log('send', 'waiting list not saved: $e');
+        }
+      });
+
+  /// At start: what was waiting for a device before LocalRoll closed.
+  Future<void> loadHeld() async {
+    try {
+      if (!await _heldFile.exists()) return;
+      final list = jsonDecode(await _heldFile.readAsString());
+      if (list is! List) return;
+      for (final e in list.whereType<Map>()) {
+        final id = e['peer'] as String?;
+        if (id == null) continue;
+        final toPhone = e['toPhone'] == true;
+        final t = settings.trusted[id];
+        final peer = toPhone
+            ? (phoneTarget?.call(id) ??
+                (t == null ? null : PeerPc(id: id, name: t.name, hosts: const [], port: 0, token: '', pairedMs: t.pairedMs)))
+            : settings.peers[id];
+        if (peer == null) continue; // no longer paired
+        final files = [for (final f in (e['files'] as List? ?? const [])) ?SendFile.fromJson(f)];
+        if (files.isEmpty) continue;
+        final j = SendJob(peer, files, e['title'] as String? ?? '',
+            toPhone: toPhone, convert: e['convert'] == true, platform: e['platform'] as String? ?? '')
+          ..state = SendJobState.held
+          ..heldSince = e['since'] is num ? DateTime.fromMillisecondsSinceEpoch((e['since'] as num).toInt()) : DateTime.now();
+        jobs.add(j);
+      }
+      notifyListeners();
+      _checkHeld();
+    } catch (e) {
+      DiagLog.log('send', 'waiting list unreadable: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    _check?.cancel();
+    super.dispose();
   }
 
   /// Sends a piece of text; null when it arrived, else an error code.
@@ -809,6 +982,25 @@ class PeerSender extends ChangeNotifier {
     _tick(force: true);
     LrClient? c;
     Directory? temp;
+    // Waited for the device: what was deleted or changed meanwhile is left out.
+    if (j.heldSince != null) {
+      final kept = [
+        for (final f in j.files)
+          if (() {
+            try {
+              final st = File(f.path).statSync();
+              return st.type == FileSystemEntityType.file && st.size == f.size;
+            } catch (_) {
+              return false;
+            }
+          }())
+            f,
+      ];
+      j.goneFiles += j.files.length - kept.length;
+      j
+        ..files = kept
+        ..totalBytes = kept.fold(0, (a, f) => a + f.size);
+    }
     var files = j.files;
     try {
       // Phone: first make what its photo app can't take into what it can.
@@ -878,6 +1070,9 @@ class PeerSender extends ChangeNotifier {
     } on PeerError catch (e) {
       if (e.code == 'cancelled' || j._cancel) {
         j.state = SendJobState.cancelled;
+      } else if (e.code == 'peer_offline' || e.code == 'phone_closed') {
+        // Gone offline: waits for it (what arrived is skipped next time).
+        _hold(j);
       } else {
         j
           ..state = SendJobState.failed
@@ -889,9 +1084,7 @@ class PeerSender extends ChangeNotifier {
         ..error = e.code
         ..reason = (e.body['reason'] as String?)?.trim();
     } catch (e) {
-      j
-        ..state = SendJobState.failed
-        ..error = 'peer_offline';
+      _hold(j);
       debugPrint('send failed: $e');
     } finally {
       c?.close();
@@ -901,7 +1094,8 @@ class PeerSender extends ChangeNotifier {
       } catch (_) {}
       j
         ..current = null
-        ..finished = DateTime.now();
+        ..finished = j.state == SendJobState.held ? null : DateTime.now();
+      unawaited(_saveHeld());
       DiagLog.log('send', 'to ${j.peer.name}${j.toPhone ? ' (phone)' : ''}: ${j.state.name}, ${j.sentFiles} sent, '
           '${j.skippedFiles} already there, ${j.failedFiles} failed${j.error == null ? '' : ', ${j.error}'}');
       _tick(force: true);

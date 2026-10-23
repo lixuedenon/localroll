@@ -951,9 +951,10 @@ class _LibraryPageState extends State<LibraryPage> {
     ];
     if (files.isEmpty) return;
     final count = items.length + paths.length;
-    setState(_clearSelection);
-    await sendToPc(context, widget.services, files,
+    final queued = await sendToPc(context, widget.services, files,
         count == 1 ? (items.isNotEmpty ? items.first.name : paths.first.split(sep).last) : tr('send.n_items', {'count': count}));
+    // Kept selected if nothing was sent (cancelled, went back).
+    if (queued && mounted) setState(_clearSelection);
   }
 
   /// Copy the originals (and files) into a folder of your choice.

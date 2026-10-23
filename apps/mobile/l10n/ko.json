@@ -488,5 +488,9 @@
   "phone.rename": "이름 바꾸기",
   "pclib.search_hint": "PC 사진과 파일 속 글자 검색",
   "pclib.search_none": "'{q}'에 대한 결과가 없습니다. PC가 아직 읽지 않은 글자는 찾을 수 없습니다.",
-  "phone.name_what": "PC의 기기 목록에 표시되어 이 휴대폰을 알아보는 데 쓰입니다"
+  "phone.name_what": "PC의 기기 목록에 표시되어 이 휴대폰을 알아보는 데 쓰입니다",
+  "mylib.purge_everything": "모두 완전히 삭제",
+  "mylib.trash_hint_more": "30일 동안 보관한 뒤 완전히 삭제됩니다. 탭하면 보고, 길게 누르면 여러 개를 고릅니다. 사진 앱에 저장된 사진은 삭제하면 그 앱의 '최근 삭제된 항목'으로 갑니다.",
+  "pclib.pc_reading": "PC가 아직 사진을 읽는 중이라 아직 다 찾지 못할 수 있습니다.",
+  "pclib.slow": "{pc}이(가) 제때 응답하지 않았습니다. 켜져 있고 LocalRoll이 열려 있는지 확인한 뒤 다시 시도하세요."
 }

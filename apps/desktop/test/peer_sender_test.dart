@@ -48,6 +48,7 @@ void main() {
   });
 
   tearDown(() async {
+    sender.dispose();
     await a.close();
     await b.close();
     try {
@@ -162,5 +163,34 @@ void main() {
     expect(j.failedFiles, 1);
     expect(j.error, 'file_changed');
     expect(b.library.items, isEmpty);
+  });
+
+  test('B offline: waits (kept across restarts), then goes when B is online', () async {
+    var online = false;
+    sender.isOnline = (_) => online;
+    final f = await make('wait.jpg', bytesOf(300, 4));
+    final gone = await make('gone.jpg', bytesOf(300, 5));
+    final j = sender.add(bAsSeenByA, [SendFile.plain(f, 'wait.jpg', toLibrary: true)!, SendFile.plain(gone, 'gone.jpg', toLibrary: true)!], 'later');
+    expect(j.state, SendJobState.held);
+    expect(sender.busy, isFalse); // background reading isn't held up by it
+    // LocalRoll closed and opened again: still waiting.
+    await eventually(() => File('${a.settings.dataDir.path}${Platform.pathSeparator}send_waiting.json').existsSync());
+    final again = PeerSender(settings: a.settings, peers: PeerDirectory(settings: a.settings, server: a.server))
+      ..isOnline = (_) => online;
+    await again.loadHeld();
+    expect(again.jobs.single.state, SendJobState.held);
+    expect(again.jobs.single.files, hasLength(2));
+    sender.cancel(j);
+    // Deleted meanwhile: left out, said so.
+    await gone.delete();
+    online = true;
+    again.online(bAsSeenByA.id);
+    final k = again.jobs.single;
+    await eventually(() => k.over, within: const Duration(seconds: 30));
+    expect(k.state, SendJobState.done, reason: k.error);
+    expect(k.sentFiles, 1);
+    expect(k.goneFiles, 1);
+    expect(b.library.items.single.name, 'wait.jpg');
+    again.dispose();
   });
 }

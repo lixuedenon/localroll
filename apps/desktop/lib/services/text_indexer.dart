@@ -31,6 +31,9 @@ enum IndexState {
 
   /// Everything read.
   done,
+
+  /// The model gave no answers (see the diagnostics log); tried again later.
+  failed,
 }
 
 class IndexProgress {
@@ -152,23 +155,35 @@ class TextIndexer {
         final todo = await _todo();
         if (todo.isEmpty) {
           await index.save();
+          if (WindowsOcr.supported && !(languages.value?.any ?? false)) {
+            // The check failed at start (or nothing to read with): try again.
+            languages.value = await ocr.languages(refresh: true);
+          }
           final noOcr = WindowsOcr.supported && !(languages.value?.any ?? false);
           progress.value = IndexProgress(noOcr ? IndexState.noOcr : IndexState.done, done: index.count, total: index.count);
           await _sleep(const Duration(minutes: 10));
           continue;
         }
+        final total = todo.fold(0, (a, j) => a + j.$1);
         var done = 0;
-        for (final job in todo) {
+        for (final (weight, job) in todo) {
           if (_stopped || !enabled()) break;
           while (busy() || library.offline) {
-            progress.value = IndexProgress(IndexState.paused, done: done, total: todo.length);
+            progress.value = IndexProgress(IndexState.paused, done: done, total: total);
             await _sleep(const Duration(seconds: 10));
             if (_stopped || !enabled()) break;
           }
           if (_stopped || !enabled()) break;
-          progress.value = IndexProgress(IndexState.working, done: done, total: todo.length);
-          await job();
-          done++;
+          progress.value = IndexProgress(IndexState.working, done: done, total: total);
+          if (!await job()) {
+            // Windows' text recognition gave no answer at all: not every
+            // minute again — Settings says why; tried again later.
+            progress.value = const IndexProgress(IndexState.noOcr);
+            await _sleep(const Duration(minutes: 30));
+            languages.value = await ocr.languages(refresh: true);
+            break;
+          }
+          done += weight;
           // Quiet: a little rest between items.
           await Future<void>.delayed(const Duration(milliseconds: 150));
         }
@@ -193,10 +208,12 @@ class TextIndexer {
 
   /// What is not read yet: Office / text / PDFs first (quick), then photos
   /// newest first; scanned PDF pages are read as part of their PDF.
-  Future<List<Future<void> Function()>> _todo() async {
-    final quick = <Future<void> Function()>[];
-    final photos = <Future<void> Function()>[];
-    final pdfs = <Future<void> Function()>[];
+  /// Each: how many items it reads, and the reading (false: Windows'
+  /// recognition gave no answer at all).
+  Future<List<(int, Future<bool> Function())>> _todo() async {
+    final quick = <(int, Future<bool> Function())>[];
+    final photos = <(String, String, String)>[]; // key, path, name
+    final pdfs = <(int, Future<bool> Function())>[];
     final keep = <String>{};
     final ocrOk = WindowsOcr.supported && (languages.value?.any ?? false);
 
@@ -206,7 +223,7 @@ class TextIndexer {
       final key = TextIndex.mediaKey(i);
       keep.add(key);
       if (!ocrOk || !_stale(key)) continue;
-      photos.add(() => _readPicture(key, library.absPath(i), i.name));
+      photos.add((key, library.absPath(i), i.name));
     }
     for (final f in await files.list()) {
       final rel = files.relOf(f.path);
@@ -216,41 +233,78 @@ class TextIndexer {
       if (!_stale(key)) continue;
       final ext = extensionOf(f.name);
       if (ext == 'pdf') {
-        if (readPdf != null) pdfs.add(() => _readPdf(key, f.path));
+        if (readPdf != null) pdfs.add((1, () => _readPdf(key, f.path)));
       } else if (OfficeDoc.canRead(ext) || _textKinds.contains(ext)) {
-        quick.add(() => _readDocument(key, f.path, ext));
+        quick.add((1, () async {
+          await _readDocument(key, f.path, ext);
+          return true;
+        }));
       } else if (MediaKind.fromName(f.name) == MediaKind.image) {
-        if (ocrOk) photos.add(() => _readPicture(key, f.path, f.name));
+        if (ocrOk) photos.add((key, f.path, f.name));
       } else {
         // Nothing to read: only the name is searched.
         index.put(key, const TextEntry(''));
       }
     }
-    index.prune(keep);
-    return [...quick, ...photos, ...pdfs];
+    if (keep.isNotEmpty) index.prune(keep);
+    // Photos a dozen at a time: one PowerShell run each.
+    final batches = <(int, Future<bool> Function())>[
+      for (var i = 0; i < photos.length; i += _batch)
+        () {
+          final b = photos.sublist(i, min(i + _batch, photos.length));
+          return (b.length, () => _readPictures(b));
+        }(),
+    ];
+    return [...quick, ...batches, ...pdfs];
   }
 
-  Future<void> _readPicture(String key, String path, String name) async {
-    final ext = extensionOf(name);
-    String? text;
-    if (_direct.contains(ext)) text = await ocr.read(path);
-    if (text == null && convert != null) {
-      // HEIC, RAW, WebP… or too big: a JPEG for reading.
-      await Directory(_tmp).create(recursive: true);
-      final jpg = '$_tmp${Platform.pathSeparator}page.jpg';
-      try {
-        if (await convert!(path, jpg)) text = await ocr.read(jpg);
-      } finally {
-        try {
-          await File(jpg).delete();
-        } catch (_) {}
+  static const int _batch = 12;
+
+  /// A dozen photos: those Windows opens itself read as they are; the rest
+  /// (HEIC, RAW…), or any it couldn't read, through a JPEG made first.
+  Future<bool> _readPictures(List<(String, String, String)> photos) async {
+    final texts = List<String?>.filled(photos.length, null);
+    final direct = [for (var i = 0; i < photos.length; i++) if (_direct.contains(extensionOf(photos[i].$3))) i];
+    if (direct.isNotEmpty) {
+      final r = await ocr.readMany([for (final i in direct) photos[i].$2]);
+      if (r == null) return false;
+      for (var k = 0; k < direct.length; k++) {
+        texts[direct[k]] = r[k];
       }
     }
-    // Not readable: kept empty (not tried again until it changes).
-    index.put(key, TextEntry(text ?? '', lang: languages.value?.preferred ?? '', ocr: true));
+    final rest = [for (var i = 0; i < photos.length; i++) if (texts[i] == null) i];
+    if (rest.isNotEmpty && convert != null) {
+      await Directory(_tmp).create(recursive: true);
+      final jpgs = <int, String>{};
+      try {
+        for (final i in rest) {
+          final jpg = '$_tmp${Platform.pathSeparator}page_$i.jpg';
+          if (await convert!(photos[i].$2, jpg)) jpgs[i] = jpg;
+        }
+        if (jpgs.isNotEmpty) {
+          final order = jpgs.keys.toList();
+          final r = await ocr.readMany([for (final i in order) jpgs[i]!]);
+          if (r == null) return false;
+          for (var k = 0; k < order.length; k++) {
+            texts[order[k]] = r[k];
+          }
+        }
+      } finally {
+        for (final j in jpgs.values) {
+          try {
+            await File(j).delete();
+          } catch (_) {}
+        }
+      }
+    }
+    for (var i = 0; i < photos.length; i++) {
+      // Not readable: kept empty (not tried again until it changes).
+      index.put(photos[i].$1, TextEntry(texts[i] ?? '', lang: languages.value?.preferred ?? '', ocr: true));
+    }
+    return true;
   }
 
-  Future<void> _readPdf(String key, String path) async {
+  Future<bool> _readPdf(String key, String path) async {
     await Directory(_tmp).create(recursive: true);
     final ocrOk = WindowsOcr.supported && (languages.value?.any ?? false);
     final r = await readPdf!(
@@ -267,11 +321,12 @@ class TextIndexer {
     );
     if (r == null) {
       if (!_stopped && enabled()) index.put(key, const TextEntry(''));
-      return;
+      return true;
     }
     final (text, usedOcr) = r;
     // Scanned pages read without a recognizer: read again once there is one.
     index.put(key, TextEntry(text, lang: usedOcr ? (ocrOk ? (languages.value?.preferred ?? '') : 'none') : '', ocr: usedOcr));
+    return true;
   }
 
   Future<void> _readDocument(String key, String path, String ext) async {

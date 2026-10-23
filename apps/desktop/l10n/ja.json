@@ -180,7 +180,7 @@
   "send.transfers": "転送",
   "send.clear": "完了した転送記録を消去",
   "send.online": "オンライン",
-  "send.offline": "見つかりません",
+  "send.offline": "オフライン",
   "send.files": "ファイルを送信…",
   "send.folder": "フォルダーを送信…",
   "send.forget": "登録解除",
@@ -601,5 +601,14 @@
   "lib.senders_tip": "ここへ送ったことのあるデバイス。名前はスマホで設定したものです",
   "lib.from_this_pc": "この PC（直接コピーしたもの）",
   "search.progress_where": "文字・画面・人物の読み取り状況は「設定 › 文字検索」で確認できます",
-  "convert.skipped_files": "{count} 件の文書・ファイルは変換不要のためスキップしました。"
+  "convert.skipped_files": "{count} 件の文書・ファイルは変換不要のためスキップしました。",
+  "search.ocr_broken_title": "この PC では Windows の文字認識が動いていません",
+  "search.ocr_broken_body": "ファイル名と文書は検索できます。写真は待機中です。30 分ごとに再試行します。「もう一度確認」を押しても構いません。Windows からのメッセージ：",
+  "search.state_failed": "一時停止：モデルが応答しません（30 分後に再試行。詳細は診断ログ）",
+  "people.stats": "見た写真 {photos} 枚 · 見つかった顔 {faces}",
+  "send.offline_hint": "オフラインのデバイスも選べます。オンラインになると自動で始まります（最長 7 日）。",
+  "send.queued_held": "{name} はオフラインです。オンラインになり次第送ります。",
+  "send.held": "{name} のオンライン待ち",
+  "send.gone_n": "待機中に {count} 件が削除・変更されました",
+  "send.err_expired": "7 日待ってもオンラインになりませんでした：取り消し"
 }

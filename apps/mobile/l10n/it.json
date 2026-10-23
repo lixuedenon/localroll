@@ -488,5 +488,9 @@
   "phone.rename": "Rinomina",
   "pclib.search_hint": "Cerca testo in foto e file del PC",
   "pclib.search_none": "Nessun risultato per «{q}». Il testo non ancora letto dal PC non si trova.",
-  "phone.name_what": "Compare nell'elenco dispositivi del PC, per riconoscere questo telefono"
+  "phone.name_what": "Compare nell'elenco dispositivi del PC, per riconoscere questo telefono",
+  "mylib.purge_everything": "Elimina tutto definitivamente",
+  "mylib.trash_hint_more": "Conservati 30 giorni, poi eliminati. Tocca per vedere, tieni premuto per sceglierne più d'uno. Le foto salvate nell'app Foto finiscono nel suo «Eliminati di recente».",
+  "pclib.pc_reading": "Il PC sta ancora leggendo le foto; potrebbe non trovare ancora tutto.",
+  "pclib.slow": "{pc} non ha risposto in tempo. Controlla che sia acceso con LocalRoll aperto e riprova."
 }

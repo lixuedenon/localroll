@@ -180,7 +180,7 @@
   "send.transfers": "Transfer",
   "send.clear": "Hapus transfer yang selesai",
   "send.online": "Online",
-  "send.offline": "Tidak ditemukan",
+  "send.offline": "offline",
   "send.files": "Kirim file…",
   "send.folder": "Kirim folder…",
   "send.forget": "Lupakan",
@@ -601,5 +601,14 @@
   "lib.senders_tip": "Perangkat yang pernah mengirim ke sini; namanya sesuai yang diatur di ponsel",
   "lib.from_this_pc": "PC ini (disalin langsung)",
   "search.progress_where": "Kemajuan teks, gambar, dan orang ada di Pengaturan › Pencarian teks",
-  "convert.skipped_files": "{count} dokumen/file tidak perlu dikonversi, dilewati."
+  "convert.skipped_files": "{count} dokumen/file tidak perlu dikonversi, dilewati.",
+  "search.ocr_broken_title": "Pengenalan teks Windows tidak berjalan di PC ini",
+  "search.ocr_broken_body": "Nama file dan dokumen bisa dicari; foto menunggu. Dicoba lagi tiap 30 menit, atau tekan “Periksa lagi”. Kata Windows:",
+  "search.state_failed": "Dijeda: model tidak menjawab (dicoba lagi 30 menit lagi; detail di log diagnostik)",
+  "people.stats": "Foto dilihat: {photos} · wajah: {faces}",
+  "send.offline_hint": "Perangkat offline juga bisa dipilih: mulai sendiri saat online (hingga 7 hari).",
+  "send.queued_held": "{name} offline: akan dikirim begitu online.",
+  "send.held": "Menunggu {name} online",
+  "send.gone_n": "{count} dihapus atau diubah selama menunggu",
+  "send.err_expired": "Sudah menunggu 7 hari, perangkat tak pernah online: dibatalkan"
 }

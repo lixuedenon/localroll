@@ -180,7 +180,7 @@
   "send.transfers": "传输记录",
   "send.clear": "清除已完成的传输记录",
   "send.online": "在线",
-  "send.offline": "未找到",
+  "send.offline": "离线",
   "send.files": "发送文件…",
   "send.folder": "发送文件夹…",
   "send.forget": "忘记",
@@ -601,5 +601,14 @@
   "lib.senders_tip": "发送过内容的设备；名字是手机里设置的",
   "lib.from_this_pc": "这台电脑（直接拷进来的）",
   "search.progress_where": "文字、画面、人物的识别进度可以在 设置 › 文字搜索 里查看",
-  "convert.skipped_files": "其中 {count} 个文档不需要转换，已跳过。"
+  "convert.skipped_files": "其中 {count} 个文档不需要转换，已跳过。",
+  "search.ocr_broken_title": "这台电脑上 Windows 的文字识别没有运行起来",
+  "search.ocr_broken_body": "文件名和文档照常能搜，照片先等着。每半小时自动再试一次，也可以点“重新检查”。Windows 给出的原因：",
+  "search.state_failed": "暂停：模型没有响应（30 分钟后再试，详情见诊断日志）",
+  "people.stats": "已看 {photos} 张照片，找到 {faces} 张脸",
+  "send.offline_hint": "离线的设备也可以选：等它上线会自动开始发送（最多等 7 天）。",
+  "send.queued_held": "{name} 不在线，等它上线会自动发送。",
+  "send.held": "等待 {name} 上线",
+  "send.gone_n": "等待期间有 {count} 个被删或改了，已跳过",
+  "send.err_expired": "等了 7 天对方都没上线，已取消"
 }

@@ -38,7 +38,9 @@ class PictureIndex extends ChangeNotifier {
   static final List<int> _magic = utf8.encode('LRP2');
 
   String get _sep => Platform.pathSeparator;
-  File get _file => File('${library.metaDir}${_sep}search${_sep}pictures-${PictureModel.version}.bin');
+  /// "-2": beta.70 — before it, a model that failed to start marked
+  /// pictures as unreadable; read again.
+  File get _file => File('${library.metaDir}${_sep}search${_sep}pictures-${PictureModel.version}-2.bin');
 
   int get count => _keys.length;
   bool has(String key) => _row.containsKey(key);
@@ -55,6 +57,8 @@ class PictureIndex extends ChangeNotifier {
     _vectors.clear();
     _scales.clear();
     try {
+      final old = File('${library.metaDir}${_sep}search${_sep}pictures-${PictureModel.version}.bin');
+      if (await old.exists()) await old.delete();
       if (await _file.exists()) {
         final b = await _file.readAsBytes();
         final d = ByteData.sublistView(b);
@@ -211,6 +215,8 @@ class PictureIndexer {
   final ValueNotifier<IndexProgress> progress = ValueNotifier(const IndexProgress(IndexState.off));
   bool _running = false;
   bool _stopped = false;
+  int _failures = 0;
+  bool _warm = false;
   Completer<void>? _wake;
   Timer? _wakeSoon;
 
@@ -256,6 +262,7 @@ class PictureIndexer {
         if (!ready) {
           progress.value = const IndexProgress(IndexState.off);
           encoder.close();
+          _warm = false;
           await _sleep(const Duration(minutes: 5));
           continue;
         }
@@ -265,6 +272,11 @@ class PictureIndexer {
           continue;
         }
         await index.load();
+        // The text side loaded now, so the first search is quick.
+        if (!_warm) {
+          _warm = true;
+          unawaited(encoder.text('photo'));
+        }
         final todo = await _todo();
         if (todo.isEmpty) {
           await index.save();
@@ -283,13 +295,29 @@ class PictureIndexer {
           if (_stopped || !ready) break;
           progress.value = IndexProgress(IndexState.working, done: done, total: todo.length);
           final px = await rgb(path, video: video);
-          final e = px == null ? null : await encoder.picture(px);
-          // Not readable: an empty mark, so it isn't tried again and again.
-          index.put(key, e ?? Float32List(PictureIndex.dim));
+          final e = px == null ? Float32List(PictureIndex.dim) : await encoder.picture(px);
+          if (e == null) {
+            // The model gave no answer: not marked (tried again later);
+            // after a few in a row, stop and say so.
+            if (++_failures >= 3) break;
+            continue;
+          }
+          _failures = 0;
+          // Not readable as a picture: an empty mark, so it isn't tried
+          // again and again.
+          index.put(key, e);
           done++;
           await Future<void>.delayed(const Duration(milliseconds: 100));
         }
         await index.save();
+        if (_failures >= 3) {
+          _failures = 0;
+          progress.value = const IndexProgress(IndexState.failed);
+          DiagLog.log('search', 'picture reading paused for 30 min: ${encoder.lastError}');
+          encoder.close();
+          _warm = false;
+          await _sleep(const Duration(minutes: 30));
+        }
       } catch (e, st) {
         DiagLog.log('search', 'picture reading stopped: $e\n$st');
         await _sleep(const Duration(minutes: 2));

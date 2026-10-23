@@ -39,7 +39,9 @@ class TextIndex extends ChangeNotifier {
   final LibraryIndex library;
 
   /// Bumped when the way text is read changes: everything is read again.
-  static const int version = 1;
+  /// 2: beta.70 — before it, Windows' recognition gave no answer on some
+  /// PCs and photos were kept as "no text".
+  static const int version = 2;
 
   /// Longest text kept per item.
   static const int maxChars = 20000;

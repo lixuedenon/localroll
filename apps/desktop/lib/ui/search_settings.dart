@@ -109,7 +109,13 @@ class _SearchSettingsState extends State<SearchSettings> {
             const Divider(height: 1),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
-              child: langs.chinese ? _langsLine(langs) : _addChinese(theme, langs),
+              // Windows' recognition didn't answer at all: say so (adding
+              // Chinese would not help).
+              child: _ix.ocr.problem != null && !langs.any
+                  ? _ocrBroken(theme, _ix.ocr.problem!)
+                  : langs.chinese
+                      ? _langsLine(langs)
+                      : _addChinese(theme, langs),
             ),
           ],
           const Divider(height: 1),
@@ -217,6 +223,7 @@ class _SearchSettingsState extends State<SearchSettings> {
             color: p.state == IndexState.done ? LrColors.verified : LrColors.muted,
           ),
           title: Text(peopleState(p)),
+          subtitle: Text(tr('people.stats', {'photos': s.server.people.photosRead, 'faces': s.server.people.facesFound})),
         ),
       ],
       if (s.server.people.photosRead > 0)
@@ -238,6 +245,7 @@ class _SearchSettingsState extends State<SearchSettings> {
         IndexState.working => tr('search.picture_working', {'done': p.done, 'total': p.total}),
         IndexState.paused => tr('search.state_paused', {'done': p.done, 'total': p.total}),
         IndexState.done => tr('search.picture_done', {'count': p.total}),
+        IndexState.failed => tr('search.state_failed'),
         _ => tr('search.state_starting'),
       };
 
@@ -248,7 +256,23 @@ class _SearchSettingsState extends State<SearchSettings> {
         IndexState.working => tr('search.state_working', {'done': p.done, 'total': p.total}),
         IndexState.paused => tr('search.state_paused', {'done': p.done, 'total': p.total}),
         IndexState.done => tr('search.state_done', {'count': p.total}),
+        IndexState.failed => tr('search.state_failed'),
       };
+
+  /// Text recognition doesn't run on this PC: why, and trying again.
+  Widget _ocrBroken(ThemeData theme, String why) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          const Icon(Icons.error_outline_rounded, size: 18, color: LrColors.safelight),
+          const SizedBox(width: 8),
+          Expanded(child: Text(tr('search.ocr_broken_title'), style: theme.textTheme.titleSmall)),
+        ]),
+        const SizedBox(height: 6),
+        Text(tr('search.ocr_broken_body'), style: theme.textTheme.bodySmall),
+        const SizedBox(height: 4),
+        Text(why, style: theme.textTheme.bodySmall?.copyWith(color: LrColors.muted)),
+        const SizedBox(height: 8),
+        TextButton(onPressed: _recheck, child: Text(tr('search.recheck'))),
+      ]);
 
   Widget _langsLine(OcrLanguages l) => Row(children: [
         const Icon(Icons.translate_rounded, size: 18, color: LrColors.muted),

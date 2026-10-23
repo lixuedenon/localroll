@@ -488,5 +488,9 @@
   "phone.rename": "Yeniden adlandır",
   "pclib.search_hint": "Bilgisayardaki fotoğraf ve dosyalarda metin ara",
   "pclib.search_none": "“{q}” için sonuç yok. Bilgisayarın henüz okumadığı metin bulunamaz.",
-  "phone.name_what": "Bilgisayarın cihaz listesinde görünür, bu telefonu tanımak için"
+  "phone.name_what": "Bilgisayarın cihaz listesinde görünür, bu telefonu tanımak için",
+  "mylib.purge_everything": "Tümünü kalıcı sil",
+  "mylib.trash_hint_more": "30 gün saklanır, sonra kalıcı silinir. Görmek için dokunun, birkaç tane seçmek için basılı tutun. Fotoğraflar uygulamasındaki fotoğraflar silinince onun “Son Silinenler”ine gider.",
+  "pclib.pc_reading": "Bilgisayar fotoğrafları hâlâ okuyor; henüz her şey bulunmayabilir.",
+  "pclib.slow": "{pc} zamanında yanıt vermedi. Açık olduğunu ve LocalRoll'un çalıştığını denetleyip yeniden deneyin."
 }
