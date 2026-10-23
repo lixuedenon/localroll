@@ -1,0 +1,28 @@
+# .github/workflows/faces.yml
+# Run by hand (Actions → "Face models"). Copies the two face models from
+# OpenCV Zoo (YuNet: MIT; SFace: Apache 2.0) into this repo's "deps" release,
+# checked by SHA-256. CI bundles them into the Windows build from there.
+name: Face models
+
+on:
+  workflow_dispatch:
+
+jobs:
+  copy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download and check
+        run: |
+          set -e
+          base=https://media.githubusercontent.com/media/opencv/opencv_zoo/main/models
+          curl -sSfL -o face-detect.onnx "$base/face_detection_yunet/face_detection_yunet_2023mar.onnx"
+          curl -sSfL -o face-id.onnx "$base/face_recognition_sface/face_recognition_sface_2021dec.onnx"
+          echo "8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4  face-detect.onnx" > sums
+          echo "0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79  face-id.onnx" >> sums
+          sha256sum -c sums
+      - name: Upload to the "deps" release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload deps -R "$GITHUB_REPOSITORY" face-detect.onnx face-id.onnx --clobber
