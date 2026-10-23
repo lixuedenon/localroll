@@ -25,6 +25,8 @@ CTX = 77
 
 model, _, preprocess = open_clip.create_model_and_transforms(NAME, pretrained=PRETRAINED)
 model.eval()
+# The fast attention path has no ONNX form: the plain one exports.
+torch.backends.mha.set_fastpath_enabled(False)
 print("preprocess:", preprocess)
 
 
