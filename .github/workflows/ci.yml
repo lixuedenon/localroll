@@ -183,7 +183,9 @@ jobs:
           $env:PATH = "$release;$env:PATH"
           $env:LR_MODELS_DIR = "$release\models"
           flutter test test/models_load_test.dart 2>&1 | Tee-Object -FilePath models.log
-          if ($LASTEXITCODE -ne 0) {
+          # The test prints this line only when the models really answered
+          # (flutter's own exit code on Windows here is not reliable).
+          if (-not (Select-String -Path models.log -Pattern 'face models: ok' -Quiet)) {
             Get-Content models.log | Where-Object { $_.Trim() -ne '' } | Select-Object -Last 9 | ForEach-Object {
               $l = $_; if ($l.Length -gt 900) { $l = $l.Substring(0, 900) }; Write-Output "::error::$l"
             }
