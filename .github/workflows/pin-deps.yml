@@ -3,7 +3,8 @@
 # It makes builds repeatable:
 #   * pubspec.lock for core, desktop and mobile (exact package versions,
 #     resolved with the Flutter used for Windows and Android);
-#   * one ffmpeg for Windows: the newest release-branch build from
+#   * one ffmpeg for Windows (LGPL build: no GPL parts, fine for a paid app):
+#     the newest release-branch build from
 #     BtbN/FFmpeg-Builds is copied into this repo's "deps" release (so it
 #     can't vanish upstream) and its SHA-256 written to scripts/ffmpeg-pin.env.
 # Both are committed to main; ci.yml then always uses exactly these.
@@ -44,13 +45,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -e
-          # Release-branch builds (e.g. ffmpeg-n7.1-latest-win64-gpl-7.1.zip), newest version.
+          # Release-branch builds (e.g. ffmpeg-n7.1-latest-win64-lgpl-7.1.zip), newest version.
           asset=$(gh release view latest -R BtbN/FFmpeg-Builds --json assets \
-            --jq '.assets[].name' | grep -E '^ffmpeg-n[0-9.]+-latest-win64-gpl-[0-9.]+\.zip$' | sort -V | tail -1)
-          if [ -z "$asset" ]; then echo "::error::no release-branch win64-gpl build found"; exit 1; fi
+            --jq '.assets[].name' | grep -E '^ffmpeg-n[0-9.]+-latest-win64-lgpl-[0-9.]+\.zip$' | sort -V | tail -1)
+          if [ -z "$asset" ]; then echo "::error::no release-branch win64-lgpl build found"; exit 1; fi
           ver=$(echo "$asset" | sed -E 's/^ffmpeg-n([0-9.]+)-latest.*/\1/')
           day=$(date -u +%Y%m%d)
-          name="ffmpeg-${ver}-${day}-win64-gpl.zip"
+          name="ffmpeg-${ver}-${day}-win64-lgpl.zip"
           gh release download latest -R BtbN/FFmpeg-Builds -p "$asset" -O "$name"
           sha=$(sha256sum "$name" | cut -d' ' -f1)
           # Not "latest": testers' download scripts must keep finding the app.
