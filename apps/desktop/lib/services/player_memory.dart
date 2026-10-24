@@ -70,6 +70,10 @@ class PlayerMemory extends ChangeNotifier {
   int clipBefore = 10;
   int clipAfter = 10;
 
+  /// The list on the right of the player is open, and which tab.
+  bool sideOpen = true;
+  String sideTab = 'list';
+
   /// The last video playing (for "Continue"), with its key.
   RecentEntry? last;
   String? lastKey;
@@ -103,6 +107,8 @@ class PlayerMemory extends ChangeNotifier {
       pauseAtNotes = j['pauseAtNotes'] == true;
       shotsFolder = j['shots'] as String?;
       clipsFolder = j['clips'] as String?;
+      sideOpen = j['side'] != false;
+      sideTab = j['sideTab'] as String? ?? 'list';
       clipBefore = ((j['clipBefore'] as num?)?.toInt() ?? 10).clamp(0, 60);
       clipAfter = ((j['clipAfter'] as num?)?.toInt() ?? 10).clamp(0, 60);
       last = RecentEntry.fromJson(j['last']);
@@ -182,6 +188,12 @@ class PlayerMemory extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setSide({bool? open, String? tab}) {
+    if (open != null) sideOpen = open;
+    if (tab != null) sideTab = tab;
+    _save();
+  }
+
   void setClipAround(int before, int after) {
     clipBefore = before.clamp(0, 60);
     clipAfter = after.clamp(0, 60);
@@ -221,6 +233,8 @@ class PlayerMemory extends ChangeNotifier {
         'shots': ?shotsFolder,
         'clips': ?clipsFolder,
         'clipBefore': clipBefore,
+        'side': sideOpen,
+        'sideTab': sideTab,
         'clipAfter': clipAfter,
         'last': ?last?.toJson(),
         'lastKey': ?lastKey,

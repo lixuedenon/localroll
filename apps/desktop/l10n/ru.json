@@ -765,5 +765,17 @@
   "clip.around": "Фрагмент вокруг заметки",
   "clip.around_now": "Фрагмент: {before} с до, {after} с после…",
   "clip.before": "До",
-  "clip.after": "После"
+  "clip.after": "После",
+  "player.open_verb": "Воспроизвести в LocalRoll",
+  "player.side": "Список справа (L)",
+  "player.side_close": "Скрыть список (L)",
+  "player.tab_list": "Список",
+  "player.tab_info": "Сведения",
+  "player.kind_all": "Все",
+  "player.kind_video": "Видео",
+  "player.kind_photo": "Фото",
+  "player.notes_this": "Этот файл",
+  "player.notes_all": "Все в списке",
+  "player.notes_none_in_list": "У файлов этого списка пока нет заметок.",
+  "player.my_notes": "Мои последние заметки"
 }

@@ -18,6 +18,7 @@ import 'services/autostart.dart';
 import 'services/face_engine.dart';
 import 'services/open_with.dart';
 import 'services/settings.dart';
+import 'services/single_instance.dart';
 import 'services/watchdog.dart';
 import 'ui/app_nav.dart';
 import 'ui/home_shell.dart';
@@ -35,10 +36,15 @@ Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   // Photos / videos handed over by Explorer ("Open with").
   final files = existingFiles(args);
-  if (!await AppSettings.acquireInstanceLock()) {
-    // Already running: bring that window to the front (with the files) and
-    // quit quietly. Only if it can't be reached, say so in a small window.
-    if (files.isNotEmpty ? await _openInRunningCopy(files) : await _activateRunningCopy()) exit(0);
+  // Only ever one LocalRoll, decided before anything shows: a copy already
+  // running (it answers on this PC) gets the files and comes to the front;
+  // this one quits at once. Checked three ways: it answers, the Windows
+  // mutex, the lock file.
+  if (await _handOver(files, rounds: 1)) exit(0);
+  if (!SingleInstance.claim() || !await AppSettings.acquireInstanceLock()) {
+    // It may still be starting (Explorer opens one copy per file): keep trying
+    // a few seconds. Only if it can't be reached, say so in a small window.
+    if (await _handOver(files, rounds: 16)) exit(0);
     runApp(const _AlreadyRunningApp());
     return;
   }
@@ -70,7 +76,8 @@ Future<void> main(List<String> args) async {
     unawaited(_bringToFront());
     PlayerLauncher.request(services, existingFiles(paths));
   };
-  unawaited(OpenWith.register());
+  // After the first screens: written in the language LocalRoll shows.
+  unawaited(Future<void>.delayed(const Duration(seconds: 5), OpenWith.register));
   runApp(LocalRollApp(services: services));
   if (files.isNotEmpty) PlayerLauncher.request(services, files);
 }
@@ -122,12 +129,17 @@ Future<void> _bringToFront() async {
   } catch (_) {}
 }
 
+/// Hands [files] (none: just "come to the front") to the copy already
+/// running (on this PC only); [rounds] tries, half a second apart.
+Future<bool> _handOver(List<String> files, {required int rounds}) =>
+    files.isNotEmpty ? _openInRunningCopy(files, rounds: rounds) : _activateRunningCopy(rounds: rounds);
+
 /// Hands [files] to the copy that is already running (on this PC only).
 /// Explorer starts one copy per file when several are opened at once, and
 /// the first may still be starting: tried for a few seconds.
-Future<bool> _openInRunningCopy(List<String> files) async {
+Future<bool> _openInRunningCopy(List<String> files, {int rounds = 16}) async {
   final body = utf8.encode(jsonEncode({'paths': files}));
-  for (var round = 0; round < 16; round++) {
+  for (var round = 0; round < rounds; round++) {
     final saved = await AppSettings.savedPort();
     final ports = {?saved, LrProtocol.defaultPort, ...LrProtocol.fallbackPorts};
     final client = HttpClient()..connectionTimeout = const Duration(milliseconds: 600);
@@ -145,29 +157,32 @@ Future<bool> _openInRunningCopy(List<String> files) async {
     } finally {
       client.close(force: true);
     }
-    await Future<void>.delayed(const Duration(milliseconds: 500));
+    if (round + 1 < rounds) await Future<void>.delayed(const Duration(milliseconds: 500));
   }
   return false;
 }
 
 /// Asks the copy that is already running (on this PC only) to show itself.
-Future<bool> _activateRunningCopy() async {
-  final saved = await AppSettings.savedPort();
-  final ports = {?saved, LrProtocol.defaultPort, ...LrProtocol.fallbackPorts};
-  final client = HttpClient()..connectionTimeout = const Duration(milliseconds: 600);
-  try {
-    for (final port in ports) {
-      try {
-        final req = await client.post(InternetAddress.loopbackIPv4.address, port, LrProtocol.pathLocalShow);
-        final res = await req.close().timeout(const Duration(seconds: 1));
-        await res.drain<void>();
-        if (res.statusCode == 200) return true;
-      } catch (_) {}
+Future<bool> _activateRunningCopy({int rounds = 1}) async {
+  for (var round = 0; round < rounds; round++) {
+    final saved = await AppSettings.savedPort();
+    final ports = {?saved, LrProtocol.defaultPort, ...LrProtocol.fallbackPorts};
+    final client = HttpClient()..connectionTimeout = const Duration(milliseconds: 600);
+    try {
+      for (final port in ports) {
+        try {
+          final req = await client.post(InternetAddress.loopbackIPv4.address, port, LrProtocol.pathLocalShow);
+          final res = await req.close().timeout(const Duration(seconds: 1));
+          await res.drain<void>();
+          if (res.statusCode == 200) return true;
+        } catch (_) {}
+      }
+    } finally {
+      client.close(force: true);
     }
-    return false;
-  } finally {
-    client.close(force: true);
+    if (round + 1 < rounds) await Future<void>.delayed(const Duration(milliseconds: 500));
   }
+  return false;
 }
 
 class LocalRollApp extends StatelessWidget {

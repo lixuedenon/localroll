@@ -29,7 +29,11 @@ class NotesPanel extends StatefulWidget {
     required this.onAction,
     required this.onHold,
     required this.onClipAround,
+    this.leading,
   });
+
+  /// Shown at the top left instead of the title.
+  final Widget? leading;
 
   final AppServices services;
   final PlayerEntry entry;
@@ -135,16 +139,15 @@ class _NotesPanelState extends State<NotesPanel> {
   Widget build(BuildContext context) {
     final all = widget.set?.sorted ?? const <Note>[];
     final shown = all.where(_matches).toList();
-    return Container(
-      width: 320,
-      decoration: const BoxDecoration(color: LrColors.surface, border: Border(left: BorderSide(color: LrColors.line))),
+    return Material(
+      color: Colors.transparent,
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 6, 4),
           child: Row(children: [
             Expanded(
-              child: Text('${tr('ink.notes')}${all.isEmpty ? '' : ' (${all.length})'}',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              child: widget.leading ??
+                  Text('${tr('ink.notes')}${all.isEmpty ? '' : ' (${all.length})'}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             ),
             IconButton(
               tooltip: tr(widget.showInk ? 'ink.hide' : 'ink.show'),

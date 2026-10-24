@@ -765,5 +765,17 @@
   "clip.around": "片段前後時長",
   "clip.around_now": "片段：前 {before} 秒、後 {after} 秒…",
   "clip.before": "之前",
-  "clip.after": "之後"
+  "clip.after": "之後",
+  "player.open_verb": "用 LocalRoll 播放",
+  "player.side": "右側清單（L）",
+  "player.side_close": "收起清單（L）",
+  "player.tab_list": "清單",
+  "player.tab_info": "資訊",
+  "player.kind_all": "全部",
+  "player.kind_video": "影片",
+  "player.kind_photo": "照片",
+  "player.notes_this": "這個檔案",
+  "player.notes_all": "清單裡全部",
+  "player.notes_none_in_list": "這個清單裡的檔案還沒有標註。",
+  "player.my_notes": "我的標註"
 }

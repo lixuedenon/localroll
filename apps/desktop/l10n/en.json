@@ -765,5 +765,17 @@
   "clip.around": "Clip around a note",
   "clip.around_now": "Clip: {before} s before, {after} s after…",
   "clip.before": "Before",
-  "clip.after": "After"
+  "clip.after": "After",
+  "player.open_verb": "Play with LocalRoll",
+  "player.side": "List on the right (L)",
+  "player.side_close": "Hide the list (L)",
+  "player.tab_list": "List",
+  "player.tab_info": "Info",
+  "player.kind_all": "All",
+  "player.kind_video": "Videos",
+  "player.kind_photo": "Photos",
+  "player.notes_this": "This file",
+  "player.notes_all": "All in the list",
+  "player.notes_none_in_list": "No notes on the files of this list yet.",
+  "player.my_notes": "My latest notes"
 }

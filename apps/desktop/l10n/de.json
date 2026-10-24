@@ -765,5 +765,17 @@
   "clip.around": "Ausschnitt um eine Notiz",
   "clip.around_now": "Ausschnitt: {before} s davor, {after} s danach …",
   "clip.before": "Davor",
-  "clip.after": "Danach"
+  "clip.after": "Danach",
+  "player.open_verb": "Mit LocalRoll abspielen",
+  "player.side": "Liste rechts (L)",
+  "player.side_close": "Liste ausblenden (L)",
+  "player.tab_list": "Liste",
+  "player.tab_info": "Infos",
+  "player.kind_all": "Alle",
+  "player.kind_video": "Videos",
+  "player.kind_photo": "Fotos",
+  "player.notes_this": "Diese Datei",
+  "player.notes_all": "Alle in der Liste",
+  "player.notes_none_in_list": "Noch keine Notizen zu den Dateien dieser Liste.",
+  "player.my_notes": "Meine letzten Notizen"
 }

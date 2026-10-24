@@ -765,5 +765,17 @@
   "clip.around": "Clipe ao redor de uma nota",
   "clip.around_now": "Clipe: {before} s antes, {after} s depois…",
   "clip.before": "Antes",
-  "clip.after": "Depois"
+  "clip.after": "Depois",
+  "player.open_verb": "Reproduzir com LocalRoll",
+  "player.side": "Lista à direita (L)",
+  "player.side_close": "Ocultar lista (L)",
+  "player.tab_list": "Lista",
+  "player.tab_info": "Info",
+  "player.kind_all": "Tudo",
+  "player.kind_video": "Vídeos",
+  "player.kind_photo": "Fotos",
+  "player.notes_this": "Este arquivo",
+  "player.notes_all": "Todos da lista",
+  "player.notes_none_in_list": "Ainda não há notas nos arquivos desta lista.",
+  "player.my_notes": "Minhas notas recentes"
 }

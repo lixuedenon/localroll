@@ -20,7 +20,9 @@ import '../../services/network.dart';
 import '../../services/peers.dart';
 import '../../services/player_memory.dart';
 import '../app_nav.dart';
+import '../files_view.dart';
 import '../format.dart';
+import '../media_thumb.dart';
 import '../send_page.dart';
 import '../theme.dart';
 import '../trash_actions.dart';
@@ -32,6 +34,7 @@ import 'notes_panel.dart';
 import 'player_entry.dart';
 import 'snapshot.dart';
 
+part 'player_side.dart';
 part 'player_video.dart';
 
 /// Opens files from this PC (Explorer's "Open with", drag and drop, the
@@ -146,8 +149,8 @@ abstract class _ViewHandle {
   void seekTo(int ms, {bool play = false});
 }
 
-/// What is open on the right.
-enum _Panel { none, info, notes }
+/// The tabs of the list on the right.
+enum _Tab { list, notes, info }
 
 /// Typing somewhere (a text mark, a search box): keys are letters then.
 bool _typing() => FocusManager.instance.primaryFocus?.context?.findAncestorStateOfType<EditableTextState>() != null;
@@ -176,7 +179,13 @@ class _PlayerPageState extends State<PlayerPage> {
   final FocusNode _focus = FocusNode(debugLabel: 'player');
   final Map<PlayerEntry, _ViewHandle> _handles = {};
 
-  _Panel _panel = _Panel.none;
+  /// The list on the right: open, which tab, notes of this file or all.
+  late bool _side = widget.services.player.sideOpen;
+  late _Tab _tab = _Tab.values.firstWhere((t) => t.name == widget.services.player.sideTab, orElse: () => _Tab.list);
+  bool _notesAll = false;
+
+  /// Full screen: the list slid out from the right edge.
+  bool _peek = false;
   bool _fullscreen = false;
 
   /// Annotations of each item, once read.
@@ -335,9 +344,11 @@ class _PlayerPageState extends State<PlayerPage> {
     if (k == LogicalKeyboardKey.keyF || k == LogicalKeyboardKey.f11) {
       _setFullscreen(!_fullscreen);
     } else if (k == LogicalKeyboardKey.keyI) {
-      _toggle(_Panel.info);
+      _showTab(_Tab.info);
     } else if (k == LogicalKeyboardKey.keyN && !shift) {
-      _toggle(_Panel.notes);
+      _showTab(_Tab.notes);
+    } else if (k == LogicalKeyboardKey.keyL) {
+      _toggleSide();
     } else if (k == LogicalKeyboardKey.keyD) {
       _editor == null ? _startDraw() : unawaited(_finishDraw());
     } else if (k == LogicalKeyboardKey.keyC && !ctrl && _entry.video) {
@@ -393,7 +404,83 @@ class _PlayerPageState extends State<PlayerPage> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('convert.queued_hint', {'preset': p.label}))));
   }
 
-  void _toggle(_Panel p) => setState(() => _panel = _panel == p ? _Panel.none : p);
+  /// Show [t] on the right (pressed again while shown: the list closes).
+  void _showTab(_Tab t) {
+    if (_fullscreen) {
+      setState(() {
+        _peek = !(_peek && _tab == t);
+        _tab = t;
+      });
+    } else {
+      setState(() {
+        _side = !(_side && _tab == t);
+        _tab = t;
+      });
+    }
+    _memory.setSide(open: _fullscreen ? null : _side, tab: t.name);
+  }
+
+  void _openTab(_Tab t) {
+    setState(() {
+      _tab = t;
+      if (_fullscreen) {
+        _peek = true;
+      } else {
+        _side = true;
+      }
+    });
+    _memory.setSide(open: _fullscreen ? null : true, tab: t.name);
+  }
+
+  void _toggleSide() {
+    if (_fullscreen) {
+      setState(() => _peek = !_peek);
+      return;
+    }
+    setState(() => _side = !_side);
+    _memory.setSide(open: _side);
+  }
+
+  /// Every annotation of the files in this list: (which file, note).
+  List<(int, Note)> _allNotes() {
+    final byRel = <String, int>{}, byPath = <String, int>{};
+    for (var i = 0; i < _entries.length; i++) {
+      final e = _entries[i];
+      if (e.item != null) byRel[e.item!.relPath] = i;
+      byPath[e.path.toLowerCase()] = i;
+    }
+    final seen = <String>{};
+    final out = <(int, Note)>[];
+    void add(NoteSet set, int? i) {
+      if (i == null) return;
+      for (final n in set.notes) {
+        if (seen.add(n.id)) out.add((i, n));
+      }
+    }
+
+    for (final e in _sets.entries) {
+      add(e.value, _entries.indexOf(e.key) < 0 ? null : _entries.indexOf(e.key));
+    }
+    for (final set in widget.services.notes.sets) {
+      add(set, set.rel != null ? byRel[set.rel] : byPath[set.path.toLowerCase()]);
+    }
+    out.sort((a, b) => a.$1 != b.$1 ? a.$1.compareTo(b.$1) : a.$2.startMs.compareTo(b.$2.startMs));
+    return out;
+  }
+
+  /// Go to [n] on the [index]th file (from "all notes").
+  void _goToNote(int index, Note n) {
+    if (index == _index) {
+      unawaited(_noteAction(n, _entry.video ? NoteAction.jump : NoteAction.edit));
+      return;
+    }
+    final e = _entries[index];
+    if (e.video) {
+      final to = n.startMs - _memory.leadSec * 1000;
+      _startAt[e] = to < 0 ? 0 : to;
+    }
+    _pages.jumpToPage(index);
+  }
 
   // ------------------------------------------------------------- drawing
 
@@ -459,7 +546,7 @@ class _PlayerPageState extends State<PlayerPage> {
       action: SnackBarAction(
         label: tr('ink.view'),
         onPressed: () {
-          if (mounted && _panel != _Panel.notes) setState(() => _panel = _Panel.notes);
+          if (mounted) _openTab(_Tab.notes);
         },
       ),
     ));
@@ -839,9 +926,10 @@ class _PlayerPageState extends State<PlayerPage> {
           offset: const Offset(-4, 4),
           backgroundColor: LrColors.safelight,
           textColor: Colors.black,
-          child: _btn(Icons.format_list_bulleted_rounded, tr('ink.notes_key'), () => _toggle(_Panel.notes), on: _panel == _Panel.notes),
+          child: _btn(Icons.format_list_bulleted_rounded, tr('ink.notes_key'), () => _showTab(_Tab.notes),
+              on: (_fullscreen ? _peek : _side) && _tab == _Tab.notes),
         ),
-        _btn(Icons.info_outline_rounded, tr('player.info'), () => _toggle(_Panel.info), on: _panel == _Panel.info),
+        _btn(Icons.view_sidebar_rounded, tr('player.side'), _toggleSide, on: _fullscreen ? _peek : _side),
         _btn(Icons.send_rounded, tr('player.send'), () => _send(e)),
         PopupMenuButton<String>(
           tooltip: tr('ink.more'),
@@ -952,6 +1040,22 @@ class _PlayerPageState extends State<PlayerPage> {
                 ),
               ),
             ),
+          // Full screen: the list slides out at the right edge.
+          if (_fullscreen && !_peek)
+            Positioned(
+              right: 0,
+              top: 80,
+              bottom: 80,
+              width: 10,
+              child: MouseRegion(opaque: false, onEnter: (_) => setState(() => _peek = true)),
+            ),
+          if (_fullscreen && _peek)
+            Positioned(
+              right: 0,
+              top: 56,
+              bottom: 0,
+              child: MouseRegion(onExit: (_) => setState(() => _peek = false), child: _sideBox()),
+            ),
           if (_fullscreen)
             Positioned(
               left: 0,
@@ -980,27 +1084,99 @@ class _PlayerPageState extends State<PlayerPage> {
           backgroundColor: Colors.black,
           body: Row(children: [
             Expanded(child: main),
-            if (_panel == _Panel.info)
-              _InfoPanel(key: ObjectKey(_entry), entry: _entry, services: widget.services, from: _entry.item == null ? null : _from(_entry.item!)),
-            if (_panel == _Panel.notes)
-              NotesPanel(
-                key: ObjectKey(_entry),
-                services: widget.services,
-                entry: _entry,
-                set: _set,
-                aspect: () {
-                  final sz = _active?.pictureSize;
-                  return sz == null || sz.height == 0 ? 16 / 9 : sz.width / sz.height;
-                }(),
-                showInk: _showInk,
-                onShowInk: (v) => setState(() => _showInk = v),
-                onAction: (n, a) => unawaited(_noteAction(n, a)),
-                onHold: (n, ms) => unawaited(_hold(n, ms)),
-                onClipAround: () => unawaited(_clipAround()),
-              ),
+            if (!_fullscreen && _side) _sideBox(),
           ]),
         ),
       ),
+    );
+  }
+
+  // ------------------------------------------------------- list on the right
+
+  Widget _tabButton(_Tab t, String label, int count) {
+    final on = _tab == t;
+    return Expanded(
+      child: InkWell(
+        onTap: () => _openTab(t),
+        child: Container(
+          height: 42,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            border: Border(bottom: BorderSide(color: on ? LrColors.safelight : Colors.transparent, width: 2)),
+          ),
+          child: Text(count > 0 ? '$label $count' : label,
+              style: TextStyle(fontSize: 13.5, fontWeight: on ? FontWeight.w600 : FontWeight.w400, color: on ? LrColors.text : LrColors.muted)),
+        ),
+      ),
+    );
+  }
+
+  Widget _scopeSwitch() => SegmentedButton<bool>(
+        showSelectedIcon: false,
+        style: const ButtonStyle(visualDensity: VisualDensity.compact, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+        segments: [
+          ButtonSegment(value: false, label: Text(tr('player.notes_this'), style: const TextStyle(fontSize: 12))),
+          ButtonSegment(value: true, label: Text(tr('player.notes_all'), style: const TextStyle(fontSize: 12))),
+        ],
+        selected: {_notesAll},
+        onSelectionChanged: (v) => setState(() => _notesAll = v.first),
+      );
+
+  Widget _sideBox() {
+    final e = _entry;
+    final all = _notesAll ? _allNotes() : const <(int, Note)>[];
+    final Widget body = switch (_tab) {
+      _Tab.list => _EntryList(
+          key: const ValueKey('list'),
+          services: widget.services,
+          entries: _entries,
+          index: _index,
+          onPick: (i) => _pages.jumpToPage(i),
+        ),
+      _Tab.notes => _notesAll
+          ? _AllNotes(
+              services: widget.services,
+              entries: _entries,
+              notes: all,
+              current: _index,
+              header: _scopeSwitch(),
+              onPick: _goToNote,
+            )
+          : NotesPanel(
+              key: ObjectKey(e),
+              services: widget.services,
+              entry: e,
+              set: _set,
+              leading: Align(alignment: Alignment.centerLeft, child: _scopeSwitch()),
+              aspect: () {
+                final sz = _active?.pictureSize;
+                return sz == null || sz.height == 0 ? 16 / 9 : sz.width / sz.height;
+              }(),
+              showInk: _showInk,
+              onShowInk: (v) => setState(() => _showInk = v),
+              onAction: (n, a) => unawaited(_noteAction(n, a)),
+              onHold: (n, ms) => unawaited(_hold(n, ms)),
+              onClipAround: () => unawaited(_clipAround()),
+            ),
+      _Tab.info => _InfoPanel(key: ObjectKey(e), entry: e, services: widget.services, from: e.item == null ? null : _from(e.item!)),
+    };
+    return Container(
+      width: 330,
+      decoration: const BoxDecoration(color: LrColors.surface, border: Border(left: BorderSide(color: LrColors.line))),
+      child: Column(children: [
+        Row(children: [
+          _tabButton(_Tab.list, tr('player.tab_list'), _entries.length > 1 ? _entries.length : 0),
+          _tabButton(_Tab.notes, tr('ink.notes'), _set?.notes.length ?? 0),
+          _tabButton(_Tab.info, tr('player.tab_info'), 0),
+          IconButton(
+            tooltip: tr('player.side_close'),
+            onPressed: _toggleSide,
+            icon: const Icon(Icons.chevron_right_rounded, size: 20),
+          ),
+        ]),
+        const Divider(height: 1),
+        Expanded(child: body),
+      ]),
     );
   }
 }
@@ -1318,9 +1494,8 @@ class _InfoPanelState extends State<_InfoPanel> {
   @override
   Widget build(BuildContext context) {
     final e = widget.entry;
-    return Container(
-      width: 300,
-      decoration: const BoxDecoration(color: LrColors.surface, border: Border(left: BorderSide(color: LrColors.line))),
+    return Material(
+      color: Colors.transparent,
       child: FutureBuilder<ProbeInfo>(
         future: _probe,
         builder: (context, snap) {

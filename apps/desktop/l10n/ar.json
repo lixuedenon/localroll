@@ -765,5 +765,17 @@
   "clip.around": "مدة المقطع حول التعليق",
   "clip.around_now": "المقطع: {before} ث قبل، {after} ث بعد…",
   "clip.before": "قبل التعليق",
-  "clip.after": "بعد التعليق"
+  "clip.after": "بعد التعليق",
+  "player.open_verb": "تشغيل باستخدام LocalRoll",
+  "player.side": "القائمة على اليمين (L)",
+  "player.side_close": "إخفاء القائمة (L)",
+  "player.tab_list": "القائمة",
+  "player.tab_info": "معلومات",
+  "player.kind_all": "الكل",
+  "player.kind_video": "فيديو",
+  "player.kind_photo": "صور",
+  "player.notes_this": "هذا الملف",
+  "player.notes_all": "كل ملفات القائمة",
+  "player.notes_none_in_list": "لا توجد تعليقات على ملفات هذه القائمة بعد.",
+  "player.my_notes": "تعليقاتي الأخيرة"
 }

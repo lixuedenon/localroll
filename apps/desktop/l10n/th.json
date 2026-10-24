@@ -765,5 +765,17 @@
   "clip.around": "คลิปรอบโน้ต",
   "clip.around_now": "คลิป: ก่อน {before} วินาที หลัง {after} วินาที…",
   "clip.before": "ก่อน",
-  "clip.after": "หลัง"
+  "clip.after": "หลัง",
+  "player.open_verb": "เล่นด้วย LocalRoll",
+  "player.side": "รายการด้านขวา (L)",
+  "player.side_close": "ซ่อนรายการ (L)",
+  "player.tab_list": "รายการ",
+  "player.tab_info": "ข้อมูล",
+  "player.kind_all": "ทั้งหมด",
+  "player.kind_video": "วิดีโอ",
+  "player.kind_photo": "รูป",
+  "player.notes_this": "ไฟล์นี้",
+  "player.notes_all": "ทั้งรายการ",
+  "player.notes_none_in_list": "ไฟล์ในรายการนี้ยังไม่มีโน้ต",
+  "player.my_notes": "โน้ตล่าสุดของฉัน"
 }

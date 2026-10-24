@@ -765,5 +765,17 @@
   "clip.around": "메모 앞뒤 클립",
   "clip.around_now": "클립: 앞 {before}초, 뒤 {after}초…",
   "clip.before": "앞",
-  "clip.after": "뒤"
+  "clip.after": "뒤",
+  "player.open_verb": "LocalRoll로 재생",
+  "player.side": "오른쪽 목록 (L)",
+  "player.side_close": "목록 숨기기 (L)",
+  "player.tab_list": "목록",
+  "player.tab_info": "정보",
+  "player.kind_all": "전체",
+  "player.kind_video": "동영상",
+  "player.kind_photo": "사진",
+  "player.notes_this": "이 파일",
+  "player.notes_all": "목록 전체",
+  "player.notes_none_in_list": "이 목록의 파일에는 아직 메모가 없습니다.",
+  "player.my_notes": "최근 메모"
 }

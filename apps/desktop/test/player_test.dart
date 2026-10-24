@@ -79,7 +79,9 @@ void main() {
   });
 
   test('"Open with" entries never take over the default program', () {
-    final reg = OpenWith.regFile(exe: r'C:\Apps\LocalRoll\LocalRoll.exe', exeName: 'LocalRoll.exe', extensions: ['mp4', 'heic']);
+    final reg = OpenWith.regFile(exe: r'C:\Apps\LocalRoll\LocalRoll.exe', exeName: 'LocalRoll.exe', verb: 'Play with LocalRoll', extensions: ['mp4', 'heic']);
+    expect(reg, contains(r'SystemFileAssociations\.mp4\shell\LocalRoll.Play'));
+    expect(reg, contains('"MUIVerb"="Play with LocalRoll"'));
     expect(reg, startsWith('Windows Registry Editor Version 5.00'));
     expect(reg, contains(r'@="\"C:\\Apps\\LocalRoll\\LocalRoll.exe\" \"%1\""'));
     expect(reg, contains('[HKEY_CURRENT_USER\\Software\\Classes\\.mp4\\OpenWithProgids]'));

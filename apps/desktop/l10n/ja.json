@@ -765,5 +765,17 @@
   "clip.around": "メモの前後のクリップ",
   "clip.around_now": "クリップ：前 {before} 秒・後 {after} 秒…",
   "clip.before": "前",
-  "clip.after": "後"
+  "clip.after": "後",
+  "player.open_verb": "LocalRoll で再生",
+  "player.side": "右側のリスト（L）",
+  "player.side_close": "リストを隠す（L）",
+  "player.tab_list": "リスト",
+  "player.tab_info": "情報",
+  "player.kind_all": "すべて",
+  "player.kind_video": "動画",
+  "player.kind_photo": "写真",
+  "player.notes_this": "このファイル",
+  "player.notes_all": "リスト全体",
+  "player.notes_none_in_list": "このリストのファイルにはまだメモがありません。",
+  "player.my_notes": "最近のメモ"
 }

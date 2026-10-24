@@ -765,5 +765,17 @@
   "clip.around": "Klip di sekitar catatan",
   "clip.around_now": "Klip: {before} dtk sebelum, {after} dtk sesudah…",
   "clip.before": "Sebelum",
-  "clip.after": "Sesudah"
+  "clip.after": "Sesudah",
+  "player.open_verb": "Putar dengan LocalRoll",
+  "player.side": "Daftar di kanan (L)",
+  "player.side_close": "Sembunyikan daftar (L)",
+  "player.tab_list": "Daftar",
+  "player.tab_info": "Info",
+  "player.kind_all": "Semua",
+  "player.kind_video": "Video",
+  "player.kind_photo": "Foto",
+  "player.notes_this": "File ini",
+  "player.notes_all": "Semua di daftar",
+  "player.notes_none_in_list": "Belum ada catatan di file daftar ini.",
+  "player.my_notes": "Catatan terbaru saya"
 }

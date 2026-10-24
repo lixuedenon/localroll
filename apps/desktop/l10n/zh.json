@@ -765,5 +765,17 @@
   "clip.around": "片段前后时长",
   "clip.around_now": "片段：前 {before} 秒、后 {after} 秒…",
   "clip.before": "之前",
-  "clip.after": "之后"
+  "clip.after": "之后",
+  "player.open_verb": "用 LocalRoll 播放",
+  "player.side": "右侧列表（L）",
+  "player.side_close": "收起列表（L）",
+  "player.tab_list": "列表",
+  "player.tab_info": "信息",
+  "player.kind_all": "全部",
+  "player.kind_video": "视频",
+  "player.kind_photo": "照片",
+  "player.notes_this": "这个文件",
+  "player.notes_all": "列表里全部",
+  "player.notes_none_in_list": "这个列表里的文件还没有标注。",
+  "player.my_notes": "我的标注"
 }

@@ -765,5 +765,17 @@
   "clip.around": "Đoạn phim quanh ghi chú",
   "clip.around_now": "Đoạn phim: trước {before} giây, sau {after} giây…",
   "clip.before": "Trước",
-  "clip.after": "Sau"
+  "clip.after": "Sau",
+  "player.open_verb": "Phát bằng LocalRoll",
+  "player.side": "Danh sách bên phải (L)",
+  "player.side_close": "Ẩn danh sách (L)",
+  "player.tab_list": "Danh sách",
+  "player.tab_info": "Thông tin",
+  "player.kind_all": "Tất cả",
+  "player.kind_video": "Video",
+  "player.kind_photo": "Ảnh",
+  "player.notes_this": "Tệp này",
+  "player.notes_all": "Cả danh sách",
+  "player.notes_none_in_list": "Các tệp trong danh sách này chưa có ghi chú.",
+  "player.my_notes": "Ghi chú gần đây của tôi"
 }

@@ -449,6 +449,18 @@ class NoteStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Every annotation set read so far (library and other files).
+  Iterable<NoteSet> get sets => _sets.values;
+
+  /// The [count] annotations changed last.
+  List<NoteHit> recent(int count) {
+    final all = [
+      for (final s in _sets.values)
+        for (final n in s.notes) NoteHit(set: s, note: n),
+    ]..sort((a, b) => b.note.modifiedMs.compareTo(a.note.modifiedMs));
+    return all.take(count).toList();
+  }
+
   /// Annotations whose name, words or tool names have all of [query]'s words.
   List<NoteHit> search(String query) {
     final q = SearchQuery(query);

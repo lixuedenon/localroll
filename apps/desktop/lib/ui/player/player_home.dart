@@ -400,7 +400,9 @@ class _NoteSearchState extends State<_NoteSearch> {
   Widget build(BuildContext context) => ListenableBuilder(
         listenable: widget.services.notes,
         builder: (context, _) {
-          final hits = widget.services.notes.search(_q.text);
+          final searching = _q.text.trim().isNotEmpty;
+          // Nothing typed: the latest annotations ("My notes").
+          final hits = searching ? widget.services.notes.search(_q.text) : widget.services.notes.recent(10);
           return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             SizedBox(
               width: 460,
@@ -421,8 +423,13 @@ class _NoteSearchState extends State<_NoteSearch> {
                 ),
               ),
             ),
-            if (_q.text.trim().isNotEmpty) ...[
+            if (searching || hits.isNotEmpty) ...[
               const SizedBox(height: 8),
+              if (!searching)
+                Padding(
+                  padding: const EdgeInsets.only(top: 10, bottom: 4),
+                  child: Text(tr('player.my_notes'), style: Theme.of(context).textTheme.titleMedium),
+                ),
               if (hits.isEmpty)
                 Text(tr('ink.no_hits'), style: const TextStyle(color: LrColors.muted))
               else

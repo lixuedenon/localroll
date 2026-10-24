@@ -765,5 +765,17 @@
   "clip.around": "नोट के आसपास की क्लिप",
   "clip.around_now": "क्लिप: {before} सेकंड पहले, {after} सेकंड बाद…",
   "clip.before": "पहले",
-  "clip.after": "बाद"
+  "clip.after": "बाद",
+  "player.open_verb": "LocalRoll से चलाएँ",
+  "player.side": "दाईं ओर सूची (L)",
+  "player.side_close": "सूची छिपाएँ (L)",
+  "player.tab_list": "सूची",
+  "player.tab_info": "जानकारी",
+  "player.kind_all": "सभी",
+  "player.kind_video": "वीडियो",
+  "player.kind_photo": "फ़ोटो",
+  "player.notes_this": "यह फ़ाइल",
+  "player.notes_all": "सूची की सभी",
+  "player.notes_none_in_list": "इस सूची की फ़ाइलों पर अभी कोई नोट नहीं।",
+  "player.my_notes": "मेरे हाल के नोट"
 }

@@ -765,5 +765,17 @@
   "clip.around": "Notun çevresindeki klip",
   "clip.around_now": "Klip: {before} sn önce, {after} sn sonra…",
   "clip.before": "Önce",
-  "clip.after": "Sonra"
+  "clip.after": "Sonra",
+  "player.open_verb": "LocalRoll ile oynat",
+  "player.side": "Sağdaki liste (L)",
+  "player.side_close": "Listeyi gizle (L)",
+  "player.tab_list": "Liste",
+  "player.tab_info": "Bilgi",
+  "player.kind_all": "Tümü",
+  "player.kind_video": "Video",
+  "player.kind_photo": "Fotoğraf",
+  "player.notes_this": "Bu dosya",
+  "player.notes_all": "Listedeki tümü",
+  "player.notes_none_in_list": "Bu listedeki dosyalarda henüz not yok.",
+  "player.my_notes": "Son notlarım"
 }
