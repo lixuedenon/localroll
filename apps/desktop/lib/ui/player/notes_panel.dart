@@ -12,7 +12,7 @@ import 'ink_paint.dart';
 import 'player_entry.dart';
 
 /// What was chosen on an annotation in the list.
-enum NoteAction { jump, edit, rename, shot, send, delete }
+enum NoteAction { jump, edit, rename, shot, send, clip, sendClip, delete }
 
 /// The annotations of what is shown: jump to one, edit, rename,
 /// screenshot, send, delete. Settings: how far before to start, stop at
@@ -28,6 +28,7 @@ class NotesPanel extends StatefulWidget {
     required this.onShowInk,
     required this.onAction,
     required this.onHold,
+    required this.onClipAround,
   });
 
   final AppServices services;
@@ -40,6 +41,9 @@ class NotesPanel extends StatefulWidget {
   final ValueChanged<bool> onShowInk;
   final void Function(Note note, NoteAction action) onAction;
   final void Function(Note note, int holdMs) onHold;
+
+  /// Change the seconds a note's clip takes before / after it.
+  final VoidCallback onClipAround;
 
   @override
   State<NotesPanel> createState() => _NotesPanelState();
@@ -88,6 +92,10 @@ class _NotesPanelState extends State<NotesPanel> {
         PopupMenuItem(value: NoteAction.shot, child: row(Icons.camera_alt_rounded, tr('ink.shot'))),
         PopupMenuItem(value: NoteAction.send, child: row(Icons.send_rounded, tr('ink.send_shot'))),
         if (video) ...[
+          PopupMenuItem(value: NoteAction.clip, child: row(Icons.movie_creation_rounded, tr('clip.of_note'))),
+          PopupMenuItem(value: NoteAction.sendClip, child: row(Icons.send_rounded, tr('clip.send_of_note'))),
+        ],
+        if (video) ...[
           const PopupMenuDivider(),
           PopupMenuItem(enabled: false, child: Text(tr('ink.hold'))),
           for (final s in const [1, 3, 5, 10])
@@ -108,11 +116,13 @@ class _NotesPanelState extends State<NotesPanel> {
       icon: const Icon(Icons.tune_rounded, size: 20),
       onSelected: (v) {
         if (v == 'pause') m.setPauseAtNotes(!m.pauseAtNotes);
+        if (v == 'around') widget.onClipAround();
         if (v.startsWith('lead:')) m.setLead(int.parse(v.substring(5)));
         setState(() {});
       },
       itemBuilder: (_) => [
         CheckedPopupMenuItem(value: 'pause', checked: m.pauseAtNotes, child: Text(tr('ink.pause_at_notes'))),
+        PopupMenuItem(value: 'around', child: Text(tr('clip.around_now', {'before': m.clipBefore, 'after': m.clipAfter}))),
         const PopupMenuDivider(),
         PopupMenuItem(enabled: false, child: Text(tr('ink.lead'))),
         for (final s in const [0, 1, 2, 3, 5])

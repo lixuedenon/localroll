@@ -10,6 +10,7 @@ import 'package:localroll_core/localroll_core.dart';
 import 'package:localroll_desktop/services/annotations.dart';
 import 'package:localroll_desktop/services/library_index.dart';
 import 'package:localroll_desktop/services/text_index.dart';
+import 'package:localroll_desktop/ui/player/clip_export.dart';
 import 'package:localroll_desktop/ui/player/ink_editor.dart';
 import 'package:localroll_desktop/ui/player/ink_paint.dart';
 
@@ -150,5 +151,68 @@ void main() {
     // Turned upright around its middle.
     expect(InkGeometry.hits(line, size, const Offset(500, 200)), isTrue);
     expect(InkGeometry.hits(line, size, const Offset(200, 500)), isFalse);
+  });
+
+  test('drawn while paused: the video stops there and replays it, gaps shortened', () {
+    InkMark still(int wall, int took) => mark(InkTool.pen, [Offset.zero, const Offset(0.1, 0.1)], at: 8000)
+      ..wallMs = wall
+      ..times = [0, took];
+    final n = Note(id: 'p', name: 'x', startMs: 8000, holdMs: 3000, inks: [still(0, 500), still(5000, 400)]);
+    final f = n.freezes.single;
+    expect(f.atMs, 8000);
+    // 500 drawing, a 4.5 s pause cut to 0.6 s, 400 drawing.
+    expect(f.drawMs, 500 + FreezePlan.maxGapMs + 400);
+    expect(f.totalMs, f.drawMs + 3000);
+    expect(f.start[n.inks[1].id], 500 + FreezePlan.maxGapMs);
+    final live = mark(InkTool.pen, [Offset.zero], at: 9000)..live = true;
+    expect(Note(id: 'l', name: 'y', startMs: 9000, inks: [live]).freezes, isEmpty);
+  });
+
+  test('a clip stands still where something was drawn while paused', () {
+    final n = Note(id: 'p', name: 'x', startMs: 20000, holdMs: 3000, inks: [
+      mark(InkTool.pen, [Offset.zero, const Offset(0.1, 0.1)], at: 20000)
+        ..wallMs = 0
+        ..times = [0, 1000],
+    ]);
+    final pieces = clipPieces([n], 10000, 30000);
+    expect(pieces.length, 3);
+    expect(pieces[0].fromMs, 10000);
+    expect(pieces[0].toMs, 20000);
+    expect(pieces[1].freeze, isNotNull);
+    expect(pieces[1].lengthMs, 4000);
+    expect(pieces[2].fromMs, 20000);
+    // 2 s into the stop: still at 20 s, the stroke drawn 2 s worth (all of it).
+    final m = clipMoment(pieces, 12000);
+    expect(m.now, 20000);
+    expect(m.freeze?.elapsedMs, 2000);
+    expect(clipMoment(pieces, 15000).now, 21000);
+    expect(clipMoment(pieces, 1000).now, 11000);
+  });
+
+  test('every point keeps its time, so a replay shows it being drawn', () {
+    var now = 0;
+    var playing = true;
+    final ed = InkEditor(video: true, clock: () => now, playing: () => playing);
+    now = 1000;
+    ed.begin(const Offset(0.1, 0.1));
+    now = 1200;
+    ed.extend(const Offset(0.2, 0.2));
+    now = 1500;
+    ed.extend(const Offset(0.3, 0.3));
+    ed.end();
+    final i = ed.inks.single;
+    expect(i.live, isTrue);
+    expect(i.times, [0, 200, 500]);
+    expect(Note(id: 'z', name: 'z', startMs: 1000, inks: [i]).lastMs, 1500);
+    playing = false;
+    ed.begin(const Offset(0.5, 0.5));
+    ed.extend(const Offset(0.6, 0.6));
+    ed.end();
+    expect(ed.inks.last.live, isFalse);
+    expect(ed.inks.last.wallMs, isNotNull);
+    expect(ed.inks.last.times.length, ed.inks.last.points.length);
+    final back = InkMark.fromJson(i.toJson());
+    expect(back.times, [0, 200, 500]);
+    expect(back.live, isTrue);
   });
 }

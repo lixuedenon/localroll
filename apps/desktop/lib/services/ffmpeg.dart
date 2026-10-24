@@ -391,6 +391,37 @@ class FfmpegService extends ChangeNotifier {
     }
   }
 
+  /// Frames per second of the first video stream, and whether there is
+  /// sound (for cutting clips).
+  Future<({double fps, bool audio})> streamInfo(String path) async {
+    var fps = 30.0;
+    var audio = false;
+    if (ffprobe == null) return (fps: fps, audio: audio);
+    try {
+      final r = await Process.run(ffprobe!, ['-v', 'error', '-show_entries', 'stream=codec_type,avg_frame_rate,r_frame_rate', '-of', 'json', path]);
+      if (r.exitCode == 0) {
+        final j = jsonDecode(r.stdout as String) as Map<String, dynamic>;
+        double? rate(Object? v) {
+          final p = '$v'.split('/');
+          final a = double.tryParse(p.first), b = p.length > 1 ? double.tryParse(p[1]) : 1.0;
+          return a == null || b == null || b == 0 || a <= 0 ? null : a / b;
+        }
+
+        var seenVideo = false;
+        for (final st in (j['streams'] as List?) ?? const []) {
+          if (st is! Map) continue;
+          if (st['codec_type'] == 'audio') audio = true;
+          if (st['codec_type'] == 'video' && !seenVideo) {
+            seenVideo = true;
+            final f = rate(st['avg_frame_rate']) ?? rate(st['r_frame_rate']);
+            if (f != null && f >= 1 && f <= 240) fps = f;
+          }
+        }
+      }
+    } catch (_) {}
+    return (fps: fps, audio: audio);
+  }
+
   Future<ProbeInfo> probe(String path) async {
     if (ffprobe == null) return const ProbeInfo();
     try {

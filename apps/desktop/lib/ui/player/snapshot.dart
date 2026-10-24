@@ -23,9 +23,11 @@ class Snapshots {
   Snapshots._();
 
   /// The folder: in the library, else in Windows' Pictures.
-  static String folder(AppServices s) {
-    final name = s.player.shotsFolder ?? tr('ink.shots_folder');
-    if (s.player.shotsFolder == null) s.player.setShotsFolder(name);
+  static String folder(AppServices s, {bool clips = false}) {
+    final m = s.player;
+    final name = (clips ? m.clipsFolder : m.shotsFolder) ?? tr(clips ? 'ink.clips_folder' : 'ink.shots_folder');
+    if (clips && m.clipsFolder == null) m.setClipsFolder(name);
+    if (!clips && m.shotsFolder == null) m.setShotsFolder(name);
     final lib = s.library;
     final sep = Platform.pathSeparator;
     if (lib.rootPath.isNotEmpty && !lib.offline && Directory(lib.rootPath).existsSync()) return '${lib.rootPath}$sep${sanitizeFileName(name)}';
@@ -35,7 +37,7 @@ class Snapshots {
 
   static String _secs(int ms) => (ms / 1000).toStringAsFixed(3);
 
-  static String _stamp(int ms) {
+  static String stamp(int ms) {
     final d = Duration(milliseconds: ms);
     String two(int n) => n.toString().padLeft(2, '0');
     final t = '${two(d.inMinutes % 60)}-${two(d.inSeconds % 60)}';
@@ -58,7 +60,7 @@ class Snapshots {
     try {
       await Directory(dir).create(recursive: true);
       final base = e.name.contains('.') ? e.name.substring(0, e.name.lastIndexOf('.')) : e.name;
-      final out = LibraryIndex.uniquePath(dir, sanitizeFileName('${base}_${e.video ? _stamp(ms) : 'note'}.jpg'));
+      final out = LibraryIndex.uniquePath(dir, sanitizeFileName('${base}_${e.video ? stamp(ms) : 'note'}.jpg'));
 
       // 1. The picture itself, upright, full size.
       String src;
@@ -70,7 +72,7 @@ class Snapshots {
             '-vf', [if (hdr) _toneMap, 'format=yuvj420p'].join(','),
             '-q:v', '2', out,
           ]);
-          return ok ? await _done(s, File(out)) : null;
+          return ok ? await done(s, File(out)) : null;
         }
         final png = tempFile('png');
         final ok = await ff.run([
@@ -108,10 +110,10 @@ class Snapshots {
       await png.writeAsBytes(bytes.buffer.asUint8List(), flush: true);
 
       // 3. JPEG (far smaller); without ffmpeg the PNG is kept.
-      if (await ff.run(['-i', png.path, '-q:v', '2', out])) return await _done(s, File(out));
+      if (await ff.run(['-i', png.path, '-q:v', '2', out])) return await done(s, File(out));
       final keep = LibraryIndex.uniquePath(dir, out.split(sep).last.replaceAll(RegExp(r'\.jpg$'), '.png'));
       await png.copy(keep);
-      return await _done(s, File(keep));
+      return await done(s, File(keep));
     } catch (err) {
       DiagLog.log('player', 'screenshot failed: $err');
       return null;
@@ -125,7 +127,7 @@ class Snapshots {
   }
 
   /// In the library at once (not only after it notices the new file).
-  static Future<File> _done(AppServices s, File f) async {
+  static Future<File> done(AppServices s, File f, {bool video = false}) async {
     final lib = s.library;
     final root = '${lib.rootPath}${Platform.pathSeparator}';
     if (lib.rootPath.isNotEmpty && f.path.toLowerCase().startsWith(root.toLowerCase())) {
@@ -134,12 +136,12 @@ class Snapshots {
         relPath: f.path.substring(root.length).replaceAll(Platform.pathSeparator, '/'),
         name: f.path.split(Platform.pathSeparator).last,
         size: await f.length(),
-        kind: MediaKind.image,
+        kind: video ? MediaKind.video : MediaKind.image,
         captureMs: now,
         receivedMs: now,
       ));
     }
-    DiagLog.log('player', 'screenshot saved');
+    DiagLog.log('player', video ? 'clip saved' : 'screenshot saved');
     return f;
   }
 }

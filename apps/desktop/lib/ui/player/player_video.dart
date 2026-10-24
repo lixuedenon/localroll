@@ -20,6 +20,7 @@ class _VideoView extends StatefulWidget {
     required this.editor,
     this.startMs,
     required this.onEnded,
+    required this.onClip,
     required this.onFullscreen,
     required this.onChanged,
   });
@@ -49,6 +50,9 @@ class _VideoView extends StatefulWidget {
   /// Start here instead of where it was left.
   final int? startMs;
   final VoidCallback onEnded;
+
+  /// Cut a clip around where it is.
+  final VoidCallback onClip;
   final VoidCallback onFullscreen;
   final VoidCallback onChanged;
 
@@ -86,6 +90,52 @@ class _VideoViewState extends State<_VideoView> implements _ViewHandle {
   int get nowMs => _player.state.position.inMilliseconds;
 
   @override
+  int get durationMs => _player.state.duration.inMilliseconds;
+
+  @override
+  bool get playing => _player.state.playing;
+
+  /// Replaying marks drawn while paused (the video stands still for it).
+  final ValueNotifier<FreezeNow?> _freeze = ValueNotifier(null);
+  Timer? _freezeTimer;
+  final Stopwatch _freezeClock = Stopwatch();
+
+  /// The last stop made (not made again until played through again).
+  String? _frozeFor;
+  int _frozeAt = -1;
+
+  void _startFreeze(FreezePlan f) {
+    _frozeFor = '${f.noteId}|${f.atMs}';
+    _frozeAt = f.atMs;
+    unawaited(() async {
+      await _player.pause();
+      await _player.seek(Duration(milliseconds: f.atMs));
+    }());
+    _freeze.value = (plan: f, elapsedMs: 0);
+    _freezeClock
+      ..reset()
+      ..start();
+    _freezeTimer?.cancel();
+    _freezeTimer = Timer.periodic(const Duration(milliseconds: 16), (_) {
+      final e = _freezeClock.elapsedMilliseconds;
+      if (e >= f.totalMs) {
+        _endFreeze(play: true);
+      } else {
+        _freeze.value = (plan: f, elapsedMs: e);
+      }
+    });
+  }
+
+  /// [play]: the replay ended by itself; else the person played or moved on.
+  void _endFreeze({required bool play}) {
+    if (_freeze.value == null) return;
+    _freezeTimer?.cancel();
+    _freezeTimer = null;
+    _freeze.value = null;
+    if (play && mounted) unawaited(_player.play());
+  }
+
+  @override
   Size? get pictureSize => _size;
 
   @override
@@ -99,6 +149,27 @@ class _VideoViewState extends State<_VideoView> implements _ViewHandle {
   void _position(Duration d) {
     final now = d.inMilliseconds;
     _ms.value = now;
+    final fz = _freeze.value;
+    if (fz != null && (now - fz.plan.atMs).abs() > 400) _endFreeze(play: false);
+    if (_frozeAt >= 0 && now + 300 < _frozeAt) {
+      _frozeFor = null;
+      _frozeAt = -1;
+    }
+    // Drawn while paused: stop there and draw it again (playing on, not jumping).
+    final playingOn = widget.editor == null && _player.state.playing && now - _lastMs < 1500;
+    if (playingOn && _freeze.value == null) {
+      for (final n in widget.notes) {
+        for (final f in n.freezes) {
+          final crossed = (f.atMs > _lastMs || (_lastMs == 0 && f.atMs == 0)) && f.atMs <= now;
+          if (crossed && _frozeFor != '${f.noteId}|${f.atMs}') {
+            _startFreeze(f);
+            _pausedFor = n.id;
+            _lastMs = now;
+            return;
+          }
+        }
+      }
+    }
     // "Stop at each annotation": only while playing on, not when jumping.
     if (_memory.pauseAtNotes && widget.editor == null && _player.state.playing && now > _lastMs && now - _lastMs < 1500) {
       for (final n in widget.notes) {
@@ -139,6 +210,10 @@ class _VideoViewState extends State<_VideoView> implements _ViewHandle {
     final asked = widget.startMs;
     final from = asked != null ? Duration(milliseconds: asked) : _memory.positionOf(_e.key);
     _subs.add(_player.stream.position.listen(_position));
+    // Played by hand during a replay: the replay ends.
+    _subs.add(_player.stream.playing.listen((on) {
+      if (on && _freeze.value != null && _freezeClock.elapsedMilliseconds > 300) _endFreeze(play: false);
+    }));
     _subs.add(_player.stream.width.listen((_) => _dims()));
     _subs.add(_player.stream.height.listen((_) => _dims()));
     _subs.add(_player.stream.completed.listen((done) {
@@ -192,6 +267,8 @@ class _VideoViewState extends State<_VideoView> implements _ViewHandle {
     }
     _tc.dispose();
     _ms.dispose();
+    _freezeTimer?.cancel();
+    _freeze.dispose();
     unawaited(_player.dispose());
     super.dispose();
   }
@@ -366,7 +443,7 @@ class _VideoViewState extends State<_VideoView> implements _ViewHandle {
                   aspectRatio: sz.width / sz.height,
                   child: Stack(fit: StackFit.expand, children: [
                     video,
-                    InkLayer(notes: widget.notes, video: true, clock: _ms, editor: widget.editor),
+                    InkLayer(notes: widget.notes, video: true, clock: _ms, freeze: _freeze, editor: widget.editor),
                   ]),
                 ),
               ),
@@ -412,6 +489,7 @@ class _VideoViewState extends State<_VideoView> implements _ViewHandle {
       onAb: () => unawaited(_abStep()),
       onVolume: (v) => unawaited(_setVolume(v)),
       onEnd: (m) => unawaited(_setEnd(m)),
+      onClip: widget.onClip,
       onFullscreen: widget.onFullscreen,
     ));
     // One shape in and out of full screen (the picture is not rebuilt).
@@ -453,6 +531,7 @@ class _ControlBar extends StatelessWidget {
     required this.onAb,
     required this.onVolume,
     required this.onEnd,
+    required this.onClip,
     required this.onFullscreen,
   });
 
@@ -467,6 +546,7 @@ class _ControlBar extends StatelessWidget {
   final VoidCallback onAb;
   final ValueChanged<double> onVolume;
   final ValueChanged<EndMode> onEnd;
+  final VoidCallback onClip;
   final VoidCallback onFullscreen;
 
   Widget _icon(IconData i, String tip, VoidCallback? onTap, {bool on = false}) => IconButton(
@@ -600,6 +680,7 @@ class _ControlBar extends StatelessWidget {
           _icon(Icons.repeat_rounded, a == null ? tr('player.ab') : (b == null ? tr('player.ab_set_a') : tr('player.ab_on', {'a': playerTime(a!), 'b': playerTime(b!)})),
               onAb, on: a != null),
           _tracks(),
+          _icon(Icons.content_cut_rounded, tr('clip.cut'), onClip),
           PopupMenuButton<EndMode>(
             tooltip: '${tr('player.at_end')}: ${_endLabel(endMode)}',
             icon: Icon(_endIcon(endMode), color: endMode == EndMode.stop ? Colors.white : LrColors.safelight, size: 22),

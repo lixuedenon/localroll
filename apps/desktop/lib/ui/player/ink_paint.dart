@@ -125,16 +125,41 @@ class InkGeometry {
 
   // --------------------------------------------------------------- paint
 
-  static void paint(Canvas c, Size s, InkMark i) {
+  /// [upto]: only what was drawn in its first [upto] ms (replay).
+  static void paint(Canvas c, Size s, InkMark i, {int? upto}) {
     if (i.points.isEmpty) return;
+    if (upto != null && upto < 0) return;
     final center = box(i, s).center;
     c.save();
     c.translate(center.dx + i.dx * s.width, center.dy + i.dy * s.height);
     c.rotate(i.rotation);
     c.scale(i.scale);
     c.translate(-center.dx, -center.dy);
-    _paintPlain(c, s, i);
+    _paintPlain(c, s, i, upto == null || upto >= i.drawMs ? null : _partial(i, upto));
     c.restore();
+  }
+
+  /// The points drawn by [upto] ms (shapes grow to their size).
+  static List<Offset> _partial(InkMark i, int upto) {
+    final p = i.points, t = i.times;
+    if (t.length != p.length || p.isEmpty) return p;
+    switch (i.tool) {
+      case InkTool.pen:
+      case InkTool.marker:
+        var n = 1;
+        while (n < p.length && t[n] <= upto) {
+          n++;
+        }
+        return p.sublist(0, n);
+      case InkTool.line:
+      case InkTool.arrow:
+      case InkTool.rect:
+      case InkTool.ellipse:
+        final f = i.drawMs <= 0 ? 1.0 : (upto / i.drawMs).clamp(0.0, 1.0);
+        return [p.first, Offset.lerp(p.first, p.last, f)!];
+      default:
+        return p;
+    }
   }
 
   static Paint _stroke(InkMark i, double w, {double alpha = 1}) => Paint()
@@ -159,8 +184,8 @@ class InkGeometry {
     return path;
   }
 
-  static void _paintPlain(Canvas c, Size s, InkMark i) {
-    final pts = [for (final x in i.points) px(x, s)];
+  static void _paintPlain(Canvas c, Size s, InkMark i, [List<Offset>? only]) {
+    final pts = [for (final x in only ?? i.points) px(x, s)];
     final w = lineWidth(i, s);
     switch (i.tool) {
       case InkTool.pen:
@@ -217,14 +242,45 @@ class InkGeometry {
   }
 }
 
-/// Paints annotations over a picture: [notes] as they are at [ms] (a photo:
-/// all of them), plus what is being drawn now.
+/// A replay of marks drawn while paused, [elapsedMs] into it.
+typedef FreezeNow = ({FreezePlan plan, int elapsedMs});
+
+/// Draws [notes] as they are at [now] ms into a video (a photo: all), the
+/// way they were drawn: marks drawn while it played grow with the video;
+/// marks drawn while paused are whole — or, while [freeze] replays them,
+/// drawn again stroke by stroke.
+void paintNotes(Canvas canvas, Size size, List<Note> notes, {required bool video, int now = 0, FreezeNow? freeze}) {
+  for (final n in notes) {
+    if (!video) {
+      for (final i in n.inks) {
+        InkGeometry.paint(canvas, size, i);
+      }
+      continue;
+    }
+    if (!n.shownAt(now)) continue;
+    for (final i in n.inks) {
+      final at = i.atMs ?? n.startMs;
+      if (now < at) continue;
+      if (i.live) {
+        InkGeometry.paint(canvas, size, i, upto: now - at);
+      } else if (freeze != null && freeze.plan.noteId == n.id && (freeze.plan.atMs - at).abs() <= 150) {
+        InkGeometry.paint(canvas, size, i, upto: freeze.elapsedMs - (freeze.plan.start[i.id] ?? 0));
+      } else {
+        InkGeometry.paint(canvas, size, i);
+      }
+    }
+  }
+}
+
+/// Paints annotations over a picture: [notes] as they are now, plus what
+/// is being drawn ([draft], read each time it paints).
 class InkPainter extends CustomPainter {
   InkPainter({
     required this.notes,
     required this.video,
     this.ms,
-    this.draft = const [],
+    this.freeze,
+    this.draft,
     this.selected,
     super.repaint,
   });
@@ -232,24 +288,19 @@ class InkPainter extends CustomPainter {
   final List<Note> notes;
   final bool video;
   final ValueGetter<int>? ms;
-  final List<InkMark> draft;
-  final InkMark? selected;
+  final ValueGetter<FreezeNow?>? freeze;
+  final ValueGetter<List<InkMark>>? draft;
+  final ValueGetter<InkMark?>? selected;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final now = ms?.call() ?? 0;
     canvas.save();
     canvas.clipRect(Offset.zero & size);
-    for (final n in notes) {
-      if (video && !n.shownAt(now)) continue;
-      for (final i in n.inks) {
-        if (!video || n.inkShownAt(i, now)) InkGeometry.paint(canvas, size, i);
-      }
-    }
-    for (final i in draft) {
+    paintNotes(canvas, size, notes, video: video, now: ms?.call() ?? 0, freeze: freeze?.call());
+    for (final i in draft?.call() ?? const <InkMark>[]) {
       InkGeometry.paint(canvas, size, i);
     }
-    final sel = selected;
+    final sel = selected?.call();
     if (sel != null) {
       final c = InkGeometry.corners(sel, size);
       final line = Paint()

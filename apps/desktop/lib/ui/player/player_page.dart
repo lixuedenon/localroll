@@ -24,6 +24,8 @@ import '../format.dart';
 import '../send_page.dart';
 import '../theme.dart';
 import '../trash_actions.dart';
+import 'clip_dialog.dart';
+import 'clip_export.dart';
 import 'ink_editor.dart';
 import 'notes_panel.dart';
 import 'player_entry.dart';
@@ -131,6 +133,11 @@ abstract class _ViewHandle {
 
   /// Where the video is (photos: 0).
   int get nowMs;
+
+  /// How long the video is (photos: 0).
+  int get durationMs;
+
+  bool get playing;
 
   /// The picture's own size in pixels, once known.
   Size? get pictureSize;
@@ -332,6 +339,8 @@ class _PlayerPageState extends State<PlayerPage> {
       _toggle(_Panel.notes);
     } else if (k == LogicalKeyboardKey.keyD) {
       _editor == null ? _startDraw() : unawaited(_finishDraw());
+    } else if (k == LogicalKeyboardKey.keyC && !ctrl && _entry.video) {
+      unawaited(_clip());
     } else if (k == LogicalKeyboardKey.keyS && !ctrl) {
       unawaited(_shoot(withInk: true));
     } else if (k == LogicalKeyboardKey.pageDown || (shift && k == LogicalKeyboardKey.keyN)) {
@@ -395,7 +404,13 @@ class _PlayerPageState extends State<PlayerPage> {
     if (!_sets.containsKey(e)) return;
     setState(() {
       _showInk = true;
-      _editor = InkEditor(video: e.video, clock: () => _active?.nowMs ?? 0, inks: note?.inks, original: note);
+      _editor = InkEditor(
+        video: e.video,
+        clock: () => _active?.nowMs ?? 0,
+        playing: () => _active?.playing ?? false,
+        inks: note?.inks,
+        original: note,
+      );
     });
     DiagLog.log('player', 'drawing ${note == null ? 'new' : 'edit'}');
   }
@@ -440,7 +455,12 @@ class _PlayerPageState extends State<PlayerPage> {
     setState(() {});
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(tr('ink.saved', {'name': note.name})),
-      action: SnackBarAction(label: tr('ink.rename'), onPressed: () => _rename(e, note)),
+      action: SnackBarAction(
+        label: tr('ink.view'),
+        onPressed: () {
+          if (mounted && _panel != _Panel.notes) setState(() => _panel = _Panel.notes);
+        },
+      ),
     ));
   }
 
@@ -532,6 +552,98 @@ class _PlayerPageState extends State<PlayerPage> {
     await sendToPc(context, s, [file], name);
   }
 
+  /// Cut a clip: around [note] (the seconds before / after from the
+  /// settings), else around where the video is.
+  Future<void> _clip({Note? note, bool send = false}) async {
+    final e = _entry;
+    final v = _active;
+    if (!e.video || v == null) return;
+    final m = _memory;
+    final dur = v.durationMs;
+    final from = note != null ? note.startMs - m.clipBefore * 1000 : v.nowMs - m.clipBefore * 1000;
+    final to = note != null ? note.endMs + m.clipAfter * 1000 : v.nowMs + m.clipAfter * 1000;
+    final notes = _sets[e]?.notes ?? const <Note>[];
+    final choice = await showClipDialog(
+      context,
+      startMs: from < 0 ? 0 : from,
+      endMs: dur > 0 && to > dur ? dur : to,
+      durationMs: dur,
+      hasInk: notes.isNotEmpty,
+      send: send,
+    );
+    if (choice == null || !mounted) return;
+    if (v.playing) v.seekTo(v.nowMs);
+    final pic = v.pictureSize ?? const Size(1920, 1080);
+    final exporter = ClipExporter(widget.services);
+    final progress = ValueNotifier<double>(0);
+    final done = exporter.run(
+      e,
+      startMs: choice.startMs,
+      endMs: choice.endMs,
+      withInk: choice.withInk,
+      notes: _showInk ? notes : const [],
+      picture: pic,
+      onProgress: (p) => progress.value = p,
+    );
+    unawaited(showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        unawaited(done.whenComplete(() {
+          if (ctx.mounted) Navigator.of(ctx).pop();
+        }));
+        return AlertDialog(
+          title: Text(tr(choice.withInk ? 'clip.making_ink' : 'clip.making')),
+          content: SizedBox(
+            width: 360,
+            child: ValueListenableBuilder<double>(
+              valueListenable: progress,
+              builder: (_, p, _) => Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                LinearProgressIndicator(value: p <= 0 ? null : p),
+                const SizedBox(height: 8),
+                Text('${(p * 100).round()}%', style: const TextStyle(color: LrColors.muted)),
+              ]),
+            ),
+          ),
+          actions: [TextButton(onPressed: exporter.cancel, child: Text(tr('common.cancel')))],
+        );
+      },
+    ));
+    final f = await done;
+    progress.dispose();
+    if (!mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    if (f == null) {
+      messenger.showSnackBar(SnackBar(content: Text(tr('clip.failed'))));
+      return;
+    }
+    if (choice.send) {
+      await _sendFile(f);
+      return;
+    }
+    messenger.showSnackBar(SnackBar(
+      duration: const Duration(seconds: 8),
+      content: Row(children: [
+        Expanded(child: Text(tr('clip.saved', {'folder': f.parent.path.split(Platform.pathSeparator).last}))),
+        TextButton(onPressed: () => revealInExplorer(f.path), child: Text(tr('common.show_in_folder'))),
+        const SizedBox(width: 4),
+        FilledButton.icon(
+          onPressed: () {
+            messenger.hideCurrentSnackBar();
+            unawaited(_sendFile(f));
+          },
+          icon: const Icon(Icons.send_rounded, size: 16),
+          label: Text(tr('player.send')),
+        ),
+      ]),
+    ));
+  }
+
+  Future<void> _clipAround() async {
+    final r = await showClipAroundDialog(context, _memory.clipBefore, _memory.clipAfter);
+    if (r != null) _memory.setClipAround(r.$1, r.$2);
+  }
+
   Future<void> _rename(PlayerEntry e, Note n) async {
     final set = _sets[e];
     if (set == null) return;
@@ -579,6 +691,10 @@ class _PlayerPageState extends State<PlayerPage> {
       case NoteAction.send:
         final f = await Snapshots.take(widget.services, e, ms: n.lastMs, inks: n.inks);
         if (f != null && mounted) await _sendFile(f);
+      case NoteAction.clip:
+        await _clip(note: n);
+      case NoteAction.sendClip:
+        await _clip(note: n, send: true);
       case NoteAction.delete:
         final at = set.notes.indexOf(n);
         set.notes.remove(n);
@@ -641,6 +757,7 @@ class _PlayerPageState extends State<PlayerPage> {
                   row('D', tr('ink.draw')),
                   row('N', tr('ink.notes_key')),
                   row('S', tr('ink.shot_key')),
+                  row('C', tr('clip.title')),
                   row('Ctrl+Z  Ctrl+Y', tr('ink.key_undo')),
                   row('Shift', tr('ink.key_shift')),
                 ]),
@@ -715,7 +832,14 @@ class _PlayerPageState extends State<PlayerPage> {
             PopupMenuItem(value: false, child: Text(tr('ink.shot_without'))),
           ],
         ),
-        _btn(Icons.format_list_bulleted_rounded, tr('ink.notes_key'), () => _toggle(_Panel.notes), on: _panel == _Panel.notes),
+        Badge(
+          isLabelVisible: (_set?.notes.length ?? 0) > 0,
+          label: Text('${_set?.notes.length ?? 0}'),
+          offset: const Offset(-4, 4),
+          backgroundColor: LrColors.safelight,
+          textColor: Colors.black,
+          child: _btn(Icons.format_list_bulleted_rounded, tr('ink.notes_key'), () => _toggle(_Panel.notes), on: _panel == _Panel.notes),
+        ),
         _btn(Icons.info_outline_rounded, tr('player.info'), () => _toggle(_Panel.info), on: _panel == _Panel.info),
         _btn(Icons.send_rounded, tr('player.send'), () => _send(e)),
         PopupMenuButton<String>(
@@ -764,6 +888,7 @@ class _PlayerPageState extends State<PlayerPage> {
                   editor: i == _index ? _editor : null,
                   startMs: _startAt.remove(it),
                   onEnded: _ended,
+                  onClip: () => unawaited(_clip()),
                   onFullscreen: () => _setFullscreen(!_fullscreen),
                   onChanged: () {
                     if (mounted) setState(() {});
@@ -870,6 +995,7 @@ class _PlayerPageState extends State<PlayerPage> {
                 onShowInk: (v) => setState(() => _showInk = v),
                 onAction: (n, a) => unawaited(_noteAction(n, a)),
                 onHold: (n, ms) => unawaited(_hold(n, ms)),
+                onClipAround: () => unawaited(_clipAround()),
               ),
           ]),
         ),
@@ -928,6 +1054,12 @@ class _ImageViewState extends State<_ImageView> implements _ViewHandle {
 
   @override
   int get nowMs => 0;
+
+  @override
+  int get durationMs => 0;
+
+  @override
+  bool get playing => false;
 
   @override
   Size? get pictureSize => _size;

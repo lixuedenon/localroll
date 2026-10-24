@@ -63,6 +63,13 @@ class PlayerMemory extends ChangeNotifier {
   /// Screenshots' folder in the library (named once, in the language then).
   String? shotsFolder;
 
+  /// Clips' folder in the library (named the same way).
+  String? clipsFolder;
+
+  /// A clip of an annotation starts / ends this many seconds around it.
+  int clipBefore = 10;
+  int clipAfter = 10;
+
   /// The last video playing (for "Continue"), with its key.
   RecentEntry? last;
   String? lastKey;
@@ -95,6 +102,9 @@ class PlayerMemory extends ChangeNotifier {
       leadSec = ((j['lead'] as num?)?.toInt() ?? 2).clamp(0, 30);
       pauseAtNotes = j['pauseAtNotes'] == true;
       shotsFolder = j['shots'] as String?;
+      clipsFolder = j['clips'] as String?;
+      clipBefore = ((j['clipBefore'] as num?)?.toInt() ?? 10).clamp(0, 60);
+      clipAfter = ((j['clipAfter'] as num?)?.toInt() ?? 10).clamp(0, 60);
       last = RecentEntry.fromJson(j['last']);
       lastKey = j['lastKey'] as String?;
     } catch (e) {
@@ -172,6 +182,18 @@ class PlayerMemory extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setClipAround(int before, int after) {
+    clipBefore = before.clamp(0, 60);
+    clipAfter = after.clamp(0, 60);
+    _save();
+    notifyListeners();
+  }
+
+  void setClipsFolder(String name) {
+    clipsFolder = name;
+    _save();
+  }
+
   void setShotsFolder(String name) {
     shotsFolder = name;
     _save();
@@ -197,6 +219,9 @@ class PlayerMemory extends ChangeNotifier {
         'lead': leadSec,
         'pauseAtNotes': pauseAtNotes,
         'shots': ?shotsFolder,
+        'clips': ?clipsFolder,
+        'clipBefore': clipBefore,
+        'clipAfter': clipAfter,
         'last': ?last?.toJson(),
         'lastKey': ?lastKey,
       };

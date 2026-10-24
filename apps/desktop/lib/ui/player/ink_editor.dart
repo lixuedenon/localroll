@@ -33,13 +33,25 @@ const List<double> _sizes = [0.035, 0.05, 0.075];
 /// selected mark. [clock] says where the video is (marks drawn on a video
 /// remember when).
 class InkEditor extends ChangeNotifier {
-  InkEditor({required this.video, required this.clock, List<InkMark>? inks, this.original})
-      : inks = [for (final i in inks ?? const <InkMark>[]) i.copy()] {
+  InkEditor({required this.video, required this.clock, bool Function()? playing, List<InkMark>? inks, this.original})
+      : playing = playing ?? (() => false),
+        inks = [for (final i in inks ?? const <InkMark>[]) i.copy()] {
+    // Continue the real-time line of an annotation being changed.
+    final last = this.inks.fold<int>(0, (m, i) => math.max(m, (i.wallMs ?? 0) + i.drawMs));
+    _wallBase = last == 0 ? 0 : last + 1000;
     _number = 1 + this.inks.fold<int>(0, (m, i) => math.max(m, i.number ?? 0));
   }
 
   final bool video;
   final int Function() clock;
+
+  /// The video is playing (marks then grow with it).
+  final bool Function() playing;
+
+  /// Real time since drawing began (paused marks replay at this pace).
+  final Stopwatch _wall = Stopwatch()..start();
+  int _wallBase = 0;
+  final Stopwatch _stroke = Stopwatch();
 
   /// Editing this annotation (null: a new one).
   final Note? original;
@@ -150,15 +162,30 @@ class InkEditor extends ChangeNotifier {
         _ => null,
       };
 
-  InkMark _new(InkTool t, Offset at) => InkMark(
-        id: InkMark.newId(),
-        tool: t,
-        color: color.toARGB32(),
-        width: _widths[level],
-        size: _sizes[level],
-        points: [at],
-        atMs: video ? clock() : null,
-      );
+  InkMark _new(InkTool t, Offset at) {
+    final live = video && playing();
+    _stroke
+      ..reset()
+      ..start();
+    return InkMark(
+      id: InkMark.newId(),
+      tool: t,
+      color: color.toARGB32(),
+      width: _widths[level],
+      size: _sizes[level],
+      points: [at],
+      atMs: video ? clock() : null,
+      times: [0],
+      live: live,
+      wallMs: video && !live ? _wallBase + _wall.elapsedMilliseconds : null,
+    );
+  }
+
+  /// When this point of [d] is drawn: video time while playing, else real time.
+  int _tick(InkMark d) {
+    final t = d.live ? clock() - (d.atMs ?? 0) : _stroke.elapsedMilliseconds;
+    return math.max(t, d.times.isEmpty ? 0 : d.times.last);
+  }
 
   /// A new mark is being drawn (not in [inks] until it ends).
   InkMark? drawing;
@@ -183,7 +210,10 @@ class InkEditor extends ChangeNotifier {
       return;
     }
     drawing = _new(t, at);
-    if (t != InkTool.pen && t != InkTool.marker) drawing!.points.add(at);
+    if (t != InkTool.pen && t != InkTool.marker) {
+      drawing!.points.add(at);
+      drawing!.times.add(0);
+    }
     notifyListeners();
   }
 
@@ -191,7 +221,10 @@ class InkEditor extends ChangeNotifier {
     final d = drawing;
     if (d == null) return;
     if (d.tool == InkTool.pen || d.tool == InkTool.marker) {
-      if ((d.points.last - at).distance > 0.0008) d.points.add(at);
+      if ((d.points.last - at).distance > 0.0008) {
+        d.points.add(at);
+        d.times.add(_tick(d));
+      }
     } else {
       var to = at;
       // Shift: level / upright lines, squares and circles.
@@ -207,6 +240,7 @@ class InkEditor extends ChangeNotifier {
         }
       }
       d.points[d.points.length - 1] = to;
+      d.times[d.times.length - 1] = _tick(d);
     }
     notifyListeners();
   }
@@ -270,11 +304,14 @@ enum _Drag { none, draw, erase, move, scale, rotate }
 /// The marks over a picture; with an [editor], drawing on it too. Sits
 /// exactly on the picture (same size), so marks stay put when zooming.
 class InkLayer extends StatefulWidget {
-  const InkLayer({super.key, required this.notes, required this.video, this.clock, this.editor});
+  const InkLayer({super.key, required this.notes, required this.video, this.clock, this.freeze, this.editor});
 
   final List<Note> notes;
   final bool video;
   final ValueNotifier<int>? clock;
+
+  /// A replay of marks drawn while paused (the video is stopped for it).
+  final ValueNotifier<FreezeNow?>? freeze;
   final InkEditor? editor;
 
   @override
@@ -480,15 +517,17 @@ class _InkLayerState extends State<InkLayer> {
           notes: widget.notes,
           video: widget.video,
           ms: widget.clock == null ? null : () => widget.clock!.value,
+          freeze: widget.freeze == null ? null : () => widget.freeze!.value,
+          // Read at each paint: what is being drawn shows as it is drawn.
           draft: ed == null
-              ? const []
-              : [
-                  for (final i in ed.inks)
-                    if (i.id != _textFor) i,
-                  ?ed.drawing,
-                ],
-          selected: ed?.selected,
-          repaint: Listenable.merge([?widget.clock, ?ed]),
+              ? null
+              : () => [
+                    for (final i in ed.inks)
+                      if (i.id != _textFor) i,
+                    ?ed.drawing,
+                  ],
+          selected: ed == null ? null : () => ed.selected,
+          repaint: Listenable.merge([?widget.clock, ?widget.freeze, ?ed]),
         ),
       );
       if (ed == null) return IgnorePointer(child: paint);

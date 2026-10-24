@@ -33,7 +33,10 @@ class InkMark {
     this.dy = 0,
     this.scale = 1,
     this.rotation = 0,
-  });
+    List<int>? times,
+    this.live = false,
+    this.wallMs,
+  }) : times = times ?? [];
 
   final String id;
   final InkTool tool;
@@ -54,6 +57,21 @@ class InkMark {
   /// Moved (0–1 of the picture), resized, turned (radians) afterwards.
   double dx, dy, scale, rotation;
 
+  /// When each point was drawn, ms after the first one (replaying shows
+  /// it being drawn). Drawn while the video played ([live]): video time;
+  /// drawn while paused: real time.
+  List<int> times;
+
+  /// Drawn while the video played (it grows with the video).
+  bool live;
+
+  /// Drawn while paused: when, in real time since drawing began (the
+  /// order and pace of the replay).
+  int? wallMs;
+
+  /// How long drawing it took (ms).
+  int get drawMs => times.isEmpty ? 0 : times.last;
+
   bool get isStamp => tool == InkTool.text || tool == InkTool.check || tool == InkTool.cross || tool == InkTool.number;
 
   InkMark copy() => InkMark.fromJson(toJson());
@@ -72,6 +90,9 @@ class InkMark {
         if (dy != 0) 'dy': _r(dy),
         if (scale != 1) 'k': _r(scale),
         if (rotation != 0) 'r': _r(rotation),
+        if (times.isNotEmpty) 'pt': times,
+        if (live) 'lv': true,
+        'wall': ?wallMs,
       };
 
   static double _r(double v) => (v * 100000).roundToDouble() / 100000;
@@ -92,6 +113,9 @@ class InkMark {
       dy: (j['dy'] as num?)?.toDouble() ?? 0,
       scale: (j['k'] as num?)?.toDouble() ?? 1,
       rotation: (j['r'] as num?)?.toDouble() ?? 0,
+      times: [for (final t in (j['pt'] as List?) ?? const []) (t as num).toInt()],
+      live: j['lv'] == true,
+      wallMs: (j['wall'] as num?)?.toInt(),
     );
   }
 
@@ -137,7 +161,20 @@ class Note {
   final int createdMs;
   int modifiedMs;
 
-  int get lastMs => inks.fold(startMs, (m, i) => math.max(m, i.atMs ?? startMs));
+  int get lastMs => inks.fold(startMs, (m, i) => math.max(m, (i.atMs ?? startMs) + (i.live ? i.drawMs : 0)));
+
+  /// Moments where it was drawn while paused: playing stops there and the
+  /// drawing is shown again, as it was drawn.
+  List<FreezePlan> get freezes {
+    final groups = <int, List<InkMark>>{};
+    for (final i in inks) {
+      if (i.live || i.atMs == null) continue;
+      final at = groups.keys.firstWhere((k) => (k - i.atMs!).abs() <= 150, orElse: () => i.atMs!);
+      (groups[at] ??= []).add(i);
+    }
+    return [for (final e in groups.entries) FreezePlan(noteId: id, atMs: e.key, inks: e.value, holdMs: holdMs)]
+      ..sort((a, b) => a.atMs.compareTo(b.atMs));
+  }
   int get endMs => lastMs + holdMs;
 
   /// Shown at [ms] (videos).
@@ -168,6 +205,44 @@ class Note {
         modifiedMs: (j['modified'] as num?)?.toInt(),
         inks: [for (final i in (j['inks'] as List?) ?? const []) if (i is Map<String, dynamic>) InkMark.fromJson(i)],
       );
+}
+
+/// Replaying what was drawn while the video was paused: the video stops
+/// at [atMs], the marks are drawn again at their own pace (long thinking
+/// gaps shortened), then it stays [holdMs] and plays on.
+class FreezePlan {
+  FreezePlan({required this.noteId, required this.atMs, required List<InkMark> inks, required this.holdMs}) {
+    final sorted = List.of(inks)..sort((a, b) => (a.wallMs ?? 0).compareTo(b.wallMs ?? 0));
+    var t = 0;
+    int? lastEnd;
+    for (final i in sorted) {
+      final w = i.wallMs;
+      if (w == null) {
+        // Drawn before replays were recorded: all at once.
+        start[i.id] = 0;
+        continue;
+      }
+      if (lastEnd != null) t += math.min(math.max(0, w - lastEnd), maxGapMs);
+      start[i.id] = t;
+      t += i.drawMs;
+      lastEnd = w + i.drawMs;
+    }
+    drawMs = t;
+  }
+
+  /// Pauses between marks longer than this are cut to it.
+  static const int maxGapMs = 600;
+
+  final String noteId;
+  final int atMs;
+  final int holdMs;
+
+  /// When each mark starts in the replay (ms).
+  final Map<String, int> start = {};
+  late final int drawMs;
+
+  /// The whole stop: drawing, then the hold.
+  int get totalMs => drawMs + holdMs;
 }
 
 /// The annotations of one photo or video.
