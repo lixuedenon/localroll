@@ -54,6 +54,15 @@ class PlayerMemory extends ChangeNotifier {
   EndMode endMode = EndMode.stop;
   double volume = 100;
 
+  /// Jumping to an annotation starts this many seconds before it.
+  int leadSec = 2;
+
+  /// Playing stops at each annotation (for explaining / teaching).
+  bool pauseAtNotes = false;
+
+  /// Screenshots' folder in the library (named once, in the language then).
+  String? shotsFolder;
+
   /// The last video playing (for "Continue"), with its key.
   RecentEntry? last;
   String? lastKey;
@@ -83,6 +92,9 @@ class PlayerMemory extends ChangeNotifier {
       }
       endMode = EndMode.values.firstWhere((m) => m.name == j['end'], orElse: () => EndMode.stop);
       volume = ((j['volume'] as num?)?.toDouble() ?? 100).clamp(0, 100).toDouble();
+      leadSec = ((j['lead'] as num?)?.toInt() ?? 2).clamp(0, 30);
+      pauseAtNotes = j['pauseAtNotes'] == true;
+      shotsFolder = j['shots'] as String?;
       last = RecentEntry.fromJson(j['last']);
       lastKey = j['lastKey'] as String?;
     } catch (e) {
@@ -148,6 +160,23 @@ class PlayerMemory extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setLead(int sec) {
+    leadSec = sec.clamp(0, 30);
+    _save();
+    notifyListeners();
+  }
+
+  void setPauseAtNotes(bool on) {
+    pauseAtNotes = on;
+    _save();
+    notifyListeners();
+  }
+
+  void setShotsFolder(String name) {
+    shotsFolder = name;
+    _save();
+  }
+
   void setVolume(double v) {
     volume = v.clamp(0, 100).toDouble();
     _save();
@@ -165,6 +194,9 @@ class PlayerMemory extends ChangeNotifier {
         'recent': [for (final r in _recent) r.toJson()],
         'end': endMode.name,
         'volume': volume,
+        'lead': leadSec,
+        'pauseAtNotes': pauseAtNotes,
+        'shots': ?shotsFolder,
         'last': ?last?.toJson(),
         'lastKey': ?lastKey,
       };

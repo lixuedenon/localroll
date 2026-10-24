@@ -1509,6 +1509,27 @@ class _LibraryPageState extends State<LibraryPage> {
                   ),
                 ),
               ),
+            // Drawn on in the player: how many annotations.
+            ListenableBuilder(
+              listenable: s.notes,
+              builder: (context, _) {
+                final n = s.notes.countFor(item);
+                if (n == 0) return const SizedBox.shrink();
+                return Positioned(
+                  left: 4,
+                  bottom: 4,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                    decoration: BoxDecoration(color: const Color(0xCC000000), borderRadius: BorderRadius.circular(8)),
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      const Icon(Icons.brush_rounded, size: 12, color: Color(0xFFFFB547)),
+                      const SizedBox(width: 3),
+                      Text('$n', style: const TextStyle(fontSize: 11, color: Colors.white)),
+                    ]),
+                  ),
+                );
+              },
+            ),
             if (selected) _selectedFrame(context),
             _selectButton(key, selected),
           ],

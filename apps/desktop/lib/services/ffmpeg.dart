@@ -309,6 +309,17 @@ class FfmpegService extends ChangeNotifier {
         (src, out) => ['-i', src, '-frames:v', '1', '-vf', 'scale=360:-2', '-q:v', '4', out]);
   }
 
+  /// A small still of a video at [ms] (annotation list), kept per file version.
+  Future<File?> frameAt(String path, int ms, {required int size, required int modifiedMs}) async {
+    final outPath = _fileCache(path, size, modifiedMs, '_at$ms');
+    await Directory(fileCacheDir).create(recursive: true);
+    return _cachedAt(outPath, path, true,
+        (src, out) => ['-ss', (ms / 1000).toStringAsFixed(3), '-i', src, '-frames:v', '1', '-vf', 'scale=320:-2', '-q:v', '4', out]);
+  }
+
+  /// Runs ffmpeg with [args] (at most two at once); true when it worked.
+  Future<bool> run(List<String> args) => available ? _limited(() => _run(args)) : Future.value(false);
+
   /// Keeps the player's picture folder small: the newest [keep] files stay.
   Future<void> trimFileCache({int keep = 600}) async {
     try {

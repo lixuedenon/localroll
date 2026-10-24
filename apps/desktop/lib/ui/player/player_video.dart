@@ -15,6 +15,10 @@ class _VideoView extends StatefulWidget {
     required this.chrome,
     required this.overlay,
     required this.register,
+    required this.notes,
+    required this.markers,
+    required this.editor,
+    this.startMs,
     required this.onEnded,
     required this.onFullscreen,
     required this.onChanged,
@@ -32,6 +36,18 @@ class _VideoView extends StatefulWidget {
   /// Full screen: controls float over the picture.
   final bool overlay;
   final void Function(PlayerEntry, _ViewHandle?) register;
+
+  /// Annotations shown on it (each at its time).
+  final List<Note> notes;
+
+  /// Where annotations start (dots on the time line).
+  final List<int> markers;
+
+  /// Drawing on it now.
+  final InkEditor? editor;
+
+  /// Start here instead of where it was left.
+  final int? startMs;
   final VoidCallback onEnded;
   final VoidCallback onFullscreen;
   final VoidCallback onChanged;
@@ -58,6 +74,55 @@ class _VideoViewState extends State<_VideoView> implements _ViewHandle {
   PlayerMemory get _memory => widget.services.player;
   PlayerEntry get _e => widget.entry;
 
+  /// Where it is (the marks follow it).
+  final ValueNotifier<int> _ms = ValueNotifier(0);
+  int _lastMs = 0;
+
+  /// Stopped at this annotation already (it plays on from there).
+  String? _pausedFor;
+  Size? _size;
+
+  @override
+  int get nowMs => _player.state.position.inMilliseconds;
+
+  @override
+  Size? get pictureSize => _size;
+
+  @override
+  void seekTo(int ms, {bool play = false}) {
+    unawaited(() async {
+      await _player.seek(Duration(milliseconds: ms));
+      if (play) await _player.play();
+    }());
+  }
+
+  void _position(Duration d) {
+    final now = d.inMilliseconds;
+    _ms.value = now;
+    // "Stop at each annotation": only while playing on, not when jumping.
+    if (_memory.pauseAtNotes && widget.editor == null && _player.state.playing && now > _lastMs && now - _lastMs < 1500) {
+      for (final n in widget.notes) {
+        if (n.startMs > _lastMs && n.startMs <= now && _pausedFor != n.id) {
+          _pausedFor = n.id;
+          unawaited(_player.pause());
+          _show(n.name, seconds: 3);
+          break;
+        }
+      }
+    }
+    _lastMs = now;
+  }
+
+  void _dims() {
+    final w = _player.state.width, h = _player.state.height;
+    if (w == null || h == null || w <= 0 || h <= 0) return;
+    final sz = Size(w.toDouble(), h.toDouble());
+    if (sz != _size && mounted) {
+      setState(() => _size = sz);
+      widget.onChanged();
+    }
+  }
+
   NativePlayer? get _mpv {
     final p = _player.platform;
     return p is NativePlayer ? p : null;
@@ -71,7 +136,11 @@ class _VideoViewState extends State<_VideoView> implements _ViewHandle {
   }
 
   Future<void> _open() async {
-    final from = _memory.positionOf(_e.key);
+    final asked = widget.startMs;
+    final from = asked != null ? Duration(milliseconds: asked) : _memory.positionOf(_e.key);
+    _subs.add(_player.stream.position.listen(_position));
+    _subs.add(_player.stream.width.listen((_) => _dims()));
+    _subs.add(_player.stream.height.listen((_) => _dims()));
     _subs.add(_player.stream.completed.listen((done) {
       if (done && mounted) widget.onEnded();
     }));
@@ -79,7 +148,7 @@ class _VideoViewState extends State<_VideoView> implements _ViewHandle {
     await _player.setVolume(_memory.volume);
     if (_memory.endMode == EndMode.repeat) await _player.setPlaylistMode(PlaylistMode.single);
     await _player.open(Media(_e.path, start: from), play: widget.active);
-    if (from != null && mounted) {
+    if (asked == null && from != null && mounted) {
       _show(tr('player.resumed', {'time': playerTime(from)}), action: () {
         unawaited(_player.seek(Duration.zero));
         _hideNote();
@@ -122,6 +191,7 @@ class _VideoViewState extends State<_VideoView> implements _ViewHandle {
       unawaited(s.cancel());
     }
     _tc.dispose();
+    _ms.dispose();
     unawaited(_player.dispose());
     super.dispose();
   }
@@ -275,16 +345,34 @@ class _VideoViewState extends State<_VideoView> implements _ViewHandle {
 
   // ------------------------------------------------------------------ view
 
-  Widget _picture() => GestureDetector(
-        onTap: () => unawaited(_player.playOrPause()),
-        onDoubleTap: widget.onFullscreen,
-        child: InteractiveViewer(
-          transformationController: _tc,
-          minScale: 1,
-          maxScale: 8,
-          child: Video(controller: _controller, controls: NoVideoControls, fill: Colors.black),
-        ),
-      );
+  Widget _picture() {
+    final drawing = widget.editor != null;
+    final sz = _size;
+    final video = Video(controller: _controller, controls: NoVideoControls, fill: Colors.black);
+    return GestureDetector(
+      onTap: drawing ? null : () => unawaited(_player.playOrPause()),
+      onDoubleTap: drawing ? null : widget.onFullscreen,
+      child: InteractiveViewer(
+        transformationController: _tc,
+        minScale: 1,
+        maxScale: 8,
+        // While drawing a drag draws.
+        panEnabled: !drawing,
+        scaleEnabled: !drawing,
+        child: sz == null
+            ? video
+            : Center(
+                child: AspectRatio(
+                  aspectRatio: sz.width / sz.height,
+                  child: Stack(fit: StackFit.expand, children: [
+                    video,
+                    InkLayer(notes: widget.notes, video: true, clock: _ms, editor: widget.editor),
+                  ]),
+                ),
+              ),
+      ),
+    );
+  }
 
   Widget _noteView() => Align(
         alignment: const Alignment(0, -0.75),
@@ -316,6 +404,7 @@ class _VideoViewState extends State<_VideoView> implements _ViewHandle {
       a: _a,
       b: _b,
       endMode: _memory.endMode,
+      markers: widget.markers,
       overlay: widget.overlay,
       onFrame: _frame,
       onSeekBy: _seekBy,
@@ -356,6 +445,7 @@ class _ControlBar extends StatelessWidget {
     required this.a,
     required this.b,
     required this.endMode,
+    required this.markers,
     required this.overlay,
     required this.onFrame,
     required this.onSeekBy,
@@ -369,6 +459,7 @@ class _ControlBar extends StatelessWidget {
   final Player player;
   final Duration? a, b;
   final EndMode endMode;
+  final List<int> markers;
   final bool overlay;
   final Future<void> Function(bool forward) onFrame;
   final Future<void> Function(Duration) onSeekBy;
@@ -459,6 +550,7 @@ class _ControlBar extends StatelessWidget {
             duration: p.state.duration,
             a: a,
             b: b,
+            markers: markers,
             onSeek: (d) => unawaited(p.seek(d)),
           ),
         ),
@@ -545,11 +637,14 @@ class _ControlBar extends StatelessWidget {
 /// The time line: played part, the A-B loop, a dot to drag. Dragging
 /// moves the picture along (a few times a second).
 class _SeekBar extends StatefulWidget {
-  const _SeekBar({required this.position, required this.duration, required this.onSeek, this.a, this.b});
+  const _SeekBar({required this.position, required this.duration, required this.onSeek, this.a, this.b, this.markers = const []});
 
   final Duration position;
   final Duration duration;
   final Duration? a, b;
+
+  /// Annotations (ms): small marks above the line.
+  final List<int> markers;
   final ValueChanged<Duration> onSeek;
 
   @override
@@ -604,6 +699,7 @@ class _SeekBarState extends State<_SeekBar> {
                       played: shown,
                       a: widget.a == null ? null : _frac(widget.a!),
                       b: widget.b == null ? null : _frac(widget.b!),
+                      marks: [for (final m in widget.markers) _frac(Duration(milliseconds: m))],
                       pad: pad,
                     ),
                   ),
@@ -626,11 +722,12 @@ class _SeekBarState extends State<_SeekBar> {
 }
 
 class _SeekPainter extends CustomPainter {
-  _SeekPainter({required this.played, required this.pad, this.a, this.b});
+  _SeekPainter({required this.played, required this.pad, this.a, this.b, this.marks = const []});
 
   final double played;
   final double pad;
   final double? a, b;
+  final List<double> marks;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -653,9 +750,13 @@ class _SeekPainter extends CustomPainter {
       ..strokeWidth = 4
       ..strokeCap = StrokeCap.round;
     canvas.drawLine(Offset(pad, y), Offset(pad + played * w, y), done);
+    final mark = Paint()..color = const Color(0xFFFFB547);
+    for (final m in marks) {
+      canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: Offset(pad + m * w, y - 7), width: 4, height: 8), const Radius.circular(2)), mark);
+    }
     canvas.drawCircle(Offset(pad + played * w, y), 7, Paint()..color = Colors.white);
   }
 
   @override
-  bool shouldRepaint(_SeekPainter old) => old.played != played || old.a != a || old.b != b;
+  bool shouldRepaint(_SeekPainter old) => old.played != played || old.a != a || old.b != b || old.marks.length != marks.length;
 }

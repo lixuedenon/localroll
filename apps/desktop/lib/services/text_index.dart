@@ -147,16 +147,33 @@ class TextIndex extends ChangeNotifier {
 
   /// Does the item at [key] (named [name]) match [query]? Every word of
   /// the query must be in its text or its name.
+  /// Player annotations of a library item (names, typed text, tool
+  /// names), per [mediaKey]: found by the search box too.
+  final Map<String, String> notes = {};
+  final Map<String, String> _notesPlain = {};
+
+  void setNotes(String key, String? text) {
+    if (text == null || text.trim().isEmpty) {
+      notes.remove(key);
+      _notesPlain.remove(key);
+    } else {
+      notes[key] = text;
+      _notesPlain[key] = normalize(text);
+    }
+  }
+
   bool matches(String key, String name, SearchQuery query) {
     if (query.isEmpty) return true;
-    final text = _plain[key] ?? '';
+    final text = '${_plain[key] ?? ''}${_notesPlain[key] ?? ''}';
     final n = normalize(name);
     return query.words.every((w) => text.contains(w) || n.contains(w));
   }
 
   /// A little of the text around the first word of [query] (for a tooltip).
   String? snippet(String key, SearchQuery query) {
-    final raw = _entries[key]?.text;
+    var raw = _entries[key]?.text;
+    final note = notes[key];
+    if (note != null && query.words.any((w) => (_notesPlain[key] ?? '').contains(w))) raw = note;
     if (raw == null || raw.isEmpty || query.isEmpty) return null;
     final flat = raw.replaceAll(RegExp(r'\s+'), ' ');
     final lower = flat.toLowerCase();

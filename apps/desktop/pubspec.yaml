@@ -28,6 +28,8 @@ dependencies:
   nsd: '>=4.0.0 <5.0.0'
 
   path_provider: ^2.1.4
+  # Finding a file's annotations by its contents (BSD).
+  crypto: ^3.0.3
   # Photos / videos dragged from Explorer open in the player (Apache 2.0).
   # 0.9 needs a newer Flutter than the one used for Windows here.
   desktop_drop: '>=0.8.0 <0.9.0'

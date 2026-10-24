@@ -12,6 +12,7 @@ import 'package:window_manager/window_manager.dart';
 
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
+import '../../services/annotations.dart';
 import '../../services/converter.dart';
 import '../../services/ffmpeg.dart';
 import '../../services/library_index.dart';
@@ -23,14 +24,17 @@ import '../format.dart';
 import '../send_page.dart';
 import '../theme.dart';
 import '../trash_actions.dart';
+import 'ink_editor.dart';
+import 'notes_panel.dart';
 import 'player_entry.dart';
+import 'snapshot.dart';
 
 part 'player_video.dart';
 
 /// Opens files from this PC (Explorer's "Open with", drag and drop, the
 /// open dialog). One file: the photos and videos of its folder come along,
 /// so the arrows go through them.
-Future<void> openInPlayer(BuildContext context, AppServices s, List<String> paths) async {
+Future<void> openInPlayer(BuildContext context, AppServices s, List<String> paths, {int? startMs}) async {
   final wanted = [for (final p in paths) if (PlayerEntry.playable(p)) p];
   if (wanted.isEmpty) {
     ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('player.nothing_playable'))));
@@ -57,7 +61,7 @@ Future<void> openInPlayer(BuildContext context, AppServices s, List<String> path
     return;
   }
   if (!context.mounted) return;
-  await openPlayer(context, s, entries, at);
+  await openPlayer(context, s, entries, at, startMs: startMs);
 }
 
 /// Files asked for from outside the window (Explorer's "Open with", a
@@ -96,10 +100,11 @@ class PlayerLauncher {
 Future<void> openLibraryItems(BuildContext context, AppServices s, List<MediaItem> items, int index) =>
     openPlayer(context, s, [for (final i in items) PlayerEntry.fromItem(s.library, i)], index < 0 ? 0 : index);
 
-Future<void> openPlayer(BuildContext context, AppServices s, List<PlayerEntry> entries, int index) =>
+/// [startMs]: a video starts there (an annotation found by search).
+Future<void> openPlayer(BuildContext context, AppServices s, List<PlayerEntry> entries, int index, {int? startMs}) =>
     Navigator.of(context).push(MaterialPageRoute(
       settings: const RouteSettings(name: 'player'),
-      builder: (_) => PlayerPage(services: s, entries: entries, initialIndex: index.clamp(0, entries.length - 1)),
+      builder: (_) => PlayerPage(services: s, entries: entries, initialIndex: index.clamp(0, entries.length - 1), initialMs: startMs),
     ));
 
 /// For "Recent" and "Continue".
@@ -123,17 +128,34 @@ String playerTime(Duration d) {
 abstract class _ViewHandle {
   /// True when the key was used.
   bool onKey(KeyEvent e);
+
+  /// Where the video is (photos: 0).
+  int get nowMs;
+
+  /// The picture's own size in pixels, once known.
+  Size? get pictureSize;
+
+  void seekTo(int ms, {bool play = false});
 }
+
+/// What is open on the right.
+enum _Panel { none, info, notes }
+
+/// Typing somewhere (a text mark, a search box): keys are letters then.
+bool _typing() => FocusManager.instance.primaryFocus?.context?.findAncestorStateOfType<EditableTextState>() != null;
 
 /// The one player for photos and videos — library, received files, files
 /// anywhere on this PC. Videos (HEVC, HDR, Dolby Vision, MKV…) play
 /// through libmpv; HEIC, AVIF, TIFF, camera RAW are shown as they are.
 class PlayerPage extends StatefulWidget {
-  const PlayerPage({super.key, required this.services, required this.entries, required this.initialIndex});
+  const PlayerPage({super.key, required this.services, required this.entries, required this.initialIndex, this.initialMs});
 
   final AppServices services;
   final List<PlayerEntry> entries;
   final int initialIndex;
+
+  /// The first video starts here (instead of where it was left).
+  final int? initialMs;
 
   @override
   State<PlayerPage> createState() => _PlayerPageState();
@@ -146,8 +168,15 @@ class _PlayerPageState extends State<PlayerPage> {
   final FocusNode _focus = FocusNode(debugLabel: 'player');
   final Map<PlayerEntry, _ViewHandle> _handles = {};
 
-  bool _info = false;
+  _Panel _panel = _Panel.none;
   bool _fullscreen = false;
+
+  /// Annotations of each item, once read.
+  final Map<PlayerEntry, NoteSet> _sets = {};
+
+  /// Drawing now (null: not).
+  InkEditor? _editor;
+  bool _showInk = true;
 
   /// Bars shown (in full screen they step aside when the mouse rests).
   bool _chrome = true;
@@ -159,10 +188,25 @@ class _PlayerPageState extends State<PlayerPage> {
   PlayerEntry get _entry => _entries[_index];
   _ViewHandle? get _active => _handles[_entry];
   PlayerMemory get _memory => widget.services.player;
+  NoteSet? get _set => _sets[_entry];
+
+  /// Where the first video starts (used once).
+  late final Map<PlayerEntry, int> _startAt = {if (widget.initialMs != null) _entries[widget.initialIndex]: widget.initialMs!};
+
+  Future<void> _loadNotes(PlayerEntry e) async {
+    if (_sets.containsKey(e)) return;
+    try {
+      final set = await widget.services.notes.open(item: e.item, path: e.path, name: e.name, size: e.size, video: e.video);
+      if (mounted) setState(() => _sets[e] = set);
+    } catch (err) {
+      DiagLog.log('player', 'annotations not opened: $err');
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    unawaited(_loadNotes(_entry));
     _memory.opened(recentOf(_entry));
     DiagLog.log('player', 'open ${_entry.video ? 'video' : 'photo'} .${_entry.extension} (${_entries.length} in list)');
   }
@@ -198,8 +242,11 @@ class _PlayerPageState extends State<PlayerPage> {
   }
 
   void _changed(int i) {
+    // Drawing on the one left: kept.
+    if (_editor != null) unawaited(_finishDraw(on: _entry));
     setState(() => _index = i);
     _memory.opened(recentOf(_entries[i]));
+    unawaited(_loadNotes(_entries[i]));
   }
 
   /// A video ended: on to the next one if asked to.
@@ -241,10 +288,30 @@ class _PlayerPageState extends State<PlayerPage> {
   }
 
   KeyEventResult _key(FocusNode _, KeyEvent e) {
-    if (e is KeyUpEvent) return KeyEventResult.ignored;
+    if (e is KeyUpEvent || _typing()) return KeyEventResult.ignored;
     final k = e.logicalKey;
     final shift = HardwareKeyboard.instance.isShiftPressed;
+    final ctrl = HardwareKeyboard.instance.isControlPressed;
     final down = e is KeyDownEvent;
+    final ed = _editor;
+    if (ed != null && down) {
+      if (ctrl && k == LogicalKeyboardKey.keyZ) {
+        shift ? ed.redo() : ed.undo();
+        return KeyEventResult.handled;
+      }
+      if (ctrl && k == LogicalKeyboardKey.keyY) {
+        ed.redo();
+        return KeyEventResult.handled;
+      }
+      if ((k == LogicalKeyboardKey.delete || k == LogicalKeyboardKey.backspace) && ed.selected != null) {
+        ed.deleteSelected();
+        return KeyEventResult.handled;
+      }
+      if (k == LogicalKeyboardKey.escape) {
+        unawaited(_finishDraw());
+        return KeyEventResult.handled;
+      }
+    }
     if (down && k == LogicalKeyboardKey.escape) {
       if (_fullscreen) {
         _setFullscreen(false);
@@ -260,7 +327,13 @@ class _PlayerPageState extends State<PlayerPage> {
     if (k == LogicalKeyboardKey.keyF || k == LogicalKeyboardKey.f11) {
       _setFullscreen(!_fullscreen);
     } else if (k == LogicalKeyboardKey.keyI) {
-      setState(() => _info = !_info);
+      _toggle(_Panel.info);
+    } else if (k == LogicalKeyboardKey.keyN && !shift) {
+      _toggle(_Panel.notes);
+    } else if (k == LogicalKeyboardKey.keyD) {
+      _editor == null ? _startDraw() : unawaited(_finishDraw());
+    } else if (k == LogicalKeyboardKey.keyS && !ctrl) {
+      unawaited(_shoot(withInk: true));
     } else if (k == LogicalKeyboardKey.pageDown || (shift && k == LogicalKeyboardKey.keyN)) {
       _go(1);
     } else if (k == LogicalKeyboardKey.pageUp || (shift && k == LogicalKeyboardKey.keyP)) {
@@ -310,6 +383,230 @@ class _PlayerPageState extends State<PlayerPage> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('convert.queued_hint', {'preset': p.label}))));
   }
 
+  void _toggle(_Panel p) => setState(() => _panel = _panel == p ? _Panel.none : p);
+
+  // ------------------------------------------------------------- drawing
+
+  /// Start drawing (on a video: at where it is; marks drawn while it
+  /// plays remember their moment). [note]: change that one.
+  void _startDraw({Note? note}) {
+    if (_editor != null) return;
+    final e = _entry;
+    if (!_sets.containsKey(e)) return;
+    setState(() {
+      _showInk = true;
+      _editor = InkEditor(video: e.video, clock: () => _active?.nowMs ?? 0, inks: note?.inks, original: note);
+    });
+    DiagLog.log('player', 'drawing ${note == null ? 'new' : 'edit'}');
+  }
+
+  /// Done drawing: kept as an annotation (nothing drawn: nothing kept).
+  Future<void> _finishDraw({PlayerEntry? on}) async {
+    final ed = _editor;
+    if (ed == null) return;
+    final e = on ?? _entry;
+    final set = _sets[e];
+    setState(() => _editor = null);
+    FocusManager.instance.primaryFocus?.unfocus();
+    _focus.requestFocus();
+    if (set == null) return;
+    final inks = ed.result;
+    final old = ed.original;
+    if (inks.isEmpty) {
+      if (old != null) {
+        set.notes.remove(old);
+        await widget.services.notes.save(set);
+      }
+      return;
+    }
+    final start = e.video ? inks.map((i) => i.atMs ?? 0).reduce((a, b) => a < b ? a : b) : 0;
+    final Note note;
+    if (old != null) {
+      note = old
+        ..inks = inks
+        ..startMs = start
+        ..modifiedMs = DateTime.now().millisecondsSinceEpoch;
+    } else {
+      note = Note(
+        id: InkMark.newId(),
+        name: e.video ? tr('ink.note_at', {'time': playerTime(Duration(milliseconds: start))}) : tr('ink.note_n', {'n': set.notes.length + 1}),
+        inks: inks,
+        startMs: start,
+      );
+      set.notes.add(note);
+    }
+    await widget.services.notes.save(set);
+    if (!mounted) return;
+    setState(() {});
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(tr('ink.saved', {'name': note.name})),
+      action: SnackBarAction(label: tr('ink.rename'), onPressed: () => _rename(e, note)),
+    ));
+  }
+
+  Future<void> _cancelDraw() async {
+    final ed = _editor;
+    if (ed == null) return;
+    if (ed.inks.isNotEmpty && ed.original == null) {
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          content: Text(tr('ink.discard')),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('common.cancel'))),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('ink.discard_yes'))),
+          ],
+        ),
+      );
+      if (ok != true) return;
+    }
+    if (!mounted) return;
+    setState(() => _editor = null);
+    _focus.requestFocus();
+  }
+
+  /// The annotations drawn on the picture now (others, not the one being
+  /// changed).
+  List<Note> _shownNotes(PlayerEntry e) {
+    if (!_showInk) return const [];
+    final all = _sets[e]?.notes ?? const <Note>[];
+    final editing = e == _entry ? _editor?.original : null;
+    return [for (final n in all) if (n != editing) n];
+  }
+
+  /// The marks a screenshot gets now: what is on the picture.
+  List<InkMark> _inksNow() {
+    final e = _entry;
+    final ms = _active?.nowMs ?? 0;
+    return [
+      for (final n in _shownNotes(e))
+        if (!e.video || n.shownAt(ms))
+          for (final i in n.inks)
+            if (!e.video || n.inkShownAt(i, ms)) i,
+      ...?_editor?.result,
+    ];
+  }
+
+  Future<void> _shoot({required bool withInk, Note? note}) async {
+    final e = _entry;
+    final ms = note != null ? note.lastMs : (_active?.nowMs ?? 0);
+    final inks = note != null ? note.inks : (withInk ? _inksNow() : const <InkMark>[]);
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(SnackBar(content: Text(tr('ink.shooting')), duration: const Duration(seconds: 20)));
+    final f = await Snapshots.take(widget.services, e, ms: ms, inks: inks);
+    messenger.hideCurrentSnackBar();
+    if (!mounted) return;
+    if (f == null) {
+      messenger.showSnackBar(SnackBar(content: Text(tr('ink.shot_failed'))));
+      return;
+    }
+    messenger.showSnackBar(SnackBar(
+      duration: const Duration(seconds: 8),
+      content: Row(children: [
+        Expanded(child: Text(tr('ink.shot_saved', {'folder': f.parent.path.split(Platform.pathSeparator).last}))),
+        TextButton(onPressed: () => revealInExplorer(f.path), child: Text(tr('common.show_in_folder'))),
+        const SizedBox(width: 4),
+        FilledButton.icon(
+          onPressed: () {
+            messenger.hideCurrentSnackBar();
+            unawaited(_sendFile(f));
+          },
+          icon: const Icon(Icons.send_rounded, size: 16),
+          label: Text(tr('player.send')),
+        ),
+      ]),
+    ));
+  }
+
+  /// A screenshot to another device (from the library when it is in it).
+  Future<void> _sendFile(File f, {bool ask = true}) async {
+    final s = widget.services;
+    final lib = s.library;
+    final root = '${lib.rootPath}${Platform.pathSeparator}';
+    final item = f.path.toLowerCase().startsWith(root.toLowerCase())
+        ? lib.findByRel(f.path.substring(root.length).replaceAll(Platform.pathSeparator, '/'))
+        : null;
+    final name = f.path.split(Platform.pathSeparator).last;
+    final file = item != null ? SendFile.fromLibrary(lib, item) : SendFile.plain(f, name);
+    if (file == null || !mounted) return;
+    await sendToPc(context, s, [file], name);
+  }
+
+  Future<void> _rename(PlayerEntry e, Note n) async {
+    final set = _sets[e];
+    if (set == null) return;
+    final ctrl = TextEditingController(text: n.name);
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr('ink.rename')),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          onSubmitted: (v) => Navigator.pop(ctx, v),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('common.cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, ctrl.text), child: Text(tr('common.ok'))),
+        ],
+      ),
+    );
+    ctrl.dispose();
+    if (name == null || name.trim().isEmpty) return;
+    n
+      ..name = name.trim()
+      ..modifiedMs = DateTime.now().millisecondsSinceEpoch;
+    await widget.services.notes.save(set);
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _noteAction(Note n, NoteAction a) async {
+    final e = _entry;
+    final set = _sets[e];
+    if (set == null) return;
+    switch (a) {
+      case NoteAction.jump:
+        final to = n.startMs - _memory.leadSec * 1000;
+        _active?.seekTo(to < 0 ? 0 : to, play: true);
+      case NoteAction.edit:
+        if (_editor != null) await _finishDraw();
+        if (e.video) _active?.seekTo(n.startMs);
+        _startDraw(note: n);
+      case NoteAction.rename:
+        await _rename(e, n);
+      case NoteAction.shot:
+        await _shoot(withInk: true, note: n);
+      case NoteAction.send:
+        final f = await Snapshots.take(widget.services, e, ms: n.lastMs, inks: n.inks);
+        if (f != null && mounted) await _sendFile(f);
+      case NoteAction.delete:
+        final at = set.notes.indexOf(n);
+        set.notes.remove(n);
+        await widget.services.notes.save(set);
+        if (!mounted) return;
+        setState(() {});
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(tr('ink.deleted', {'name': n.name})),
+          action: SnackBarAction(
+            label: tr('trash.undo'),
+            onPressed: () async {
+              set.notes.insert(at.clamp(0, set.notes.length), n);
+              await widget.services.notes.save(set);
+              if (mounted) setState(() {});
+            },
+          ),
+        ));
+    }
+  }
+
+  Future<void> _hold(Note n, int ms) async {
+    final set = _sets[_entry];
+    if (set == null) return;
+    n.holdMs = ms;
+    await widget.services.notes.save(set);
+    if (mounted) setState(() {});
+  }
+
   Future<void> _shortcuts() => showDialog<void>(
         context: context,
         builder: (ctx) {
@@ -341,6 +638,11 @@ class _PlayerPageState extends State<PlayerPage> {
                   row('R  Shift+R', tr('player.rotate')),
                   row('F  F11  Esc', tr('player.fullscreen')),
                   row('I', tr('player.info')),
+                  row('D', tr('ink.draw')),
+                  row('N', tr('ink.notes_key')),
+                  row('S', tr('ink.shot_key')),
+                  row('Ctrl+Z  Ctrl+Y', tr('ink.key_undo')),
+                  row('Shift', tr('ink.key_shift')),
                 ]),
               ),
             ),
@@ -398,24 +700,44 @@ class _PlayerPageState extends State<PlayerPage> {
           _btn(Icons.fit_screen_rounded, tr('player.zoom_fit'), image.fit),
           _btn(Icons.rotate_right_rounded, tr('player.rotate'), () => image.rotate(1)),
         ],
-        if (_entries.length > 1)
+        if (_entries.length > 1 && _editor == null)
           _btn(_slideshow ? Icons.stop_circle_outlined : Icons.slideshow_rounded,
               tr(_slideshow ? 'player.slideshow_stop' : 'player.slideshow'), () => _setSlideshow(!_slideshow),
               on: _slideshow),
-        _btn(Icons.info_outline_rounded, tr('player.info'), () => setState(() => _info = !_info), on: _info),
+        _btn(Icons.brush_rounded, tr('ink.draw'), _set == null ? null : () => _editor == null ? _startDraw() : unawaited(_finishDraw()),
+            on: _editor != null),
+        PopupMenuButton<bool>(
+          tooltip: tr('ink.shot'),
+          icon: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 22),
+          onSelected: (w) => unawaited(_shoot(withInk: w)),
+          itemBuilder: (_) => [
+            PopupMenuItem(value: true, child: Text(tr('ink.shot_with'))),
+            PopupMenuItem(value: false, child: Text(tr('ink.shot_without'))),
+          ],
+        ),
+        _btn(Icons.format_list_bulleted_rounded, tr('ink.notes_key'), () => _toggle(_Panel.notes), on: _panel == _Panel.notes),
+        _btn(Icons.info_outline_rounded, tr('player.info'), () => _toggle(_Panel.info), on: _panel == _Panel.info),
         _btn(Icons.send_rounded, tr('player.send'), () => _send(e)),
-        if (item != null)
-          PopupMenuButton<ConvertPreset>(
-            tooltip: tr('convert.keep_original_tooltip'),
-            icon: const Icon(Icons.auto_fix_high_rounded, color: Colors.white, size: 22),
-            onSelected: (p) => _convert(e, p),
-            itemBuilder: (_) => [
-              for (final p in ConvertPreset.values) PopupMenuItem(value: p, child: Text(tr('convert.to', {'preset': p.label}))),
+        PopupMenuButton<String>(
+          tooltip: tr('ink.more'),
+          icon: const Icon(Icons.more_vert_rounded, color: Colors.white, size: 22),
+          onSelected: (v) {
+            if (v == 'reveal') revealInExplorer(e.path);
+            if (v == 'delete') unawaited(_delete(e));
+            if (v == 'keys') unawaited(_shortcuts());
+            if (v.startsWith('convert:')) _convert(e, ConvertPreset.values.firstWhere((p) => 'convert:${p.name}' == v));
+          },
+          itemBuilder: (_) => [
+            if (item != null)
+              for (final p in ConvertPreset.values) PopupMenuItem(value: 'convert:${p.name}', child: Text(tr('convert.to', {'preset': p.label}))),
+            PopupMenuItem(value: 'reveal', child: Text(tr('common.show_in_folder'))),
+            PopupMenuItem(value: 'keys', child: Text(tr('player.shortcuts'))),
+            if (item != null) ...[
+              const PopupMenuDivider(),
+              PopupMenuItem(value: 'delete', child: Text(tr('lib.delete'), style: const TextStyle(color: LrColors.danger))),
             ],
-          ),
-        _btn(Icons.folder_open_rounded, tr('common.show_in_folder'), () => revealInExplorer(e.path)),
-        if (item != null) _btn(Icons.delete_outline_rounded, tr('lib.delete'), () => _delete(e)),
-        _btn(Icons.keyboard_rounded, tr('player.shortcuts'), _shortcuts),
+          ],
+        ),
         _btn(_fullscreen ? Icons.fullscreen_exit_rounded : Icons.fullscreen_rounded,
             tr(_fullscreen ? 'player.exit_fullscreen' : 'player.fullscreen'), () => _setFullscreen(!_fullscreen)),
       ]),
@@ -437,6 +759,10 @@ class _PlayerPageState extends State<PlayerPage> {
                   chrome: _chrome,
                   overlay: _fullscreen,
                   register: _register,
+                  notes: _shownNotes(it),
+                  markers: [for (final n in _sets[it]?.notes ?? const <Note>[]) n.startMs],
+                  editor: i == _index ? _editor : null,
+                  startMs: _startAt.remove(it),
                   onEnded: _ended,
                   onFullscreen: () => _setFullscreen(!_fullscreen),
                   onChanged: () {
@@ -448,6 +774,8 @@ class _PlayerPageState extends State<PlayerPage> {
                   entry: it,
                   services: widget.services,
                   register: _register,
+                  notes: _shownNotes(it),
+                  editor: i == _index ? _editor : null,
                   onFullscreen: () => _setFullscreen(!_fullscreen),
                   onChanged: () {
                     if (mounted) setState(() {});
@@ -486,7 +814,18 @@ class _PlayerPageState extends State<PlayerPage> {
       Expanded(
         child: Stack(children: [
           Positioned.fill(child: _pageView()),
-          _arrows(),
+          if (_editor == null) _arrows(),
+          if (_editor != null)
+            Positioned(
+              left: 0,
+              right: 0,
+              top: _fullscreen ? 56 : 0,
+              child: Center(
+                child: ExcludeFocus(
+                  child: InkToolbar(editor: _editor!, onDone: () => unawaited(_finishDraw()), onCancel: () => unawaited(_cancelDraw())),
+                ),
+              ),
+            ),
           if (_fullscreen)
             Positioned(
               left: 0,
@@ -515,7 +854,23 @@ class _PlayerPageState extends State<PlayerPage> {
           backgroundColor: Colors.black,
           body: Row(children: [
             Expanded(child: main),
-            if (_info) _InfoPanel(key: ObjectKey(_entry), entry: _entry, services: widget.services, from: _entry.item == null ? null : _from(_entry.item!)),
+            if (_panel == _Panel.info)
+              _InfoPanel(key: ObjectKey(_entry), entry: _entry, services: widget.services, from: _entry.item == null ? null : _from(_entry.item!)),
+            if (_panel == _Panel.notes)
+              NotesPanel(
+                key: ObjectKey(_entry),
+                services: widget.services,
+                entry: _entry,
+                set: _set,
+                aspect: () {
+                  final sz = _active?.pictureSize;
+                  return sz == null || sz.height == 0 ? 16 / 9 : sz.width / sz.height;
+                }(),
+                showInk: _showInk,
+                onShowInk: (v) => setState(() => _showInk = v),
+                onAction: (n, a) => unawaited(_noteAction(n, a)),
+                onHold: (n, ms) => unawaited(_hold(n, ms)),
+              ),
           ]),
         ),
       ),
@@ -531,6 +886,8 @@ class _ImageView extends StatefulWidget {
     required this.entry,
     required this.services,
     required this.register,
+    required this.notes,
+    required this.editor,
     required this.onFullscreen,
     required this.onChanged,
   });
@@ -538,6 +895,12 @@ class _ImageView extends StatefulWidget {
   final PlayerEntry entry;
   final AppServices services;
   final void Function(PlayerEntry, _ViewHandle?) register;
+
+  /// Annotations drawn on it.
+  final List<Note> notes;
+
+  /// Drawing on it now.
+  final InkEditor? editor;
   final VoidCallback onFullscreen;
   final VoidCallback onChanged;
 
@@ -552,6 +915,11 @@ class _ImageViewState extends State<_ImageView> implements _ViewHandle {
   Size _box = Size.zero;
   Offset? _tapAt;
 
+  /// The picture's own size (the marks sit exactly on it).
+  Size? _size;
+  ImageStream? _stream;
+  ImageStreamListener? _listener;
+
   /// Playing the Live Photo's video over the still.
   bool _playingLive = false;
 
@@ -559,20 +927,51 @@ class _ImageViewState extends State<_ImageView> implements _ViewHandle {
   bool get _direct => nativelyDecodableImages.contains(_e.extension);
 
   @override
+  int get nowMs => 0;
+
+  @override
+  Size? get pictureSize => _size;
+
+  @override
+  void seekTo(int ms, {bool play = false}) {}
+
+  @override
   void initState() {
     super.initState();
     widget.register(_e, this);
-    if (!_direct) {
+    if (_direct) {
+      _measure(File(_e.path));
+    } else {
       final ff = widget.services.ffmpeg;
       final item = _e.item;
       _preview = item != null ? ff.preview(item) : ff.previewFile(_e.path, size: _e.size, modifiedMs: _e.modifiedMs);
+      _preview!.then((f) {
+        if (f != null && mounted) _measure(f);
+      });
     }
     // The page's zoom buttons need this view registered first.
     WidgetsBinding.instance.addPostFrameCallback((_) => widget.onChanged());
   }
 
+  /// The same picture Image.file shows (decoded once, shared).
+  void _measure(File f) {
+    final stream = FileImage(f).resolve(ImageConfiguration.empty);
+    final l = ImageStreamListener((info, _) {
+      final sz = Size(info.image.width.toDouble(), info.image.height.toDouble());
+      if (mounted && sz != _size) {
+        setState(() => _size = sz);
+        widget.onChanged();
+      }
+    }, onError: (_, _) {});
+    _stream = stream;
+    _listener = l;
+    stream.addListener(l);
+  }
+
   @override
   void dispose() {
+    final l = _listener;
+    if (l != null) _stream?.removeListener(l);
     widget.register(_e, null);
     _tc.dispose();
     super.dispose();
@@ -608,7 +1007,7 @@ class _ImageViewState extends State<_ImageView> implements _ViewHandle {
       zoomBy(1 / 1.25);
     } else if (k == LogicalKeyboardKey.digit0 || k == LogicalKeyboardKey.numpad0) {
       fit();
-    } else if (k == LogicalKeyboardKey.keyR && e is KeyDownEvent) {
+    } else if (k == LogicalKeyboardKey.keyR && e is KeyDownEvent && widget.editor == null) {
       rotate(HardwareKeyboard.instance.isShiftPressed ? 3 : 1);
     } else {
       return false;
@@ -643,37 +1042,56 @@ class _ImageViewState extends State<_ImageView> implements _ViewHandle {
     );
   }
 
+  /// The picture with its marks on top, exactly its shape.
+  Widget _withInk() {
+    final sz = _size;
+    if (sz == null || sz.height == 0) return _still();
+    return AspectRatio(
+      aspectRatio: sz.width / sz.height,
+      child: Stack(fit: StackFit.expand, children: [
+        _still(),
+        InkLayer(notes: widget.notes, video: false, editor: widget.editor),
+      ]),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final drawing = widget.editor != null;
     final view = LayoutBuilder(builder: (context, c) {
       _box = Size(c.maxWidth, c.maxHeight);
       return GestureDetector(
-        onDoubleTapDown: (d) => _tapAt = d.localPosition,
-        onDoubleTap: () {
-          if (_tc.value.getMaxScaleOnAxis() > 1.01) {
-            fit();
-          } else {
-            zoomBy(2.5, _tapAt);
-          }
-        },
+        onDoubleTapDown: drawing ? null : (d) => _tapAt = d.localPosition,
+        onDoubleTap: drawing
+            ? null
+            : () {
+                if (_tc.value.getMaxScaleOnAxis() > 1.01) {
+                  fit();
+                } else {
+                  zoomBy(2.5, _tapAt);
+                }
+              },
         child: InteractiveViewer(
           transformationController: _tc,
           minScale: 1,
           maxScale: 12,
+          // While drawing a drag draws (zoom with + − first).
+          panEnabled: !drawing,
+          scaleEnabled: !drawing,
           child: SizedBox(
             width: c.maxWidth,
             height: c.maxHeight,
-            child: Center(child: RotatedBox(quarterTurns: _turns, child: _still())),
+            child: Center(child: RotatedBox(quarterTurns: _turns, child: _withInk())),
           ),
         ),
       );
     });
     final item = _e.item;
-    final live = item == null ? null : widget.services.library.liveFor(item);
-    if (live == null) return view;
+    final live = item == null || drawing ? null : widget.services.library.liveFor(item);
+    // One shape with or without the Live Photo button (zoom is kept).
     return Stack(children: [
       Positioned.fill(child: view),
-      if (_playingLive)
+      if (live != null && _playingLive)
         Positioned.fill(
           child: _LivePlayback(
             path: widget.services.library.absPath(live),
@@ -682,6 +1100,7 @@ class _ImageViewState extends State<_ImageView> implements _ViewHandle {
             },
           ),
         ),
+      if (live != null)
       Positioned(
         left: 16,
         bottom: 16,

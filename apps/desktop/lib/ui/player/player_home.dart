@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
+import '../../services/annotations.dart';
 import '../../services/player_memory.dart';
 import '../../services/win_dialogs.dart';
 import '../app_nav.dart';
@@ -107,6 +108,8 @@ class PlayerHome extends StatelessWidget {
               ]),
               const SizedBox(height: 10),
               Text(tr('player.drop_hint'), style: const TextStyle(color: LrColors.muted, fontSize: 12.5)),
+              const SizedBox(height: 22),
+              _NoteSearch(services: services),
               if (last != null && at != null) ...[
                 const SizedBox(height: 26),
                 Text(tr('player.resume'), style: theme.textTheme.titleMedium),
@@ -348,3 +351,101 @@ class _PlayerDropTargetState extends State<PlayerDropTarget> {
         ]),
       );
 }
+
+/// Search every annotation (library and other files on this PC): names,
+/// typed words, tool names. A result opens at its moment.
+class _NoteSearch extends StatefulWidget {
+  const _NoteSearch({required this.services});
+
+  final AppServices services;
+
+  @override
+  State<_NoteSearch> createState() => _NoteSearchState();
+}
+
+class _NoteSearchState extends State<_NoteSearch> {
+  final TextEditingController _q = TextEditingController();
+
+  @override
+  void dispose() {
+    _q.dispose();
+    super.dispose();
+  }
+
+  Future<void> _open(NoteHit h) async {
+    final s = widget.services;
+    final lib = s.library;
+    final set = h.set;
+    PlayerEntry? inLibrary;
+    if (set.rel != null) {
+      final i = (set.sha != null ? lib.findSame(set.size, set.sha!) : null) ?? lib.findByRel(set.rel!);
+      if (i != null) inLibrary = PlayerEntry.fromItem(lib, i);
+    }
+    final lead = h.note.startMs - s.player.leadSec * 1000;
+    final int? at = set.video ? (lead < 0 ? 0 : lead) : null;
+    if (inLibrary != null) {
+      await openPlayer(context, s, [inLibrary], 0, startMs: at);
+      return;
+    }
+    if (!File(set.path).existsSync()) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('player.missing'))));
+      return;
+    }
+    await openInPlayer(context, s, [set.path], startMs: at);
+  }
+
+  String _time(int ms) => playerTime(Duration(milliseconds: ms));
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+        listenable: widget.services.notes,
+        builder: (context, _) {
+          final hits = widget.services.notes.search(_q.text);
+          return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            SizedBox(
+              width: 460,
+              child: TextField(
+                controller: _q,
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(
+                  isDense: true,
+                  prefixIcon: const Icon(Icons.search_rounded, size: 20),
+                  hintText: tr('ink.search_all'),
+                  border: const OutlineInputBorder(),
+                  suffixIcon: _q.text.isEmpty
+                      ? null
+                      : IconButton(
+                          onPressed: () => setState(_q.clear),
+                          icon: const Icon(Icons.close_rounded, size: 18),
+                        ),
+                ),
+              ),
+            ),
+            if (_q.text.trim().isNotEmpty) ...[
+              const SizedBox(height: 8),
+              if (hits.isEmpty)
+                Text(tr('ink.no_hits'), style: const TextStyle(color: LrColors.muted))
+              else
+                for (final h in hits.take(40))
+                  SizedBox(
+                    width: 460,
+                    child: ListTile(
+                      dense: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 6),
+                      leading: Icon(h.set.video ? Icons.movie_rounded : Icons.image_rounded, color: LrColors.muted),
+                      title: Text(h.note.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+                      subtitle: Text(
+                        [h.set.name, if (h.set.video) _time(h.note.startMs)].join(' · '),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: LrColors.muted),
+                      ),
+                      onTap: () => _open(h),
+                    ),
+                  ),
+            ],
+          ]);
+        },
+      );
+}
+

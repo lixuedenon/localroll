@@ -7,6 +7,7 @@ import 'package:localroll_core/localroll_core.dart';
 
 import 'l10n/l10n.dart';
 import 'server/transfer_server.dart';
+import 'services/annotations.dart';
 import 'services/converter.dart';
 import 'services/ffmpeg.dart';
 import 'services/library_index.dart';
@@ -78,6 +79,9 @@ class AppServices {
   /// turns it on) and the background reading.
   /// The player: where videos were left, recent files (this PC only).
   late final PlayerMemory player = PlayerMemory(File('${settings.dataDir.path}${Platform.pathSeparator}player.json'));
+  /// Drawings and annotations made in the player.
+  late final NoteStore notes = NoteStore(library: library, dataDir: settings.dataDir, textIndex: server.textIndex)
+    ..toolName = (t) => tr('ink.tool_${t.name}');
   late final PictureModel pictureModel = PictureModel(settings.dataDir);
   late final PictureIndexer pictureIndexer = PictureIndexer(
     library: library,
@@ -227,6 +231,8 @@ class AppServices {
     s.sender.isOnline = (id) => s.settings.peers.containsKey(id) ? s.isOnline(id) : s.phoneTarget(id) != null;
     await s.sender.loadHeld();
     await s.player.load();
+    unawaited(s.notes.scan());
+    library.addListener(() => unawaited(s.notes.scan()));
     unawaited(ffmpeg.trimFileCache());
     // A phone browsing this library: pictures, and "save to my phone".
     server.thumbnail = ffmpeg.thumbnail;
