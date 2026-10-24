@@ -101,10 +101,10 @@ class Snapshots {
       for (final i in inks) {
         InkGeometry.paint(canvas, size, i);
       }
-      final done = await rec.endRecording().toImage(image.width, image.height);
-      final bytes = await done.toByteData(format: ui.ImageByteFormat.png);
+      final drawn = await rec.endRecording().toImage(image.width, image.height);
+      final bytes = await drawn.toByteData(format: ui.ImageByteFormat.png);
       image.dispose();
-      done.dispose();
+      drawn.dispose();
       if (bytes == null) return null;
       final png = tempFile('png');
       await png.writeAsBytes(bytes.buffer.asUint8List(), flush: true);

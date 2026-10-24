@@ -27,6 +27,7 @@ import '../trash_actions.dart';
 import 'clip_dialog.dart';
 import 'clip_export.dart';
 import 'ink_editor.dart';
+import 'ink_paint.dart';
 import 'notes_panel.dart';
 import 'player_entry.dart';
 import 'snapshot.dart';
