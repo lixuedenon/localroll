@@ -32,7 +32,7 @@ import 'send_page.dart';
 import 'theme.dart';
 import 'trash_actions.dart';
 import 'trash_page.dart';
-import 'viewer_page.dart';
+import 'player/player_page.dart';
 
 enum _Filter { all, photos, videos, docs, other }
 
@@ -1019,9 +1019,7 @@ class _LibraryPageState extends State<LibraryPage> {
     final s = widget.services;
     switch (choice) {
       case 'open':
-        await Navigator.of(this.context).push(MaterialPageRoute(
-          builder: (_) => ViewerPage(services: s, items: items, initialIndex: index),
-        ));
+        await openLibraryItems(this.context, s, items, index);
       case 'select':
         _toggle(item.relPath);
       case 'export':
@@ -1482,9 +1480,7 @@ class _LibraryPageState extends State<LibraryPage> {
         child: GestureDetector(
         onTap: () => _tap(
           key,
-          () => Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => ViewerPage(services: s, items: items, initialIndex: index),
-          )),
+          () => openLibraryItems(context, s, items, index),
         ),
         onLongPress: () => _toggle(key),
         onSecondaryTapUp: (d) => _contextMenu(context, items, index, d.globalPosition),

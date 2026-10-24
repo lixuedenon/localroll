@@ -204,13 +204,23 @@ jobs:
             Write-Output "::notice::ffmpeg: $($pin['FFMPEG_FROM'])"
           } else {
             Write-Output "::warning::ffmpeg not pinned yet (run 'Pin dependencies'); using upstream's newest"
-            Invoke-WebRequest -Uri "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip" -OutFile ffmpeg.zip
+            Invoke-WebRequest -Uri "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-lgpl.zip" -OutFile ffmpeg.zip
           }
           Expand-Archive ffmpeg.zip -DestinationPath ffmpeg-dl
           $bin = Get-ChildItem -Path ffmpeg-dl -Recurse -Filter ffmpeg.exe | Select-Object -First 1
           New-Item -ItemType Directory -Force -Path "$release/ffmpeg" | Out-Null
           Copy-Item $bin.FullName "$release/ffmpeg/"
           Copy-Item (Join-Path $bin.DirectoryName "ffprobe.exe") "$release/ffmpeg/"
+          # LGPL only (no GPL parts: fine for a paid app), with the H.264
+          # encoder every Windows PC has (Media Foundation).
+          $ff = "$release/ffmpeg/ffmpeg.exe"
+          $conf = (& $ff -hide_banner -version) -join "`n"
+          if ($conf -match '--enable-gpl') { Write-Output "::error::bundled ffmpeg is a GPL build"; exit 1 }
+          $enc = (& $ff -hide_banner -encoders) -join "`n"
+          if ($enc -notmatch 'h264_mf') { Write-Output "::error::bundled ffmpeg has no h264_mf encoder"; exit 1 }
+          if ($enc -match 'libx264') { Write-Output "::error::bundled ffmpeg has libx264 (GPL)"; exit 1 }
+          $flt = (& $ff -hide_banner -filters) -join "`n"
+          if ($flt -notmatch 'zscale') { Write-Output "::warning::bundled ffmpeg has no zscale: HDR videos are converted without tone mapping" }
           Rename-Item "$release/localroll_desktop.exe" "LocalRoll.exe" -ErrorAction SilentlyContinue
       - uses: actions/upload-artifact@v4
         with:

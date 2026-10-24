@@ -8,6 +8,7 @@ import 'package:localroll_core/localroll_core.dart';
 import 'converter.dart';
 import 'ffmpeg.dart';
 import 'peers.dart';
+import 'video_encoders.dart';
 
 /// What to do with one file before it goes to a phone.
 enum PhoneAction {
@@ -76,8 +77,10 @@ class PhoneFormatter {
         'hevc_nvenc' => ['-c:v', 'hevc_nvenc', '-preset', 'p5', '-tune', 'hq', '-rc', 'vbr', '-cq', '21', '-b:v', '0', '-profile:v', 'main', '-tag:v', 'hvc1'],
         'hevc_qsv' => ['-c:v', 'hevc_qsv', '-preset', 'medium', '-global_quality', '21', '-profile:v', 'main', '-tag:v', 'hvc1'],
         'hevc_amf' => ['-c:v', 'hevc_amf', '-quality', 'quality', '-rc', 'cqp', '-qp_i', '20', '-qp_p', '22', '-profile:v', 'main', '-tag:v', 'hvc1'],
-        _ => ['-c:v', 'libx264', '-crf', '18', '-preset', 'faster', '-profile:v', 'high'],
+        _ => const [],
       };
+
+  late final H264Encoders _h264 = H264Encoders(() => ffmpeg.ffmpeg);
 
   /// [platform]: 'ios' or 'android'.
   Future<PhoneAction> decide(SendFile f, String platform) async {
@@ -144,7 +147,7 @@ class PhoneFormatter {
     if (rawExtensions.contains(ext)) {
       // Camera RAW: the camera already put a full-size JPEG inside (that is
       // what its own screen shows). Use it, with the RAW file's EXIF.
-      final jpeg = await _embeddedJpeg(src);
+      final jpeg = await embeddedJpeg(src);
       if (jpeg == null) return false;
       await out.writeAsBytes(jpeg, flush: true);
       if (exif != null && Exif.extractTiff(jpeg) == null) await ConverterService.writeExif(out.path, exif);
@@ -165,7 +168,7 @@ class PhoneFormatter {
   }
 
   /// The largest JPEG stored inside a RAW file (its full-size preview).
-  static Future<Uint8List?> _embeddedJpeg(String path) async {
+  static Future<Uint8List?> embeddedJpeg(String path) async {
     final b = await File(path).readAsBytes();
     var bestStart = -1, bestLen = 0;
     for (var i = 0; i + 3 < b.length; i++) {
@@ -227,23 +230,27 @@ class PhoneFormatter {
       } catch (_) {}
       onProgress?.call(0);
     }
-    return _videoWith(src, out, info, reencode: true, onProgress: onProgress);
+    // No HEVC on the graphics chip: H.264 (graphics chip or Windows' own;
+    // no GPL encoder in this ffmpeg).
+    final h264 = await _h264.best();
+    if (h264 == null) return false;
+    return _videoWith(src, out, info, reencode: true, h264: h264, onProgress: onProgress);
   }
 
   Future<bool> _videoWith(String src, File out, ProbeInfo info,
-      {required bool reencode, String? hw, void Function(double)? onProgress}) {
+      {required bool reencode, String? hw, String? h264, void Function(double)? onProgress}) {
     final filters = <String>[
       // HDR (iPhone HLG, HDR10) to normal colours, else it looks washed out.
       if (reencode && info.isHdr)
         'zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv',
-      if (reencode) hw == null ? 'format=yuv420p' : 'format=nv12',
+      if (reencode) 'format=nv12',
     ];
     final args = [
       '-i', src,
       '-map', '0:v:0', '-map', '0:a:0?',
       if (reencode) ...[
         '-vf', filters.join(','),
-        ..._encodeArgs(hw),
+        ...(hw != null ? _encodeArgs(hw) : H264Encoders.args(h264!, high: true, width: info.width ?? 0, height: info.height ?? 0)),
       ] else
         ...['-c:v', 'copy', if (info.codec == 'hevc') ...['-tag:v', 'hvc1']],
       // Phones want AAC sound (AC-3, DTS, Vorbis, WMA… are re-encoded).

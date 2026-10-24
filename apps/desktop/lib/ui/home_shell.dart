@@ -12,6 +12,7 @@ import 'jobs_page.dart';
 import 'library_page.dart';
 import 'notices.dart';
 import 'pair_prompt.dart';
+import 'player/player_home.dart';
 import 'settings_page.dart';
 import 'text_window.dart';
 import 'theme.dart';
@@ -83,6 +84,7 @@ class _HomeShellState extends State<HomeShell> {
       DashboardPage(services: s),
       DevicesPage(services: s),
       LibraryPage(services: s),
+      PlayerHome(services: s),
       JobsPage(services: s),
       SettingsPage(services: s),
     ];
@@ -124,6 +126,13 @@ class _HomeShellState extends State<HomeShell> {
                       selected: _nav.tab == AppNav.library,
                       dot: s.library.offline || s.library.pendingMissing.isNotEmpty,
                       onTap: () => _nav.selectTab(AppNav.library),
+                    ),
+                    _RailItem(
+                      icon: Icons.play_circle_outline_rounded,
+                      selectedIcon: Icons.play_circle_rounded,
+                      label: tr('nav.player'),
+                      selected: _nav.tab == AppNav.player,
+                      onTap: () => _nav.selectTab(AppNav.player),
                     ),
                     _RailItem(
                       icon: Icons.auto_fix_high_outlined,

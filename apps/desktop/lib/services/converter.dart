@@ -1,6 +1,7 @@
 // apps/desktop/lib/services/converter.dart
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -8,6 +9,7 @@ import 'package:localroll_core/localroll_core.dart';
 
 import 'ffmpeg.dart';
 import 'library_index.dart';
+import 'video_encoders.dart';
 import '../l10n/l10n.dart';
 
 /// What the converted copy is for. Originals are never modified.
@@ -42,9 +44,12 @@ class ConvertJob {
 
 /// Sequential conversion queue (one ffmpeg encode at a time keeps the PC usable).
 class ConverterService extends ChangeNotifier {
-  ConverterService(this.ffmpeg, this.library);
+  ConverterService(this.ffmpeg, this.library) : encoders = H264Encoders(() => ffmpeg.ffmpeg);
 
   final FfmpegService ffmpeg;
+
+  /// H.264 without GPL parts (graphics chip, or Windows' own).
+  final H264Encoders encoders;
   final LibraryIndex library;
   final List<ConvertJob> jobs = [];
   bool _pumping = false;
@@ -169,16 +174,24 @@ class ConverterService extends ChangeNotifier {
       // Long edge ≤ 1920 for both landscape and portrait.
       filters.add("scale='if(gt(iw,ih),min(1920,iw),-2)':'if(gt(iw,ih),-2,min(1920,ih))'");
     }
-    filters.add('format=yuv420p');
+    filters.add('format=nv12');
 
-    final crf = job.preset == ConvertPreset.compatible ? '18' : '23';
-    final preset = job.preset == ConvertPreset.compatible ? 'slow' : 'medium';
-    final audio = job.preset == ConvertPreset.compatible ? '192k' : '128k';
+    // No GPL encoder: the graphics chip's, or Windows' own.
+    final enc = await encoders.best();
+    if (enc == null) throw StateError('no H.264 encoder on this PC');
+    final high = job.preset == ConvertPreset.compatible;
+    final audio = high ? '192k' : '128k';
+    var w = info.width ?? 0, h = info.height ?? 0;
+    if (!high && math.max(w, h) > 1920) {
+      final k = 1920 / math.max(w, h);
+      w = (w * k).round();
+      h = (h * k).round();
+    }
     return [
       '-i', src,
       '-map', '0:v:0', '-map', '0:a:0?',
       '-vf', filters.join(','),
-      '-c:v', 'libx264', '-crf', crf, '-preset', preset, '-profile:v', 'high',
+      ...H264Encoders.args(enc, high: high, width: w, height: h),
       '-c:a', 'aac', '-b:a', audio,
       // Keep capture date, GPS (com.apple.quicktime.location) and rotation.
       '-map_metadata', '0',

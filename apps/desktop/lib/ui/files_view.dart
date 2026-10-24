@@ -15,6 +15,8 @@ import 'theme.dart';
 import 'office_view.dart';
 import 'pdf_thumb.dart';
 import 'pdf_viewer_page.dart';
+import 'player/player_entry.dart';
+import 'player/player_page.dart';
 import 'text_window.dart';
 import 'trash_actions.dart';
 
@@ -303,7 +305,9 @@ Future<void> openReceivedFile(BuildContext context, AppServices services, String
     size = await File(path).length();
   } catch (_) {}
   if (!context.mounted) return;
-  if (isPdfPath(path)) {
+  if (PlayerEntry.playable(name)) {
+    await openInPlayer(context, services, [path]);
+  } else if (isPdfPath(path)) {
     await Navigator.of(context).push(MaterialPageRoute(builder: (_) => PdfViewerPage(path: path)));
   } else if (googleShortcutKinds.containsKey(extensionOf(name))) {
     await _openGoogle(context, path, size);
@@ -411,7 +415,12 @@ class FileThumb extends StatelessWidget {
     if (kind == MediaKind.image || kind == MediaKind.video) {
       final lib = services.library;
       final root = '${lib.rootPath}${Platform.pathSeparator}';
-      if (!services.ffmpeg.available || !path.toLowerCase().startsWith(root.toLowerCase())) return null;
+      if (!services.ffmpeg.available) return null;
+      if (!path.toLowerCase().startsWith(root.toLowerCase())) {
+        // Elsewhere on this PC (opened in the player).
+        return services.ffmpeg.thumbnailFile(path,
+            size: size, modifiedMs: modified.millisecondsSinceEpoch, video: kind == MediaKind.video);
+      }
       final rel = path.substring(root.length).replaceAll(Platform.pathSeparator, '/');
       // Not in the library list; described just enough for ffmpeg's cache.
       return services.ffmpeg.thumbnail(MediaItem(

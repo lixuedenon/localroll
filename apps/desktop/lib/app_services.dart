@@ -17,6 +17,7 @@ import 'services/face_engine.dart';
 import 'services/face_indexer.dart';
 import 'services/picture_index.dart';
 import 'services/picture_model.dart';
+import 'services/player_memory.dart';
 import 'services/phone_formats.dart';
 import 'services/receive_hub.dart';
 import 'services/settings.dart';
@@ -75,6 +76,8 @@ class AppServices {
 
   /// Search by what pictures show: the model (downloaded when the person
   /// turns it on) and the background reading.
+  /// The player: where videos were left, recent files (this PC only).
+  late final PlayerMemory player = PlayerMemory(File('${settings.dataDir.path}${Platform.pathSeparator}player.json'));
   late final PictureModel pictureModel = PictureModel(settings.dataDir);
   late final PictureIndexer pictureIndexer = PictureIndexer(
     library: library,
@@ -223,6 +226,8 @@ class AppServices {
     // A phone can be sent to while LocalRoll is open on it; a PC while it answers.
     s.sender.isOnline = (id) => s.settings.peers.containsKey(id) ? s.isOnline(id) : s.phoneTarget(id) != null;
     await s.sender.loadHeld();
+    await s.player.load();
+    unawaited(ffmpeg.trimFileCache());
     // A phone browsing this library: pictures, and "save to my phone".
     server.thumbnail = ffmpeg.thumbnail;
     server.display = ffmpeg.display;
@@ -332,8 +337,10 @@ class AppServices {
       } catch (_) {}
     }
 
+    player.saveOpen?.call();
     await Future.wait([
       capped(library.flush, 3000),
+      capped(player.flush, 1000),
       capped(peers.sayBye, 1300), // other PCs show us offline at once
     ]);
     peers.release();

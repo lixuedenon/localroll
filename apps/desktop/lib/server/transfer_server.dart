@@ -570,6 +570,9 @@ class TransferServer extends ChangeNotifier {
 
   /// A second LocalRoll was started: bring this window to the front.
   void Function()? onShowRequested;
+
+  /// A second copy of the app was started with these files (this PC only).
+  void Function(List<String> paths)? onOpenRequested;
   int _failedPinAttempts = 0;
 
   /// Tap-to-pair requests; the UI shows an Allow / Deny dialog for each.
@@ -712,6 +715,27 @@ class TransferServer extends ChangeNotifier {
         await req.drain<void>();
         if (local) onShowRequested?.call();
         return _json(res, local ? 200 : 403, {'ok': local});
+      }
+      if (req.method == 'POST' && path == LrProtocol.pathLocalOpen) {
+        // Only from this computer; just file paths, opened in the player.
+        final local = req.connectionInfo?.remoteAddress.isLoopback ?? false;
+        if (!local) {
+          await req.drain<void>();
+          return _json(res, 403, {'ok': false});
+        }
+        try {
+          final bytes = <int>[];
+          await for (final chunk in req) {
+            bytes.addAll(chunk);
+            if (bytes.length > 256 * 1024) throw const FormatException('too big');
+          }
+          final j = jsonDecode(utf8.decode(bytes));
+          final paths = [for (final p in (j is Map && j['paths'] is List ? j['paths'] as List : const [])) if (p is String) p];
+          onOpenRequested?.call(paths.take(500).toList());
+          return _json(res, 200, {'ok': true});
+        } catch (_) {
+          return _json(res, 400, {'ok': false});
+        }
       }
       if (req.method == 'GET' && path == LrProtocol.pathInfo) {
         return _json(res, 200, settings.deviceInfo.toJson());

@@ -23,7 +23,7 @@ import 'media_thumb.dart';
 import 'send_page.dart';
 import 'theme.dart';
 import 'trash_actions.dart';
-import 'viewer_page.dart';
+import 'player/player_page.dart';
 
 /// Home: this PC at a glance — status, the main actions, what came in
 /// last, the family, disk space, and anything that needs attention.
@@ -395,9 +395,7 @@ class _DashboardPageState extends State<DashboardPage> {
         message: item.name,
         waitDuration: const Duration(milliseconds: 600),
         child: GestureDetector(
-          onTap: () => Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => ViewerPage(services: s, items: media, initialIndex: media.indexOf(item)),
-          )),
+          onTap: () => openLibraryItems(context, s, media, media.indexOf(item)),
           onSecondaryTapUp: (d) => _recentMenu(context, d.globalPosition, item: item),
           child: MediaThumb(item: item, library: s.library, ffmpeg: s.ffmpeg),
         ),
@@ -465,7 +463,7 @@ class _DashboardPageState extends State<DashboardPage> {
     switch (choice) {
       case 'open':
         if (item != null) {
-          await Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => ViewerPage(services: s, items: [item], initialIndex: 0)));
+          await openLibraryItems(ctx, s, [item], 0);
         } else {
           await openReceivedFile(ctx, s, path);
         }

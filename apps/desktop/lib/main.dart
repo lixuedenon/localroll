@@ -1,5 +1,6 @@
 // apps/desktop/lib/main.dart
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' show PlatformDispatcher;
@@ -15,10 +16,13 @@ import 'app_services.dart';
 import 'l10n/l10n.dart';
 import 'services/autostart.dart';
 import 'services/face_engine.dart';
+import 'services/open_with.dart';
 import 'services/settings.dart';
 import 'services/watchdog.dart';
 import 'ui/app_nav.dart';
 import 'ui/home_shell.dart';
+import 'ui/player/player_home.dart';
+import 'ui/player/player_page.dart';
 import 'ui/theme.dart';
 import 'ui/title_bar.dart';
 
@@ -29,10 +33,12 @@ Future<void> main(List<String> args) async {
     exit(await checkModels(args[1]));
   }
   WidgetsFlutterBinding.ensureInitialized();
+  // Photos / videos handed over by Explorer ("Open with").
+  final files = existingFiles(args);
   if (!await AppSettings.acquireInstanceLock()) {
-    // Already running: bring that window to the front and quit quietly.
-    // Only if it can't be reached, say so in a small window.
-    if (await _activateRunningCopy()) exit(0);
+    // Already running: bring that window to the front (with the files) and
+    // quit quietly. Only if it can't be reached, say so in a small window.
+    if (files.isNotEmpty ? await _openInRunningCopy(files) : await _activateRunningCopy()) exit(0);
     runApp(const _AlreadyRunningApp());
     return;
   }
@@ -60,7 +66,13 @@ Future<void> main(List<String> args) async {
   await windowManager.setPreventClose(true);
   final services = await AppServices.create();
   services.server.onShowRequested = _bringToFront;
+  services.server.onOpenRequested = (paths) {
+    unawaited(_bringToFront());
+    PlayerLauncher.request(services, existingFiles(paths));
+  };
+  unawaited(OpenWith.register());
   runApp(LocalRollApp(services: services));
+  if (files.isNotEmpty) PlayerLauncher.request(services, files);
 }
 
 /// Diagnostics log (stays on this PC; exported from Settings on purpose):
@@ -108,6 +120,34 @@ Future<void> _bringToFront() async {
     await windowManager.focus();
     Future<void>.delayed(const Duration(seconds: 1), () => windowManager.setAlwaysOnTop(false));
   } catch (_) {}
+}
+
+/// Hands [files] to the copy that is already running (on this PC only).
+/// Explorer starts one copy per file when several are opened at once, and
+/// the first may still be starting: tried for a few seconds.
+Future<bool> _openInRunningCopy(List<String> files) async {
+  final body = utf8.encode(jsonEncode({'paths': files}));
+  for (var round = 0; round < 16; round++) {
+    final saved = await AppSettings.savedPort();
+    final ports = {?saved, LrProtocol.defaultPort, ...LrProtocol.fallbackPorts};
+    final client = HttpClient()..connectionTimeout = const Duration(milliseconds: 600);
+    try {
+      for (final port in ports) {
+        try {
+          final req = await client.post(InternetAddress.loopbackIPv4.address, port, LrProtocol.pathLocalOpen);
+          req.headers.contentType = ContentType.json;
+          req.add(body);
+          final res = await req.close().timeout(const Duration(seconds: 2));
+          await res.drain<void>();
+          if (res.statusCode == 200) return true;
+        } catch (_) {}
+      }
+    } finally {
+      client.close(force: true);
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+  }
+  return false;
 }
 
 /// Asks the copy that is already running (on this PC only) to show itself.
@@ -160,8 +200,12 @@ class LocalRollApp extends StatelessWidget {
               key: ValueKey(translator.language),
               child: Column(
                 children: [
-                  LrTitleBar(services: services),
-                  Expanded(child: child!),
+                  // The player in full screen has the whole screen.
+                  ValueListenableBuilder<bool>(
+                    valueListenable: AppNav.instance.fullscreen,
+                    builder: (context, full, _) => full ? const SizedBox.shrink() : LrTitleBar(services: services),
+                  ),
+                  Expanded(child: PlayerDropTarget(services: services, child: child!)),
                 ],
               ),
             );

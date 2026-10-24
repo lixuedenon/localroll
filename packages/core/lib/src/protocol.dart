@@ -75,6 +75,10 @@ class LrProtocol {
   /// to come to the front, then quits.
   static const String pathLocalShow = '/local/show';
 
+  /// PC only, from 127.0.0.1: a second copy started with files (Explorer's
+  /// "Open with") hands them to the running one: {"paths": [...]}.
+  static const String pathLocalOpen = '/local/open';
+
   /// Browsing the PC's library from a phone (allowed per device on the PC):
   ///   GET  /api/v1/library?offset=&limit=&kind=     -> LibraryPage
   ///   GET  /api/v1/library/thumb?p=<item>           -> small JPEG

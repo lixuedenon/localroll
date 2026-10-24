@@ -8,6 +8,7 @@ import 'package:localroll_core/localroll_core.dart';
 
 import 'face_math.dart';
 import 'library_index.dart';
+import 'phone_formats.dart';
 import 'settings.dart';
 
 /// Basic stream facts from ffprobe.
@@ -260,6 +261,73 @@ class FfmpegService extends ChangeNotifier {
         }
       });
 
+  /// Files outside the library (opened in the player): their pictures are
+  /// kept in the app's own folder on this PC, per file version.
+  String get fileCacheDir => '${settings.dataDir.path}${Platform.pathSeparator}player-cache';
+
+  String _fileCache(String path, int size, int modifiedMs, String suffix) =>
+      '$fileCacheDir${Platform.pathSeparator}${shortKey('file|${path.toLowerCase()}|$size|$modifiedMs')}$suffix.jpg';
+
+  /// Full-size JPEG of a picture file anywhere on this PC (HEIC, AVIF,
+  /// TIFF…; camera RAW: the full-size JPEG the camera put inside).
+  Future<File?> previewFile(String path, {required int size, required int modifiedMs}) async {
+    final outPath = _fileCache(path, size, modifiedMs, '_p');
+    if (rawExtensions.contains(extensionOf(path))) {
+      return _inflight.putIfAbsent(outPath, () async {
+        try {
+          final out = File(outPath);
+          if (await out.exists() && await out.length() > 0) return out;
+          final jpeg = await PhoneFormatter.embeddedJpeg(path);
+          if (jpeg == null) return null;
+          await Directory(fileCacheDir).create(recursive: true);
+          await out.writeAsBytes(jpeg, flush: true);
+          return out;
+        } catch (_) {
+          return null;
+        } finally {
+          _inflight.remove(outPath);
+        }
+      });
+    }
+    await Directory(fileCacheDir).create(recursive: true);
+    return _cachedAt(outPath, path, false, (src, out) => ['-i', src, '-frames:v', '1', '-q:v', '2', out]);
+  }
+
+  /// Small JPEG of a photo or video file anywhere on this PC.
+  Future<File?> thumbnailFile(String path, {required int size, required int modifiedMs, required bool video}) async {
+    final outPath = _fileCache(path, size, modifiedMs, '_t');
+    await Directory(fileCacheDir).create(recursive: true);
+    if (video) {
+      return _cachedAt(outPath, path, true,
+          (src, out) => ['-ss', '1', '-i', src, '-frames:v', '1', '-vf', 'scale=360:-2', '-q:v', '4', out]);
+    }
+    final full = nativelyDecodableImages.contains(extensionOf(path))
+        ? File(path)
+        : await previewFile(path, size: size, modifiedMs: modifiedMs);
+    if (full == null) return null;
+    return _cachedAt(outPath, full.path, false,
+        (src, out) => ['-i', src, '-frames:v', '1', '-vf', 'scale=360:-2', '-q:v', '4', out]);
+  }
+
+  /// Keeps the player's picture folder small: the newest [keep] files stay.
+  Future<void> trimFileCache({int keep = 600}) async {
+    try {
+      final dir = Directory(fileCacheDir);
+      if (!await dir.exists()) return;
+      final files = <File>[];
+      await for (final e in dir.list()) {
+        if (e is File) files.add(e);
+      }
+      if (files.length <= keep) return;
+      final dated = [for (final f in files) (f, (await f.stat()).modified)]..sort((a, b) => b.$2.compareTo(a.$2));
+      for (final (f, _) in dated.skip(keep)) {
+        try {
+          await f.delete();
+        } catch (_) {}
+      }
+    } catch (_) {}
+  }
+
   /// Full-resolution JPEG used to display formats Flutter cannot decode (HEIC, DNG…).
   Future<File?> preview(MediaItem item) =>
       _cached(_cachePath(item, '_p'), item, (src, out) => [
@@ -274,15 +342,22 @@ class FfmpegService extends ChangeNotifier {
     MediaItem item,
     List<String> Function(String src, String out) args, {
     String? source,
-  }) {
+  }) =>
+      _cachedAt(outPath, source ?? library.absPath(item), item.kind == MediaKind.video, args);
+
+  Future<File?> _cachedAt(
+    String outPath,
+    String src,
+    bool video,
+    List<String> Function(String src, String out) args,
+  ) {
     return _inflight.putIfAbsent(outPath, () async {
       try {
         final out = File(outPath);
         if (await out.exists() && await out.length() > 0) return out;
         if (!available) return null;
-        final src = source ?? library.absPath(item);
         var ok = await _limited(() => _run(args(src, outPath)));
-        if (!ok && item.kind == MediaKind.video) {
+        if (!ok && video) {
           // Clips shorter than 1s: grab the first frame instead.
           ok = await _limited(() => _run(['-i', src, '-frames:v', '1', '-vf', 'scale=360:-2', outPath]));
         }

@@ -13,13 +13,17 @@ class AppNav extends ChangeNotifier {
   static const int home = 0;
   static const int devices = 1;
   static const int library = 2;
-  static const int convert = 3;
-  static const int settings = 4;
+  static const int player = 3;
+  static const int convert = 4;
+  static const int settings = 5;
 
   /// Receiving, sending and the family group all live on "Devices" now.
   static const int receive = devices;
   static const int send = devices;
   static const int family = devices;
+
+  /// The player is full screen: the title bar steps aside.
+  final ValueNotifier<bool> fullscreen = ValueNotifier(false);
 
   /// A device to show opened on the Devices page (set from Home etc.).
   final ValueNotifier<String?> deviceFocus = ValueNotifier(null);
@@ -62,7 +66,7 @@ class AppNav extends ChangeNotifier {
   bool get hasPage => _routes > 1;
 
   /// Switch section and remember where we came from.
-  static const List<String> _names = ['home', 'devices', 'library', 'convert', 'settings'];
+  static const List<String> _names = ['home', 'devices', 'library', 'player', 'convert', 'settings'];
 
   void selectTab(int i) {
     if (i == tab) return;
