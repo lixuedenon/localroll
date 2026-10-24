@@ -519,7 +519,7 @@ class _PlayerPageState extends State<PlayerPage> {
   }
 
   /// A screenshot to another device (from the library when it is in it).
-  Future<void> _sendFile(File f, {bool ask = true}) async {
+  Future<void> _sendFile(File f) async {
     final s = widget.services;
     final lib = s.library;
     final root = '${lib.rootPath}${Platform.pathSeparator}';
