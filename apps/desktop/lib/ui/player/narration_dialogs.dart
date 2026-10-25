@@ -67,7 +67,8 @@ enum RecordedChoice { save, saveSend, discard }
 
 /// "The explanation is recorded (2:35)": save, save and send, or throw
 /// away; and how the original's sound goes in.
-Future<(RecordedChoice, OriginalSound)?> recordedDialog(BuildContext context, int lengthMs, OriginalSound sound, {bool again = false}) =>
+Future<(RecordedChoice, OriginalSound)?> recordedDialog(BuildContext context, int lengthMs, OriginalSound sound,
+        {bool again = false, bool screen = false}) =>
     showDialog<(RecordedChoice, OriginalSound)>(
       context: context,
       barrierDismissible: false,
@@ -75,10 +76,11 @@ Future<(RecordedChoice, OriginalSound)?> recordedDialog(BuildContext context, in
         var s = sound;
         return StatefulBuilder(
           builder: (ctx, set) => AlertDialog(
-            title: Text(tr(again ? 'rec.remake_title' : 'rec.done_title', {'time': _len(lengthMs)})),
+            title: Text(tr(again ? 'rec.remake_title' : (screen ? 'screen.done_title' : 'rec.done_title'), {'time': _len(lengthMs)})),
             content: SizedBox(
               width: 440,
               child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                if (!screen) ...[
                 Text(tr('rec.sound'), style: const TextStyle(color: LrColors.muted)),
                 const SizedBox(height: 6),
                 SegmentedButton<OriginalSound>(
@@ -92,7 +94,8 @@ Future<(RecordedChoice, OriginalSound)?> recordedDialog(BuildContext context, in
                   onSelectionChanged: (v) => set(() => s = v.first),
                 ),
                 const SizedBox(height: 10),
-                Text(tr('rec.done_tip'), style: const TextStyle(color: LrColors.muted, fontSize: 12.5, height: 1.5)),
+                ],
+                Text(tr(screen ? 'screen.done_tip' : 'rec.done_tip'), style: const TextStyle(color: LrColors.muted, fontSize: 12.5, height: 1.5)),
               ]),
             ),
             actions: [

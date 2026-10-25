@@ -23,10 +23,13 @@ class Snapshots {
   Snapshots._();
 
   /// The folder: in the library, else in Windows' Pictures.
-  static String folder(AppServices s, {bool clips = false, bool narration = false}) {
+  static String folder(AppServices s, {bool clips = false, bool narration = false, bool screen = false}) {
     final m = s.player;
     final String name;
-    if (narration) {
+    if (screen) {
+      name = m.screensFolder ?? tr('screen.folder');
+      if (m.screensFolder == null) m.setScreen(folder: name);
+    } else if (narration) {
       name = m.narrationsFolder ?? tr('rec.folder');
       if (m.narrationsFolder == null) m.setNarrationsFolder(name);
     } else {

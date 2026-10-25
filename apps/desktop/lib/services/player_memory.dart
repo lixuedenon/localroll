@@ -69,6 +69,14 @@ class PlayerMemory extends ChangeNotifier {
   /// Recorded explanations' folder in the library.
   String? narrationsFolder;
 
+  /// Screen recording: its folder, what was recorded last time (screen /
+  /// window / area, which screen), frames a second, with the microphone.
+  String? screensFolder;
+  String screenMode = 'screen';
+  int screenIndex = 0;
+  int screenFps = 30;
+  bool screenMic = true;
+
   /// The microphone chosen for explanations, and how the original's sound
   /// goes in ('quiet', 'none', 'full').
   String? mic;
@@ -116,6 +124,11 @@ class PlayerMemory extends ChangeNotifier {
       shotsFolder = j['shots'] as String?;
       clipsFolder = j['clips'] as String?;
       narrationsFolder = j['narrations'] as String?;
+      screensFolder = j['screens'] as String?;
+      screenMode = j['screenMode'] as String? ?? 'screen';
+      screenIndex = (j['screenIndex'] as num?)?.toInt() ?? 0;
+      screenFps = (j['screenFps'] as num?)?.toInt() == 60 ? 60 : 30;
+      screenMic = j['screenMic'] != false;
       mic = j['mic'] as String?;
       sound = j['sound'] as String? ?? 'quiet';
       sideOpen = j['side'] != false;
@@ -212,6 +225,15 @@ class PlayerMemory extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setScreen({String? mode, int? index, int? fps, bool? mic, String? folder}) {
+    if (mode != null) screenMode = mode;
+    if (index != null) screenIndex = index;
+    if (fps != null) screenFps = fps;
+    if (mic != null) screenMic = mic;
+    if (folder != null) screensFolder = folder;
+    _save();
+  }
+
   void setNarrationsFolder(String name) {
     narrationsFolder = name;
     _save();
@@ -259,6 +281,11 @@ class PlayerMemory extends ChangeNotifier {
         'shots': ?shotsFolder,
         'clips': ?clipsFolder,
         'narrations': ?narrationsFolder,
+        'screens': ?screensFolder,
+        'screenMode': screenMode,
+        'screenIndex': screenIndex,
+        'screenFps': screenFps,
+        'screenMic': screenMic,
         'mic': ?mic,
         'sound': sound,
         'clipBefore': clipBefore,

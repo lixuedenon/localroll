@@ -567,11 +567,17 @@ class _InkLayerState extends State<InkLayer> {
 
 /// The tools above the picture while drawing.
 class InkToolbar extends StatelessWidget {
-  const InkToolbar({super.key, required this.editor, required this.onDone, required this.onCancel});
+  const InkToolbar({super.key, required this.editor, required this.onDone, this.onCancel, this.doneLabel, this.extra = const []});
 
   final InkEditor editor;
   final VoidCallback onDone;
-  final VoidCallback onCancel;
+
+  /// Null: no cancel button.
+  final VoidCallback? onCancel;
+  final String? doneLabel;
+
+  /// More buttons before Done.
+  final List<Widget> extra;
 
   static IconData icon(EditTool t) => switch (t) {
         EditTool.pen => Icons.edit_rounded,
@@ -671,14 +677,15 @@ class InkToolbar extends StatelessWidget {
               color: Colors.white,
             ),
             const SizedBox(width: 6),
-            TextButton(onPressed: onCancel, child: Text(tr('common.cancel'))),
+            ...extra,
+            if (onCancel != null) TextButton(onPressed: onCancel, child: Text(tr('common.cancel'))),
             const SizedBox(width: 4),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: FilledButton.icon(
                 onPressed: onDone,
                 icon: const Icon(Icons.check_rounded, size: 18),
-                label: Text(tr('ink.done')),
+                label: Text(doneLabel ?? tr('ink.done')),
               ),
             ),
           ]),

@@ -24,6 +24,7 @@ import 'ui/app_nav.dart';
 import 'ui/home_shell.dart';
 import 'ui/player/player_home.dart';
 import 'ui/player/player_page.dart';
+import 'ui/screen/screen_record.dart';
 import 'ui/theme.dart';
 import 'ui/title_bar.dart';
 
@@ -79,6 +80,8 @@ Future<void> main(List<String> args) async {
   // After the first screens: written in the language LocalRoll shows.
   unawaited(Future<void>.delayed(const Duration(seconds: 5), OpenWith.register));
   runApp(LocalRollApp(services: services));
+  // Ctrl+Shift+R / P / D for recording the screen, from anywhere.
+  ScreenRecorder.instance.watchKeys(services);
   if (files.isNotEmpty) PlayerLauncher.request(services, files);
 }
 
