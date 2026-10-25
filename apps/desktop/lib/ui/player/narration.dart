@@ -13,7 +13,6 @@ import '../../services/annotations.dart';
 import '../../services/library_index.dart';
 import '../../services/video_encoders.dart';
 import 'ink_paint.dart';
-import 'player_entry.dart';
 import 'snapshot.dart';
 
 /// How the original's own sound goes into an explanation.
