@@ -33,7 +33,7 @@ const List<double> _sizes = [0.035, 0.05, 0.075];
 /// selected mark. [clock] says where the video is (marks drawn on a video
 /// remember when).
 class InkEditor extends ChangeNotifier {
-  InkEditor({required this.video, required this.clock, bool Function()? playing, List<InkMark>? inks, this.original})
+  InkEditor({required this.video, required this.clock, bool Function()? playing, this.sessionClock, List<InkMark>? inks, this.original})
       : playing = playing ?? (() => false),
         inks = [for (final i in inks ?? const <InkMark>[]) i.copy()] {
     // Continue the real-time line of an annotation being changed.
@@ -52,6 +52,13 @@ class InkEditor extends ChangeNotifier {
   final Stopwatch _wall = Stopwatch()..start();
   int _wallBase = 0;
   final Stopwatch _stroke = Stopwatch();
+
+  /// Recording an explanation: its clock (ms). Each mark then also keeps
+  /// when it was started on that clock and each point's real time, so the
+  /// recording shows it being drawn as it was.
+  final int Function()? sessionClock;
+  final Map<String, int> sessionStart = {};
+  final Map<String, List<int>> sessionTimes = {};
 
   /// Editing this annotation (null: a new one).
   final Note? original;
@@ -167,8 +174,14 @@ class InkEditor extends ChangeNotifier {
     _stroke
       ..reset()
       ..start();
+    final id = InkMark.newId();
+    final sc = sessionClock;
+    if (sc != null) {
+      sessionStart[id] = sc();
+      sessionTimes[id] = [0];
+    }
     return InkMark(
-      id: InkMark.newId(),
+      id: id,
       tool: t,
       color: color.toARGB32(),
       width: _widths[level],
@@ -224,6 +237,7 @@ class InkEditor extends ChangeNotifier {
       if ((d.points.last - at).distance > 0.0008) {
         d.points.add(at);
         d.times.add(_tick(d));
+        sessionTimes[d.id]?.add(_stroke.elapsedMilliseconds);
       }
     } else {
       var to = at;
@@ -241,6 +255,11 @@ class InkEditor extends ChangeNotifier {
       }
       d.points[d.points.length - 1] = to;
       d.times[d.times.length - 1] = _tick(d);
+      final st = sessionTimes[d.id];
+      if (st != null) {
+        if (st.length < d.points.length) st.add(_stroke.elapsedMilliseconds);
+        st[st.length - 1] = _stroke.elapsedMilliseconds;
+      }
     }
     notifyListeners();
   }

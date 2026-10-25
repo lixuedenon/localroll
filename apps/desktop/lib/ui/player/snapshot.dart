@@ -23,11 +23,17 @@ class Snapshots {
   Snapshots._();
 
   /// The folder: in the library, else in Windows' Pictures.
-  static String folder(AppServices s, {bool clips = false}) {
+  static String folder(AppServices s, {bool clips = false, bool narration = false}) {
     final m = s.player;
-    final name = (clips ? m.clipsFolder : m.shotsFolder) ?? tr(clips ? 'ink.clips_folder' : 'ink.shots_folder');
-    if (clips && m.clipsFolder == null) m.setClipsFolder(name);
-    if (!clips && m.shotsFolder == null) m.setShotsFolder(name);
+    final String name;
+    if (narration) {
+      name = m.narrationsFolder ?? tr('rec.folder');
+      if (m.narrationsFolder == null) m.setNarrationsFolder(name);
+    } else {
+      name = (clips ? m.clipsFolder : m.shotsFolder) ?? tr(clips ? 'ink.clips_folder' : 'ink.shots_folder');
+      if (clips && m.clipsFolder == null) m.setClipsFolder(name);
+      if (!clips && m.shotsFolder == null) m.setShotsFolder(name);
+    }
     final lib = s.library;
     final sep = Platform.pathSeparator;
     if (lib.rootPath.isNotEmpty && !lib.offline && Directory(lib.rootPath).existsSync()) return '${lib.rootPath}$sep${sanitizeFileName(name)}';

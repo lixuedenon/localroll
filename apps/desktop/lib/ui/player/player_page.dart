@@ -1,5 +1,6 @@
 // apps/desktop/lib/ui/player/player_page.dart
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' show FontFeature;
 
@@ -16,6 +17,7 @@ import '../../services/annotations.dart';
 import '../../services/converter.dart';
 import '../../services/ffmpeg.dart';
 import '../../services/library_index.dart';
+import '../../services/mic.dart';
 import '../../services/network.dart';
 import '../../services/peers.dart';
 import '../../services/player_memory.dart';
@@ -30,6 +32,8 @@ import 'clip_dialog.dart';
 import 'clip_export.dart';
 import 'ink_editor.dart';
 import 'ink_paint.dart';
+import 'narration.dart';
+import 'narration_dialogs.dart';
 import 'notes_panel.dart';
 import 'player_entry.dart';
 import 'snapshot.dart';
@@ -143,10 +147,32 @@ abstract class _ViewHandle {
 
   bool get playing;
 
+  double get rate;
+
+  /// The part of the picture on screen now (0–1; all of it: 0,0,1,1).
+  Rect get zoomRect;
+
+  /// Marks drawn while paused being drawn again now (videos).
+  FreezeNow? get freezeNow;
+
   /// The picture's own size in pixels, once known.
   Size? get pictureSize;
 
   void seekTo(int ms, {bool play = false});
+}
+
+/// The part of a picture of [pic] pixels, fitted in [box], that is on
+/// screen after zooming with [m] (0–1).
+Rect _visibleRect(Matrix4 m, Size box, Size? pic) {
+  const all = Rect.fromLTWH(0, 0, 1, 1);
+  if (pic == null || pic.isEmpty || box.isEmpty || m.getMaxScaleOnAxis() < 1.01) return all;
+  final fit = (box.width / pic.width) < (box.height / pic.height) ? box.width / pic.width : box.height / pic.height;
+  final p = Rect.fromCenter(center: box.center(Offset.zero), width: pic.width * fit, height: pic.height * fit);
+  final inv = Matrix4.tryInvert(m);
+  if (inv == null) return all;
+  final v = MatrixUtils.transformRect(inv, Offset.zero & box).intersect(p);
+  if (v.isEmpty) return all;
+  return Rect.fromLTWH((v.left - p.left) / p.width, (v.top - p.top) / p.height, v.width / p.width, v.height / p.height);
 }
 
 /// The tabs of the list on the right.
@@ -154,6 +180,66 @@ enum _Tab { list, notes, info }
 
 /// Typing somewhere (a text mark, a search box): keys are letters then.
 bool _typing() => FocusManager.instance.primaryFocus?.context?.findAncestorStateOfType<EditableTextState>() != null;
+
+/// An explanation being recorded: its clock (stops while paused), the
+/// voice in parts, what the player did, what was drawn.
+class _Rec {
+  _Rec({required this.session, required this.dir, required this.mic, required this.device});
+
+  final NarrationSession session;
+  final Directory dir;
+  final MicRecorder mic;
+  final String device;
+  final Stopwatch clock = Stopwatch();
+  final List<({File file, int headMs, int lengthMs})> parts = [];
+  final Map<PlayerEntry, int> fileIndex = {};
+  final Map<String, NarrationInk> inks = {};
+  Timer? sampler;
+  bool paused = false;
+  InkEditor? lastEditor;
+  Set<String> lastIds = {};
+
+  File? _part;
+  int _partStart = 0;
+
+  /// Starts the microphone into a new part (true: it is listening).
+  Future<bool> startPart() async {
+    final f = File('${dir.path}${Platform.pathSeparator}voice_${parts.length}.wav');
+    _part = f;
+    return mic.start(device, f);
+  }
+
+  /// The clock goes on from now; the part's sound before now is cut.
+  void go() {
+    final first = mic.firstSound ?? DateTime.now();
+    final head = DateTime.now().difference(first).inMilliseconds;
+    _partStart = clock.elapsedMilliseconds;
+    _head = head < 0 ? 0 : head;
+    clock.start();
+  }
+
+  int _head = 0;
+
+  Future<void> stopPart() async {
+    clock.stop();
+    await mic.stop();
+    final f = _part;
+    if (f != null) parts.add((file: f, headMs: _head, lengthMs: clock.elapsedMilliseconds - _partStart));
+    _part = null;
+  }
+
+  int fileOf(PlayerEntry e, Size? pic) => fileIndex.putIfAbsent(e, () {
+        session.files.add(NarrationFile(
+          path: e.path,
+          name: e.name,
+          video: e.video,
+          width: (pic?.width ?? 1920).round(),
+          height: (pic?.height ?? 1080).round(),
+          rel: e.item?.relPath,
+        ));
+        return session.files.length - 1;
+      });
+}
 
 /// The one player for photos and videos — library, received files, files
 /// anywhere on this PC. Videos (HEVC, HDR, Dolby Vision, MKV…) play
@@ -193,6 +279,13 @@ class _PlayerPageState extends State<PlayerPage> {
 
   /// Drawing now (null: not).
   InkEditor? _editor;
+
+  /// Recording an explanation (null: not); the 3-2-1 before it starts.
+  _Rec? _rec;
+  int _countdown = 0;
+
+  /// Explanations recorded on this PC (to make them again).
+  List<NarrationSession> _narrations = const [];
   bool _showInk = true;
 
   /// Bars shown (in full screen they step aside when the mouse rests).
@@ -220,9 +313,15 @@ class _PlayerPageState extends State<PlayerPage> {
     }
   }
 
+  Future<void> _loadNarrations() async {
+    final all = await NarrationSession.all(widget.services.settings.dataDir);
+    if (mounted) setState(() => _narrations = all);
+  }
+
   @override
   void initState() {
     super.initState();
+    unawaited(_loadNarrations());
     unawaited(_loadNotes(_entry));
     _memory.opened(recentOf(_entry));
     DiagLog.log('player', 'open ${_entry.video ? 'video' : 'photo'} .${_entry.extension} (${_entries.length} in list)');
@@ -339,6 +438,10 @@ class _PlayerPageState extends State<PlayerPage> {
       }
       return KeyEventResult.handled;
     }
+    if (down && _rec != null && k == LogicalKeyboardKey.keyR && !ctrl) {
+      unawaited(_stopRecording());
+      return KeyEventResult.handled;
+    }
     if (_active?.onKey(e) ?? false) return KeyEventResult.handled;
     if (!down) return KeyEventResult.ignored;
     if (k == LogicalKeyboardKey.keyF || k == LogicalKeyboardKey.f11) {
@@ -351,6 +454,9 @@ class _PlayerPageState extends State<PlayerPage> {
       _toggleSide();
     } else if (k == LogicalKeyboardKey.keyD) {
       _editor == null ? _startDraw() : unawaited(_finishDraw());
+    } else if (k == LogicalKeyboardKey.keyR && !ctrl) {
+      // (Photos: R turns the picture; the record button starts there.)
+      unawaited(_startRecording());
     } else if (k == LogicalKeyboardKey.keyC && !ctrl && _entry.video) {
       unawaited(_clip());
     } else if (k == LogicalKeyboardKey.keyS && !ctrl) {
@@ -496,6 +602,7 @@ class _PlayerPageState extends State<PlayerPage> {
         video: e.video,
         clock: () => _active?.nowMs ?? 0,
         playing: () => _active?.playing ?? false,
+        sessionClock: _rec == null ? null : () => _rec?.clock.elapsedMilliseconds ?? 0,
         inks: note?.inks,
         original: note,
       );
@@ -537,10 +644,13 @@ class _PlayerPageState extends State<PlayerPage> {
         startMs: start,
       );
       set.notes.add(note);
+      // Made while recording: the recording draws these itself.
+      _rec?.session.noteIds.add(note.id);
     }
     await widget.services.notes.save(set);
     if (!mounted) return;
     setState(() {});
+    if (_rec != null) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(tr('ink.saved', {'name': note.name})),
       action: SnackBarAction(
@@ -569,6 +679,14 @@ class _PlayerPageState extends State<PlayerPage> {
       if (ok != true) return;
     }
     if (!mounted) return;
+    final rec = _rec;
+    if (rec != null) {
+      // Thrown away while recording: gone from the recording from now on.
+      final t = rec.clock.elapsedMilliseconds;
+      for (final id in ed.sessionStart.keys) {
+        rec.inks[id]?.removedT ??= t;
+      }
+    }
     setState(() => _editor = null);
     _focus.requestFocus();
   }
@@ -811,6 +929,309 @@ class _PlayerPageState extends State<PlayerPage> {
     if (mounted) setState(() {});
   }
 
+  // ----------------------------------------------------- explanations
+
+  void _snack(String text) {
+    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  }
+
+  /// Start recording an explanation: the microphone (chosen once), 3-2-1,
+  /// then what the player does and what is drawn is recorded with the voice.
+  Future<void> _startRecording() async {
+    if (_rec != null || _countdown > 0) return;
+    final s = widget.services;
+    if (!s.ffmpeg.available) {
+      _snack(tr('viewer.needs_ffmpeg', {'ext': 'MP4'}));
+      return;
+    }
+    final mic = MicRecorder(s.ffmpeg.ffmpeg);
+    var device = _memory.mic;
+    final devices = await mic.devices();
+    if (!mounted) return;
+    if (device == null || !devices.contains(device)) {
+      device = await pickMicrophone(context, mic, current: device);
+      if (device == null || !mounted) return;
+      _memory.setMic(device);
+    }
+    if (_editor != null) await _finishDraw();
+    _slide?.cancel();
+    if (_slideshow) setState(() => _slideshow = false);
+    final id = InkMark.newId();
+    final dir = NarrationSession.folderOf(s.settings.dataDir, id);
+    await dir.create(recursive: true);
+    final rec = _Rec(session: NarrationSession(id: id, createdMs: DateTime.now().millisecondsSinceEpoch), dir: dir, mic: mic, device: device);
+    // The microphone starts while counting down.
+    final listening = rec.startPart();
+    for (var c = 3; c > 0; c--) {
+      if (!mounted) return;
+      setState(() => _countdown = c);
+      await Future<void>.delayed(const Duration(seconds: 1));
+    }
+    final ok = await listening;
+    if (!mounted) {
+      await mic.stop();
+      return;
+    }
+    setState(() => _countdown = 0);
+    if (!ok) {
+      try {
+        await dir.delete(recursive: true);
+      } catch (_) {}
+      if (!mounted) return;
+      await showDialog<void>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(tr('rec.mic_failed')),
+          content: SizedBox(width: 420, child: Text(tr('rec.no_mic_tip'))),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                _memory.setMic(null);
+              },
+              child: Text(tr('rec.pick_other')),
+            ),
+            FilledButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('common.close'))),
+          ],
+        ),
+      );
+      return;
+    }
+    rec.go();
+    setState(() => _rec = rec);
+    rec.sampler = Timer.periodic(const Duration(milliseconds: 50), (_) => _sample());
+    _sample();
+    DiagLog.log('player', 'explanation recording');
+  }
+
+  /// What the player is doing now, into the recording.
+  void _sample() {
+    final rec = _rec;
+    if (rec == null || rec.paused) return;
+    final a = _active;
+    final e = _entry;
+    final t = rec.clock.elapsedMilliseconds;
+    final fi = rec.fileOf(e, a?.pictureSize);
+    final fz = a?.freezeNow;
+    rec.session.samples.add(NarrationSample(
+      t: t,
+      file: fi,
+      pos: e.video ? (a?.nowMs ?? 0) : 0,
+      playing: a?.playing ?? false,
+      rate: a?.rate ?? 1,
+      zoom: a?.zoomRect ?? const Rect.fromLTWH(0, 0, 1, 1),
+      freezeNote: fz?.plan.noteId,
+      freezeAt: fz?.plan.atMs,
+      freezeMs: fz?.elapsedMs,
+    ));
+    final ed = _editor;
+    if (ed != null) {
+      final now = {for (final i in [...ed.inks, ?ed.drawing]) i.id: i};
+      for (final i in now.values) {
+        final st = ed.sessionStart[i.id];
+        if (st == null) continue;
+        final old = rec.inks[i.id];
+        rec.inks[i.id] = NarrationInk(file: old?.file ?? fi, ink: i.copy(), startT: st, times: List.of(ed.sessionTimes[i.id] ?? const [0]));
+      }
+      if (identical(rec.lastEditor, ed)) {
+        for (final id in rec.lastIds) {
+          if (!now.containsKey(id)) rec.inks[id]?.removedT ??= t;
+        }
+      }
+      rec.lastEditor = ed;
+      rec.lastIds = now.keys.toSet();
+    }
+  }
+
+  Future<void> _pauseRecording() async {
+    final rec = _rec;
+    if (rec == null) return;
+    if (!rec.paused) {
+      _sample();
+      setState(() => rec.paused = true);
+      await rec.stopPart();
+    } else {
+      final ok = await rec.startPart();
+      if (!ok) {
+        _snack(tr('rec.mic_failed'));
+        return;
+      }
+      rec.go();
+      if (mounted) setState(() => rec.paused = false);
+    }
+  }
+
+  /// Stop: the voice in one file, the recording kept, then save / send /
+  /// throw away.
+  Future<void> _stopRecording() async {
+    final rec = _rec;
+    if (rec == null) return;
+    rec.sampler?.cancel();
+    _sample();
+    if (_editor != null) await _finishDraw();
+    if (!rec.paused) await rec.stopPart();
+    rec.session.lengthMs = rec.clock.elapsedMilliseconds;
+    rec.session.inks
+      ..clear()
+      ..addAll(rec.inks.values);
+    if (mounted) setState(() => _rec = null);
+    DiagLog.log('player', 'explanation recorded (${rec.session.lengthMs ~/ 1000} s)');
+    final exe = widget.services.ffmpeg.ffmpeg;
+    final voice = File('${rec.dir.path}${Platform.pathSeparator}voice.wav');
+    if (exe != null) await joinVoice(exe, rec.parts, voice);
+    for (final p in rec.parts) {
+      try {
+        await p.file.delete();
+      } catch (_) {}
+    }
+    try {
+      await File('${rec.dir.path}${Platform.pathSeparator}session.json').writeAsString(jsonEncode(rec.session.toJson()));
+    } catch (e) {
+      DiagLog.log('player', 'explanation not kept: $e');
+    }
+    await _loadNarrations();
+    if (mounted) await _afterRecording(rec.session);
+  }
+
+  OriginalSound get _sound => OriginalSound.values.firstWhere((v) => v.name == _memory.sound, orElse: () => OriginalSound.quiet);
+
+  /// Save / save and send / throw away (asked twice) a recording; [again]:
+  /// making a kept one again.
+  Future<void> _afterRecording(NarrationSession n, {bool again = false}) async {
+    final voice = File('${NarrationSession.folderOf(widget.services.settings.dataDir, n.id).path}${Platform.pathSeparator}voice.wav');
+    while (mounted) {
+      final r = await recordedDialog(context, n.lengthMs, _sound, again: again);
+      if (r == null || !mounted) return;
+      _memory.setSound(r.$2.name);
+      if (r.$1 == RecordedChoice.discard) {
+        final ink = await confirmDiscard(context, drew: n.noteIds.isNotEmpty);
+        if (ink == null) continue; // back to the first question
+        await _deleteNarration(n, withInk: ink);
+        _snack(tr('rec.discarded'));
+        return;
+      }
+      await _makeNarration(n, voice, r.$2, send: r.$1 == RecordedChoice.saveSend);
+      return;
+    }
+  }
+
+  Future<void> _deleteNarration(NarrationSession n, {required bool withInk}) async {
+    try {
+      await NarrationSession.folderOf(widget.services.settings.dataDir, n.id).delete(recursive: true);
+    } catch (_) {}
+    if (withInk && n.noteIds.isNotEmpty) {
+      for (final set in {..._sets.values, ...widget.services.notes.sets}) {
+        final before = set.notes.length;
+        set.notes.removeWhere((m) => n.noteIds.contains(m.id));
+        if (set.notes.length != before) await widget.services.notes.save(set);
+      }
+    }
+    await _loadNarrations();
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _makeNarration(NarrationSession n, File voice, OriginalSound sound, {required bool send}) async {
+    final s = widget.services;
+    // The annotations of each file (as the player showed them).
+    final sets = <NoteSet?>[];
+    for (final f in n.files) {
+      final e = _entries.where((x) => x.path.toLowerCase() == f.path.toLowerCase()).firstOrNull;
+      NoteSet? set = e == null ? null : _sets[e];
+      if (set == null && File(f.path).existsSync()) {
+        try {
+          final item = f.rel == null ? null : s.library.findByRel(f.rel!);
+          set = await s.notes.open(item: item, path: f.path, name: f.name, size: File(f.path).lengthSync(), video: f.video);
+        } catch (_) {}
+      }
+      sets.add(set);
+    }
+    if (!mounted) return;
+    final maker = NarrationComposer(s);
+    final progress = ValueNotifier<double>(0);
+    final done = maker.make(n, voice: voice, sound: sound, notes: sets, onProgress: (p) => progress.value = p);
+    unawaited(showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        unawaited(done.whenComplete(() {
+          if (ctx.mounted) Navigator.of(ctx).pop();
+        }));
+        return AlertDialog(
+          title: Text(tr('rec.making')),
+          content: SizedBox(
+            width: 360,
+            child: ValueListenableBuilder<double>(
+              valueListenable: progress,
+              builder: (_, p, _) => Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                LinearProgressIndicator(value: p <= 0 ? null : p),
+                const SizedBox(height: 8),
+                Text('${(p * 100).round()}%', style: const TextStyle(color: LrColors.muted)),
+              ]),
+            ),
+          ),
+          actions: [TextButton(onPressed: maker.cancel, child: Text(tr('common.cancel')))],
+        );
+      },
+    ));
+    final f = await done;
+    progress.dispose();
+    if (!mounted) return;
+    if (f == null) {
+      _snack(tr('rec.failed'));
+      return;
+    }
+    if (send) {
+      await _sendFile(f);
+      return;
+    }
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(SnackBar(
+      duration: const Duration(seconds: 8),
+      content: Row(children: [
+        Expanded(child: Text(tr('clip.saved', {'folder': f.parent.path.split(Platform.pathSeparator).last}))),
+        TextButton(onPressed: () => revealInExplorer(f.path), child: Text(tr('common.show_in_folder'))),
+        const SizedBox(width: 4),
+        FilledButton.icon(
+          onPressed: () {
+            messenger.hideCurrentSnackBar();
+            unawaited(_sendFile(f));
+          },
+          icon: const Icon(Icons.send_rounded, size: 16),
+          label: Text(tr('player.send')),
+        ),
+      ]),
+    ));
+  }
+
+  /// Kept recordings that include what is shown now.
+  List<NarrationSession> get _narrationsHere {
+    final p = _entry.path.toLowerCase();
+    return [for (final n in _narrations) if (n.files.any((f) => f.path.toLowerCase() == p)) n];
+  }
+
+  Future<void> _narrationAction(NarrationSession n, String action) async {
+    if (action == 'remake') {
+      await _afterRecording(n, again: true);
+    } else if (action == 'delete') {
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(tr('rec.delete_record')),
+          content: SizedBox(width: 420, child: Text(tr('rec.delete_record_tip'))),
+          actions: [
+            FilledButton(autofocus: true, onPressed: () => Navigator.pop(ctx, false), child: Text(tr('rec.back'))),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: TextButton.styleFrom(foregroundColor: LrColors.danger),
+              child: Text(tr('ink.delete')),
+            ),
+          ],
+        ),
+      );
+      if (ok == true) await _deleteNarration(n, withInk: false);
+    }
+  }
+
   Future<void> _shortcuts() => showDialog<void>(
         context: context,
         builder: (ctx) {
@@ -846,6 +1267,7 @@ class _PlayerPageState extends State<PlayerPage> {
                   row('N', tr('ink.notes_key')),
                   row('S', tr('ink.shot_key')),
                   row('C', tr('clip.title')),
+                  row('R', tr('rec.start')),
                   row('Ctrl+Z  Ctrl+Y', tr('ink.key_undo')),
                   row('Shift', tr('ink.key_shift')),
                 ]),
@@ -909,6 +1331,8 @@ class _PlayerPageState extends State<PlayerPage> {
           _btn(_slideshow ? Icons.stop_circle_outlined : Icons.slideshow_rounded,
               tr(_slideshow ? 'player.slideshow_stop' : 'player.slideshow'), () => _setSlideshow(!_slideshow),
               on: _slideshow),
+        if (_rec == null)
+          _btn(Icons.fiber_manual_record_rounded, tr('rec.start'), _countdown > 0 ? null : () => unawaited(_startRecording())),
         _btn(Icons.brush_rounded, tr('ink.draw'), _set == null ? null : () => _editor == null ? _startDraw() : unawaited(_finishDraw()),
             on: _editor != null),
         PopupMenuButton<bool>(
@@ -1040,6 +1464,33 @@ class _PlayerPageState extends State<PlayerPage> {
                 ),
               ),
             ),
+          if (_rec != null)
+            Positioned(
+              left: 0,
+              right: 0,
+              top: _editor != null ? 64 : (_fullscreen ? 56 : 0),
+              child: Center(
+                child: ExcludeFocus(
+                  child: RecordingBar(
+                    elapsed: () => _rec?.clock.elapsedMilliseconds ?? 0,
+                    paused: _rec!.paused,
+                    level: () => _rec?.mic.level() ?? 0,
+                    onPause: () => unawaited(_pauseRecording()),
+                    onStop: () => unawaited(_stopRecording()),
+                  ),
+                ),
+              ),
+            ),
+          if (_countdown > 0)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: Container(
+                  color: const Color(0x66000000),
+                  alignment: Alignment.center,
+                  child: Text('$_countdown', style: const TextStyle(fontSize: 120, fontWeight: FontWeight.w700, color: Colors.white)),
+                ),
+              ),
+            ),
           // Full screen: the list slides out at the right edge.
           if (_fullscreen && !_peek)
             Positioned(
@@ -1073,7 +1524,13 @@ class _PlayerPageState extends State<PlayerPage> {
         ]),
       ),
     ]);
-    return Focus(
+    return PopScope(
+      // Recording: leaving asks first (stop, then save or not).
+      canPop: _rec == null,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) unawaited(_stopRecording());
+      },
+      child: Focus(
       focusNode: _focus,
       autofocus: true,
       onKeyEvent: _key,
@@ -1087,6 +1544,7 @@ class _PlayerPageState extends State<PlayerPage> {
             if (!_fullscreen && _side) _sideBox(),
           ]),
         ),
+      ),
       ),
     );
   }
@@ -1157,6 +1615,8 @@ class _PlayerPageState extends State<PlayerPage> {
               onAction: (n, a) => unawaited(_noteAction(n, a)),
               onHold: (n, ms) => unawaited(_hold(n, ms)),
               onClipAround: () => unawaited(_clipAround()),
+              narrations: _narrationsHere,
+              onNarration: (n, a) => unawaited(_narrationAction(n, a)),
             ),
       _Tab.info => _InfoPanel(key: ObjectKey(e), entry: e, services: widget.services, from: e.item == null ? null : _from(e.item!)),
     };
@@ -1237,6 +1697,15 @@ class _ImageViewState extends State<_ImageView> implements _ViewHandle {
 
   @override
   bool get playing => false;
+
+  @override
+  double get rate => 1;
+
+  @override
+  Rect get zoomRect => _turns != 0 ? const Rect.fromLTWH(0, 0, 1, 1) : _visibleRect(_tc.value, _box, _size);
+
+  @override
+  FreezeNow? get freezeNow => null;
 
   @override
   Size? get pictureSize => _size;

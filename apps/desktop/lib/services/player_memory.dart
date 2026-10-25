@@ -66,6 +66,14 @@ class PlayerMemory extends ChangeNotifier {
   /// Clips' folder in the library (named the same way).
   String? clipsFolder;
 
+  /// Recorded explanations' folder in the library.
+  String? narrationsFolder;
+
+  /// The microphone chosen for explanations, and how the original's sound
+  /// goes in ('quiet', 'none', 'full').
+  String? mic;
+  String sound = 'quiet';
+
   /// A clip of an annotation starts / ends this many seconds around it.
   int clipBefore = 10;
   int clipAfter = 10;
@@ -107,6 +115,9 @@ class PlayerMemory extends ChangeNotifier {
       pauseAtNotes = j['pauseAtNotes'] == true;
       shotsFolder = j['shots'] as String?;
       clipsFolder = j['clips'] as String?;
+      narrationsFolder = j['narrations'] as String?;
+      mic = j['mic'] as String?;
+      sound = j['sound'] as String? ?? 'quiet';
       sideOpen = j['side'] != false;
       sideTab = j['sideTab'] as String? ?? 'list';
       clipBefore = ((j['clipBefore'] as num?)?.toInt() ?? 10).clamp(0, 60);
@@ -201,6 +212,21 @@ class PlayerMemory extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setNarrationsFolder(String name) {
+    narrationsFolder = name;
+    _save();
+  }
+
+  void setMic(String? name) {
+    mic = name;
+    _save();
+  }
+
+  void setSound(String v) {
+    sound = v;
+    _save();
+  }
+
   void setClipsFolder(String name) {
     clipsFolder = name;
     _save();
@@ -232,6 +258,9 @@ class PlayerMemory extends ChangeNotifier {
         'pauseAtNotes': pauseAtNotes,
         'shots': ?shotsFolder,
         'clips': ?clipsFolder,
+        'narrations': ?narrationsFolder,
+        'mic': ?mic,
+        'sound': sound,
         'clipBefore': clipBefore,
         'side': sideOpen,
         'sideTab': sideTab,

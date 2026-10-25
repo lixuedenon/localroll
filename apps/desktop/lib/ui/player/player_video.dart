@@ -95,6 +95,18 @@ class _VideoViewState extends State<_VideoView> implements _ViewHandle {
   @override
   bool get playing => _player.state.playing;
 
+  @override
+  double get rate => _player.state.rate;
+
+  @override
+  Rect get zoomRect => _visibleRect(_tc.value, _box, _size);
+
+  /// The picture area's size (for what part is zoomed in on).
+  Size _box = Size.zero;
+
+  @override
+  FreezeNow? get freezeNow => _freeze.value;
+
   /// Replaying marks drawn while paused (the video stands still for it).
   final ValueNotifier<FreezeNow?> _freeze = ValueNotifier(null);
   Timer? _freezeTimer;
@@ -429,7 +441,9 @@ class _VideoViewState extends State<_VideoView> implements _ViewHandle {
     return GestureDetector(
       onTap: drawing ? null : () => unawaited(_player.playOrPause()),
       onDoubleTap: drawing ? null : widget.onFullscreen,
-      child: InteractiveViewer(
+      child: LayoutBuilder(builder: (context, c) {
+        _box = Size(c.maxWidth, c.maxHeight);
+        return InteractiveViewer(
         transformationController: _tc,
         minScale: 1,
         maxScale: 8,
@@ -447,7 +461,8 @@ class _VideoViewState extends State<_VideoView> implements _ViewHandle {
                   ]),
                 ),
               ),
-      ),
+      );
+      }),
     );
   }
 

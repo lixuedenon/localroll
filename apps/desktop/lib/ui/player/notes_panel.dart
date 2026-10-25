@@ -9,6 +9,7 @@ import '../../services/annotations.dart';
 import '../../services/text_index.dart';
 import '../theme.dart';
 import 'ink_paint.dart';
+import 'narration.dart';
 import 'player_entry.dart';
 
 /// What was chosen on an annotation in the list.
@@ -30,7 +31,13 @@ class NotesPanel extends StatefulWidget {
     required this.onHold,
     required this.onClipAround,
     this.leading,
+    this.narrations = const [],
+    this.onNarration,
   });
+
+  /// Explanations recorded with this file (to make again or delete).
+  final List<NarrationSession> narrations;
+  final void Function(NarrationSession n, String action)? onNarration;
 
   /// Shown at the top left instead of the title.
   final Widget? leading;
@@ -229,6 +236,40 @@ class _NotesPanelState extends State<NotesPanel> {
                   },
                 ),
         ),
+        if (widget.narrations.isNotEmpty) ...[
+          const Divider(height: 1),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 2),
+            child: Text(tr('rec.records'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: LrColors.muted)),
+          ),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 180),
+            child: ListView(shrinkWrap: true, padding: const EdgeInsets.only(bottom: 8), children: [
+              for (final n in widget.narrations)
+                ListTile(
+                  dense: true,
+                  leading: const Icon(Icons.mic_rounded, size: 18, color: LrColors.danger),
+                  title: Text(tr('rec.record_name', {'time': _time(n.lengthMs)})),
+                  subtitle: Text(() {
+                    final d = DateTime.fromMillisecondsSinceEpoch(n.createdMs);
+                    String two(int v) => v.toString().padLeft(2, '0');
+                    return '${d.month}-${two(d.day)} ${two(d.hour)}:${two(d.minute)}'
+                        '${n.files.length > 1 ? ' · ${tr('rec.n_files', {'n': n.files.length})}' : ''}';
+                  }(), style: const TextStyle(fontSize: 12, color: LrColors.muted)),
+                  trailing: PopupMenuButton<String>(
+                    tooltip: tr('ink.more'),
+                    icon: const Icon(Icons.more_vert_rounded, size: 18),
+                    onSelected: (a) => widget.onNarration?.call(n, a),
+                    itemBuilder: (_) => [
+                      PopupMenuItem(value: 'remake', child: Text(tr('rec.remake'))),
+                      PopupMenuItem(value: 'delete', child: Text(tr('rec.delete_record'), style: const TextStyle(color: LrColors.danger))),
+                    ],
+                  ),
+                  onTap: () => widget.onNarration?.call(n, 'remake'),
+                ),
+            ]),
+          ),
+        ],
       ]),
     );
   }
