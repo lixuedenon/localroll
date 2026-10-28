@@ -13,6 +13,8 @@ import 'library_page.dart';
 import 'notices.dart';
 import 'pair_prompt.dart';
 import 'player/player_home.dart';
+import 'screen/screen_page.dart';
+import 'screen/screen_record.dart';
 import 'settings_page.dart';
 import 'text_window.dart';
 import 'theme.dart';
@@ -85,86 +87,14 @@ class _HomeShellState extends State<HomeShell> {
       DevicesPage(services: s),
       LibraryPage(services: s),
       PlayerHome(services: s),
+      ScreenPage(services: s),
       JobsPage(services: s),
       SettingsPage(services: s),
     ];
     return Scaffold(
       body: Row(
         children: [
-          ListenableBuilder(
-            listenable: Listenable.merge([s.hub, s.converter, s.library, s.sender, _nav, _nav.attention]),
-            builder: (context, _) {
-              final receiving = s.hub.transfers.any((t) => t.fraction != null && t.fraction! < 1);
-              return Container(
-                width: 96,
-                decoration: const BoxDecoration(
-                  color: LrColors.surface,
-                  border: Border(right: BorderSide(color: LrColors.line)),
-                ),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 14),
-                    _RailItem(
-                      icon: Icons.home_outlined,
-                      selectedIcon: Icons.home_rounded,
-                      label: tr('nav.home'),
-                      selected: _nav.tab == AppNav.home,
-                      onTap: () => _nav.selectTab(AppNav.home),
-                    ),
-                    _RailItem(
-                      icon: Icons.devices_other_outlined,
-                      selectedIcon: Icons.devices_other_rounded,
-                      label: tr('nav.transfer'),
-                      selected: _nav.tab == AppNav.devices,
-                      dot: receiving || s.sender.busy,
-                      flash: _nav.attention.value > 0,
-                      onTap: () => _nav.selectTab(AppNav.devices),
-                    ),
-                    _RailItem(
-                      icon: Icons.photo_library_outlined,
-                      selectedIcon: Icons.photo_library_rounded,
-                      label: tr('nav.library'),
-                      selected: _nav.tab == AppNav.library,
-                      dot: s.library.offline || s.library.pendingMissing.isNotEmpty,
-                      onTap: () => _nav.selectTab(AppNav.library),
-                    ),
-                    _RailItem(
-                      icon: Icons.play_circle_outline_rounded,
-                      selectedIcon: Icons.play_circle_rounded,
-                      label: tr('nav.player'),
-                      selected: _nav.tab == AppNav.player,
-                      onTap: () => _nav.selectTab(AppNav.player),
-                    ),
-                    _RailItem(
-                      icon: Icons.auto_fix_high_outlined,
-                      selectedIcon: Icons.auto_fix_high_rounded,
-                      label: tr('nav.convert'),
-                      selected: _nav.tab == AppNav.convert,
-                      count: s.converter.pending,
-                      onTap: () => _nav.selectTab(AppNav.convert),
-                    ),
-                    _RailItem(
-                      icon: Icons.tune_outlined,
-                      selectedIcon: Icons.tune_rounded,
-                      label: tr('nav.settings'),
-                      selected: _nav.tab == AppNav.settings,
-                      onTap: () => _nav.selectTab(AppNav.settings),
-                    ),
-                    const Spacer(),
-                    _RailItem(
-                      icon: Icons.power_settings_new_rounded,
-                      selectedIcon: Icons.power_settings_new_rounded,
-                      label: tr('app.exit'),
-                      selected: false,
-                      quiet: true,
-                      onTap: () => confirmExit(s),
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-                ),
-              );
-            },
-          ),
+          AppRail(services: s),
           Expanded(
             child: ListenableBuilder(
               listenable: _nav,
@@ -173,6 +103,109 @@ class _HomeShellState extends State<HomeShell> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// The left rail: the main sections. Also shown beside the player (so it
+/// stays in reach); [onSelect] then leaves the player first.
+class AppRail extends StatelessWidget {
+  const AppRail({super.key, required this.services, this.selected, this.onSelect});
+
+  final AppServices services;
+
+  /// Shown as selected (null: the current section).
+  final int? selected;
+  final void Function(int tab)? onSelect;
+
+  AppNav get _nav => AppNav.instance;
+
+  void _go(int tab) => onSelect != null ? onSelect!(tab) : _nav.selectTab(tab);
+
+  @override
+  Widget build(BuildContext context) {
+    final s = services;
+    return ListenableBuilder(
+      listenable: Listenable.merge([s.hub, s.converter, s.library, s.sender, _nav, _nav.attention, ScreenRecorder.instance]),
+      builder: (context, _) {
+        final receiving = s.hub.transfers.any((t) => t.fraction != null && t.fraction! < 1);
+        return Container(
+          width: 96,
+          decoration: const BoxDecoration(
+            color: LrColors.surface,
+            border: Border(right: BorderSide(color: LrColors.line)),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 14),
+              _RailItem(
+                icon: Icons.home_outlined,
+                selectedIcon: Icons.home_rounded,
+                label: tr('nav.home'),
+                selected: (selected ?? _nav.tab) == AppNav.home,
+                onTap: () => _go(AppNav.home),
+              ),
+              _RailItem(
+                icon: Icons.devices_other_outlined,
+                selectedIcon: Icons.devices_other_rounded,
+                label: tr('nav.transfer'),
+                selected: (selected ?? _nav.tab) == AppNav.devices,
+                dot: receiving || s.sender.busy,
+                flash: _nav.attention.value > 0,
+                onTap: () => _go(AppNav.devices),
+              ),
+              _RailItem(
+                icon: Icons.photo_library_outlined,
+                selectedIcon: Icons.photo_library_rounded,
+                label: tr('nav.library'),
+                selected: (selected ?? _nav.tab) == AppNav.library,
+                dot: s.library.offline || s.library.pendingMissing.isNotEmpty,
+                onTap: () => _go(AppNav.library),
+              ),
+              _RailItem(
+                icon: Icons.play_circle_outline_rounded,
+                selectedIcon: Icons.play_circle_rounded,
+                label: tr('nav.player'),
+                selected: (selected ?? _nav.tab) == AppNav.player,
+                onTap: () => _go(AppNav.player),
+              ),
+              _RailItem(
+                icon: Icons.videocam_outlined,
+                selectedIcon: Icons.videocam_rounded,
+                label: tr('nav.screen'),
+                selected: (selected ?? _nav.tab) == AppNav.screen,
+                dot: ScreenRecorder.instance.recording,
+                onTap: () => _go(AppNav.screen),
+              ),
+              _RailItem(
+                icon: Icons.auto_fix_high_outlined,
+                selectedIcon: Icons.auto_fix_high_rounded,
+                label: tr('nav.convert'),
+                selected: (selected ?? _nav.tab) == AppNav.convert,
+                count: s.converter.pending,
+                onTap: () => _go(AppNav.convert),
+              ),
+              _RailItem(
+                icon: Icons.tune_outlined,
+                selectedIcon: Icons.tune_rounded,
+                label: tr('nav.settings'),
+                selected: (selected ?? _nav.tab) == AppNav.settings,
+                onTap: () => _go(AppNav.settings),
+              ),
+              const Spacer(),
+              _RailItem(
+                icon: Icons.power_settings_new_rounded,
+                selectedIcon: Icons.power_settings_new_rounded,
+                label: tr('app.exit'),
+                selected: false,
+                quiet: true,
+                onTap: () => confirmExit(s),
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -10,7 +10,6 @@ import 'package:localroll_core/localroll_core.dart';
 
 import '../app_services.dart';
 import '../l10n/l10n.dart';
-import '../services/converter.dart';
 import '../services/file_actions.dart';
 import '../services/library_index.dart';
 import '../services/network.dart';
@@ -21,6 +20,7 @@ import '../services/text_index.dart';
 import '../services/text_indexer.dart';
 import '../services/win_dialogs.dart';
 import 'app_nav.dart';
+import 'convert_dialog.dart';
 import 'files_view.dart';
 import 'format.dart';
 import 'hover_tip.dart';
@@ -471,24 +471,20 @@ class _LibraryPageState extends State<LibraryPage> {
                   onPressed: () => _deleteSelected(items),
                 ),
                 if (chosenMedia.isNotEmpty)
-                PopupMenuButton<ConvertPreset>(
+                IconButton(
                   tooltip: tr('convert.selected_tooltip'),
                   icon: const Icon(Icons.auto_fix_high),
-                  onSelected: (p) {
+                  onPressed: () async {
                     // Documents and other files have nothing to convert.
                     final skipped = _files.where((f) => _selected.contains(fileKey(f.path))).length;
-                    s.converter.enqueue(chosenMedia, p);
+                    final video = chosenMedia.every((i) => i.kind == MediaKind.video);
+                    final ok = await convertWithDialog(context, s, items: chosenMedia, video: video);
+                    if (!ok || !mounted) return;
                     setState(_clearSelection);
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text([
-                        tr('convert.queued', {'preset': p.label}),
-                        if (skipped > 0) tr('convert.skipped_files', {'count': skipped}),
-                      ].join('  ')),
-                    ));
+                    if (skipped > 0) {
+                      ScaffoldMessenger.of(this.context).showSnackBar(SnackBar(content: Text(tr('convert.skipped_files', {'count': skipped}))));
+                    }
                   },
-                  itemBuilder: (_) => [
-                    for (final p in ConvertPreset.values) PopupMenuItem(value: p, child: Text(tr('convert.to', {'preset': p.label}))),
-                  ],
                 ),
               ] else ...[
                 _searchBox(),
@@ -1000,8 +996,7 @@ class _LibraryPageState extends State<LibraryPage> {
               _selected.contains(item.relPath) ? tr('lib.unselect') : tr('lib.select')),
         ),
         const PopupMenuDivider(),
-        for (final p in ConvertPreset.values)
-          PopupMenuItem(value: 'convert:${p.name}', child: _menuRow(Icons.auto_fix_high_rounded, tr('convert.to', {'preset': p.label}))),
+        PopupMenuItem(value: 'convert', child: _menuRow(Icons.auto_fix_high_rounded, tr('convert.menu'))),
         PopupMenuItem(value: 'export', child: _menuRow(Icons.drive_file_move_rounded, tr('lib.export'))),
         PopupMenuItem(value: 'send', child: _menuRow(Icons.send_rounded, tr('send.to_pc'))),
         if (targets.length == 1)
@@ -1030,15 +1025,9 @@ class _LibraryPageState extends State<LibraryPage> {
         revealInExplorer(s.library.absPath(item));
       case 'delete':
         await _delete(targets);
-      default:
-        if (choice.startsWith('convert:')) {
-          final p = ConvertPreset.values.firstWhere((x) => 'convert:${x.name}' == choice);
-          s.converter.enqueue(targets, p);
-          setState(_clearSelection);
-          ScaffoldMessenger.of(this.context).showSnackBar(
-            SnackBar(content: Text(tr('convert.queued', {'preset': p.label}))),
-          );
-        }
+      case 'convert':
+        final ok = await convertWithDialog(this.context, s, items: targets, video: targets.every((i) => i.kind == MediaKind.video));
+        if (ok && mounted) setState(_clearSelection);
     }
   }
 

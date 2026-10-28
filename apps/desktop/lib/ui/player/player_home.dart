@@ -15,7 +15,6 @@ import '../media_thumb.dart';
 import '../theme.dart';
 import 'player_entry.dart';
 import 'player_page.dart';
-import '../screen/screen_record.dart';
 
 /// "Player" on the left: continue where you left off, open photos and
 /// videos from anywhere on this PC (or drop them on the window), recent.
@@ -107,10 +106,7 @@ class PlayerHome extends StatelessWidget {
                   label: Text(tr('player.open_folder')),
                 ),
                 OutlinedButton.icon(
-                  onPressed: () async {
-                    final su = await showScreenSetup(context, services);
-                    if (su != null) await ScreenRecorder.instance.begin(su);
-                  },
+                  onPressed: () => AppNav.instance.selectTab(AppNav.screen),
                   icon: const Icon(Icons.screenshot_monitor_rounded, color: LrColors.danger),
                   label: Text(tr('screen.button')),
                 ),

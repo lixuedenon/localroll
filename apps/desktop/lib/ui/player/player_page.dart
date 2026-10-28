@@ -15,7 +15,6 @@ import 'package:window_manager/window_manager.dart';
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/annotations.dart';
-import '../../services/converter.dart';
 import '../../services/ffmpeg.dart';
 import '../../services/library_index.dart';
 import '../../services/mic.dart';
@@ -23,6 +22,8 @@ import '../../services/network.dart';
 import '../../services/peers.dart';
 import '../../services/player_memory.dart';
 import '../app_nav.dart';
+import '../convert_dialog.dart';
+import '../home_shell.dart' show AppRail;
 import '../files_view.dart';
 import '../format.dart';
 import '../media_thumb.dart';
@@ -45,7 +46,7 @@ part 'player_video.dart';
 /// Opens files from this PC (Explorer's "Open with", drag and drop, the
 /// open dialog). One file: the photos and videos of its folder come along,
 /// so the arrows go through them.
-Future<void> openInPlayer(BuildContext context, AppServices s, List<String> paths, {int? startMs}) async {
+Future<void> openInPlayer(BuildContext context, AppServices s, List<String> paths, {int? startMs, bool record = false}) async {
   final wanted = [for (final p in paths) if (PlayerEntry.playable(p)) p];
   if (wanted.isEmpty) {
     ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('player.nothing_playable'))));
@@ -72,7 +73,7 @@ Future<void> openInPlayer(BuildContext context, AppServices s, List<String> path
     return;
   }
   if (!context.mounted) return;
-  await openPlayer(context, s, entries, at, startMs: startMs);
+  await openPlayer(context, s, entries, at, startMs: startMs, record: record);
 }
 
 /// Files asked for from outside the window (Explorer's "Open with", a
@@ -112,10 +113,11 @@ Future<void> openLibraryItems(BuildContext context, AppServices s, List<MediaIte
     openPlayer(context, s, [for (final i in items) PlayerEntry.fromItem(s.library, i)], index < 0 ? 0 : index);
 
 /// [startMs]: a video starts there (an annotation found by search).
-Future<void> openPlayer(BuildContext context, AppServices s, List<PlayerEntry> entries, int index, {int? startMs}) =>
+/// [record]: start explaining it (recording) as soon as it is open.
+Future<void> openPlayer(BuildContext context, AppServices s, List<PlayerEntry> entries, int index, {int? startMs, bool record = false}) =>
     Navigator.of(context).push(MaterialPageRoute(
       settings: const RouteSettings(name: 'player'),
-      builder: (_) => PlayerPage(services: s, entries: entries, initialIndex: index.clamp(0, entries.length - 1), initialMs: startMs),
+      builder: (_) => PlayerPage(services: s, entries: entries, initialIndex: index.clamp(0, entries.length - 1), initialMs: startMs, record: record),
     ));
 
 /// For "Recent" and "Continue".
@@ -250,7 +252,10 @@ class _Rec {
 /// anywhere on this PC. Videos (HEVC, HDR, Dolby Vision, MKV…) play
 /// through libmpv; HEIC, AVIF, TIFF, camera RAW are shown as they are.
 class PlayerPage extends StatefulWidget {
-  const PlayerPage({super.key, required this.services, required this.entries, required this.initialIndex, this.initialMs});
+  const PlayerPage({super.key, required this.services, required this.entries, required this.initialIndex, this.initialMs, this.record = false});
+
+  /// Start recording an explanation once it is open.
+  final bool record;
 
   final AppServices services;
   final List<PlayerEntry> entries;
@@ -329,6 +334,11 @@ class _PlayerPageState extends State<PlayerPage> {
     unawaited(_loadNarrations());
     unawaited(_loadNotes(_entry));
     _memory.opened(recentOf(_entry));
+    if (widget.record) {
+      Future<void>.delayed(const Duration(milliseconds: 700), () {
+        if (mounted && _rec == null) unawaited(_startRecording());
+      });
+    }
     DiagLog.log('player', 'open ${_entry.video ? 'video' : 'photo'} .${_entry.extension} (${_entries.length} in list)');
   }
 
@@ -510,11 +520,11 @@ class _PlayerPageState extends State<PlayerPage> {
     _pages.jumpToPage(_index);
   }
 
-  void _convert(PlayerEntry e, ConvertPreset p) {
+  /// Convert to…: then "Convert" shows it going (the player closes).
+  Future<void> _convert(PlayerEntry e) async {
     final item = e.item;
-    if (item == null) return;
-    widget.services.converter.enqueue([item], p);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('convert.queued_hint', {'preset': p.label}))));
+    final ok = await convertWithDialog(context, widget.services, items: [?item], path: item == null ? e.path : null, video: e.video);
+    if (ok && mounted) Navigator.of(context).popUntil((r) => r.isFirst);
   }
 
   /// Show [t] on the right (pressed again while shown: the list closes).
@@ -1370,11 +1380,10 @@ class _PlayerPageState extends State<PlayerPage> {
             if (v == 'reveal') revealInExplorer(e.path);
             if (v == 'delete') unawaited(_delete(e));
             if (v == 'keys') unawaited(_shortcuts());
-            if (v.startsWith('convert:')) _convert(e, ConvertPreset.values.firstWhere((p) => 'convert:${p.name}' == v));
+            if (v == 'convert') unawaited(_convert(e));
           },
           itemBuilder: (_) => [
-            if (item != null)
-              for (final p in ConvertPreset.values) PopupMenuItem(value: 'convert:${p.name}', child: Text(tr('convert.to', {'preset': p.label}))),
+            PopupMenuItem(value: 'convert', child: Text(tr('convert.menu'))),
             PopupMenuItem(value: 'reveal', child: Text(tr('common.show_in_folder'))),
             PopupMenuItem(value: 'keys', child: Text(tr('player.shortcuts'))),
             if (item != null) ...[
@@ -1548,6 +1557,20 @@ class _PlayerPageState extends State<PlayerPage> {
         child: Scaffold(
           backgroundColor: Colors.black,
           body: Row(children: [
+            // The main sections stay in reach (full screen covers them).
+            if (!_fullscreen)
+              AppRail(
+                services: widget.services,
+                selected: AppNav.player,
+                onSelect: (t) {
+                  if (_rec != null) {
+                    unawaited(_stopRecording());
+                    return;
+                  }
+                  Navigator.of(context).popUntil((r) => r.isFirst);
+                  AppNav.instance.selectTab(t);
+                },
+              ),
             Expanded(child: main),
             if (!_fullscreen && _side) _sideBox(),
           ]),

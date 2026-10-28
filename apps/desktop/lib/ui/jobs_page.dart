@@ -139,7 +139,7 @@ class _JobTile extends StatelessWidget {
         JobState.done => Icons.check_circle_rounded,
         JobState.failed => Icons.error_outline_rounded,
       }, color: color),
-      title: Text('${job.item.name}  →  ${job.preset.label}', overflow: TextOverflow.ellipsis),
+      title: Text('${job.item.name}  →  ${job.label}', overflow: TextOverflow.ellipsis),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

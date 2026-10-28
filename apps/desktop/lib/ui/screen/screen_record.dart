@@ -949,12 +949,13 @@ class _ScreenComposer {
 // ------------------------------------------------------------------ UI
 
 /// Choose what to record: a whole screen, a window, or an area.
-Future<ScreenSetup?> showScreenSetup(BuildContext context, AppServices s) async {
+/// [initial]: start with this kind chosen (else the last one).
+Future<ScreenSetup?> showScreenSetup(BuildContext context, AppServices s, {ScreenMode? initial}) async {
   final screens = WinScreen.screens();
   if (screens.isEmpty) return null;
   final windows = WinScreen.windows();
   final m = s.player;
-  var mode = ScreenMode.values.firstWhere((x) => x.name == m.screenMode, orElse: () => ScreenMode.screen);
+  var mode = initial ?? ScreenMode.values.firstWhere((x) => x.name == m.screenMode, orElse: () => ScreenMode.screen);
   if (mode == ScreenMode.window && windows.isEmpty) mode = ScreenMode.screen;
   var screen = screens[m.screenIndex.clamp(0, screens.length - 1)];
   WindowInfo? window = windows.isEmpty ? null : windows.first;
