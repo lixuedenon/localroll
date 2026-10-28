@@ -87,7 +87,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       sub: tr('settings.accept_rule_hint'),
                       trailing: OutlinedButton(
                         onPressed: () => AppNav.instance.selectTab(AppNav.devices),
-                        child: Text(tr('nav.devices')),
+                        child: Text(tr('nav.transfer')),
                       ),
                     ),
                   ]),

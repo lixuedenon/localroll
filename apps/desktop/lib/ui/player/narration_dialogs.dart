@@ -230,11 +230,13 @@ class _RecordingBarState extends State<RecordingBar> {
           ),
         ),
         const SizedBox(width: 8),
-        IconButton(
-          tooltip: tr(widget.paused ? 'rec.resume' : 'rec.pause'),
+        TextButton.icon(
+          style: TextButton.styleFrom(foregroundColor: Colors.white, visualDensity: VisualDensity.compact),
           onPressed: widget.onPause,
-          icon: Icon(widget.paused ? Icons.play_arrow_rounded : Icons.pause_rounded, color: Colors.white, size: 20),
+          icon: Icon(widget.paused ? Icons.play_arrow_rounded : Icons.pause_rounded, size: 20),
+          label: Text(tr(widget.paused ? 'rec.resume' : 'rec.pause')),
         ),
+        const SizedBox(width: 4),
         FilledButton.icon(
           style: FilledButton.styleFrom(backgroundColor: LrColors.danger, foregroundColor: Colors.white, visualDensity: VisualDensity.compact),
           onPressed: widget.onStop,

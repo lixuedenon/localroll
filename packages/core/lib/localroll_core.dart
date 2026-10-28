@@ -10,7 +10,7 @@ export 'src/hashing.dart';
 export 'src/i18n.dart';
 export 'src/clip_tokenizer.dart';
 export 'src/device_names.dart';
-export 'src/languages.g.dart' show deviceNameWords;
+export 'src/languages.g.dart' show deviceNameWords, appName;
 export 'src/exif.dart';
 export 'src/family.dart';
 export 'src/version.dart';

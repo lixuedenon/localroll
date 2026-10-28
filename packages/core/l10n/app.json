@@ -1,0 +1,4 @@
+{
+  "_comment": "The app's shown name. Change it here only, then run python scripts/gen_l10n.py. Internal names (folders, registry, package ids) never change.",
+  "name": "LocalRoll"
+}

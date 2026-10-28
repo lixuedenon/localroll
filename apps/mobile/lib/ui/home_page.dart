@@ -900,7 +900,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(widget.settings.simpleMode ? 'LocalRoll' : tr('photos.title')),
+                Text(widget.settings.simpleMode ? appName : tr('photos.title')),
                 // Simple mode picks photos to send: where to stays in sight.
                 if (widget.settings.simpleMode || _sendTarget != null) Row(
                   mainAxisSize: MainAxisSize.min,
@@ -1050,7 +1050,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         );
     return Scaffold(
       appBar: AppBar(
-        title: const Text('LocalRoll'),
+        title: const Text(appName),
         actions: [
           IconButton(tooltip: tr('settings.title'), onPressed: _openSettings, icon: const Icon(Icons.settings_rounded)),
         ],

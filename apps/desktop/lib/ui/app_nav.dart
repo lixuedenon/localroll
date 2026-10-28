@@ -1,6 +1,10 @@
 // apps/desktop/lib/ui/app_nav.dart
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:localroll_core/localroll_core.dart';
+
+import '../services/win_screen.dart';
 
 /// App-wide navigation state for the title bar's Back button: pops a pushed
 /// page (viewer…) first, otherwise returns to the previously visited section.
@@ -21,6 +25,16 @@ class AppNav extends ChangeNotifier {
   static const int receive = devices;
   static const int send = devices;
   static const int family = devices;
+
+  /// Something arrived that needs the person ("X wants to send files"):
+  /// "Send and receive" in the rail and the taskbar button flash until it
+  /// is answered.
+  final ValueNotifier<int> attention = ValueNotifier(0);
+
+  void needAttention(bool on) {
+    attention.value = (attention.value + (on ? 1 : -1)).clamp(0, 99);
+    if (Platform.isWindows) WinScreen.flashTaskbar(attention.value > 0);
+  }
 
   /// The player is full screen: the title bar steps aside.
   final ValueNotifier<bool> fullscreen = ValueNotifier(false);

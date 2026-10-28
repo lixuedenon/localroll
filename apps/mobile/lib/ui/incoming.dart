@@ -1,5 +1,8 @@
 // apps/mobile/lib/ui/incoming.dart
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:localroll_core/localroll_core.dart';
 
 import '../l10n/l10n.dart';
@@ -23,11 +26,18 @@ const int maxReasonLength = 100;
 /// "X wants to send you N items": Accept / Decline / Decline with a reason.
 Future<IncomingReply> askIncoming(BuildContext context, IncomingAsk ask) async {
   final pc = isDesktopPlatform(ask.from.platform);
+  // A few buzzes to be noticed (the icon keeps flashing until answered).
+  unawaited(Future(() async {
+    for (var i = 0; i < 3; i++) {
+      await HapticFeedback.heavyImpact();
+      await Future<void>.delayed(const Duration(milliseconds: 350));
+    }
+  }));
   final reply = await showDialog<IncomingReply>(
     context: context,
     barrierDismissible: false,
     builder: (c) => AlertDialog(
-      icon: Icon(pc ? Icons.computer_rounded : Icons.smartphone_rounded, size: 36, color: onlineGlow),
+      icon: _Flashing(child: Icon(pc ? Icons.computer_rounded : Icons.smartphone_rounded, size: 36, color: onlineGlow)),
       title: Text(tr('incoming.title', {'name': ask.from.name})),
       content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(tr('incoming.body', {'count': ask.count})),
@@ -172,4 +182,30 @@ class ReceivingBanner extends StatelessWidget {
       },
     );
   }
+}
+
+/// Flashes until it goes away (the dialog is answered).
+class _Flashing extends StatefulWidget {
+  const _Flashing({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_Flashing> createState() => _FlashingState();
+}
+
+class _FlashingState extends State<_Flashing> with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 600))..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => FadeTransition(
+        opacity: Tween<double>(begin: 0.25, end: 1).animate(_c),
+        child: ScaleTransition(scale: Tween<double>(begin: 0.9, end: 1.12).animate(_c), child: widget.child),
+      );
 }

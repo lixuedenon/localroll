@@ -1,5 +1,6 @@
 // apps/mobile/lib/ui/simple_home.dart
 import 'package:flutter/material.dart';
+import 'package:localroll_core/localroll_core.dart' show appName;
 
 import '../l10n/l10n.dart';
 import '../services/auto_sender.dart';
@@ -38,7 +39,7 @@ class SimpleHome extends StatelessWidget {
       data: mq.copyWith(textScaler: TextScaler.linear(scale)),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('LocalRoll'),
+          title: const Text(appName),
           actions: [
             IconButton(
               tooltip: tr('settings.title'),

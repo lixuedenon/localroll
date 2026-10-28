@@ -55,7 +55,7 @@ Future<void> main(List<String> args) async {
   await windowManager.ensureInitialized();
   await windowManager.waitUntilReadyToShow(
     const WindowOptions(
-      title: 'LocalRoll',
+      title: appName,
       minimumSize: Size(960, 620),
       titleBarStyle: TitleBarStyle.hidden,
       backgroundColor: LrColors.ink,
@@ -200,7 +200,7 @@ class LocalRollApp extends StatelessWidget {
       builder: (context, _) {
         final lang = services.settings.language;
         return MaterialApp(
-          title: 'LocalRoll',
+          title: appName,
           debugShowCheckedModeBanner: false,
           theme: buildLrTheme(),
           themeMode: ThemeMode.dark,
@@ -242,7 +242,7 @@ class _AlreadyRunningApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'LocalRoll',
+      title: appName,
       debugShowCheckedModeBanner: false,
       theme: buildLrTheme(),
       supportedLocales: appSupportedLocales,

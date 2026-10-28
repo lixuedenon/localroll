@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:ui' show FontFeature;
 
 import 'package:flutter/material.dart';
@@ -159,6 +160,10 @@ abstract class _ViewHandle {
   Size? get pictureSize;
 
   void seekTo(int ms, {bool play = false});
+
+  /// C / the scissors: first a range to cut on the time line (drag its
+  /// ends), then cut it.
+  void clipStep();
 }
 
 /// The part of a picture of [pic] pixels, fitted in [box], that is on
@@ -429,6 +434,8 @@ class _PlayerPageState extends State<PlayerPage> {
       }
     }
     if (down && k == LogicalKeyboardKey.escape) {
+      // A clip being chosen is let go first.
+      if (_active?.onKey(e) ?? false) return KeyEventResult.handled;
       if (_fullscreen) {
         _setFullscreen(false);
       } else if (_slideshow) {
@@ -458,7 +465,7 @@ class _PlayerPageState extends State<PlayerPage> {
       // (Photos: R turns the picture; the record button starts there.)
       unawaited(_startRecording());
     } else if (k == LogicalKeyboardKey.keyC && !ctrl && _entry.video) {
-      unawaited(_clip());
+      _active?.clipStep();
     } else if (k == LogicalKeyboardKey.keyS && !ctrl) {
       unawaited(_shoot(withInk: true));
     } else if (k == LogicalKeyboardKey.pageDown || (shift && k == LogicalKeyboardKey.keyN)) {
@@ -758,16 +765,17 @@ class _PlayerPageState extends State<PlayerPage> {
     await sendToPc(context, s, [file], name);
   }
 
-  /// Cut a clip: around [note] (the seconds before / after from the
-  /// settings), else around where the video is.
-  Future<void> _clip({Note? note, bool send = false}) async {
+  /// Cut a clip: [fromMs]–[toMs] (chosen on the time line), else around
+  /// [note] (the seconds before / after from the settings), else around
+  /// where the video is. The dialog can still move each end.
+  Future<void> _clip({Note? note, bool send = false, int? fromMs, int? toMs}) async {
     final e = _entry;
     final v = _active;
     if (!e.video || v == null) return;
     final m = _memory;
     final dur = v.durationMs;
-    final from = note != null ? note.startMs - m.clipBefore * 1000 : v.nowMs - m.clipBefore * 1000;
-    final to = note != null ? note.endMs + m.clipAfter * 1000 : v.nowMs + m.clipAfter * 1000;
+    final from = fromMs ?? (note != null ? note.startMs - m.clipBefore * 1000 : v.nowMs - m.clipBefore * 1000);
+    final to = toMs ?? (note != null ? note.endMs + m.clipAfter * 1000 : v.nowMs + m.clipAfter * 1000);
     final notes = _sets[e]?.notes ?? const <Note>[];
     final choice = await showClipDialog(
       context,
@@ -1401,7 +1409,7 @@ class _PlayerPageState extends State<PlayerPage> {
                   editor: i == _index ? _editor : null,
                   startMs: _startAt.remove(it),
                   onEnded: _ended,
-                  onClip: () => unawaited(_clip()),
+                  onClip: (a, b) => unawaited(_clip(fromMs: a, toMs: b)),
                   onFullscreen: () => _setFullscreen(!_fullscreen),
                   onChanged: () {
                     if (mounted) setState(() {});
@@ -1712,6 +1720,9 @@ class _ImageViewState extends State<_ImageView> implements _ViewHandle {
 
   @override
   void seekTo(int ms, {bool play = false}) {}
+
+  @override
+  void clipStep() {}
 
   @override
   void initState() {

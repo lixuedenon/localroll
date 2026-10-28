@@ -4,6 +4,7 @@
 All text lives in data files, one file per language; nothing is typed into
 the code:
 
+  packages/core/l10n/app.json              the app's shown name ({app} in texts)
   packages/core/l10n/languages.json        languages, picker order, native names
   packages/core/l10n/names/<lang>.json     random device-name words (phone + PC)
   apps/desktop/l10n/<lang>.json            PC app text
@@ -47,6 +48,10 @@ def load(path: pathlib.Path):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def app_name() -> str:
+    return load(CORE / "l10n" / "app.json")["name"]
+
+
 def languages() -> list[dict]:
     return load(CORE / "l10n" / "languages.json")["languages"]
 
@@ -79,8 +84,9 @@ def load_app(app: str, codes: list[str]) -> tuple[dict, list[str]]:
             if key not in table:
                 problems.append(f"{app}/{lang}: missing key '{key}'")
                 continue
-            want = set(PLACEHOLDER.findall(text))
-            got = set(PLACEHOLDER.findall(table[key]))
+            # {app} (the app's name) is optional: a language may leave it out.
+            want = set(PLACEHOLDER.findall(text)) - {"app"}
+            got = set(PLACEHOLDER.findall(table[key])) - {"app"}
             if want != got:
                 problems.append(f"{app}/{lang}: '{key}' placeholders {sorted(got)} != {sorted(want)}")
         for key in table:
@@ -90,6 +96,11 @@ def load_app(app: str, codes: list[str]) -> tuple[dict, list[str]]:
         for key in IOS_KEYS:
             if key not in en:
                 problems.append(f"mobile/en: missing iOS key '{key}'")
+    # {app}: the app's shown name, filled in here (one place to rename).
+    name = app_name()
+    for lang, table in tables.items():
+        for key, text in table.items():
+            table[key] = text.replace("{app}", name)
     return tables, problems
 
 
@@ -134,6 +145,9 @@ def core_dart(langs: list[dict]) -> tuple[str, list[str]]:
         "",
         "import 'device_names.dart';",
         "import 'i18n.dart';",
+        "",
+        "/// The app's shown name (packages/core/l10n/app.json).",
+        f"const String appName = {dart_string(app_name())};",
         "",
         "/// From packages/core/l10n/languages.json.",
         "const List<LrLanguage> generatedLanguages = [",

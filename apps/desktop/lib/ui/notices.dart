@@ -99,7 +99,10 @@ class Notices {
     }));
     _openAsk = a;
     var quiet = false;
-    final answer = await showDialog<AskAnswer>(
+    AppNav.instance.needAttention(true);
+    final AskAnswer? answer;
+    try {
+      answer = await showDialog<AskAnswer>(
       context: ctx,
       barrierDismissible: false,
       builder: (c) => StatefulBuilder(
@@ -143,6 +146,9 @@ class Notices {
         ),
       ),
     );
+    } finally {
+      AppNav.instance.needAttention(false);
+    }
     if (_openAsk == a) _openAsk = null;
     s.server.answerIncoming(a, answer ?? const AskAnswer(accept: false));
   }

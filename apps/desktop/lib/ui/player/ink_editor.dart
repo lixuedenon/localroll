@@ -203,6 +203,17 @@ class InkEditor extends ChangeNotifier {
   /// A new mark is being drawn (not in [inks] until it ends).
   InkMark? drawing;
 
+  /// Ticks at each new point of the line being drawn: only the picture
+  /// is painted again then (not the tools), so the line keeps up with the
+  /// pointer.
+  final ValueNotifier<int> strokes = ValueNotifier(0);
+
+  @override
+  void dispose() {
+    strokes.dispose();
+    super.dispose();
+  }
+
   void begin(Offset at) {
     final t = _inkTool;
     if (t == null) return;
@@ -261,7 +272,7 @@ class InkEditor extends ChangeNotifier {
         st[st.length - 1] = _stroke.elapsedMilliseconds;
       }
     }
-    notifyListeners();
+    strokes.value++;
   }
 
   void end() {
@@ -313,6 +324,29 @@ class InkEditor extends ChangeNotifier {
 
   void touched() => notifyListeners();
 
+  /// The top mark under [px] (selection unchanged).
+  InkMark? topAt(Offset px, Size size) => inks.reversed.where((i) => InkGeometry.hits(i, size, px, slop: 8)).firstOrNull;
+
+  void select(String? id) {
+    selectedId = id;
+    notifyListeners();
+  }
+
+  /// Takes back mark [id] that a click just made (the first click of a
+  /// double-click), without leaving an undo step.
+  void dropMade(String id) {
+    if (drawing?.id == id) drawing = null;
+    final gone = inks.where((i) => i.id == id).firstOrNull;
+    if (gone != null) {
+      inks.remove(gone);
+      if (_undoInks.isNotEmpty) _undoInks.removeLast();
+      if (gone.number != null) _number = gone.number!;
+    }
+    sessionStart.remove(id);
+    sessionTimes.remove(id);
+    notifyListeners();
+  }
+
   /// The marks to keep (the one being typed included).
   List<InkMark> get result => [for (final i in inks) if (!(i.tool == InkTool.text && (i.text ?? '').trim().isEmpty)) i];
 }
@@ -339,6 +373,11 @@ class InkLayer extends StatefulWidget {
 
 class _InkLayerState extends State<InkLayer> {
   _Drag _drag = _Drag.none;
+
+  /// Double-click: the first click's time and place, and the mark it made.
+  DateTime _lastDown = DateTime(0);
+  Offset _lastAt = Offset.zero;
+  String? _clickMade;
   Offset _from = Offset.zero;
   InkMark? _start;
   final TextEditingController _text = TextEditingController();
@@ -378,6 +417,49 @@ class _InkLayerState extends State<InkLayer> {
       _endTyping();
     }
     final p = e.localPosition;
+    // Double-click on a mark (any tool): select it; on the selected one:
+    // delete it (undo brings it back).
+    final now = DateTime.now();
+    final twice = now.difference(_lastDown).inMilliseconds < 400 && (p - _lastAt).distance < 8;
+    _lastDown = now;
+    _lastAt = p;
+    final made = _clickMade;
+    _clickMade = null;
+    if (twice && ed.tool != EditTool.text) {
+      if (made != null) ed.dropMade(made);
+      final hit = ed.topAt(p, s);
+      if (hit != null) {
+        if (ed.selectedId == hit.id) {
+          ed.deleteSelected();
+          _lastDown = DateTime(0);
+          _deleted(ed);
+        } else {
+          ed.select(hit.id);
+        }
+        _drag = _Drag.none;
+        return;
+      }
+    }
+    // Something selected while drawing: drag it (or its corners / knob);
+    // a click elsewhere lets it go.
+    final sel = ed.selected;
+    if (sel != null && ed.tool != EditTool.select && ed.tool != EditTool.eraser) {
+      final knob = InkPainter.rotateKnob(sel, s);
+      if ((p - knob).distance < 12) {
+        _drag = _Drag.rotate;
+      } else if (InkGeometry.corners(sel, s).any((c) => (p - c).distance < 10)) {
+        _drag = _Drag.scale;
+      } else if (InkGeometry.hits(sel, s, p, slop: 8)) {
+        _drag = _Drag.move;
+      } else {
+        ed.select(null);
+        return;
+      }
+      ed.remember();
+      _from = p;
+      _start = sel.copy();
+      return;
+    }
     switch (ed.tool) {
       case EditTool.eraser:
         _drag = _Drag.erase;
@@ -418,8 +500,20 @@ class _InkLayerState extends State<InkLayer> {
         _startTyping();
       default:
         _drag = _Drag.draw;
+        final before = ed.inks.length;
         ed.begin(_n(p, s));
+        _clickMade = ed.drawing?.id ?? (ed.inks.length > before ? ed.inks.last.id : null);
     }
+  }
+
+  void _deleted(InkEditor ed) {
+    final m = ScaffoldMessenger.maybeOf(context);
+    m?.hideCurrentSnackBar();
+    m?.showSnackBar(SnackBar(
+      duration: const Duration(seconds: 4),
+      content: Text(tr('ink.deleted')),
+      action: SnackBarAction(label: tr('ink.undo'), onPressed: ed.undo),
+    ));
   }
 
   void _startTyping() {
@@ -546,7 +640,7 @@ class _InkLayerState extends State<InkLayer> {
                     ?ed.drawing,
                   ],
           selected: ed == null ? null : () => ed.selected,
-          repaint: Listenable.merge([?widget.clock, ?widget.freeze, ?ed]),
+          repaint: Listenable.merge([?widget.clock, ?widget.freeze, ?ed, ?ed?.strokes]),
         ),
       );
       if (ed == null) return IgnorePointer(child: paint);

@@ -92,7 +92,7 @@ class _HomeShellState extends State<HomeShell> {
       body: Row(
         children: [
           ListenableBuilder(
-            listenable: Listenable.merge([s.hub, s.converter, s.library, s.sender, _nav]),
+            listenable: Listenable.merge([s.hub, s.converter, s.library, s.sender, _nav, _nav.attention]),
             builder: (context, _) {
               final receiving = s.hub.transfers.any((t) => t.fraction != null && t.fraction! < 1);
               return Container(
@@ -114,9 +114,10 @@ class _HomeShellState extends State<HomeShell> {
                     _RailItem(
                       icon: Icons.devices_other_outlined,
                       selectedIcon: Icons.devices_other_rounded,
-                      label: tr('nav.devices'),
+                      label: tr('nav.transfer'),
                       selected: _nav.tab == AppNav.devices,
                       dot: receiving || s.sender.busy,
+                      flash: _nav.attention.value > 0,
                       onTap: () => _nav.selectTab(AppNav.devices),
                     ),
                     _RailItem(
@@ -187,7 +188,11 @@ class _RailItem extends StatefulWidget {
     this.dot = false,
     this.count = 0,
     this.quiet = false,
+    this.flash = false,
   });
+
+  /// Needs the person: pulses until answered.
+  final bool flash;
 
   final IconData icon;
   final IconData selectedIcon;
@@ -208,11 +213,52 @@ class _RailItem extends StatefulWidget {
   State<_RailItem> createState() => _RailItemState();
 }
 
-class _RailItemState extends State<_RailItem> {
+class _RailItemState extends State<_RailItem> with SingleTickerProviderStateMixin {
   bool _hover = false;
+  late final AnimationController _pulse = AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.flash) _pulse.repeat(reverse: true);
+  }
+
+  @override
+  void didUpdateWidget(_RailItem old) {
+    super.didUpdateWidget(old);
+    if (widget.flash && !_pulse.isAnimating) _pulse.repeat(reverse: true);
+    if (!widget.flash && _pulse.isAnimating) {
+      _pulse
+        ..stop()
+        ..value = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.flash) {
+      return AnimatedBuilder(
+        animation: _pulse,
+        builder: (context, child) => DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            color: LrColors.safelight.withValues(alpha: 0.10 + 0.35 * _pulse.value),
+          ),
+          child: child,
+        ),
+        child: _item(context),
+      );
+    }
+    return _item(context);
+  }
+
+  Widget _item(BuildContext context) {
     final sel = widget.selected;
     final color = sel
         ? const Color(0xFF2B1A00)

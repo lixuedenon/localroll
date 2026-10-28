@@ -120,7 +120,7 @@ Future<bool> sendToPc(BuildContext context, AppServices s, List<SendFile> files,
   if (s.settings.peers.isEmpty && s.phones.isEmpty) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(tr('send.no_paired')),
-      action: SnackBarAction(label: tr('nav.devices'), onPressed: () => AppNav.instance.selectTab(AppNav.devices)),
+      action: SnackBarAction(label: tr('nav.transfer'), onPressed: () => AppNav.instance.selectTab(AppNav.devices)),
     ));
     return false;
   }

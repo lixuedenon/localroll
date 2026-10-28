@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:ui' show Rect, Offset;
 
 import 'package:ffi/ffi.dart';
+import 'package:localroll_core/localroll_core.dart' show appName;
 
 final class _RECT extends Struct {
   @Int32()
@@ -21,6 +22,19 @@ final class _POINT extends Struct {
   external int x;
   @Int32()
   external int y;
+}
+
+final class _FLASHWINFO extends Struct {
+  @Uint32()
+  external int cbSize;
+  @IntPtr()
+  external int hwnd;
+  @Uint32()
+  external int dwFlags;
+  @Uint32()
+  external int uCount;
+  @Uint32()
+  external int dwTimeout;
 }
 
 final class _MONITORINFO extends Struct {
@@ -191,7 +205,7 @@ class WinScreen {
     final u = _user32;
     if (u == null) return 0;
     final find = u.lookupFunction<IntPtr Function(Pointer<Utf16>, Pointer<Utf16>), int Function(Pointer<Utf16>, Pointer<Utf16>)>('FindWindowW');
-    final cls = 'FLUTTER_RUNNER_WIN32_WINDOW'.toNativeUtf16(), title = 'LocalRoll'.toNativeUtf16();
+    final cls = 'FLUTTER_RUNNER_WIN32_WINDOW'.toNativeUtf16(), title = appName.toNativeUtf16();
     try {
       final h = find(cls, title);
       return h != 0 ? h : find(nullptr, title);
@@ -216,15 +230,63 @@ class WinScreen {
     }
   }
 
-  /// Puts LocalRoll's window at [r] (pixels), on top of everything or not.
-  static void place(Rect r, {required bool onTop}) {
+  /// Puts LocalRoll's window at [r] (pixels), on top of everything or not;
+  /// [activate]: it also becomes the window in use.
+  static void place(Rect r, {required bool onTop, bool activate = true}) {
     final u = _user32;
     final h = ownWindow();
     if (u == null || h == 0) return;
     final set = u.lookupFunction<Int32 Function(IntPtr, IntPtr, Int32, Int32, Int32, Int32, Uint32), int Function(int, int, int, int, int, int, int)>('SetWindowPos');
-    // SWP_SHOWWINDOW | SWP_NOACTIVATE? No: it is used, so activate.
-    set(h, onTop ? -1 : -2, r.left.round(), r.top.round(), r.width.round(), r.height.round(), 0x0040);
+    // SWP_SHOWWINDOW (| SWP_NOACTIVATE).
+    set(h, onTop ? -1 : -2, r.left.round(), r.top.round(), r.width.round(), r.height.round(), activate ? 0x0040 : 0x0050);
   }
+
+  /// LocalRoll's taskbar button flashes until [on] is false again.
+  static void flashTaskbar(bool on) {
+    final u = _user32;
+    final h = ownWindow();
+    if (u == null || h == 0) return;
+    final f = calloc<_FLASHWINFO>();
+    try {
+      f.ref
+        ..cbSize = sizeOf<_FLASHWINFO>()
+        ..hwnd = h
+        ..dwFlags = on ? 0x07 : 0 // FLASHW_ALL | FLASHW_TIMER : FLASHW_STOP
+        ..uCount = 0
+        ..dwTimeout = 0;
+      u.lookupFunction<Int32 Function(Pointer<_FLASHWINFO>), int Function(Pointer<_FLASHWINFO>)>('FlashWindowEx')(f);
+    } catch (_) {
+    } finally {
+      calloc.free(f);
+    }
+  }
+
+  /// The window in use now (0: none).
+  static int foreground() {
+    final u = _user32;
+    if (u == null) return 0;
+    try {
+      return u.lookupFunction<IntPtr Function(), int Function()>('GetForegroundWindow')();
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  /// Brings [hwnd] to the front (restored if minimised), so nothing covers it.
+  static void bringToFront(int hwnd) {
+    final u = _user32;
+    if (u == null || hwnd == 0) return;
+    try {
+      if (u.lookupFunction<Int32 Function(IntPtr), int Function(int)>('IsIconic')(hwnd) != 0) {
+        u.lookupFunction<Int32 Function(IntPtr, Int32), int Function(int, int)>('ShowWindow')(hwnd, 9); // SW_RESTORE
+      }
+      u.lookupFunction<Int32 Function(IntPtr), int Function(int)>('BringWindowToTop')(hwnd);
+      u.lookupFunction<Int32 Function(IntPtr), int Function(int)>('SetForegroundWindow')(hwnd);
+    } catch (_) {}
+  }
+
+  /// The top window under [p] (screen pixels) among [list] (front to back).
+  static WindowInfo? windowAt(List<WindowInfo> list, Offset p) => list.where((w) => w.rect.contains(p)).firstOrNull;
 
   /// Where LocalRoll's window is (pixels).
   static Rect? ownRect() {

@@ -62,7 +62,7 @@ class LocalRollMobileApp extends StatelessWidget {
       builder: (context, _) {
         final lang = settings.language;
         return MaterialApp(
-          title: 'LocalRoll',
+          title: appName,
           debugShowCheckedModeBanner: false,
           theme: buildLrTheme(),
           themeMode: ThemeMode.dark,

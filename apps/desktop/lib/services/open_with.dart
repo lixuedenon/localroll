@@ -68,12 +68,12 @@ class OpenWith {
     const root = r'HKEY_CURRENT_USER\Software\Classes';
     final command = _q('"$exe" "%1"');
     final b = StringBuffer('Windows Registry Editor Version 5.00\r\n\r\n')
-      ..write('[$root\\$progId]\r\n@=${_q('LocalRoll')}\r\n"FriendlyTypeName"=${_q('LocalRoll')}\r\n')
+      ..write('[$root\\$progId]\r\n@=${_q(appName)}\r\n"FriendlyTypeName"=${_q(appName)}\r\n')
       ..write('"LocalRollSetup"=${_q('$_version|$exe|${shortKey(verb)}')}\r\n\r\n')
       ..write('[$root\\$progId\\DefaultIcon]\r\n@=${_q('"$exe",0')}\r\n\r\n')
-      ..write('[$root\\$progId\\shell\\open]\r\n"FriendlyAppName"=${_q('LocalRoll')}\r\n\r\n')
+      ..write('[$root\\$progId\\shell\\open]\r\n"FriendlyAppName"=${_q(appName)}\r\n\r\n')
       ..write('[$root\\$progId\\shell\\open\\command]\r\n@=$command\r\n\r\n')
-      ..write('[$root\\Applications\\$exeName]\r\n"FriendlyAppName"=${_q('LocalRoll')}\r\n\r\n')
+      ..write('[$root\\Applications\\$exeName]\r\n"FriendlyAppName"=${_q(appName)}\r\n\r\n')
       ..write('[$root\\Applications\\$exeName\\shell\\open\\command]\r\n@=$command\r\n\r\n')
       ..write('[$root\\Applications\\$exeName\\SupportedTypes]\r\n');
     final exts = extensions.toSet().toList()..sort();
@@ -94,7 +94,7 @@ class OpenWith {
     // A registered program: Windows lists it in "Open with" from the start.
     b
       ..write('[HKEY_CURRENT_USER\\Software\\LocalRoll\\Capabilities]\r\n')
-      ..write('"ApplicationName"=${_q('LocalRoll')}\r\n"ApplicationDescription"=${_q('LocalRoll')}\r\n\r\n')
+      ..write('"ApplicationName"=${_q(appName)}\r\n"ApplicationDescription"=${_q(appName)}\r\n\r\n')
       ..write('[HKEY_CURRENT_USER\\Software\\LocalRoll\\Capabilities\\FileAssociations]\r\n');
     for (final e in exts) {
       b.write('".$e"=${_q(progId)}\r\n');

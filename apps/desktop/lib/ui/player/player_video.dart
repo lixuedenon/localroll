@@ -51,8 +51,8 @@ class _VideoView extends StatefulWidget {
   final int? startMs;
   final VoidCallback onEnded;
 
-  /// Cut a clip around where it is.
-  final VoidCallback onClip;
+  /// Cut the clip chosen (ms).
+  final void Function(int startMs, int endMs) onClip;
   final VoidCallback onFullscreen;
   final VoidCallback onChanged;
 
@@ -69,6 +69,9 @@ class _VideoViewState extends State<_VideoView> implements _ViewHandle {
 
   /// A-B loop: start and end (mpv repeats between them).
   Duration? _a, _b;
+
+  /// The clip being chosen on the time line (ms), or null.
+  int? _cin, _cout;
 
   /// A short line over the picture ("1.5×", "Continued from 1:23").
   String? _note;
@@ -387,11 +390,77 @@ class _VideoViewState extends State<_VideoView> implements _ViewHandle {
         .multiplied(m);
   }
 
+  int get _durMs => _player.state.duration.inMilliseconds;
+
+  @override
+  void clipStep() {
+    if (_cin != null && _cout != null) {
+      widget.onClip(_cin!, _cout!);
+      return;
+    }
+    final now = _player.state.position.inMilliseconds;
+    final dur = _durMs;
+    int a, b;
+    if (_a != null && _b != null) {
+      a = _a!.inMilliseconds;
+      b = _b!.inMilliseconds;
+    } else {
+      a = now - _memory.clipBefore * 1000;
+      b = now + _memory.clipAfter * 1000;
+    }
+    a = a.clamp(0, dur > 0 ? dur : a.abs());
+    if (dur > 0) b = b.clamp(a + 1000, math.max(a + 1000, dur));
+    setState(() {
+      _cin = a;
+      _cout = b;
+    });
+    _show(tr('clip.range_tip'), seconds: 5);
+  }
+
+  /// I / O: the clip starts / ends here.
+  void _setClipEdge(bool start) {
+    final now = _player.state.position.inMilliseconds;
+    final dur = _durMs;
+    setState(() {
+      if (start) {
+        _cin = now;
+        if (_cout == null || _cout! <= now + 500) _cout = dur > 0 ? math.min(dur, now + _memory.clipAfter * 1000) : now + 10000;
+      } else {
+        _cout = now;
+        if (_cin == null || _cin! >= now - 500) _cin = math.max(0, now - _memory.clipBefore * 1000);
+      }
+    });
+    _show(tr(start ? 'clip.in_set' : 'clip.out_set', {'time': playerTime(Duration(milliseconds: start ? _cin! : _cout!))}));
+  }
+
+  void _clipEdges(int a, int b) => setState(() {
+        _cin = a;
+        _cout = b;
+      });
+
+  void _clipOff() => setState(() {
+        _cin = null;
+        _cout = null;
+      });
+
   @override
   bool onKey(KeyEvent e) {
     if (e is! KeyDownEvent && e is! KeyRepeatEvent) return false;
     final k = e.logicalKey;
     final down = e is KeyDownEvent;
+    // I is the info panel unless a clip is being chosen.
+    if (down && k == LogicalKeyboardKey.keyI && _cin != null && !HardwareKeyboard.instance.isControlPressed) {
+      _setClipEdge(true);
+      return true;
+    }
+    if (down && k == LogicalKeyboardKey.keyO && !HardwareKeyboard.instance.isControlPressed) {
+      _setClipEdge(false);
+      return true;
+    }
+    if (down && k == LogicalKeyboardKey.escape && _cin != null) {
+      _clipOff();
+      return true;
+    }
     if (down && (k == LogicalKeyboardKey.space || k == LogicalKeyboardKey.keyK)) {
       unawaited(_player.playOrPause());
     } else if (k == LogicalKeyboardKey.arrowLeft) {
@@ -504,7 +573,11 @@ class _VideoViewState extends State<_VideoView> implements _ViewHandle {
       onAb: () => unawaited(_abStep()),
       onVolume: (v) => unawaited(_setVolume(v)),
       onEnd: (m) => unawaited(_setEnd(m)),
-      onClip: widget.onClip,
+      clipIn: _cin,
+      clipOut: _cout,
+      onClip: clipStep,
+      onClipEdges: _clipEdges,
+      onClipOff: _clipOff,
       onFullscreen: widget.onFullscreen,
     ));
     // One shape in and out of full screen (the picture is not rebuilt).
@@ -531,6 +604,9 @@ class _VideoViewState extends State<_VideoView> implements _ViewHandle {
   }
 }
 
+/// The clip being chosen on the time line.
+const Color _clipColor = Color(0xFF5AB0FF);
+
 /// Seek bar and buttons below a video.
 class _ControlBar extends StatelessWidget {
   const _ControlBar({
@@ -547,10 +623,19 @@ class _ControlBar extends StatelessWidget {
     required this.onVolume,
     required this.onEnd,
     required this.onClip,
+    required this.onClipEdges,
+    required this.onClipOff,
     required this.onFullscreen,
+    this.clipIn,
+    this.clipOut,
   });
 
   final Player player;
+
+  /// The clip being chosen (ms).
+  final int? clipIn, clipOut;
+  final void Function(int, int) onClipEdges;
+  final VoidCallback onClipOff;
   final Duration? a, b;
   final EndMode endMode;
   final List<int> markers;
@@ -637,6 +722,31 @@ class _ControlBar extends StatelessWidget {
       ),
       padding: const EdgeInsets.fromLTRB(8, 4, 12, 8),
       child: Column(mainAxisSize: MainAxisSize.min, children: [
+        if (clipIn != null && clipOut != null)
+          Padding(
+            padding: const EdgeInsets.only(left: 10, bottom: 2),
+            child: Row(children: [
+              const Icon(Icons.content_cut_rounded, size: 16, color: _clipColor),
+              const SizedBox(width: 6),
+              Text(
+                '${playerTime(Duration(milliseconds: clipIn!))} – ${playerTime(Duration(milliseconds: clipOut!))}'
+                '  (${playerTime(Duration(milliseconds: clipOut! - clipIn!))})',
+                style: const TextStyle(color: Colors.white, fontSize: 12.5, fontFeatures: [FontFeature.tabularFigures()]),
+              ),
+              const SizedBox(width: 10),
+              Flexible(
+                child: Text(tr('clip.range_hint'), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white60, fontSize: 12)),
+              ),
+              const SizedBox(width: 8),
+              FilledButton.icon(
+                style: FilledButton.styleFrom(visualDensity: VisualDensity.compact),
+                onPressed: onClip,
+                icon: const Icon(Icons.content_cut_rounded, size: 16),
+                label: Text(tr('clip.cut_this')),
+              ),
+              IconButton(tooltip: tr('common.cancel'), onPressed: onClipOff, color: Colors.white70, icon: const Icon(Icons.close_rounded, size: 18)),
+            ]),
+          ),
         StreamBuilder<Duration>(
           stream: p.stream.position,
           initialData: p.state.position,
@@ -645,6 +755,9 @@ class _ControlBar extends StatelessWidget {
             duration: p.state.duration,
             a: a,
             b: b,
+            clipIn: clipIn,
+            clipOut: clipOut,
+            onClipEdges: onClipEdges,
             markers: markers,
             onSeek: (d) => unawaited(p.seek(d)),
           ),
@@ -733,11 +846,25 @@ class _ControlBar extends StatelessWidget {
 /// The time line: played part, the A-B loop, a dot to drag. Dragging
 /// moves the picture along (a few times a second).
 class _SeekBar extends StatefulWidget {
-  const _SeekBar({required this.position, required this.duration, required this.onSeek, this.a, this.b, this.markers = const []});
+  const _SeekBar({
+    required this.position,
+    required this.duration,
+    required this.onSeek,
+    this.a,
+    this.b,
+    this.markers = const [],
+    this.clipIn,
+    this.clipOut,
+    this.onClipEdges,
+  });
 
   final Duration position;
   final Duration duration;
   final Duration? a, b;
+
+  /// The clip being chosen (ms): its two ends can be dragged.
+  final int? clipIn, clipOut;
+  final void Function(int, int)? onClipEdges;
 
   /// Annotations (ms): small marks above the line.
   final List<int> markers;
@@ -749,6 +876,9 @@ class _SeekBar extends StatefulWidget {
 
 class _SeekBarState extends State<_SeekBar> {
   double? _drag;
+
+  /// Dragging an end of the clip: 0 start, 1 end.
+  int? _edge;
   double? _hover;
   DateTime _lastSeek = DateTime.fromMillisecondsSinceEpoch(0);
 
@@ -781,9 +911,44 @@ class _SeekBarState extends State<_SeekBar> {
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTapUp: (d) => _move(f(d.localPosition), done: true),
-            onHorizontalDragStart: (d) => _move(f(d.localPosition)),
-            onHorizontalDragUpdate: (d) => _move(f(d.localPosition)),
+            onHorizontalDragStart: (d) {
+              final ci = widget.clipIn, co = widget.clipOut;
+              if (ci != null && co != null) {
+                final x = d.localPosition.dx;
+                final xi = pad + _frac(Duration(milliseconds: ci)) * w, xo = pad + _frac(Duration(milliseconds: co)) * w;
+                final di = (x - xi).abs(), dO = (x - xo).abs();
+                if (math.min(di, dO) < 12) {
+                  _edge = di <= dO ? 0 : 1;
+                  return;
+                }
+              }
+              _move(f(d.localPosition));
+            },
+            onHorizontalDragUpdate: (d) {
+              final e = _edge;
+              if (e != null) {
+                final ms = _at(f(d.localPosition)).inMilliseconds;
+                final ci = widget.clipIn!, co = widget.clipOut!;
+                if (e == 0) {
+                  widget.onClipEdges?.call(math.min(ms, co - 1000).clamp(0, co), co);
+                } else {
+                  widget.onClipEdges?.call(ci, math.max(ms, ci + 1000));
+                }
+                // The picture follows the end being moved.
+                final now = DateTime.now();
+                if (now.difference(_lastSeek) > const Duration(milliseconds: 150)) {
+                  _lastSeek = now;
+                  widget.onSeek(Duration(milliseconds: e == 0 ? widget.clipIn! : widget.clipOut!));
+                }
+                return;
+              }
+              _move(f(d.localPosition));
+            },
             onHorizontalDragEnd: (_) {
+              if (_edge != null) {
+                _edge = null;
+                return;
+              }
               if (_drag != null) _move(_drag!, done: true);
             },
             child: SizedBox(
@@ -796,6 +961,8 @@ class _SeekBarState extends State<_SeekBar> {
                       a: widget.a == null ? null : _frac(widget.a!),
                       b: widget.b == null ? null : _frac(widget.b!),
                       marks: [for (final m in widget.markers) _frac(Duration(milliseconds: m))],
+                      clipIn: widget.clipIn == null ? null : _frac(Duration(milliseconds: widget.clipIn!)),
+                      clipOut: widget.clipOut == null ? null : _frac(Duration(milliseconds: widget.clipOut!)),
                       pad: pad,
                     ),
                   ),
@@ -818,11 +985,12 @@ class _SeekBarState extends State<_SeekBar> {
 }
 
 class _SeekPainter extends CustomPainter {
-  _SeekPainter({required this.played, required this.pad, this.a, this.b, this.marks = const []});
+  _SeekPainter({required this.played, required this.pad, this.a, this.b, this.marks = const [], this.clipIn, this.clipOut});
 
   final double played;
   final double pad;
   final double? a, b;
+  final double? clipIn, clipOut;
   final List<double> marks;
 
   @override
@@ -846,6 +1014,14 @@ class _SeekPainter extends CustomPainter {
       ..strokeWidth = 4
       ..strokeCap = StrokeCap.round;
     canvas.drawLine(Offset(pad, y), Offset(pad + played * w, y), done);
+    if (clipIn != null && clipOut != null) {
+      final x0 = pad + clipIn! * w, x1 = pad + clipOut! * w;
+      canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTRB(x0, y - 6, x1, y + 6), const Radius.circular(3)), Paint()..color = _clipColor.withValues(alpha: 0.45));
+      final handle = Paint()..color = _clipColor;
+      for (final x in [x0, x1]) {
+        canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: Offset(x, y), width: 6, height: 20), const Radius.circular(3)), handle);
+      }
+    }
     final mark = Paint()..color = const Color(0xFFFFB547);
     for (final m in marks) {
       canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: Offset(pad + m * w, y - 7), width: 4, height: 8), const Radius.circular(2)), mark);
@@ -854,5 +1030,6 @@ class _SeekPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_SeekPainter old) => old.played != played || old.a != a || old.b != b || old.marks.length != marks.length;
+  bool shouldRepaint(_SeekPainter old) =>
+      old.played != played || old.a != a || old.b != b || old.marks.length != marks.length || old.clipIn != clipIn || old.clipOut != clipOut;
 }

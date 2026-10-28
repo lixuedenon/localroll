@@ -2,6 +2,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:localroll_core/localroll_core.dart' show appName;
 import 'package:window_manager/window_manager.dart';
 
 import '../app_services.dart';
@@ -76,7 +77,7 @@ class _LrTitleBarState extends State<LrTitleBar> with WindowListener {
           const SizedBox(width: 8),
           const _Mark(),
           const SizedBox(width: 10),
-          Text('LocalRoll', style: Theme.of(context).textTheme.titleMedium?.copyWith(letterSpacing: 0.2)),
+          Text(appName, style: Theme.of(context).textTheme.titleMedium?.copyWith(letterSpacing: 0.2)),
           const Expanded(child: DragToMoveArea(child: SizedBox.expand())),
           TransfersButton(services: widget.services),
           const SizedBox(width: 6),

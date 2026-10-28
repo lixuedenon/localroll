@@ -44,6 +44,76 @@ class ScreenSetup {
   final String? mic;
 }
 
+/// ffmpeg's Windows screen copy (gdigrab) in real pixels: told it handles
+/// display scaling itself, so 125 % / 150 % screens line up with the
+/// windows' places (else it records the wrong part). Checked once against
+/// the screens' size; what is still off is scaled.
+class _Gdi {
+  _Gdi._();
+
+  static const Map<String, String> env = {'__COMPAT_LAYER': 'HighDpiAware'};
+  static double? _k;
+  static Rect? _for;
+
+  /// Union of all screens (pixels).
+  static Rect desktop() {
+    final all = WinScreen.screens();
+    if (all.isEmpty) return Rect.zero;
+    return all.skip(1).fold(all.first.rect, (r, x) => r.expandToInclude(x.rect));
+  }
+
+  /// gdigrab's pixels per real pixel (1 when it sees the real pixels).
+  static Future<double> scale(String exe) async {
+    final d = desktop();
+    if (_k != null && _for == d) return _k!;
+    var k = 1.0;
+    final f = File('${Directory.systemTemp.path}${Platform.pathSeparator}lr_gdi_${DateTime.now().microsecondsSinceEpoch}.png');
+    try {
+      await Process.run(exe, ['-hide_banner', '-loglevel', 'error', '-y', '-f', 'gdigrab', '-draw_mouse', '0', '-i', 'desktop', '-frames:v', '1', f.path],
+          environment: env);
+      if (f.existsSync()) {
+        final b = await f.readAsBytes();
+        if (b.length > 24 && d.width > 0) {
+          final w = (b[16] << 24) | (b[17] << 16) | (b[18] << 8) | b[19];
+          if (w > 0 && (w - d.width).abs() > 2) k = w / d.width;
+          DiagLog.log('screen', 'desktop ${d.width.round()}x${d.height.round()}, gdigrab sees $w wide${k == 1 ? '' : ' (scale ${k.toStringAsFixed(3)})'}');
+        }
+      }
+    } catch (_) {
+    } finally {
+      try {
+        if (f.existsSync()) f.deleteSync();
+      } catch (_) {}
+    }
+    _for = d;
+    return _k = k;
+  }
+
+  /// ffmpeg's input options for [r] (real screen pixels).
+  static List<String> input(Rect r, double k, {required int fps, bool mouse = true}) {
+    final w = (r.width * k).round() ~/ 2 * 2, h = (r.height * k).round() ~/ 2 * 2;
+    return [
+      '-f', 'gdigrab', if (fps > 0) ...['-framerate', '$fps'], '-draw_mouse', mouse ? '1' : '0',
+      '-offset_x', '${(r.left * k).round()}', '-offset_y', '${(r.top * k).round()}', '-video_size', '${w}x$h',
+      '-i', 'desktop',
+    ];
+  }
+
+  /// A still of [screen] (LocalRoll kept out of it).
+  static Future<File?> still(String exe, ScreenInfo screen) async {
+    final k = await scale(exe);
+    final shot = File('${Directory.systemTemp.path}${Platform.pathSeparator}lr_still_${DateTime.now().microsecondsSinceEpoch}.png');
+    WinScreen.excludeFromCapture(true);
+    try {
+      await Process.run(exe, ['-hide_banner', '-loglevel', 'error', '-y', ...input(screen.rect, k, fps: 0, mouse: false), '-frames:v', '1', shot.path],
+          environment: env);
+    } finally {
+      WinScreen.excludeFromCapture(false);
+    }
+    return shot.existsSync() ? shot : null;
+  }
+}
+
 /// ffmpeg filming a part of the screen (Windows' own screen copy) into a
 /// file at good quality; how far it has got (to line it up with the voice).
 class _Capture {
@@ -53,18 +123,18 @@ class _Capture {
   final StringBuffer _err = StringBuffer();
 
   Future<bool> start(String exe, Rect area, int fps, String enc, File out) async {
+    final k = await _Gdi.scale(exe);
     final w = area.width.round() ~/ 2 * 2, h = area.height.round() ~/ 2 * 2;
     final p = _p = await Process.start(exe, [
       '-hide_banner', '-loglevel', 'error', '-y',
-      '-f', 'gdigrab', '-framerate', '$fps', '-draw_mouse', '1',
-      '-offset_x', '${area.left.round()}', '-offset_y', '${area.top.round()}', '-video_size', '${w}x$h',
-      '-i', 'desktop',
-      '-vf', 'format=nv12',
+      ..._Gdi.input(area, k, fps: fps),
+      // Back to real pixels when gdigrab saw others.
+      '-vf', [if (k != 1) 'scale=$w:$h', 'format=nv12'].join(','),
       ...H264Encoders.args(enc, high: true, width: w, height: h, fps: fps.toDouble()),
       '-g', '${fps * 2}',
       '-progress', 'pipe:1', '-stats_period', '0.1',
       out.path,
-    ]);
+    ], environment: _Gdi.env);
     p.stderr.transform(const Utf8Decoder(allowMalformed: true)).listen(_err.write);
     p.stdout.transform(const Utf8Decoder(allowMalformed: true)).transform(const LineSplitter()).listen((line) {
       if (line.startsWith('out_time_us=') || line.startsWith('out_time_ms=')) {
@@ -149,8 +219,18 @@ class ScreenRecorder extends ChangeNotifier {
   File? penPicture;
   InkEditor? editor;
 
-  /// Pen marks fade after 3 seconds (else they stay until cleared).
-  bool fade = true;
+  /// One page of marks for each window drawn on: switching to another
+  /// window hides them, coming back shows them again.
+  final Map<int, InkEditor> _pages = {};
+  final Map<String, int> _inkPage = {};
+  int _page = 0;
+
+  /// The window in use over time (not LocalRoll's own): whose page shows.
+  final List<(int, int)> _front = [];
+  int _own = 0, _firstPage = 0;
+
+  /// Pen marks fade after 3 seconds (else they stay until deleted).
+  bool fade = false;
 
   ScreenSetup? setup;
   final Stopwatch clock = Stopwatch();
@@ -225,10 +305,17 @@ class ScreenRecorder extends ChangeNotifier {
     _windowAt.clear();
     _inks.clear();
     _fades.clear();
+    _pages.clear();
+    _inkPage.clear();
+    _front.clear();
+    _lastIds = {};
     clock.reset();
     paused = false;
     pen = false;
     editor = null;
+    _own = WinScreen.ownWindow();
+    final fg = WinScreen.foreground();
+    _page = fg == _own ? 0 : fg;
 
     // The bar: small, on top, at the top of the screen recorded, never in the video.
     _savedWindow = WinScreen.ownRect();
@@ -237,6 +324,12 @@ class ScreenRecorder extends ChangeNotifier {
     WinScreen.excludeFromCapture(true);
     _placeBar();
     AppNav.instance.navigatorKey.currentState?.push(MaterialPageRoute(settings: const RouteSettings(name: 'screen-record'), builder: (_) => const ScreenRecordPage()));
+    // A window: in front, so nothing else is filmed over it.
+    if (su.mode == ScreenMode.window && su.window != null) {
+      WinScreen.bringToFront(su.window!.handle);
+      _page = su.window!.handle;
+    }
+    _firstPage = _page;
 
     final mic = su.mic == null ? null : (_mic = MicRecorder(exe));
     final listening = mic == null ? Future.value(true) : _startVoice();
@@ -284,8 +377,8 @@ class ScreenRecorder extends ChangeNotifier {
   void _placeBar() {
     final scr = setup!.screen;
     final k = scr.scale;
-    final w = 560 * k, h = 64 * k;
-    WinScreen.place(Rect.fromLTWH(scr.rect.center.dx - w / 2, scr.rect.top + 12 * k, w, h), onTop: true);
+    final w = 660 * k, h = 64 * k;
+    WinScreen.place(Rect.fromLTWH(scr.rect.center.dx - w / 2, scr.rect.top + 12 * k, w, h), onTop: true, activate: false);
   }
 
   void _message(String text) {
@@ -313,35 +406,65 @@ class ScreenRecorder extends ChangeNotifier {
         final rect = WinScreen.windowRect(su.window!.handle);
         if (rect != null && (_windowAt.isEmpty || _windowAt.last.$2 != rect)) _windowAt.add((t, rect));
       }
+      // The window in use (LocalRoll's own bar / pen screen does not count).
+      final fg = WinScreen.foreground();
+      if (fg != 0 && fg != _own && !pen && fg != _page) {
+        _page = fg;
+        _front.add((t, fg));
+      }
     }
-    if (_sample % 3 == 0) _snapInks(t);
+    // Fading marks go from the screen too.
+    if (_sample % 6 == 0 && _fades.values.any((f) => f)) {
+      for (final ed in _pages.values) {
+        final gone = [
+          for (final i in ed.inks)
+            if (_fades[i.id] == true && t > (ed.sessionStart[i.id] ?? t) + (ed.sessionTimes[i.id]?.last ?? 0) + 3000) i,
+        ];
+        if (gone.isNotEmpty) {
+          ed.inks.removeWhere(gone.contains);
+          ed.touched();
+        }
+      }
+    }
   }
 
+  Timer? _snapTimer;
+
+  /// A page changed: kept for the video a moment later (not at every
+  /// point of a line, so drawing stays smooth).
+  void _snapSoon() {
+    if (_snapTimer?.isActive ?? false) return;
+    _snapTimer = Timer(const Duration(milliseconds: 60), () {
+      if (recording) _snapInks(clock.elapsedMilliseconds);
+    });
+  }
+
+  /// The marks of every page as they are now (kept for the video): when
+  /// each was drawn, and when it was rubbed out.
   void _snapInks(int t) {
-    final ed = editor;
-    if (ed == null) return;
-    final now = {for (final i in [...ed.inks, ?ed.drawing]) i.id: i};
-    for (final i in now.values) {
-      final st = ed.sessionStart[i.id];
-      if (st == null) continue;
-      _fades.putIfAbsent(i.id, () => fade);
-      _inks[i.id] = NarrationInk(file: 0, ink: i.copy(), startT: st, times: List.of(ed.sessionTimes[i.id] ?? const [0]), removedT: _inks[i.id]?.removedT);
+    final now = <String, InkMark>{};
+    for (final e in _pages.entries) {
+      final ed = e.value;
+      for (final i in [...ed.inks, ?ed.drawing]) {
+        final st = ed.sessionStart[i.id];
+        if (st == null) continue;
+        now[i.id] = i;
+        _inkPage[i.id] = e.key;
+        _fades.putIfAbsent(i.id, () => fade);
+        _inks[i.id] = NarrationInk(file: 0, ink: i.copy(), startT: st, times: List.of(ed.sessionTimes[i.id] ?? const [0]), removedT: null);
+      }
     }
     for (final id in _lastIds) {
       if (!now.containsKey(id)) _inks[id]?.removedT ??= t;
     }
-    _lastIds = now.keys.toSet();
-    // Fading ones go from the screen too.
-    if (fade || _fades.values.any((f) => f)) {
-      final gone = [
-        for (final i in ed.inks)
-          if (_fades[i.id] == true && t > (ed.sessionStart[i.id] ?? t) + (ed.sessionTimes[i.id]?.last ?? 0) + 3000) i,
-      ];
-      if (gone.isNotEmpty) {
-        ed.inks.removeWhere(gone.contains);
-        ed.touched();
+    // Back again (undo): shown again from now.
+    for (final id in now.keys) {
+      final old = _inks[id];
+      if (old != null && old.removedT != null && !_lastIds.contains(id)) {
+        _inks[id] = NarrationInk(file: 0, ink: old.ink, startT: math.max(old.startT, t), times: const [0], removedT: null);
       }
     }
+    _lastIds = now.keys.toSet();
   }
 
   Future<void> togglePause() async {
@@ -383,15 +506,16 @@ class ScreenRecorder extends ChangeNotifier {
       if (exe == null) return;
       final scr = setup!.screen;
       final shot = File('${_dir!.path}${Platform.pathSeparator}pen_${DateTime.now().millisecondsSinceEpoch}.png');
-      await Process.run(exe, [
-        '-hide_banner', '-loglevel', 'error', '-y',
-        '-f', 'gdigrab', '-draw_mouse', '0',
-        '-offset_x', '${scr.rect.left.round()}', '-offset_y', '${scr.rect.top.round()}',
-        '-video_size', '${scr.rect.width.round()}x${scr.rect.height.round()}',
-        '-i', 'desktop', '-frames:v', '1', shot.path,
-      ]);
+      final k = await _Gdi.scale(exe);
+      await Process.run(exe, ['-hide_banner', '-loglevel', 'error', '-y', ..._Gdi.input(scr.rect, k, fps: 0, mouse: false), '-frames:v', '1', shot.path],
+          environment: _Gdi.env);
       penPicture = shot.existsSync() ? shot : null;
-      editor ??= InkEditor(video: false, clock: () => 0, sessionClock: () => clock.elapsedMilliseconds);
+      // The page of the window in use (a new one the first time).
+      editor = _pages.putIfAbsent(_page, () {
+        final ed = InkEditor(video: false, clock: () => 0, sessionClock: () => clock.elapsedMilliseconds);
+        ed.addListener(_snapSoon);
+        return ed;
+      });
       pen = true;
       WinScreen.place(scr.rect, onTop: true);
     } else {
@@ -491,6 +615,9 @@ class ScreenRecorder extends ChangeNotifier {
       clicks: _clicks,
       inks: _inks.values.toList(),
       fades: _fades,
+      pageOf: _inkPage,
+      front: _front,
+      firstPage: _firstPage,
       voice: voice,
       fps: setup!.fps,
       onProgress: (p) => progress.value = p,
@@ -625,6 +752,9 @@ class _ScreenComposer {
     required List<_Click> clicks,
     required List<NarrationInk> inks,
     required Map<String, bool> fades,
+    required Map<String, int> pageOf,
+    required List<(int, int)> front,
+    required int firstPage,
     required File? voice,
     required int fps,
     required void Function(double) onProgress,
@@ -700,7 +830,7 @@ class _ScreenComposer {
           for (var f = 0; f < frames && !_cancelled; f++) {
             final t = p.startT + (f * 1000 / ofps).round();
             final rec = ui.PictureRecorder();
-            _paint(Canvas(rec), size, t, area, screen, c, clicks, inks, fades);
+            _paint(Canvas(rec), size, t, area, screen, c, clicks, inks, fades, _pageAt(t, front, firstPage), pageOf);
             final img = await rec.endRecording().toImage(ow, oh);
             final bytes = await img.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
             img.dispose();
@@ -748,8 +878,19 @@ class _ScreenComposer {
     }
   }
 
-  /// Pen marks and click circles at [t], on the finished frame.
-  void _paint(Canvas c, Size out, int t, Rect area, ScreenInfo screen, Rect crop, List<_Click> clicks, List<NarrationInk> inks, Map<String, bool> fades) {
+  /// Whose page shows at [t]: the window in use then.
+  static int _pageAt(int t, List<(int, int)> front, int first) {
+    var p = first;
+    for (final (ft, w) in front) {
+      if (ft > t) break;
+      p = w;
+    }
+    return p;
+  }
+
+  /// Pen marks (of [page]) and click circles at [t], on the finished frame.
+  void _paint(Canvas c, Size out, int t, Rect area, ScreenInfo screen, Rect crop, List<_Click> clicks, List<NarrationInk> inks, Map<String, bool> fades,
+      int page, Map<String, int> pageOf) {
     final fit = math.min(out.width / crop.width, out.height / crop.height);
     final padX = (out.width - crop.width * fit) / 2, padY = (out.height - crop.height * fit) / 2;
     c.save();
@@ -764,6 +905,8 @@ class _ScreenComposer {
     final scr = screen.rect.size;
     for (final i in inks) {
       if (t < i.startT) continue;
+      final p = pageOf[i.ink.id] ?? 0;
+      if (p != 0 && p != page) continue;
       final drawn = i.times.isEmpty ? 0 : i.times.last;
       var until = i.removedT;
       double alpha = 1;
@@ -838,7 +981,7 @@ Future<ScreenSetup?> showScreenSetup(BuildContext context, AppServices s) async 
                 onSelectionChanged: (v) => set(() => mode = v.first),
               ),
               const SizedBox(height: 14),
-              if (mode != ScreenMode.window && screens.length > 1) ...[
+              if (screens.length > 1) ...[
                 Text(tr('screen.which_screen'), style: const TextStyle(color: LrColors.muted)),
                 const SizedBox(height: 6),
                 Wrap(spacing: 8, children: [
@@ -853,6 +996,19 @@ Future<ScreenSetup?> showScreenSetup(BuildContext context, AppServices s) async 
                 const SizedBox(height: 12),
               ],
               if (mode == ScreenMode.window) ...[
+                FilledButton.tonalIcon(
+                  onPressed: () async {
+                    final w = await _pickWindow(ctx, s, screen);
+                    if (w == null) return;
+                    set(() {
+                      if (!windows.any((x) => x.handle == w.handle)) windows.insert(0, w);
+                      window = w;
+                    });
+                  },
+                  icon: const Icon(Icons.ads_click_rounded, size: 18),
+                  label: Text(tr('screen.pick_window')),
+                ),
+                const SizedBox(height: 10),
                 Text(tr('screen.which_window'), style: const TextStyle(color: LrColors.muted)),
                 const SizedBox(height: 6),
                 ConstrainedBox(
@@ -928,7 +1084,9 @@ Future<ScreenSetup?> showScreenSetup(BuildContext context, AppServices s) async 
   if (micName != null) m.setMic(micName);
   m.setScreen(mode: mode.name, index: screen.index, fps: fps, mic: withMic);
   if (mode == ScreenMode.window && window != null) {
-    // The screen the window is on.
+    // Where it is now; the screen it is on.
+    final now = WinScreen.windowRect(window!.handle);
+    if (now != null) window = WindowInfo(handle: window!.handle, title: window!.title, rect: now);
     final c = window!.rect.center;
     screen = screens.firstWhere((x) => x.rect.contains(c), orElse: () => screen);
   }
@@ -941,20 +1099,114 @@ Future<ScreenSetup?> showScreenSetup(BuildContext context, AppServices s) async 
   return ScreenSetup(mode: mode, screen: screen, window: mode == ScreenMode.window ? window : null, area: area, fps: fps, mic: withMic ? micName : null);
 }
 
+/// Point at a window on a still of [screen] (it lights up), click to take it.
+Future<WindowInfo?> _pickWindow(BuildContext context, AppServices s, ScreenInfo screen) async {
+  final exe = s.ffmpeg.ffmpeg;
+  if (exe == null) return null;
+  final saved = WinScreen.ownRect();
+  final list = [for (final w in WinScreen.windows()) if (w.rect.overlaps(screen.rect)) w];
+  final shot = await _Gdi.still(exe, screen);
+  if (shot == null) return null;
+  AppNav.instance.fullscreen.value = true;
+  await windowManager.setMinimumSize(const Size(200, 40));
+  WinScreen.place(screen.rect, onTop: true);
+  if (!context.mounted) return null;
+  final picked = await Navigator.of(context).push<WindowInfo>(MaterialPageRoute(builder: (_) => _WindowPicker(shot: shot, screen: screen, windows: list)));
+  AppNav.instance.fullscreen.value = false;
+  if (saved != null) WinScreen.place(saved, onTop: false);
+  await windowManager.setMinimumSize(const Size(960, 620));
+  try {
+    await shot.delete();
+  } catch (_) {}
+  return picked;
+}
+
+class _WindowPicker extends StatefulWidget {
+  const _WindowPicker({required this.shot, required this.screen, required this.windows});
+
+  final File shot;
+  final ScreenInfo screen;
+  final List<WindowInfo> windows;
+
+  @override
+  State<_WindowPicker> createState() => _WindowPickerState();
+}
+
+class _WindowPickerState extends State<_WindowPicker> {
+  WindowInfo? _over;
+
+  WindowInfo? _at(Offset local, Size size) {
+    final r = widget.screen.rect;
+    final p = Offset(r.left + local.dx / size.width * r.width, r.top + local.dy / size.height * r.height);
+    return WinScreen.windowAt(widget.windows, p);
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        backgroundColor: Colors.black,
+        body: LayoutBuilder(builder: (context, c) {
+          final size = Size(c.maxWidth, c.maxHeight);
+          final r = widget.screen.rect;
+          Rect? box;
+          final o = _over;
+          if (o != null) {
+            box = Rect.fromLTRB(
+              (o.rect.left - r.left) / r.width * size.width,
+              (o.rect.top - r.top) / r.height * size.height,
+              (o.rect.right - r.left) / r.width * size.width,
+              (o.rect.bottom - r.top) / r.height * size.height,
+            ).intersect(Offset.zero & size);
+          }
+          return Focus(
+            autofocus: true,
+            onKeyEvent: (_, e) {
+              if (e is KeyDownEvent && e.logicalKey == LogicalKeyboardKey.escape) {
+                Navigator.pop(context);
+                return KeyEventResult.handled;
+              }
+              return KeyEventResult.ignored;
+            },
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              onHover: (e) {
+                final w = _at(e.localPosition, size);
+                if (w?.handle != _over?.handle) setState(() => _over = w);
+              },
+              child: GestureDetector(
+                onTapUp: (d) {
+                  final w = _at(d.localPosition, size);
+                  if (w != null) Navigator.pop(context, w);
+                },
+                child: Stack(fit: StackFit.expand, children: [
+                  Image.file(widget.shot, fit: BoxFit.fill),
+                  CustomPaint(painter: _AreaPainter(box)),
+                  Positioned(
+                    top: 24,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        decoration: BoxDecoration(color: const Color(0xE6202020), borderRadius: BorderRadius.circular(10)),
+                        child: Text(o == null ? tr('screen.pick_window_tip') : o.title, style: const TextStyle(color: Colors.white)),
+                      ),
+                    ),
+                  ),
+                ]),
+              ),
+            ),
+          );
+        }),
+      );
+}
+
 /// Drag a box on a still of the screen (LocalRoll covers that screen for it).
 Future<Rect?> _pickArea(BuildContext context, AppServices s, ScreenInfo screen) async {
   final exe = s.ffmpeg.ffmpeg;
   if (exe == null) return null;
   final saved = WinScreen.ownRect();
-  WinScreen.excludeFromCapture(true);
-  final shot = File('${Directory.systemTemp.path}${Platform.pathSeparator}lr_area_${DateTime.now().millisecondsSinceEpoch}.png');
-  await Process.run(exe, [
-    '-hide_banner', '-loglevel', 'error', '-y', '-f', 'gdigrab', '-draw_mouse', '0',
-    '-offset_x', '${screen.rect.left.round()}', '-offset_y', '${screen.rect.top.round()}',
-    '-video_size', '${screen.rect.width.round()}x${screen.rect.height.round()}',
-    '-i', 'desktop', '-frames:v', '1', shot.path,
-  ]);
-  WinScreen.excludeFromCapture(false);
+  final shot = await _Gdi.still(exe, screen);
+  if (shot == null) return null;
   AppNav.instance.fullscreen.value = true;
   await windowManager.setMinimumSize(const Size(200, 40));
   WinScreen.place(screen.rect, onTop: true);
