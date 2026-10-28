@@ -1,10 +1,10 @@
 // apps/desktop/lib/ui/convert_dialog.dart
 import 'package:flutter/material.dart';
-import 'package:localroll_core/localroll_core.dart';
 
 import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/converter.dart';
+import '../services/library_index.dart';
 import 'app_nav.dart';
 import 'theme.dart';
 
