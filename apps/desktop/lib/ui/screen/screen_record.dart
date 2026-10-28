@@ -12,6 +12,7 @@ import 'package:window_manager/window_manager.dart';
 
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
+import '../../services/annotations.dart';
 import '../../services/library_index.dart';
 import '../../services/mic.dart';
 import '../../services/peers.dart';
