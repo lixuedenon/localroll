@@ -10,6 +10,7 @@ import '../l10n/l10n.dart';
 import '../services/autostart.dart';
 import '../services/network.dart';
 import 'app_nav.dart';
+import 'feature_list.dart';
 import 'identity_card.dart';
 import 'search_settings.dart';
 import 'theme.dart';
@@ -78,6 +79,23 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     const Divider(height: 1),
                     const _AutoStartSwitch(),
+                    const Divider(height: 1),
+                    _row(
+                      Icons.lightbulb_outline_rounded,
+                      tr('features.settings'),
+                      sub: tr('features.settings_tip'),
+                      trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                        OutlinedButton(onPressed: () => showFeatures(context), child: Text(tr('features.view'))),
+                        const SizedBox(width: 8),
+                        Tooltip(
+                          message: tr('features.on_home'),
+                          child: Switch(
+                            value: s.settings.showFeatures,
+                            onChanged: (v) => s.settings.update((x) => x.showFeatures = v),
+                          ),
+                        ),
+                      ]),
+                    ),
                   ]),
                   _group(theme, tr('settings.receiving'), [
                     // Who needs "Accept" is decided per device (family / guest).

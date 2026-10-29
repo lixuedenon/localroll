@@ -15,12 +15,14 @@ import 'package:window_manager/window_manager.dart';
 import 'app_services.dart';
 import 'l10n/l10n.dart';
 import 'services/autostart.dart';
+import 'services/boot.dart';
 import 'services/face_engine.dart';
 import 'services/open_with.dart';
 import 'services/settings.dart';
 import 'services/single_instance.dart';
 import 'services/watchdog.dart';
 import 'ui/app_nav.dart';
+import 'ui/boot_screen.dart';
 import 'ui/home_shell.dart';
 import 'ui/player/player_home.dart';
 import 'ui/player/player_page.dart';
@@ -49,7 +51,10 @@ Future<void> main(List<String> args) async {
     runApp(const _AlreadyRunningApp());
     return;
   }
+  Boot.mark('one copy');
   await _startLog();
+  Boot.logReady();
+  Boot.mark('log');
   MediaKit.ensureInitialized();
   // Our own title bar replaces the native one; closing asks first.
   await windowManager.ensureInitialized();
@@ -71,6 +76,9 @@ Future<void> main(List<String> args) async {
     },
   );
   await windowManager.setPreventClose(true);
+  Boot.mark('window');
+  // Something to look at at once, while the rest gets ready.
+  runApp(const BootApp());
   final services = await AppServices.create();
   services.server.onShowRequested = _bringToFront;
   services.server.onOpenRequested = (paths) {
@@ -80,6 +88,7 @@ Future<void> main(List<String> args) async {
   // After the first screens: written in the language LocalRoll shows.
   unawaited(Future<void>.delayed(const Duration(seconds: 5), OpenWith.register));
   runApp(LocalRollApp(services: services));
+  WidgetsBinding.instance.addPostFrameCallback((_) => Boot.mark('first screen'));
   // Ctrl+Shift+R / P / D for recording the screen, from anywhere.
   ScreenRecorder.instance.watchKeys(services);
   if (files.isNotEmpty) PlayerLauncher.request(services, files);

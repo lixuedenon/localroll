@@ -217,6 +217,9 @@ class AppSettings extends ChangeNotifier {
   /// Read the text in photos and files (on this PC only) so it can be searched.
   bool textSearch = true;
 
+  /// Home shows "What I can do" (until the person says they know).
+  bool showFeatures = true;
+
   /// Search by what pictures show (needs the downloaded model; off until
   /// the person turns it on).
   bool pictureSearch = false;
@@ -269,6 +272,7 @@ class AppSettings extends ChangeNotifier {
     s.recentSeenMs = (j['recentSeenMs'] as num?)?.toInt() ?? 0;
     s.autoAccept = j['autoAccept'] != false;
     s.textSearch = j['textSearch'] != false;
+    s.showFeatures = j['showFeatures'] != false;
     s.pictureSearch = j['pictureSearch'] == true;
     s.pictureAsked = j['pictureAsked'] == true;
     s.faces = j['faces'] == true;
@@ -321,6 +325,7 @@ class AppSettings extends ChangeNotifier {
       'recentSeenMs': recentSeenMs,
       'autoAccept': autoAccept,
       'textSearch': textSearch,
+      'showFeatures': showFeatures,
       'pictureSearch': pictureSearch,
       'pictureAsked': pictureAsked,
       'faces': faces,

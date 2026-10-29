@@ -14,6 +14,7 @@ import '../services/peers.dart';
 import '../services/received_files.dart';
 import 'add_device_dialog.dart';
 import 'app_nav.dart';
+import 'feature_list.dart';
 import 'breathing.dart';
 import 'device_badge.dart';
 import 'files_view.dart';
@@ -93,6 +94,8 @@ class _DashboardPageState extends State<DashboardPage> {
             padding: const EdgeInsets.fromLTRB(36, 28, 36, 36),
             children: [
               _header(context),
+              // What LocalRoll can do (until the person says they know).
+              if (s.settings.showFeatures) ...[const SizedBox(height: 18), FeatureCard(services: s)],
               // Library folder unreachable: say so first, with what can be done.
               if (s.library.offline) LibraryRecovery(services: s),
               const SizedBox(height: 22),

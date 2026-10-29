@@ -8,6 +8,7 @@ import 'package:localroll_core/localroll_core.dart';
 import 'l10n/l10n.dart';
 import 'server/transfer_server.dart';
 import 'services/annotations.dart';
+import 'services/boot.dart';
 import 'services/converter.dart';
 import 'services/ffmpeg.dart';
 import 'services/library_index.dart';
@@ -189,11 +190,14 @@ class AppServices {
   final ValueNotifier<List<String>> addresses = ValueNotifier(const []);
 
   static Future<AppServices> create() async {
+    Boot.step.value = 'settings';
     final settings = await AppSettings.load();
+    Boot.mark('settings', next: 'library');
     final library = LibraryIndex(settings.libraryPath, stateFile: settings.libraryStateFile);
     // Documents / other files from PCs live beside the photos, not in the library view.
     library.ignoredFolders = {?settings.docsFolder, ?settings.otherFolder};
     await library.load();
+    Boot.mark('library (${library.items.length} items)', next: 'certificate');
     final hub = ReceiveHub();
     // HTTPS certificate (made on first start, a few seconds once).
     TlsIdentity? tls;
@@ -203,6 +207,7 @@ class AppServices {
     } catch (e) {
       debugPrint('TLS certificate unavailable, plain HTTP only: $e');
     }
+    Boot.mark('certificate', next: 'network');
     final server = TransferServer(settings: settings, library: library, hub: hub, tls: tls);
     final ffmpeg = FfmpegService(settings, library);
     final converter = ConverterService(ffmpeg, library);
@@ -272,12 +277,15 @@ class AppServices {
     server.addListener(s._recomputePresence);
     s.peers.addListener(s._recomputePresence);
     server.arrivals.listen((id) => s._presence.add(PresenceEvent(id, online: true, again: true)));
+    Boot.mark('devices and player memory', next: 'network');
     await s.startNetworking();
+    Boot.mark('network', next: 'tools');
     // Keep in touch with paired PCs all the time (not only on the Send
     // page), so both sides know who is online.
     s.peers.acquire();
     s._onlineSeen = s.onlineDevices;
     await ffmpeg.locate();
+    Boot.mark('ffmpeg', next: 'ready');
     // "Recently deleted": what is older than 30 days goes for good (now,
     // and every few hours while LocalRoll runs).
     unawaited(server.trash.purgeOld());
