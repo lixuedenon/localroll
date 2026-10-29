@@ -148,7 +148,9 @@ jobs:
         working-directory: apps/desktop
         shell: bash
         run: |
-          grep -iE "error|fatal|exception|failed" build.log | grep -viE "warning|0 error" | tail -40 | while IFS= read -r l; do echo "::error::${l:0:900}"; done
+          # Compiler / linker errors first (the plain word "error" also appears in every command line).
+          grep -E "error C[0-9]+|error LNK[0-9]+|fatal error|: error " build.log | grep -v "/ERRORREPORT" | head -25 | while IFS= read -r l; do echo "::error::${l:0:900}"; done
+          grep -iE "error|fatal|exception|failed" build.log | grep -viE "warning|0 error|/ERRORREPORT" | tail -15 | while IFS= read -r l; do echo "::error::${l:0:900}"; done
       - name: Check the screen pen helper
         shell: pwsh
         run: |
