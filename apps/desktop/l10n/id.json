@@ -874,5 +874,22 @@
   "screen.explain_pick": "Apa yang akan dijelaskan?",
   "screen.explain_tip": "Dibuka di pemutar, rekaman mulai setelah 3-2-1.",
   "screen.made": "Rekaman",
-  "screen.made_empty": "Belum ada rekaman."
+  "screen.made_empty": "Belum ada rekaman.",
+  "pen.operate": "Mouse (pakai aplikasi)",
+  "pen.clear_page": "Bersihkan halaman ini",
+  "pen.new_page": "Halaman baru",
+  "pen.prev_page": "Halaman sebelumnya",
+  "pen.next_page": "Halaman berikutnya",
+  "pen.board": "Papan",
+  "pen.board_none": "Mati (layar)",
+  "pen.board_white": "Papan putih",
+  "pen.board_black": "Papan tulis hitam",
+  "pen.highlight": "Sorot kursor",
+  "pen.auto_return": "Kembali ke mouse setelah tiap goresan",
+  "pen.stylus": "Pena selalu menggambar, mouse mengoperasikan",
+  "pen.tips": "Klik dua kali: pilih, lagi: hapus. Tahan Ctrl untuk memakai aplikasi sejenak.",
+  "pen.missing": "Pena layar tidak ada. Pasang ulang {app}.",
+  "pen.end": "Akhiri pena",
+  "pen.only": "Gambar di layar (tanpa merekam)",
+  "pen.only_tip": "Untuk mengajar, rapat, dan demo. Ctrl+Shift+D kapan saja."
 }

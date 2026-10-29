@@ -874,5 +874,22 @@
   "screen.explain_pick": "何を解説しますか？",
   "screen.explain_tip": "プレーヤーで開き、3-2-1 の後に録画が始まります。",
   "screen.made": "録画したもの",
-  "screen.made_empty": "まだありません。"
+  "screen.made_empty": "まだありません。",
+  "pen.operate": "マウス（アプリを操作）",
+  "pen.clear_page": "このページを消去",
+  "pen.new_page": "新しいページ",
+  "pen.prev_page": "前のページ",
+  "pen.next_page": "次のページ",
+  "pen.board": "ボード",
+  "pen.board_none": "なし（画面）",
+  "pen.board_white": "ホワイトボード",
+  "pen.board_black": "黒板",
+  "pen.highlight": "マウスを強調",
+  "pen.auto_return": "1 回描いたらマウスに戻る",
+  "pen.stylus": "ペンはいつでも描画、マウスは操作",
+  "pen.tips": "ダブルクリックで選択、もう一度で削除。Ctrl を押している間はアプリを操作できます。",
+  "pen.missing": "画面ペンが見つかりません。{app} を入れ直してください。",
+  "pen.end": "ペンを終了",
+  "pen.only": "画面に描く（録画しない）",
+  "pen.only_tip": "授業・会議・デモに。いつでも Ctrl+Shift+D。"
 }

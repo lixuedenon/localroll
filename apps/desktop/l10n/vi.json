@@ -874,5 +874,22 @@
   "screen.explain_pick": "Bạn sẽ giảng giải gì?",
   "screen.explain_tip": "Mở trong trình phát, ghi bắt đầu sau 3-2-1.",
   "screen.made": "Bản đã quay",
-  "screen.made_empty": "Chưa có bản nào."
+  "screen.made_empty": "Chưa có bản nào.",
+  "pen.operate": "Chuột (thao tác ứng dụng)",
+  "pen.clear_page": "Xóa trang này",
+  "pen.new_page": "Trang mới",
+  "pen.prev_page": "Trang trước",
+  "pen.next_page": "Trang sau",
+  "pen.board": "Bảng",
+  "pen.board_none": "Tắt (màn hình)",
+  "pen.board_white": "Bảng trắng",
+  "pen.board_black": "Bảng đen",
+  "pen.highlight": "Làm nổi chuột",
+  "pen.auto_return": "Vẽ xong mỗi nét thì quay lại chuột",
+  "pen.stylus": "Bút cảm ứng luôn vẽ, chuột để thao tác",
+  "pen.tips": "Bấm đúp: chọn, bấm đúp lần nữa: xóa. Giữ Ctrl để tạm thao tác ứng dụng.",
+  "pen.missing": "Không thấy bút màn hình. Hãy cài lại {app}.",
+  "pen.end": "Tắt bút",
+  "pen.only": "Vẽ lên màn hình (không quay)",
+  "pen.only_tip": "Dùng khi dạy học, họp, trình bày. Ctrl+Shift+D bất cứ lúc nào."
 }

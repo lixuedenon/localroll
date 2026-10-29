@@ -874,5 +874,22 @@
   "screen.explain_pick": "O que você vai explicar?",
   "screen.explain_tip": "Abre no player e a gravação começa após 3-2-1.",
   "screen.made": "Gravações",
-  "screen.made_empty": "Nenhuma gravação ainda."
+  "screen.made_empty": "Nenhuma gravação ainda.",
+  "pen.operate": "Mouse (usar os apps)",
+  "pen.clear_page": "Limpar esta página",
+  "pen.new_page": "Nova página",
+  "pen.prev_page": "Página anterior",
+  "pen.next_page": "Próxima página",
+  "pen.board": "Quadro",
+  "pen.board_none": "Não (a tela)",
+  "pen.board_white": "Quadro branco",
+  "pen.board_black": "Quadro negro",
+  "pen.highlight": "Destacar o mouse",
+  "pen.auto_return": "Voltar ao mouse após cada traço",
+  "pen.stylus": "A caneta sempre desenha, o mouse opera",
+  "pen.tips": "Clique duplo: selecionar; de novo: excluir. Segure Ctrl para usar os apps por um momento.",
+  "pen.missing": "A caneta de tela não foi encontrada. Reinstale o {app}.",
+  "pen.end": "Encerrar caneta",
+  "pen.only": "Desenhar na tela (sem gravar)",
+  "pen.only_tip": "Para aulas, reuniões e demos. Ctrl+Shift+D a qualquer momento."
 }

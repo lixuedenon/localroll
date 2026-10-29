@@ -874,5 +874,22 @@
   "screen.explain_pick": "What will you explain?",
   "screen.explain_tip": "It opens in the player and recording starts after 3-2-1.",
   "screen.made": "Recordings",
-  "screen.made_empty": "Nothing recorded yet."
+  "screen.made_empty": "Nothing recorded yet.",
+  "pen.operate": "Mouse (use the apps)",
+  "pen.clear_page": "Clear this page",
+  "pen.new_page": "New page",
+  "pen.prev_page": "Previous page",
+  "pen.next_page": "Next page",
+  "pen.board": "Board",
+  "pen.board_none": "Off (the screen)",
+  "pen.board_white": "Whiteboard",
+  "pen.board_black": "Blackboard",
+  "pen.highlight": "Light around the mouse",
+  "pen.auto_return": "Back to the mouse after each mark",
+  "pen.stylus": "A stylus always draws, the mouse operates",
+  "pen.tips": "Double-click a mark to select it, again to delete. Hold Ctrl while drawing to use the apps for a moment.",
+  "pen.missing": "The screen pen is missing. Please reinstall {app}.",
+  "pen.end": "End the pen",
+  "pen.only": "Draw on the screen (no recording)",
+  "pen.only_tip": "For teaching, meetings and demos. Ctrl+Shift+D anytime."
 }

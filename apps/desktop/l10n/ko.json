@@ -874,5 +874,22 @@
   "screen.explain_pick": "무엇을 설명할까요?",
   "screen.explain_tip": "플레이어에서 열리고 3-2-1 후 녹화가 시작됩니다.",
   "screen.made": "녹화한 영상",
-  "screen.made_empty": "아직 녹화한 영상이 없습니다."
+  "screen.made_empty": "아직 녹화한 영상이 없습니다.",
+  "pen.operate": "마우스 (앱 사용)",
+  "pen.clear_page": "이 페이지 지우기",
+  "pen.new_page": "새 페이지",
+  "pen.prev_page": "이전 페이지",
+  "pen.next_page": "다음 페이지",
+  "pen.board": "보드",
+  "pen.board_none": "끄기 (화면)",
+  "pen.board_white": "화이트보드",
+  "pen.board_black": "칠판",
+  "pen.highlight": "마우스 강조",
+  "pen.auto_return": "한 번 그리면 마우스로 돌아가기",
+  "pen.stylus": "펜은 항상 그리기, 마우스는 조작",
+  "pen.tips": "더블클릭: 선택, 한 번 더: 삭제. Ctrl을 누르고 있으면 잠시 앱을 조작할 수 있습니다.",
+  "pen.missing": "화면 펜이 없습니다. {app}을(를) 다시 설치하세요.",
+  "pen.end": "펜 끝내기",
+  "pen.only": "화면에 그리기 (녹화 안 함)",
+  "pen.only_tip": "수업, 회의, 시연용. 언제든 Ctrl+Shift+D."
 }

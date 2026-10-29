@@ -874,5 +874,22 @@
   "screen.explain_pick": "Cosa vuoi spiegare?",
   "screen.explain_tip": "Si apre nel player e la registrazione parte dopo 3-2-1.",
   "screen.made": "Registrazioni",
-  "screen.made_empty": "Ancora nessuna registrazione."
+  "screen.made_empty": "Ancora nessuna registrazione.",
+  "pen.operate": "Mouse (usa le app)",
+  "pen.clear_page": "Pulisci questa pagina",
+  "pen.new_page": "Nuova pagina",
+  "pen.prev_page": "Pagina precedente",
+  "pen.next_page": "Pagina successiva",
+  "pen.board": "Lavagna",
+  "pen.board_none": "No (lo schermo)",
+  "pen.board_white": "Lavagna bianca",
+  "pen.board_black": "Lavagna nera",
+  "pen.highlight": "Evidenzia il mouse",
+  "pen.auto_return": "Torna al mouse dopo ogni tratto",
+  "pen.stylus": "La penna disegna sempre, il mouse opera",
+  "pen.tips": "Doppio clic: seleziona, di nuovo: elimina. Tieni Ctrl per usare le app un momento.",
+  "pen.missing": "Manca la penna dello schermo. Reinstalla {app}.",
+  "pen.end": "Chiudi penna",
+  "pen.only": "Disegna sullo schermo (senza registrare)",
+  "pen.only_tip": "Per lezioni, riunioni e demo. Ctrl+Maiusc+D in qualsiasi momento."
 }

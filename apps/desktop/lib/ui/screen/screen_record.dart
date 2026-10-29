@@ -15,6 +15,7 @@ import '../../l10n/l10n.dart';
 import '../../services/annotations.dart';
 import '../../services/library_index.dart';
 import '../../services/mic.dart';
+import '../../services/pen_overlay.dart';
 import '../../services/peers.dart';
 import '../../services/video_encoders.dart';
 import '../../services/win_screen.dart';
@@ -24,6 +25,7 @@ import '../player/ink_paint.dart';
 import '../player/narration.dart';
 import '../player/narration_dialogs.dart';
 import '../player/snapshot.dart';
+import 'pen_bar.dart';
 import '../send_page.dart';
 import '../theme.dart';
 import '../../services/network.dart';
@@ -233,6 +235,18 @@ class ScreenRecorder extends ChangeNotifier {
   /// Pen marks fade after 3 seconds (else they stay until deleted).
   bool fade = false;
 
+  /// The screen pen's layer is used (marks on the real screen, recorded as
+  /// they are); without the helper, the old way (a still to draw on).
+  bool usesOverlay = false;
+
+  void _onOverlay() {
+    final on = PenOverlay.instance.draw;
+    if (!recording || on == pen) return;
+    pen = on;
+    _placeBar();
+    notifyListeners();
+  }
+
   ScreenSetup? setup;
   final Stopwatch clock = Stopwatch();
   final _Capture _cap = _Capture();
@@ -271,7 +285,7 @@ class ScreenRecorder extends ChangeNotifier {
       final r = mod && WinScreen.down(0x52), p = mod && WinScreen.down(0x50), d = mod && WinScreen.down(0x44);
       if (r && !_hkR) unawaited(recording || countdown > 0 ? stop() : startQuick());
       if (p && !_hkP && recording) unawaited(togglePause());
-      if (d && !_hkD && recording) unawaited(togglePen());
+      if (d && !_hkD) unawaited(recording ? togglePen() : (countdown > 0 ? Future.value() : PenSession.instance.toggle()));
       _hkR = r;
       _hkP = p;
       _hkD = d;
@@ -319,16 +333,32 @@ class ScreenRecorder extends ChangeNotifier {
     _page = fg == _own ? 0 : fg;
 
     // The bar: small, on top, at the top of the screen recorded, never in the video.
-    _savedWindow = WinScreen.ownRect();
+    final fromPen = PenSession.instance.active;
+    if (fromPen) {
+      // Drawing on the screen already: the recording takes the pen over.
+      _savedWindow = PenSession.instance.savedWindow;
+      PenSession.instance.handOver();
+    } else {
+      _savedWindow = WinScreen.ownRect();
+    }
     AppNav.instance.fullscreen.value = true;
     await windowManager.setMinimumSize(const Size(200, 40));
     WinScreen.excludeFromCapture(true);
+    final o = PenOverlay.instance;
+    usesOverlay = PenOverlay.available && (o.running || await o.start());
+    if (usesOverlay) {
+      o.setDraw(false);
+      o.border(su.mode == ScreenMode.area ? su.area : null);
+      o.removeListener(_onOverlay);
+      o.addListener(_onOverlay);
+    }
     _placeBar();
     AppNav.instance.navigatorKey.currentState?.push(MaterialPageRoute(settings: const RouteSettings(name: 'screen-record'), builder: (_) => const ScreenRecordPage()));
     // A window: in front, so nothing else is filmed over it.
     if (su.mode == ScreenMode.window && su.window != null) {
       WinScreen.bringToFront(su.window!.handle);
       _page = su.window!.handle;
+      if (usesOverlay) o.page(su.window!.handle);
     }
     _firstPage = _page;
 
@@ -344,6 +374,7 @@ class ScreenRecorder extends ChangeNotifier {
     countdown = 0;
     if (!okV) {
       await _mic?.stop();
+      if (usesOverlay) await PenOverlay.instance.stop();
       await _restore();
       notifyListeners();
       _message(tr('screen.failed_start'));
@@ -378,7 +409,8 @@ class ScreenRecorder extends ChangeNotifier {
   void _placeBar() {
     final scr = setup!.screen;
     final k = scr.scale;
-    final w = 660 * k, h = 64 * k;
+    final tools = usesOverlay && pen;
+    final w = (tools ? 1180 : 660) * k, h = (tools ? 140 : 64) * k;
     WinScreen.place(Rect.fromLTWH(scr.rect.center.dx - w / 2, scr.rect.top + 12 * k, w, h), onTop: true, activate: false);
   }
 
@@ -501,6 +533,14 @@ class ScreenRecorder extends ChangeNotifier {
   /// screen, drawing; off: back to the bar.
   Future<void> togglePen() async {
     if (!recording) return;
+    if (usesOverlay) {
+      final o = PenOverlay.instance;
+      o.setDraw(!o.draw);
+      pen = o.draw;
+      _placeBar();
+      notifyListeners();
+      return;
+    }
     final s = _s!;
     if (!pen) {
       final exe = s.ffmpeg.ffmpeg;
@@ -550,6 +590,12 @@ class ScreenRecorder extends ChangeNotifier {
     recording = false;
     paused = false;
     pen = false;
+    if (usesOverlay) {
+      final o = PenOverlay.instance;
+      o.removeListener(_onOverlay);
+      o.border(null);
+      await o.stop();
+    }
     final length = clock.elapsedMilliseconds;
     await _restore();
     notifyListeners();
@@ -1339,6 +1385,18 @@ class ScreenRecordPage extends StatelessWidget {
         listenable: r,
         builder: (context, _) {
           final bar = _Bar(r: r);
+          if (r.usesOverlay) {
+            // The pen draws on the real screen; here only its tools.
+            return Scaffold(
+              backgroundColor: LrColors.ink,
+              body: Center(
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  bar,
+                  if (r.pen) ...[const SizedBox(height: 6), const Material(color: Colors.transparent, child: PenToolbar())],
+                ]),
+              ),
+            );
+          }
           if (!r.pen || r.editor == null) {
             return Scaffold(backgroundColor: LrColors.ink, body: Center(child: bar));
           }

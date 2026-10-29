@@ -17,6 +17,7 @@ import '../player/player_page.dart';
 import '../player/snapshot.dart';
 import '../send_page.dart';
 import '../theme.dart';
+import 'pen_bar.dart';
 import 'screen_record.dart';
 
 /// "Record screen" on the left: what to record (the whole screen, a
@@ -188,6 +189,7 @@ class _ScreenPageState extends State<ScreenPage> {
             _choice(Icons.web_asset_rounded, tr('screen.mode_window'), tr('screen.choice_window'), () => _record(ScreenMode.window)),
             _choice(Icons.crop_rounded, tr('screen.mode_area'), tr('screen.choice_area'), () => _record(ScreenMode.area)),
             _choice(Icons.record_voice_over_rounded, tr('screen.mode_explain'), tr('screen.choice_explain'), _explain, special: true),
+            _choice(Icons.draw_rounded, tr('pen.only'), tr('pen.only_tip'), () => unawaited(PenSession.instance.start())),
           ]),
           const SizedBox(height: 12),
           Text(tr('screen.keys_tip'), style: const TextStyle(color: LrColors.muted, fontSize: 12.5, height: 1.5)),

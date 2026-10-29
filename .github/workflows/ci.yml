@@ -149,6 +149,29 @@ jobs:
         shell: bash
         run: |
           grep -iE "error|fatal|exception|failed" build.log | grep -viE "warning|0 error" | tail -40 | while IFS= read -r l; do echo "::error::${l:0:900}"; done
+      - name: Check the screen pen helper
+        shell: pwsh
+        run: |
+          # lr_overlay.exe must be next to the app and really draw (Direct2D).
+          $exe = (Resolve-Path "apps/desktop/build/windows/x64/runner/Release").Path + "\lr_overlay.exe"
+          if (-not (Test-Path $exe)) { Write-Output "::error::lr_overlay.exe missing from the build"; exit 1 }
+          $psi = New-Object System.Diagnostics.ProcessStartInfo $exe
+          $psi.RedirectStandardInput = $true
+          $psi.RedirectStandardOutput = $true
+          $psi.UseShellExecute = $false
+          $p = [System.Diagnostics.Process]::Start($psi)
+          $cmds = @('own 0', 'color FFFF0000', 'level 2', 'text 100 100 MMMMMMMM')
+          foreach ($x in 100..320) { if ($x % 2 -eq 0) { $cmds += "probe $x 130" } }
+          $cmds += @('board white', 'probe 5 5', 'board none', 'undo', 'probe 5 5', 'quit')
+          foreach ($c in $cmds) { $p.StandardInput.WriteLine($c) }
+          $p.StandardInput.Close()
+          $out = $p.StandardOutput.ReadToEnd()
+          if (-not $p.WaitForExit(20000)) { $p.Kill(); Write-Output "::error::lr_overlay did not quit"; exit 1 }
+          $lines = $out -split "`r?`n"
+          Write-Output ($lines | Where-Object { $_ -notmatch '^pixel 00000000' } | Select-Object -First 12)
+          if (-not ($lines | Where-Object { $_ -match '^ready ' })) { Write-Output "::error::lr_overlay did not start: $out"; exit 1 }
+          if (-not ($lines | Where-Object { $_ -match '^pixel FF[0-9A-F]{2}0000' })) { Write-Output "::error::lr_overlay drew no text"; exit 1 }
+          if (-not ($lines | Where-Object { $_ -match '^pixel FFFAFAF7' })) { Write-Output "::error::lr_overlay drew no board"; exit 1 }
       - name: Check onnxruntime.dll
         shell: pwsh
         run: |

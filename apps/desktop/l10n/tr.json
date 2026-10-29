@@ -874,5 +874,22 @@
   "screen.explain_pick": "Neyi anlatacaksınız?",
   "screen.explain_tip": "Oynatıcıda açılır, 3-2-1 sonra kayıt başlar.",
   "screen.made": "Kayıtlar",
-  "screen.made_empty": "Henüz kayıt yok."
+  "screen.made_empty": "Henüz kayıt yok.",
+  "pen.operate": "Fare (uygulamaları kullan)",
+  "pen.clear_page": "Bu sayfayı temizle",
+  "pen.new_page": "Yeni sayfa",
+  "pen.prev_page": "Önceki sayfa",
+  "pen.next_page": "Sonraki sayfa",
+  "pen.board": "Tahta",
+  "pen.board_none": "Kapalı (ekran)",
+  "pen.board_white": "Beyaz tahta",
+  "pen.board_black": "Kara tahta",
+  "pen.highlight": "Fareyi vurgula",
+  "pen.auto_return": "Her çizimden sonra fareye dön",
+  "pen.stylus": "Kalem hep çizer, fare kullanır",
+  "pen.tips": "Çift tık: seç, tekrar: sil. Uygulamaları kısa süre kullanmak için Ctrl’yi basılı tutun.",
+  "pen.missing": "Ekran kalemi bulunamadı. Lütfen {app} uygulamasını yeniden kurun.",
+  "pen.end": "Kalemi kapat",
+  "pen.only": "Ekrana çiz (kayıt yok)",
+  "pen.only_tip": "Ders, toplantı ve tanıtımlar için. İstediğiniz an Ctrl+Shift+D."
 }

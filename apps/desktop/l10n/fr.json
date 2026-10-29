@@ -874,5 +874,22 @@
   "screen.explain_pick": "Que voulez-vous commenter ?",
   "screen.explain_tip": "Il s’ouvre dans le lecteur, l’enregistrement démarre après 3-2-1.",
   "screen.made": "Enregistrements",
-  "screen.made_empty": "Aucun enregistrement pour l’instant."
+  "screen.made_empty": "Aucun enregistrement pour l’instant.",
+  "pen.operate": "Souris (utiliser les applis)",
+  "pen.clear_page": "Effacer cette page",
+  "pen.new_page": "Nouvelle page",
+  "pen.prev_page": "Page précédente",
+  "pen.next_page": "Page suivante",
+  "pen.board": "Tableau",
+  "pen.board_none": "Non (l’écran)",
+  "pen.board_white": "Tableau blanc",
+  "pen.board_black": "Tableau noir",
+  "pen.highlight": "Halo autour de la souris",
+  "pen.auto_return": "Revenir à la souris après chaque trait",
+  "pen.stylus": "Le stylet dessine toujours, la souris pilote",
+  "pen.tips": "Double-clic : sélectionner, encore : supprimer. Maintenez Ctrl pour utiliser les applis un instant.",
+  "pen.missing": "Le stylo d’écran est absent. Réinstallez {app}.",
+  "pen.end": "Terminer",
+  "pen.only": "Dessiner à l’écran (sans enregistrer)",
+  "pen.only_tip": "Pour cours, réunions et démos. Ctrl+Maj+D à tout moment."
 }

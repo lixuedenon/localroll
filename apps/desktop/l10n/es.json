@@ -874,5 +874,22 @@
   "screen.explain_pick": "¿Qué vas a explicar?",
   "screen.explain_tip": "Se abre en el reproductor y la grabación empieza tras 3-2-1.",
   "screen.made": "Grabaciones",
-  "screen.made_empty": "Aún no hay grabaciones."
+  "screen.made_empty": "Aún no hay grabaciones.",
+  "pen.operate": "Ratón (usar los programas)",
+  "pen.clear_page": "Borrar esta página",
+  "pen.new_page": "Página nueva",
+  "pen.prev_page": "Página anterior",
+  "pen.next_page": "Página siguiente",
+  "pen.board": "Pizarra",
+  "pen.board_none": "No (la pantalla)",
+  "pen.board_white": "Pizarra blanca",
+  "pen.board_black": "Pizarra negra",
+  "pen.highlight": "Resaltar el ratón",
+  "pen.auto_return": "Volver al ratón tras cada trazo",
+  "pen.stylus": "El lápiz siempre dibuja, el ratón opera",
+  "pen.tips": "Doble clic: seleccionar; otra vez: borrar. Mantén Ctrl para usar los programas un momento.",
+  "pen.missing": "Falta el lápiz de pantalla. Reinstala {app}.",
+  "pen.end": "Terminar",
+  "pen.only": "Dibujar en la pantalla (sin grabar)",
+  "pen.only_tip": "Para clases, reuniones y demostraciones. Ctrl+Mayús+D cuando quieras."
 }

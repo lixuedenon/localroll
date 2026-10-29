@@ -874,5 +874,22 @@
   "screen.explain_pick": "Was möchten Sie erklären?",
   "screen.explain_tip": "Es öffnet sich im Player, die Aufnahme beginnt nach 3-2-1.",
   "screen.made": "Aufnahmen",
-  "screen.made_empty": "Noch keine Aufnahmen."
+  "screen.made_empty": "Noch keine Aufnahmen.",
+  "pen.operate": "Maus (Programme bedienen)",
+  "pen.clear_page": "Diese Seite leeren",
+  "pen.new_page": "Neue Seite",
+  "pen.prev_page": "Vorige Seite",
+  "pen.next_page": "Nächste Seite",
+  "pen.board": "Tafel",
+  "pen.board_none": "Aus (Bildschirm)",
+  "pen.board_white": "Weiße Tafel",
+  "pen.board_black": "Schwarze Tafel",
+  "pen.highlight": "Mauszeiger hervorheben",
+  "pen.auto_return": "Nach jedem Strich zurück zur Maus",
+  "pen.stylus": "Stift zeichnet immer, Maus bedient",
+  "pen.tips": "Doppelklick: auswählen, nochmals: löschen. Strg halten: kurz die Programme bedienen.",
+  "pen.missing": "Der Bildschirmstift fehlt. Bitte {app} neu installieren.",
+  "pen.end": "Stift beenden",
+  "pen.only": "Auf dem Bildschirm zeichnen (ohne Aufnahme)",
+  "pen.only_tip": "Für Unterricht, Meetings, Vorführungen. Jederzeit Strg+Umschalt+D."
 }

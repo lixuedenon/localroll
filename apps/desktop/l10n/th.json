@@ -874,5 +874,22 @@
   "screen.explain_pick": "จะอธิบายอะไร?",
   "screen.explain_tip": "จะเปิดในเครื่องเล่น และเริ่มอัดหลัง 3-2-1",
   "screen.made": "ที่อัดไว้",
-  "screen.made_empty": "ยังไม่มี"
+  "screen.made_empty": "ยังไม่มี",
+  "pen.operate": "เมาส์ (ใช้งานโปรแกรม)",
+  "pen.clear_page": "ล้างหน้านี้",
+  "pen.new_page": "หน้าใหม่",
+  "pen.prev_page": "หน้าก่อน",
+  "pen.next_page": "หน้าถัดไป",
+  "pen.board": "กระดาน",
+  "pen.board_none": "ปิด (หน้าจอ)",
+  "pen.board_white": "กระดานขาว",
+  "pen.board_black": "กระดานดำ",
+  "pen.highlight": "ไฮไลต์เมาส์",
+  "pen.auto_return": "วาดเสร็จแล้วกลับไปใช้เมาส์",
+  "pen.stylus": "ปากกาวาดได้เสมอ เมาส์ใช้งาน",
+  "pen.tips": "ดับเบิลคลิกเพื่อเลือก อีกครั้งเพื่อลบ · กด Ctrl ค้างไว้เพื่อใช้งานโปรแกรมชั่วคราว",
+  "pen.missing": "ไม่พบปากกาบนหน้าจอ โปรดติดตั้ง {app} ใหม่",
+  "pen.end": "เลิกใช้ปากกา",
+  "pen.only": "วาดบนหน้าจอ (ไม่อัด)",
+  "pen.only_tip": "สำหรับสอน ประชุม และสาธิต กด Ctrl+Shift+D ได้ทุกเมื่อ"
 }

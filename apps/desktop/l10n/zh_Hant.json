@@ -874,5 +874,22 @@
   "screen.explain_pick": "講解哪個影片或照片？",
   "screen.explain_tip": "會在播放器裡打開，3-2-1 後開始錄。",
   "screen.made": "錄好的影片",
-  "screen.made_empty": "還沒有錄過。"
+  "screen.made_empty": "還沒有錄過。",
+  "pen.operate": "滑鼠（操作電腦，畫的線留著）",
+  "pen.clear_page": "清除這一頁",
+  "pen.new_page": "新的一頁（舊的收起來，可以翻回去）",
+  "pen.prev_page": "上一頁",
+  "pen.next_page": "下一頁",
+  "pen.board": "白板 / 黑板",
+  "pen.board_none": "不用（顯示螢幕）",
+  "pen.board_white": "白板",
+  "pen.board_black": "黑板",
+  "pen.highlight": "滑鼠高亮圈",
+  "pen.auto_return": "畫完一筆自動回到操作",
+  "pen.stylus": "手寫筆一直能畫，滑鼠照常操作",
+  "pen.tips": "雙擊選取，再雙擊刪除；畫的時候按住 Ctrl，可以暫時操作電腦。",
+  "pen.missing": "找不到螢幕畫筆，請重新安裝 {app}。",
+  "pen.end": "結束畫筆",
+  "pen.only": "在螢幕上畫（不錄）",
+  "pen.only_tip": "講課、開會、展示時用。隨時按 Ctrl+Shift+D。"
 }

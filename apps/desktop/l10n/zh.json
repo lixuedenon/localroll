@@ -874,5 +874,22 @@
   "screen.explain_pick": "讲解哪个视频或照片？",
   "screen.explain_tip": "会在播放器里打开，3-2-1 后开始录。",
   "screen.made": "录好的视频",
-  "screen.made_empty": "还没有录过。"
+  "screen.made_empty": "还没有录过。",
+  "pen.operate": "鼠标（操作电脑，画的线留着）",
+  "pen.clear_page": "清除这一页",
+  "pen.new_page": "新的一页（旧的收起来，可以翻回去）",
+  "pen.prev_page": "上一页",
+  "pen.next_page": "下一页",
+  "pen.board": "白板 / 黑板",
+  "pen.board_none": "不用（显示屏幕）",
+  "pen.board_white": "白板",
+  "pen.board_black": "黑板",
+  "pen.highlight": "鼠标高亮圈",
+  "pen.auto_return": "画完一笔自动回到操作",
+  "pen.stylus": "手写笔一直能画，鼠标照常操作",
+  "pen.tips": "双击选中，再双击删除；画的时候按住 Ctrl，可以临时操作电脑。",
+  "pen.missing": "找不到屏幕画笔，请重新安装 {app}。",
+  "pen.end": "结束画笔",
+  "pen.only": "在屏幕上画（不录）",
+  "pen.only_tip": "讲课、开会、演示时用。随时按 Ctrl+Shift+D。"
 }
