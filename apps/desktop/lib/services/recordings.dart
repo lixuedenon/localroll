@@ -10,6 +10,7 @@ import '../l10n/l10n.dart';
 import 'library_index.dart';
 import 'peers.dart';
 import 'player_memory.dart';
+import 'settings.dart' show randomId;
 
 /// What kind of thing was recorded.
 enum RecKind { screen, narration, clip, shot }
