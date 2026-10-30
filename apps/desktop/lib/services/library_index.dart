@@ -844,6 +844,14 @@ class LibraryIndex extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// A file moved or renamed by LocalRoll itself (inside the library).
+  void moved(MediaItem item, String relPath) {
+    item.relPath = relPath;
+    item.name = relPath.split('/').last;
+    _scheduleSave();
+    notifyListeners();
+  }
+
   /// Family group: mark items (and their Live Photo videos) "only me" or
   /// visible to the family.
   void setPrivate(Iterable<MediaItem> items, bool value) {

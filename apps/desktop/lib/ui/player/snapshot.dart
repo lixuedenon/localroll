@@ -9,6 +9,7 @@ import '../../app_services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/annotations.dart';
 import '../../services/library_index.dart';
+import '../../services/recordings.dart';
 import 'ink_paint.dart';
 import 'player_entry.dart';
 
@@ -22,27 +23,9 @@ const String _toneMap = 'zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709
 class Snapshots {
   Snapshots._();
 
-  /// The folder: in the library, else in Windows' Pictures.
-  static String folder(AppServices s, {bool clips = false, bool narration = false, bool screen = false}) {
-    final m = s.player;
-    final String name;
-    if (screen) {
-      name = m.screensFolder ?? tr('screen.folder');
-      if (m.screensFolder == null) m.setScreen(folder: name);
-    } else if (narration) {
-      name = m.narrationsFolder ?? tr('rec.folder');
-      if (m.narrationsFolder == null) m.setNarrationsFolder(name);
-    } else {
-      name = (clips ? m.clipsFolder : m.shotsFolder) ?? tr(clips ? 'ink.clips_folder' : 'ink.shots_folder');
-      if (clips && m.clipsFolder == null) m.setClipsFolder(name);
-      if (!clips && m.shotsFolder == null) m.setShotsFolder(name);
-    }
-    final lib = s.library;
-    final sep = Platform.pathSeparator;
-    if (lib.rootPath.isNotEmpty && !lib.offline && Directory(lib.rootPath).existsSync()) return '${lib.rootPath}$sep${sanitizeFileName(name)}';
-    final home = Platform.environment['USERPROFILE'] ?? Directory.systemTemp.path;
-    return '$home${sep}Pictures$sep${sanitizeFileName(name)}';
-  }
+  /// The folder: LocalRoll's recordings folder for this kind.
+  static String folder(AppServices s, {bool clips = false, bool narration = false, bool screen = false}) =>
+      s.recordings.folder(screen ? RecKind.screen : (narration ? RecKind.narration : (clips ? RecKind.clip : RecKind.shot)));
 
   static String _secs(int ms) => (ms / 1000).toStringAsFixed(3);
 
@@ -68,8 +51,9 @@ class Snapshots {
 
     try {
       await Directory(dir).create(recursive: true);
-      final base = e.name.contains('.') ? e.name.substring(0, e.name.lastIndexOf('.')) : e.name;
-      final out = LibraryIndex.uniquePath(dir, sanitizeFileName('${base}_${e.video ? stamp(ms) : 'note'}.jpg'));
+      final base = stemOf(e.name);
+      final out = LibraryIndex.uniquePath(dir, sanitizeFileName('${recName(base, tr('recs.name_shot'), DateTime.now(), extra: e.video ? stamp(ms) : '')}.jpg'));
+      Future<File> saved(File f) => done(s, f, kind: RecKind.shot, source: base, sourcePath: e.path);
 
       // 1. The picture itself, upright, full size.
       String src;
@@ -81,7 +65,7 @@ class Snapshots {
             '-vf', [if (hdr) _toneMap, 'format=yuvj420p'].join(','),
             '-q:v', '2', out,
           ]);
-          return ok ? await done(s, File(out)) : null;
+          return ok ? await saved(File(out)) : null;
         }
         final png = tempFile('png');
         final ok = await ff.run([
@@ -119,10 +103,10 @@ class Snapshots {
       await png.writeAsBytes(bytes.buffer.asUint8List(), flush: true);
 
       // 3. JPEG (far smaller); without ffmpeg the PNG is kept.
-      if (await ff.run(['-i', png.path, '-q:v', '2', out])) return await done(s, File(out));
+      if (await ff.run(['-i', png.path, '-q:v', '2', out])) return await saved(File(out));
       final keep = LibraryIndex.uniquePath(dir, out.split(sep).last.replaceAll(RegExp(r'\.jpg$'), '.png'));
       await png.copy(keep);
-      return await done(s, File(keep));
+      return await saved(File(keep));
     } catch (err) {
       DiagLog.log('player', 'screenshot failed: $err');
       return null;
@@ -136,7 +120,18 @@ class Snapshots {
   }
 
   /// In the library at once (not only after it notices the new file).
-  static Future<File> done(AppServices s, File f, {bool video = false}) async {
+  /// [kind]: also in "My recordings" (made from [sourcePath], named
+  /// [source]).
+  static Future<File> done(
+    AppServices s,
+    File f, {
+    bool video = false,
+    RecKind? kind,
+    String source = '',
+    String? sourcePath,
+    int lengthMs = 0,
+    String? narrationId,
+  }) async {
     final lib = s.library;
     final root = '${lib.rootPath}${Platform.pathSeparator}';
     if (lib.rootPath.isNotEmpty && f.path.toLowerCase().startsWith(root.toLowerCase())) {
@@ -150,6 +145,7 @@ class Snapshots {
         receivedMs: now,
       ));
     }
+    if (kind != null) s.recordings.add(f, kind: kind, source: source, sourcePath: sourcePath, lengthMs: lengthMs, narrationId: narrationId);
     DiagLog.log('player', video ? 'clip saved' : 'screenshot saved');
     return f;
   }

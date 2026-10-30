@@ -6,12 +6,14 @@ import 'package:flutter/services.dart';
 import 'package:localroll_core/localroll_core.dart' show DiagLog;
 import 'package:window_manager/window_manager.dart';
 
+import '../../app_services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/pen_overlay.dart';
 import '../../services/win_screen.dart';
 import '../app_nav.dart';
 import '../player/ink_editor.dart';
 import '../theme.dart';
+import 'screen_record.dart';
 
 /// The screen pen's tools (LocalRoll's window, kept out of recordings):
 /// the mouse button lets the mouse through to the apps; any drawing tool
@@ -189,6 +191,9 @@ class PenSession {
   bool active = false;
   Rect? _saved;
 
+  /// Set when LocalRoll starts (for saving screenshots).
+  AppServices? services;
+
   /// Where LocalRoll's window was before (a recording started from here
   /// takes it over).
   Rect? get savedWindow => _saved;
@@ -278,6 +283,7 @@ class _PenBarPage extends StatelessWidget {
                   return KeyEventResult.ignored;
                 },
                 child: PenToolbar(extra: [
+                  const _ShotButton(),
                   const SizedBox(width: 6),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
@@ -294,4 +300,44 @@ class _PenBarPage extends StatelessWidget {
           ),
         ),
       );
+}
+
+/// "Save as screenshot" (what is on the screen now, with the marks).
+class _ShotButton extends StatefulWidget {
+  const _ShotButton();
+
+  @override
+  State<_ShotButton> createState() => _ShotButtonState();
+}
+
+class _ShotButtonState extends State<_ShotButton> {
+  bool _busy = false;
+  String? _done;
+
+  Future<void> _take() async {
+    final s = PenSession.instance.services;
+    if (s == null || _busy) return;
+    setState(() => _busy = true);
+    final f = await savePenShot(s);
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      _done = f == null ? tr('ink.shot_failed') : tr('recs.pen_saved');
+    });
+    Future<void>.delayed(const Duration(seconds: 3), () {
+      if (mounted) setState(() => _done = null);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => Row(mainAxisSize: MainAxisSize.min, children: [
+        IconButton(
+          tooltip: tr('recs.pen_shot'),
+          onPressed: _busy ? null : () => unawaited(_take()),
+          icon: _busy
+              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+              : const Icon(Icons.add_a_photo_outlined, size: 20, color: Colors.white),
+        ),
+        if (_done != null) Text(_done!, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+      ]);
 }

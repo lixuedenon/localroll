@@ -11,6 +11,7 @@ import 'package:localroll_core/localroll_core.dart';
 import '../../app_services.dart';
 import '../../services/annotations.dart';
 import '../../services/library_index.dart';
+import '../../services/recordings.dart';
 import '../../services/video_encoders.dart';
 import 'ink_paint.dart';
 import 'snapshot.dart';
@@ -540,7 +541,7 @@ class NarrationComposer {
       ]);
       if (!ok || !File(out).existsSync()) return null;
       onProgress(1);
-      return Snapshots.done(s, File(out), video: true);
+      return Snapshots.done(s, File(out), video: true, kind: RecKind.narration, source: base, sourcePath: f0.path, lengthMs: total, narrationId: n.id);
     } catch (e) {
       DiagLog.log('player', 'explanation not made: $e');
       return null;

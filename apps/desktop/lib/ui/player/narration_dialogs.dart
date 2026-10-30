@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/l10n.dart';
 import '../../services/mic.dart';
+import '../../services/recordings.dart';
 import '../theme.dart';
 import 'narration.dart';
 
@@ -163,11 +164,7 @@ Future<RecordedAnswer?> recordedDialog(
 
 /// A file name for a recording: [base]_[what]_20261029-2201 (in the
 /// language LocalRoll shows).
-String recordingName(String base, String what, DateTime at) {
-  String two(int v) => v.toString().padLeft(2, '0');
-  final stamp = '${at.year}${two(at.month)}${two(at.day)}-${two(at.hour)}${two(at.minute)}';
-  return [if (base.isNotEmpty) base, what, stamp].join('_');
-}
+String recordingName(String base, String what, DateTime at) => recName(base, what, at);
 
 /// "Throw this explanation away?" — really (and the drawings too?).
 /// Null: back.

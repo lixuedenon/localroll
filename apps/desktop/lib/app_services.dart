@@ -20,6 +20,7 @@ import 'services/face_indexer.dart';
 import 'services/picture_index.dart';
 import 'services/picture_model.dart';
 import 'services/player_memory.dart';
+import 'services/recordings.dart';
 import 'services/phone_formats.dart';
 import 'services/receive_hub.dart';
 import 'services/settings.dart';
@@ -80,6 +81,9 @@ class AppServices {
   /// turns it on) and the background reading.
   /// The player: where videos were left, recent files (this PC only).
   late final PlayerMemory player = PlayerMemory(File('${settings.dataDir.path}${Platform.pathSeparator}player.json'));
+  /// Screen recordings, explanations, clips, screenshots.
+  late final Recordings recordings = Recordings(library: library, dataDir: settings.dataDir, memory: player);
+
   /// Drawings and annotations made in the player.
   late final NoteStore notes = NoteStore(library: library, dataDir: settings.dataDir, textIndex: server.textIndex)
     ..toolName = (t) => tr('ink.tool_${t.name}');
@@ -236,6 +240,10 @@ class AppServices {
     s.sender.isOnline = (id) => s.settings.peers.containsKey(id) ? s.isOnline(id) : s.phoneTarget(id) != null;
     await s.sender.loadHeld();
     await s.player.load();
+    await s.recordings.load();
+    s.recordings.watch(s.sender);
+    server.hiddenRecording = s.recordings.hiddenFrom;
+    unawaited(s.recordings.moveOld());
     unawaited(s.notes.scan());
     library.addListener(() => unawaited(s.notes.scan()));
     unawaited(ffmpeg.trimFileCache());
@@ -355,6 +363,7 @@ class AppServices {
     await Future.wait([
       capped(library.flush, 3000),
       capped(player.flush, 1000),
+      capped(recordings.flush, 1000),
       capped(peers.sayBye, 1300), // other PCs show us offline at once
     ]);
     peers.release();

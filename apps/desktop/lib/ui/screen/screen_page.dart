@@ -6,18 +6,12 @@ import 'package:flutter/material.dart';
 
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
-import '../../services/network.dart';
-import '../../services/peers.dart';
 import '../../services/win_dialogs.dart';
-import '../convert_dialog.dart';
-import '../files_view.dart';
-import '../format.dart';
 import '../player/player_entry.dart';
 import '../player/player_page.dart';
-import '../player/snapshot.dart';
-import '../send_page.dart';
 import '../theme.dart';
 import 'pen_bar.dart';
+import 'recordings_view.dart';
 import 'screen_record.dart';
 
 /// "Record screen" on the left: what to record (the whole screen, a
@@ -33,14 +27,12 @@ class ScreenPage extends StatefulWidget {
 }
 
 class _ScreenPageState extends State<ScreenPage> {
-  List<File> _made = const [];
-
   AppServices get s => widget.services;
 
   @override
   void initState() {
     super.initState();
-    _reload();
+    PenSession.instance.services = s;
     ScreenRecorder.instance.addListener(_onRecorder);
   }
 
@@ -50,28 +42,8 @@ class _ScreenPageState extends State<ScreenPage> {
     super.dispose();
   }
 
-  bool _was = false;
-
-  /// A recording just ended: its file shows up here.
   void _onRecorder() {
-    final now = ScreenRecorder.instance.recording;
-    if (_was && !now) Future<void>.delayed(const Duration(seconds: 3), _reload);
-    _was = now;
     if (mounted) setState(() {});
-  }
-
-  /// Recordings and explanations, newest first.
-  void _reload() {
-    final out = <File>[];
-    for (final dir in {Snapshots.folder(s, screen: true), Snapshots.folder(s, narration: true)}) {
-      try {
-        for (final e in Directory(dir).listSync()) {
-          if (e is File && e.path.toLowerCase().endsWith('.mp4')) out.add(e);
-        }
-      } catch (_) {}
-    }
-    out.sort((a, b) => b.statSync().modified.compareTo(a.statSync().modified));
-    if (mounted) setState(() => _made = out.take(40).toList());
   }
 
   Future<void> _record(ScreenMode mode) async {
@@ -126,26 +98,6 @@ class _ScreenPageState extends State<ScreenPage> {
     await openInPlayer(context, s, [path], record: true);
   }
 
-  Future<void> _send(File f) async {
-    final lib = s.library;
-    final root = '${lib.rootPath}${Platform.pathSeparator}';
-    final item = lib.rootPath.isNotEmpty && f.path.toLowerCase().startsWith(root.toLowerCase())
-        ? lib.findByRel(f.path.substring(root.length).replaceAll(Platform.pathSeparator, '/'))
-        : null;
-    final name = f.path.split(Platform.pathSeparator).last;
-    final file = item != null ? SendFile.fromLibrary(lib, item) : SendFile.plain(f, name);
-    if (file != null && mounted) await sendToPc(context, s, [file], name);
-  }
-
-  Future<void> _convert(File f) async {
-    final lib = s.library;
-    final root = '${lib.rootPath}${Platform.pathSeparator}';
-    final item = lib.rootPath.isNotEmpty && f.path.toLowerCase().startsWith(root.toLowerCase())
-        ? lib.findByRel(f.path.substring(root.length).replaceAll(Platform.pathSeparator, '/'))
-        : null;
-    await convertWithDialog(context, s, items: [?item], path: item == null ? f.path : null, video: true);
-  }
-
   Widget _choice(IconData icon, String title, String tip, VoidCallback onTap, {bool special = false}) => SizedBox(
         width: 250,
         child: Material(
@@ -194,72 +146,10 @@ class _ScreenPageState extends State<ScreenPage> {
           const SizedBox(height: 12),
           Text(tr('screen.keys_tip'), style: const TextStyle(color: LrColors.muted, fontSize: 12.5, height: 1.5)),
           const SizedBox(height: 26),
-          Row(children: [
-            Text(tr('screen.made'), style: theme.textTheme.titleMedium),
-            const Spacer(),
-            IconButton(tooltip: tr('common.refresh'), onPressed: _reload, icon: const Icon(Icons.refresh_rounded)),
-          ]),
-          const SizedBox(height: 8),
-          if (_made.isEmpty)
-            Text(tr('screen.made_empty'), style: const TextStyle(color: LrColors.muted))
-          else
-            Wrap(spacing: 12, runSpacing: 12, children: [for (final f in _made) _tile(f)]),
+          Text(tr('recs.title'), style: theme.textTheme.titleMedium),
+          const SizedBox(height: 10),
+          RecordingsView(services: s),
         ],
-      ),
-    );
-  }
-
-  Widget _tile(File f) {
-    final st = f.statSync();
-    final name = f.path.split(Platform.pathSeparator).last;
-    return SizedBox(
-      width: 220,
-      child: Material(
-        color: LrColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () => unawaited(openInPlayer(context, s, [f.path])),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            AspectRatio(
-              aspectRatio: 16 / 9,
-              child: FileThumb(
-                key: ValueKey(f.path),
-                path: f.path,
-                size: st.size,
-                modified: st.modified,
-                services: s,
-                icon: const Icon(Icons.movie_rounded, color: LrColors.muted),
-                box: 220,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 8, 4, 6),
-              child: Row(children: [
-                Expanded(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12.5)),
-                    Text('${formatBytes(st.size)} · ${st.modified.month}/${st.modified.day} ${st.modified.hour}:${st.modified.minute.toString().padLeft(2, '0')}',
-                        style: const TextStyle(color: LrColors.muted, fontSize: 11.5)),
-                  ]),
-                ),
-                PopupMenuButton<String>(
-                  tooltip: tr('ink.more'),
-                  onSelected: (v) {
-                    if (v == 'send') unawaited(_send(f));
-                    if (v == 'convert') unawaited(_convert(f));
-                    if (v == 'reveal') revealInExplorer(f.path);
-                  },
-                  itemBuilder: (_) => [
-                    PopupMenuItem(value: 'send', child: Text(tr('player.send'))),
-                    PopupMenuItem(value: 'convert', child: Text(tr('convert.menu'))),
-                    PopupMenuItem(value: 'reveal', child: Text(tr('common.show_in_folder'))),
-                  ],
-                ),
-              ]),
-            ),
-          ]),
-        ),
       ),
     );
   }

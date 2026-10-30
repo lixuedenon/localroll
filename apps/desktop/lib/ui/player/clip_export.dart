@@ -9,8 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:localroll_core/localroll_core.dart';
 
 import '../../app_services.dart';
+import '../../l10n/l10n.dart';
 import '../../services/annotations.dart';
 import '../../services/library_index.dart';
+import '../../services/recordings.dart';
 import '../../services/video_encoders.dart';
 import 'ink_paint.dart';
 import 'player_entry.dart';
@@ -102,9 +104,9 @@ class ClipExporter {
     if (exe == null || endMs <= startMs) return null;
     final dir = Snapshots.folder(s, clips: true);
     await Directory(dir).create(recursive: true);
-    final base = e.name.contains('.') ? e.name.substring(0, e.name.lastIndexOf('.')) : e.name;
+    final base = stemOf(e.name);
     final ext = withInk ? 'mp4' : (e.extension.isEmpty ? 'mp4' : e.extension);
-    final out = LibraryIndex.uniquePath(dir, sanitizeFileName('${base}_${Snapshots.stamp(startMs)}-${Snapshots.stamp(endMs)}.$ext'));
+    final out = LibraryIndex.uniquePath(dir, sanitizeFileName('${recName(base, tr('recs.name_clip'), DateTime.now())}.$ext'));
     final ok = withInk
         ? await _drawn(exe, e, out, startMs, endMs, notes, picture, onProgress)
         : await _copy(exe, e, out, startMs, endMs, onProgress);
@@ -114,7 +116,7 @@ class ClipExporter {
       } catch (_) {}
       return null;
     }
-    return Snapshots.done(s, File(out), video: true);
+    return Snapshots.done(s, File(out), video: true, kind: RecKind.clip, source: base, sourcePath: e.path, lengthMs: endMs - startMs);
   }
 
   /// As it is: no re-encoding (it starts at the key frame just before).

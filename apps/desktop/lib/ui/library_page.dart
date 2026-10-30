@@ -34,7 +34,7 @@ import 'trash_actions.dart';
 import 'trash_page.dart';
 import 'player/player_page.dart';
 
-enum _Filter { all, photos, videos, docs, other }
+enum _Filter { all, photos, videos, made, docs, other }
 
 /// One square on the "All" timeline: a library photo / video, or a received
 /// file (Documents / Other).
@@ -345,11 +345,18 @@ class _LibraryPageState extends State<LibraryPage> {
     return list;
   }
 
+  /// In LocalRoll's recordings folder.
+  bool _made(MediaItem i) {
+    final top = i.relPath.contains('/') ? i.relPath.substring(0, i.relPath.indexOf('/')) : '';
+    return top.isNotEmpty && top.toLowerCase() == widget.services.recordings.folderName.toLowerCase();
+  }
+
   List<MediaItem> _filtered(List<MediaItem> all, FamilyDirectory family) => [
         for (final i in all)
           if ((_filter == _Filter.all ||
                   (_filter == _Filter.photos && i.kind == MediaKind.image) ||
-                  (_filter == _Filter.videos && i.kind == MediaKind.video)) &&
+                  (_filter == _Filter.videos && i.kind == MediaKind.video) ||
+                  (_filter == _Filter.made && _made(i))) &&
               (_member == null || FamilyDirectory.keyOf(_memberOf(family, i)) == FamilyDirectory.keyOf(_member!)))
             i,
       ];
@@ -494,6 +501,7 @@ class _LibraryPageState extends State<LibraryPage> {
                     ButtonSegment(value: _Filter.all, label: Text(tr('library.filter_all'))),
                     ButtonSegment(value: _Filter.photos, label: Text(tr('library.filter_photos'))),
                     ButtonSegment(value: _Filter.videos, label: Text(tr('library.filter_videos'))),
+                    ButtonSegment(value: _Filter.made, label: Text(tr('recs.title'))),
                     ButtonSegment(value: _Filter.docs, label: Text(tr('library.filter_docs'))),
                     ButtonSegment(value: _Filter.other, label: Text(tr('library.filter_other'))),
                   ],

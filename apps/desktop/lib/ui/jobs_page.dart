@@ -7,7 +7,11 @@ import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/converter.dart';
 import '../services/network.dart';
+import '../services/peers.dart';
 import 'app_nav.dart';
+import 'player/player_entry.dart';
+import 'player/player_page.dart';
+import 'send_page.dart';
 import 'theme.dart';
 
 /// Convert: the queue of conversions started from the library or viewer.
@@ -83,7 +87,7 @@ class JobsPage extends StatelessWidget {
                 child: Column(children: [
                   for (var i = 0; i < c.jobs.length; i++) ...[
                     if (i > 0) const Divider(height: 1, indent: 16, endIndent: 16),
-                    _JobTile(job: c.jobs[i]),
+                    _JobTile(job: c.jobs[i], services: s),
                   ],
                 ]),
               ),
@@ -114,9 +118,10 @@ Widget _box({required Widget child, Color? border, EdgeInsets padding = const Ed
     );
 
 class _JobTile extends StatelessWidget {
-  const _JobTile({required this.job});
+  const _JobTile({required this.job, required this.services});
 
   final ConvertJob job;
+  final AppServices services;
 
   @override
   Widget build(BuildContext context) {
@@ -154,11 +159,27 @@ class _JobTile extends StatelessWidget {
                 style: const TextStyle(color: LrColors.danger, fontSize: 12)),
         ],
       ),
+      onTap: job.state == JobState.done && job.outputPath != null && PlayerEntry.playable(job.outputPath!)
+          ? () => openInPlayer(context, services, [job.outputPath!])
+          : null,
       trailing: job.state == JobState.done && job.outputPath != null
-          ? IconButton(
-              tooltip: tr('common.show_in_folder'),
-              onPressed: () => revealInExplorer(job.outputPath!),
-              icon: const Icon(Icons.folder_open),
+          ? PopupMenuButton<String>(
+              tooltip: tr('ink.more'),
+              onSelected: (a) {
+                final out = job.outputPath!;
+                if (a == 'open') openInPlayer(context, services, [out]);
+                if (a == 'send') {
+                  final f = SendFile.plain(File(out), out.split(Platform.pathSeparator).last);
+                  if (f != null) sendToPc(context, services, [f], out.split(Platform.pathSeparator).last);
+                }
+                if (a == 'reveal') revealInExplorer(out);
+              },
+              itemBuilder: (_) => [
+                if (PlayerEntry.playable(job.outputPath!)) PopupMenuItem(value: 'open', child: Text(tr('recs.play'))),
+                PopupMenuItem(value: 'send', child: Text(tr('player.send'))),
+                const PopupMenuDivider(),
+                PopupMenuItem(value: 'reveal', child: Text(tr('common.show_in_folder'))),
+              ],
             )
           : null,
     );

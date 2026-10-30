@@ -407,7 +407,18 @@ class _NoteSearchState extends State<_NoteSearch> {
         builder: (context, _) {
           final searching = _q.text.trim().isNotEmpty;
           // Nothing typed: the latest annotations ("My notes").
-          final hits = searching ? widget.services.notes.search(_q.text) : widget.services.notes.recent(10);
+          // By video (the one drawn on last first); searching: the matches,
+          // by video.
+          final hits = searching ? widget.services.notes.search(_q.text) : widget.services.notes.recent(100000);
+          final groups = <String, List<NoteHit>>{};
+          for (final h in hits) {
+            groups.putIfAbsent(h.set.key, () => []).add(h);
+          }
+          String day(int ms) {
+            final d = DateTime.fromMillisecondsSinceEpoch(ms);
+            return '${d.month}-${d.day.toString().padLeft(2, '0')}';
+          }
+
           return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             SizedBox(
               width: 460,
@@ -438,21 +449,35 @@ class _NoteSearchState extends State<_NoteSearch> {
               if (hits.isEmpty)
                 Text(tr('ink.no_hits'), style: const TextStyle(color: LrColors.muted))
               else
-                for (final h in hits.take(40))
+                for (final g in groups.values.take(30))
                   SizedBox(
-                    width: 460,
-                    child: ListTile(
-                      dense: true,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 6),
-                      leading: Icon(h.set.video ? Icons.movie_rounded : Icons.image_rounded, color: LrColors.muted),
-                      title: Text(h.note.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    width: 520,
+                    child: ExpansionTile(
+                      key: PageStorageKey('notes-${g.first.set.key}-$searching'),
+                      initiallyExpanded: searching,
+                      tilePadding: const EdgeInsets.symmetric(horizontal: 6),
+                      leading: Icon(g.first.set.video ? Icons.movie_rounded : Icons.image_rounded, color: LrColors.muted),
+                      title: Text(g.first.set.name, maxLines: 1, overflow: TextOverflow.ellipsis),
                       subtitle: Text(
-                        [h.set.name, if (h.set.video) _time(h.note.startMs)].join(' · '),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(color: LrColors.muted),
+                        tr('player.notes_group', {'n': g.length, 'day': day(g.first.note.modifiedMs)}),
+                        style: const TextStyle(color: LrColors.muted, fontSize: 12),
                       ),
-                      onTap: () => _open(h),
+                      children: [
+                        for (final h in ([...g]..sort((a, b) => a.note.startMs.compareTo(b.note.startMs))))
+                          ListTile(
+                            dense: true,
+                            contentPadding: const EdgeInsets.only(left: 46, right: 6),
+                            title: Text(h.note.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+                            subtitle: Text(
+                              [
+                                if (h.set.video) _time(h.note.startMs),
+                                if (h.note.narration) tr('ink.from_narration'),
+                              ].join(' · '),
+                              style: const TextStyle(color: LrColors.muted),
+                            ),
+                            onTap: () => _open(h),
+                          ),
+                      ],
                     ),
                   ),
             ],

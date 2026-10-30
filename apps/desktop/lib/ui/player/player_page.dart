@@ -21,6 +21,7 @@ import '../../services/mic.dart';
 import '../../services/network.dart';
 import '../../services/peers.dart';
 import '../../services/player_memory.dart';
+import '../../services/recordings.dart';
 import '../app_nav.dart';
 import '../convert_dialog.dart';
 import '../home_shell.dart' show AppRail;
@@ -28,6 +29,7 @@ import '../files_view.dart';
 import '../format.dart';
 import '../media_thumb.dart';
 import '../send_page.dart';
+import '../screen/recordings_view.dart';
 import '../theme.dart';
 import '../trash_actions.dart';
 import 'clip_dialog.dart';
@@ -46,7 +48,7 @@ part 'player_video.dart';
 /// Opens files from this PC (Explorer's "Open with", drag and drop, the
 /// open dialog). One file: the photos and videos of its folder come along,
 /// so the arrows go through them.
-Future<void> openInPlayer(BuildContext context, AppServices s, List<String> paths, {int? startMs, bool record = false}) async {
+Future<void> openInPlayer(BuildContext context, AppServices s, List<String> paths, {int? startMs, bool record = false, String? remake}) async {
   final wanted = [for (final p in paths) if (PlayerEntry.playable(p)) p];
   if (wanted.isEmpty) {
     ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('player.nothing_playable'))));
@@ -54,9 +56,13 @@ Future<void> openInPlayer(BuildContext context, AppServices s, List<String> path
   }
   var range = wanted;
   var start = wanted.first;
+  var source = tr('player.src_files');
   if (wanted.length == 1) {
     final all = PlayerEntry.inFolder(File(start).parent.path);
-    if (all.any((p) => p.toLowerCase() == start.toLowerCase())) range = all;
+    if (all.any((p) => p.toLowerCase() == start.toLowerCase())) {
+      range = all;
+      source = File(start).parent.path;
+    }
   }
   final entries = <PlayerEntry>[];
   var at = 0;
@@ -73,7 +79,7 @@ Future<void> openInPlayer(BuildContext context, AppServices s, List<String> path
     return;
   }
   if (!context.mounted) return;
-  await openPlayer(context, s, entries, at, startMs: startMs, record: record);
+  await openPlayer(context, s, entries, at, startMs: startMs, record: record, source: source, remake: remake);
 }
 
 /// Files asked for from outside the window (Explorer's "Open with", a
@@ -110,14 +116,18 @@ class PlayerLauncher {
 
 /// Library items (the list shown, in its order: the arrows go through it).
 Future<void> openLibraryItems(BuildContext context, AppServices s, List<MediaItem> items, int index) =>
-    openPlayer(context, s, [for (final i in items) PlayerEntry.fromItem(s.library, i)], index < 0 ? 0 : index);
+    openPlayer(context, s, [for (final i in items) PlayerEntry.fromItem(s.library, i)], index < 0 ? 0 : index, source: tr('player.src_library'));
 
 /// [startMs]: a video starts there (an annotation found by search).
 /// [record]: start explaining it (recording) as soon as it is open.
-Future<void> openPlayer(BuildContext context, AppServices s, List<PlayerEntry> entries, int index, {int? startMs, bool record = false}) =>
+/// [source]: where the list came from (shown above it); [remake]: make
+/// this explanation again once it is open.
+Future<void> openPlayer(BuildContext context, AppServices s, List<PlayerEntry> entries, int index,
+        {int? startMs, bool record = false, String? source, String? remake}) =>
     Navigator.of(context).push(MaterialPageRoute(
       settings: const RouteSettings(name: 'player'),
-      builder: (_) => PlayerPage(services: s, entries: entries, initialIndex: index.clamp(0, entries.length - 1), initialMs: startMs, record: record),
+      builder: (_) => PlayerPage(
+          services: s, entries: entries, initialIndex: index.clamp(0, entries.length - 1), initialMs: startMs, record: record, source: source, remake: remake),
     ));
 
 /// For "Recent" and "Continue".
@@ -186,7 +196,7 @@ Rect _visibleRect(Matrix4 m, Size box, Size? pic) {
 }
 
 /// The tabs of the list on the right.
-enum _Tab { list, notes, info }
+enum _Tab { list, notes, made, info }
 
 /// Typing somewhere (a text mark, a search box): keys are letters then.
 bool _typing() => FocusManager.instance.primaryFocus?.context?.findAncestorStateOfType<EditableTextState>() != null;
@@ -255,7 +265,22 @@ class _Rec {
 /// anywhere on this PC. Videos (HEVC, HDR, Dolby Vision, MKV…) play
 /// through libmpv; HEIC, AVIF, TIFF, camera RAW are shown as they are.
 class PlayerPage extends StatefulWidget {
-  const PlayerPage({super.key, required this.services, required this.entries, required this.initialIndex, this.initialMs, this.record = false});
+  const PlayerPage({
+    super.key,
+    required this.services,
+    required this.entries,
+    required this.initialIndex,
+    this.initialMs,
+    this.record = false,
+    this.source,
+    this.remake,
+  });
+
+  /// Where the list came from ("D:\Trip", "Library", "My recordings").
+  final String? source;
+
+  /// An explanation's recording to make again once it is open.
+  final String? remake;
 
   /// Start recording an explanation once it is open.
   final bool record;
@@ -272,9 +297,20 @@ class PlayerPage extends StatefulWidget {
 }
 
 class _PlayerPageState extends State<PlayerPage> {
-  late final PageController _pages = PageController(initialPage: widget.initialIndex);
+  late PageController _pages = PageController(initialPage: widget.initialIndex);
   late int _index = widget.initialIndex;
   late final List<PlayerEntry> _entries = List.of(widget.entries);
+  late String? _source = widget.source;
+
+  /// Playing recordings opened from the list on the right: the list before
+  /// (to go back to it).
+  ({List<PlayerEntry> entries, int index, String? source})? _back;
+
+  /// The page view starts again when the list is swapped.
+  int _listGen = 0;
+
+  /// "My recordings" on the right: what to look for.
+  String _madeQuery = '';
   final FocusNode _focus = FocusNode(debugLabel: 'player');
   final Map<PlayerEntry, _ViewHandle> _handles = {};
 
@@ -329,6 +365,64 @@ class _PlayerPageState extends State<PlayerPage> {
   Future<void> _loadNarrations() async {
     final all = await NarrationSession.all(widget.services.settings.dataDir);
     if (mounted) setState(() => _narrations = all);
+    // Asked to make one again (from "My recordings").
+    final id = widget.remake;
+    if (id != null && !_remakeAsked && mounted) {
+      _remakeAsked = true;
+      final n = all.where((x) => x.id == id).firstOrNull;
+      if (n == null) {
+        _snack(tr('recs.raw_gone'));
+      } else {
+        await _afterRecording(n, again: true);
+      }
+    }
+  }
+
+  bool _remakeAsked = false;
+
+  /// Plays recordings ([list]) here; the list before comes back with
+  /// "Back to …".
+  void _openRecordings(List<Recording> list, Recording r) {
+    if (_rec != null) {
+      _snack(tr('recs.busy'));
+      return;
+    }
+    if (_editor != null) unawaited(_finishDraw());
+    final entries = <PlayerEntry>[];
+    var at = 0;
+    for (final x in list) {
+      final e = PlayerEntry.fromPath(x.path, library: widget.services.library);
+      if (e == null) continue;
+      if (x.id == r.id) at = entries.length;
+      entries.add(e);
+    }
+    if (entries.isEmpty) return;
+    _back ??= (entries: List.of(_entries), index: _index, source: _source);
+    _swapList(entries, at, tr('recs.title'));
+  }
+
+  void _goBack() {
+    final b = _back;
+    if (b == null) return;
+    _back = null;
+    _swapList(b.entries, b.index, b.source);
+  }
+
+  void _swapList(List<PlayerEntry> entries, int index, String? source) {
+    _active?.pause();
+    final old = _pages;
+    setState(() {
+      _entries
+        ..clear()
+        ..addAll(entries);
+      _index = index.clamp(0, entries.length - 1);
+      _source = source;
+      _listGen++;
+      _pages = PageController(initialPage: _index);
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => old.dispose());
+    _memory.opened(recentOf(_entry));
+    unawaited(_loadNotes(_entry));
   }
 
   @override
@@ -660,11 +754,15 @@ class _PlayerPageState extends State<PlayerPage> {
         ..startMs = start
         ..modifiedMs = DateTime.now().millisecondsSinceEpoch;
     } else {
+      // "Trip_annotation_Circle+Arrow_20261030-1405" ("…_explanation_…"
+      // while recording one).
       note = Note(
         id: InkMark.newId(),
-        name: e.video ? tr('ink.note_at', {'time': playerTime(Duration(milliseconds: start))}) : tr('ink.note_n', {'n': set.notes.length + 1}),
+        name: recName(stemOf(e.name), tr(_rec != null ? 'recs.name_narration' : 'recs.name_note'), DateTime.now(),
+            extra: [for (final k in inkKinds(inks)) tr('ink.tool_${k.name}')].join('+')),
         inks: inks,
         startMs: start,
+        narration: _rec != null,
       );
       set.notes.add(note);
       // Made while recording: the recording draws these itself.
@@ -749,22 +847,7 @@ class _PlayerPageState extends State<PlayerPage> {
       messenger.showSnackBar(SnackBar(content: Text(tr('ink.shot_failed'))));
       return;
     }
-    messenger.showSnackBar(SnackBar(
-      duration: const Duration(seconds: 8),
-      content: Row(children: [
-        Expanded(child: Text(tr('ink.shot_saved', {'folder': f.parent.path.split(Platform.pathSeparator).last}))),
-        TextButton(onPressed: () => revealInExplorer(f.path), child: Text(tr('common.show_in_folder'))),
-        const SizedBox(width: 4),
-        FilledButton.icon(
-          onPressed: () {
-            messenger.hideCurrentSnackBar();
-            unawaited(_sendFile(f));
-          },
-          icon: const Icon(Icons.send_rounded, size: 16),
-          label: Text(tr('player.send')),
-        ),
-      ]),
-    ));
+    showSavedBar(context, widget.services, f);
   }
 
   /// A screenshot to another device (from the library when it is in it).
@@ -851,22 +934,7 @@ class _PlayerPageState extends State<PlayerPage> {
       await _sendFile(f);
       return;
     }
-    messenger.showSnackBar(SnackBar(
-      duration: const Duration(seconds: 8),
-      content: Row(children: [
-        Expanded(child: Text(tr('clip.saved', {'folder': f.parent.path.split(Platform.pathSeparator).last}))),
-        TextButton(onPressed: () => revealInExplorer(f.path), child: Text(tr('common.show_in_folder'))),
-        const SizedBox(width: 4),
-        FilledButton.icon(
-          onPressed: () {
-            messenger.hideCurrentSnackBar();
-            unawaited(_sendFile(f));
-          },
-          icon: const Icon(Icons.send_rounded, size: 16),
-          label: Text(tr('player.send')),
-        ),
-      ]),
-    ));
+    showSavedBar(context, widget.services, f);
   }
 
   Future<void> _clipAround() async {
@@ -1158,7 +1226,7 @@ class _PlayerPageState extends State<PlayerPage> {
         _sound,
         again: again,
         summary: parts.join('、'),
-        defaultName: recordingName(base, tr('rec.name_part'), DateTime.fromMillisecondsSinceEpoch(n.createdMs)),
+        defaultName: recordingName(base, tr('recs.name_narration'), DateTime.fromMillisecondsSinceEpoch(n.createdMs)),
         beforeSec: _memory.narrationBefore,
         afterSec: _memory.narrationAfter,
         extendable: n.files.any((f) => f.video),
@@ -1250,29 +1318,7 @@ class _PlayerPageState extends State<PlayerPage> {
       await _sendFile(f);
       return;
     }
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.showSnackBar(SnackBar(
-      duration: const Duration(seconds: 8),
-      content: Row(children: [
-        Expanded(child: Text(tr('clip.saved', {'folder': f.parent.path.split(Platform.pathSeparator).last}))),
-        TextButton(onPressed: () => revealInExplorer(f.path), child: Text(tr('common.show_in_folder'))),
-        const SizedBox(width: 4),
-        FilledButton.icon(
-          onPressed: () {
-            messenger.hideCurrentSnackBar();
-            unawaited(_sendFile(f));
-          },
-          icon: const Icon(Icons.send_rounded, size: 16),
-          label: Text(tr('player.send')),
-        ),
-      ]),
-    ));
-  }
-
-  /// Kept recordings that include what is shown now.
-  List<NarrationSession> get _narrationsHere {
-    final p = _entry.path.toLowerCase();
-    return [for (final n in _narrations) if (n.files.any((f) => f.path.toLowerCase() == p)) n];
+    showSavedBar(context, widget.services, f);
   }
 
   Future<void> _narrationAction(NarrationSession n, String action) async {
@@ -1447,6 +1493,7 @@ class _PlayerPageState extends State<PlayerPage> {
   }
 
   Widget _pageView() => PageView.builder(
+        key: ValueKey(_listGen),
         controller: _pages,
         itemCount: _entries.length,
         onPageChanged: _changed,
@@ -1642,7 +1689,9 @@ class _PlayerPageState extends State<PlayerPage> {
             border: Border(bottom: BorderSide(color: on ? LrColors.safelight : Colors.transparent, width: 2)),
           ),
           child: Text(count > 0 ? '$label $count' : label,
-              style: TextStyle(fontSize: 13.5, fontWeight: on ? FontWeight.w600 : FontWeight.w400, color: on ? LrColors.text : LrColors.muted)),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 12.5, fontWeight: on ? FontWeight.w600 : FontWeight.w400, color: on ? LrColors.text : LrColors.muted)),
         ),
       ),
     );
@@ -1668,6 +1717,7 @@ class _PlayerPageState extends State<PlayerPage> {
           services: widget.services,
           entries: _entries,
           index: _index,
+          source: _source,
           onPick: (i) => _pages.jumpToPage(i),
         ),
       _Tab.notes => _notesAll
@@ -1694,10 +1744,34 @@ class _PlayerPageState extends State<PlayerPage> {
               onAction: (n, a) => unawaited(_noteAction(n, a)),
               onHold: (n, ms) => unawaited(_hold(n, ms)),
               onClipAround: () => unawaited(_clipAround()),
-              narrations: _narrationsHere,
-              onNarration: (n, a) => unawaited(_narrationAction(n, a)),
             ),
-      _Tab.info => _InfoPanel(key: ObjectKey(e), entry: e, services: widget.services, from: e.item == null ? null : _from(e.item!)),
+      _Tab.made => RecordingsView(
+          key: const ValueKey('made'),
+          services: widget.services,
+          compact: true,
+          current: e.path,
+          query: _madeQuery,
+          onOpen: _openRecordings,
+          onRemake: (r) async {
+            final n = _narrations.where((x) => x.id == r.narrationId).firstOrNull;
+            if (n == null) {
+              _snack(tr('recs.raw_gone'));
+            } else {
+              await _afterRecording(n, again: true);
+            }
+          },
+          footer: _unmade(),
+        ),
+      _Tab.info => _InfoPanel(
+          key: ObjectKey(e),
+          entry: e,
+          services: widget.services,
+          from: e.item == null ? null : _from(e.item!),
+          onMade: () {
+            setState(() => _madeQuery = stemOf(e.name));
+            _openTab(_Tab.made);
+          },
+        ),
     };
     return Container(
       width: 330,
@@ -1706,6 +1780,7 @@ class _PlayerPageState extends State<PlayerPage> {
         Row(children: [
           _tabButton(_Tab.list, tr('player.tab_list'), _entries.length > 1 ? _entries.length : 0),
           _tabButton(_Tab.notes, tr('ink.notes'), _set?.notes.length ?? 0),
+          _tabButton(_Tab.made, tr('recs.tab'), 0),
           _tabButton(_Tab.info, tr('player.tab_info'), 0),
           IconButton(
             tooltip: tr('player.side_close'),
@@ -1714,9 +1789,77 @@ class _PlayerPageState extends State<PlayerPage> {
           ),
         ]),
         const Divider(height: 1),
+        if (_back != null)
+          Material(
+            color: LrColors.safelight.withValues(alpha: 0.14),
+            child: InkWell(
+              onTap: _goBack,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                child: Row(children: [
+                  const Icon(Icons.arrow_back_rounded, size: 18, color: LrColors.safelight),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      tr('player.back_to', {
+                        'name': _back!.entries[_back!.index].name,
+                        'n': _back!.index + 1,
+                        'of': _back!.entries.length,
+                      }),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 12.5, color: LrColors.safelight),
+                    ),
+                  ),
+                ]),
+              ),
+            ),
+          ),
         Expanded(child: body),
       ]),
     );
+  }
+
+  /// Explanations recorded here but not made into a video (to make them).
+  Widget? _unmade() {
+    final made = {for (final r in widget.services.recordings.items) ?r.narrationId};
+    final left = [for (final n in _narrations) if (!made.contains(n.id)) n];
+    if (left.isEmpty) return null;
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      const Divider(height: 24),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(14, 0, 14, 4),
+        child: Text(tr('recs.unmade'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: LrColors.muted)),
+      ),
+      for (final n in left)
+        ListTile(
+          dense: true,
+          leading: const Icon(Icons.mic_rounded, size: 18, color: LrColors.danger),
+          title: Text(
+            n.files.isEmpty ? tr('rec.record_name', {'time': playerTime(Duration(milliseconds: n.lengthMs))}) : n.files.first.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          subtitle: Text(
+            '${playerTime(Duration(milliseconds: n.lengthMs))} · ${() {
+              final d = DateTime.fromMillisecondsSinceEpoch(n.createdMs);
+              String two(int v) => v.toString().padLeft(2, '0');
+              return '${d.month}-${two(d.day)} ${two(d.hour)}:${two(d.minute)}';
+            }()}',
+            style: const TextStyle(fontSize: 12, color: LrColors.muted),
+          ),
+          trailing: PopupMenuButton<String>(
+            tooltip: tr('ink.more'),
+            icon: const Icon(Icons.more_vert_rounded, size: 18),
+            onSelected: (a) => unawaited(_narrationAction(n, a)),
+            itemBuilder: (_) => [
+              PopupMenuItem(value: 'remake', child: Text(tr('rec.remake'))),
+              PopupMenuItem(value: 'delete', child: Text(tr('rec.delete_record'), style: const TextStyle(color: LrColors.danger))),
+            ],
+          ),
+          onTap: () => unawaited(_narrationAction(n, 'remake')),
+        ),
+    ]);
   }
 }
 
@@ -2023,11 +2166,14 @@ class _LivePlaybackState extends State<_LivePlayback> {
 // ------------------------------------------------------------------ info
 
 class _InfoPanel extends StatefulWidget {
-  const _InfoPanel({super.key, required this.entry, required this.services, this.from});
+  const _InfoPanel({super.key, required this.entry, required this.services, this.from, this.onMade});
 
   final PlayerEntry entry;
   final AppServices services;
   final String? from;
+
+  /// "Made from it: …" tapped.
+  final VoidCallback? onMade;
 
   @override
   State<_InfoPanel> createState() => _InfoPanelState();
@@ -2070,6 +2216,28 @@ class _InfoPanelState extends State<_InfoPanel> {
             if (codec.isNotEmpty) _row(tr('player.info_codec'), codec.join(' · ')),
             if (widget.from != null) _row(tr('player.info_from'), widget.from!),
             _row(tr('player.info_where'), e.path),
+            ...() {
+              final made = widget.services.recordings.madeFrom(e.path);
+              if (made.isEmpty) return const <Widget>[];
+              final counts = <RecKind, int>{};
+              for (final r in made) {
+                counts[r.kind] = (counts[r.kind] ?? 0) + 1;
+              }
+              return [
+                InkWell(
+                  onTap: widget.onMade,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text(tr('player.info_made'), style: const TextStyle(fontSize: 12, color: LrColors.muted)),
+                      const SizedBox(height: 2),
+                      Text('${[for (final c in counts.entries) '${tr('recs.kind_${c.key.name}')} ${c.value}'].join(' · ')} ›',
+                          style: const TextStyle(fontSize: 13.5, color: LrColors.safelight)),
+                    ]),
+                  ),
+                ),
+              ];
+            }(),
           ]);
         },
       ),

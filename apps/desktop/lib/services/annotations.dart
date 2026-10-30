@@ -146,6 +146,7 @@ class Note {
     required this.inks,
     this.startMs = 0,
     this.holdMs = defaultHoldMs,
+    this.narration = false,
     int? createdMs,
     int? modifiedMs,
   })  : createdMs = createdMs ?? DateTime.now().millisecondsSinceEpoch,
@@ -155,6 +156,9 @@ class Note {
 
   final String id;
   String name;
+
+  /// Drawn while recording an explanation.
+  final bool narration;
   List<InkMark> inks;
   int startMs;
   int holdMs;
@@ -191,6 +195,7 @@ class Note {
         'name': name,
         'start': startMs,
         'hold': holdMs,
+        if (narration) 'narration': true,
         'created': createdMs,
         'modified': modifiedMs,
         'inks': [for (final i in inks) i.toJson()],
@@ -201,6 +206,7 @@ class Note {
         name: j['name'] as String? ?? '',
         startMs: (j['start'] as num?)?.toInt() ?? 0,
         holdMs: (j['hold'] as num?)?.toInt() ?? defaultHoldMs,
+        narration: j['narration'] == true,
         createdMs: (j['created'] as num?)?.toInt(),
         modifiedMs: (j['modified'] as num?)?.toInt(),
         inks: [for (final i in (j['inks'] as List?) ?? const []) if (i is Map<String, dynamic>) InkMark.fromJson(i)],
@@ -479,4 +485,14 @@ class NoteStore extends ChangeNotifier {
     out.sort((a, b) => b.note.modifiedMs.compareTo(a.note.modifiedMs));
     return out;
   }
+}
+
+/// "Circle, arrow": the kinds of marks in [inks] (in the order first used),
+/// for an annotation's name.
+List<InkTool> inkKinds(List<InkMark> inks) {
+  final out = <InkTool>[];
+  for (final i in inks) {
+    if (!out.contains(i.tool)) out.add(i.tool);
+  }
+  return out;
 }

@@ -17,6 +17,7 @@ import '../../services/library_index.dart';
 import '../../services/mic.dart';
 import '../../services/pen_overlay.dart';
 import '../../services/peers.dart';
+import '../../services/recordings.dart';
 import '../../services/video_encoders.dart';
 import '../../services/win_screen.dart';
 import '../app_nav.dart';
@@ -25,10 +26,10 @@ import '../player/ink_paint.dart';
 import '../player/narration.dart';
 import '../player/narration_dialogs.dart';
 import '../player/snapshot.dart';
-import 'pen_bar.dart';
 import '../send_page.dart';
 import '../theme.dart';
-import '../../services/network.dart';
+import 'pen_bar.dart';
+import 'recordings_view.dart';
 
 /// What is recorded.
 enum ScreenMode { screen, window, area }
@@ -114,6 +115,41 @@ class _Gdi {
       WinScreen.excludeFromCapture(false);
     }
     return shot.existsSync() ? shot : null;
+  }
+}
+
+/// The screen pen's "Save as screenshot": the screen under the mouse with
+/// what is drawn on it (LocalRoll's toolbar left out), into the
+/// screenshots, named after the program in front.
+Future<File?> savePenShot(AppServices s) async {
+  final exe = s.ffmpeg.ffmpeg;
+  final screens = WinScreen.screens();
+  if (exe == null || screens.isEmpty) return null;
+  final c = WinScreen.cursor();
+  final scr = screens.firstWhere((x) => x.rect.contains(c), orElse: () => screens.first);
+  final w = WinScreen.windowAt(WinScreen.windows(), scr.rect.center);
+  var program = w == null ? '' : sanitizeFileName(programOf(w.title));
+  if (program.isEmpty) program = tr('recs.whole_screen');
+  final k = await _Gdi.scale(exe);
+  final sep = Platform.pathSeparator;
+  final png = File('${Directory.systemTemp.path}${sep}lr_pen_${DateTime.now().microsecondsSinceEpoch}.png');
+  try {
+    await Process.run(exe, ['-hide_banner', '-loglevel', 'error', '-y', ..._Gdi.input(scr.rect, k, fps: 0, mouse: false), '-frames:v', '1', png.path],
+        environment: _Gdi.env);
+    if (!png.existsSync()) return null;
+    final dir = s.recordings.folder(RecKind.shot);
+    await Directory(dir).create(recursive: true);
+    final out = LibraryIndex.uniquePath(dir, sanitizeFileName('${recName(program, tr('recs.name_pen'), DateTime.now())}.jpg'));
+    final r = await Process.run(exe, ['-hide_banner', '-loglevel', 'error', '-y', '-i', png.path, '-q:v', '2', out]);
+    if (r.exitCode != 0 || !File(out).existsSync()) await png.copy(out);
+    return Snapshots.done(s, File(out), kind: RecKind.shot, source: program);
+  } catch (e) {
+    DiagLog.log('pen', 'screenshot not saved: $e');
+    return null;
+  } finally {
+    try {
+      if (png.existsSync()) png.deleteSync();
+    } catch (_) {}
   }
 }
 
@@ -279,6 +315,7 @@ class ScreenRecorder extends ChangeNotifier {
   /// Ctrl+Shift+R start / stop, Ctrl+Shift+P pause, Ctrl+Shift+D pen.
   void watchKeys(AppServices s) {
     _s = s;
+    PenSession.instance.services = s;
     if (!Platform.isWindows) return;
     Timer.periodic(const Duration(milliseconds: 40), (_) {
       final mod = WinScreen.down(0x11) && WinScreen.down(0x10);
@@ -628,7 +665,7 @@ class ScreenRecorder extends ChangeNotifier {
       final c = AppNav.instance.navigatorKey.currentContext;
       if (c == null || !c.mounted) return;
       final r = await recordedDialog(c, length, OriginalSound.none, screen: true,
-          defaultName: recordingName('', tr('screen.file_name'), DateTime.now()));
+          defaultName: recName(_source, tr('recs.name_screen'), DateTime.now()));
       if (r == null) return;
       final c2 = AppNav.instance.navigatorKey.currentContext;
       if (c2 == null || !c2.mounted) return;
@@ -639,7 +676,7 @@ class ScreenRecorder extends ChangeNotifier {
         _message(tr('rec.discarded'));
         return;
       }
-      await _make(c2, length, voice.existsSync() ? voice : null, send: r.choice == RecordedChoice.saveSend, name: r.name);
+      await _make(c2, length, voice.existsSync() ? voice : null, send: r.choice == RecordedChoice.saveSend, name: r.name, source: _source);
       return;
     }
   }
@@ -650,7 +687,18 @@ class ScreenRecorder extends ChangeNotifier {
     } catch (_) {}
   }
 
-  Future<void> _make(BuildContext context, int length, File? voice, {required bool send, required String name}) async {
+  /// What was recorded: the program, "Whole screen" or "Area".
+  String get _source {
+    final su = setup;
+    if (su == null) return tr('recs.whole_screen');
+    return switch (su.mode) {
+      ScreenMode.window => sanitizeFileName(programOf(su.window?.title ?? '')).isEmpty ? tr('recs.window') : sanitizeFileName(programOf(su.window!.title)),
+      ScreenMode.area => tr('recs.area'),
+      ScreenMode.screen => tr('recs.whole_screen'),
+    };
+  }
+
+  Future<void> _make(BuildContext context, int length, File? voice, {required bool send, required String name, String source = ''}) async {
     final s = _s!;
     final maker = _ScreenComposer(s);
     final progress = ValueNotifier<double>(0);
@@ -668,6 +716,7 @@ class ScreenRecorder extends ChangeNotifier {
       firstPage: _firstPage,
       voice: voice,
       name: name,
+      source: source,
       fps: setup!.fps,
       onProgress: (p) => progress.value = p,
     );
@@ -721,22 +770,7 @@ class ScreenRecorder extends ChangeNotifier {
       await sendIt();
       return;
     }
-    messenger.showSnackBar(SnackBar(
-      duration: const Duration(seconds: 8),
-      content: Row(children: [
-        Expanded(child: Text(tr('clip.saved', {'folder': f.parent.path.split(Platform.pathSeparator).last}))),
-        TextButton(onPressed: () => revealInExplorer(f.path), child: Text(tr('common.show_in_folder'))),
-        const SizedBox(width: 4),
-        FilledButton.icon(
-          onPressed: () {
-            messenger.hideCurrentSnackBar();
-            unawaited(sendIt());
-          },
-          icon: const Icon(Icons.send_rounded, size: 16),
-          label: Text(tr('player.send')),
-        ),
-      ]),
-    ));
+    showSavedBar(c, s, f);
   }
 }
 
@@ -806,6 +840,7 @@ class _ScreenComposer {
     required int firstPage,
     required File? voice,
     required String name,
+    String source = '',
     required int fps,
     required void Function(double) onProgress,
   }) async {
@@ -914,7 +949,7 @@ class _ScreenComposer {
       ]);
       if (!ok || !File(out).existsSync()) return null;
       onProgress(1);
-      return Snapshots.done(s, File(out), video: true);
+      return Snapshots.done(s, File(out), video: true, kind: RecKind.screen, source: source, lengthMs: length);
     } catch (e) {
       DiagLog.log('screen', 'not made: $e');
       return null;

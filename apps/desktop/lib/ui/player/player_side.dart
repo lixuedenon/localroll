@@ -7,11 +7,14 @@ enum _Kind { all, video, photo }
 /// The files of this list (what the arrows go through): thumbnails, the
 /// one shown highlighted; all, only videos or only photos.
 class _EntryList extends StatefulWidget {
-  const _EntryList({super.key, required this.services, required this.entries, required this.index, required this.onPick});
+  const _EntryList({super.key, required this.services, required this.entries, required this.index, required this.onPick, this.source});
 
   final AppServices services;
   final List<PlayerEntry> entries;
   final int index;
+
+  /// Where the list came from.
+  final String? source;
   final ValueChanged<int> onPick;
 
   @override
@@ -88,6 +91,23 @@ class _EntryListState extends State<_EntryList> {
     final videos = widget.entries.where((e) => e.video).length;
     final photos = widget.entries.length - videos;
     return Column(children: [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 2),
+        child: Row(children: [
+          Expanded(
+            child: Text(
+              tr('player.from_list', {'where': widget.source ?? tr('player.src_files'), 'n': widget.entries.length}),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 12, color: LrColors.muted),
+            ),
+          ),
+          Tooltip(
+            message: tr('player.list_marks'),
+            child: const Icon(Icons.info_outline_rounded, size: 16, color: LrColors.muted),
+          ),
+        ]),
+      ),
       if (videos > 0 && photos > 0)
         Padding(
           padding: const EdgeInsets.fromLTRB(10, 8, 10, 4),
@@ -108,7 +128,7 @@ class _EntryListState extends State<_EntryList> {
         ),
       Expanded(
         child: ListenableBuilder(
-          listenable: widget.services.notes,
+          listenable: Listenable.merge([widget.services.notes, widget.services.recordings]),
           builder: (context, _) => ListView.builder(
             controller: _scroll,
             itemExtent: _row,
@@ -119,6 +139,7 @@ class _EntryListState extends State<_EntryList> {
               final e = widget.entries[i];
               final on = i == widget.index;
               final notes = e.item == null ? 0 : widget.services.notes.countFor(e.item!);
+              final made = widget.services.recordings.madeFrom(e.path).length;
               return Material(
                 color: on ? LrColors.safelight.withValues(alpha: 0.16) : Colors.transparent,
                 child: InkWell(
@@ -159,6 +180,12 @@ class _EntryListState extends State<_EntryList> {
                               const Icon(Icons.brush_rounded, size: 12, color: LrColors.safelight),
                               const SizedBox(width: 2),
                               Text('$notes', style: const TextStyle(fontSize: 11.5, color: LrColors.safelight)),
+                            ],
+                            if (made > 0) ...[
+                              const SizedBox(width: 6),
+                              const Icon(Icons.mic_rounded, size: 12, color: LrColors.safelight),
+                              const SizedBox(width: 2),
+                              Text('$made', style: const TextStyle(fontSize: 11.5, color: LrColors.safelight)),
                             ],
                           ]),
                         ]),

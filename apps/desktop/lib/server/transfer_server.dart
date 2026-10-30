@@ -552,6 +552,9 @@ class TransferServer extends ChangeNotifier {
   /// ("Recently deleted", 30 days).
   Future<int> Function(List<MediaItem> items)? deleter;
 
+  /// LocalRoll's own recordings: hidden from phones not allowed to see them.
+  bool Function(MediaItem item, String deviceId)? hiddenRecording;
+
   /// Send [items] to phone [d] the usual way (converted, it saves them);
   /// how many were queued. Throws [StateError] when it can't receive now.
   Future<int> Function(TrustedDevice d, List<MediaItem> items)? sendToPhone;
@@ -1086,6 +1089,7 @@ class TransferServer extends ChangeNotifier {
     final item = library.findByRel(rel);
     if (item == null) return null;
     if (item.private && !item.ownedBy(device.id)) return null; // someone else's "only me"
+    if (hiddenRecording?.call(item, device.id) ?? false) return null;
     return item;
   }
 
@@ -1145,6 +1149,7 @@ class TransferServer extends ChangeNotifier {
         if ((kind == null || i.kind.name == kind) &&
             (i.kind == MediaKind.image || i.kind == MediaKind.video) &&
             !(i.private && !i.ownedBy(device.id)) &&
+            !(hiddenRecording?.call(i, device.id) ?? false) &&
             found(TextIndex.mediaKey(i), i.name)) {
           entries.add((
             order(TextIndex.mediaKey(i), i.name, byReceived ? i.receivedMs : i.captureMs),

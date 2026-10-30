@@ -215,19 +215,23 @@ class _NotesPanelState extends State<NotesPanel> {
                                   [
                                     if (widget.entry.video) _time(n.startMs),
                                     tr('ink.n_marks', {'n': n.inks.length}),
+                                    if (n.narration) tr('ink.from_narration'),
                                   ].join(' · '),
                                   style: const TextStyle(fontSize: 12, color: LrColors.muted),
                                 ),
                               ]),
                             ),
-                            IconButton(
-                              tooltip: tr('ink.more'),
-                              onPressed: () {
-                                final box = context.findRenderObject() as RenderBox?;
-                                final at = box == null ? Offset.zero : box.localToGlobal(box.size.centerRight(Offset.zero));
-                                _menu(context, n, at);
-                              },
-                              icon: const Icon(Icons.more_vert_rounded, size: 18),
+                            Builder(
+                              builder: (bc) => IconButton(
+                                tooltip: tr('ink.more'),
+                                onPressed: () {
+                                  final ro = bc.findRenderObject();
+                                  final box = ro is RenderBox ? ro : null;
+                                  final at = box == null ? Offset.zero : box.localToGlobal(box.size.bottomLeft(Offset.zero));
+                                  _menu(context, n, at);
+                                },
+                                icon: const Icon(Icons.more_vert_rounded, size: 18),
+                              ),
                             ),
                           ]),
                         ),
