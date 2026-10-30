@@ -929,5 +929,12 @@
   "features.convert": "Formate umwandeln",
   "features.convert_tip": "MP4, MOV, WebM, GIF, MP3, JPEG, PNG, WebP … – das Original bleibt.",
   "features.phone": "Vom Handy aus stöbern",
-  "features.phone_tip": "Fotos durchsehen, suchen und aufs Handy holen – mit Kontrolle, wer was sieht."
+  "features.phone_tip": "Fotos durchsehen, suchen und aufs Handy holen – mit Kontrolle, wer was sieht.",
+  "home.issues_see": "Alle ansehen",
+  "rec.holds": "Enthält: {what}",
+  "rec.around": "Etwas vom Originalvideo davor und danach mitnehmen:",
+  "rec.before": "Davor",
+  "rec.after": "Danach",
+  "rec.name": "Dateiname",
+  "rec.name_part": "Erklärung"
 }

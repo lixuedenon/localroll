@@ -503,5 +503,6 @@
   "photos.backed_up": "PC에 백업됨",
   "photos.not_backed_up": "아직 백업 안 됨",
   "photos.send": "보내기…",
-  "photos.delete": "삭제"
+  "photos.delete": "삭제",
+  "settings.log_send": "PC로 보내기"
 }

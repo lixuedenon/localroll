@@ -503,5 +503,6 @@
   "photos.backed_up": "Auf dem PC gesichert",
   "photos.not_backed_up": "Noch nicht gesichert",
   "photos.send": "Senden an…",
-  "photos.delete": "Löschen"
+  "photos.delete": "Löschen",
+  "settings.log_send": "An einen PC senden"
 }

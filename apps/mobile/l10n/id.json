@@ -503,5 +503,6 @@
   "photos.backed_up": "Sudah dicadangkan ke PC",
   "photos.not_backed_up": "Belum dicadangkan",
   "photos.send": "Kirim ke…",
-  "photos.delete": "Hapus"
+  "photos.delete": "Hapus",
+  "settings.log_send": "Kirim ke PC"
 }

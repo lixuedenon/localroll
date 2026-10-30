@@ -503,5 +503,6 @@
   "photos.backed_up": "Sauvegardée sur le PC",
   "photos.not_backed_up": "Pas encore sauvegardée",
   "photos.send": "Envoyer à…",
-  "photos.delete": "Supprimer"
+  "photos.delete": "Supprimer",
+  "settings.log_send": "Envoyer à un PC"
 }

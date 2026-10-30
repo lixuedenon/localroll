@@ -929,5 +929,12 @@
   "features.convert": "格式转换",
   "features.convert_tip": "MP4、MOV、WebM、GIF、MP3、JPEG、PNG、WebP 等常用格式互转，原文件不变。",
   "features.phone": "手机看电脑相册",
-  "features.phone_tip": "在手机上浏览、搜索、保存电脑里的照片，谁能看什么由你定。"
+  "features.phone_tip": "在手机上浏览、搜索、保存电脑里的照片，谁能看什么由你定。",
+  "home.issues_see": "查看",
+  "rec.holds": "包含：{what}",
+  "rec.around": "前后各多带一点原视频：",
+  "rec.before": "前面",
+  "rec.after": "后面",
+  "rec.name": "文件名",
+  "rec.name_part": "讲解片段"
 }

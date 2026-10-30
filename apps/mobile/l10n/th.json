@@ -503,5 +503,6 @@
   "photos.backed_up": "สำรองไว้ที่พีซีแล้ว",
   "photos.not_backed_up": "ยังไม่ได้สำรอง",
   "photos.send": "ส่งไปที่…",
-  "photos.delete": "ลบ"
+  "photos.delete": "ลบ",
+  "settings.log_send": "ส่งไปยังคอมพิวเตอร์"
 }

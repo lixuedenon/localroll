@@ -393,6 +393,9 @@ class _VideoViewState extends State<_VideoView> implements _ViewHandle {
   int get _durMs => _player.state.duration.inMilliseconds;
 
   @override
+  void pause() => unawaited(_player.pause());
+
+  @override
   void clipStep() {
     if (_cin != null && _cout != null) {
       widget.onClip(_cin!, _cout!);

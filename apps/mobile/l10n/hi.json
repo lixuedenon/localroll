@@ -503,5 +503,6 @@
   "photos.backed_up": "PC पर बैकअप हो गया",
   "photos.not_backed_up": "अभी बैकअप नहीं",
   "photos.send": "भेजें…",
-  "photos.delete": "मिटाएँ"
+  "photos.delete": "मिटाएँ",
+  "settings.log_send": "कंप्यूटर पर भेजें"
 }

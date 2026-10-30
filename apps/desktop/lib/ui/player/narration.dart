@@ -140,11 +140,20 @@ class NarrationFile {
 /// A whole recording: kept (with its voice) so it can be made again later,
 /// e.g. with the original sound another way.
 class NarrationSession {
-  NarrationSession({required this.id, required this.createdMs, List<NarrationFile>? files, List<NarrationSample>? samples, List<NarrationInk>? inks, this.lengthMs = 0, Set<String>? noteIds})
+  NarrationSession(
+      {required this.id,
+      required this.createdMs,
+      List<NarrationFile>? files,
+      List<NarrationSample>? samples,
+      List<NarrationInk>? inks,
+      this.lengthMs = 0,
+      Set<String>? noteIds,
+      Map<String, int>? edited})
       : files = files ?? [],
         samples = samples ?? [],
         inks = inks ?? [],
-        noteIds = noteIds ?? {};
+        noteIds = noteIds ?? {},
+        edited = edited ?? {};
 
   final String id;
   final int createdMs;
@@ -156,6 +165,11 @@ class NarrationSession {
   /// Annotations made from what was drawn (left out when drawing those as
   /// they were before, so nothing shows twice).
   final Set<String> noteIds;
+
+  /// Annotations from before that were changed while recording: from this
+  /// moment on (ms), their marks are drawn from what was recorded (so a
+  /// mark rubbed out goes at that moment, not from the start).
+  final Map<String, int> edited;
 
   /// Where it is kept (with voice.wav).
   static Directory folderOf(Directory dataDir, String id) =>
@@ -170,6 +184,7 @@ class NarrationSession {
         'samples': [for (final s in samples) s.toJson()],
         'inks': [for (final i in inks) i.toJson()],
         'notes': [...noteIds],
+        'edited': edited,
       };
 
   static NarrationSession fromJson(Map<String, dynamic> j) => NarrationSession(
@@ -180,6 +195,10 @@ class NarrationSession {
         samples: [for (final s in (j['samples'] as List?) ?? const []) NarrationSample.fromJson(s as Map<String, dynamic>)],
         inks: [for (final i in (j['inks'] as List?) ?? const []) NarrationInk.fromJson(i as Map<String, dynamic>)],
         noteIds: {for (final x in (j['notes'] as List?) ?? const []) '$x'},
+        edited: {
+          for (final e in ((j['edited'] as Map?) ?? const {}).entries)
+            if (e.value is num) '${e.key}': (e.value as num).toInt(),
+        },
       );
 
   /// Every recording kept on this PC, newest first.
@@ -205,7 +224,20 @@ class NarrationSession {
 /// [toMs] (any speed), or standing still at [fromMs]; always [lengthMs]
 /// long in the recording, and one framing ([zoom]).
 class NarrationPiece {
-  NarrationPiece({required this.file, required this.startT, required this.endT, required this.fromMs, required this.toMs, required this.still, required this.zoom});
+  NarrationPiece({
+    required this.file,
+    required this.startT,
+    required this.endT,
+    required this.fromMs,
+    required this.toMs,
+    required this.still,
+    required this.zoom,
+    this.extra = false,
+  });
+
+  /// Before / after the explanation: the original as it is (its own sound,
+  /// no voice, nothing drawn from the recording).
+  final bool extra;
 
   final int file;
   final int startT;
@@ -345,6 +377,9 @@ class NarrationComposer {
     required OriginalSound sound,
     required List<NoteSet?> notes,
     required void Function(double) onProgress,
+    int beforeMs = 0,
+    int afterMs = 0,
+    String? name,
   }) async {
     final ff = s.ffmpeg;
     final exe = ff.ffmpeg;
@@ -353,6 +388,31 @@ class NarrationComposer {
     if (enc == null) return null;
     final pieces = narrationPieces(n);
     if (pieces.isEmpty) return null;
+    // A little of the original before and after: what led up to it, what
+    // followed (videos only).
+    var preMs = 0;
+    final first = pieces.first, last = pieces.last;
+    const whole = Rect.fromLTWH(0, 0, 1, 1);
+    if (beforeMs > 0 && n.files[first.file].video) {
+      preMs = math.min(beforeMs, first.fromMs);
+      if (preMs >= 200) {
+        pieces.insert(0, NarrationPiece(file: first.file, startT: 0, endT: preMs, fromMs: first.fromMs - preMs, toMs: first.fromMs, still: false, zoom: whole, extra: true));
+      } else {
+        preMs = 0;
+      }
+    }
+    if (afterMs > 0 && n.files[last.file].video) {
+      final from = last.still ? last.fromMs : last.toMs;
+      final dur = (((await ff.probe(n.files[last.file].path)).durationSec ?? 0) * 1000).round();
+      final len = dur > 0 ? math.min(afterMs, dur - from) : afterMs;
+      if (len >= 200) {
+        pieces.add(NarrationPiece(file: last.file, startT: 0, endT: len, fromMs: from, toMs: from + len, still: false, zoom: whole, extra: true));
+      }
+    }
+    for (final p in pieces) {
+      DiagLog.log('player', 'explanation piece: file ${p.file} (${n.files[p.file].video ? 'video' : 'photo'}) '
+          '${p.extra ? 'around ' : ''}${p.still ? 'still at' : 'from'} ${p.fromMs} ms${p.still ? '' : ' to ${p.toMs} ms'}, ${p.lengthMs} ms');
+    }
     final f0 = n.files[pieces.first.file];
     final k = math.min(1.0, 3840 / math.max(f0.width, f0.height));
     final w = _even(f0.width * k), h = _even(f0.height * k);
@@ -407,10 +467,11 @@ class NarrationComposer {
           input = ['-ss', _secs(p.fromMs), '-t', _secs(srcLen + 100), '-i', src];
           vf = '[0:v]$frame,setpts=(PTS-STARTPTS)*$stretch,fps=$fps[base]';
         }
-        final keepSound = file.video && si.audio && p.normalSpeed && sound != OriginalSound.none;
+        // Around the explanation: the original's own sound, as it is.
+        final keepSound = file.video && si.audio && (p.extra || (p.normalSpeed && sound != OriginalSound.none));
         final af = keepSound
             ? '[0:a]atrim=duration=$len,asetpts=PTS-STARTPTS,aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo,'
-                'volume=${sound == OriginalSound.quiet ? '0.3' : '1.0'},apad=whole_dur=$len[aout]'
+                'volume=${sound == OriginalSound.quiet && !p.extra ? '0.3' : '1.0'},apad=whole_dur=$len[aout]'
             : 'anullsrc=channel_layout=stereo:sample_rate=48000,atrim=duration=$len[aout]';
         final frames = (p.lengthMs / 1000 * fps).ceil() + 1;
         final args = [
@@ -459,8 +520,8 @@ class NarrationComposer {
       final base = f0.name.contains('.') ? f0.name.substring(0, f0.name.lastIndexOf('.')) : f0.name;
       final stamp = DateTime.fromMillisecondsSinceEpoch(n.createdMs);
       String two(int v) => v.toString().padLeft(2, '0');
-      final out = LibraryIndex.uniquePath(
-          folder, sanitizeFileName('${base}_${stamp.year}${two(stamp.month)}${two(stamp.day)}-${two(stamp.hour)}${two(stamp.minute)}.mp4'));
+      final fallback = '${base}_${stamp.year}${two(stamp.month)}${two(stamp.day)}-${two(stamp.hour)}${two(stamp.minute)}';
+      final out = LibraryIndex.uniquePath(folder, sanitizeFileName('${(name ?? '').trim().isEmpty ? fallback : name!.trim()}.mp4'));
       final hasVoice = voice.existsSync() && voice.lengthSync() > 44;
       final ok = await _run(exe, [
         '-hide_banner', '-loglevel', 'error', '-y',
@@ -468,7 +529,9 @@ class NarrationComposer {
         if (hasVoice) ...['-i', voice.path],
         if (hasVoice) ...[
           '-filter_complex',
-          '[1:a]aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo,apad[v];[0:a][v]amix=inputs=2:duration=first:normalize=0[a]',
+          // The voice starts where the explanation starts (after the lead-in).
+          '[1:a]aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo,${preMs > 0 ? 'adelay=$preMs|$preMs,' : ''}apad[v];'
+              '[0:a][v]amix=inputs=2:duration=first:normalize=0[a]',
           '-map', '0:v', '-map', '[a]',
         ] else ...['-map', '0:v', '-map', '0:a'],
         '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k',
@@ -506,7 +569,10 @@ class NarrationComposer {
     // The file's own annotations (not those made from this recording).
     final set = p.file < notes.length ? notes[p.file] : null;
     if (set != null) {
-      final own = [for (final m in set.notes) if (!n.noteIds.contains(m.id)) m];
+      final own = [
+        for (final m in set.notes)
+          if (!n.noteIds.contains(m.id) && (p.extra || n.edited[m.id] == null || t < n.edited[m.id]!)) m,
+      ];
       final FreezeNow? fz = x?.freezeNote == null
           ? null
           : () {
@@ -517,9 +583,11 @@ class NarrationComposer {
               }
               return null;
             }();
-      paintNotes(c, pic, own, video: file.video, now: x?.pos ?? p.fromMs, freeze: fz);
+      final pos = p.extra ? p.fromMs + (t - p.startT) : (x?.pos ?? p.fromMs);
+      paintNotes(c, pic, own, video: file.video, now: pos, freeze: p.extra ? null : fz);
     }
     for (final i in n.inks) {
+      if (p.extra) break;
       if (i.file != p.file || t < i.startT || (i.removedT != null && t >= i.removedT!)) continue;
       final m = i.ink.copy()
         ..times = i.times

@@ -929,5 +929,12 @@
   "features.convert": "تحويل الصيغ",
   "features.convert_tip": "MP4 وMOV وWebM وGIF وMP3 وJPEG وPNG وWebP…؛ الأصل لا يتغير.",
   "features.phone": "الهاتف يتصفح هذا الكمبيوتر",
-  "features.phone_tip": "تصفّح الصور وابحث واحفظ ما تريد على الهاتف، مع التحكم بمن يرى ماذا."
+  "features.phone_tip": "تصفّح الصور وابحث واحفظ ما تريد على الهاتف، مع التحكم بمن يرى ماذا.",
+  "home.issues_see": "عرض الكل",
+  "rec.holds": "يتضمن: {what}",
+  "rec.around": "أضف قليلاً من الفيديو الأصلي قبل الشرح وبعده:",
+  "rec.before": "قبل",
+  "rec.after": "بعد",
+  "rec.name": "اسم الملف",
+  "rec.name_part": "مقطع_شرح"
 }

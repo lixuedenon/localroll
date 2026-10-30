@@ -929,5 +929,12 @@
   "features.convert": "แปลงรูปแบบไฟล์",
   "features.convert_tip": "MP4, MOV, WebM, GIF, MP3, JPEG, PNG, WebP… ต้นฉบับไม่เปลี่ยน",
   "features.phone": "ดูคอมพิวเตอร์เครื่องนี้จากมือถือ",
-  "features.phone_tip": "ดู ค้นหา และบันทึกลงมือถือ กำหนดได้ว่าใครเห็นอะไร"
+  "features.phone_tip": "ดู ค้นหา และบันทึกลงมือถือ กำหนดได้ว่าใครเห็นอะไร",
+  "home.issues_see": "ดูทั้งหมด",
+  "rec.holds": "ประกอบด้วย: {what}",
+  "rec.around": "ใส่วิดีโอต้นฉบับก่อนและหลังเล็กน้อย:",
+  "rec.before": "ก่อน",
+  "rec.after": "หลัง",
+  "rec.name": "ชื่อไฟล์",
+  "rec.name_part": "คำอธิบาย"
 }

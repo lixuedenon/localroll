@@ -503,5 +503,6 @@
   "photos.backed_up": "Đã sao lưu lên máy tính",
   "photos.not_backed_up": "Chưa sao lưu",
   "photos.send": "Gửi tới…",
-  "photos.delete": "Xóa"
+  "photos.delete": "Xóa",
+  "settings.log_send": "Gửi tới máy tính"
 }

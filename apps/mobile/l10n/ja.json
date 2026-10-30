@@ -503,5 +503,6 @@
   "photos.backed_up": "PC にバックアップ済み",
   "photos.not_backed_up": "まだバックアップしていません",
   "photos.send": "送る…",
-  "photos.delete": "削除"
+  "photos.delete": "削除",
+  "settings.log_send": "パソコンへ送る"
 }

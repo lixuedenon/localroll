@@ -929,5 +929,12 @@
   "features.convert": "Convertir les formats",
   "features.convert_tip": "MP4, MOV, WebM, GIF, MP3, JPEG, PNG, WebP… — l’original reste intact.",
   "features.phone": "Parcourir ce PC depuis le téléphone",
-  "features.phone_tip": "Parcourez, cherchez et enregistrez sur le téléphone, en contrôlant qui voit quoi."
+  "features.phone_tip": "Parcourez, cherchez et enregistrez sur le téléphone, en contrôlant qui voit quoi.",
+  "home.issues_see": "Tout voir",
+  "rec.holds": "Contient : {what}",
+  "rec.around": "Inclure un peu de la vidéo d'origine avant et après :",
+  "rec.before": "Avant",
+  "rec.after": "Après",
+  "rec.name": "Nom du fichier",
+  "rec.name_part": "explication"
 }

@@ -116,7 +116,7 @@ class _DashboardPageState extends State<DashboardPage> {
               _box(context, width: 2000, child: _recent(context, items)),
               if (_issues().isNotEmpty) ...[
                 const SizedBox(height: 16),
-                _box(context, width: 2000, child: _attention(context), border: LrColors.safelight),
+                KeyedSubtree(key: _attentionKey, child: _box(context, width: 2000, child: _attention(context), border: LrColors.safelight)),
               ],
             ],
           ),
@@ -168,13 +168,24 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
+  final GlobalKey _attentionKey = GlobalKey();
+
+  /// What needs doing: one thing is named and opens where it is done;
+  /// several: the list further down comes into view.
   Widget _statusStat() {
-    final n = _issues().length;
+    final issues = _issues();
+    final n = issues.length;
+    void showList() {
+      final c = _attentionKey.currentContext;
+      if (c != null) Scrollable.ensureVisible(c, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+    }
+
     return _stat(
       tr('home.status'),
       n == 0 ? tr('home.all_good_short') : tr('home.issues', {'count': n}),
-      sub: n == 0 ? tr('home.all_good_sub') : null,
-      subColor: LrColors.muted,
+      sub: n == 0 ? tr('home.all_good_sub') : (n == 1 ? '${issues.first.$2} ›' : '${tr('home.issues_see')} ›'),
+      subColor: n == 0 ? LrColors.muted : LrColors.safelight,
+      onTap: n == 0 ? null : (n == 1 && issues.first.$3 != null ? issues.first.$3 : showList),
     );
   }
 

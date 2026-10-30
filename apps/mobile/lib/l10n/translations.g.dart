@@ -505,6 +505,7 @@ const Map<String, Map<String, String>> translations = {
     'photos.not_backed_up': 'Not backed up yet',
     'photos.send': 'Send to…',
     'photos.delete': 'Delete',
+    'settings.log_send': 'Send to a PC',
   },
   'zh': {
     'common.cancel': '取消',
@@ -1008,6 +1009,7 @@ const Map<String, Map<String, String>> translations = {
     'photos.not_backed_up': '还没备份',
     'photos.send': '发送到…',
     'photos.delete': '删除',
+    'settings.log_send': '发送到电脑',
   },
   'zh_Hant': {
     'common.cancel': '取消',
@@ -1511,6 +1513,7 @@ const Map<String, Map<String, String>> translations = {
     'photos.not_backed_up': '還沒備份',
     'photos.send': '傳送到…',
     'photos.delete': '刪除',
+    'settings.log_send': '傳送到電腦',
   },
   'ja': {
     'common.cancel': 'キャンセル',
@@ -2014,6 +2017,7 @@ const Map<String, Map<String, String>> translations = {
     'photos.not_backed_up': 'まだバックアップしていません',
     'photos.send': '送る…',
     'photos.delete': '削除',
+    'settings.log_send': 'パソコンへ送る',
   },
   'ko': {
     'common.cancel': '취소',
@@ -2517,6 +2521,7 @@ const Map<String, Map<String, String>> translations = {
     'photos.not_backed_up': '아직 백업 안 됨',
     'photos.send': '보내기…',
     'photos.delete': '삭제',
+    'settings.log_send': 'PC로 보내기',
   },
   'es': {
     'common.cancel': 'Cancelar',
@@ -3020,6 +3025,7 @@ const Map<String, Map<String, String>> translations = {
     'photos.not_backed_up': 'Aún sin copia',
     'photos.send': 'Enviar a…',
     'photos.delete': 'Borrar',
+    'settings.log_send': 'Enviar a un PC',
   },
   'fr': {
     'common.cancel': 'Annuler',
@@ -3523,6 +3529,7 @@ const Map<String, Map<String, String>> translations = {
     'photos.not_backed_up': 'Pas encore sauvegardée',
     'photos.send': 'Envoyer à…',
     'photos.delete': 'Supprimer',
+    'settings.log_send': 'Envoyer à un PC',
   },
   'de': {
     'common.cancel': 'Abbrechen',
@@ -4026,6 +4033,7 @@ const Map<String, Map<String, String>> translations = {
     'photos.not_backed_up': 'Noch nicht gesichert',
     'photos.send': 'Senden an…',
     'photos.delete': 'Löschen',
+    'settings.log_send': 'An einen PC senden',
   },
   'pt': {
     'common.cancel': 'Cancelar',
@@ -4529,6 +4537,7 @@ const Map<String, Map<String, String>> translations = {
     'photos.not_backed_up': 'Ainda sem cópia',
     'photos.send': 'Enviar para…',
     'photos.delete': 'Apagar',
+    'settings.log_send': 'Enviar para um PC',
   },
   'ru': {
     'common.cancel': 'Отмена',
@@ -5032,6 +5041,7 @@ const Map<String, Map<String, String>> translations = {
     'photos.not_backed_up': 'Ещё не сохранено',
     'photos.send': 'Отправить…',
     'photos.delete': 'Удалить',
+    'settings.log_send': 'Отправить на ПК',
   },
   'it': {
     'common.cancel': 'Annulla',
@@ -5535,6 +5545,7 @@ const Map<String, Map<String, String>> translations = {
     'photos.not_backed_up': 'Non ancora salvata',
     'photos.send': 'Invia a…',
     'photos.delete': 'Elimina',
+    'settings.log_send': 'Invia a un PC',
   },
   'ar': {
     'common.cancel': 'إلغاء',
@@ -6038,6 +6049,7 @@ const Map<String, Map<String, String>> translations = {
     'photos.not_backed_up': 'لم يُنسخ احتياطيًا بعد',
     'photos.send': 'إرسال إلى…',
     'photos.delete': 'حذف',
+    'settings.log_send': 'إرسال إلى كمبيوتر',
   },
   'hi': {
     'common.cancel': 'रद्द करें',
@@ -6541,6 +6553,7 @@ const Map<String, Map<String, String>> translations = {
     'photos.not_backed_up': 'अभी बैकअप नहीं',
     'photos.send': 'भेजें…',
     'photos.delete': 'मिटाएँ',
+    'settings.log_send': 'कंप्यूटर पर भेजें',
   },
   'id': {
     'common.cancel': 'Batal',
@@ -7044,6 +7057,7 @@ const Map<String, Map<String, String>> translations = {
     'photos.not_backed_up': 'Belum dicadangkan',
     'photos.send': 'Kirim ke…',
     'photos.delete': 'Hapus',
+    'settings.log_send': 'Kirim ke PC',
   },
   'vi': {
     'common.cancel': 'Hủy',
@@ -7547,6 +7561,7 @@ const Map<String, Map<String, String>> translations = {
     'photos.not_backed_up': 'Chưa sao lưu',
     'photos.send': 'Gửi tới…',
     'photos.delete': 'Xóa',
+    'settings.log_send': 'Gửi tới máy tính',
   },
   'th': {
     'common.cancel': 'ยกเลิก',
@@ -8050,6 +8065,7 @@ const Map<String, Map<String, String>> translations = {
     'photos.not_backed_up': 'ยังไม่ได้สำรอง',
     'photos.send': 'ส่งไปที่…',
     'photos.delete': 'ลบ',
+    'settings.log_send': 'ส่งไปยังคอมพิวเตอร์',
   },
   'tr': {
     'common.cancel': 'İptal',
@@ -8553,5 +8569,6 @@ const Map<String, Map<String, String>> translations = {
     'photos.not_backed_up': 'Henüz yedeklenmedi',
     'photos.send': 'Gönder…',
     'photos.delete': 'Sil',
+    'settings.log_send': 'Bir PC’ye gönder',
   },
 };

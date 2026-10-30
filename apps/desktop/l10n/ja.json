@@ -929,5 +929,12 @@
   "features.convert": "形式の変換",
   "features.convert_tip": "MP4、MOV、WebM、GIF、MP3、JPEG、PNG、WebP…。元はそのまま。",
   "features.phone": "スマホからこのパソコンを見る",
-  "features.phone_tip": "見て、探して、スマホに保存。誰が何を見られるかも決められます。"
+  "features.phone_tip": "見て、探して、スマホに保存。誰が何を見られるかも決められます。",
+  "home.issues_see": "一覧を見る",
+  "rec.holds": "内容：{what}",
+  "rec.around": "前後に元の動画を少し含める：",
+  "rec.before": "前",
+  "rec.after": "後",
+  "rec.name": "ファイル名",
+  "rec.name_part": "解説"
 }

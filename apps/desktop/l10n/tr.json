@@ -929,5 +929,12 @@
   "features.convert": "Biçim dönüştür",
   "features.convert_tip": "MP4, MOV, WebM, GIF, MP3, JPEG, PNG, WebP… — orijinal aynen kalır.",
   "features.phone": "Telefondan bu PC’ye göz at",
-  "features.phone_tip": "Göz atın, arayın, telefona kaydedin; kimin neyi göreceğini siz seçin."
+  "features.phone_tip": "Göz atın, arayın, telefona kaydedin; kimin neyi göreceğini siz seçin.",
+  "home.issues_see": "Hepsini gör",
+  "rec.holds": "İçerik: {what}",
+  "rec.around": "Öncesinden ve sonrasından biraz orijinal video ekle:",
+  "rec.before": "Önce",
+  "rec.after": "Sonra",
+  "rec.name": "Dosya adı",
+  "rec.name_part": "anlatım"
 }

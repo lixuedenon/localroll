@@ -503,5 +503,6 @@
   "photos.backed_up": "Backed up to the PC",
   "photos.not_backed_up": "Not backed up yet",
   "photos.send": "Send to…",
-  "photos.delete": "Delete"
+  "photos.delete": "Delete",
+  "settings.log_send": "Send to a PC"
 }

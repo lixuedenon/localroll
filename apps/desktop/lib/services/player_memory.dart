@@ -86,6 +86,11 @@ class PlayerMemory extends ChangeNotifier {
   int clipBefore = 10;
   int clipAfter = 10;
 
+  /// An explanation also takes this many seconds of the original before /
+  /// after it (0–30).
+  int narrationBefore = 5;
+  int narrationAfter = 5;
+
   /// The list on the right of the player is open, and which tab.
   bool sideOpen = true;
   String sideTab = 'list';
@@ -135,6 +140,8 @@ class PlayerMemory extends ChangeNotifier {
       sideTab = j['sideTab'] as String? ?? 'list';
       clipBefore = ((j['clipBefore'] as num?)?.toInt() ?? 10).clamp(0, 60);
       clipAfter = ((j['clipAfter'] as num?)?.toInt() ?? 10).clamp(0, 60);
+      narrationBefore = ((j['narrBefore'] as num?)?.toInt() ?? 5).clamp(0, 30);
+      narrationAfter = ((j['narrAfter'] as num?)?.toInt() ?? 5).clamp(0, 30);
       last = RecentEntry.fromJson(j['last']);
       lastKey = j['lastKey'] as String?;
     } catch (e) {
@@ -234,6 +241,12 @@ class PlayerMemory extends ChangeNotifier {
     _save();
   }
 
+  void setNarrationAround(int before, int after) {
+    narrationBefore = before.clamp(0, 30);
+    narrationAfter = after.clamp(0, 30);
+    _save();
+  }
+
   void setNarrationsFolder(String name) {
     narrationsFolder = name;
     _save();
@@ -292,6 +305,8 @@ class PlayerMemory extends ChangeNotifier {
         'side': sideOpen,
         'sideTab': sideTab,
         'clipAfter': clipAfter,
+        'narrBefore': narrationBefore,
+        'narrAfter': narrationAfter,
         'last': ?last?.toJson(),
         'lastKey': ?lastKey,
       };

@@ -65,51 +65,93 @@ Future<String?> pickMicrophone(BuildContext context, MicRecorder mic, {String? c
 /// What to do with a finished recording.
 enum RecordedChoice { save, saveSend, discard }
 
-/// "The explanation is recorded (2:35)": save, save and send, or throw
-/// away; and how the original's sound goes in.
-Future<(RecordedChoice, OriginalSound)?> recordedDialog(BuildContext context, int lengthMs, OriginalSound sound,
-        {bool again = false, bool screen = false}) =>
-    showDialog<(RecordedChoice, OriginalSound)>(
+/// The answer: what to do, the original's sound, seconds of the original
+/// before / after the explanation, and the file's name.
+typedef RecordedAnswer = ({RecordedChoice choice, OriginalSound sound, int beforeSec, int afterSec, String name});
+
+/// "The explanation is recorded (2:35)": what it holds ([summary]), how
+/// the original's sound goes in, how much of the original comes before /
+/// after it (0–30 s, for what led up to it and what followed), its name;
+/// save, save and send, or throw away.
+Future<RecordedAnswer?> recordedDialog(
+  BuildContext context,
+  int lengthMs,
+  OriginalSound sound, {
+  bool again = false,
+  bool screen = false,
+  String? summary,
+  String defaultName = '',
+  int beforeSec = 5,
+  int afterSec = 5,
+  bool extendable = false,
+}) =>
+    showDialog<RecordedAnswer>(
       context: context,
       barrierDismissible: false,
       builder: (ctx) {
         var s = sound;
+        var before = beforeSec.toDouble(), after = afterSec.toDouble();
+        final name = TextEditingController(text: defaultName);
+        RecordedAnswer answer(RecordedChoice c) =>
+            (choice: c, sound: s, beforeSec: before.round(), afterSec: after.round(), name: name.text.trim().isEmpty ? defaultName : name.text.trim());
+        Widget slider(String label, double v, void Function(double) on) => Row(children: [
+              SizedBox(width: 120, child: Text(label)),
+              Expanded(child: Slider(value: v, max: 30, divisions: 30, label: '${v.round()}s', onChanged: on)),
+              SizedBox(width: 40, child: Text('${v.round()}s')),
+            ]);
         return StatefulBuilder(
           builder: (ctx, set) => AlertDialog(
             title: Text(tr(again ? 'rec.remake_title' : (screen ? 'screen.done_title' : 'rec.done_title'), {'time': _len(lengthMs)})),
             content: SizedBox(
-              width: 440,
-              child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                if (!screen) ...[
-                Text(tr('rec.sound'), style: const TextStyle(color: LrColors.muted)),
-                const SizedBox(height: 6),
-                SegmentedButton<OriginalSound>(
-                  showSelectedIcon: false,
-                  segments: [
-                    ButtonSegment(value: OriginalSound.quiet, label: Text(tr('rec.sound_quiet'))),
-                    ButtonSegment(value: OriginalSound.none, label: Text(tr('rec.sound_none'))),
-                    ButtonSegment(value: OriginalSound.full, label: Text(tr('rec.sound_full'))),
+              width: 480,
+              child: SingleChildScrollView(
+                child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  if (summary != null && summary.isNotEmpty) ...[
+                    Text(tr('rec.holds', {'what': summary}), style: const TextStyle(height: 1.5)),
+                    const SizedBox(height: 12),
                   ],
-                  selected: {s},
-                  onSelectionChanged: (v) => set(() => s = v.first),
-                ),
-                const SizedBox(height: 10),
-                ],
-                Text(tr(screen ? 'screen.done_tip' : 'rec.done_tip'), style: const TextStyle(color: LrColors.muted, fontSize: 12.5, height: 1.5)),
-              ]),
+                  if (extendable) ...[
+                    Text(tr('rec.around'), style: const TextStyle(color: LrColors.muted)),
+                    slider(tr('rec.before'), before, (v) => set(() => before = v)),
+                    slider(tr('rec.after'), after, (v) => set(() => after = v)),
+                    const SizedBox(height: 6),
+                  ],
+                  if (!screen) ...[
+                    Text(tr('rec.sound'), style: const TextStyle(color: LrColors.muted)),
+                    const SizedBox(height: 6),
+                    SegmentedButton<OriginalSound>(
+                      showSelectedIcon: false,
+                      segments: [
+                        ButtonSegment(value: OriginalSound.quiet, label: Text(tr('rec.sound_quiet'))),
+                        ButtonSegment(value: OriginalSound.none, label: Text(tr('rec.sound_none'))),
+                        ButtonSegment(value: OriginalSound.full, label: Text(tr('rec.sound_full'))),
+                      ],
+                      selected: {s},
+                      onSelectionChanged: (v) => set(() => s = v.first),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  TextField(
+                    controller: name,
+                    decoration: InputDecoration(labelText: tr('rec.name'), isDense: true),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(tr(screen ? 'screen.done_tip' : 'rec.done_tip'), style: const TextStyle(color: LrColors.muted, fontSize: 12.5, height: 1.5)),
+                ]),
+              ),
             ),
             actions: [
               if (!again)
                 TextButton(
-                  onPressed: () => Navigator.pop(ctx, (RecordedChoice.discard, s)),
+                  onPressed: () => Navigator.pop(ctx, answer(RecordedChoice.discard)),
                   style: TextButton.styleFrom(foregroundColor: LrColors.danger),
                   child: Text(tr('rec.discard')),
                 )
               else
                 TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('common.cancel'))),
-              OutlinedButton(onPressed: () => Navigator.pop(ctx, (RecordedChoice.save, s)), child: Text(tr('clip.save'))),
+              OutlinedButton(onPressed: () => Navigator.pop(ctx, answer(RecordedChoice.save)), child: Text(tr('clip.save'))),
               FilledButton.icon(
-                onPressed: () => Navigator.pop(ctx, (RecordedChoice.saveSend, s)),
+                onPressed: () => Navigator.pop(ctx, answer(RecordedChoice.saveSend)),
                 icon: const Icon(Icons.send_rounded, size: 18),
                 label: Text(tr('clip.save_send')),
               ),
@@ -118,6 +160,14 @@ Future<(RecordedChoice, OriginalSound)?> recordedDialog(BuildContext context, in
         );
       },
     );
+
+/// A file name for a recording: [base]_[what]_20261029-2201 (in the
+/// language LocalRoll shows).
+String recordingName(String base, String what, DateTime at) {
+  String two(int v) => v.toString().padLeft(2, '0');
+  final stamp = '${at.year}${two(at.month)}${two(at.day)}-${two(at.hour)}${two(at.minute)}';
+  return [if (base.isNotEmpty) base, what, stamp].join('_');
+}
 
 /// "Throw this explanation away?" — really (and the drawings too?).
 /// Null: back.

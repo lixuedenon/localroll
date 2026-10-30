@@ -627,18 +627,19 @@ class ScreenRecorder extends ChangeNotifier {
     while (true) {
       final c = AppNav.instance.navigatorKey.currentContext;
       if (c == null || !c.mounted) return;
-      final r = await recordedDialog(c, length, OriginalSound.none, screen: true);
+      final r = await recordedDialog(c, length, OriginalSound.none, screen: true,
+          defaultName: recordingName('', tr('screen.file_name'), DateTime.now()));
       if (r == null) return;
       final c2 = AppNav.instance.navigatorKey.currentContext;
       if (c2 == null || !c2.mounted) return;
-      if (r.$1 == RecordedChoice.discard) {
+      if (r.choice == RecordedChoice.discard) {
         final ok = await confirmDiscard(c2, drew: false);
         if (ok == null) continue;
         await _cleanup();
         _message(tr('rec.discarded'));
         return;
       }
-      await _make(c2, length, voice.existsSync() ? voice : null, send: r.$1 == RecordedChoice.saveSend);
+      await _make(c2, length, voice.existsSync() ? voice : null, send: r.choice == RecordedChoice.saveSend, name: r.name);
       return;
     }
   }
@@ -649,7 +650,7 @@ class ScreenRecorder extends ChangeNotifier {
     } catch (_) {}
   }
 
-  Future<void> _make(BuildContext context, int length, File? voice, {required bool send}) async {
+  Future<void> _make(BuildContext context, int length, File? voice, {required bool send, required String name}) async {
     final s = _s!;
     final maker = _ScreenComposer(s);
     final progress = ValueNotifier<double>(0);
@@ -666,6 +667,7 @@ class ScreenRecorder extends ChangeNotifier {
       front: _front,
       firstPage: _firstPage,
       voice: voice,
+      name: name,
       fps: setup!.fps,
       onProgress: (p) => progress.value = p,
     );
@@ -803,6 +805,7 @@ class _ScreenComposer {
     required List<(int, int)> front,
     required int firstPage,
     required File? voice,
+    required String name,
     required int fps,
     required void Function(double) onProgress,
   }) async {
@@ -899,10 +902,7 @@ class _ScreenComposer {
       onProgress(0.96);
       final folder = Snapshots.folder(s, screen: true);
       await Directory(folder).create(recursive: true);
-      final now = DateTime.now();
-      String two(int v) => v.toString().padLeft(2, '0');
-      final out = LibraryIndex.uniquePath(folder,
-          sanitizeFileName('${tr('screen.file_name')}_${now.year}${two(now.month)}${two(now.day)}-${two(now.hour)}${two(now.minute)}${two(now.second)}.mp4'));
+      final out = LibraryIndex.uniquePath(folder, sanitizeFileName('$name.mp4'));
       final ok = await _run(exe, [
         '-hide_banner', '-loglevel', 'error', '-y',
         '-i', joined,

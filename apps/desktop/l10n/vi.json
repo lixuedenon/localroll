@@ -929,5 +929,12 @@
   "features.convert": "Chuyển định dạng",
   "features.convert_tip": "MP4, MOV, WebM, GIF, MP3, JPEG, PNG, WebP… — bản gốc giữ nguyên.",
   "features.phone": "Xem máy tính này từ điện thoại",
-  "features.phone_tip": "Xem, tìm và lưu về điện thoại, tự quyết ai xem được gì."
+  "features.phone_tip": "Xem, tìm và lưu về điện thoại, tự quyết ai xem được gì.",
+  "home.issues_see": "Xem tất cả",
+  "rec.holds": "Gồm: {what}",
+  "rec.around": "Thêm một chút video gốc trước và sau:",
+  "rec.before": "Trước",
+  "rec.after": "Sau",
+  "rec.name": "Tên tệp",
+  "rec.name_part": "thuyết minh"
 }

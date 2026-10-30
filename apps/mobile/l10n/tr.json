@@ -503,5 +503,6 @@
   "photos.backed_up": "Bilgisayara yedeklendi",
   "photos.not_backed_up": "Henüz yedeklenmedi",
   "photos.send": "Gönder…",
-  "photos.delete": "Sil"
+  "photos.delete": "Sil",
+  "settings.log_send": "Bir PC’ye gönder"
 }

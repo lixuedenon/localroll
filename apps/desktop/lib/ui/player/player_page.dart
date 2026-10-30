@@ -163,6 +163,9 @@ abstract class _ViewHandle {
 
   void seekTo(int ms, {bool play = false});
 
+  /// Stops playing (photos: nothing).
+  void pause();
+
   /// C / the scissors: first a range to cut on the time line (drag its
   /// ends), then cut it.
   void clipStep();
@@ -376,6 +379,7 @@ class _PlayerPageState extends State<PlayerPage> {
     // Drawing on the one left: kept.
     if (_editor != null) unawaited(_finishDraw(on: _entry));
     setState(() => _index = i);
+    if (_rec != null) DiagLog.log('player', 'explanation: now on item ${i + 1} of ${_entries.length} (${_entries[i].video ? 'video' : 'photo'})');
     _memory.opened(recentOf(_entries[i]));
     unawaited(_loadNotes(_entries[i]));
   }
@@ -631,6 +635,8 @@ class _PlayerPageState extends State<PlayerPage> {
   Future<void> _finishDraw({PlayerEntry? on}) async {
     final ed = _editor;
     if (ed == null) return;
+    // Recording: what was rubbed out just now is kept as rubbed out.
+    if (_rec != null && !_rec!.paused) _sample();
     final e = on ?? _entry;
     final set = _sets[e];
     setState(() => _editor = null);
@@ -1045,10 +1051,18 @@ class _PlayerPageState extends State<PlayerPage> {
     final ed = _editor;
     if (ed != null) {
       final now = {for (final i in [...ed.inks, ?ed.drawing]) i.id: i};
+      // An annotation from before being changed: from now on its marks
+      // come from the recording (a mark rubbed out goes at that moment).
+      final orig = ed.original;
+      if (orig != null && !rec.session.noteIds.contains(orig.id)) rec.session.edited.putIfAbsent(orig.id, () => t);
       for (final i in now.values) {
         final st = ed.sessionStart[i.id];
-        if (st == null) continue;
         final old = rec.inks[i.id];
+        if (st == null) {
+          // Drawn before: whole, from when it was first seen here.
+          if (old == null) rec.inks[i.id] = NarrationInk(file: fi, ink: i.copy(), startT: t, times: const []);
+          continue;
+        }
         rec.inks[i.id] = NarrationInk(file: old?.file ?? fi, ink: i.copy(), startT: st, times: List.of(ed.sessionTimes[i.id] ?? const [0]));
       }
       if (identical(rec.lastEditor, ed)) {
@@ -1086,6 +1100,8 @@ class _PlayerPageState extends State<PlayerPage> {
     if (rec == null) return;
     rec.sampler?.cancel();
     _sample();
+    // The video stops too (it would go on playing while the explanation is made).
+    _active?.pause();
     if (_editor != null) await _finishDraw();
     if (!rec.paused) await rec.stopPart();
     rec.session.lengthMs = rec.clock.elapsedMilliseconds;
@@ -1117,18 +1133,48 @@ class _PlayerPageState extends State<PlayerPage> {
   /// making a kept one again.
   Future<void> _afterRecording(NarrationSession n, {bool again = false}) async {
     final voice = File('${NarrationSession.folderOf(widget.services.settings.dataDir, n.id).path}${Platform.pathSeparator}voice.wav');
+    // What it holds: each file and the part of it shown, in order.
+    final pieces = narrationPieces(n);
+    final parts = <String>[];
+    for (var i = 0; i < pieces.length;) {
+      final f = pieces[i].file;
+      var lo = pieces[i].fromMs, hi = pieces[i].still ? pieces[i].fromMs : pieces[i].toMs;
+      while (i < pieces.length && pieces[i].file == f) {
+        lo = math.min(lo, pieces[i].fromMs);
+        hi = math.max(hi, pieces[i].still ? pieces[i].fromMs : pieces[i].toMs);
+        i++;
+      }
+      final file = n.files[f];
+      parts.add(file.video
+          ? '${file.name} (${playerTime(Duration(milliseconds: lo))}–${playerTime(Duration(milliseconds: hi))})'
+          : file.name);
+    }
+    final f0 = n.files.isEmpty ? null : n.files[pieces.isEmpty ? 0 : pieces.first.file];
+    final base = f0 == null ? '' : (f0.name.contains('.') ? f0.name.substring(0, f0.name.lastIndexOf('.')) : f0.name);
     while (mounted) {
-      final r = await recordedDialog(context, n.lengthMs, _sound, again: again);
+      final r = await recordedDialog(
+        context,
+        n.lengthMs,
+        _sound,
+        again: again,
+        summary: parts.join('、'),
+        defaultName: recordingName(base, tr('rec.name_part'), DateTime.fromMillisecondsSinceEpoch(n.createdMs)),
+        beforeSec: _memory.narrationBefore,
+        afterSec: _memory.narrationAfter,
+        extendable: n.files.any((f) => f.video),
+      );
       if (r == null || !mounted) return;
-      _memory.setSound(r.$2.name);
-      if (r.$1 == RecordedChoice.discard) {
+      _memory.setSound(r.sound.name);
+      _memory.setNarrationAround(r.beforeSec, r.afterSec);
+      if (r.choice == RecordedChoice.discard) {
         final ink = await confirmDiscard(context, drew: n.noteIds.isNotEmpty);
         if (ink == null) continue; // back to the first question
         await _deleteNarration(n, withInk: ink);
         _snack(tr('rec.discarded'));
         return;
       }
-      await _makeNarration(n, voice, r.$2, send: r.$1 == RecordedChoice.saveSend);
+      await _makeNarration(n, voice, r.sound,
+          send: r.choice == RecordedChoice.saveSend, beforeMs: r.beforeSec * 1000, afterMs: r.afterSec * 1000, name: r.name);
       return;
     }
   }
@@ -1148,7 +1194,8 @@ class _PlayerPageState extends State<PlayerPage> {
     if (mounted) setState(() {});
   }
 
-  Future<void> _makeNarration(NarrationSession n, File voice, OriginalSound sound, {required bool send}) async {
+  Future<void> _makeNarration(NarrationSession n, File voice, OriginalSound sound,
+      {required bool send, int beforeMs = 0, int afterMs = 0, String? name}) async {
     final s = widget.services;
     // The annotations of each file (as the player showed them).
     final sets = <NoteSet?>[];
@@ -1166,7 +1213,8 @@ class _PlayerPageState extends State<PlayerPage> {
     if (!mounted) return;
     final maker = NarrationComposer(s);
     final progress = ValueNotifier<double>(0);
-    final done = maker.make(n, voice: voice, sound: sound, notes: sets, onProgress: (p) => progress.value = p);
+    final done = maker.make(n,
+        voice: voice, sound: sound, notes: sets, onProgress: (p) => progress.value = p, beforeMs: beforeMs, afterMs: afterMs, name: name);
     unawaited(showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -1746,6 +1794,9 @@ class _ImageViewState extends State<_ImageView> implements _ViewHandle {
 
   @override
   void clipStep() {}
+
+  @override
+  void pause() {}
 
   @override
   void initState() {

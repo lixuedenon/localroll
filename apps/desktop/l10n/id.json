@@ -929,5 +929,12 @@
   "features.convert": "Ubah format",
   "features.convert_tip": "MP4, MOV, WebM, GIF, MP3, JPEG, PNG, WebP… — file asli tetap.",
   "features.phone": "Jelajahi PC ini dari ponsel",
-  "features.phone_tip": "Lihat, cari, dan simpan ke ponsel, dengan kendali siapa melihat apa."
+  "features.phone_tip": "Lihat, cari, dan simpan ke ponsel, dengan kendali siapa melihat apa.",
+  "home.issues_see": "Lihat semua",
+  "rec.holds": "Berisi: {what}",
+  "rec.around": "Sertakan sedikit video asli sebelum dan sesudahnya:",
+  "rec.before": "Sebelum",
+  "rec.after": "Sesudah",
+  "rec.name": "Nama file",
+  "rec.name_part": "penjelasan"
 }

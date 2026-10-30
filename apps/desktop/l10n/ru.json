@@ -929,5 +929,12 @@
   "features.convert": "Преобразование форматов",
   "features.convert_tip": "MP4, MOV, WebM, GIF, MP3, JPEG, PNG, WebP… — оригинал не меняется.",
   "features.phone": "Просмотр ПК с телефона",
-  "features.phone_tip": "Смотрите, ищите и сохраняйте на телефон, решая, кто что видит."
+  "features.phone_tip": "Смотрите, ищите и сохраняйте на телефон, решая, кто что видит.",
+  "home.issues_see": "Посмотреть",
+  "rec.holds": "Содержит: {what}",
+  "rec.around": "Добавить немного исходного видео до и после:",
+  "rec.before": "До",
+  "rec.after": "После",
+  "rec.name": "Имя файла",
+  "rec.name_part": "пояснение"
 }

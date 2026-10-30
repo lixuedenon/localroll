@@ -14,6 +14,7 @@ import '../services/visibility_sync.dart';
 import 'connect_page.dart';
 import 'device_badge.dart';
 import 'phone_name_dialog.dart';
+import 'send_files_page.dart';
 import 'theme.dart';
 
 /// Phone settings: auto-send, language, PCs.
@@ -207,7 +208,7 @@ class SettingsPage extends StatelessWidget {
                     leading: const Icon(Icons.receipt_long_outlined),
                     title: Text(tr('settings.log_export')),
                     subtitle: Text(tr('settings.log_hint')),
-                    onTap: () => _exportLog(context),
+                    onTap: () => _exportLog(context, settings, discovery),
                   ),
                   ListTile(
                     leading: const Icon(Icons.privacy_tip_outlined),
@@ -335,18 +336,41 @@ Future<void> _pickLanguage(BuildContext context, MobileSettings settings) async 
 
 /// Diagnostics log → a text file in Files › LocalRoll (iPhone) or
 /// Download/LocalRoll (Android), to send to whoever helps.
-Future<void> _exportLog(BuildContext context) async {
+Future<void> _exportLog(BuildContext context, MobileSettings settings, DesktopDiscovery discovery) async {
   final m = ScaffoldMessenger.of(context);
+  File file;
   try {
     final dir = await MediaSaver.filesFolder();
     final d = DateTime.now();
     final stamp = '${d.year}${d.month.toString().padLeft(2, '0')}${d.day.toString().padLeft(2, '0')}-'
         '${d.hour.toString().padLeft(2, '0')}${d.minute.toString().padLeft(2, '0')}';
-    await File('${dir.path}/LocalRoll-log-$stamp.txt').writeAsString(await DiagLog.read());
-    m.showSnackBar(SnackBar(content: Text(tr(Platform.isIOS ? 'settings.log_saved_ios' : 'settings.log_saved_android'))));
+    file = File('${dir.path}/LocalRoll-log-$stamp.txt');
+    await file.writeAsString(await DiagLog.read());
   } catch (_) {
     m.showSnackBar(SnackBar(content: Text(tr('settings.log_failed'))));
+    return;
   }
+  if (!context.mounted) return;
+  // Kept in LocalRoll's own files; one tap sends it to a computer.
+  final send = await showDialog<bool>(
+    context: context,
+    builder: (c) => AlertDialog(
+      title: Text(tr('settings.log_title')),
+      content: Text(tr(Platform.isIOS ? 'settings.log_saved_ios' : 'settings.log_saved_android')),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('common.ok'))),
+        FilledButton.icon(
+          onPressed: () => Navigator.pop(c, true),
+          icon: const Icon(Icons.computer_rounded, size: 18),
+          label: Text(tr('settings.log_send')),
+        ),
+      ],
+    ),
+  );
+  if (send != true || !context.mounted) return;
+  final sender = await pickFileTarget(context, settings, discovery, [file]);
+  if (sender == null || !context.mounted) return;
+  await Navigator.of(context).push(MaterialPageRoute(builder: (_) => SendFilesPage(sender: sender)));
 }
 
 /// What LocalRoll does and doesn't do with your data.

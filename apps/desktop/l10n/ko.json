@@ -929,5 +929,12 @@
   "features.convert": "형식 변환",
   "features.convert_tip": "MP4, MOV, WebM, GIF, MP3, JPEG, PNG, WebP… 원본은 그대로.",
   "features.phone": "휴대폰으로 이 PC 둘러보기",
-  "features.phone_tip": "둘러보고 찾고 휴대폰에 저장. 누가 무엇을 볼지도 정할 수 있습니다."
+  "features.phone_tip": "둘러보고 찾고 휴대폰에 저장. 누가 무엇을 볼지도 정할 수 있습니다.",
+  "home.issues_see": "모두 보기",
+  "rec.holds": "포함: {what}",
+  "rec.around": "앞뒤로 원본 영상을 조금 포함:",
+  "rec.before": "앞",
+  "rec.after": "뒤",
+  "rec.name": "파일 이름",
+  "rec.name_part": "해설"
 }

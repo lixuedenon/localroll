@@ -11,6 +11,7 @@ import 'package:share_plus/share_plus.dart';
 import '../l10n/l10n.dart';
 import 'cleanup_page.dart' show formatSize;
 import 'office_view.dart';
+import '../services/pdf_pages.dart';
 import 'pdf_view_page.dart';
 import 'theme.dart';
 
@@ -27,7 +28,20 @@ Future<void> openDocument(BuildContext context, String path, {String? name, Futu
   final ext = _ext(shown.isNotEmpty ? shown : path);
   final nav = Navigator.of(context);
   if (ext == 'pdf') {
-    await nav.push(MaterialPageRoute(builder: (_) => PdfViewPage(path: path, title: shown)));
+    // LocalRoll's reader when the phone can read it; else (logged, to find
+    // out why) the system's own preview / the file card.
+    final n = await PdfPages.count(path).timeout(const Duration(seconds: 8), onTimeout: () => -1);
+    if (n > 0) {
+      await nav.push(MaterialPageRoute(builder: (_) => PdfViewPage(path: path, title: shown)));
+      return;
+    }
+    await _logUnreadable(path, n);
+    if (Platform.isIOS && await FileOpener.preview(path)) return;
+    var size = 0;
+    try {
+      size = await File(path).length();
+    } catch (_) {}
+    await nav.push(MaterialPageRoute(builder: (_) => FileInfoPage(path: path, name: shown, size: size, onSend: onSend)));
     return;
   }
   if (googleShortcutKinds.containsKey(ext)) {
@@ -50,6 +64,22 @@ Future<void> openDocument(BuildContext context, String path, {String? name, Futu
     return;
   }
   await nav.push(MaterialPageRoute(builder: (_) => FileInfoPage(path: path, name: shown, size: size, onSend: onSend)));
+}
+
+/// Why a PDF could not be read: its size and first bytes (a real PDF
+/// starts with "%PDF"; an error page or a cut-off download does not).
+Future<void> _logUnreadable(String path, int pages) async {
+  try {
+    final f = File(path);
+    final size = await f.length();
+    final raf = await f.open();
+    final head = await raf.read(16);
+    await raf.close();
+    final shown = String.fromCharCodes([for (final b in head) b >= 32 && b < 127 ? b : 46]);
+    DiagLog.log('files', 'pdf not readable (${pages < 0 ? 'no answer in 8 s' : '$pages pages'}): $size bytes, starts "$shown", name .${path.split('.').last}');
+  } catch (e) {
+    DiagLog.log('files', 'pdf not readable, file not there: $e');
+  }
 }
 
 String _ext(String name) {

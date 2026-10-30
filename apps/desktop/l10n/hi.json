@@ -929,5 +929,12 @@
   "features.convert": "फ़ॉर्मैट बदलें",
   "features.convert_tip": "MP4, MOV, WebM, GIF, MP3, JPEG, PNG, WebP… — मूल वैसा ही रहता है।",
   "features.phone": "फ़ोन से इस कंप्यूटर को देखें",
-  "features.phone_tip": "देखें, खोजें और फ़ोन में सहेजें — कौन क्या देखे, यह आप तय करें।"
+  "features.phone_tip": "देखें, खोजें और फ़ोन में सहेजें — कौन क्या देखे, यह आप तय करें।",
+  "home.issues_see": "सभी देखें",
+  "rec.holds": "इसमें: {what}",
+  "rec.around": "व्याख्या से पहले और बाद में मूल वीडियो का थोड़ा हिस्सा भी लें:",
+  "rec.before": "पहले",
+  "rec.after": "बाद में",
+  "rec.name": "फ़ाइल का नाम",
+  "rec.name_part": "व्याख्या"
 }
