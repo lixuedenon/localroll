@@ -866,7 +866,7 @@
   "convert.note_video": "原檔不變，轉好的放在「_converted」資料夾。H.265 要用顯示卡或 Windows 內建的編碼器。",
   "convert.note_image": "原檔不變。HEIC 能打開、能轉成別的格式，但不能轉成 HEIC。",
   "screen.page_hint": "錄任何軟體，或用原畫質講解影片",
-  "screen.mode_explain": "講解播放器裡的影片（原畫質）",
+  "screen.mode_explain": "講解影片（原畫質）",
   "screen.choice_screen": "螢幕上的所有內容。",
   "screen.choice_window": "只錄一個視窗，移動也跟著。",
   "screen.choice_area": "在螢幕上框一塊。",
@@ -993,5 +993,14 @@
   "player.back_to": "回到：{name}（第 {n}/{of} 個）",
   "player.info_made": "用它做過",
   "player.notes_group": "{n} 條標註 · 最近 {day}",
-  "ink.from_narration": "錄講解時畫的"
+  "ink.from_narration": "錄講解時畫的",
+  "screen.choice_explain_short": "邊播邊講邊畫，用原檔合成，畫質不變。",
+  "ink.only_original": "只看原影片（H）",
+  "ink.show_notes": "顯示標註（H）",
+  "ink.hidden_n": "已隱藏 {n} 條標註",
+  "ink.delete_all": "刪除這個影片的全部標註",
+  "ink.delete_found": "刪除搜到的這些標註",
+  "ink.delete_all_title": "刪除「{name}」的 {n} 條標註？",
+  "ink.delete_all_text": "原影片本身不會改變。10 秒內可以復原。",
+  "ink.deleted_n": "已刪除 {n} 條標註"
 }

@@ -993,5 +993,14 @@
   "player.back_to": "Back to: {name} ({n}/{of})",
   "player.info_made": "Made from it",
   "player.notes_group": "{n} notes · latest {day}",
-  "ink.from_narration": "drawn while explaining"
+  "ink.from_narration": "drawn while explaining",
+  "screen.choice_explain_short": "Play, talk and draw – in the original quality.",
+  "ink.only_original": "Only the original (H)",
+  "ink.show_notes": "Show notes (H)",
+  "ink.hidden_n": "{n} notes hidden",
+  "ink.delete_all": "Delete all notes of this file",
+  "ink.delete_found": "Delete the notes found",
+  "ink.delete_all_title": "Delete {n} notes of {name}?",
+  "ink.delete_all_text": "The video itself isn’t changed. You can undo for 10 seconds.",
+  "ink.deleted_n": "{n} notes deleted"
 }

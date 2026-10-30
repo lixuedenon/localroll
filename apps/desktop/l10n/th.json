@@ -993,5 +993,14 @@
   "player.back_to": "กลับไปที่: {name} ({n}/{of})",
   "player.info_made": "สร้างจากไฟล์นี้",
   "player.notes_group": "{n} บันทึกย่อ · ล่าสุด {day}",
-  "ink.from_narration": "วาดระหว่างอธิบาย"
+  "ink.from_narration": "วาดระหว่างอธิบาย",
+  "screen.choice_explain_short": "เล่น พูด และวาด – คุณภาพเดิม",
+  "ink.only_original": "เฉพาะต้นฉบับ (H)",
+  "ink.show_notes": "แสดงบันทึกย่อ (H)",
+  "ink.hidden_n": "ซ่อนบันทึกย่อ {n} รายการ",
+  "ink.delete_all": "ลบบันทึกย่อทั้งหมดของไฟล์นี้",
+  "ink.delete_found": "ลบบันทึกย่อที่พบ",
+  "ink.delete_all_title": "ลบบันทึกย่อ {n} รายการของ {name} ไหม",
+  "ink.delete_all_text": "วิดีโอเองไม่เปลี่ยน ยกเลิกได้ภายใน 10 วินาที",
+  "ink.deleted_n": "ลบบันทึกย่อ {n} รายการแล้ว"
 }

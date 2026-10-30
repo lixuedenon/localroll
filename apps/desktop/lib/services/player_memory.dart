@@ -88,6 +88,9 @@ class PlayerMemory extends ChangeNotifier {
 
   /// An explanation also takes this many seconds of the original before /
   /// after it (0–30).
+  /// Annotations drawn over videos / photos (false: only the original).
+  bool showInk = true;
+
   int narrationBefore = 5;
   int narrationAfter = 5;
 
@@ -141,6 +144,7 @@ class PlayerMemory extends ChangeNotifier {
       clipBefore = ((j['clipBefore'] as num?)?.toInt() ?? 10).clamp(0, 60);
       clipAfter = ((j['clipAfter'] as num?)?.toInt() ?? 10).clamp(0, 60);
       narrationBefore = ((j['narrBefore'] as num?)?.toInt() ?? 5).clamp(0, 30);
+      showInk = j['showInk'] != false;
       narrationAfter = ((j['narrAfter'] as num?)?.toInt() ?? 5).clamp(0, 30);
       last = RecentEntry.fromJson(j['last']);
       lastKey = j['lastKey'] as String?;
@@ -241,6 +245,11 @@ class PlayerMemory extends ChangeNotifier {
     _save();
   }
 
+  void setShowInk(bool v) {
+    showInk = v;
+    _save();
+  }
+
   void setNarrationAround(int before, int after) {
     narrationBefore = before.clamp(0, 30);
     narrationAfter = after.clamp(0, 30);
@@ -306,6 +315,7 @@ class PlayerMemory extends ChangeNotifier {
         'sideTab': sideTab,
         'clipAfter': clipAfter,
         'narrBefore': narrationBefore,
+        'showInk': showInk,
         'narrAfter': narrationAfter,
         'last': ?last?.toJson(),
         'lastKey': ?lastKey,

@@ -1,4 +1,5 @@
 // apps/desktop/lib/ui/player/player_home.dart
+import 'dart:async';
 import 'dart:io';
 
 import 'package:desktop_drop/desktop_drop.dart';
@@ -104,11 +105,6 @@ class PlayerHome extends StatelessWidget {
                   onPressed: () => _openFolder(context),
                   icon: const Icon(Icons.folder_open_rounded),
                   label: Text(tr('player.open_folder')),
-                ),
-                OutlinedButton.icon(
-                  onPressed: () => AppNav.instance.selectTab(AppNav.screen),
-                  icon: const Icon(Icons.screenshot_monitor_rounded, color: LrColors.danger),
-                  label: Text(tr('screen.button')),
                 ),
               ]),
               const SizedBox(height: 10),
@@ -401,6 +397,64 @@ class _NoteSearchState extends State<_NoteSearch> {
 
   String _time(int ms) => playerTime(Duration(milliseconds: ms));
 
+  Future<void> _rename(NoteHit h) async {
+    final c = TextEditingController(text: h.note.name);
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr('recs.rename')),
+        content: SizedBox(width: 420, child: TextField(controller: c, autofocus: true, onSubmitted: (v) => Navigator.pop(ctx, v))),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('common.cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, c.text), child: Text(tr('common.ok'))),
+        ],
+      ),
+    );
+    c.dispose();
+    if (name == null || name.trim().isEmpty) return;
+    h.note.name = name.trim();
+    await widget.services.notes.save(h.set);
+  }
+
+  /// Deleted (the original is not touched); 10 seconds to undo.
+  Future<void> _delete(NoteSet set, List<Note> notes) async {
+    if (notes.length > 1) {
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(tr('ink.delete_all_title', {'n': notes.length, 'name': set.name})),
+          content: SizedBox(width: 420, child: Text(tr('ink.delete_all_text'), style: const TextStyle(height: 1.5))),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('common.cancel'))),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: LrColors.danger),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(tr('lib.delete')),
+            ),
+          ],
+        ),
+      );
+      if (ok != true) return;
+    }
+    final before = List.of(set.notes);
+    set.notes.removeWhere(notes.contains);
+    await widget.services.notes.save(set);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      duration: const Duration(seconds: 10),
+      content: Text(notes.length == 1 ? tr('ink.deleted', {'name': notes.first.name}) : tr('ink.deleted_n', {'n': notes.length})),
+      action: SnackBarAction(
+        label: tr('trash.undo'),
+        onPressed: () async {
+          set.notes
+            ..clear()
+            ..addAll(before);
+          await widget.services.notes.save(set);
+        },
+      ),
+    ));
+  }
+
   @override
   Widget build(BuildContext context) => ListenableBuilder(
         listenable: widget.services.notes,
@@ -458,6 +512,24 @@ class _NoteSearchState extends State<_NoteSearch> {
                       tilePadding: const EdgeInsets.symmetric(horizontal: 6),
                       leading: Icon(g.first.set.video ? Icons.movie_rounded : Icons.image_rounded, color: LrColors.muted),
                       title: Text(g.first.set.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+                      trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                        PopupMenuButton<String>(
+                          tooltip: tr('ink.more'),
+                          icon: const Icon(Icons.more_vert_rounded, size: 18),
+                          onSelected: (a) {
+                            if (a == 'open') unawaited(_open(g.first));
+                            if (a == 'delete') unawaited(_delete(g.first.set, [for (final h in g) h.note]));
+                          },
+                          itemBuilder: (_) => [
+                            PopupMenuItem(value: 'open', child: Text(tr('lib.open'))),
+                            PopupMenuItem(
+                              value: 'delete',
+                              child: Text(tr(searching ? 'ink.delete_found' : 'ink.delete_all'), style: const TextStyle(color: LrColors.danger)),
+                            ),
+                          ],
+                        ),
+                        const Icon(Icons.expand_more_rounded, color: LrColors.muted),
+                      ]),
                       subtitle: Text(
                         tr('player.notes_group', {'n': g.length, 'day': day(g.first.note.modifiedMs)}),
                         style: const TextStyle(color: LrColors.muted, fontSize: 12),
@@ -476,6 +548,20 @@ class _NoteSearchState extends State<_NoteSearch> {
                               style: const TextStyle(color: LrColors.muted),
                             ),
                             onTap: () => _open(h),
+                            trailing: PopupMenuButton<String>(
+                              tooltip: tr('ink.more'),
+                              icon: const Icon(Icons.more_vert_rounded, size: 18),
+                              onSelected: (a) {
+                                if (a == 'open') unawaited(_open(h));
+                                if (a == 'rename') unawaited(_rename(h));
+                                if (a == 'delete') unawaited(_delete(h.set, [h.note]));
+                              },
+                              itemBuilder: (_) => [
+                                PopupMenuItem(value: 'open', child: Text(tr('lib.open'))),
+                                PopupMenuItem(value: 'rename', child: Text(tr('recs.rename'))),
+                                PopupMenuItem(value: 'delete', child: Text(tr('ink.delete'), style: const TextStyle(color: LrColors.danger))),
+                              ],
+                            ),
                           ),
                       ],
                     ),

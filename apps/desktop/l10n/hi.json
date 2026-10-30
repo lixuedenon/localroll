@@ -993,5 +993,14 @@
   "player.back_to": "वापस: {name} ({n}/{of})",
   "player.info_made": "इससे बनाया गया",
   "player.notes_group": "{n} नोट · नवीनतम {day}",
-  "ink.from_narration": "व्याख्या के दौरान बनाया"
+  "ink.from_narration": "व्याख्या के दौरान बनाया",
+  "screen.choice_explain_short": "चलाएँ, बोलें, बनाएँ – मूल गुणवत्ता में।",
+  "ink.only_original": "केवल मूल (H)",
+  "ink.show_notes": "नोट दिखाएँ (H)",
+  "ink.hidden_n": "{n} नोट छिपे",
+  "ink.delete_all": "इस फ़ाइल के सभी नोट हटाएँ",
+  "ink.delete_found": "मिले नोट हटाएँ",
+  "ink.delete_all_title": "{name} के {n} नोट हटाएँ?",
+  "ink.delete_all_text": "वीडियो खुद नहीं बदलता। 10 सेकंड तक पूर्ववत कर सकते हैं।",
+  "ink.deleted_n": "{n} नोट हटाए गए"
 }

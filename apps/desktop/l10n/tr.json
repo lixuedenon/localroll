@@ -993,5 +993,14 @@
   "player.back_to": "Geri dön: {name} ({n}/{of})",
   "player.info_made": "Bundan yapılanlar",
   "player.notes_group": "{n} not · en son {day}",
-  "ink.from_narration": "anlatırken çizildi"
+  "ink.from_narration": "anlatırken çizildi",
+  "screen.choice_explain_short": "Oynat, konuş, çiz – orijinal kalitede.",
+  "ink.only_original": "Yalnızca orijinal (H)",
+  "ink.show_notes": "Notları göster (H)",
+  "ink.hidden_n": "{n} not gizli",
+  "ink.delete_all": "Bu dosyanın tüm notlarını sil",
+  "ink.delete_found": "Bulunan notları sil",
+  "ink.delete_all_title": "{name} için {n} not silinsin mi?",
+  "ink.delete_all_text": "Videonun kendisi değişmez. 10 saniye boyunca geri alınabilir.",
+  "ink.deleted_n": "{n} not silindi"
 }

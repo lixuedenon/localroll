@@ -993,5 +993,14 @@
   "player.back_to": "Volver a: {name} ({n}/{of})",
   "player.info_made": "Hecho a partir de él",
   "player.notes_group": "{n} notas · última {day}",
-  "ink.from_narration": "dibujado al explicar"
+  "ink.from_narration": "dibujado al explicar",
+  "screen.choice_explain_short": "Reproduce, habla y dibuja, con la calidad original.",
+  "ink.only_original": "Solo el original (H)",
+  "ink.show_notes": "Mostrar notas (H)",
+  "ink.hidden_n": "{n} notas ocultas",
+  "ink.delete_all": "Borrar todas las notas de este archivo",
+  "ink.delete_found": "Borrar las notas encontradas",
+  "ink.delete_all_title": "¿Borrar {n} notas de {name}?",
+  "ink.delete_all_text": "El vídeo no cambia. Puedes deshacerlo durante 10 segundos.",
+  "ink.deleted_n": "{n} notas borradas"
 }

@@ -866,7 +866,7 @@
   "convert.note_video": "原文件不变，转好的放在「_converted」文件夹。H.265 要用显卡或 Windows 自带的编码器。",
   "convert.note_image": "原文件不变。HEIC 能打开、能转成别的格式，但不能转成 HEIC。",
   "screen.page_hint": "录任何软件，或用原画质讲解视频",
-  "screen.mode_explain": "讲解播放器里的视频（原画质）",
+  "screen.mode_explain": "讲解视频（原画质）",
   "screen.choice_screen": "屏幕上的所有内容。",
   "screen.choice_window": "只录一个窗口，挪动也跟着。",
   "screen.choice_area": "在屏幕上框一块。",
@@ -993,5 +993,14 @@
   "player.back_to": "回到：{name}（第 {n}/{of} 个）",
   "player.info_made": "用它做过",
   "player.notes_group": "{n} 条标注 · 最近 {day}",
-  "ink.from_narration": "录讲解时画的"
+  "ink.from_narration": "录讲解时画的",
+  "screen.choice_explain_short": "边播边讲边画，用原文件合成，画质不变。",
+  "ink.only_original": "只看原视频（H）",
+  "ink.show_notes": "显示标注（H）",
+  "ink.hidden_n": "已隐藏 {n} 条标注",
+  "ink.delete_all": "删除这个视频的全部标注",
+  "ink.delete_found": "删除搜到的这些标注",
+  "ink.delete_all_title": "删除「{name}」的 {n} 条标注？",
+  "ink.delete_all_text": "原视频本身不会改变。10 秒内可以撤销。",
+  "ink.deleted_n": "已删除 {n} 条标注"
 }

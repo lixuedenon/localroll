@@ -98,9 +98,14 @@ class _ScreenPageState extends State<ScreenPage> {
     await openInPlayer(context, s, [path], record: true);
   }
 
-  Widget _choice(IconData icon, String title, String tip, VoidCallback onTap, {bool special = false}) => SizedBox(
+  /// One card; all the same size (the full text, when longer, on hover).
+  Widget _choice(IconData icon, String title, String tip, VoidCallback onTap, {bool special = false, String? more}) => SizedBox(
         width: 250,
-        child: Material(
+        height: 172,
+        child: Tooltip(
+          message: more ?? tip,
+          waitDuration: const Duration(milliseconds: 500),
+          child: Material(
           color: LrColors.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -114,12 +119,13 @@ class _ScreenPageState extends State<ScreenPage> {
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Icon(icon, size: 30, color: special ? LrColors.safelight : LrColors.danger),
                 const SizedBox(height: 10),
-                Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                Text(title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 6),
-                Text(tip, style: const TextStyle(color: LrColors.muted, fontSize: 12.5, height: 1.45)),
+                Text(tip, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: LrColors.muted, fontSize: 12.5, height: 1.45)),
               ]),
             ),
           ),
+        ),
         ),
       );
 
@@ -140,7 +146,8 @@ class _ScreenPageState extends State<ScreenPage> {
             _choice(Icons.desktop_windows_rounded, tr('screen.mode_screen'), tr('screen.choice_screen'), () => _record(ScreenMode.screen)),
             _choice(Icons.web_asset_rounded, tr('screen.mode_window'), tr('screen.choice_window'), () => _record(ScreenMode.window)),
             _choice(Icons.crop_rounded, tr('screen.mode_area'), tr('screen.choice_area'), () => _record(ScreenMode.area)),
-            _choice(Icons.record_voice_over_rounded, tr('screen.mode_explain'), tr('screen.choice_explain'), _explain, special: true),
+            _choice(Icons.record_voice_over_rounded, tr('screen.mode_explain'), tr('screen.choice_explain_short'), _explain,
+                special: true, more: tr('screen.choice_explain')),
             _choice(Icons.draw_rounded, tr('pen.only'), tr('pen.only_tip'), () => unawaited(PenSession.instance.start())),
           ]),
           const SizedBox(height: 12),

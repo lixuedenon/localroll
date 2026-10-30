@@ -993,5 +993,14 @@
   "player.back_to": "Revenir à : {name} ({n}/{of})",
   "player.info_made": "Créé à partir de lui",
   "player.notes_group": "{n} notes · dernière {day}",
-  "ink.from_narration": "dessiné pendant l’explication"
+  "ink.from_narration": "dessiné pendant l’explication",
+  "screen.choice_explain_short": "Lisez, parlez, dessinez – en qualité d’origine.",
+  "ink.only_original": "Original seul (H)",
+  "ink.show_notes": "Afficher les notes (H)",
+  "ink.hidden_n": "{n} notes masquées",
+  "ink.delete_all": "Supprimer toutes les notes de ce fichier",
+  "ink.delete_found": "Supprimer les notes trouvées",
+  "ink.delete_all_title": "Supprimer {n} notes de {name} ?",
+  "ink.delete_all_text": "La vidéo elle-même n’est pas modifiée. Annulation possible pendant 10 secondes.",
+  "ink.deleted_n": "{n} notes supprimées"
 }

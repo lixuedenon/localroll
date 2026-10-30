@@ -993,5 +993,14 @@
   "player.back_to": "العودة إلى: {name} ({n}/{of})",
   "player.info_made": "صُنع منه",
   "player.notes_group": "{n} ملاحظات · آخرها {day}",
-  "ink.from_narration": "رُسم أثناء الشرح"
+  "ink.from_narration": "رُسم أثناء الشرح",
+  "screen.choice_explain_short": "شغّل وتحدث وارسم؛ الجودة الأصلية كما هي.",
+  "ink.only_original": "عرض الأصل فقط (H)",
+  "ink.show_notes": "إظهار الملاحظات (H)",
+  "ink.hidden_n": "{n} ملاحظات مخفية",
+  "ink.delete_all": "حذف كل ملاحظات هذا الملف",
+  "ink.delete_found": "حذف الملاحظات الموجودة هنا",
+  "ink.delete_all_title": "حذف {n} ملاحظات من {name}؟",
+  "ink.delete_all_text": "الفيديو نفسه لا يتغير. يمكنك التراجع لمدة 10 ثوانٍ.",
+  "ink.deleted_n": "تم حذف {n} ملاحظات"
 }

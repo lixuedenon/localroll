@@ -993,5 +993,14 @@
   "player.back_to": "Quay lại: {name} ({n}/{of})",
   "player.info_made": "Đã làm từ tệp này",
   "player.notes_group": "{n} chú thích · gần nhất {day}",
-  "ink.from_narration": "vẽ khi thuyết minh"
+  "ink.from_narration": "vẽ khi thuyết minh",
+  "screen.choice_explain_short": "Vừa phát vừa nói vừa vẽ, giữ nguyên chất lượng.",
+  "ink.only_original": "Chỉ xem bản gốc (H)",
+  "ink.show_notes": "Hiện chú thích (H)",
+  "ink.hidden_n": "Đã ẩn {n} chú thích",
+  "ink.delete_all": "Xóa mọi chú thích của tệp này",
+  "ink.delete_found": "Xóa các chú thích tìm được",
+  "ink.delete_all_title": "Xóa {n} chú thích của {name}?",
+  "ink.delete_all_text": "Bản thân video không đổi. Có thể hoàn tác trong 10 giây.",
+  "ink.deleted_n": "Đã xóa {n} chú thích"
 }

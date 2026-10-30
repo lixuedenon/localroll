@@ -993,5 +993,14 @@
   "player.back_to": "Kembali ke: {name} ({n}/{of})",
   "player.info_made": "Dibuat darinya",
   "player.notes_group": "{n} catatan · terakhir {day}",
-  "ink.from_narration": "digambar saat menjelaskan"
+  "ink.from_narration": "digambar saat menjelaskan",
+  "screen.choice_explain_short": "Putar, bicara, dan gambar – kualitas asli.",
+  "ink.only_original": "Hanya aslinya (H)",
+  "ink.show_notes": "Tampilkan catatan (H)",
+  "ink.hidden_n": "{n} catatan disembunyikan",
+  "ink.delete_all": "Hapus semua catatan file ini",
+  "ink.delete_found": "Hapus catatan yang ditemukan",
+  "ink.delete_all_title": "Hapus {n} catatan dari {name}?",
+  "ink.delete_all_text": "Videonya sendiri tidak berubah. Bisa dibatalkan selama 10 detik.",
+  "ink.deleted_n": "{n} catatan dihapus"
 }

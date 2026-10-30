@@ -993,5 +993,14 @@
   "player.back_to": "Назад к: {name} ({n}/{of})",
   "player.info_made": "Сделано из него",
   "player.notes_group": "Заметок: {n} · последняя {day}",
-  "ink.from_narration": "нарисовано при пояснении"
+  "ink.from_narration": "нарисовано при пояснении",
+  "screen.choice_explain_short": "Воспроизводите, говорите, рисуйте — в исходном качестве.",
+  "ink.only_original": "Только оригинал (H)",
+  "ink.show_notes": "Показать заметки (H)",
+  "ink.hidden_n": "Скрыто заметок: {n}",
+  "ink.delete_all": "Удалить все заметки этого файла",
+  "ink.delete_found": "Удалить найденные заметки",
+  "ink.delete_all_title": "Удалить заметки ({n}) у {name}?",
+  "ink.delete_all_text": "Само видео не меняется. Отменить можно в течение 10 секунд.",
+  "ink.deleted_n": "Удалено заметок: {n}"
 }

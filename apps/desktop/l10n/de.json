@@ -993,5 +993,14 @@
   "player.back_to": "Zurück zu: {name} ({n}/{of})",
   "player.info_made": "Daraus gemacht",
   "player.notes_group": "{n} Notizen · zuletzt {day}",
-  "ink.from_narration": "beim Erklären gezeichnet"
+  "ink.from_narration": "beim Erklären gezeichnet",
+  "screen.choice_explain_short": "Abspielen, sprechen, zeichnen – in Originalqualität.",
+  "ink.only_original": "Nur Original zeigen (H)",
+  "ink.show_notes": "Notizen zeigen (H)",
+  "ink.hidden_n": "{n} Notizen ausgeblendet",
+  "ink.delete_all": "Alle Notizen dieser Datei löschen",
+  "ink.delete_found": "Gefundene Notizen löschen",
+  "ink.delete_all_title": "{n} Notizen von {name} löschen?",
+  "ink.delete_all_text": "Das Video selbst bleibt unverändert. 10 Sekunden lang rückgängig zu machen.",
+  "ink.deleted_n": "{n} Notizen gelöscht"
 }

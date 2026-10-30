@@ -335,7 +335,7 @@ class _PlayerPageState extends State<PlayerPage> {
 
   /// Explanations recorded on this PC (to make them again).
   List<NarrationSession> _narrations = const [];
-  bool _showInk = true;
+  late bool _showInk = widget.services.player.showInk;
 
   /// Bars shown (in full screen they step aside when the mouse rests).
   bool _chrome = true;
@@ -567,6 +567,8 @@ class _PlayerPageState extends State<PlayerPage> {
       _showTab(_Tab.notes);
     } else if (k == LogicalKeyboardKey.keyL) {
       _toggleSide();
+    } else if (k == LogicalKeyboardKey.keyH && _editor == null) {
+      _setShowInk(!_showInk);
     } else if (k == LogicalKeyboardKey.keyD) {
       _editor == null ? _startDraw() : unawaited(_finishDraw());
     } else if (k == LogicalKeyboardKey.keyR && !ctrl) {
@@ -653,6 +655,12 @@ class _PlayerPageState extends State<PlayerPage> {
     _memory.setSide(open: _fullscreen ? null : true, tab: t.name);
   }
 
+  /// Annotations shown, or only the original (remembered).
+  void _setShowInk(bool v) {
+    setState(() => _showInk = v);
+    _memory.setShowInk(v);
+  }
+
   void _toggleSide() {
     if (_fullscreen) {
       setState(() => _peek = !_peek);
@@ -711,8 +719,8 @@ class _PlayerPageState extends State<PlayerPage> {
     if (_editor != null) return;
     final e = _entry;
     if (!_sets.containsKey(e)) return;
+    if (!_showInk) _setShowInk(true);
     setState(() {
-      _showInk = true;
       _editor = InkEditor(
         video: e.video,
         clock: () => _active?.nowMs ?? 0,
@@ -1445,6 +1453,10 @@ class _PlayerPageState extends State<PlayerPage> {
               on: _slideshow),
         if (_rec == null)
           _btn(Icons.fiber_manual_record_rounded, tr('rec.start'), _countdown > 0 ? null : () => unawaited(_startRecording())),
+        if ((_set?.notes.isNotEmpty ?? false) || !_showInk)
+          _btn(_showInk ? Icons.layers_rounded : Icons.layers_clear_rounded, tr(_showInk ? 'ink.only_original' : 'ink.show_notes'),
+              () => _setShowInk(!_showInk),
+              on: !_showInk),
         _btn(Icons.brush_rounded, tr('ink.draw'), _set == null ? null : () => _editor == null ? _startDraw() : unawaited(_finishDraw()),
             on: _editor != null),
         PopupMenuButton<bool>(
@@ -1565,6 +1577,27 @@ class _PlayerPageState extends State<PlayerPage> {
         child: Stack(children: [
           Positioned.fill(child: _pageView()),
           if (_editor == null) _arrows(),
+          if (!_showInk && (_set?.notes.isNotEmpty ?? false) && _editor == null)
+            Positioned(
+              right: 12,
+              top: _fullscreen ? 64 : 10,
+              child: Material(
+                color: const Color(0xCC202020),
+                borderRadius: BorderRadius.circular(14),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(14),
+                  onTap: () => _setShowInk(true),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      const Icon(Icons.layers_clear_rounded, size: 15, color: Colors.white70),
+                      const SizedBox(width: 6),
+                      Text(tr('ink.hidden_n', {'n': _set!.notes.length}), style: const TextStyle(color: Colors.white, fontSize: 12.5)),
+                    ]),
+                  ),
+                ),
+              ),
+            ),
           if (_editor != null)
             Positioned(
               left: 0,
@@ -1740,7 +1773,7 @@ class _PlayerPageState extends State<PlayerPage> {
                 return sz == null || sz.height == 0 ? 16 / 9 : sz.width / sz.height;
               }(),
               showInk: _showInk,
-              onShowInk: (v) => setState(() => _showInk = v),
+              onShowInk: _setShowInk,
               onAction: (n, a) => unawaited(_noteAction(n, a)),
               onHold: (n, ms) => unawaited(_hold(n, ms)),
               onClipAround: () => unawaited(_clipAround()),

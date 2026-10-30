@@ -993,5 +993,14 @@
   "player.back_to": "戻る：{name}（{n}/{of}）",
   "player.info_made": "これから作成",
   "player.notes_group": "注釈 {n} 件 · 最新 {day}",
-  "ink.from_narration": "解説中に描いたもの"
+  "ink.from_narration": "解説中に描いたもの",
+  "screen.choice_explain_short": "再生しながら話して描く。画質はそのまま。",
+  "ink.only_original": "元の動画だけ（H）",
+  "ink.show_notes": "注釈を表示（H）",
+  "ink.hidden_n": "注釈 {n} 件を非表示",
+  "ink.delete_all": "このファイルの注釈をすべて削除",
+  "ink.delete_found": "見つかった注釈を削除",
+  "ink.delete_all_title": "{name} の注釈 {n} 件を削除しますか？",
+  "ink.delete_all_text": "動画そのものは変わりません。10 秒間は元に戻せます。",
+  "ink.deleted_n": "注釈 {n} 件を削除しました"
 }
