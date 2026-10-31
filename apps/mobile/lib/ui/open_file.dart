@@ -31,6 +31,7 @@ Future<void> openDocument(BuildContext context, String path, {String? name, Futu
     // LocalRoll's reader when the phone can read it; else (logged, to find
     // out why) the system's own preview / the file card.
     final n = await PdfPages.count(path).timeout(const Duration(seconds: 8), onTimeout: () => -1);
+    DiagLog.log('files', 'pdf: ${n < 0 ? 'no answer in 8 s' : '$n pages'}');
     if (n > 0) {
       await nav.push(MaterialPageRoute(builder: (_) => PdfViewPage(path: path, title: shown)));
       return;

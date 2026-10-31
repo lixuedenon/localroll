@@ -36,7 +36,18 @@ List<StripDevice> stripDevices(MobileSettings settings, DesktopDiscovery discove
 
 /// Home's device row: one small chip each (online ones glow), "+" to add.
 class DeviceStrip extends StatelessWidget {
-  const DeviceStrip({super.key, required this.settings, required this.discovery, required this.onTap, required this.onAdd, this.big = false});
+  const DeviceStrip({
+    super.key,
+    required this.settings,
+    required this.discovery,
+    required this.onTap,
+    required this.onAdd,
+    this.big = false,
+    this.light = false,
+  });
+
+  /// On the light home page: frosted white chips.
+  final bool light;
 
   final MobileSettings settings;
   final DesktopDiscovery discovery;
@@ -60,9 +71,11 @@ class DeviceStrip extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(right: 8),
               child: Material(
-                color: LrColors.surface,
+                color: light ? Colors.white.withValues(alpha: 0.22) : LrColors.surface,
                 shape: StadiumBorder(
-                  side: BorderSide(color: d.online ? onlineGlow : LrColors.line, width: d.online ? 1.5 : 1),
+                  side: light
+                      ? BorderSide(color: Colors.white.withValues(alpha: 0.55), width: 1.2)
+                      : BorderSide(color: d.online ? onlineGlow : LrColors.line, width: d.online ? 1.5 : 1),
                 ),
                 child: InkWell(
                   customBorder: const StadiumBorder(),
@@ -73,14 +86,16 @@ class DeviceStrip extends StatelessWidget {
                       _avatar(d, h - 14),
                       const SizedBox(width: 8),
                       Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text(d.name, style: TextStyle(fontWeight: FontWeight.w700, fontSize: big ? 16 : 14)),
+                        Text(d.name, style: TextStyle(fontWeight: FontWeight.w700, fontSize: big ? 16 : 14, color: light ? Colors.white : null)),
                         Text(
                           d.id == cur
                               ? '● ${tr('home.backup_pc')}'
                               : d.online
                                   ? '● ${tr(d.isPc ? 'home.kind_pc' : 'home.kind_phone')}'
                                   : tr('home.pc_offline'),
-                          style: TextStyle(fontSize: big ? 13 : 11, color: d.online ? onlineGlow : LrColors.muted),
+                          style: TextStyle(
+                              fontSize: big ? 13 : 11,
+                              color: light ? (d.online ? const Color(0xFF8CF5B5) : Colors.white70) : (d.online ? onlineGlow : LrColors.muted)),
                         ),
                       ]),
                     ]),
@@ -93,7 +108,13 @@ class DeviceStrip extends StatelessWidget {
               width: h - 4,
               height: h - 4,
               child: OutlinedButton(
-                style: OutlinedButton.styleFrom(shape: const CircleBorder(), padding: EdgeInsets.zero),
+                style: OutlinedButton.styleFrom(
+                  shape: const CircleBorder(),
+                  padding: EdgeInsets.zero,
+                  foregroundColor: light ? Colors.white : null,
+                  backgroundColor: light ? Colors.white.withValues(alpha: 0.18) : null,
+                  side: light ? BorderSide(color: Colors.white.withValues(alpha: 0.6), width: 1.2) : null,
+                ),
                 onPressed: onAdd,
                 child: Icon(Icons.add_rounded, semanticLabel: tr('home.add_device')),
               ),

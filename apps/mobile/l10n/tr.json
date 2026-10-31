@@ -504,5 +504,8 @@
   "photos.not_backed_up": "Henüz yedeklenmedi",
   "photos.send": "Gönder…",
   "photos.delete": "Sil",
-  "settings.log_send": "Bir PC’ye gönder"
+  "settings.log_send": "Bir PC’ye gönder",
+  "home.tagline": "Gönder · Yedekle · Tara · PC’ye göz at",
+  "pclib.stalled": "{pc} üzerinden alma durdu. Ağı kontrol edip tekrar deneyin.",
+  "pclib.fetching": "{pc} üzerinden alınıyor…"
 }

@@ -504,5 +504,8 @@
   "photos.not_backed_up": "Not backed up yet",
   "photos.send": "Send to…",
   "photos.delete": "Delete",
-  "settings.log_send": "Send to a PC"
+  "settings.log_send": "Send to a PC",
+  "home.tagline": "Send · Back up · Scan · Browse your PC",
+  "pclib.stalled": "Getting it from {pc} stopped. Check the network and try again.",
+  "pclib.fetching": "Getting it from {pc}…"
 }

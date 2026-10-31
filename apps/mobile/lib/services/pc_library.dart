@@ -240,6 +240,7 @@ class PcLibrary extends ChangeNotifier {
         'phone_closed' => tr('pclib.phone_closed'),
         // An older PC has no such page.
         'not_found' => tr('pclib.pc_too_old', {'pc': desktop.name}),
+        'stalled' || 'incomplete' => tr('pclib.stalled', {'pc': desktop.name}),
         _ => serverError(e.code),
       };
     }
@@ -289,8 +290,17 @@ class PcLibrary extends ChangeNotifier {
   /// first page and to open it. Only over the same signed-in HTTPS link.
   Future<String> fetch(RemoteItem item) {
     final key = '${item.path}|${item.size}|${item.receivedMs}';
-    return _fetching[key] ??= _fetch(item).whenComplete(() => _fetching.remove(key));
+    return _fetching[key] ??= () {
+      got.putIfAbsent(item.path, () => ValueNotifier(0)).value = 0;
+      return _fetch(item).whenComplete(() {
+        _fetching.remove(key);
+        got.remove(item.path);
+      });
+    }();
   }
+
+  /// Bytes arrived so far of files being fetched (by path), for "45 %".
+  final Map<String, ValueNotifier<int>> got = {};
 
   static Directory? _cacheDir;
 
@@ -318,21 +328,48 @@ class PcLibrary extends ChangeNotifier {
     final f = File('${dir.path}/${name.isEmpty ? 'file' : name}');
     if (await f.exists() && await f.length() == item.size) return f.path;
     await dir.create(recursive: true);
-    final c = await _connect();
-    final res = await c.open(c.libraryFileUri(item.path));
-    if (res.statusCode != 200) {
-      await res.drain<void>();
-      throw LrHttpError(res.statusCode, {'error': res.statusCode == 404 ? 'not_found' : 'HTTP ${res.statusCode}'});
-    }
-    final part = File('${f.path}.part');
-    final sink = part.openWrite();
+    final ext = item.name.contains('.') ? item.name.substring(item.name.lastIndexOf('.') + 1).toLowerCase() : '?';
+    final clock = Stopwatch()..start();
+    final progress = got[item.path];
+    var n = 0;
     try {
-      await sink.addStream(res);
-    } finally {
-      await sink.close();
+      final c = await _connect();
+      final res = await c.open(c.libraryFileUri(item.path));
+      if (res.statusCode != 200) {
+        await res.drain<void>();
+        DiagLog.log('pclib', 'file .$ext: PC answered ${res.statusCode}');
+        throw LrHttpError(res.statusCode, {'error': res.statusCode == 404 ? 'not_found' : 'HTTP ${res.statusCode}'});
+      }
+      final part = File('${f.path}.part');
+      final sink = part.openWrite();
+      try {
+        // Nothing new for 15 s: given up (else it would wait for ever).
+        await for (final chunk in res.timeout(const Duration(seconds: 15))) {
+          sink.add(chunk);
+          n += chunk.length;
+          progress?.value = n;
+        }
+      } finally {
+        await sink.close();
+      }
+      if (item.size > 0 && n != item.size) {
+        DiagLog.log('pclib', 'file .$ext: got $n of ${item.size} bytes');
+        try {
+          await part.delete();
+        } catch (_) {}
+        throw LrHttpError(0, {'error': 'incomplete'});
+      }
+      await part.rename(f.path);
+      DiagLog.log('pclib', 'file .$ext fetched: $n bytes in ${clock.elapsedMilliseconds} ms');
+      return f.path;
+    } on TimeoutException {
+      DiagLog.log('pclib', 'file .$ext: stalled after $n of ${item.size} bytes (${clock.elapsedMilliseconds} ms)');
+      _drop();
+      throw LrHttpError(0, {'error': 'stalled'});
+    } catch (e) {
+      if (e is! LrHttpError) DiagLog.log('pclib', 'file .$ext not fetched after $n bytes: $e');
+      rethrow;
     }
-    await part.rename(f.path);
-    return f.path;
   }
 
   /// Into LocalRoll's own files on this phone (Documents / Other, under

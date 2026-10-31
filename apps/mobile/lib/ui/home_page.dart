@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart' show FilePicker, PlatformFile;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:localroll_core/localroll_core.dart';
 import 'package:photo_manager/photo_manager.dart';
 
@@ -26,6 +27,7 @@ import 'cleanup_page.dart';
 import 'connect_page.dart';
 import 'device_badge.dart';
 import 'device_strip.dart';
+import 'home_look.dart';
 import 'incoming.dart';
 import 'lost_notice.dart';
 import 'my_library_page.dart';
@@ -824,7 +826,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             2 => MyLibraryPage(settings: widget.settings, discovery: widget.discovery),
             _ => _pcTabPage(context),
           },
-          bottomNavigationBar: NavigationBar(
+          bottomNavigationBar: _tab == 0
+              ? Theme(data: homeTheme(Theme.of(context)), child: _nav())
+              : _nav(),
+        );
+      },
+    );
+  }
+
+  Widget _nav() => NavigationBar(
             selectedIndex: _tab,
             onDestinationSelected: _selectTab,
             destinations: [
@@ -835,11 +845,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   icon: const Icon(Icons.folder_outlined), selectedIcon: const Icon(Icons.folder_rounded), label: tr('nav.files')),
               NavigationDestination(icon: const Icon(Icons.computer_outlined), selectedIcon: const Icon(Icons.computer_rounded), label: tr('nav.pc')),
             ],
-          ),
-        );
-      },
-    );
-  }
+          );
 
   /// "PC" tab: the PC's library (the backup PC, or the one picked at the
   /// top); no PC yet: pair one.
@@ -1022,149 +1028,184 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   /// Home: the devices (one row), what still needs backing up, three
   /// actions, notices when there are any, and what arrived lately.
   Widget _home(BuildContext context, PairedDesktop? d) {
-    final theme = Theme.of(context);
+    final base = Theme.of(context);
     final last = d == null ? null : widget.settings.lastBackup(d.id);
     final pending = _pending;
-    Widget action(IconData icon, String title, String sub, VoidCallback onTap, {Color? color}) => Expanded(
-          child: Material(
-            color: LrColors.surface,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: LrColors.line)),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(16),
-              onTap: onTap,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
-                child: Column(children: [
-                  Icon(icon, color: color ?? LrColors.safelight, size: 26),
-                  const SizedBox(height: 6),
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 2),
-                  Text(sub,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 11.5, color: color ?? LrColors.muted)),
-                ]),
-              ),
-            ),
-          ),
-        );
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(appName),
-        actions: [
-          IconButton(tooltip: tr('settings.title'), onPressed: _openSettings, icon: const Icon(Icons.settings_rounded)),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: _pullDown,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-          children: [
-            DeviceStrip(settings: widget.settings, discovery: widget.discovery, onTap: _onDevice, onAdd: _openConnect),
-            ReceivingBanner(server: _server),
-            _lostBanner(context),
-            _autoBanner(context),
-            const SizedBox(height: 14),
-            // What is not on the backup PC yet.
-            Container(
-              padding: const EdgeInsets.fromLTRB(18, 16, 18, 6),
-              decoration: BoxDecoration(
-                color: LrColors.raised,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: LrColors.line),
-              ),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(d == null ? tr('home.not_connected') : tr('home.not_backed_up_to', {'pc': d.name}),
-                    style: const TextStyle(color: LrColors.muted)),
-                const SizedBox(height: 6),
-                if (pending == null)
-                  Row(children: [
-                    const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
-                    const SizedBox(width: 10),
-                    Text(tr('home.counting')),
-                  ])
-                else
-                  Text.rich(TextSpan(children: [
-                    TextSpan(
-                      text: tr('home.items', {'count': pending.assets.length}),
-                      style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
-                    ),
-                    if (pending.sizesKnown && pending.totalBytes > 0)
-                      TextSpan(text: '  ${tr('home.about', {'size': formatSize(pending.totalBytes)})}', style: const TextStyle(color: LrColors.muted)),
-                  ])),
-                if (last != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    tr('home.last_backup', {
-                      'when': MaterialLocalizations.of(context).formatShortDate(last.time),
-                      'time': TimeOfDay.fromDateTime(last.time).format(context),
-                      'count': last.count,
-                    }),
-                    style: const TextStyle(color: LrColors.muted, fontSize: 13),
+    final top = MediaQuery.of(context).padding.top;
+    final card = GlassCard(
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Stack(children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 104),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(9),
+                    gradient: const LinearGradient(colors: [Color(0xFF4F9BFF), HomeColors.blue]),
                   ),
-                ],
-                const SizedBox(height: 14),
-                Row(children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 50,
-                      // The height is set here: no padding of its own on top
-                      // (iPhone's Chinese font is taller and was cut off).
-                      child: FilledButton(
-                        style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 12)),
-                        onPressed: d == null ? _openConnect : _backupNow,
-                        child: Text(tr(d == null ? 'home.connect_pc' : 'home.backup_now'),
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-                      ),
-                    ),
-                  ),
-                  if (d != null) ...[
-                    const SizedBox(width: 8),
-                    SizedBox(
-                      height: 50,
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 14)),
-                        onPressed: () async {
-                          await _backupAll();
-                          unawaited(_refreshHome());
-                        },
-                        child: Text(tr('home.backup_choose')),
-                      ),
-                    ),
-                  ],
-                ]),
-                const SizedBox(height: 6),
-                const Divider(height: 18),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  dense: true,
-                  value: widget.settings.autoSend,
-                  title: Text(tr('home.auto_new'), style: const TextStyle(fontSize: 14)),
-                  onChanged: d == null
-                      ? null
-                      : (on) async {
-                          await widget.settings.setAutoSend(on);
-                          await _onAutoSendChanged();
-                        },
+                  child: const Icon(Icons.cloud_upload_rounded, color: Colors.white, size: 18),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(d == null ? tr('home.not_connected') : tr('home.not_backed_up_to', {'pc': d.name}),
+                      maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: HomeColors.muted, fontSize: 14)),
                 ),
               ]),
-            ),
-            const SizedBox(height: 12),
-            Row(children: [
-              action(Icons.send_rounded, tr('home.act_send'), tr('home.act_send_sub'), () => _startSend()),
-              const SizedBox(width: 10),
-              action(Icons.document_scanner_rounded, tr('home.tile_scan'), tr('home.tile_scan_sub'), _openScan),
-              const SizedBox(width: 10),
-              action(
-                Icons.cleaning_services_rounded,
-                tr('home.cleanup'),
-                _freeable > 0 ? tr('home.tile_free_sub', {'size': formatSize(_freeable)}) : tr('home.tile_free_none'),
-                d == null ? _openConnect : () => _openCleanup(d),
-                color: _freeable > 0 ? LrColors.verified : null,
-              ),
+              const SizedBox(height: 10),
+              if (pending == null)
+                Row(children: [
+                  const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
+                  const SizedBox(width: 10),
+                  Text(tr('home.counting')),
+                ])
+              else
+                Text.rich(TextSpan(children: [
+                  TextSpan(
+                    text: tr('home.items', {'count': pending.assets.length}),
+                    style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: HomeColors.ink, height: 1.15),
+                  ),
+                  if (pending.sizesKnown && pending.totalBytes > 0)
+                    TextSpan(text: '  ${tr('home.about', {'size': formatSize(pending.totalBytes)})}', style: const TextStyle(color: HomeColors.muted)),
+                ])),
+              if (last != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  tr('home.last_backup', {
+                    'when': MaterialLocalizations.of(context).formatShortDate(last.time),
+                    'time': TimeOfDay.fromDateTime(last.time).format(context),
+                    'count': last.count,
+                  }),
+                  style: const TextStyle(color: HomeColors.muted, fontSize: 13),
+                ),
+              ],
             ]),
-            _recentStrip(context),
+          ),
+          const Positioned(right: -4, top: 0, child: FloatingKinds()),
+        ]),
+        const SizedBox(height: 16),
+        Row(children: [
+          Expanded(
+            child: SkyButton(
+              icon: d == null ? Icons.link_rounded : Icons.cloud_upload_rounded,
+              label: tr(d == null ? 'home.connect_pc' : 'home.backup_now'),
+              onPressed: d == null ? _openConnect : _backupNow,
+            ),
+          ),
+          if (d != null) ...[
+            const SizedBox(width: 10),
+            SizedBox(
+              height: 54,
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 16)),
+                onPressed: () async {
+                  await _backupAll();
+                  unawaited(_refreshHome());
+                },
+                child: Text(tr('home.backup_choose'), style: const TextStyle(fontWeight: FontWeight.w700)),
+              ),
+            ),
           ],
+        ]),
+        const SizedBox(height: 10),
+        const Divider(height: 18),
+        Row(children: [
+          const Icon(Icons.photo_camera_rounded, color: HomeColors.blue, size: 22),
+          const SizedBox(width: 10),
+          Expanded(child: Text(tr('home.auto_new'), style: const TextStyle(fontSize: 14.5, color: HomeColors.ink))),
+          Switch(
+            value: widget.settings.autoSend,
+            onChanged: d == null
+                ? null
+                : (on) async {
+                    await widget.settings.setAutoSend(on);
+                    await _onAutoSendChanged();
+                  },
+          ),
+        ]),
+      ]),
+    );
+    return Theme(
+      data: homeTheme(base),
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.light,
+        child: Scaffold(
+          backgroundColor: HomeColors.page,
+          body: Stack(children: [
+            HomeBackdrop(height: top + 330),
+            RefreshIndicator(
+              onRefresh: _pullDown,
+              child: ListView(
+                padding: EdgeInsets.fromLTRB(16, top + 10, 16, 24),
+                children: [
+                  // The mark, the name, what it does; settings.
+                  Row(children: [
+                    const LogoMark(size: 54),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        const Text(appName, style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+                        Text(tr('home.tagline'),
+                            maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Color(0xE6FFFFFF), fontSize: 13.5)),
+                      ]),
+                    ),
+                    Material(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      shape: CircleBorder(side: BorderSide(color: Colors.white.withValues(alpha: 0.55))),
+                      child: IconButton(
+                        tooltip: tr('settings.title'),
+                        onPressed: _openSettings,
+                        icon: const Icon(Icons.settings_rounded, color: Colors.white),
+                      ),
+                    ),
+                  ]),
+                  const SizedBox(height: 16),
+                  DeviceStrip(settings: widget.settings, discovery: widget.discovery, onTap: _onDevice, onAdd: _openConnect, light: true),
+                  ReceivingBanner(server: _server),
+                  _lostBanner(context),
+                  _autoBanner(context),
+                  const SizedBox(height: 16),
+                  card,
+                  const SizedBox(height: 14),
+                  Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Expanded(
+                      child: PastelTile(
+                        icon: Icons.send_rounded,
+                        title: tr('home.act_send'),
+                        sub: tr('home.act_send_sub'),
+                        tint: const Color(0xFF2F7BFF),
+                        onTap: () => _startSend(),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: PastelTile(
+                        icon: Icons.document_scanner_rounded,
+                        title: tr('home.tile_scan'),
+                        sub: tr('home.tile_scan_sub'),
+                        tint: const Color(0xFF14B87A),
+                        onTap: _openScan,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: PastelTile(
+                        icon: Icons.cleaning_services_rounded,
+                        title: tr('home.cleanup'),
+                        sub: _freeable > 0 ? tr('home.tile_free_sub', {'size': formatSize(_freeable)}) : tr('home.tile_free_none'),
+                        subColor: _freeable > 0 ? HomeColors.blue : null,
+                        tint: const Color(0xFFFF8A1F),
+                        onTap: d == null ? _openConnect : () => _openCleanup(d),
+                      ),
+                    ),
+                  ]),
+                  _recentStrip(context),
+                ],
+              ),
+            ),
+          ]),
         ),
       ),
     );
@@ -1178,7 +1219,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       padding: const EdgeInsets.only(top: 18),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          Expanded(child: Text(tr('home.recent'), style: const TextStyle(fontWeight: FontWeight.w700))),
+          const Icon(Icons.schedule_rounded, color: HomeColors.blue, size: 22),
+          const SizedBox(width: 8),
+          Expanded(child: Text(tr('home.recent'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17, color: HomeColors.ink))),
           TextButton(onPressed: () => _selectTab(2), child: Text(tr('home.recent_all'))),
         ]),
         Row(children: [
@@ -1191,7 +1234,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     ? InkWell(
                         borderRadius: BorderRadius.circular(10),
                         onTap: () => _selectTab(2),
-                        child: ClipRRect(borderRadius: BorderRadius.circular(10), child: MyItemThumb(item: items[k])),
+                        child: Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: const [BoxShadow(color: Color(0x141E4FB8), blurRadius: 10, offset: Offset(0, 4))],
+                          ),
+                          child: ClipRRect(borderRadius: BorderRadius.circular(11), child: MyItemThumb(item: items[k])),
+                        ),
                       )
                     : const SizedBox.shrink(),
               ),

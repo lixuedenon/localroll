@@ -504,5 +504,8 @@
   "photos.not_backed_up": "لم يُنسخ احتياطيًا بعد",
   "photos.send": "إرسال إلى…",
   "photos.delete": "حذف",
-  "settings.log_send": "إرسال إلى كمبيوتر"
+  "settings.log_send": "إرسال إلى كمبيوتر",
+  "home.tagline": "نقل · نسخ احتياطي · مسح · تصفح الحاسوب",
+  "pclib.stalled": "توقف التنزيل من {pc}. تحقق من الشبكة وحاول مرة أخرى.",
+  "pclib.fetching": "جارٍ الأخذ من {pc}…"
 }

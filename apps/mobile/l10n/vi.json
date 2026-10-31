@@ -504,5 +504,8 @@
   "photos.not_backed_up": "Chưa sao lưu",
   "photos.send": "Gửi tới…",
   "photos.delete": "Xóa",
-  "settings.log_send": "Gửi tới máy tính"
+  "settings.log_send": "Gửi tới máy tính",
+  "home.tagline": "Gửi · Sao lưu · Quét · Xem máy tính",
+  "pclib.stalled": "Việc tải từ {pc} bị dừng. Kiểm tra mạng rồi thử lại.",
+  "pclib.fetching": "Đang lấy từ {pc}…"
 }

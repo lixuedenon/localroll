@@ -504,5 +504,8 @@
   "photos.not_backed_up": "まだバックアップしていません",
   "photos.send": "送る…",
   "photos.delete": "削除",
-  "settings.log_send": "パソコンへ送る"
+  "settings.log_send": "パソコンへ送る",
+  "home.tagline": "送る・バックアップ・スキャン・PC を見る",
+  "pclib.stalled": "{pc} からの取得が止まりました。ネットワークを確認してもう一度お試しください。",
+  "pclib.fetching": "{pc} から取得中…"
 }

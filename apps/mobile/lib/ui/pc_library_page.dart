@@ -140,13 +140,29 @@ class _PcLibraryPageState extends State<PcLibraryPage> {
   Future<void> _openFile(RemoteItem item) async {
     final nav = Navigator.of(context);
     var shown = false;
+    var cancelled = false;
+    final ext = item.name.contains('.') ? item.name.substring(item.name.lastIndexOf('.') + 1).toLowerCase() : '?';
+    DiagLog.log('pclib', 'open file .$ext (${item.size} bytes)');
     final wait = Timer(const Duration(milliseconds: 300), () {
       if (!mounted) return;
       shown = true;
       unawaited(showDialog<void>(
         context: context,
         barrierDismissible: false,
-        builder: (_) => const Center(child: CircularProgressIndicator()),
+        builder: (ctx) => AlertDialog(
+          title: Text(item.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 16)),
+          content: _FetchProgress(lib: lib, item: item),
+          actions: [
+            TextButton(
+              onPressed: () {
+                cancelled = true;
+                shown = false;
+                Navigator.of(ctx).pop();
+              },
+              child: Text(tr('common.cancel')),
+            ),
+          ],
+        ),
       ));
     });
     String? path;
@@ -158,7 +174,10 @@ class _PcLibraryPageState extends State<PcLibraryPage> {
     }
     wait.cancel();
     if (shown && mounted) nav.pop();
-    if (!mounted) return;
+    if (!mounted || cancelled) {
+      if (cancelled) DiagLog.log('pclib', 'open file .$ext: cancelled');
+      return;
+    }
     if (path == null) {
       _toast(lib.describe(problem ?? 'not_found'));
       return;
@@ -939,4 +958,31 @@ class _FilePage extends StatelessWidget {
           ]),
         ),
       );
+}
+
+/// "Getting it from the PC… 45 %".
+class _FetchProgress extends StatelessWidget {
+  const _FetchProgress({required this.lib, required this.item});
+
+  final PcLibrary lib;
+  final RemoteItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final got = lib.got[item.path];
+    Widget body(int n) {
+      final p = item.size > 0 ? (n / item.size).clamp(0.0, 1.0) : 0.0;
+      return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+        LinearProgressIndicator(value: n == 0 ? null : p),
+        const SizedBox(height: 10),
+        Text(n == 0 ? tr('pclib.fetching', {'pc': lib.desktop.name}) : '${(p * 100).round()} %  ·  ${formatSize(n)} / ${formatSize(item.size)}',
+            style: const TextStyle(color: LrColors.muted)),
+      ]);
+    }
+
+    return SizedBox(
+      width: 300,
+      child: got == null ? body(0) : ValueListenableBuilder<int>(valueListenable: got, builder: (_, n, _) => body(n)),
+    );
+  }
 }

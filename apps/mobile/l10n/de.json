@@ -504,5 +504,8 @@
   "photos.not_backed_up": "Noch nicht gesichert",
   "photos.send": "Senden an…",
   "photos.delete": "Löschen",
-  "settings.log_send": "An einen PC senden"
+  "settings.log_send": "An einen PC senden",
+  "home.tagline": "Senden · Sichern · Scannen · PC durchsuchen",
+  "pclib.stalled": "Die Übertragung von {pc} ist hängen geblieben. Netzwerk prüfen und erneut versuchen.",
+  "pclib.fetching": "Wird von {pc} geholt…"
 }

@@ -506,6 +506,9 @@ const Map<String, Map<String, String>> translations = {
     'photos.send': 'Send to…',
     'photos.delete': 'Delete',
     'settings.log_send': 'Send to a PC',
+    'home.tagline': 'Send · Back up · Scan · Browse your PC',
+    'pclib.stalled': 'Getting it from {pc} stopped. Check the network and try again.',
+    'pclib.fetching': 'Getting it from {pc}…',
   },
   'zh': {
     'common.cancel': '取消',
@@ -1010,6 +1013,9 @@ const Map<String, Map<String, String>> translations = {
     'photos.send': '发送到…',
     'photos.delete': '删除',
     'settings.log_send': '发送到电脑',
+    'home.tagline': '传输 · 备份 · 扫描 · 浏览电脑',
+    'pclib.stalled': '从「{pc}」取文件卡住了，请检查网络后再试。',
+    'pclib.fetching': '正在从「{pc}」取文件…',
   },
   'zh_Hant': {
     'common.cancel': '取消',
@@ -1514,6 +1520,9 @@ const Map<String, Map<String, String>> translations = {
     'photos.send': '傳送到…',
     'photos.delete': '刪除',
     'settings.log_send': '傳送到電腦',
+    'home.tagline': '傳輸 · 備份 · 掃描 · 瀏覽電腦',
+    'pclib.stalled': '從「{pc}」取檔案卡住了，請檢查網路後再試。',
+    'pclib.fetching': '正在從「{pc}」取檔案…',
   },
   'ja': {
     'common.cancel': 'キャンセル',
@@ -2018,6 +2027,9 @@ const Map<String, Map<String, String>> translations = {
     'photos.send': '送る…',
     'photos.delete': '削除',
     'settings.log_send': 'パソコンへ送る',
+    'home.tagline': '送る・バックアップ・スキャン・PC を見る',
+    'pclib.stalled': '{pc} からの取得が止まりました。ネットワークを確認してもう一度お試しください。',
+    'pclib.fetching': '{pc} から取得中…',
   },
   'ko': {
     'common.cancel': '취소',
@@ -2522,6 +2534,9 @@ const Map<String, Map<String, String>> translations = {
     'photos.send': '보내기…',
     'photos.delete': '삭제',
     'settings.log_send': 'PC로 보내기',
+    'home.tagline': '보내기 · 백업 · 스캔 · PC 보기',
+    'pclib.stalled': '{pc}에서 받기가 멈췄습니다. 네트워크를 확인하고 다시 시도하세요.',
+    'pclib.fetching': '{pc}에서 가져오는 중…',
   },
   'es': {
     'common.cancel': 'Cancelar',
@@ -3026,6 +3041,9 @@ const Map<String, Map<String, String>> translations = {
     'photos.send': 'Enviar a…',
     'photos.delete': 'Borrar',
     'settings.log_send': 'Enviar a un PC',
+    'home.tagline': 'Enviar · Copiar · Escanear · Ver el PC',
+    'pclib.stalled': 'La descarga desde {pc} se detuvo. Revisa la red e inténtalo de nuevo.',
+    'pclib.fetching': 'Obteniendo de {pc}…',
   },
   'fr': {
     'common.cancel': 'Annuler',
@@ -3530,6 +3548,9 @@ const Map<String, Map<String, String>> translations = {
     'photos.send': 'Envoyer à…',
     'photos.delete': 'Supprimer',
     'settings.log_send': 'Envoyer à un PC',
+    'home.tagline': 'Envoyer · Sauvegarder · Scanner · Parcourir le PC',
+    'pclib.stalled': 'Le téléchargement depuis {pc} s’est arrêté. Vérifiez le réseau et réessayez.',
+    'pclib.fetching': 'Récupération depuis {pc}…',
   },
   'de': {
     'common.cancel': 'Abbrechen',
@@ -4034,6 +4055,9 @@ const Map<String, Map<String, String>> translations = {
     'photos.send': 'Senden an…',
     'photos.delete': 'Löschen',
     'settings.log_send': 'An einen PC senden',
+    'home.tagline': 'Senden · Sichern · Scannen · PC durchsuchen',
+    'pclib.stalled': 'Die Übertragung von {pc} ist hängen geblieben. Netzwerk prüfen und erneut versuchen.',
+    'pclib.fetching': 'Wird von {pc} geholt…',
   },
   'pt': {
     'common.cancel': 'Cancelar',
@@ -4538,6 +4562,9 @@ const Map<String, Map<String, String>> translations = {
     'photos.send': 'Enviar para…',
     'photos.delete': 'Apagar',
     'settings.log_send': 'Enviar para um PC',
+    'home.tagline': 'Enviar · Backup · Digitalizar · Ver o PC',
+    'pclib.stalled': 'O download de {pc} parou. Verifique a rede e tente de novo.',
+    'pclib.fetching': 'Buscando de {pc}…',
   },
   'ru': {
     'common.cancel': 'Отмена',
@@ -5042,6 +5069,9 @@ const Map<String, Map<String, String>> translations = {
     'photos.send': 'Отправить…',
     'photos.delete': 'Удалить',
     'settings.log_send': 'Отправить на ПК',
+    'home.tagline': 'Отправка · Копия · Скан · Просмотр ПК',
+    'pclib.stalled': 'Загрузка с {pc} остановилась. Проверьте сеть и попробуйте снова.',
+    'pclib.fetching': 'Загрузка с {pc}…',
   },
   'it': {
     'common.cancel': 'Annulla',
@@ -5546,6 +5576,9 @@ const Map<String, Map<String, String>> translations = {
     'photos.send': 'Invia a…',
     'photos.delete': 'Elimina',
     'settings.log_send': 'Invia a un PC',
+    'home.tagline': 'Invia · Backup · Scansiona · Sfoglia il PC',
+    'pclib.stalled': 'Il download da {pc} si è fermato. Controlla la rete e riprova.',
+    'pclib.fetching': 'Recupero da {pc}…',
   },
   'ar': {
     'common.cancel': 'إلغاء',
@@ -6050,6 +6083,9 @@ const Map<String, Map<String, String>> translations = {
     'photos.send': 'إرسال إلى…',
     'photos.delete': 'حذف',
     'settings.log_send': 'إرسال إلى كمبيوتر',
+    'home.tagline': 'نقل · نسخ احتياطي · مسح · تصفح الحاسوب',
+    'pclib.stalled': 'توقف التنزيل من {pc}. تحقق من الشبكة وحاول مرة أخرى.',
+    'pclib.fetching': 'جارٍ الأخذ من {pc}…',
   },
   'hi': {
     'common.cancel': 'रद्द करें',
@@ -6554,6 +6590,9 @@ const Map<String, Map<String, String>> translations = {
     'photos.send': 'भेजें…',
     'photos.delete': 'मिटाएँ',
     'settings.log_send': 'कंप्यूटर पर भेजें',
+    'home.tagline': 'भेजें · बैकअप · स्कैन · PC देखें',
+    'pclib.stalled': '{pc} से डाउनलोड रुक गया। नेटवर्क जाँचें और फिर कोशिश करें।',
+    'pclib.fetching': '{pc} से लाया जा रहा है…',
   },
   'id': {
     'common.cancel': 'Batal',
@@ -7058,6 +7097,9 @@ const Map<String, Map<String, String>> translations = {
     'photos.send': 'Kirim ke…',
     'photos.delete': 'Hapus',
     'settings.log_send': 'Kirim ke PC',
+    'home.tagline': 'Kirim · Cadangkan · Pindai · Jelajahi PC',
+    'pclib.stalled': 'Pengambilan dari {pc} terhenti. Periksa jaringan lalu coba lagi.',
+    'pclib.fetching': 'Mengambil dari {pc}…',
   },
   'vi': {
     'common.cancel': 'Hủy',
@@ -7562,6 +7604,9 @@ const Map<String, Map<String, String>> translations = {
     'photos.send': 'Gửi tới…',
     'photos.delete': 'Xóa',
     'settings.log_send': 'Gửi tới máy tính',
+    'home.tagline': 'Gửi · Sao lưu · Quét · Xem máy tính',
+    'pclib.stalled': 'Việc tải từ {pc} bị dừng. Kiểm tra mạng rồi thử lại.',
+    'pclib.fetching': 'Đang lấy từ {pc}…',
   },
   'th': {
     'common.cancel': 'ยกเลิก',
@@ -8066,6 +8111,9 @@ const Map<String, Map<String, String>> translations = {
     'photos.send': 'ส่งไปที่…',
     'photos.delete': 'ลบ',
     'settings.log_send': 'ส่งไปยังคอมพิวเตอร์',
+    'home.tagline': 'ส่ง · สำรอง · สแกน · ดูคอมพิวเตอร์',
+    'pclib.stalled': 'การดึงไฟล์จาก {pc} หยุดค้าง ตรวจสอบเครือข่ายแล้วลองใหม่',
+    'pclib.fetching': 'กำลังดึงจาก {pc}…',
   },
   'tr': {
     'common.cancel': 'İptal',
@@ -8570,5 +8618,8 @@ const Map<String, Map<String, String>> translations = {
     'photos.send': 'Gönder…',
     'photos.delete': 'Sil',
     'settings.log_send': 'Bir PC’ye gönder',
+    'home.tagline': 'Gönder · Yedekle · Tara · PC’ye göz at',
+    'pclib.stalled': '{pc} üzerinden alma durdu. Ağı kontrol edip tekrar deneyin.',
+    'pclib.fetching': '{pc} üzerinden alınıyor…',
   },
 };

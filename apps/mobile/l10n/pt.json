@@ -504,5 +504,8 @@
   "photos.not_backed_up": "Ainda sem cópia",
   "photos.send": "Enviar para…",
   "photos.delete": "Apagar",
-  "settings.log_send": "Enviar para um PC"
+  "settings.log_send": "Enviar para um PC",
+  "home.tagline": "Enviar · Backup · Digitalizar · Ver o PC",
+  "pclib.stalled": "O download de {pc} parou. Verifique a rede e tente de novo.",
+  "pclib.fetching": "Buscando de {pc}…"
 }

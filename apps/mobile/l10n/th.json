@@ -504,5 +504,8 @@
   "photos.not_backed_up": "ยังไม่ได้สำรอง",
   "photos.send": "ส่งไปที่…",
   "photos.delete": "ลบ",
-  "settings.log_send": "ส่งไปยังคอมพิวเตอร์"
+  "settings.log_send": "ส่งไปยังคอมพิวเตอร์",
+  "home.tagline": "ส่ง · สำรอง · สแกน · ดูคอมพิวเตอร์",
+  "pclib.stalled": "การดึงไฟล์จาก {pc} หยุดค้าง ตรวจสอบเครือข่ายแล้วลองใหม่",
+  "pclib.fetching": "กำลังดึงจาก {pc}…"
 }

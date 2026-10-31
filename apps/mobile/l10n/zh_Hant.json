@@ -504,5 +504,8 @@
   "photos.not_backed_up": "還沒備份",
   "photos.send": "傳送到…",
   "photos.delete": "刪除",
-  "settings.log_send": "傳送到電腦"
+  "settings.log_send": "傳送到電腦",
+  "home.tagline": "傳輸 · 備份 · 掃描 · 瀏覽電腦",
+  "pclib.stalled": "從「{pc}」取檔案卡住了，請檢查網路後再試。",
+  "pclib.fetching": "正在從「{pc}」取檔案…"
 }

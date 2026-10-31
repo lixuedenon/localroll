@@ -504,5 +504,8 @@
   "photos.not_backed_up": "Belum dicadangkan",
   "photos.send": "Kirim ke…",
   "photos.delete": "Hapus",
-  "settings.log_send": "Kirim ke PC"
+  "settings.log_send": "Kirim ke PC",
+  "home.tagline": "Kirim · Cadangkan · Pindai · Jelajahi PC",
+  "pclib.stalled": "Pengambilan dari {pc} terhenti. Periksa jaringan lalu coba lagi.",
+  "pclib.fetching": "Mengambil dari {pc}…"
 }

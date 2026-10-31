@@ -504,5 +504,8 @@
   "photos.not_backed_up": "अभी बैकअप नहीं",
   "photos.send": "भेजें…",
   "photos.delete": "मिटाएँ",
-  "settings.log_send": "कंप्यूटर पर भेजें"
+  "settings.log_send": "कंप्यूटर पर भेजें",
+  "home.tagline": "भेजें · बैकअप · स्कैन · PC देखें",
+  "pclib.stalled": "{pc} से डाउनलोड रुक गया। नेटवर्क जाँचें और फिर कोशिश करें।",
+  "pclib.fetching": "{pc} से लाया जा रहा है…"
 }

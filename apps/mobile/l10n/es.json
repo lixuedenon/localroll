@@ -504,5 +504,8 @@
   "photos.not_backed_up": "Aún sin copia",
   "photos.send": "Enviar a…",
   "photos.delete": "Borrar",
-  "settings.log_send": "Enviar a un PC"
+  "settings.log_send": "Enviar a un PC",
+  "home.tagline": "Enviar · Copiar · Escanear · Ver el PC",
+  "pclib.stalled": "La descarga desde {pc} se detuvo. Revisa la red e inténtalo de nuevo.",
+  "pclib.fetching": "Obteniendo de {pc}…"
 }

@@ -504,5 +504,8 @@
   "photos.not_backed_up": "Non ancora salvata",
   "photos.send": "Invia a…",
   "photos.delete": "Elimina",
-  "settings.log_send": "Invia a un PC"
+  "settings.log_send": "Invia a un PC",
+  "home.tagline": "Invia · Backup · Scansiona · Sfoglia il PC",
+  "pclib.stalled": "Il download da {pc} si è fermato. Controlla la rete e riprova.",
+  "pclib.fetching": "Recupero da {pc}…"
 }

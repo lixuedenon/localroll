@@ -504,5 +504,8 @@
   "photos.not_backed_up": "Ещё не сохранено",
   "photos.send": "Отправить…",
   "photos.delete": "Удалить",
-  "settings.log_send": "Отправить на ПК"
+  "settings.log_send": "Отправить на ПК",
+  "home.tagline": "Отправка · Копия · Скан · Просмотр ПК",
+  "pclib.stalled": "Загрузка с {pc} остановилась. Проверьте сеть и попробуйте снова.",
+  "pclib.fetching": "Загрузка с {pc}…"
 }
