@@ -1010,5 +1010,16 @@
   "pen.key_title": "Touche dessiner / utiliser",
   "pen.key_none": "Aucune touche",
   "pen.move_bar": "Faites glisser pour déplacer la barre",
-  "pen.tips_v2": "Double-clic pour sélectionner : glisser pour déplacer, coins pour la taille, point pour tourner ; molette = taille (Maj : tourner) ; Suppr ou double-clic supprime ; Échap désélectionne. Maintenez Ctrl pour utiliser les applis un instant."
+  "pen.tips_v2": "Double-clic pour sélectionner : glisser pour déplacer, coins pour la taille, point pour tourner ; molette = taille (Maj : tourner) ; Suppr ou double-clic supprime ; Échap désélectionne. Maintenez Ctrl pour utiliser les applis un instant.",
+  "recs.name_win": "Enregistrement de fenêtre",
+  "recs.name_full": "Enregistrement d’écran",
+  "recs.name_area": "Enregistrement de zone",
+  "pen.per_window": "Les traits suivent la fenêtre",
+  "rec.add_title": "Ajouter une vidéo…",
+  "rec.add_tip": "Il rejoint la liste et s’affiche ; l’enregistrement continue.",
+  "rec.add_files": "Depuis les fichiers…",
+  "rec.leave_title": "Enregistrement d’une explication",
+  "rec.leave_text": "Aller ailleurs arrête d’abord l’enregistrement. Pour montrer une autre vidéo, utilisez « Ajouter une vidéo… » dans la barre.",
+  "rec.leave_stay": "Continuer",
+  "rec.leave_stop": "Arrêter"
 }

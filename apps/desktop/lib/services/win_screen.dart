@@ -261,6 +261,41 @@ class WinScreen {
     }
   }
 
+  /// The program a window belongs to, from its file name
+  /// ("sideloadly.exe" → "Sideloadly"); '' when it can't be told.
+  static String programName(int hwnd) {
+    final u = _user32;
+    if (u == null || hwnd == 0) return '';
+    final pid = calloc<Uint32>();
+    final buf = calloc<Uint16>(1024);
+    final len = calloc<Uint32>()..value = 1024;
+    try {
+      u.lookupFunction<Uint32 Function(IntPtr, Pointer<Uint32>), int Function(int, Pointer<Uint32>)>('GetWindowThreadProcessId')(hwnd, pid);
+      final k = DynamicLibrary.open('kernel32.dll');
+      final open = k.lookupFunction<IntPtr Function(Uint32, Int32, Uint32), int Function(int, int, int)>('OpenProcess');
+      final close = k.lookupFunction<Int32 Function(IntPtr), int Function(int)>('CloseHandle');
+      final query = k.lookupFunction<Int32 Function(IntPtr, Uint32, Pointer<Utf16>, Pointer<Uint32>), int Function(int, int, Pointer<Utf16>, Pointer<Uint32>)>(
+          'QueryFullProcessImageNameW');
+      final h = open(0x1000, 0, pid.value); // PROCESS_QUERY_LIMITED_INFORMATION
+      if (h == 0) return '';
+      try {
+        if (query(h, 0, buf.cast(), len) == 0) return '';
+      } finally {
+        close(h);
+      }
+      var name = buf.cast<Utf16>().toDartString().split(RegExp(r'[\\/]')).last;
+      if (name.toLowerCase().endsWith('.exe')) name = name.substring(0, name.length - 4);
+      if (name.isEmpty) return '';
+      return name[0].toUpperCase() + name.substring(1);
+    } catch (_) {
+      return '';
+    } finally {
+      calloc.free(pid);
+      calloc.free(buf);
+      calloc.free(len);
+    }
+  }
+
   /// The window in use now (0: none).
   static int foreground() {
     final u = _user32;

@@ -1010,5 +1010,16 @@
   "pen.key_title": "Tasto disegna / usa il computer",
   "pen.key_none": "Nessun tasto",
   "pen.move_bar": "Trascina per spostare la barra",
-  "pen.tips_v2": "Doppio clic per selezionare: trascina per spostare, angoli per la dimensione, punto per ruotare; rotella = dimensione (Maiusc: ruota); Canc o doppio clic elimina; Esc deseleziona. Tieni premuto Ctrl per usare le app un momento."
+  "pen.tips_v2": "Doppio clic per selezionare: trascina per spostare, angoli per la dimensione, punto per ruotare; rotella = dimensione (Maiusc: ruota); Canc o doppio clic elimina; Esc deseleziona. Tieni premuto Ctrl per usare le app un momento.",
+  "recs.name_win": "Registrazione finestra",
+  "recs.name_full": "Registrazione schermo",
+  "recs.name_area": "Registrazione area",
+  "pen.per_window": "I segni seguono la finestra",
+  "rec.add_title": "Aggiungi un video…",
+  "rec.add_tip": "Entra nella lista e viene mostrato; la registrazione continua.",
+  "rec.add_files": "Dai file…",
+  "rec.leave_title": "Registrazione della spiegazione in corso",
+  "rec.leave_text": "Andare altrove ferma prima la registrazione. Per mostrare un altro video usa «Aggiungi un video…» nella barra.",
+  "rec.leave_stay": "Continua a registrare",
+  "rec.leave_stop": "Ferma la registrazione"
 }

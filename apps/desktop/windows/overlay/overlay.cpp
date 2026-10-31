@@ -16,6 +16,9 @@
 //   undo  redo  clear  delete  newpage  prevpage  nextpage
 //   board none|white|black  highlight 0|1  fade 0|1  autoreturn 0|1
 //   pendraw 0|1           a pen (stylus) draws even in operate mode
+//   pages screen|window   one layer for the whole screen (default), or
+//                         one per program window (dialogs of the same
+//                         program share it; back to it: its marks return)
 //   togglekey <vk>        this key switches draw / operate (0: none);
 //                         the key is not passed on to the app in front
 //   text <x> <y> <words>  put words at x, y (screen pixels)
@@ -995,6 +998,25 @@ bool isShell(HWND w) {
          c == L"ForegroundStaging" || c == L"NotifyIconOverflowWindow" || c == L"TopLevelWindowForOverflowXamlIsland";
 }
 
+bool g_perWindow = false;
+
+DWORD pidOf(HWND w) {
+  DWORD pid = 0;
+  GetWindowThreadProcessId(w, &pid);
+  return pid;
+}
+
+// The page for [w]: a window of a program that already has a page uses
+// that page (its dialogs and other windows keep the marks).
+HWND pageKeyFor(HWND w) {
+  if (g_pages.count(w)) return w;
+  const DWORD pid = pidOf(w);
+  for (const auto& [h, p] : g_pages) {
+    if (h && IsWindow(h) && pidOf(h) == pid) return h;
+  }
+  return w;
+}
+
 void switchPage(HWND w) {
   if (w == g_page) return;
   if (g_drag != kNone) onUp();
@@ -1011,7 +1033,8 @@ void CALLBACK onForeground(HWINEVENTHOOK, DWORD, HWND w, LONG, LONG, DWORD, DWOR
   DWORD pid = 0;
   GetWindowThreadProcessId(w, &pid);
   if (pid == GetCurrentProcessId()) return;
-  switchPage(w);
+  if (!g_perWindow) return;  // one layer for the whole screen
+  switchPage(pageKeyFor(w));
 }
 
 // ---------------------------------------------------------------- the light around the mouse
@@ -1063,11 +1086,15 @@ void moveSpot() {
 
 // ---------------------------------------------------------------- red frame around the recorded area
 
+bool g_frameShown = false;
+
 void showFrame(const RECT* area) {
   if (!area) {
+    g_frameShown = false;
     ShowWindow(g_frame, SW_HIDE);
     return;
   }
+  g_frameShown = true;
   const int pad = 6;
   const int w = area->right - area->left + pad * 2, h = area->bottom - area->top + pad * 2;
   HDC screen = GetDC(nullptr);
@@ -1132,7 +1159,25 @@ void command(const std::string& line) {
     render();
     emitState();
   } else if (cmd == "page") {
-    switchPage(reinterpret_cast<HWND>(static_cast<INT_PTR>(std::strtoll(arg.c_str(), nullptr, 10))));
+    if (g_perWindow) switchPage(pageKeyFor(reinterpret_cast<HWND>(static_cast<INT_PTR>(std::strtoll(arg.c_str(), nullptr, 10)))));
+  } else if (cmd == "pages") {
+    const bool per = arg == "window";
+    if (per != g_perWindow) {
+      g_perWindow = per;
+      // One layer: the marks of the page in use stay on it.
+      if (!per && g_page != nullptr) {
+        g_pages[nullptr] = g_pages[g_page];
+        switchPage(nullptr);
+      } else if (per) {
+        HWND fg = GetForegroundWindow();
+        fg = fg ? GetAncestor(fg, GA_ROOT) : nullptr;
+        if (fg && fg != g_own && pidOf(fg) != GetCurrentProcessId()) {
+          g_pages[pageKeyFor(fg)] = g_pages[g_page];
+          switchPage(pageKeyFor(fg));
+        }
+      }
+      emitState();
+    }
   } else if (cmd == "mode") {
     setMode(arg == "draw");
   } else if (cmd == "tool") {
@@ -1266,6 +1311,12 @@ LRESULT CALLBACK msgProc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
   if (msg == WM_TIMER && wp == kTimerCursor) {
     moveSpot();
     return 0;
+  }
+  if (msg == WM_TIMER && wp == kTimerTick && g_frameShown) {
+    // The red frame breathes (slowly brighter and dimmer), so it is seen.
+    const double t = static_cast<double>(GetTickCount64() % 1600) / 1600.0;
+    BLENDFUNCTION bf{AC_SRC_OVER, 0, static_cast<BYTE>(110 + 145 * (0.5 + 0.5 * std::cos(t * 2 * 3.14159265))), AC_SRC_ALPHA};
+    UpdateLayeredWindow(g_frame, nullptr, nullptr, nullptr, nullptr, nullptr, 0, &bf, ULW_ALPHA);
   }
   if (msg == WM_TIMER && wp == kTimerTick) {
     // Hold Ctrl while drawing: the mouse goes through for that moment.

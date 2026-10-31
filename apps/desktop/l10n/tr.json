@@ -1010,5 +1010,16 @@
   "pen.key_title": "Çiz / kullan tuşu",
   "pen.key_none": "Tuş yok",
   "pen.move_bar": "Araç çubuğunu taşımak için sürükleyin",
-  "pen.tips_v2": "Seçmek için çift tıklayın: taşımak için sürükleyin, köşeler boyut, nokta döndürür; tekerlek boyut (Shift: döndür); Delete veya tekrar çift tık siler; Esc bırakır. Uygulamaları kısa süre kullanmak için Ctrl’yi basılı tutun."
+  "pen.tips_v2": "Seçmek için çift tıklayın: taşımak için sürükleyin, köşeler boyut, nokta döndürür; tekerlek boyut (Shift: döndür); Delete veya tekrar çift tık siler; Esc bırakır. Uygulamaları kısa süre kullanmak için Ctrl’yi basılı tutun.",
+  "recs.name_win": "Pencere kaydı",
+  "recs.name_full": "Ekran kaydı",
+  "recs.name_area": "Alan kaydı",
+  "pen.per_window": "İşaretler pencereyi izler",
+  "rec.add_title": "Video ekle…",
+  "rec.add_tip": "Listeye eklenip gösterilir; kayıt sürer.",
+  "rec.add_files": "Dosyalardan…",
+  "rec.leave_title": "Anlatım kaydediliyor",
+  "rec.leave_text": "Başka yere gitmek önce kaydı durdurur. Başka bir video göstermek için araç çubuğundaki “Video ekle…”yi kullanın.",
+  "rec.leave_stay": "Kayda devam",
+  "rec.leave_stop": "Kaydı durdur"
 }

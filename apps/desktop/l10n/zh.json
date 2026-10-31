@@ -1010,5 +1010,16 @@
   "pen.key_title": "画 / 操作 切换键",
   "pen.key_none": "不用按键",
   "pen.move_bar": "按住拖动工具条",
-  "pen.tips_v2": "双击选中：拖动移动，拖四角缩放，拖上方圆点旋转；滚轮缩放（按住 Shift 旋转）；Delete 或再双击删除；Esc 取消选中。画的时候按住 Ctrl 可以临时操作电脑。"
+  "pen.tips_v2": "双击选中：拖动移动，拖四角缩放，拖上方圆点旋转；滚轮缩放（按住 Shift 旋转）；Delete 或再双击删除；Esc 取消选中。画的时候按住 Ctrl 可以临时操作电脑。",
+  "recs.name_win": "窗口录屏",
+  "recs.name_full": "全屏录屏",
+  "recs.name_area": "区域录屏",
+  "pen.per_window": "标注跟着窗口",
+  "rec.add_title": "加入视频…",
+  "rec.add_tip": "加进右边的列表并切过去，录制不中断。",
+  "rec.add_files": "从文件夹选…",
+  "rec.leave_title": "正在录讲解",
+  "rec.leave_text": "去别的页面要先停止录制。想讲解另一个视频，用工具条上的「加入视频…」，录制不会中断。",
+  "rec.leave_stay": "继续录",
+  "rec.leave_stop": "停止录制"
 }

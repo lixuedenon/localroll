@@ -54,6 +54,33 @@ class PdfThumbs {
       await c.future;
     }
     _busy = true;
+    final clock = Stopwatch()..start();
+    try {
+      // One PDF that never finishes must not hold up all the others.
+      final f = await _render(path, out).timeout(const Duration(seconds: 15));
+      if (f == null) DiagLog.log('ui', 'pdf thumbnail: nothing drawn (${clock.elapsedMilliseconds} ms)');
+      return f;
+    } on TimeoutException {
+      DiagLog.log('ui', 'pdf thumbnail: gave up after 15 s (${_size(path)})');
+      return null;
+    } catch (e) {
+      DiagLog.log('ui', 'pdf thumbnail failed: $e');
+      return null;
+    } finally {
+      _busy = false;
+      if (_waiting.isNotEmpty) _waiting.removeFirst().complete();
+    }
+  }
+
+  static String _size(String path) {
+    try {
+      return '${(File(path).lengthSync() / 1024).round()} KB';
+    } catch (_) {
+      return 'gone';
+    }
+  }
+
+  static Future<File?> _render(String path, File out) async {
     PdfDocument? doc;
     try {
       doc = await PdfDocument.openFile(path);
@@ -61,11 +88,9 @@ class PdfThumbs {
       final page = doc.pages.first;
       final w = width.toDouble();
       final h = (w * page.height / page.width).clamp(40.0, w * 2);
-      final img = await page.render(fullWidth: w, fullHeight: h, backgroundColor: Colors.white);
+      final img = await page.render(width: w.round(), height: h.round(), fullWidth: w, fullHeight: h, backgroundColor: Colors.white);
       if (img == null) return null;
-      final c = Completer<ui.Image>();
-      ui.decodeImageFromPixels(img.pixels, img.width, img.height, img.format, c.complete);
-      final picture = await c.future;
+      final picture = await img.createImage();
       img.dispose();
       final png = await picture.toByteData(format: ui.ImageByteFormat.png);
       picture.dispose();
@@ -73,15 +98,10 @@ class PdfThumbs {
       await out.parent.create(recursive: true);
       await out.writeAsBytes(png.buffer.asUint8List(), flush: true);
       return out;
-    } catch (e) {
-      DiagLog.log('ui', 'pdf thumbnail failed: $e');
-      return null;
     } finally {
       try {
         await doc?.dispose();
       } catch (_) {}
-      _busy = false;
-      if (_waiting.isNotEmpty) _waiting.removeFirst().complete();
     }
   }
 }

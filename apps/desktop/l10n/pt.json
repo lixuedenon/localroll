@@ -1010,5 +1010,16 @@
   "pen.key_title": "Tecla desenhar / usar",
   "pen.key_none": "Sem tecla",
   "pen.move_bar": "Arraste para mover a barra",
-  "pen.tips_v2": "Clique duas vezes para selecionar: arraste para mover, cantos para o tamanho, o ponto para girar; a roda muda o tamanho (Shift: gira); Delete ou duplo clique exclui; Esc solta. Segure Ctrl para usar os apps por um momento."
+  "pen.tips_v2": "Clique duas vezes para selecionar: arraste para mover, cantos para o tamanho, o ponto para girar; a roda muda o tamanho (Shift: gira); Delete ou duplo clique exclui; Esc solta. Segure Ctrl para usar os apps por um momento.",
+  "recs.name_win": "Gravação de janela",
+  "recs.name_full": "Gravação de tela",
+  "recs.name_area": "Gravação de área",
+  "pen.per_window": "Marcas seguem a janela",
+  "rec.add_title": "Adicionar vídeo…",
+  "rec.add_tip": "Entra na lista e é mostrado; a gravação continua.",
+  "rec.add_files": "Dos arquivos…",
+  "rec.leave_title": "Gravando uma explicação",
+  "rec.leave_text": "Ir para outro lugar para a gravação primeiro. Para mostrar outro vídeo, use “Adicionar vídeo…” na barra.",
+  "rec.leave_stay": "Continuar gravando",
+  "rec.leave_stop": "Parar a gravação"
 }

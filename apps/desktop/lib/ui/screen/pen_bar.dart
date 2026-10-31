@@ -181,6 +181,7 @@ class _PenToolbarState extends State<PenToolbar> {
                       if (v == 'fade') o.setFade(!o.fade);
                       if (v == 'return') o.setAutoReturn(!o.autoReturn);
                       if (v == 'stylus') o.setPenDraws(!o.penDraws);
+                      if (v == 'perwindow') o.setPerWindow(!o.perWindow);
                       if (v.startsWith('key')) {
                         final vk = int.parse(v.substring(3));
                         o.setToggleKey(vk);
@@ -191,6 +192,7 @@ class _PenToolbarState extends State<PenToolbar> {
                       CheckedPopupMenuItem(value: 'fade', checked: o.fade, child: Text(tr('screen.fade'))),
                       CheckedPopupMenuItem(value: 'return', checked: o.autoReturn, child: Text(tr('pen.auto_return'))),
                       CheckedPopupMenuItem(value: 'stylus', checked: o.penDraws, child: Text(tr('pen.stylus'))),
+                      CheckedPopupMenuItem(value: 'perwindow', checked: o.perWindow, child: Text(tr('pen.per_window'))),
                       const PopupMenuDivider(),
                       PopupMenuItem(enabled: false, child: Text(tr('pen.key_title'), style: const TextStyle(fontSize: 12, color: LrColors.muted))),
                       for (final vk in const [0x75, 0x76, 0x77, 0x78, 0x79, 0])
@@ -236,6 +238,8 @@ class PenSession {
     await windowManager.setMinimumSize(const Size(200, 40));
     WinScreen.excludeFromCapture(true);
     final o = PenOverlay.instance;
+    // Drawing without recording: one layer over the whole screen.
+    if (!o.running) o.perWindow = false;
     if (!await o.start()) {
       await _restore();
       return false;

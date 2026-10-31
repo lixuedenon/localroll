@@ -1010,5 +1010,16 @@
   "pen.key_title": "Tecla dibujar / usar el ordenador",
   "pen.key_none": "Sin tecla",
   "pen.move_bar": "Arrastra para mover la barra",
-  "pen.tips_v2": "Doble clic para seleccionar: arrastra para mover, esquinas para el tamaño, el punto para girar; la rueda cambia el tamaño (Mayús: gira); Supr o doble clic borra; Esc suelta. Mantén Ctrl para usar las apps un momento."
+  "pen.tips_v2": "Doble clic para seleccionar: arrastra para mover, esquinas para el tamaño, el punto para girar; la rueda cambia el tamaño (Mayús: gira); Supr o doble clic borra; Esc suelta. Mantén Ctrl para usar las apps un momento.",
+  "recs.name_win": "Grabación de ventana",
+  "recs.name_full": "Grabación de pantalla",
+  "recs.name_area": "Grabación de área",
+  "pen.per_window": "Los trazos siguen a la ventana",
+  "rec.add_title": "Añadir un vídeo…",
+  "rec.add_tip": "Se añade a la lista y se muestra; la grabación sigue.",
+  "rec.add_files": "Desde archivos…",
+  "rec.leave_title": "Grabando una explicación",
+  "rec.leave_text": "Para ir a otro sitio primero se detiene la grabación. Para mostrar otro vídeo usa «Añadir un vídeo…» en la barra.",
+  "rec.leave_stay": "Seguir grabando",
+  "rec.leave_stop": "Detener grabación"
 }

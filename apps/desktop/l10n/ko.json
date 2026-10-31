@@ -1010,5 +1010,16 @@
   "pen.key_title": "그리기 / 조작 전환 키",
   "pen.key_none": "키 없음",
   "pen.move_bar": "드래그해 도구 모음 이동",
-  "pen.tips_v2": "더블클릭으로 선택: 드래그로 이동, 모서리로 크기, 점으로 회전. 휠로 크기(Shift: 회전). Delete 또는 다시 더블클릭으로 삭제, Esc로 선택 해제. Ctrl을 누르고 있으면 잠시 앱을 조작합니다."
+  "pen.tips_v2": "더블클릭으로 선택: 드래그로 이동, 모서리로 크기, 점으로 회전. 휠로 크기(Shift: 회전). Delete 또는 다시 더블클릭으로 삭제, Esc로 선택 해제. Ctrl을 누르고 있으면 잠시 앱을 조작합니다.",
+  "recs.name_win": "창 녹화",
+  "recs.name_full": "화면 녹화",
+  "recs.name_area": "영역 녹화",
+  "pen.per_window": "표시가 창을 따라감",
+  "rec.add_title": "영상 추가…",
+  "rec.add_tip": "목록에 추가되어 표시되고 녹화는 계속됩니다.",
+  "rec.add_files": "파일에서…",
+  "rec.leave_title": "해설 녹화 중",
+  "rec.leave_text": "다른 곳으로 가면 먼저 녹화가 멈춥니다. 다른 영상을 보여주려면 도구 모음의 “영상 추가…”를 쓰세요.",
+  "rec.leave_stay": "계속 녹화",
+  "rec.leave_stop": "녹화 중지"
 }

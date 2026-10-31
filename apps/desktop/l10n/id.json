@@ -1010,5 +1010,16 @@
   "pen.key_title": "Tombol gambar / pakai komputer",
   "pen.key_none": "Tanpa tombol",
   "pen.move_bar": "Seret untuk memindahkan bilah",
-  "pen.tips_v2": "Klik dua kali untuk memilih: seret untuk memindah, sudut untuk ukuran, titik untuk memutar; roda mengubah ukuran (Shift: memutar); Delete atau klik dua kali menghapus; Esc membatalkan. Tahan Ctrl untuk memakai aplikasi sebentar."
+  "pen.tips_v2": "Klik dua kali untuk memilih: seret untuk memindah, sudut untuk ukuran, titik untuk memutar; roda mengubah ukuran (Shift: memutar); Delete atau klik dua kali menghapus; Esc membatalkan. Tahan Ctrl untuk memakai aplikasi sebentar.",
+  "recs.name_win": "Rekaman jendela",
+  "recs.name_full": "Rekaman layar",
+  "recs.name_area": "Rekaman area",
+  "pen.per_window": "Coretan mengikuti jendela",
+  "rec.add_title": "Tambah video…",
+  "rec.add_tip": "Masuk ke daftar dan ditampilkan; rekaman terus berjalan.",
+  "rec.add_files": "Dari file…",
+  "rec.leave_title": "Sedang merekam penjelasan",
+  "rec.leave_text": "Pergi ke tempat lain akan menghentikan rekaman dulu. Untuk menampilkan video lain, pakai “Tambah video…” di bilah alat.",
+  "rec.leave_stay": "Lanjut merekam",
+  "rec.leave_stop": "Hentikan rekaman"
 }

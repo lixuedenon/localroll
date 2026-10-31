@@ -1010,5 +1010,16 @@
   "pen.key_title": "Phím đổi vẽ / điều khiển",
   "pen.key_none": "Không dùng phím",
   "pen.move_bar": "Kéo để di chuyển thanh công cụ",
-  "pen.tips_v2": "Nhấp đúp để chọn: kéo để di chuyển, kéo góc để đổi cỡ, chấm để xoay; con lăn đổi cỡ (Shift: xoay); Delete hoặc nhấp đúp lần nữa để xóa; Esc bỏ chọn. Giữ Ctrl để tạm điều khiển ứng dụng."
+  "pen.tips_v2": "Nhấp đúp để chọn: kéo để di chuyển, kéo góc để đổi cỡ, chấm để xoay; con lăn đổi cỡ (Shift: xoay); Delete hoặc nhấp đúp lần nữa để xóa; Esc bỏ chọn. Giữ Ctrl để tạm điều khiển ứng dụng.",
+  "recs.name_win": "Ghi cửa sổ",
+  "recs.name_full": "Ghi màn hình",
+  "recs.name_area": "Ghi vùng",
+  "pen.per_window": "Nét vẽ theo cửa sổ",
+  "rec.add_title": "Thêm video…",
+  "rec.add_tip": "Được thêm vào danh sách và mở ra; vẫn tiếp tục ghi.",
+  "rec.add_files": "Từ tệp…",
+  "rec.leave_title": "Đang ghi thuyết minh",
+  "rec.leave_text": "Sang chỗ khác sẽ dừng ghi trước. Muốn đưa video khác vào, dùng “Thêm video…” trên thanh công cụ.",
+  "rec.leave_stay": "Tiếp tục ghi",
+  "rec.leave_stop": "Dừng ghi"
 }

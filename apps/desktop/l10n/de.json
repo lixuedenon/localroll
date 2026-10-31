@@ -1010,5 +1010,16 @@
   "pen.key_title": "Taste: Zeichnen / Bedienen",
   "pen.key_none": "Keine Taste",
   "pen.move_bar": "Ziehen, um die Leiste zu verschieben",
-  "pen.tips_v2": "Doppelklick wählt eine Markierung: ziehen = verschieben, Ecken = Größe, Punkt = drehen; Mausrad = Größe (Umschalt: drehen); Entf oder Doppelklick = löschen; Esc = abwählen. Strg halten: kurz die Apps bedienen."
+  "pen.tips_v2": "Doppelklick wählt eine Markierung: ziehen = verschieben, Ecken = Größe, Punkt = drehen; Mausrad = Größe (Umschalt: drehen); Entf oder Doppelklick = löschen; Esc = abwählen. Strg halten: kurz die Apps bedienen.",
+  "recs.name_win": "Fensteraufnahme",
+  "recs.name_full": "Bildschirmaufnahme",
+  "recs.name_area": "Bereichsaufnahme",
+  "pen.per_window": "Markierungen folgen dem Fenster",
+  "rec.add_title": "Video hinzufügen…",
+  "rec.add_tip": "Kommt in die Liste und wird gezeigt; die Aufnahme läuft weiter.",
+  "rec.add_files": "Aus Dateien…",
+  "rec.leave_title": "Erklärung wird aufgenommen",
+  "rec.leave_text": "Um woandershin zu gehen, wird die Aufnahme zuerst beendet. Ein weiteres Video kommt mit „Video hinzufügen…“ in der Leiste dazu.",
+  "rec.leave_stay": "Weiter aufnehmen",
+  "rec.leave_stop": "Aufnahme beenden"
 }

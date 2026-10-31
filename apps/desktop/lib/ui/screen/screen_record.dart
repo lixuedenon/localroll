@@ -274,6 +274,7 @@ class ScreenRecorder extends ChangeNotifier {
   /// The screen pen's layer is used (marks on the real screen, recorded as
   /// they are); without the helper, the old way (a still to draw on).
   bool usesOverlay = false;
+  Rect? _framed;
 
   void _onOverlay() {
     final on = PenOverlay.instance.draw;
@@ -386,7 +387,11 @@ class ScreenRecorder extends ChangeNotifier {
     usesOverlay = PenOverlay.available && (o.running || await o.start());
     if (usesOverlay) {
       o.setDraw(false);
-      o.border(su.mode == ScreenMode.area ? su.area : null);
+      // A window: the marks follow it (its dialogs too); else one layer.
+      o.setPerWindow(su.mode == ScreenMode.window);
+      // What is recorded: a breathing red frame round the area / window
+      // (never in the video).
+      o.border(su.mode == ScreenMode.area ? su.area : (su.mode == ScreenMode.window && su.window != null ? WinScreen.windowRect(su.window!.handle) : null));
       o.removeListener(_onOverlay);
       o.addListener(_onOverlay);
     }
@@ -448,7 +453,7 @@ class ScreenRecorder extends ChangeNotifier {
     final scr = setup!.screen;
     final k = scr.scale;
     final tools = usesOverlay && pen;
-    final w = (tools ? 1180 : 660) * k, h = (tools ? 140 : 64) * k;
+    final w = (tools ? 1180 : 860) * k, h = (tools ? 140 : 64) * k;
     WinScreen.place(BarPlace.rect(Rect.fromLTWH(scr.rect.center.dx - w / 2, scr.rect.top + 12 * k, w, h)), onTop: true, activate: false);
   }
 
@@ -476,6 +481,11 @@ class ScreenRecorder extends ChangeNotifier {
       if (su.mode == ScreenMode.window && su.window != null) {
         final rect = WinScreen.windowRect(su.window!.handle);
         if (rect != null && (_windowAt.isEmpty || _windowAt.last.$2 != rect)) _windowAt.add((t, rect));
+        // The frame follows the window (and goes while it is minimised).
+        if (usesOverlay && rect != _framed) {
+          _framed = rect;
+          PenOverlay.instance.border(rect);
+        }
       }
       // The window in use (LocalRoll's own bar / pen screen does not count).
       final fg = WinScreen.foreground();
@@ -666,7 +676,7 @@ class ScreenRecorder extends ChangeNotifier {
       final c = AppNav.instance.navigatorKey.currentContext;
       if (c == null || !c.mounted) return;
       final r = await recordedDialog(c, length, OriginalSound.none, screen: true,
-          defaultName: recName(_source, tr('recs.name_screen'), DateTime.now()));
+          defaultName: _defaultName());
       if (r == null) return;
       final c2 = AppNav.instance.navigatorKey.currentContext;
       if (c2 == null || !c2.mounted) return;
@@ -688,12 +698,31 @@ class ScreenRecorder extends ChangeNotifier {
     } catch (_) {}
   }
 
+  /// "Window recording_Sideloadly_20261031-1146", "Screen recording_…",
+  /// "Area recording_…".
+  String _defaultName() {
+    final mode = setup?.mode ?? ScreenMode.screen;
+    return switch (mode) {
+      ScreenMode.window => recName('', tr('recs.name_win'), DateTime.now(), extra: _source),
+      ScreenMode.area => recName('', tr('recs.name_area'), DateTime.now()),
+      ScreenMode.screen => recName('', tr('recs.name_full'), DateTime.now()),
+    };
+  }
+
+  /// What is recorded, for the bar ("Recording: Sideloadly").
+  String get recordingWhat => _source;
+
   /// What was recorded: the program, "Whole screen" or "Area".
   String get _source {
     final su = setup;
     if (su == null) return tr('recs.whole_screen');
     return switch (su.mode) {
-      ScreenMode.window => sanitizeFileName(programOf(su.window?.title ?? '')).isEmpty ? tr('recs.window') : sanitizeFileName(programOf(su.window!.title)),
+      ScreenMode.window => () {
+          final w = su.window;
+          var p = w == null ? '' : sanitizeFileName(WinScreen.programName(w.handle));
+          if (p.isEmpty && w != null) p = sanitizeFileName(programOf(w.title));
+          return p.isEmpty ? tr('recs.window') : p;
+        }(),
       ScreenMode.area => tr('recs.area'),
       ScreenMode.screen => tr('recs.whole_screen'),
     };
@@ -1487,6 +1516,7 @@ class _Bar extends StatelessWidget {
         // Without the pen the bar is the window: moved by its grip.
         if (!r.pen) const BarGrip(),
         RecordingBar(
+          what: r.recordingWhat,
           elapsed: () => r.elapsedMs,
           paused: r.paused,
           level: r.level,

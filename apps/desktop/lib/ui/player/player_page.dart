@@ -22,6 +22,7 @@ import '../../services/network.dart';
 import '../../services/peers.dart';
 import '../../services/player_memory.dart';
 import '../../services/recordings.dart';
+import '../../services/win_dialogs.dart';
 import '../app_nav.dart';
 import '../convert_dialog.dart';
 import '../home_shell.dart' show AppRail;
@@ -92,6 +93,10 @@ class PlayerLauncher {
   static final List<String> _pending = [];
   static Timer? _timer;
 
+  /// Set while an explanation is being recorded: files opened from
+  /// outside go into that player's list (the recording goes on).
+  static bool Function(List<String> paths)? whileRecording;
+
   static void request(AppServices s, List<String> paths) {
     if (paths.isEmpty) return;
     _pending.addAll(paths);
@@ -109,6 +114,7 @@ class PlayerLauncher {
     }
     final paths = {for (final p in _pending) p.toLowerCase(): p}.values.toList();
     _pending.clear();
+    if (whileRecording?.call(paths) ?? false) return;
     nav.popUntil((r) => r.isFirst);
     await openInPlayer(ctx, s, paths);
   }
@@ -441,6 +447,7 @@ class _PlayerPageState extends State<PlayerPage> {
 
   @override
   void dispose() {
+    if (PlayerLauncher.whileRecording == _addWhileRecording) PlayerLauncher.whileRecording = null;
     _hide?.cancel();
     _slide?.cancel();
     if (_fullscreen) {
@@ -1037,6 +1044,83 @@ class _PlayerPageState extends State<PlayerPage> {
 
   /// Start recording an explanation: the microphone (chosen once), 3-2-1,
   /// then what the player does and what is drawn is recorded with the voice.
+  /// Files opened while recording: added to this list, the first shown.
+  bool _addWhileRecording(List<String> paths) {
+    if (_rec == null || !mounted) return false;
+    _addToList(paths);
+    return true;
+  }
+
+  void _addToList(List<String> paths) {
+    int? first;
+    final added = <PlayerEntry>[];
+    for (final p in paths) {
+      final at = _entries.indexWhere((e) => e.path.toLowerCase() == p.toLowerCase());
+      if (at >= 0) {
+        first ??= at;
+        continue;
+      }
+      final e = PlayerEntry.fromPath(p, library: widget.services.library);
+      if (e == null) continue;
+      first ??= _entries.length + added.length;
+      added.add(e);
+    }
+    if (added.isNotEmpty) setState(() => _entries.addAll(added));
+    DiagLog.log('player', 'explanation: ${added.length} added to the list');
+    final to = first;
+    if (to != null && to != _index) WidgetsBinding.instance.addPostFrameCallback((_) => _pages.jumpToPage(to));
+  }
+
+  /// "Add a video…" while recording: recent ones or any file; it joins the
+  /// list and the recording goes on.
+  Future<void> _addDuringRecording() async {
+    final s = widget.services;
+    final recent = [for (final r in s.player.recent) if (File(r.path).existsSync()) r].take(10).toList();
+    final picked = await showDialog<List<String>>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr('rec.add_title')),
+        content: SizedBox(
+          width: 460,
+          child: SingleChildScrollView(
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(tr('rec.add_tip'), style: const TextStyle(color: LrColors.muted, fontSize: 12.5, height: 1.5)),
+              const SizedBox(height: 10),
+              if (recent.isNotEmpty) ...[
+                Text(tr('player.recent'), style: const TextStyle(color: LrColors.muted)),
+                for (final r in recent)
+                  ListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(r.video ? Icons.movie_rounded : Icons.image_rounded),
+                    title: Text(r.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    onTap: () => Navigator.pop(ctx, [r.path]),
+                  ),
+              ],
+            ]),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('common.cancel'))),
+          FilledButton.icon(
+            onPressed: () async {
+              final files = await WinDialogs.pickFiles(
+                title: tr('player.open_files'),
+                typeLabel: tr('player.file_types'),
+                extensions: [...playerImageExtensions, ...playerVideoExtensions],
+              );
+              if (files.isNotEmpty && ctx.mounted) Navigator.pop(ctx, files);
+            },
+            icon: const Icon(Icons.file_open_rounded, size: 18),
+            label: Text(tr('rec.add_files')),
+          ),
+        ],
+      ),
+    );
+    if (picked == null || picked.isEmpty || !mounted) return;
+    _addToList(picked);
+  }
+
   Future<void> _startRecording() async {
     if (_rec != null || _countdown > 0) return;
     final s = widget.services;
@@ -1099,6 +1183,7 @@ class _PlayerPageState extends State<PlayerPage> {
     }
     rec.go();
     setState(() => _rec = rec);
+    PlayerLauncher.whileRecording = _addWhileRecording;
     rec.sampler = Timer.periodic(const Duration(milliseconds: 50), (_) => _sample());
     _sample();
     DiagLog.log('player', 'explanation recording');
@@ -1184,6 +1269,7 @@ class _PlayerPageState extends State<PlayerPage> {
     rec.session.inks
       ..clear()
       ..addAll(rec.inks.values);
+    if (PlayerLauncher.whileRecording == _addWhileRecording) PlayerLauncher.whileRecording = null;
     if (mounted) setState(() => _rec = null);
     DiagLog.log('player', 'explanation recorded (${rec.session.lengthMs ~/ 1000} s)');
     final exe = widget.services.ffmpeg.ffmpeg;
@@ -1452,7 +1538,9 @@ class _PlayerPageState extends State<PlayerPage> {
               tr(_slideshow ? 'player.slideshow_stop' : 'player.slideshow'), () => _setSlideshow(!_slideshow),
               on: _slideshow),
         if (_rec == null)
-          _btn(Icons.fiber_manual_record_rounded, tr('rec.start'), _countdown > 0 ? null : () => unawaited(_startRecording())),
+          _btn(Icons.fiber_manual_record_rounded, tr('rec.start'), _countdown > 0 ? null : () => unawaited(_startRecording()))
+        else
+          _btn(Icons.playlist_add_rounded, tr('rec.add_title'), () => unawaited(_addDuringRecording())),
         if ((_set?.notes.isNotEmpty ?? false) || !_showInk)
           _btn(_showInk ? Icons.layers_rounded : Icons.layers_clear_rounded, tr(_showInk ? 'ink.only_original' : 'ink.show_notes'),
               () => _setShowInk(!_showInk),
@@ -1690,9 +1778,20 @@ class _PlayerPageState extends State<PlayerPage> {
               AppRail(
                 services: widget.services,
                 selected: AppNav.player,
-                onSelect: (t) {
+                onSelect: (t) async {
                   if (_rec != null) {
-                    unawaited(_stopRecording());
+                    final stop = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: Text(tr('rec.leave_title')),
+                        content: SizedBox(width: 420, child: Text(tr('rec.leave_text'), style: const TextStyle(height: 1.5))),
+                        actions: [
+                          FilledButton(autofocus: true, onPressed: () => Navigator.pop(ctx, false), child: Text(tr('rec.leave_stay'))),
+                          TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('rec.leave_stop'))),
+                        ],
+                      ),
+                    );
+                    if (stop == true) unawaited(_stopRecording());
                     return;
                   }
                   Navigator.of(context).popUntil((r) => r.isFirst);

@@ -214,7 +214,11 @@ class RecordingBar extends StatefulWidget {
     required this.level,
     required this.onPause,
     required this.onStop,
+    this.what,
   });
+
+  /// What is being recorded ("Sideloadly", "Whole screen").
+  final String? what;
 
   final int Function() elapsed;
   final bool paused;
@@ -262,6 +266,13 @@ class _RecordingBarState extends State<RecordingBar> {
           '${tr(widget.paused ? 'rec.paused' : 'rec.recording')}  ${_len(widget.elapsed())}',
           style: const TextStyle(color: Colors.white, fontFeatures: [FontFeature.tabularFigures()]),
         ),
+        if (widget.what != null && widget.what!.isNotEmpty) ...[
+          const SizedBox(width: 8),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 200),
+            child: Text('· ${widget.what}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Color(0xFFFF9A90))),
+          ),
+        ],
         const SizedBox(width: 12),
         Tooltip(
           message: tr('rec.level'),

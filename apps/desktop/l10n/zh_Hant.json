@@ -1010,5 +1010,16 @@
   "pen.key_title": "畫 / 操作 切換鍵",
   "pen.key_none": "不用按鍵",
   "pen.move_bar": "按住拖動工具列",
-  "pen.tips_v2": "雙擊選取：拖動移動，拖四角縮放，拖上方圓點旋轉；滾輪縮放（按住 Shift 旋轉）；Delete 或再雙擊刪除；Esc 取消選取。畫的時候按住 Ctrl 可以臨時操作電腦。"
+  "pen.tips_v2": "雙擊選取：拖動移動，拖四角縮放，拖上方圓點旋轉；滾輪縮放（按住 Shift 旋轉）；Delete 或再雙擊刪除；Esc 取消選取。畫的時候按住 Ctrl 可以臨時操作電腦。",
+  "recs.name_win": "視窗錄屏",
+  "recs.name_full": "全螢幕錄屏",
+  "recs.name_area": "區域錄屏",
+  "pen.per_window": "標註跟著視窗",
+  "rec.add_title": "加入影片…",
+  "rec.add_tip": "加進右邊的列表並切過去，錄製不中斷。",
+  "rec.add_files": "從資料夾選…",
+  "rec.leave_title": "正在錄講解",
+  "rec.leave_text": "去別的頁面要先停止錄製。想講解另一個影片，用工具列上的「加入影片…」，錄製不會中斷。",
+  "rec.leave_stay": "繼續錄",
+  "rec.leave_stop": "停止錄製"
 }

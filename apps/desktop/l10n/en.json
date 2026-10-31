@@ -1010,5 +1010,16 @@
   "pen.key_title": "Key for draw / use the computer",
   "pen.key_none": "No key",
   "pen.move_bar": "Drag to move the toolbar",
-  "pen.tips_v2": "Double-click a mark to select it: drag to move, corners to resize, the dot to turn; the wheel resizes (Shift: turns); Delete or double-click again deletes; Esc lets go. Hold Ctrl to use the apps for a moment."
+  "pen.tips_v2": "Double-click a mark to select it: drag to move, corners to resize, the dot to turn; the wheel resizes (Shift: turns); Delete or double-click again deletes; Esc lets go. Hold Ctrl to use the apps for a moment.",
+  "recs.name_win": "Window recording",
+  "recs.name_full": "Screen recording",
+  "recs.name_area": "Area recording",
+  "pen.per_window": "Marks follow the window",
+  "rec.add_title": "Add a video…",
+  "rec.add_tip": "It joins the list and is shown; the recording goes on.",
+  "rec.add_files": "From files…",
+  "rec.leave_title": "Recording an explanation",
+  "rec.leave_text": "Going elsewhere stops the recording first. To show another video, use “Add a video…” on the toolbar.",
+  "rec.leave_stay": "Keep recording",
+  "rec.leave_stop": "Stop recording"
 }

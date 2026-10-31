@@ -46,6 +46,9 @@ class PenOverlay extends ChangeNotifier {
   /// code; 0x77 = F8, 0 = none).
   int toggleKey = 0x77;
 
+  /// Marks follow program windows (else one layer for the whole screen).
+  bool perWindow = false;
+
   /// The text tool was clicked here (screen pixels): words are asked for.
   ({int x, int y})? textAt;
 
@@ -83,6 +86,7 @@ class PenOverlay extends ChangeNotifier {
       _send('autoreturn ${autoReturn ? 1 : 0}');
       _send('pendraw ${penDraws ? 1 : 0}');
       _send('togglekey $toggleKey');
+      _send('pages ${perWindow ? 'window' : 'screen'}');
       board = 0;
       highlight = false;
       return true;
@@ -206,6 +210,12 @@ class PenOverlay extends ChangeNotifier {
   void setPenDraws(bool on) {
     penDraws = on;
     _send('pendraw ${on ? 1 : 0}');
+    notifyListeners();
+  }
+
+  void setPerWindow(bool on) {
+    perWindow = on;
+    _send('pages ${on ? 'window' : 'screen'}');
     notifyListeners();
   }
 
