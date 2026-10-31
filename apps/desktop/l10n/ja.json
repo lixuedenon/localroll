@@ -1002,5 +1002,13 @@
   "ink.delete_found": "見つかった注釈を削除",
   "ink.delete_all_title": "{name} の注釈 {n} 件を削除しますか？",
   "ink.delete_all_text": "動画そのものは変わりません。10 秒間は元に戻せます。",
-  "ink.deleted_n": "注釈 {n} 件を削除しました"
+  "ink.deleted_n": "注釈 {n} 件を削除しました",
+  "pen.to_operate": "パソコン操作",
+  "pen.back_draw": "ペンに戻る",
+  "pen.operate_tip": "マウスでアプリを操作。描いた線は残ります。（{key}）",
+  "pen.back_tip": "同じペンで続けて描きます。（{key}）",
+  "pen.key_title": "描く / 操作 の切り替えキー",
+  "pen.key_none": "キーなし",
+  "pen.move_bar": "ドラッグでツールバーを移動",
+  "pen.tips_v2": "ダブルクリックで選択：ドラッグで移動、角で拡大縮小、上の点で回転。ホイールで拡大縮小（Shift で回転）。Delete かもう一度ダブルクリックで削除、Esc で選択解除。Ctrl を押している間はアプリを操作できます。"
 }

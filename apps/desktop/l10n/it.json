@@ -1002,5 +1002,13 @@
   "ink.delete_found": "Elimina le note trovate",
   "ink.delete_all_title": "Eliminare {n} note di {name}?",
   "ink.delete_all_text": "Il video non cambia. Puoi annullare per 10 secondi.",
-  "ink.deleted_n": "{n} note eliminate"
+  "ink.deleted_n": "{n} note eliminate",
+  "pen.to_operate": "Usa il computer",
+  "pen.back_draw": "Torna alla penna",
+  "pen.operate_tip": "Il mouse usa le app; i segni restano. ({key})",
+  "pen.back_tip": "Disegna di nuovo con la stessa penna. ({key})",
+  "pen.key_title": "Tasto disegna / usa il computer",
+  "pen.key_none": "Nessun tasto",
+  "pen.move_bar": "Trascina per spostare la barra",
+  "pen.tips_v2": "Doppio clic per selezionare: trascina per spostare, angoli per la dimensione, punto per ruotare; rotella = dimensione (Maiusc: ruota); Canc o doppio clic elimina; Esc deseleziona. Tieni premuto Ctrl per usare le app un momento."
 }

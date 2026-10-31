@@ -1002,5 +1002,13 @@
   "ink.delete_found": "删除搜到的这些标注",
   "ink.delete_all_title": "删除「{name}」的 {n} 条标注？",
   "ink.delete_all_text": "原视频本身不会改变。10 秒内可以撤销。",
-  "ink.deleted_n": "已删除 {n} 条标注"
+  "ink.deleted_n": "已删除 {n} 条标注",
+  "pen.to_operate": "操作电脑",
+  "pen.back_draw": "回到画笔",
+  "pen.operate_tip": "鼠标操作电脑，画的线留着。（{key}）",
+  "pen.back_tip": "用刚才那支笔继续画。（{key}）",
+  "pen.key_title": "画 / 操作 切换键",
+  "pen.key_none": "不用按键",
+  "pen.move_bar": "按住拖动工具条",
+  "pen.tips_v2": "双击选中：拖动移动，拖四角缩放，拖上方圆点旋转；滚轮缩放（按住 Shift 旋转）；Delete 或再双击删除；Esc 取消选中。画的时候按住 Ctrl 可以临时操作电脑。"
 }

@@ -1002,5 +1002,13 @@
   "ink.delete_found": "刪除搜到的這些標註",
   "ink.delete_all_title": "刪除「{name}」的 {n} 條標註？",
   "ink.delete_all_text": "原影片本身不會改變。10 秒內可以復原。",
-  "ink.deleted_n": "已刪除 {n} 條標註"
+  "ink.deleted_n": "已刪除 {n} 條標註",
+  "pen.to_operate": "操作電腦",
+  "pen.back_draw": "回到畫筆",
+  "pen.operate_tip": "滑鼠操作電腦，畫的線留著。（{key}）",
+  "pen.back_tip": "用剛才那支筆繼續畫。（{key}）",
+  "pen.key_title": "畫 / 操作 切換鍵",
+  "pen.key_none": "不用按鍵",
+  "pen.move_bar": "按住拖動工具列",
+  "pen.tips_v2": "雙擊選取：拖動移動，拖四角縮放，拖上方圓點旋轉；滾輪縮放（按住 Shift 旋轉）；Delete 或再雙擊刪除；Esc 取消選取。畫的時候按住 Ctrl 可以臨時操作電腦。"
 }

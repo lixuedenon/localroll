@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' show Offset;
 
 import 'package:flutter/foundation.dart';
 
@@ -91,6 +92,13 @@ class PlayerMemory extends ChangeNotifier {
   /// Annotations drawn over videos / photos (false: only the original).
   bool showInk = true;
 
+  /// Where the recording / pen toolbar was moved to (screen pixels; null:
+  /// top middle).
+  Offset? barAt;
+
+  /// The screen pen's draw / operate key (Windows key code).
+  int penKey = 0x77;
+
   int narrationBefore = 5;
   int narrationAfter = 5;
 
@@ -145,6 +153,9 @@ class PlayerMemory extends ChangeNotifier {
       clipAfter = ((j['clipAfter'] as num?)?.toInt() ?? 10).clamp(0, 60);
       narrationBefore = ((j['narrBefore'] as num?)?.toInt() ?? 5).clamp(0, 30);
       showInk = j['showInk'] != false;
+      final bx = (j['barX'] as num?)?.toDouble(), by = (j['barY'] as num?)?.toDouble();
+      barAt = bx == null || by == null ? null : Offset(bx, by);
+      penKey = (j['penKey'] as num?)?.toInt() ?? 0x77;
       narrationAfter = ((j['narrAfter'] as num?)?.toInt() ?? 5).clamp(0, 30);
       last = RecentEntry.fromJson(j['last']);
       lastKey = j['lastKey'] as String?;
@@ -245,6 +256,16 @@ class PlayerMemory extends ChangeNotifier {
     _save();
   }
 
+  void setBarAt(Offset p) {
+    barAt = p;
+    _save();
+  }
+
+  void setPenKey(int vk) {
+    penKey = vk;
+    _save();
+  }
+
   void setShowInk(bool v) {
     showInk = v;
     _save();
@@ -316,6 +337,9 @@ class PlayerMemory extends ChangeNotifier {
         'clipAfter': clipAfter,
         'narrBefore': narrationBefore,
         'showInk': showInk,
+        if (barAt != null) 'barX': barAt!.dx,
+        if (barAt != null) 'barY': barAt!.dy,
+        'penKey': penKey,
         'narrAfter': narrationAfter,
         'last': ?last?.toJson(),
         'lastKey': ?lastKey,

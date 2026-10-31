@@ -1002,5 +1002,13 @@
   "ink.delete_found": "찾은 주석 삭제",
   "ink.delete_all_title": "{name}의 주석 {n}개를 삭제할까요?",
   "ink.delete_all_text": "영상 자체는 바뀌지 않습니다. 10초 동안 되돌릴 수 있습니다.",
-  "ink.deleted_n": "주석 {n}개 삭제됨"
+  "ink.deleted_n": "주석 {n}개 삭제됨",
+  "pen.to_operate": "컴퓨터 조작",
+  "pen.back_draw": "펜으로 돌아가기",
+  "pen.operate_tip": "마우스로 앱을 조작하고, 그린 표시는 남습니다. ({key})",
+  "pen.back_tip": "같은 펜으로 계속 그립니다. ({key})",
+  "pen.key_title": "그리기 / 조작 전환 키",
+  "pen.key_none": "키 없음",
+  "pen.move_bar": "드래그해 도구 모음 이동",
+  "pen.tips_v2": "더블클릭으로 선택: 드래그로 이동, 모서리로 크기, 점으로 회전. 휠로 크기(Shift: 회전). Delete 또는 다시 더블클릭으로 삭제, Esc로 선택 해제. Ctrl을 누르고 있으면 잠시 앱을 조작합니다."
 }

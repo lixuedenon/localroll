@@ -1002,5 +1002,13 @@
   "ink.delete_found": "Hapus catatan yang ditemukan",
   "ink.delete_all_title": "Hapus {n} catatan dari {name}?",
   "ink.delete_all_text": "Videonya sendiri tidak berubah. Bisa dibatalkan selama 10 detik.",
-  "ink.deleted_n": "{n} catatan dihapus"
+  "ink.deleted_n": "{n} catatan dihapus",
+  "pen.to_operate": "Pakai komputer",
+  "pen.back_draw": "Kembali ke pena",
+  "pen.operate_tip": "Mouse untuk aplikasi; coretan tetap ada. ({key})",
+  "pen.back_tip": "Gambar lagi dengan pena yang sama. ({key})",
+  "pen.key_title": "Tombol gambar / pakai komputer",
+  "pen.key_none": "Tanpa tombol",
+  "pen.move_bar": "Seret untuk memindahkan bilah",
+  "pen.tips_v2": "Klik dua kali untuk memilih: seret untuk memindah, sudut untuk ukuran, titik untuk memutar; roda mengubah ukuran (Shift: memutar); Delete atau klik dua kali menghapus; Esc membatalkan. Tahan Ctrl untuk memakai aplikasi sebentar."
 }

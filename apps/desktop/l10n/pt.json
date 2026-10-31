@@ -1002,5 +1002,13 @@
   "ink.delete_found": "Excluir as notas encontradas",
   "ink.delete_all_title": "Excluir {n} notas de {name}?",
   "ink.delete_all_text": "O vídeo em si não muda. Dá para desfazer por 10 segundos.",
-  "ink.deleted_n": "{n} notas excluídas"
+  "ink.deleted_n": "{n} notas excluídas",
+  "pen.to_operate": "Usar o computador",
+  "pen.back_draw": "Voltar à caneta",
+  "pen.operate_tip": "O mouse usa os apps; as marcas ficam. ({key})",
+  "pen.back_tip": "Desenhar de novo com a mesma caneta. ({key})",
+  "pen.key_title": "Tecla desenhar / usar",
+  "pen.key_none": "Sem tecla",
+  "pen.move_bar": "Arraste para mover a barra",
+  "pen.tips_v2": "Clique duas vezes para selecionar: arraste para mover, cantos para o tamanho, o ponto para girar; a roda muda o tamanho (Shift: gira); Delete ou duplo clique exclui; Esc solta. Segure Ctrl para usar os apps por um momento."
 }

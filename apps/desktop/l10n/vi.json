@@ -1002,5 +1002,13 @@
   "ink.delete_found": "Xóa các chú thích tìm được",
   "ink.delete_all_title": "Xóa {n} chú thích của {name}?",
   "ink.delete_all_text": "Bản thân video không đổi. Có thể hoàn tác trong 10 giây.",
-  "ink.deleted_n": "Đã xóa {n} chú thích"
+  "ink.deleted_n": "Đã xóa {n} chú thích",
+  "pen.to_operate": "Điều khiển máy",
+  "pen.back_draw": "Quay lại bút",
+  "pen.operate_tip": "Chuột điều khiển ứng dụng; nét vẽ vẫn giữ. ({key})",
+  "pen.back_tip": "Vẽ tiếp bằng cây bút đang dùng. ({key})",
+  "pen.key_title": "Phím đổi vẽ / điều khiển",
+  "pen.key_none": "Không dùng phím",
+  "pen.move_bar": "Kéo để di chuyển thanh công cụ",
+  "pen.tips_v2": "Nhấp đúp để chọn: kéo để di chuyển, kéo góc để đổi cỡ, chấm để xoay; con lăn đổi cỡ (Shift: xoay); Delete hoặc nhấp đúp lần nữa để xóa; Esc bỏ chọn. Giữ Ctrl để tạm điều khiển ứng dụng."
 }

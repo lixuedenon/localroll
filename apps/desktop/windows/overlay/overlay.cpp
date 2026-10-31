@@ -16,6 +16,8 @@
 //   undo  redo  clear  delete  newpage  prevpage  nextpage
 //   board none|white|black  highlight 0|1  fade 0|1  autoreturn 0|1
 //   pendraw 0|1           a pen (stylus) draws even in operate mode
+//   togglekey <vk>        this key switches draw / operate (0: none);
+//                         the key is not passed on to the app in front
 //   text <x> <y> <words>  put words at x, y (screen pixels)
 //   border <x> <y> <w> <h> | border off   red frame around an area
 //   visible 0|1           quit
@@ -155,7 +157,10 @@ HDC g_dc = nullptr;
 HBITMAP g_dib = nullptr;
 UINT32* g_bits = nullptr;
 HGDIOBJ g_oldBmp = nullptr;
-HHOOK g_hook = nullptr;
+HHOOK g_hook = nullptr, g_keys = nullptr;
+int g_toggleKey = VK_F8;
+bool g_keyHeld = false;
+ULONGLONG g_lastWheel = 0;
 HWINEVENTHOOK g_fgHook = nullptr;
 
 Page& page() { return g_pages[g_page]; }
@@ -895,8 +900,66 @@ LRESULT CALLBACK layerProc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
   }
 }
 
+// Keys while the pen is on: the toggle key switches draw / operate;
+// Delete / Backspace remove what is selected, Esc lets it go (only while
+// drawing, so typing in an app is never taken).
+LRESULT CALLBACK keyHook(int code, WPARAM wp, LPARAM lp) {
+  if (code == HC_ACTION && g_visible) {
+    const auto* k = reinterpret_cast<const KBDLLHOOKSTRUCT*>(lp);
+    const bool down = wp == WM_KEYDOWN || wp == WM_SYSKEYDOWN;
+    const int vk = static_cast<int>(k->vkCode);
+    if (g_toggleKey != 0 && vk == g_toggleKey) {
+      if (down && !g_keyHeld) {
+        g_keyHeld = true;
+        setMode(!g_draw);
+      } else if (!down) {
+        g_keyHeld = false;
+      }
+      return 1;
+    }
+    if (down && g_draw && !g_pass && g_selected != 0) {
+      if (vk == VK_DELETE || vk == VK_BACK) {
+        deleteSelected();
+        return 1;
+      }
+      if (vk == VK_ESCAPE) {
+        select(0);
+        return 1;
+      }
+    }
+  }
+  return CallNextHookEx(nullptr, code, wp, lp);
+}
+
+// The wheel over a selected mark: bigger / smaller (Shift: turn 15°).
+bool wheelOnSelected(const MSLLHOOKSTRUCT* m) {
+  Mark* s = findMark(g_selected);
+  const auto p = D2D1::Point2F(static_cast<float>(m->pt.x), static_cast<float>(m->pt.y));
+  if (!s || !insideBox(*s, p) || g_drag != kNone) return false;
+  const int notches = static_cast<short>(HIWORD(m->mouseData)) / WHEEL_DELTA;
+  if (notches == 0) return true;
+  // One undo step for a turn of the wheel (not for each notch).
+  const ULONGLONG now = GetTickCount64();
+  if (now - g_lastWheel > 700) remember();
+  g_lastWheel = now;
+  RECT before = areaOf(*s);
+  if (GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+    s->rot = std::round((s->rot + 15.0f * notches) / 15) * 15;
+  } else {
+    s->scale = std::clamp(s->scale * std::pow(1.1f, static_cast<float>(notches)), 0.1f, 20.0f);
+  }
+  RECT after = areaOf(*s);
+  UnionRect(&before, &before, &after);
+  render(&before);
+  emitState();
+  return true;
+}
+
 // A pen (stylus) draws even while the mouse goes through to the apps.
 LRESULT CALLBACK mouseHook(int code, WPARAM wp, LPARAM lp) {
+  if (code == HC_ACTION && wp == WM_MOUSEWHEEL && g_draw && !g_pass && g_visible && g_selected != 0) {
+    if (wheelOnSelected(reinterpret_cast<const MSLLHOOKSTRUCT*>(lp))) return 1;
+  }
   if (code == HC_ACTION && g_penDraw && !g_draw && g_visible) {
     const auto* m = reinterpret_cast<const MSLLHOOKSTRUCT*>(lp);
     const bool pen = (m->dwExtraInfo & 0xFFFFFF80) == 0xFF515700;
@@ -1145,6 +1208,9 @@ void command(const std::string& line) {
     g_autoReturn = arg == "1";
   } else if (cmd == "pendraw") {
     g_penDraw = arg == "1";
+  } else if (cmd == "togglekey") {
+    g_toggleKey = std::atoi(arg.c_str());
+    g_keyHeld = false;
   } else if (cmd == "text") {
     // text <x> <y> <words>
     char* end = nullptr;
@@ -1311,6 +1377,7 @@ int WINAPI wWinMain(HINSTANCE inst, HINSTANCE, PWSTR, int) {
   ShowWindow(g_layer, SW_SHOWNOACTIVATE);
 
   g_hook = SetWindowsHookExW(WH_MOUSE_LL, mouseHook, inst, 0);
+  g_keys = SetWindowsHookExW(WH_KEYBOARD_LL, keyHook, inst, 0);
   g_fgHook = SetWinEventHook(EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND, nullptr, onForeground, 0, 0,
                              WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS);
   SetTimer(g_msg, kTimerTick, 40, nullptr);
@@ -1336,6 +1403,7 @@ int WINAPI wWinMain(HINSTANCE inst, HINSTANCE, PWSTR, int) {
     DispatchMessageW(&msg);
   }
   if (g_hook) UnhookWindowsHookEx(g_hook);
+  if (g_keys) UnhookWindowsHookEx(g_keys);
   if (g_fgHook) UnhookWinEvent(g_fgHook);
   g_rt.reset();
   SelectObject(g_dc, g_oldBmp);

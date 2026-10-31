@@ -1002,5 +1002,13 @@
   "ink.delete_found": "Gefundene Notizen löschen",
   "ink.delete_all_title": "{n} Notizen von {name} löschen?",
   "ink.delete_all_text": "Das Video selbst bleibt unverändert. 10 Sekunden lang rückgängig zu machen.",
-  "ink.deleted_n": "{n} Notizen gelöscht"
+  "ink.deleted_n": "{n} Notizen gelöscht",
+  "pen.to_operate": "Computer bedienen",
+  "pen.back_draw": "Zurück zum Stift",
+  "pen.operate_tip": "Die Maus bedient die Apps, die Zeichnung bleibt. ({key})",
+  "pen.back_tip": "Mit demselben Stift weiterzeichnen. ({key})",
+  "pen.key_title": "Taste: Zeichnen / Bedienen",
+  "pen.key_none": "Keine Taste",
+  "pen.move_bar": "Ziehen, um die Leiste zu verschieben",
+  "pen.tips_v2": "Doppelklick wählt eine Markierung: ziehen = verschieben, Ecken = Größe, Punkt = drehen; Mausrad = Größe (Umschalt: drehen); Entf oder Doppelklick = löschen; Esc = abwählen. Strg halten: kurz die Apps bedienen."
 }

@@ -1002,5 +1002,13 @@
   "ink.delete_found": "Bulunan notları sil",
   "ink.delete_all_title": "{name} için {n} not silinsin mi?",
   "ink.delete_all_text": "Videonun kendisi değişmez. 10 saniye boyunca geri alınabilir.",
-  "ink.deleted_n": "{n} not silindi"
+  "ink.deleted_n": "{n} not silindi",
+  "pen.to_operate": "Bilgisayarı kullan",
+  "pen.back_draw": "Kaleme dön",
+  "pen.operate_tip": "Fare uygulamaları kullanır; çizimler kalır. ({key})",
+  "pen.back_tip": "Aynı kalemle çizmeye devam. ({key})",
+  "pen.key_title": "Çiz / kullan tuşu",
+  "pen.key_none": "Tuş yok",
+  "pen.move_bar": "Araç çubuğunu taşımak için sürükleyin",
+  "pen.tips_v2": "Seçmek için çift tıklayın: taşımak için sürükleyin, köşeler boyut, nokta döndürür; tekerlek boyut (Shift: döndür); Delete veya tekrar çift tık siler; Esc bırakır. Uygulamaları kısa süre kullanmak için Ctrl’yi basılı tutun."
 }

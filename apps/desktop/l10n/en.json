@@ -1002,5 +1002,13 @@
   "ink.delete_found": "Delete the notes found",
   "ink.delete_all_title": "Delete {n} notes of {name}?",
   "ink.delete_all_text": "The video itself isn’t changed. You can undo for 10 seconds.",
-  "ink.deleted_n": "{n} notes deleted"
+  "ink.deleted_n": "{n} notes deleted",
+  "pen.to_operate": "Use the computer",
+  "pen.back_draw": "Back to the pen",
+  "pen.operate_tip": "The mouse works the apps; the marks stay. ({key})",
+  "pen.back_tip": "Draw again with the same pen. ({key})",
+  "pen.key_title": "Key for draw / use the computer",
+  "pen.key_none": "No key",
+  "pen.move_bar": "Drag to move the toolbar",
+  "pen.tips_v2": "Double-click a mark to select it: drag to move, corners to resize, the dot to turn; the wheel resizes (Shift: turns); Delete or double-click again deletes; Esc lets go. Hold Ctrl to use the apps for a moment."
 }

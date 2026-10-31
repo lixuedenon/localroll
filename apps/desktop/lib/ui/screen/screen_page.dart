@@ -103,7 +103,13 @@ class _ScreenPageState extends State<ScreenPage> {
         width: 250,
         height: 172,
         child: Tooltip(
-          message: more ?? tip,
+          // A few lines, not one long one.
+          richMessage: WidgetSpan(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 340),
+              child: Text(more ?? tip, style: const TextStyle(color: Colors.white, fontSize: 13, height: 1.45)),
+            ),
+          ),
           waitDuration: const Duration(milliseconds: 500),
           child: Material(
           color: LrColors.surface,

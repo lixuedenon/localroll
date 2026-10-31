@@ -42,6 +42,10 @@ class PenOverlay extends ChangeNotifier {
   /// Options (kept while LocalRoll runs).
   bool fade = false, autoReturn = false, penDraws = true;
 
+  /// This key switches draw / operate while the pen is on (Windows key
+  /// code; 0x77 = F8, 0 = none).
+  int toggleKey = 0x77;
+
   /// The text tool was clicked here (screen pixels): words are asked for.
   ({int x, int y})? textAt;
 
@@ -78,6 +82,7 @@ class PenOverlay extends ChangeNotifier {
       _send('fade ${fade ? 1 : 0}');
       _send('autoreturn ${autoReturn ? 1 : 0}');
       _send('pendraw ${penDraws ? 1 : 0}');
+      _send('togglekey $toggleKey');
       board = 0;
       highlight = false;
       return true;
@@ -201,6 +206,12 @@ class PenOverlay extends ChangeNotifier {
   void setPenDraws(bool on) {
     penDraws = on;
     _send('pendraw ${on ? 1 : 0}');
+    notifyListeners();
+  }
+
+  void setToggleKey(int vk) {
+    toggleKey = vk;
+    _send('togglekey $vk');
     notifyListeners();
   }
 

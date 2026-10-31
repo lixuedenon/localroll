@@ -1002,5 +1002,13 @@
   "ink.delete_found": "Borrar las notas encontradas",
   "ink.delete_all_title": "¿Borrar {n} notas de {name}?",
   "ink.delete_all_text": "El vídeo no cambia. Puedes deshacerlo durante 10 segundos.",
-  "ink.deleted_n": "{n} notas borradas"
+  "ink.deleted_n": "{n} notas borradas",
+  "pen.to_operate": "Usar el ordenador",
+  "pen.back_draw": "Volver al lápiz",
+  "pen.operate_tip": "El ratón maneja las apps; los trazos se quedan. ({key})",
+  "pen.back_tip": "Seguir dibujando con el mismo lápiz. ({key})",
+  "pen.key_title": "Tecla dibujar / usar el ordenador",
+  "pen.key_none": "Sin tecla",
+  "pen.move_bar": "Arrastra para mover la barra",
+  "pen.tips_v2": "Doble clic para seleccionar: arrastra para mover, esquinas para el tamaño, el punto para girar; la rueda cambia el tamaño (Mayús: gira); Supr o doble clic borra; Esc suelta. Mantén Ctrl para usar las apps un momento."
 }

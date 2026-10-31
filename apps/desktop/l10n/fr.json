@@ -1002,5 +1002,13 @@
   "ink.delete_found": "Supprimer les notes trouvées",
   "ink.delete_all_title": "Supprimer {n} notes de {name} ?",
   "ink.delete_all_text": "La vidéo elle-même n’est pas modifiée. Annulation possible pendant 10 secondes.",
-  "ink.deleted_n": "{n} notes supprimées"
+  "ink.deleted_n": "{n} notes supprimées",
+  "pen.to_operate": "Utiliser l’ordinateur",
+  "pen.back_draw": "Revenir au stylo",
+  "pen.operate_tip": "La souris pilote les applis ; les traits restent. ({key})",
+  "pen.back_tip": "Redessiner avec le même stylo. ({key})",
+  "pen.key_title": "Touche dessiner / utiliser",
+  "pen.key_none": "Aucune touche",
+  "pen.move_bar": "Faites glisser pour déplacer la barre",
+  "pen.tips_v2": "Double-clic pour sélectionner : glisser pour déplacer, coins pour la taille, point pour tourner ; molette = taille (Maj : tourner) ; Suppr ou double-clic supprime ; Échap désélectionne. Maintenez Ctrl pour utiliser les applis un instant."
 }

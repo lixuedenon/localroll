@@ -101,7 +101,21 @@ class _PenToolbarState extends State<PenToolbar> {
           child: o.textAt != null
               ? _typing()
               : Wrap(crossAxisAlignment: WrapCrossAlignment.center, alignment: WrapAlignment.center, children: [
-                  _btn(Icons.mouse_rounded, tr('pen.operate'), () => o.setDraw(false), on: !o.draw),
+                  const BarGrip(),
+                  // On / off: operate the computer, or back to the pen in use.
+                  Tooltip(
+                    message: tr(o.draw ? 'pen.operate_tip' : 'pen.back_tip', {'key': _keyName(o.toggleKey)}),
+                    child: TextButton.icon(
+                      style: TextButton.styleFrom(
+                        foregroundColor: o.draw ? Colors.white : LrColors.safelight,
+                        backgroundColor: o.draw ? null : LrColors.safelight.withValues(alpha: 0.25),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      onPressed: () => o.setDraw(!o.draw),
+                      icon: Icon(o.draw ? Icons.mouse_rounded : Icons.edit_rounded, size: 18),
+                      label: Text(tr(o.draw ? 'pen.to_operate' : 'pen.back_draw')),
+                    ),
+                  ),
                   const SizedBox(width: 4),
                   for (final t in EditTool.values)
                     _btn(InkToolbar.icon(t), InkToolbar.label(t), () => o.setTool(t.name), on: o.draw && o.tool == t.name),
@@ -167,12 +181,22 @@ class _PenToolbarState extends State<PenToolbar> {
                       if (v == 'fade') o.setFade(!o.fade);
                       if (v == 'return') o.setAutoReturn(!o.autoReturn);
                       if (v == 'stylus') o.setPenDraws(!o.penDraws);
+                      if (v.startsWith('key')) {
+                        final vk = int.parse(v.substring(3));
+                        o.setToggleKey(vk);
+                        PenSession.instance.services?.player.setPenKey(vk);
+                      }
                     },
                     itemBuilder: (_) => [
                       CheckedPopupMenuItem(value: 'fade', checked: o.fade, child: Text(tr('screen.fade'))),
                       CheckedPopupMenuItem(value: 'return', checked: o.autoReturn, child: Text(tr('pen.auto_return'))),
                       CheckedPopupMenuItem(value: 'stylus', checked: o.penDraws, child: Text(tr('pen.stylus'))),
-                      PopupMenuItem(enabled: false, child: Text(tr('pen.tips'), style: const TextStyle(fontSize: 12, color: LrColors.muted))),
+                      const PopupMenuDivider(),
+                      PopupMenuItem(enabled: false, child: Text(tr('pen.key_title'), style: const TextStyle(fontSize: 12, color: LrColors.muted))),
+                      for (final vk in const [0x75, 0x76, 0x77, 0x78, 0x79, 0])
+                        CheckedPopupMenuItem(value: 'key$vk', checked: o.toggleKey == vk, child: Text(_keyName(vk))),
+                      const PopupMenuDivider(),
+                      PopupMenuItem(enabled: false, child: Text(tr('pen.tips_v2'), style: const TextStyle(fontSize: 12, color: LrColors.muted))),
                     ],
                   ),
                   ...widget.extra,
@@ -250,7 +274,8 @@ class PenSession {
     } catch (_) {}
   }
 
-  /// The toolbar at the top of the screen in use, over the pen's layer.
+  /// The toolbar at the top of the screen in use (or where it was moved
+  /// to), over the pen's layer.
   static void placeBar({required bool tall}) {
     final screens = WinScreen.screens();
     if (screens.isEmpty) return;
@@ -258,7 +283,7 @@ class PenSession {
     final scr = screens.firstWhere((s) => s.rect.contains(c), orElse: () => screens.first);
     final k = scr.scale;
     final w = 1180 * k, h = (tall ? 140 : 76) * k;
-    WinScreen.place(Rect.fromLTWH(scr.rect.center.dx - w / 2, scr.rect.top + 8 * k, w, h), onTop: true, activate: false);
+    WinScreen.place(BarPlace.rect(Rect.fromLTWH(scr.rect.center.dx - w / 2, scr.rect.top + 8 * k, w, h)), onTop: true, activate: false);
   }
 }
 
@@ -340,4 +365,92 @@ class _ShotButtonState extends State<_ShotButton> {
         ),
         if (_done != null) Text(_done!, style: const TextStyle(color: Colors.white70, fontSize: 12)),
       ]);
+}
+
+String _keyName(int vk) => vk == 0 ? tr('pen.key_none') : 'F${vk - 0x6F}';
+
+/// Where the toolbar goes: where it was moved to (kept on a screen), else
+/// [normal].
+class BarPlace {
+  BarPlace._();
+
+  static Rect rect(Rect normal) {
+    final at = PenSession.instance.services?.player.barAt;
+    final screens = WinScreen.screens();
+    if (at == null || screens.isEmpty) return normal;
+    final scr = screens.firstWhere((s) => s.rect.contains(at), orElse: () => screens.first);
+    final r = scr.rect;
+    final w = normal.width.clamp(0.0, r.width), h = normal.height.clamp(0.0, r.height);
+    final x = at.dx.clamp(r.left, r.right - w), y = at.dy.clamp(r.top, r.bottom - h);
+    return Rect.fromLTWH(x, y, w, h);
+  }
+
+  static void save() {
+    final r = WinScreen.ownRect();
+    if (r != null) PenSession.instance.services?.player.setBarAt(r.topLeft);
+  }
+}
+
+/// Hold and drag: the toolbar (LocalRoll's window) goes anywhere, and is
+/// there next time.
+class BarGrip extends StatefulWidget {
+  const BarGrip({super.key});
+
+  @override
+  State<BarGrip> createState() => _BarGripState();
+}
+
+class _BarGripState extends State<BarGrip> with WindowListener {
+  bool _moving = false;
+  Timer? _done;
+
+  @override
+  void initState() {
+    super.initState();
+    windowManager.addListener(this);
+  }
+
+  @override
+  void dispose() {
+    windowManager.removeListener(this);
+    _done?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void onWindowMove() {
+    if (_moving) BarPlace.save();
+  }
+
+  @override
+  void onWindowMoved() {
+    if (!_moving) return;
+    BarPlace.save();
+    _moving = false;
+  }
+
+  @override
+  Widget build(BuildContext context) => Tooltip(
+        message: tr('pen.move_bar'),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.move,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onPanStart: (_) {
+              _moving = true;
+              _done?.cancel();
+              // Saved once more when the move is over (some systems send no "moved").
+              _done = Timer(const Duration(seconds: 8), () {
+                if (_moving) BarPlace.save();
+                _moving = false;
+              });
+              unawaited(windowManager.startDragging());
+            },
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              child: Icon(Icons.drag_indicator_rounded, color: Colors.white54, size: 20),
+            ),
+          ),
+        ),
+      );
 }

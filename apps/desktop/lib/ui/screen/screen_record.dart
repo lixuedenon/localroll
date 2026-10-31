@@ -316,6 +316,7 @@ class ScreenRecorder extends ChangeNotifier {
   void watchKeys(AppServices s) {
     _s = s;
     PenSession.instance.services = s;
+    PenOverlay.instance.toggleKey = s.player.penKey;
     if (!Platform.isWindows) return;
     Timer.periodic(const Duration(milliseconds: 40), (_) {
       final mod = WinScreen.down(0x11) && WinScreen.down(0x10);
@@ -448,7 +449,7 @@ class ScreenRecorder extends ChangeNotifier {
     final k = scr.scale;
     final tools = usesOverlay && pen;
     final w = (tools ? 1180 : 660) * k, h = (tools ? 140 : 64) * k;
-    WinScreen.place(Rect.fromLTWH(scr.rect.center.dx - w / 2, scr.rect.top + 12 * k, w, h), onTop: true, activate: false);
+    WinScreen.place(BarPlace.rect(Rect.fromLTWH(scr.rect.center.dx - w / 2, scr.rect.top + 12 * k, w, h)), onTop: true, activate: false);
   }
 
   void _message(String text) {
@@ -1048,7 +1049,6 @@ Future<ScreenSetup?> showScreenSetup(BuildContext context, AppServices s, {Scree
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, set) => AlertDialog(
-        title: Text(tr('screen.title')),
         content: SizedBox(
           width: 480,
           child: SingleChildScrollView(
@@ -1484,6 +1484,8 @@ class _Bar extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: Row(mainAxisSize: MainAxisSize.min, children: [
+        // Without the pen the bar is the window: moved by its grip.
+        if (!r.pen) const BarGrip(),
         RecordingBar(
           elapsed: () => r.elapsedMs,
           paused: r.paused,
