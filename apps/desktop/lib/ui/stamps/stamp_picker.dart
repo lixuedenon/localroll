@@ -22,7 +22,9 @@ typedef PickedStamp = ({String id, StampShape shape, String name});
 Future<void> pickStampInto(BuildContext context, InkEditor editor) async {
   final r = await showStampPicker(context, drawn: editor.inks, aspect: editor.aspect);
   if (r == null) return;
-  (editor.upColor, editor.downColor) = StampLibrary.instance.colors;
+  editor
+            ..upColor = StampLibrary.instance.colors.$1
+            ..downColor = StampLibrary.instance.colors.$2;
   editor.setStamp(r.shape, r.name);
 }
 

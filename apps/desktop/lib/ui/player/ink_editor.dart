@@ -810,7 +810,9 @@ class InkToolbar extends StatelessWidget {
         if (t == EditTool.stamp) {
           unawaited(pickStampInto(context, editor));
         } else {
-          if (t == EditTool.candle) (editor.upColor, editor.downColor) = StampLibrary.instance.colors;
+          if (t == EditTool.candle) editor
+            ..upColor = StampLibrary.instance.colors.$1
+            ..downColor = StampLibrary.instance.colors.$2;
           editor.setTool(t);
         }
       },
