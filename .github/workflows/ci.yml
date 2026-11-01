@@ -188,8 +188,8 @@ jobs:
           $psi.UseShellExecute = $false
           $p = [System.Diagnostics.Process]::Start($psi)
           Start-Sleep -Seconds 2
-          $p.StandardInput.WriteLine('stop')
-          $p.StandardInput.Close()
+          # Without speakers it has already ended (with "error no speakers").
+          try { $p.StandardInput.WriteLine('stop'); $p.StandardInput.Close() } catch { }
           $out = $p.StandardOutput.ReadToEnd()
           if (-not $p.WaitForExit(15000)) { $p.Kill(); Write-Output "::error::lr_loopback did not quit"; exit 1 }
           Write-Output $out
