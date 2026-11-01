@@ -24,6 +24,7 @@ import 'services/recordings.dart';
 import 'services/phone_formats.dart';
 import 'services/receive_hub.dart';
 import 'services/settings.dart';
+import 'services/stamp_library.dart';
 import 'services/text_indexer.dart';
 import 'services/tls_identity.dart';
 import 'ui/pdf_thumb.dart';
@@ -240,6 +241,7 @@ class AppServices {
     s.sender.isOnline = (id) => s.settings.peers.containsKey(id) ? s.isOnline(id) : s.phoneTarget(id) != null;
     await s.sender.loadHeld();
     await s.player.load();
+    await StampLibrary.instance.load(s.settings.dataDir);
     await s.recordings.load();
     s.recordings.watch(s.sender);
     server.hiddenRecording = s.recordings.hiddenFrom;

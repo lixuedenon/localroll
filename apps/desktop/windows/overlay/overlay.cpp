@@ -43,6 +43,8 @@
 #include <windows.h>
 #include <d2d1.h>
 #include <dwrite.h>
+#include <wincrypt.h>
+#include <wincodec.h>
 
 #include <algorithm>
 #include <cmath>
@@ -50,6 +52,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <string>
 #include <thread>
 #include <vector>
@@ -94,13 +97,27 @@ constexpr UINT_PTR kTimerTick = 1;
 constexpr UINT_PTR kTimerCursor = 2;
 constexpr float kPi = 3.14159265358979f;
 
-enum Tool { kPen, kMarker, kLine, kArrow, kRect, kEllipse, kText, kCheck, kCross, kNumber, kSelect, kEraser };
+enum Tool { kPen, kMarker, kLine, kArrow, kRect, kEllipse, kText, kCheck, kCross, kNumber, kSelect, kEraser, kStamp, kCandle };
 
 const wchar_t* const kToolNames[] = {L"pen", L"marker", L"line", L"arrow", L"rect", L"ellipse", L"text",
-                                     L"check", L"cross", L"number", L"select", L"eraser"};
+                                     L"check", L"cross", L"number", L"select", L"eraser", L"stamp", L"candle"};
+
+// A stamp's picture (premultiplied BGRA), made into a bitmap when drawn.
+struct StampPic {
+  std::vector<BYTE> px;
+  UINT w = 0, h = 0;
+  float aspect = 1;
+  void* rt = nullptr;
+  ID2D1Bitmap* bmp = nullptr;
+  ~StampPic() {
+    if (bmp) bmp->Release();
+  }
+};
 
 struct Mark {
   int id = 0;
+  std::shared_ptr<StampPic> pic;  // a stamp: its picture; pts: two corners of its box
+  UINT32 argb2 = 0xFF16A34A;       // a candle: falling colour; pts: open, close, high, low
   int tool = kPen;
   UINT32 argb = 0xFFFF3B30;
   float width = 6;   // line width (pixels)
@@ -140,6 +157,8 @@ HWND g_page = nullptr;
 bool g_draw = false, g_pass = false, g_visible = true;
 int g_tool = kPen, g_level = 1, g_nextId = 1, g_nextNumber = 1;
 UINT32 g_color = 0xFFFF3B30;
+UINT32 g_up = 0xFFE53935, g_down = 0xFF16A34A;
+std::shared_ptr<StampPic> g_stamp;
 bool g_fade = false, g_autoReturn = false, g_penDraw = true, g_highlight = false;
 int g_board = 0;  // 0 none, 1 white, 2 black
 RECT g_boardRect{};
@@ -227,6 +246,14 @@ D2D1_RECT_F rawBox(const Mark& m) {
   if (m.tool == kCheck || m.tool == kCross || m.tool == kNumber) {
     const float h = m.size * 0.5f;
     return D2D1::RectF(p0.x - h, p0.y - h, p0.x + h, p0.y + h);
+  }
+  if (m.tool == kStamp && m.pts.size() >= 2) {
+    const auto z = m.pts[1];
+    return D2D1::RectF(std::min(p0.x, z.x), std::min(p0.y, z.y), std::max(p0.x, z.x), std::max(p0.y, z.y));
+  }
+  if (m.tool == kCandle && m.pts.size() >= 4) {
+    const float h = std::max(2.0f, m.size / 2);
+    return D2D1::RectF(p0.x - h, m.pts[2].y, p0.x + h, m.pts[3].y);
   }
   float l = p0.x, t = p0.y, r = p0.x, b = p0.y;
   for (const auto& p : m.pts) {
@@ -390,7 +417,7 @@ bool hits(const Mark& m, D2D1_POINT_2F p, float slop) {
   if (!inv.Invert()) return false;
   const auto q = inv.TransformPoint(p);
   slop /= std::max(0.1f, m.scale);
-  if (m.tool == kText || m.tool == kNumber) {
+  if (m.tool == kText || m.tool == kNumber || m.tool == kStamp || m.tool == kCandle) {
     const auto b = rawBox(m);
     return q.x >= b.left - slop && q.x <= b.right + slop && q.y >= b.top - slop && q.y <= b.bottom + slop;
   }
@@ -450,6 +477,41 @@ float fadeAlpha(const Mark& m, ULONGLONG now) {
   const ULONGLONG age = now - m.doneAt;
   if (age < 3000) return 1;
   return std::max(0.0f, 1.0f - static_cast<float>(age - 3000) / 500.0f);
+}
+
+// A candle's high / low a little beyond its body.
+void autoWicks(Mark& m) {
+  if (m.pts.size() < 2) return;
+  const auto o = m.pts[0];
+  const float c = m.pts[1].y;
+  const float top = std::min(o.y, c), bot = std::max(o.y, c), tail = std::max((bot - top) * 0.25f, 8.0f);
+  m.pts = {o, D2D1::Point2F(o.x, c), D2D1::Point2F(o.x, top - tail), D2D1::Point2F(o.x, bot + tail)};
+}
+
+// "stamp <aspect> <base64 PNG>": the picture of the stamp to place next.
+std::shared_ptr<StampPic> decodeStamp(const std::string& b64, float aspect) {
+  DWORD n = 0;
+  if (!CryptStringToBinaryA(b64.c_str(), static_cast<DWORD>(b64.size()), CRYPT_STRING_BASE64, nullptr, &n, nullptr, nullptr) || !n) return nullptr;
+  std::vector<BYTE> png(n);
+  if (!CryptStringToBinaryA(b64.c_str(), static_cast<DWORD>(b64.size()), CRYPT_STRING_BASE64, png.data(), &n, nullptr, nullptr)) return nullptr;
+  Com<IWICImagingFactory> wic;
+  if (FAILED(CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, __uuidof(IWICImagingFactory), reinterpret_cast<void**>(wic.put())))) return nullptr;
+  Com<IWICStream> st;
+  Com<IWICBitmapDecoder> dec;
+  Com<IWICBitmapFrameDecode> fr;
+  Com<IWICFormatConverter> conv;
+  if (FAILED(wic->CreateStream(st.put())) || FAILED(st->InitializeFromMemory(png.data(), n)) ||
+      FAILED(wic->CreateDecoderFromStream(st.p, nullptr, WICDecodeMetadataCacheOnLoad, dec.put())) || FAILED(dec->GetFrame(0, fr.put())) ||
+      FAILED(wic->CreateFormatConverter(conv.put())) ||
+      FAILED(conv->Initialize(fr.p, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, nullptr, 0, WICBitmapPaletteTypeCustom))) {
+    return nullptr;
+  }
+  auto pic = std::make_shared<StampPic>();
+  conv->GetSize(&pic->w, &pic->h);
+  pic->px.resize(static_cast<size_t>(pic->w) * pic->h * 4);
+  if (FAILED(conv->CopyPixels(nullptr, pic->w * 4, static_cast<UINT>(pic->px.size()), pic->px.data()))) return nullptr;
+  pic->aspect = aspect > 0 ? aspect : static_cast<float>(pic->w) / std::max(1u, pic->h);
+  return pic;
 }
 
 void present(const RECT* dirty) {
@@ -527,6 +589,36 @@ void render(const RECT* dirty = nullptr) {
           fmt->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
           const std::wstring n = std::to_wstring(m.number);
           g_rt->DrawText(n.c_str(), static_cast<UINT32>(n.size()), fmt.p, D2D1::RectF(p.x - r, p.y - r, p.x + r, p.y + r), white.p);
+        }
+      } else if (m.tool == kStamp) {
+        StampPic* pic = m.pic.get();
+        if (pic && !pic->px.empty()) {
+          if (pic->rt != g_rt.p || !pic->bmp) {
+            if (pic->bmp) pic->bmp->Release();
+            pic->bmp = nullptr;
+            g_rt->CreateBitmap(D2D1::SizeU(pic->w, pic->h), pic->px.data(), pic->w * 4,
+                               D2D1::BitmapProperties(D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)), &pic->bmp);
+            pic->rt = g_rt.p;
+          }
+          if (pic->bmp) {
+            const auto b = rawBox(m);
+            const float bw = b.right - b.left, bh = b.bottom - b.top;
+            const float w = std::min(bw, bh * pic->aspect), h = w / pic->aspect;
+            const float cx = (b.left + b.right) / 2, cy = (b.top + b.bottom) / 2;
+            g_rt->DrawBitmap(pic->bmp, D2D1::RectF(cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2), alpha, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR);
+          }
+        }
+      } else if (m.tool == kCandle) {
+        if (m.pts.size() >= 4) {
+          const bool up = m.pts[1].y <= m.pts[0].y;
+          Com<ID2D1SolidColorBrush> cb;
+          g_rt->CreateSolidColorBrush(colorOf(up ? m.argb : m.argb2, alpha), cb.put());
+          if (cb) {
+            const float x = m.pts[0].x, w = std::max(4.0f, m.size);
+            g_rt->DrawLine(m.pts[2], m.pts[3], cb.p, std::max(1.2f, w * 0.12f));
+            const float top = std::min(m.pts[0].y, m.pts[1].y), bot = std::max(std::max(m.pts[0].y, m.pts[1].y), top + 1.5f);
+            g_rt->FillRectangle(D2D1::RectF(x - w / 2, top, x + w / 2, bot), cb.p);
+          }
         }
       } else {
         auto g = outline(m);
@@ -677,7 +769,31 @@ void endDrawing() {
   if (!g_hasDraft) return;
   g_hasDraft = false;
   Mark m = g_draft;
-  const bool tiny = m.tool != kPen && m.tool != kMarker && m.pts.size() >= 2 && dist(m.pts.front(), m.pts.back()) < 3;
+  if (m.tool == kStamp && m.pts.size() >= 2 && dist(m.pts[0], m.pts[1]) < 4) {
+    // Clicked: its usual size, centred there.
+    const float h = m.size * 2.2f, w = h * (m.pic ? m.pic->aspect : 1);
+    const auto c = m.pts[0];
+    m.pts = {D2D1::Point2F(c.x - w / 2, c.y - h / 2), D2D1::Point2F(c.x + w / 2, c.y + h / 2)};
+  }
+  if (m.tool == kCandle && m.pts.size() >= 2 && std::fabs(m.pts[0].y - m.pts[1].y) < 3) {
+    // Clicked after a candle: the next one, opening at its close.
+    const Mark* prev = nullptr;
+    for (const auto& x : sheet().marks) {
+      if (x.tool == kCandle && x.pts.size() >= 4) prev = &x;
+    }
+    if (!prev) {
+      g_made = 0;
+      render();
+      return;
+    }
+    const float y = m.pts[0].y;
+    const float px = prev->pts[0].x + prev->dx + prev->size * 1.7f, open = prev->pts[1].y + prev->dy;
+    m.size = prev->size;
+    m.pts = {D2D1::Point2F(px, open), D2D1::Point2F(px, y)};
+    autoWicks(m);
+  }
+  const bool tiny = m.tool != kPen && m.tool != kMarker && m.tool != kStamp && m.tool != kCandle && m.pts.size() >= 2 &&
+                    dist(m.pts.front(), m.pts.back()) < 3;
   if (!tiny) {
     remember();
     m.doneAt = GetTickCount64();
@@ -780,6 +896,25 @@ void onDown(D2D1_POINT_2F p) {
       if (g_autoReturn) setMode(false);
       return;
     }
+    case kStamp:
+    case kCandle:
+      if (g_tool == kStamp && !g_stamp) return;
+      g_draft = newMark(g_tool, p);
+      g_draft.pts.push_back(p);
+      if (g_tool == kStamp) {
+        g_draft.pic = g_stamp;
+      } else {
+        const float cw[] = {10, 16, 24};
+        POINT sp{static_cast<LONG>(p.x), static_cast<LONG>(p.y)};
+        g_draft.size = cw[g_level] * dpiScaleAt(sp);
+        g_draft.argb = g_up;
+        g_draft.argb2 = g_down;
+        autoWicks(g_draft);
+      }
+      g_hasDraft = true;
+      g_made = g_draft.id;
+      g_drag = kDrawing;
+      return;
     default:
       g_draft = newMark(g_tool, p);
       if (g_tool != kPen && g_tool != kMarker) g_draft.pts.push_back(p);
@@ -804,6 +939,25 @@ void onMove(D2D1_POINT_2F p) {
         RECT r{static_cast<LONG>(std::min(last.x, p.x) - pad) - g_virt.left, static_cast<LONG>(std::min(last.y, p.y) - pad) - g_virt.top,
                static_cast<LONG>(std::max(last.x, p.x) + pad) - g_virt.left, static_cast<LONG>(std::max(last.y, p.y) + pad) - g_virt.top};
         render(&r);
+        return;
+      }
+      if (d.tool == kStamp) {
+        // Its own proportions, as big as the drag.
+        const auto a = d.pts[0];
+        const float k = d.pic ? d.pic->aspect : 1, vx = p.x - a.x, vy = p.y - a.y;
+        const float h = std::max(std::fabs(vy), std::fabs(vx) / k);
+        d.pts[1] = D2D1::Point2F(a.x + (vx < 0 ? -h * k : h * k), a.y + (vy < 0 ? -h : h));
+        RECT after = areaOf(d);
+        UnionRect(&before, &before, &after);
+        render(&before);
+        return;
+      }
+      if (d.tool == kCandle) {
+        d.pts[1] = D2D1::Point2F(d.pts[0].x, p.y);
+        autoWicks(d);
+        RECT after = areaOf(d);
+        UnionRect(&before, &before, &after);
+        render(&before);
         return;
       }
       auto to = p;
@@ -1189,10 +1343,23 @@ void command(const std::string& line) {
     setMode(arg == "draw");
   } else if (cmd == "tool") {
     const std::wstring w = wide(arg);
-    for (int i = 0; i <= kEraser; ++i) {
+    for (int i = 0; i <= kCandle; ++i) {
       if (w == kToolNames[i]) g_tool = i;
     }
     if (g_tool != kSelect && g_selected) select(0);
+  } else if (cmd == "stamp") {
+    // "stamp <aspect> <base64 PNG>"
+    const size_t sp = arg.find(' ');
+    if (sp != std::string::npos) {
+      auto pic = decodeStamp(arg.substr(sp + 1), static_cast<float>(std::atof(arg.substr(0, sp).c_str())));
+      if (pic) g_stamp = pic;
+    }
+  } else if (cmd == "candle") {
+    const size_t sp = arg.find(' ');
+    if (sp != std::string::npos) {
+      g_up = static_cast<UINT32>(std::strtoul(arg.substr(0, sp).c_str(), nullptr, 16));
+      g_down = static_cast<UINT32>(std::strtoul(arg.substr(sp + 1).c_str(), nullptr, 16));
+    }
   } else if (cmd == "color") {
     g_color = static_cast<UINT32>(std::strtoul(arg.c_str(), nullptr, 16));
     if (Mark* s = findMark(g_selected)) {
@@ -1390,6 +1557,7 @@ LRESULT CALLBACK msgProc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
 }  // namespace
 
 int WINAPI wWinMain(HINSTANCE inst, HINSTANCE, PWSTR, int) {
+  CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
   g_inst = inst;
   // Real pixels on every screen (matches LocalRoll's window places).
   using SetCtx = BOOL(WINAPI*)(HANDLE);

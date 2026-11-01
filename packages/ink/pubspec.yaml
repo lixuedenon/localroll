@@ -1,0 +1,13 @@
+# packages/ink/pubspec.yaml
+name: localroll_ink
+description: Marks and stamps shared by LocalRoll's desktop and phone apps (drawing on photos, videos and the screen).
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: '>=3.8.0 <4.0.0'
+  flutter: '>=3.32.0'
+
+dependencies:
+  flutter:
+    sdk: flutter

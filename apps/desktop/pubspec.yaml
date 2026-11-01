@@ -17,6 +17,8 @@ dependencies:
   intl: any
   localroll_core:
     path: ../../packages/core
+  localroll_ink:
+    path: ../../packages/ink
 
   # Video playback (libmpv): plays HEVC / HDR / Dolby Vision originals directly.
   media_kit: '>=1.1.10 <2.0.0'

@@ -1,0 +1,130 @@
+// apps/desktop/lib/services/stamp_library.dart
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
+import 'package:localroll_core/localroll_core.dart';
+import 'package:localroll_ink/localroll_ink.dart';
+
+/// One stamp the user made (from drawn marks or a picture).
+class MyStamp {
+  MyStamp({required this.id, required this.name, required this.shape});
+
+  final String id;
+  String name;
+  final StampShape shape;
+
+  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'shape': shape.toJson()};
+
+  static MyStamp? fromJson(Object? j) {
+    if (j is! Map) return null;
+    final m = j.cast<String, dynamic>();
+    final sh = m['shape'];
+    if (m['id'] is! String || sh is! Map) return null;
+    return MyStamp(id: m['id'] as String, name: m['name'] as String? ?? '', shape: StampShape.fromJson(sh.cast<String, dynamic>()));
+  }
+}
+
+/// The stamps on this PC: the user's own, recently used, favourites, and
+/// candle colours (stamps.json beside the settings; never sent anywhere).
+class StampLibrary extends ChangeNotifier {
+  StampLibrary._();
+
+  static final StampLibrary instance = StampLibrary._();
+
+  File? _file;
+  final List<MyStamp> mine = [];
+  final List<String> recent = [];
+  final Set<String> favorites = {};
+
+  /// Rising red (else rising green). Null: by language.
+  bool? _redUp;
+
+  bool get redUp => _redUp ?? const {'zh', 'ja', 'ko'}.contains(PlatformDispatcher.instance.locale.languageCode);
+
+  (int, int) get colors => Candles.colors(redUp);
+
+  Future<void> load(Directory dataDir) async {
+    final f = _file = File('${dataDir.path}${Platform.pathSeparator}stamps.json');
+    try {
+      if (!await f.exists()) return;
+      final j = jsonDecode(await f.readAsString()) as Map<String, dynamic>;
+      mine
+        ..clear()
+        ..addAll([for (final x in (j['mine'] as List?) ?? const []) ?MyStamp.fromJson(x)]);
+      recent
+        ..clear()
+        ..addAll([for (final x in (j['recent'] as List?) ?? const []) '$x']);
+      favorites
+        ..clear()
+        ..addAll([for (final x in (j['fav'] as List?) ?? const []) '$x']);
+      _redUp = j['redUp'] as bool?;
+    } catch (e) {
+      DiagLog.log('stamps', 'not read: $e');
+    }
+  }
+
+  Timer? _save;
+
+  void _changed() {
+    notifyListeners();
+    _save?.cancel();
+    _save = Timer(const Duration(milliseconds: 400), () async {
+      final f = _file;
+      if (f == null) return;
+      try {
+        final tmp = File('${f.path}.tmp');
+        await tmp.writeAsString(jsonEncode({
+          'mine': [for (final m in mine) m.toJson()],
+          'recent': recent,
+          'fav': [...favorites],
+          'redUp': ?_redUp,
+        }));
+        await tmp.rename(f.path);
+      } catch (e) {
+        DiagLog.log('stamps', 'not saved: $e');
+      }
+    });
+  }
+
+  void setRedUp(bool v) {
+    _redUp = v;
+    _changed();
+  }
+
+  /// Used now: first in "Recent" (at most 24).
+  void used(String id) {
+    recent
+      ..remove(id)
+      ..insert(0, id);
+    if (recent.length > 24) recent.removeRange(24, recent.length);
+    _changed();
+  }
+
+  void toggleFavorite(String id) {
+    if (!favorites.remove(id)) favorites.add(id);
+    _changed();
+  }
+
+  MyStamp add(String name, StampShape shape) {
+    final m = MyStamp(id: 'my_${DateTime.now().microsecondsSinceEpoch.toRadixString(36)}', name: name, shape: shape);
+    mine.insert(0, m);
+    _changed();
+    return m;
+  }
+
+  void remove(String id) {
+    mine.removeWhere((m) => m.id == id);
+    recent.remove(id);
+    favorites.remove(id);
+    _changed();
+  }
+
+  void rename(String id, String name) {
+    for (final m in mine) {
+      if (m.id == id) m.name = name;
+    }
+    _changed();
+  }
+}

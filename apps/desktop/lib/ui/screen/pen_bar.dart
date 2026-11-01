@@ -1,5 +1,6 @@
 // apps/desktop/lib/ui/screen/pen_bar.dart
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,9 +10,11 @@ import 'package:window_manager/window_manager.dart';
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/pen_overlay.dart';
+import '../../services/stamp_library.dart';
 import '../../services/win_screen.dart';
 import '../app_nav.dart';
 import '../player/ink_editor.dart';
+import '../stamps/stamp_picker.dart';
 import '../theme.dart';
 import 'screen_record.dart';
 
@@ -39,6 +42,18 @@ class _PenToolbarState extends State<PenToolbar> {
     _words.dispose();
     _wordsFocus.dispose();
     super.dispose();
+  }
+
+  /// The stamp panel: the bar grows for it a moment, then back.
+  Future<void> _pickStamp() async {
+    final was = WinScreen.ownRect();
+    final k = MediaQuery.devicePixelRatioOf(context);
+    if (was != null) {
+      WinScreen.place(Rect.fromLTWH(was.left, was.top, math.max(was.width, 820 * k), math.max(was.height, 640 * k)), onTop: true);
+    }
+    final r = await showStampPicker(context);
+    if (was != null) WinScreen.place(was, onTop: true, activate: false);
+    if (r != null) await o.setStamp(r.shape);
   }
 
   Widget _btn(IconData icon, String tip, VoidCallback? onTap, {bool on = false}) => IconButton(
@@ -118,7 +133,14 @@ class _PenToolbarState extends State<PenToolbar> {
                   ),
                   const SizedBox(width: 4),
                   for (final t in EditTool.values)
-                    _btn(InkToolbar.icon(t), InkToolbar.label(t), () => o.setTool(t.name), on: o.draw && o.tool == t.name),
+                    _btn(InkToolbar.icon(t), InkToolbar.label(t), () {
+                      if (t == EditTool.stamp) return unawaited(_pickStamp());
+                      if (t == EditTool.candle) {
+                        final (up, down) = StampLibrary.instance.colors;
+                        return o.setCandle(up, down);
+                      }
+                      o.setTool(t.name);
+                    }, on: o.draw && o.tool == t.name),
                   PopupMenuButton<Color>(
                     tooltip: tr('ink.color'),
                     onSelected: o.setColor,

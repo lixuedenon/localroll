@@ -45,6 +45,11 @@ class InkGeometry {
       case InkTool.number:
         final d = stampSize(i, s);
         return Rect.fromCenter(center: p0, width: d, height: d);
+      case InkTool.stamp:
+        final b = Rect.fromPoints(p0, px(i.points.last, s));
+        return i.shape?.fit(b) ?? b;
+      case InkTool.candle:
+        return Candles.box(i, s);
       default:
         final b = i.bounds;
         final r = Rect.fromLTRB(b.left * s.width, b.top * s.height, b.right * s.width, b.bottom * s.height);
@@ -119,6 +124,8 @@ class InkGeometry {
       case InkTool.check:
       case InkTool.cross:
       case InkTool.number:
+      case InkTool.stamp:
+      case InkTool.candle:
         return box(i, s).inflate(slop).contains(q);
     }
   }
@@ -238,6 +245,10 @@ class InkGeometry {
           textDirection: TextDirection.ltr,
         )..layout();
         tp.paint(c, r.center - Offset(tp.width / 2, tp.height / 2));
+      case InkTool.stamp:
+        i.shape?.paint(c, Rect.fromPoints(pts.first, pts.last), i.color);
+      case InkTool.candle:
+        Candles.paint(c, i, s);
     }
   }
 }
@@ -282,8 +293,8 @@ class InkPainter extends CustomPainter {
     this.freeze,
     this.draft,
     this.selected,
-    super.repaint,
-  });
+    Listenable? repaint,
+  }) : super(repaint: repaint == null ? StampImages.loaded : Listenable.merge([repaint, StampImages.loaded]));
 
   final List<Note> notes;
   final bool video;
@@ -313,6 +324,16 @@ class InkPainter extends CustomPainter {
         canvas
           ..drawCircle(p, 6, dot)
           ..drawCircle(p, 6, line);
+      }
+      // A candle: its high, open, close and low can be dragged.
+      if (sel.tool == InkTool.candle && sel.points.length >= 4) {
+        final red = Paint()..color = const Color(0xFFFFB020);
+        for (final h in Candles.handles(sel, size)) {
+          final p = InkGeometry.transform(sel, size, h);
+          canvas
+            ..drawCircle(p, 5, red)
+            ..drawCircle(p, 5, line);
+        }
       }
       final top = (c[0] + c[1]) / 2;
       final knob = rotateKnob(sel, size);

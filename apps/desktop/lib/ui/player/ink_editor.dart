@@ -1,4 +1,5 @@
 // apps/desktop/lib/ui/player/ink_editor.dart
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
@@ -7,11 +8,13 @@ import 'package:flutter/services.dart';
 
 import '../../l10n/l10n.dart';
 import '../../services/annotations.dart';
+import '../../services/stamp_library.dart';
+import '../stamps/stamp_picker.dart';
 import '../theme.dart';
 import 'ink_paint.dart';
 
 /// What the next press on the picture does.
-enum EditTool { pen, marker, line, arrow, rect, ellipse, text, check, cross, number, select, eraser }
+enum EditTool { pen, marker, line, arrow, rect, ellipse, text, check, cross, number, stamp, candle, select, eraser }
 
 const List<Color> inkColors = [
   Color(0xFFFF3B30), // red
@@ -28,6 +31,7 @@ const List<Color> inkColors = [
 /// Three sizes: line width and text / tick size (parts of the picture's height).
 const List<double> _widths = [0.003, 0.006, 0.012];
 const List<double> _sizes = [0.035, 0.05, 0.075];
+const List<double> _candleW = [0.016, 0.026, 0.04];
 
 /// Drawing one annotation: the marks so far, the tool, undo / redo, the
 /// selected mark. [clock] says where the video is (marks drawn on a video
@@ -166,6 +170,8 @@ class InkEditor extends ChangeNotifier {
         EditTool.check => InkTool.check,
         EditTool.cross => InkTool.cross,
         EditTool.number => InkTool.number,
+        EditTool.stamp => stamp == null ? null : InkTool.stamp,
+        EditTool.candle => InkTool.candle,
         _ => null,
       };
 
@@ -214,9 +220,45 @@ class InkEditor extends ChangeNotifier {
     super.dispose();
   }
 
+  /// The stamp being placed (its name, for finding it later).
+  StampShape? stamp;
+  String stampName = '';
+
+  /// Candles: rising / falling colours.
+  int upColor = Candles.red, downColor = Candles.green;
+
+  /// The picture's width for 1 high (stamps keep their proportions).
+  double aspect = 16 / 9;
+
+  void setStamp(StampShape shape, String name) {
+    stamp = shape;
+    stampName = name;
+    setTool(EditTool.stamp);
+  }
+
   void begin(Offset at) {
     final t = _inkTool;
     if (t == null) return;
+    if (t == InkTool.stamp) {
+      drawing = _new(t, at)
+        ..points = [at, at]
+        ..times = [0, 0]
+        ..shape = stamp!.resolved(upColor, downColor)
+        ..text = stampName;
+      notifyListeners();
+      return;
+    }
+    if (t == InkTool.candle) {
+      drawing = _new(t, at)
+        ..points = [at, at]
+        ..times = [0, 0]
+        ..size = _candleW[level]
+        ..color = upColor
+        ..color2 = downColor;
+      Candles.autoWicks(drawing!);
+      notifyListeners();
+      return;
+    }
     if (t == InkTool.check || t == InkTool.cross || t == InkTool.number) {
       remember();
       final i = _new(t, at);
@@ -244,6 +286,22 @@ class InkEditor extends ChangeNotifier {
   void extend(Offset at, {bool straight = false}) {
     final d = drawing;
     if (d == null) return;
+    if (d.tool == InkTool.stamp) {
+      // Dragged out: its own proportions, as big as the drag.
+      final a = d.points.first, v = at - a;
+      final k = (d.shape?.aspect ?? 1) / aspect;
+      final h = math.max(v.dy.abs(), v.dx.abs() / k);
+      d.points[1] = a + Offset(h * k * (v.dx < 0 ? -1 : 1), h * (v.dy < 0 ? -1 : 1));
+      strokes.value++;
+      return;
+    }
+    if (d.tool == InkTool.candle) {
+      // Pressed at the open, let go at the close.
+      d.points[1] = Offset(d.points[0].dx, at.dy);
+      Candles.autoWicks(d);
+      strokes.value++;
+      return;
+    }
     if (d.tool == InkTool.pen || d.tool == InkTool.marker) {
       if ((d.points.last - at).distance > 0.0008) {
         d.points.add(at);
@@ -279,7 +337,32 @@ class InkEditor extends ChangeNotifier {
     final d = drawing;
     drawing = null;
     if (d == null) return;
-    final tiny = d.points.length >= 2 && (d.points.first - d.points.last).distance < 0.002 && d.tool != InkTool.pen && d.tool != InkTool.marker;
+    if (d.tool == InkTool.stamp && (d.points.first - d.points.last).distance < 0.004) {
+      // Clicked: its usual size, centred there.
+      final h = _sizes[level] * 2.4, w = h * (d.shape?.aspect ?? 1) / aspect;
+      final c = d.points.first;
+      d.points = [c - Offset(w / 2, h / 2), c + Offset(w / 2, h / 2)];
+    }
+    if (d.tool == InkTool.candle && (d.points[0] - d.points[1]).distance < 0.004) {
+      // Clicked after a candle: the next one, opening at its close.
+      final prev = inks.lastWhere((i) => i.tool == InkTool.candle && i.points.length >= 4, orElse: () => d);
+      if (identical(prev, d)) {
+        notifyListeners();
+        return;
+      }
+      final x = prev.points[0].dx + prev.dx + prev.size * 1.7 / aspect;
+      final open = prev.points[1].dy + prev.dy;
+      d
+        ..size = prev.size
+        ..points = [Offset(x, open), Offset(x, d.points[0].dy)];
+      Candles.autoWicks(d);
+    }
+    final tiny = d.points.length >= 2 &&
+        (d.points.first - d.points.last).distance < 0.002 &&
+        d.tool != InkTool.pen &&
+        d.tool != InkTool.marker &&
+        d.tool != InkTool.stamp &&
+        d.tool != InkTool.candle;
     if (!tiny) {
       remember();
       inks.add(d);
@@ -352,7 +435,7 @@ class InkEditor extends ChangeNotifier {
 }
 
 /// What a drag on a selected mark does.
-enum _Drag { none, draw, erase, move, scale, rotate }
+enum _Drag { none, draw, erase, move, scale, rotate, candle }
 
 /// The marks over a picture; with an [editor], drawing on it too. Sits
 /// exactly on the picture (same size), so marks stay put when zooming.
@@ -425,6 +508,20 @@ class _InkLayerState extends State<InkLayer> {
     _lastAt = p;
     final made = _clickMade;
     _clickMade = null;
+    ed.aspect = s.height <= 0 ? 16 / 9 : s.width / s.height;
+    // A selected candle: its high / open / close / low handles.
+    final sc = ed.selected;
+    if (sc != null && sc.tool == InkTool.candle && sc.points.length >= 4 && !twice) {
+      final hs = Candles.handles(sc, s);
+      for (var k = 0; k < 4; k++) {
+        if ((InkGeometry.transform(sc, s, hs[k]) - p).distance < 9) {
+          ed.remember();
+          _drag = _Drag.candle;
+          _handle = const [2, 0, 1, 3][k];
+          return;
+        }
+      }
+    }
     if (twice && ed.tool != EditTool.text) {
       if (made != null) ed.dropMade(made);
       final hit = ed.topAt(p, s);
@@ -564,13 +661,26 @@ class _InkLayerState extends State<InkLayer> {
         if (HardwareKeyboard.instance.isShiftPressed) r = (r / (math.pi / 12)).round() * (math.pi / 12);
         sel.rotation = r;
         ed.touched();
+      case _Drag.candle:
+        final sel = ed.selected;
+        if (sel == null || sel.points.length < 4) return;
+        final q = InkGeometry.untransform(sel, s, p);
+        sel.points[_handle] = Offset(sel.points[_handle].dx, (q.dy / s.height).clamp(0.0, 1.0));
+        ed.touched();
       case _Drag.none:
         break;
     }
   }
 
+  int _handle = 0;
+
   void _up() {
     if (_drag == _Drag.draw) widget.editor?.end();
+    if (_drag == _Drag.candle) {
+      final sel = widget.editor?.selected;
+      if (sel != null) Candles.tidy(sel);
+      widget.editor?.touched();
+    }
     _drag = _Drag.none;
     _start = null;
   }
@@ -684,17 +794,26 @@ class InkToolbar extends StatelessWidget {
         EditTool.check => Icons.check_rounded,
         EditTool.cross => Icons.close_rounded,
         EditTool.number => Icons.looks_one_rounded,
+        EditTool.stamp => Icons.emoji_symbols_rounded,
+        EditTool.candle => Icons.candlestick_chart_rounded,
         EditTool.select => Icons.open_with_rounded,
         EditTool.eraser => Icons.cleaning_services_rounded,
       };
 
   static String label(EditTool t) => tr('ink.tool_${t.name}');
 
-  Widget _tool(EditTool t) {
+  Widget _tool(BuildContext context, EditTool t) {
     final on = editor.tool == t;
     return IconButton(
       tooltip: label(t),
-      onPressed: () => editor.setTool(t),
+      onPressed: () {
+        if (t == EditTool.stamp) {
+          unawaited(pickStampInto(context, editor));
+        } else {
+          if (t == EditTool.candle) (editor.upColor, editor.downColor) = StampLibrary.instance.colors;
+          editor.setTool(t);
+        }
+      },
       style: IconButton.styleFrom(backgroundColor: on ? LrColors.safelight.withValues(alpha: 0.25) : null),
       icon: Icon(icon(t), size: 20, color: on ? LrColors.safelight : Colors.white),
     );
@@ -712,7 +831,7 @@ class InkToolbar extends StatelessWidget {
             border: Border.all(color: const Color(0x33FFFFFF)),
           ),
           child: Wrap(crossAxisAlignment: WrapCrossAlignment.center, alignment: WrapAlignment.center, children: [
-            for (final t in EditTool.values) _tool(t),
+            for (final t in EditTool.values) _tool(context, t),
             const SizedBox(width: 6),
             PopupMenuButton<Color>(
               tooltip: tr('ink.color'),
