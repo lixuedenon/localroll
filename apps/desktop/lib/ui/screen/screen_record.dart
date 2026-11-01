@@ -382,6 +382,8 @@ class ScreenRecorder extends ChangeNotifier {
     }
     AppNav.instance.fullscreen.value = true;
     await windowManager.setMinimumSize(const Size(200, 40));
+    // The toolbar is moved by its grip only; never resized.
+    await windowManager.setResizable(false);
     WinScreen.excludeFromCapture(true);
     final o = PenOverlay.instance;
     usesOverlay = PenOverlay.available && (o.running || await o.start());
@@ -656,6 +658,8 @@ class ScreenRecorder extends ChangeNotifier {
     final r = _savedWindow;
     if (r != null) WinScreen.place(r, onTop: false);
     await windowManager.setMinimumSize(const Size(960, 620));
+    // A normal window again (resizable).
+    await windowManager.setResizable(true);
     AppNav.instance.fullscreen.value = false;
     final nav = AppNav.instance.navigatorKey.currentState;
     nav?.popUntil((route) => route.settings.name != 'screen-record');
@@ -1074,6 +1078,8 @@ Future<ScreenSetup?> showScreenSetup(BuildContext context, AppServices s, {Scree
   var withMic = m.screenMic;
   final mic = MicRecorder(s.ffmpeg.ffmpeg);
   var micName = m.mic;
+  // While choosing, LocalRoll stays over the window brought forward.
+  await windowManager.setAlwaysOnTop(true);
   final choice = await showDialog<bool>(
     context: context,
     builder: (ctx) => StatefulBuilder(
@@ -1082,6 +1088,11 @@ Future<ScreenSetup?> showScreenSetup(BuildContext context, AppServices s, {Scree
           width: 480,
           child: SingleChildScrollView(
             child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+              // Chosen on the card already: just what it is.
+              if (initial != null)
+                Text(tr('screen.rec_title', {'what': tr('screen.mode_${mode.name}')}),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700))
+              else
               SegmentedButton<ScreenMode>(
                 showSelectedIcon: false,
                 segments: [
@@ -1133,7 +1144,12 @@ Future<ScreenSetup?> showScreenSetup(BuildContext context, AppServices s, {Scree
                         // ignore: deprecated_member_use
                         groupValue: window?.handle,
                         // ignore: deprecated_member_use
-                        onChanged: (_) => set(() => window = x),
+                        onChanged: (_) {
+                          set(() => window = x);
+                          // To the front, so it is clear which one it is
+                          // (LocalRoll stays on top meanwhile).
+                          WinScreen.bringToFront(x.handle);
+                        },
                         title: Text(x.title, maxLines: 1, overflow: TextOverflow.ellipsis),
                         subtitle: Text('${x.rect.width.round()}×${x.rect.height.round()}'),
                         contentPadding: EdgeInsets.zero,
@@ -1188,6 +1204,7 @@ Future<ScreenSetup?> showScreenSetup(BuildContext context, AppServices s, {Scree
       ),
     ),
   );
+  await windowManager.setAlwaysOnTop(false);
   if (choice != true || !context.mounted) return null;
   if (withMic && micName == null) {
     micName = await pickMicrophone(context, mic);

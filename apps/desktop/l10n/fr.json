@@ -498,7 +498,7 @@
   "lib.unselect_day": "Désélectionner ce jour",
   "lib.copies_selected": "Plus {count} copies converties ({size}), non affichées dans la liste",
   "lib.copies_drop": "Retirer",
-  "pick.title": "Sélectionner par…",
+  "pick.title": "Choisir dans la bibliothèque",
   "pick.when": "Période",
   "pick.any_time": "N'importe quand",
   "pick.from": "De",
@@ -1021,5 +1021,14 @@
   "rec.leave_title": "Enregistrement d’une explication",
   "rec.leave_text": "Aller ailleurs arrête d’abord l’enregistrement. Pour montrer une autre vidéo, utilisez « Ajouter une vidéo… » dans la barre.",
   "rec.leave_stay": "Continuer",
-  "rec.leave_stop": "Arrêter"
+  "rec.leave_stop": "Arrêter",
+  "screen.rec_title": "Enregistrer : {what}",
+  "pen.prev_sheet": "Page de traits précédente (seulement les traits, pas la fenêtre)",
+  "pen.next_sheet": "Page de traits suivante (seulement les traits, pas la fenêtre)",
+  "pick.from_library": "Depuis la bibliothèque…",
+  "pick.search": "Rechercher par nom",
+  "pick.tip_multi": "Cliquez pour choisir (dans cet ordre) ; double-clic prend seulement celui-ci.",
+  "pick.tip_one": "Cliquez sur un élément pour le choisir.",
+  "pick.ok": "Utiliser ({n})",
+  "pick.no_library": "La bibliothèque n’est pas disponible."
 }

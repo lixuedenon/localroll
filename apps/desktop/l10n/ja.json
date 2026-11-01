@@ -498,7 +498,7 @@
   "lib.unselect_day": "この日の選択を解除",
   "lib.copies_selected": "ほかに変換コピー {count} 件（{size}、一覧には表示されません）",
   "lib.copies_drop": "除外する",
-  "pick.title": "条件で選択",
+  "pick.title": "ライブラリから選ぶ",
   "pick.when": "期間",
   "pick.any_time": "すべての期間",
   "pick.from": "送信者",
@@ -1021,5 +1021,14 @@
   "rec.leave_title": "解説を録画中",
   "rec.leave_text": "ほかの画面へ行くと先に録画が止まります。別の動画を見せるにはツールバーの「動画を追加…」を使います。",
   "rec.leave_stay": "録画を続ける",
-  "rec.leave_stop": "録画を止める"
+  "rec.leave_stop": "録画を止める",
+  "screen.rec_title": "録画：{what}",
+  "pen.prev_sheet": "前の注釈ページ（注釈だけ。ウィンドウは変わりません）",
+  "pen.next_sheet": "次の注釈ページ（注釈だけ。ウィンドウは変わりません）",
+  "pick.from_library": "ライブラリから…",
+  "pick.search": "名前で検索",
+  "pick.tip_multi": "クリックで選択（この順番）。ダブルクリックでその 1 つだけ。",
+  "pick.tip_one": "クリックして 1 つ選びます。",
+  "pick.ok": "決定（{n}）",
+  "pick.no_library": "ライブラリが使えません。"
 }

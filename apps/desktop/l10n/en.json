@@ -498,7 +498,7 @@
   "lib.unselect_day": "Unselect this day",
   "lib.copies_selected": "Also {count} converted copies ({size}), not shown in the list",
   "lib.copies_drop": "Leave out",
-  "pick.title": "Select by…",
+  "pick.title": "Choose from the library",
   "pick.when": "Time range",
   "pick.any_time": "Any time",
   "pick.from": "From",
@@ -1021,5 +1021,14 @@
   "rec.leave_title": "Recording an explanation",
   "rec.leave_text": "Going elsewhere stops the recording first. To show another video, use “Add a video…” on the toolbar.",
   "rec.leave_stay": "Keep recording",
-  "rec.leave_stop": "Stop recording"
+  "rec.leave_stop": "Stop recording",
+  "screen.rec_title": "Record: {what}",
+  "pen.prev_sheet": "Previous page of marks (only the marks; the window stays)",
+  "pen.next_sheet": "Next page of marks (only the marks; the window stays)",
+  "pick.from_library": "From the library…",
+  "pick.search": "Search by name",
+  "pick.tip_multi": "Click to choose (in this order); double-click takes just that one.",
+  "pick.tip_one": "Click one to choose it.",
+  "pick.ok": "Use these ({n})",
+  "pick.no_library": "The library isn’t available."
 }

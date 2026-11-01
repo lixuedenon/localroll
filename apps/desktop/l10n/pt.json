@@ -498,7 +498,7 @@
   "lib.unselect_day": "Desmarcar este dia",
   "lib.copies_selected": "Mais {count} cópias convertidas ({size}), que não aparecem na lista",
   "lib.copies_drop": "Excluir",
-  "pick.title": "Selecionar por…",
+  "pick.title": "Escolher da biblioteca",
   "pick.when": "Intervalo de tempo",
   "pick.any_time": "Qualquer data",
   "pick.from": "De",
@@ -1021,5 +1021,14 @@
   "rec.leave_title": "Gravando uma explicação",
   "rec.leave_text": "Ir para outro lugar para a gravação primeiro. Para mostrar outro vídeo, use “Adicionar vídeo…” na barra.",
   "rec.leave_stay": "Continuar gravando",
-  "rec.leave_stop": "Parar a gravação"
+  "rec.leave_stop": "Parar a gravação",
+  "screen.rec_title": "Gravar: {what}",
+  "pen.prev_sheet": "Página de marcas anterior (só as marcas, não a janela)",
+  "pen.next_sheet": "Próxima página de marcas (só as marcas, não a janela)",
+  "pick.from_library": "Da biblioteca…",
+  "pick.search": "Buscar pelo nome",
+  "pick.tip_multi": "Clique para escolher (nesta ordem); clique duplo pega só esse.",
+  "pick.tip_one": "Clique em um para escolher.",
+  "pick.ok": "Usar ({n})",
+  "pick.no_library": "A biblioteca não está disponível."
 }

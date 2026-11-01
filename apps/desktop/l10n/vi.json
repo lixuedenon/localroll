@@ -498,7 +498,7 @@
   "lib.unselect_day": "Bỏ chọn ngày này",
   "lib.copies_selected": "Thêm {count} bản chuyển đổi ({size}) không hiện trong danh sách",
   "lib.copies_drop": "Bỏ ra",
-  "pick.title": "Chọn theo điều kiện",
+  "pick.title": "Chọn từ thư viện",
   "pick.when": "Khoảng thời gian",
   "pick.any_time": "Bất kỳ lúc nào",
   "pick.from": "Từ",
@@ -1021,5 +1021,14 @@
   "rec.leave_title": "Đang ghi thuyết minh",
   "rec.leave_text": "Sang chỗ khác sẽ dừng ghi trước. Muốn đưa video khác vào, dùng “Thêm video…” trên thanh công cụ.",
   "rec.leave_stay": "Tiếp tục ghi",
-  "rec.leave_stop": "Dừng ghi"
+  "rec.leave_stop": "Dừng ghi",
+  "screen.rec_title": "Ghi: {what}",
+  "pen.prev_sheet": "Trang nét vẽ trước (chỉ nét vẽ, không đổi cửa sổ)",
+  "pen.next_sheet": "Trang nét vẽ sau (chỉ nét vẽ, không đổi cửa sổ)",
+  "pick.from_library": "Từ thư viện…",
+  "pick.search": "Tìm theo tên",
+  "pick.tip_multi": "Nhấp để chọn (theo thứ tự này); nhấp đúp lấy riêng mục đó.",
+  "pick.tip_one": "Nhấp để chọn một mục.",
+  "pick.ok": "Dùng ({n})",
+  "pick.no_library": "Thư viện không khả dụng."
 }

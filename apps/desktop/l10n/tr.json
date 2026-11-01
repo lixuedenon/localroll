@@ -498,7 +498,7 @@
   "lib.unselect_day": "Bu günün seçimini kaldır",
   "lib.copies_selected": "Ayrıca listede görünmeyen {count} dönüştürülmüş kopya ({size})",
   "lib.copies_drop": "Hariç tut",
-  "pick.title": "Koşula göre seç",
+  "pick.title": "Kitaplıktan seç",
   "pick.when": "Zaman aralığı",
   "pick.any_time": "Her zaman",
   "pick.from": "Gönderen",
@@ -1021,5 +1021,14 @@
   "rec.leave_title": "Anlatım kaydediliyor",
   "rec.leave_text": "Başka yere gitmek önce kaydı durdurur. Başka bir video göstermek için araç çubuğundaki “Video ekle…”yi kullanın.",
   "rec.leave_stay": "Kayda devam",
-  "rec.leave_stop": "Kaydı durdur"
+  "rec.leave_stop": "Kaydı durdur",
+  "screen.rec_title": "Kaydet: {what}",
+  "pen.prev_sheet": "Önceki çizim sayfası (yalnızca çizimler, pencere değil)",
+  "pen.next_sheet": "Sonraki çizim sayfası (yalnızca çizimler, pencere değil)",
+  "pick.from_library": "Kitaplıktan…",
+  "pick.search": "Ada göre ara",
+  "pick.tip_multi": "Seçmek için tıklayın (bu sırayla); çift tık yalnızca onu alır.",
+  "pick.tip_one": "Seçmek için birine tıklayın.",
+  "pick.ok": "Kullan ({n})",
+  "pick.no_library": "Kitaplık kullanılamıyor."
 }

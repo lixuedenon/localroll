@@ -26,6 +26,7 @@ import '../../services/win_dialogs.dart';
 import '../app_nav.dart';
 import '../convert_dialog.dart';
 import '../home_shell.dart' show AppRail;
+import '../library_picker.dart';
 import '../files_view.dart';
 import '../format.dart';
 import '../media_thumb.dart';
@@ -1102,6 +1103,14 @@ class _PlayerPageState extends State<PlayerPage> {
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('common.cancel'))),
+          OutlinedButton.icon(
+            onPressed: () async {
+              final picked = await pickFromLibrary(ctx, s);
+              if (picked != null && picked.isNotEmpty && ctx.mounted) Navigator.pop(ctx, picked);
+            },
+            icon: const Icon(Icons.photo_library_rounded, size: 18),
+            label: Text(tr('pick.from_library')),
+          ),
           FilledButton.icon(
             onPressed: () async {
               final files = await WinDialogs.pickFiles(

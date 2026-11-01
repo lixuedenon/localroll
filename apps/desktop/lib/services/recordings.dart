@@ -167,6 +167,9 @@ class Recordings extends ChangeNotifier {
 
   Future<void> flush() => _saving;
 
+  /// Files deleted / put back: shown again as they are now.
+  void refresh() => notifyListeners();
+
   // ---------------------------------------------------------------- where
 
   bool get _libraryOk => library.rootPath.isNotEmpty && !library.offline && Directory(library.rootPath).existsSync();

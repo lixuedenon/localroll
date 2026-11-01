@@ -498,7 +498,7 @@
   "lib.unselect_day": "取消选择这一天",
   "lib.copies_selected": "另含 {count} 个转换副本（{size}），不在列表里显示",
   "lib.copies_drop": "不要这些",
-  "pick.title": "按条件选择",
+  "pick.title": "从媒体库选",
   "pick.when": "时间范围",
   "pick.any_time": "任何时间",
   "pick.from": "发送者",
@@ -1021,5 +1021,14 @@
   "rec.leave_title": "正在录讲解",
   "rec.leave_text": "去别的页面要先停止录制。想讲解另一个视频，用工具条上的「加入视频…」，录制不会中断。",
   "rec.leave_stay": "继续录",
-  "rec.leave_stop": "停止录制"
+  "rec.leave_stop": "停止录制",
+  "screen.rec_title": "录{what}",
+  "pen.prev_sheet": "上一页标注（只翻标注，不切换窗口）",
+  "pen.next_sheet": "下一页标注（只翻标注，不切换窗口）",
+  "pick.from_library": "从媒体库选…",
+  "pick.search": "按名字搜索",
+  "pick.tip_multi": "单击选择（按这个顺序加入），双击直接用这一个。",
+  "pick.tip_one": "单击选择一个。",
+  "pick.ok": "确定（{n}）",
+  "pick.no_library": "媒体库不可用。"
 }

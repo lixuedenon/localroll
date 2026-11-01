@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/win_dialogs.dart';
+import '../library_picker.dart';
 import '../player/player_entry.dart';
 import '../player/player_page.dart';
 import '../theme.dart';
@@ -54,7 +55,7 @@ class _ScreenPageState extends State<ScreenPage> {
   /// Explain a video / photo: choose it, the player opens and records.
   Future<void> _explain() async {
     final recent = [for (final r in s.player.recent) if (File(r.path).existsSync()) r].take(8).toList();
-    final path = await showDialog<String>(
+    final path = await showDialog<Object>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(tr('screen.explain_pick')),
@@ -79,6 +80,14 @@ class _ScreenPageState extends State<ScreenPage> {
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('common.cancel'))),
+          OutlinedButton.icon(
+            onPressed: () async {
+              final picked = await pickFromLibrary(ctx, s);
+              if (picked != null && picked.isNotEmpty && ctx.mounted) Navigator.pop(ctx, picked);
+            },
+            icon: const Icon(Icons.photo_library_rounded, size: 18),
+            label: Text(tr('pick.from_library')),
+          ),
           FilledButton.icon(
             onPressed: () async {
               final picked = await WinDialogs.pickFiles(
@@ -95,7 +104,7 @@ class _ScreenPageState extends State<ScreenPage> {
       ),
     );
     if (path == null || !mounted) return;
-    await openInPlayer(context, s, [path], record: true);
+    await openInPlayer(context, s, path is List<String> ? path : [path as String], record: true);
   }
 
   /// One card; all the same size (the full text, when longer, on hover).

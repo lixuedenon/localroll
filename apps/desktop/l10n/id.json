@@ -498,7 +498,7 @@
   "lib.unselect_day": "Batalkan pilihan hari ini",
   "lib.copies_selected": "Juga {count} salinan hasil konversi ({size}), tidak tampil di daftar",
   "lib.copies_drop": "Lewati",
-  "pick.title": "Pilih menurut…",
+  "pick.title": "Pilih dari pustaka",
   "pick.when": "Rentang waktu",
   "pick.any_time": "Kapan saja",
   "pick.from": "Dari",
@@ -1021,5 +1021,14 @@
   "rec.leave_title": "Sedang merekam penjelasan",
   "rec.leave_text": "Pergi ke tempat lain akan menghentikan rekaman dulu. Untuk menampilkan video lain, pakai “Tambah video…” di bilah alat.",
   "rec.leave_stay": "Lanjut merekam",
-  "rec.leave_stop": "Hentikan rekaman"
+  "rec.leave_stop": "Hentikan rekaman",
+  "screen.rec_title": "Rekam: {what}",
+  "pen.prev_sheet": "Halaman coretan sebelumnya (hanya coretan, bukan jendela)",
+  "pen.next_sheet": "Halaman coretan berikutnya (hanya coretan, bukan jendela)",
+  "pick.from_library": "Dari pustaka…",
+  "pick.search": "Cari menurut nama",
+  "pick.tip_multi": "Klik untuk memilih (sesuai urutan); klik dua kali mengambil satu itu saja.",
+  "pick.tip_one": "Klik salah satu untuk memilih.",
+  "pick.ok": "Pakai ({n})",
+  "pick.no_library": "Pustaka tidak tersedia."
 }

@@ -498,7 +498,7 @@
   "lib.unselect_day": "取消選擇這一天",
   "lib.copies_selected": "另含 {count} 個轉換副本（{size}），不在列表中顯示",
   "lib.copies_drop": "不要這些",
-  "pick.title": "按條件選擇",
+  "pick.title": "從媒體庫選",
   "pick.when": "時間範圍",
   "pick.any_time": "任何時間",
   "pick.from": "傳送者",
@@ -1021,5 +1021,14 @@
   "rec.leave_title": "正在錄講解",
   "rec.leave_text": "去別的頁面要先停止錄製。想講解另一個影片，用工具列上的「加入影片…」，錄製不會中斷。",
   "rec.leave_stay": "繼續錄",
-  "rec.leave_stop": "停止錄製"
+  "rec.leave_stop": "停止錄製",
+  "screen.rec_title": "錄{what}",
+  "pen.prev_sheet": "上一頁標註（只翻標註，不切換視窗）",
+  "pen.next_sheet": "下一頁標註（只翻標註，不切換視窗）",
+  "pick.from_library": "從媒體庫選…",
+  "pick.search": "按名稱搜尋",
+  "pick.tip_multi": "單擊選擇（按這個順序加入），雙擊直接用這一個。",
+  "pick.tip_one": "單擊選擇一個。",
+  "pick.ok": "確定（{n}）",
+  "pick.no_library": "媒體庫不可用。"
 }

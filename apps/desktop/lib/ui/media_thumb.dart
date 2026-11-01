@@ -77,14 +77,18 @@ class _MediaThumbState extends State<MediaThumb> {
   @override
   void initState() {
     super.initState();
-    if (!_direct) _thumb = widget.ffmpeg.thumbnail(widget.item);
+    if (!_direct) _thumb = _load();
   }
+
+  /// A file that just arrived (a recording just saved) may not give a
+  /// picture at once: tried again a few times.
+  Future<File?> _load() => retryWhileNull(() => widget.ffmpeg.thumbnail(widget.item));
 
   @override
   void didUpdateWidget(MediaThumb old) {
     super.didUpdateWidget(old);
     if (old.item.relPath != widget.item.relPath && !_direct) {
-      _thumb = widget.ffmpeg.thumbnail(widget.item);
+      _thumb = _load();
     }
   }
 

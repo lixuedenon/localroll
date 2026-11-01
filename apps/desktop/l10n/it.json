@@ -498,7 +498,7 @@
   "lib.unselect_day": "Deseleziona questo giorno",
   "lib.copies_selected": "Più {count} copie convertite ({size}), non mostrate nell'elenco",
   "lib.copies_drop": "Escludi",
-  "pick.title": "Seleziona per…",
+  "pick.title": "Scegli dalla libreria",
   "pick.when": "Intervallo di tempo",
   "pick.any_time": "Qualsiasi data",
   "pick.from": "Da",
@@ -1021,5 +1021,14 @@
   "rec.leave_title": "Registrazione della spiegazione in corso",
   "rec.leave_text": "Andare altrove ferma prima la registrazione. Per mostrare un altro video usa «Aggiungi un video…» nella barra.",
   "rec.leave_stay": "Continua a registrare",
-  "rec.leave_stop": "Ferma la registrazione"
+  "rec.leave_stop": "Ferma la registrazione",
+  "screen.rec_title": "Registra: {what}",
+  "pen.prev_sheet": "Pagina di segni precedente (solo i segni, non la finestra)",
+  "pen.next_sheet": "Pagina di segni successiva (solo i segni, non la finestra)",
+  "pick.from_library": "Dalla libreria…",
+  "pick.search": "Cerca per nome",
+  "pick.tip_multi": "Clic per scegliere (in quest’ordine); doppio clic prende solo quello.",
+  "pick.tip_one": "Fai clic su uno per sceglierlo.",
+  "pick.ok": "Usa ({n})",
+  "pick.no_library": "La libreria non è disponibile."
 }

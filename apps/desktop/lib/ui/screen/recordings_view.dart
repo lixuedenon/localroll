@@ -148,6 +148,8 @@ Future<void> deleteRecordings(BuildContext context, AppServices s, List<Recordin
     }
   }
   final n = await deleteToTrash(context, s, media: media, files: files);
+  // Gone from the list at once (and back if the deletion is undone).
+  s.recordings.refresh();
   if (n == 0 || !context.mounted) return;
   final raw = [for (final r in list) ?r.narrationId];
   if (raw.isEmpty) return;

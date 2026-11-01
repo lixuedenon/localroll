@@ -159,9 +159,9 @@ class _PenToolbarState extends State<PenToolbar> {
                   _btn(Icons.delete_sweep_rounded, tr('pen.clear_page'), o.clearPage),
                   _btn(Icons.note_add_outlined, tr('pen.new_page'), o.newPage),
                   if (o.sheets > 1) ...[
-                    _btn(Icons.chevron_left_rounded, tr('pen.prev_page'), o.sheet > 1 ? o.prevPage : null),
+                    _btn(Icons.chevron_left_rounded, tr('pen.prev_sheet'), o.sheet > 1 ? o.prevPage : null),
                     Text('${o.sheet}/${o.sheets}', style: const TextStyle(color: Colors.white70, fontSize: 12)),
-                    _btn(Icons.chevron_right_rounded, tr('pen.next_page'), o.sheet < o.sheets ? o.nextPage : null),
+                    _btn(Icons.chevron_right_rounded, tr('pen.next_sheet'), o.sheet < o.sheets ? o.nextPage : null),
                   ],
                   const SizedBox(width: 4),
                   PopupMenuButton<int>(
@@ -236,6 +236,8 @@ class PenSession {
     _saved = WinScreen.ownRect();
     AppNav.instance.fullscreen.value = true;
     await windowManager.setMinimumSize(const Size(200, 40));
+    // The toolbar is moved by its grip only; never resized.
+    await windowManager.setResizable(false);
     WinScreen.excludeFromCapture(true);
     final o = PenOverlay.instance;
     // Drawing without recording: one layer over the whole screen.
@@ -271,6 +273,8 @@ class PenSession {
     if (r != null) WinScreen.place(r, onTop: false);
     _saved = null;
     await windowManager.setMinimumSize(const Size(960, 620));
+    // A normal window again (resizable).
+    await windowManager.setResizable(true);
     AppNav.instance.fullscreen.value = false;
     AppNav.instance.navigatorKey.currentState?.popUntil((r) => r.settings.name != 'pen-bar');
     try {

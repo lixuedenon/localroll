@@ -498,7 +498,7 @@
   "lib.unselect_day": "Auswahl für diesen Tag aufheben",
   "lib.copies_selected": "Dazu {count} umgewandelte Kopien ({size}), die nicht in der Liste stehen",
   "lib.copies_drop": "Weglassen",
-  "pick.title": "Nach Bedingungen auswählen",
+  "pick.title": "Aus der Mediathek wählen",
   "pick.when": "Zeitraum",
   "pick.any_time": "Beliebig",
   "pick.from": "Von",
@@ -1021,5 +1021,14 @@
   "rec.leave_title": "Erklärung wird aufgenommen",
   "rec.leave_text": "Um woandershin zu gehen, wird die Aufnahme zuerst beendet. Ein weiteres Video kommt mit „Video hinzufügen…“ in der Leiste dazu.",
   "rec.leave_stay": "Weiter aufnehmen",
-  "rec.leave_stop": "Aufnahme beenden"
+  "rec.leave_stop": "Aufnahme beenden",
+  "screen.rec_title": "Aufnehmen: {what}",
+  "pen.prev_sheet": "Vorherige Zeichenseite (nur die Zeichnungen, nicht das Fenster)",
+  "pen.next_sheet": "Nächste Zeichenseite (nur die Zeichnungen, nicht das Fenster)",
+  "pick.from_library": "Aus der Mediathek…",
+  "pick.search": "Nach Namen suchen",
+  "pick.tip_multi": "Klicken wählt (in dieser Reihenfolge), Doppelklick nimmt nur dieses eine.",
+  "pick.tip_one": "Klicken wählt eines.",
+  "pick.ok": "Übernehmen ({n})",
+  "pick.no_library": "Die Mediathek ist nicht erreichbar."
 }

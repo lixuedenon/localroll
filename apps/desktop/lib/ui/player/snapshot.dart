@@ -136,14 +136,17 @@ class Snapshots {
     final root = '${lib.rootPath}${Platform.pathSeparator}';
     if (lib.rootPath.isNotEmpty && f.path.toLowerCase().startsWith(root.toLowerCase())) {
       final now = DateTime.now().millisecondsSinceEpoch;
-      lib.add(MediaItem(
+      final item = MediaItem(
         relPath: f.path.substring(root.length).replaceAll(Platform.pathSeparator, '/'),
         name: f.path.split(Platform.pathSeparator).last,
         size: await f.length(),
         kind: video ? MediaKind.video : MediaKind.image,
         captureMs: now,
         receivedMs: now,
-      ));
+      );
+      // Its picture made now, so the library shows it at once.
+      await s.ffmpeg.thumbnail(item);
+      lib.add(item);
     }
     if (kind != null) s.recordings.add(f, kind: kind, source: source, sourcePath: sourcePath, lengthMs: lengthMs, narrationId: narrationId);
     DiagLog.log('player', video ? 'clip saved' : 'screenshot saved');

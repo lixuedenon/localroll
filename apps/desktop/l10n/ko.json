@@ -498,7 +498,7 @@
   "lib.unselect_day": "이 날짜 선택 해제",
   "lib.copies_selected": "목록에 보이지 않는 변환 사본 {count}개({size})도 포함",
   "lib.copies_drop": "제외",
-  "pick.title": "조건으로 선택",
+  "pick.title": "라이브러리에서 선택",
   "pick.when": "기간",
   "pick.any_time": "전체 기간",
   "pick.from": "보낸 사람",
@@ -1021,5 +1021,14 @@
   "rec.leave_title": "해설 녹화 중",
   "rec.leave_text": "다른 곳으로 가면 먼저 녹화가 멈춥니다. 다른 영상을 보여주려면 도구 모음의 “영상 추가…”를 쓰세요.",
   "rec.leave_stay": "계속 녹화",
-  "rec.leave_stop": "녹화 중지"
+  "rec.leave_stop": "녹화 중지",
+  "screen.rec_title": "녹화: {what}",
+  "pen.prev_sheet": "이전 표시 페이지(표시만, 창은 그대로)",
+  "pen.next_sheet": "다음 표시 페이지(표시만, 창은 그대로)",
+  "pick.from_library": "라이브러리에서…",
+  "pick.search": "이름으로 검색",
+  "pick.tip_multi": "클릭으로 선택(이 순서대로), 더블클릭하면 그것 하나만.",
+  "pick.tip_one": "하나를 클릭해 선택하세요.",
+  "pick.ok": "사용 ({n})",
+  "pick.no_library": "라이브러리를 사용할 수 없습니다."
 }
