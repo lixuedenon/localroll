@@ -75,8 +75,8 @@ class Candles {
       final (o, c, h, l) = cs[i];
       final x = (i + 0.5) / n, bw = 0.62 / n;
       final role = c >= o ? 'u' : 'd';
-      final top = 1 - math.max(o, c), bot = 1 - math.min(o, c);
-      parts.add(StampPart(polys: [[Offset(x, 1 - h), Offset(x, 1 - l)]], fill: false, w: 0.035, role: role));
+      final top = 1.0 - math.max(o, c), bot = 1.0 - math.min(o, c);
+      parts.add(StampPart(polys: [[Offset(x, 1.0 - h), Offset(x, 1.0 - l)]], fill: false, w: 0.035, role: role));
       parts.add(StampPart(
         polys: [[Offset(x - bw / 2, top), Offset(x + bw / 2, top), Offset(x + bw / 2, math.max(bot, top + 0.02)), Offset(x - bw / 2, math.max(bot, top + 0.02))]],
         role: role,

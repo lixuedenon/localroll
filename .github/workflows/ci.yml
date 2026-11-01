@@ -99,6 +99,8 @@ jobs:
           set -o pipefail
           flutter pub get
           flutter analyze --no-fatal-infos | tee ../analyze-desktop.log
+          # The shared marks / stamps package too.
+          (cd ../../packages/ink && flutter pub get && flutter analyze --no-fatal-infos) | tee -a ../analyze-desktop.log
           flutter test 2>&1 | tee ../test-desktop.log
       - name: mobile — analyze & test
         working-directory: apps/mobile

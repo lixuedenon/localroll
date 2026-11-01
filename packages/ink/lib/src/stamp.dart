@@ -112,7 +112,7 @@ class StampShape {
       final col = Color(p.color ?? color);
       if (p.text != null) {
         final tp = TextPainter(
-          text: TextSpan(text: p.text, style: TextStyle(color: col, fontSize: math.max(4, p.size * r.height), fontWeight: FontWeight.w800, height: 1)),
+          text: TextSpan(text: p.text, style: TextStyle(color: col, fontSize: math.max(4.0, p.size * r.height), fontWeight: FontWeight.w800, height: 1)),
           textDirection: TextDirection.ltr,
         )..layout();
         tp.paint(c, at(p.at) - Offset(tp.width / 2, tp.height / 2));
@@ -131,7 +131,7 @@ class StampShape {
             Paint()
               ..color = col
               ..style = PaintingStyle.stroke
-              ..strokeWidth = math.max(1, p.w * r.height)
+              ..strokeWidth = math.max(1.0, p.w * r.height)
               ..strokeCap = StrokeCap.round
               ..strokeJoin = StrokeJoin.round);
       }
