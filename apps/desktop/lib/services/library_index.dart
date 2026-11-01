@@ -559,11 +559,17 @@ class LibraryIndex extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
     _offlineRetry?.cancel();
     _saveTimer?.cancel();
+    _debounce?.cancel();
     _stopWatching();
     super.dispose();
   }
+
+  /// Closed: a check still running (a folder change seen just before)
+  /// finishes quietly.
+  bool _disposed = false;
 
   // ------------------------------------------------------------- watching
 
@@ -790,6 +796,7 @@ class LibraryIndex extends ChangeNotifier {
 
   @override
   void notifyListeners() {
+    if (_disposed) return;
     _rev++;
     super.notifyListeners();
   }
@@ -945,6 +952,7 @@ class LibraryIndex extends ChangeNotifier {
   }
 
   void _scheduleSave() {
+    if (_disposed) return;
     _saveTimer?.cancel();
     _saveTimer = Timer(const Duration(milliseconds: 500), () {
       // A save in the background must never take the app down (folder
