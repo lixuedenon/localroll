@@ -4,6 +4,7 @@ import 'package:localroll_core/localroll_core.dart';
 
 import '../app_services.dart';
 import '../l10n/l10n.dart';
+import '../services/library_index.dart';
 import 'media_thumb.dart';
 import 'theme.dart';
 
