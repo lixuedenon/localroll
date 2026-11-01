@@ -206,6 +206,75 @@ Future<bool?> confirmDiscard(BuildContext context, {required bool drew}) => show
       },
     );
 
+/// Ready to record: a breathing "Start recording" (3-2-1 after it is
+/// clicked), and Cancel. [extra]: more buttons (the camera).
+class ReadyBar extends StatefulWidget {
+  const ReadyBar({super.key, required this.onStart, required this.onCancel, this.what, this.extra = const []});
+
+  final VoidCallback onStart;
+  final VoidCallback onCancel;
+  final String? what;
+  final List<Widget> extra;
+
+  @override
+  State<ReadyBar> createState() => _ReadyBarState();
+}
+
+class _ReadyBarState extends State<ReadyBar> with SingleTickerProviderStateMixin {
+  late final AnimationController _a = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100))..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _a.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(color: const Color(0xE6202020), borderRadius: BorderRadius.circular(22)),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        if (widget.what != null && widget.what!.isNotEmpty) ...[
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 220),
+            child: Text(widget.what!, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white70)),
+          ),
+          const SizedBox(width: 10),
+        ],
+        AnimatedBuilder(
+          animation: _a,
+          builder: (context, child) {
+            final t = Curves.easeInOut.transform(_a.value);
+            return DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [BoxShadow(color: LrColors.danger.withValues(alpha: 0.25 + 0.5 * t), blurRadius: 4 + 12 * t, spreadRadius: 1 + 2 * t)],
+              ),
+              child: child,
+            );
+          },
+          child: FilledButton.icon(
+            autofocus: true,
+            style: FilledButton.styleFrom(backgroundColor: LrColors.danger, foregroundColor: Colors.white, visualDensity: VisualDensity.compact),
+            onPressed: widget.onStart,
+            icon: const Icon(Icons.fiber_manual_record_rounded, size: 18),
+            label: Text(tr('rec.start_now')),
+          ),
+        ),
+        ...widget.extra,
+        const SizedBox(width: 6),
+        TextButton(
+          style: TextButton.styleFrom(foregroundColor: Colors.white70, visualDensity: VisualDensity.compact),
+          onPressed: widget.onCancel,
+          child: Text(tr('common.cancel')),
+        ),
+      ]),
+    );
+  }
+}
+
 /// The bar on top while recording: time, how loud, pause / go on, stop.
 class RecordingBar extends StatefulWidget {
   const RecordingBar({

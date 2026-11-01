@@ -194,6 +194,40 @@ jobs:
           if (-not $p.WaitForExit(15000)) { $p.Kill(); Write-Output "::error::lr_loopback did not quit"; exit 1 }
           Write-Output $out
           if (-not ($out -match 'ready |error ')) { Write-Output "::error::lr_loopback said nothing: $out"; exit 1 }
+      - name: Check the camera and pointing helpers
+        shell: pwsh
+        run: |
+          # lr_camera.exe / lr_pick.exe must be next to the app and answer.
+          # CI machines have no camera: "list" just ends.
+          $dir = (Resolve-Path "apps/desktop/build/windows/x64/runner/Release").Path
+          foreach ($n in @('lr_camera.exe', 'lr_pick.exe')) {
+            if (-not (Test-Path "$dir\$n")) { Write-Output "::error::$n missing from the build"; exit 1 }
+          }
+          $psi = New-Object System.Diagnostics.ProcessStartInfo "$dir\lr_camera.exe"
+          $psi.RedirectStandardInput = $true
+          $psi.RedirectStandardOutput = $true
+          $psi.UseShellExecute = $false
+          $p = [System.Diagnostics.Process]::Start($psi)
+          $p.StandardInput.WriteLine('list')
+          $p.StandardInput.WriteLine('open ')
+          Start-Sleep -Seconds 3
+          try { $p.StandardInput.WriteLine('quit'); $p.StandardInput.Close() } catch { }
+          $out = $p.StandardOutput.ReadToEnd()
+          if (-not $p.WaitForExit(15000)) { $p.Kill(); Write-Output "::error::lr_camera did not quit"; exit 1 }
+          Write-Output $out
+          if (-not ($out -match 'ready') -or -not ($out -match 'end')) { Write-Output "::error::lr_camera did not answer: $out"; exit 1 }
+          $psi = New-Object System.Diagnostics.ProcessStartInfo "$dir\lr_pick.exe"
+          $psi.Arguments = '"test"'
+          $psi.RedirectStandardInput = $true
+          $psi.RedirectStandardOutput = $true
+          $psi.UseShellExecute = $false
+          $p = [System.Diagnostics.Process]::Start($psi)
+          Start-Sleep -Seconds 2
+          try { $p.StandardInput.WriteLine('quit'); $p.StandardInput.Close() } catch { }
+          $out = $p.StandardOutput.ReadToEnd()
+          if (-not $p.WaitForExit(15000)) { $p.Kill(); Write-Output "::error::lr_pick did not quit"; exit 1 }
+          Write-Output $out
+          if (-not ($out -match 'ready|error ')) { Write-Output "::error::lr_pick said nothing: $out"; exit 1 }
       - name: Check onnxruntime.dll
         shell: pwsh
         run: |

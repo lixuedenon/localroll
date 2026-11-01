@@ -13,12 +13,15 @@ import 'package:window_manager/window_manager.dart';
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/annotations.dart';
+import '../../services/camera_bubble.dart';
 import '../../services/library_index.dart';
 import '../../services/loopback.dart';
 import '../../services/mic.dart';
 import '../../services/pen_overlay.dart';
 import '../../services/peers.dart';
+import '../../services/player_memory.dart';
 import '../../services/recordings.dart';
+import '../../services/screen_pick.dart';
 import '../../services/video_encoders.dart';
 import '../../services/win_screen.dart';
 import '../app_nav.dart';
@@ -29,6 +32,7 @@ import '../player/narration_dialogs.dart';
 import '../player/snapshot.dart';
 import '../send_page.dart';
 import '../theme.dart';
+import 'camera_button.dart';
 import 'pen_bar.dart';
 import 'recordings_view.dart';
 
@@ -268,6 +272,9 @@ class ScreenRecorder extends ChangeNotifier {
 
   /// 3, 2, 1 before it starts (0: not counting).
   int countdown = 0;
+
+  /// Set up, waiting for "Start" to be clicked.
+  bool armed = false;
   bool recording = false;
   bool paused = false;
 
@@ -337,6 +344,9 @@ class ScreenRecorder extends ChangeNotifier {
   double level() => _mic?.level() ?? 0;
 
   /// How loud the PC's sound is now (null: not recorded).
+  /// Remembered choices (the camera's).
+  PlayerMemory? get memory => _s?.player;
+
   double? systemLevel() => _sys == null ? null : _sys!.level();
 
   /// Global keys (also while LocalRoll is in the background):
@@ -349,9 +359,9 @@ class ScreenRecorder extends ChangeNotifier {
     Timer.periodic(const Duration(milliseconds: 40), (_) {
       final mod = WinScreen.down(0x11) && WinScreen.down(0x10);
       final r = mod && WinScreen.down(0x52), p = mod && WinScreen.down(0x50), d = mod && WinScreen.down(0x44);
-      if (r && !_hkR) unawaited(recording || countdown > 0 ? stop() : startQuick());
+      if (r && !_hkR) unawaited(armed ? go() : (recording || countdown > 0 ? stop() : startQuick()));
       if (p && !_hkP && recording) unawaited(togglePause());
-      if (d && !_hkD) unawaited(recording ? togglePen() : (countdown > 0 ? Future.value() : PenSession.instance.toggle()));
+      if (d && !_hkD) unawaited(recording ? togglePen() : (countdown > 0 || armed ? Future.value() : PenSession.instance.toggle()));
       _hkR = r;
       _hkP = p;
       _hkD = d;
@@ -361,12 +371,13 @@ class ScreenRecorder extends ChangeNotifier {
   /// Ctrl+Shift+R while not recording: the last choice, at once.
   Future<void> startQuick() async {
     final s = _s;
-    if (s == null || recording || countdown > 0) return;
+    if (s == null || recording || armed || countdown > 0) return;
     final screens = WinScreen.screens();
     if (screens.isEmpty) return;
     final m = s.player;
     final scr = screens[m.screenIndex.clamp(0, screens.length - 1)];
-    await begin(ScreenSetup(mode: ScreenMode.screen, screen: scr, fps: m.screenFps, mic: m.screenMic ? m.mic : null));
+    // The keys are quick: no waiting for "Start".
+    if (await begin(ScreenSetup(mode: ScreenMode.screen, screen: scr, fps: m.screenFps, mic: m.screenMic ? m.mic : null))) await go();
   }
 
   /// Start: LocalRoll shrinks to the bar (kept out of the video), 3-2-1,
@@ -374,12 +385,11 @@ class ScreenRecorder extends ChangeNotifier {
   Future<bool> begin(ScreenSetup su) async {
     final s = _s;
     final exe = s?.ffmpeg.ffmpeg;
-    if (s == null || exe == null || recording || countdown > 0) return false;
-    final enc = await s.converter.encoders.best();
-    if (enc == null) return false;
+    if (s == null || exe == null || recording || armed || countdown > 0) return false;
+    if (await s.converter.encoders.best() == null) return false;
     setup = su;
     final id = DateTime.now().millisecondsSinceEpoch.toRadixString(36);
-    final dir = _dir = await Directory.systemTemp.createTemp('lr_screen_$id');
+    _dir = await Directory.systemTemp.createTemp('lr_screen_$id');
     _parts.clear();
     _voice.clear();
     _sysParts.clear();
@@ -435,7 +445,25 @@ class ScreenRecorder extends ChangeNotifier {
       if (usesOverlay) o.page(su.window!.handle);
     }
     _firstPage = _page;
+    // The camera bubble (when switched on): bottom right of what is filmed.
+    final camArea = su.mode == ScreenMode.window && su.window != null ? (WinScreen.windowRect(su.window!.handle) ?? area) : area;
+    await CameraBubble.instance.begin(s.player, camArea, su.screen.scale);
+    // Ready: the bar shows a breathing "Start" until it is clicked.
+    armed = true;
+    notifyListeners();
+    return true;
+  }
 
+  /// "Start" clicked (or Ctrl+Shift+R): the sound and the film start, 3-2-1.
+  Future<bool> go() async {
+    final s = _s;
+    final exe = s?.ffmpeg.ffmpeg;
+    final su = setup;
+    final dir = _dir;
+    if (!armed || s == null || exe == null || su == null || dir == null) return false;
+    final enc = await s.converter.encoders.best();
+    if (enc == null) return false;
+    armed = false;
     final mic = su.mic == null ? null : (_mic = MicRecorder(exe));
     final listening = mic == null ? Future.value(true) : _startVoice();
     if (su.system) _sys = LoopbackRecorder();
@@ -455,7 +483,12 @@ class ScreenRecorder extends ChangeNotifier {
     if (!okV) {
       await _mic?.stop();
       await _sys?.stop();
-      if (usesOverlay) await PenOverlay.instance.stop();
+      if (usesOverlay) {
+        PenOverlay.instance.removeListener(_onOverlay);
+        PenOverlay.instance.border(null);
+        await PenOverlay.instance.stop();
+      }
+      await CameraBubble.instance.end();
       await _restore();
       notifyListeners();
       _message(tr('screen.failed_start'));
@@ -680,6 +713,7 @@ class ScreenRecorder extends ChangeNotifier {
   /// Stop: back to the normal window, then save / send / throw away.
   Future<void> stop() async {
     if (countdown > 0) return;
+    if (armed) return cancel();
     if (!recording) return;
     _poll?.cancel();
     _snapInks(clock.elapsedMilliseconds);
@@ -703,10 +737,27 @@ class ScreenRecorder extends ChangeNotifier {
       await o.stop();
     }
     final length = clock.elapsedMilliseconds;
+    await CameraBubble.instance.end();
     await _restore();
     notifyListeners();
     DiagLog.log('screen', 'recorded ${length ~/ 1000} s');
     await _afterwards(length);
+  }
+
+  /// Ready but not started: back, nothing kept.
+  Future<void> cancel() async {
+    if (!armed) return;
+    armed = false;
+    if (usesOverlay) {
+      final o = PenOverlay.instance;
+      o.removeListener(_onOverlay);
+      o.border(null);
+      await o.stop();
+    }
+    await CameraBubble.instance.end();
+    await _restore();
+    await _cleanup();
+    notifyListeners();
   }
 
   Future<void> _restore() async {
@@ -1282,6 +1333,7 @@ Future<ScreenSetup?> showScreenSetup(BuildContext context, AppServices s, {Scree
                   title: Text(tr('screen.duck')),
                   subtitle: Text(tr('screen.duck_tip')),
                 ),
+              CameraOptions(memory: m),
               Row(children: [
                 Text(tr('screen.fps'), style: const TextStyle(color: LrColors.muted)),
                 const SizedBox(width: 12),
@@ -1459,6 +1511,23 @@ class _WindowPickerState extends State<_WindowPicker> {
 Future<Rect?> _pickArea(BuildContext context, AppServices s, ScreenInfo screen) async {
   final exe = s.ffmpeg.ffmpeg;
   if (exe == null) return null;
+  // First: point at a part of the screen (Esc: drag a box instead).
+  if (ScreenPick.available) {
+    await windowManager.hide();
+    final got = await ScreenPick.run(tr('screen.point_tip'));
+    await windowManager.show();
+    if (!got.back) {
+      final r = got.rect;
+      if (r == null) return null;
+      // On the screen chosen; never tiny.
+      var a = screen.rect.overlaps(r) ? r.intersect(screen.rect) : r;
+      if (a.width < 64 || a.height < 64) {
+        a = Rect.fromCenter(center: a.center, width: math.max(64, a.width), height: math.max(64, a.height));
+      }
+      return a;
+    }
+    if (!context.mounted) return null;
+  }
   final saved = WinScreen.ownRect();
   final shot = await _Gdi.still(exe, screen);
   if (shot == null) return null;
@@ -1653,6 +1722,20 @@ class _Bar extends StatelessWidget {
     if (r.countdown > 0) {
       return Text(tr('screen.starting_in', {'n': r.countdown}), style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600));
     }
+    if (r.armed) {
+      return Material(
+        color: Colors.transparent,
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          const BarGrip(),
+          ReadyBar(
+            what: r.recordingWhat,
+            onStart: () => unawaited(r.go()),
+            onCancel: () => unawaited(r.cancel()),
+            extra: [if (r.memory != null) CameraButton(memory: r.memory!, menu: false)],
+          ),
+        ]),
+      );
+    }
     return Material(
       color: Colors.transparent,
       child: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -1677,6 +1760,7 @@ class _Bar extends StatelessWidget {
             icon: const Icon(Icons.brush_rounded),
           ),
         ),
+        if (r.memory != null) Padding(padding: const EdgeInsets.only(top: 8), child: CameraButton(memory: r.memory!, menu: false)),
       ]),
     );
   }

@@ -56,6 +56,10 @@ add_subdirectory("runner")
 add_subdirectory("overlay")
 # The PC sound recorder (lr_loopback.exe).
 add_subdirectory("loopback")
+# The camera bubble (lr_camera.exe).
+add_subdirectory("camera")
+# Picking a part of the screen by pointing (lr_pick.exe).
+add_subdirectory("pick")
 
 
 # Generated plugin build rules, which manage building the plugins and adding

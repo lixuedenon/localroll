@@ -84,6 +84,12 @@ class PlayerMemory extends ChangeNotifier {
   double screenMicVol = 1, screenSysVol = 1;
   bool screenDuck = true;
 
+  /// The camera bubble: which camera (its name), on, round (else a rounded
+  /// square), size (0 small, 1 medium, 2 large), mirrored.
+  String? camera;
+  bool cameraOn = false, cameraRound = true, cameraMirror = true;
+  int cameraSize = 1;
+
   /// The microphone chosen for explanations, and how the original's sound
   /// goes in ('quiet', 'none', 'full').
   String? mic;
@@ -155,6 +161,11 @@ class PlayerMemory extends ChangeNotifier {
       screenMicVol = ((j['screenMicVol'] as num?)?.toDouble() ?? 1).clamp(0.0, 2.0);
       screenSysVol = ((j['screenSysVol'] as num?)?.toDouble() ?? 1).clamp(0.0, 2.0);
       screenDuck = j['screenDuck'] != false;
+      camera = j['camera'] as String?;
+      cameraOn = j['cameraOn'] == true;
+      cameraRound = j['cameraRound'] != false;
+      cameraMirror = j['cameraMirror'] != false;
+      cameraSize = ((j['cameraSize'] as num?)?.toInt() ?? 1).clamp(0, 2);
       mic = j['mic'] as String?;
       // Since beta.90 the default is "lowered only while speaking".
       sound = j['sound2'] as String? ?? 'duck';
@@ -258,6 +269,16 @@ class PlayerMemory extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setCamera({String? name, bool? on, bool? round, bool? mirror, int? size}) {
+    if (name != null) camera = name;
+    if (on != null) cameraOn = on;
+    if (round != null) cameraRound = round;
+    if (mirror != null) cameraMirror = mirror;
+    if (size != null) cameraSize = size.clamp(0, 2);
+    _save();
+    notifyListeners();
+  }
+
   void setScreenSound({required bool system, required double micVol, required double sysVol, required bool duck}) {
     screenSystem = system;
     screenMicVol = micVol;
@@ -352,6 +373,11 @@ class PlayerMemory extends ChangeNotifier {
         'screenMicVol': screenMicVol,
         'screenSysVol': screenSysVol,
         'screenDuck': screenDuck,
+        'camera': ?camera,
+        'cameraOn': cameraOn,
+        'cameraRound': cameraRound,
+        'cameraMirror': cameraMirror,
+        'cameraSize': cameraSize,
         'mic': ?mic,
         'sound2': sound,
         'clipBefore': clipBefore,

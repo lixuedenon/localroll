@@ -10,6 +10,7 @@ import 'package:localroll_core/localroll_core.dart';
 
 import '../../app_services.dart';
 import '../../services/annotations.dart';
+import '../../services/camera_bubble.dart';
 import '../../services/library_index.dart';
 import '../../services/loopback.dart';
 import '../../services/recordings.dart';
@@ -153,8 +154,10 @@ class NarrationSession {
       List<NarrationInk>? inks,
       this.lengthMs = 0,
       Set<String>? noteIds,
-      Map<String, int>? edited})
+      Map<String, int>? edited,
+      List<CameraMove>? camera})
       : files = files ?? [],
+        camera = camera ?? [],
         samples = samples ?? [],
         inks = inks ?? [],
         noteIds = noteIds ?? {},
@@ -176,6 +179,10 @@ class NarrationSession {
   /// mark rubbed out goes at that moment, not from the start).
   final Map<String, int> edited;
 
+  /// The camera bubble, where it was over time (camera.mp4 beside it, the
+  /// same clock as the recording). Empty: no camera.
+  final List<CameraMove> camera;
+
   /// Where it is kept (with voice.wav).
   static Directory folderOf(Directory dataDir, String id) =>
       Directory('${dataDir.path}${Platform.pathSeparator}narrations${Platform.pathSeparator}$id');
@@ -190,6 +197,7 @@ class NarrationSession {
         'inks': [for (final i in inks) i.toJson()],
         'notes': [...noteIds],
         'edited': edited,
+        if (camera.isNotEmpty) 'camera': [for (final c in camera) c.toJson()],
       };
 
   static NarrationSession fromJson(Map<String, dynamic> j) => NarrationSession(
@@ -204,6 +212,7 @@ class NarrationSession {
           for (final e in ((j['edited'] as Map?) ?? const {}).entries)
             if (e.value is num) '${e.key}': (e.value as num).toInt(),
         },
+        camera: [for (final c in (j['camera'] as List?) ?? const []) CameraMove.fromJson(c as Map<String, dynamic>)],
       );
 
   /// Every recording kept on this PC, newest first.
@@ -427,6 +436,9 @@ class NarrationComposer {
 
     final dir = await Directory.systemTemp.createTemp('lr_narration');
     final sep = Platform.pathSeparator;
+    // The camera bubble (recorded beside it), laid over where it was.
+    final camFile = File('${NarrationSession.folderOf(s.settings.dataDir, n.id).path}${sep}camera.mp4');
+    final camLenMs = n.camera.isEmpty || !camFile.existsSync() ? 0 : (((await ff.probe(camFile.path)).durationSec ?? 0) * 1000).round();
     try {
       final total = pieces.fold<int>(0, (t, p) => t + p.lengthMs);
       var done = 0;
@@ -479,11 +491,40 @@ class NarrationComposer {
                 'volume=${sound == OriginalSound.quiet && !p.extra ? '0.3' : '1.0'},apad=whole_dur=$len[aout]'
             : 'anullsrc=channel_layout=stereo:sample_rate=48000,atrim=duration=$len[aout]';
         final frames = (p.lengthMs / 1000 * fps).ceil() + 1;
+        // The camera over this piece: its size and shape as it starts, its
+        // place as it moved.
+        final cam0 = !p.extra && p.startT < camLenMs - 100 ? cameraAt(n.camera, p.startT) : null;
+        var camIn = <String>[];
+        var camVf = '';
+        if (cam0 != null) {
+          final side = _even(cam0.side * h);
+          final mask = File('${dir.path}${sep}mask_${side}_${cam0.round ? 'r' : 's'}.png');
+          if (!mask.existsSync()) await mask.writeAsBytes(await cameraMask(side, cam0.round));
+          String at(double Function(CameraMove) of, int full) {
+            final moves = [
+              for (final c in n.camera)
+                if (c.t > p.startT && c.t < p.endT) c,
+            ];
+            String v(CameraMove c) => '${(of(c) * full).clamp(0, math.max(0, full - side)).round()}';
+            var e = v(cameraAt(n.camera, p.startT)!);
+            // From the last move back: if(lt(t,T),before,after).
+            for (var k = moves.length - 1; k >= 0; k--) {
+              final before = k == 0 ? cameraAt(n.camera, p.startT)! : moves[k - 1];
+              e = 'if(lt(t,${_secs(moves[k].t - p.startT)}),${v(before)},$e)';
+            }
+            return e;
+          }
+          camIn = ['-ss', _secs(p.startT), '-t', _secs(p.lengthMs + 200), '-i', camFile.path, '-loop', '1', '-i', mask.path];
+          camVf = ';[2:v]setpts=PTS-STARTPTS,fps=$fps,scale=$side:$side,format=rgba[c0];[3:v]scale=$side:$side,format=gray[mk];'
+              "[c0][mk]alphamerge[cam];[base][cam]overlay=x='${at((c) => c.x, w)}':y='${at((c) => c.y, h)}':eval=frame:eof_action=repeat[base1]";
+        }
+        final base = cam0 == null ? 'base' : 'base1';
         final args = [
           '-hide_banner', '-loglevel', 'error', '-y',
           ...input,
           '-f', 'rawvideo', '-pix_fmt', 'rgba', '-s', '${ow}x$oh', '-framerate', '$fps', '-i', 'pipe:0',
-          '-filter_complex', '$vf;[1:v]scale=$w:$h,format=rgba[ov];[base][ov]overlay=0:0:eof_action=repeat,format=nv12[vout];$af',
+          ...camIn,
+          '-filter_complex', '$vf$camVf;[1:v]scale=$w:$h,format=rgba[ov];[$base][ov]overlay=0:0:eof_action=repeat,format=nv12[vout];$af',
           '-map', '[vout]', '-map', '[aout]',
           ...H264Encoders.args(enc, high: true, width: w, height: h, fps: fps.toDouble()),
           '-g', '$fps', '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-ac', '2',
@@ -496,7 +537,9 @@ class NarrationComposer {
           for (var f = 0; f < frames && !_cancelled; f++) {
             final t = p.startT + (f * 1000 / fps).round();
             final rec = ui.PictureRecorder();
-            _paintAt(Canvas(rec), size, n, notes, p, t, file);
+            final cv = Canvas(rec);
+            _paintAt(cv, size, n, notes, p, t, file);
+            if (cam0 != null) _paintCameraEdge(cv, size, n, cam0, t);
             final img = await rec.endRecording().toImage(ow, oh);
             final bytes = await img.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
             img.dispose();
@@ -557,6 +600,27 @@ class NarrationComposer {
       try {
         await dir.delete(recursive: true);
       } catch (_) {}
+    }
+  }
+
+  /// The bubble's thin white edge (on the marks layer, over the camera).
+  void _paintCameraEdge(Canvas c, Size out, NarrationSession n, CameraMove first, int t) {
+    final now = cameraAt(n.camera, t) ?? first;
+    final side = first.side * out.height;
+    final x = (now.x * out.width).clamp(0.0, math.max(0.0, out.width - side));
+    final y = (now.y * out.height).clamp(0.0, math.max(0.0, out.height - side));
+    final r = Rect.fromLTWH(x, y, side, side);
+    final edge = math.max(1.5, side / 120);
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = edge
+      ..color = Colors.white
+      ..isAntiAlias = true;
+    final inner = r.deflate(edge / 2);
+    if (first.round) {
+      c.drawOval(inner, paint);
+    } else {
+      c.drawRRect(RRect.fromRectAndRadius(inner, Radius.circular(side * 0.2)), paint);
     }
   }
 
@@ -636,4 +700,35 @@ Future<bool> joinVoice(String exe, List<({File file, int headMs, int lengthMs})>
     DiagLog.log('player', 'explanation voice not joined: $e');
     return false;
   }
+}
+
+/// Where the camera bubble was at [t] (the last move at or before it).
+CameraMove? cameraAt(List<CameraMove> moves, int t) {
+  if (moves.isEmpty) return null;
+  var best = moves.first;
+  for (final c in moves) {
+    if (c.t > t) break;
+    best = c;
+  }
+  return best;
+}
+
+/// The bubble's shape as a mask (white inside, black outside; PNG).
+Future<List<int>> cameraMask(int side, bool round) async {
+  final rec = ui.PictureRecorder();
+  final c = Canvas(rec);
+  final all = Rect.fromLTWH(0, 0, side.toDouble(), side.toDouble());
+  c.drawRect(all, Paint()..color = Colors.black);
+  final white = Paint()
+    ..color = Colors.white
+    ..isAntiAlias = true;
+  if (round) {
+    c.drawOval(all, white);
+  } else {
+    c.drawRRect(RRect.fromRectAndRadius(all, Radius.circular(side * 0.2)), white);
+  }
+  final img = await rec.endRecording().toImage(side, side);
+  final png = await img.toByteData(format: ui.ImageByteFormat.png);
+  img.dispose();
+  return png!.buffer.asUint8List();
 }

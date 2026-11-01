@@ -15,6 +15,7 @@ import 'package:window_manager/window_manager.dart';
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/annotations.dart';
+import '../../services/camera_bubble.dart';
 import '../../services/ffmpeg.dart';
 import '../../services/library_index.dart';
 import '../../services/mic.dart';
@@ -22,7 +23,9 @@ import '../../services/network.dart';
 import '../../services/peers.dart';
 import '../../services/player_memory.dart';
 import '../../services/recordings.dart';
+import '../../services/video_encoders.dart';
 import '../../services/win_dialogs.dart';
+import '../../services/win_screen.dart';
 import '../app_nav.dart';
 import '../convert_dialog.dart';
 import '../home_shell.dart' show AppRail;
@@ -31,6 +34,7 @@ import '../files_view.dart';
 import '../format.dart';
 import '../media_thumb.dart';
 import '../send_page.dart';
+import '../screen/camera_button.dart';
 import '../screen/recordings_view.dart';
 import '../theme.dart';
 import '../trash_actions.dart';
@@ -223,6 +227,10 @@ class _Rec {
   final Map<String, NarrationInk> inks = {};
   Timer? sampler;
   bool paused = false;
+
+  /// The camera bubble is recorded beside it (camera.mp4), and where it was.
+  bool camera = false;
+  final List<CameraMove> moves = [];
   InkEditor? lastEditor;
   Set<String> lastIds = {};
 
@@ -340,6 +348,9 @@ class _PlayerPageState extends State<PlayerPage> {
   _Rec? _rec;
   int _countdown = 0;
 
+  /// Ready to record: a breathing "Start recording" until it is clicked.
+  bool _armed = false;
+
   /// Explanations recorded on this PC (to make them again).
   List<NarrationSession> _narrations = const [];
   late bool _showInk = widget.services.player.showInk;
@@ -439,8 +450,8 @@ class _PlayerPageState extends State<PlayerPage> {
     unawaited(_loadNotes(_entry));
     _memory.opened(recentOf(_entry));
     if (widget.record) {
-      Future<void>.delayed(const Duration(milliseconds: 700), () {
-        if (mounted && _rec == null) unawaited(_startRecording());
+      Future<void>.delayed(const Duration(milliseconds: 500), () {
+        if (mounted && _rec == null) _arm();
       });
     }
     DiagLog.log('player', 'open ${_entry.video ? 'video' : 'photo'} .${_entry.extension} (${_entries.length} in list)');
@@ -449,6 +460,7 @@ class _PlayerPageState extends State<PlayerPage> {
   @override
   void dispose() {
     if (PlayerLauncher.whileRecording == _addWhileRecording) PlayerLauncher.whileRecording = null;
+    if (_armed || _rec != null) unawaited(CameraBubble.instance.end());
     _hide?.cancel();
     _slide?.cancel();
     if (_fullscreen) {
@@ -549,6 +561,10 @@ class _PlayerPageState extends State<PlayerPage> {
         return KeyEventResult.handled;
       }
     }
+    if (down && _armed && k == LogicalKeyboardKey.escape) {
+      _disarm();
+      return KeyEventResult.handled;
+    }
     if (down && k == LogicalKeyboardKey.escape) {
       // A clip being chosen is let go first.
       if (_active?.onKey(e) ?? false) return KeyEventResult.handled;
@@ -581,7 +597,7 @@ class _PlayerPageState extends State<PlayerPage> {
       _editor == null ? _startDraw() : unawaited(_finishDraw());
     } else if (k == LogicalKeyboardKey.keyR && !ctrl) {
       // (Photos: R turns the picture; the record button starts there.)
-      unawaited(_startRecording());
+      _armed ? unawaited(_go()) : _arm();
     } else if (k == LogicalKeyboardKey.keyC && !ctrl && _entry.video) {
       _active?.clipStep();
     } else if (k == LogicalKeyboardKey.keyS && !ctrl) {
@@ -1130,6 +1146,27 @@ class _PlayerPageState extends State<PlayerPage> {
     _addToList(picked);
   }
 
+  /// Ready to record: the camera (when on) shows, "Start recording" breathes.
+  void _arm() {
+    if (_rec != null || _countdown > 0 || _armed) return;
+    setState(() => _armed = true);
+    final own = WinScreen.ownRect();
+    if (own != null) unawaited(CameraBubble.instance.begin(_memory, own, MediaQuery.devicePixelRatioOf(context)));
+  }
+
+  void _disarm() {
+    if (!_armed) return;
+    setState(() => _armed = false);
+    unawaited(CameraBubble.instance.end());
+  }
+
+  Future<void> _go() async {
+    if (!_armed) return;
+    setState(() => _armed = false);
+    await _startRecording();
+    if (_rec == null) await CameraBubble.instance.end();
+  }
+
   Future<void> _startRecording() async {
     if (_rec != null || _countdown > 0) return;
     final s = widget.services;
@@ -1153,8 +1190,18 @@ class _PlayerPageState extends State<PlayerPage> {
     final dir = NarrationSession.folderOf(s.settings.dataDir, id);
     await dir.create(recursive: true);
     final rec = _Rec(session: NarrationSession(id: id, createdMs: DateTime.now().millisecondsSinceEpoch), dir: dir, mic: mic, device: device);
-    // The microphone starts while counting down.
+    // The microphone starts while counting down; the camera too (held).
     final listening = rec.startPart();
+    final cam = CameraBubble.instance;
+    if (cam.showing) {
+      final enc = await s.converter.encoders.best();
+      final exe = s.ffmpeg.ffmpeg;
+      if (enc != null && exe != null) {
+        rec.camera = await cam.startRecording(exe, H264Encoders.args(enc, high: true, width: 480, height: 480, fps: 30),
+            File('${dir.path}${Platform.pathSeparator}camera.mp4'));
+        if (rec.camera) cam.pause(true);
+      }
+    }
     for (var c = 3; c > 0; c--) {
       if (!mounted) return;
       setState(() => _countdown = c);
@@ -1191,6 +1238,24 @@ class _PlayerPageState extends State<PlayerPage> {
       return;
     }
     rec.go();
+    if (rec.camera) {
+      cam.pause(false);
+      // Where it is, as a part of LocalRoll's window (= the video's frame).
+      void moved(int x, int y, int side, bool round) {
+        final own = WinScreen.ownRect();
+        if (own == null || own.isEmpty) return;
+        rec.moves.add(CameraMove(
+          t: rec.clock.elapsedMilliseconds,
+          x: (x - own.left) / own.width,
+          y: (y - own.top) / own.height,
+          side: side / own.height,
+          round: round,
+        ));
+      }
+
+      cam.onMoved = moved;
+      moved(cam.x, cam.y, cam.side, cam.round);
+    }
     setState(() => _rec = rec);
     PlayerLauncher.whileRecording = _addWhileRecording;
     rec.sampler = Timer.periodic(const Duration(milliseconds: 50), (_) => _sample());
@@ -1251,6 +1316,7 @@ class _PlayerPageState extends State<PlayerPage> {
     if (!rec.paused) {
       _sample();
       setState(() => rec.paused = true);
+      if (rec.camera) CameraBubble.instance.pause(true);
       await rec.stopPart();
     } else {
       final ok = await rec.startPart();
@@ -1259,6 +1325,7 @@ class _PlayerPageState extends State<PlayerPage> {
         return;
       }
       rec.go();
+      if (rec.camera) CameraBubble.instance.pause(false);
       if (mounted) setState(() => rec.paused = false);
     }
   }
@@ -1275,6 +1342,11 @@ class _PlayerPageState extends State<PlayerPage> {
     if (_editor != null) await _finishDraw();
     if (!rec.paused) await rec.stopPart();
     rec.session.lengthMs = rec.clock.elapsedMilliseconds;
+    if (rec.camera) {
+      final frames = await CameraBubble.instance.stopRecording();
+      if (frames > 0) rec.session.camera.addAll(rec.moves);
+    }
+    await CameraBubble.instance.end();
     rec.session.inks
       ..clear()
       ..addAll(rec.inks.values);
@@ -1547,7 +1619,7 @@ class _PlayerPageState extends State<PlayerPage> {
               tr(_slideshow ? 'player.slideshow_stop' : 'player.slideshow'), () => _setSlideshow(!_slideshow),
               on: _slideshow),
         if (_rec == null)
-          _btn(Icons.fiber_manual_record_rounded, tr('rec.start'), _countdown > 0 ? null : () => unawaited(_startRecording()))
+          _btn(Icons.fiber_manual_record_rounded, tr('rec.start'), _countdown > 0 || _armed ? null : _arm)
         else
           _btn(Icons.playlist_add_rounded, tr('rec.add_title'), () => unawaited(_addDuringRecording())),
         if ((_set?.notes.isNotEmpty ?? false) || !_showInk)
@@ -1703,6 +1775,20 @@ class _PlayerPageState extends State<PlayerPage> {
               child: Center(
                 child: ExcludeFocus(
                   child: InkToolbar(editor: _editor!, onDone: () => unawaited(_finishDraw()), onCancel: () => unawaited(_cancelDraw())),
+                ),
+              ),
+            ),
+          if (_armed && _rec == null && _countdown == 0)
+            Positioned(
+              left: 0,
+              right: 0,
+              top: _editor != null ? 64 : (_fullscreen ? 56 : 0),
+              child: Center(
+                child: ReadyBar(
+                  what: tr('recs.name_narration'),
+                  onStart: () => unawaited(_go()),
+                  onCancel: _disarm,
+                  extra: [CameraButton(memory: _memory)],
                 ),
               ),
             ),
