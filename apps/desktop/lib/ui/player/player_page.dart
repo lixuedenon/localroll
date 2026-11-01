@@ -597,7 +597,7 @@ class _PlayerPageState extends State<PlayerPage> {
       _editor == null ? _startDraw() : unawaited(_finishDraw());
     } else if (k == LogicalKeyboardKey.keyR && !ctrl) {
       // (Photos: R turns the picture; the record button starts there.)
-      _armed ? unawaited(_go()) : _arm();
+      _armed ? unawaited(_goRecord()) : _arm();
     } else if (k == LogicalKeyboardKey.keyC && !ctrl && _entry.video) {
       _active?.clipStep();
     } else if (k == LogicalKeyboardKey.keyS && !ctrl) {
@@ -1160,7 +1160,7 @@ class _PlayerPageState extends State<PlayerPage> {
     unawaited(CameraBubble.instance.end());
   }
 
-  Future<void> _go() async {
+  Future<void> _goRecord() async {
     if (!_armed) return;
     setState(() => _armed = false);
     await _startRecording();
@@ -1786,7 +1786,7 @@ class _PlayerPageState extends State<PlayerPage> {
               child: Center(
                 child: ReadyBar(
                   what: tr('recs.name_narration'),
-                  onStart: () => unawaited(_go()),
+                  onStart: () => unawaited(_goRecord()),
                   onCancel: _disarm,
                   extra: [CameraButton(memory: _memory)],
                 ),

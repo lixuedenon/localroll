@@ -607,8 +607,8 @@ class NarrationComposer {
   void _paintCameraEdge(Canvas c, Size out, NarrationSession n, CameraMove first, int t) {
     final now = cameraAt(n.camera, t) ?? first;
     final side = first.side * out.height;
-    final x = (now.x * out.width).clamp(0.0, math.max(0.0, out.width - side));
-    final y = (now.y * out.height).clamp(0.0, math.max(0.0, out.height - side));
+    final x = (now.x * out.width).clamp(0.0, math.max(0.0, out.width - side)).toDouble();
+    final y = (now.y * out.height).clamp(0.0, math.max(0.0, out.height - side)).toDouble();
     final r = Rect.fromLTWH(x, y, side, side);
     final edge = math.max(1.5, side / 120);
     final paint = Paint()
