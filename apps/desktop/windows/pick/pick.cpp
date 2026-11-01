@@ -18,7 +18,10 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
+#undef WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <ole2.h>
+#include <oleacc.h>
 #include <uiautomation.h>
 
 #include <algorithm>
