@@ -44,6 +44,7 @@ import 'ink_editor.dart';
 import 'ink_paint.dart';
 import 'narration.dart';
 import 'narration_dialogs.dart';
+import 'narration_editor.dart';
 import 'notes_panel.dart';
 import 'player_entry.dart';
 import 'snapshot.dart';
@@ -54,7 +55,7 @@ part 'player_video.dart';
 /// Opens files from this PC (Explorer's "Open with", drag and drop, the
 /// open dialog). One file: the photos and videos of its folder come along,
 /// so the arrows go through them.
-Future<void> openInPlayer(BuildContext context, AppServices s, List<String> paths, {int? startMs, bool record = false, String? remake}) async {
+Future<void> openInPlayer(BuildContext context, AppServices s, List<String> paths, {int? startMs, bool record = false, String? remake, bool edit = false}) async {
   final wanted = [for (final p in paths) if (PlayerEntry.playable(p)) p];
   if (wanted.isEmpty) {
     ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('player.nothing_playable'))));
@@ -85,7 +86,7 @@ Future<void> openInPlayer(BuildContext context, AppServices s, List<String> path
     return;
   }
   if (!context.mounted) return;
-  await openPlayer(context, s, entries, at, startMs: startMs, record: record, source: source, remake: remake);
+  await openPlayer(context, s, entries, at, startMs: startMs, record: record, source: source, remake: remake, edit: edit);
 }
 
 /// Files asked for from outside the window (Explorer's "Open with", a
@@ -134,11 +135,11 @@ Future<void> openLibraryItems(BuildContext context, AppServices s, List<MediaIte
 /// [source]: where the list came from (shown above it); [remake]: make
 /// this explanation again once it is open.
 Future<void> openPlayer(BuildContext context, AppServices s, List<PlayerEntry> entries, int index,
-        {int? startMs, bool record = false, String? source, String? remake}) =>
+        {int? startMs, bool record = false, String? source, String? remake, bool edit = false}) =>
     Navigator.of(context).push(MaterialPageRoute(
       settings: const RouteSettings(name: 'player'),
       builder: (_) => PlayerPage(
-          services: s, entries: entries, initialIndex: index.clamp(0, entries.length - 1), initialMs: startMs, record: record, source: source, remake: remake),
+          services: s, entries: entries, initialIndex: index.clamp(0, entries.length - 1), initialMs: startMs, record: record, source: source, remake: remake, edit: edit),
     ));
 
 /// For "Recent" and "Continue".
@@ -289,6 +290,7 @@ class PlayerPage extends StatefulWidget {
     this.record = false,
     this.source,
     this.remake,
+    this.edit = false,
   });
 
   /// Where the list came from ("D:\Trip", "Library", "My recordings").
@@ -296,6 +298,9 @@ class PlayerPage extends StatefulWidget {
 
   /// An explanation's recording to make again once it is open.
   final String? remake;
+
+  /// With [remake]: the editor first.
+  final bool edit;
 
   /// Start recording an explanation once it is open.
   final bool record;
@@ -391,7 +396,7 @@ class _PlayerPageState extends State<PlayerPage> {
       if (n == null) {
         _snack(tr('recs.raw_gone'));
       } else {
-        await _afterRecording(n, again: true);
+        if (!widget.edit || !await _editNarration(n)) await _afterRecording(n, again: true);
       }
     }
   }
@@ -1394,6 +1399,8 @@ class _PlayerPageState extends State<PlayerPage> {
     }
     final f0 = n.files.isEmpty ? null : n.files[pieces.isEmpty ? 0 : pieces.first.file];
     final base = f0 == null ? '' : (f0.name.contains('.') ? f0.name.substring(0, f0.name.lastIndexOf('.')) : f0.name);
+    // Made before: the new one can take its place.
+    final made = widget.services.recordings.items.where((x) => x.narrationId == n.id).lastOrNull;
     while (mounted) {
       final r = await recordedDialog(
         context,
@@ -1401,12 +1408,20 @@ class _PlayerPageState extends State<PlayerPage> {
         _sound,
         again: again,
         summary: parts.join('、'),
-        defaultName: recordingName(base, tr('recs.name_narration'), DateTime.fromMillisecondsSinceEpoch(n.createdMs)),
+        defaultName: made != null
+            ? '${stemOf(made.name)}${tr('nedit.suffix')}'
+            : recordingName(base, tr('recs.name_narration'), DateTime.fromMillisecondsSinceEpoch(n.createdMs)),
         beforeSec: _memory.narrationBefore,
         afterSec: _memory.narrationAfter,
         extendable: n.files.any((f) => f.video),
+        editable: true,
+        replaceable: again && made != null,
       );
       if (r == null || !mounted) return;
+      if (r.choice == RecordedChoice.edit) {
+        if (await _editNarration(n)) return;
+        continue;
+      }
       _memory.setSound(r.sound.name);
       _memory.setNarrationAround(r.beforeSec, r.afterSec);
       if (r.choice == RecordedChoice.discard) {
@@ -1417,9 +1432,27 @@ class _PlayerPageState extends State<PlayerPage> {
         return;
       }
       await _makeNarration(n, voice, r.sound,
-          send: r.choice == RecordedChoice.saveSend, beforeMs: r.beforeSec * 1000, afterMs: r.afterSec * 1000, name: r.name);
+          send: r.choice == RecordedChoice.saveSend,
+          beforeMs: r.beforeSec * 1000,
+          afterMs: r.afterSec * 1000,
+          name: r.name,
+          replace: r.replace ? made : null);
       return;
     }
+  }
+
+  /// Edits a recording; changed: its marks / annotations again, then
+  /// asked what to make of it (true: that was done here).
+  Future<bool> _editNarration(NarrationSession n) async {
+    if (!await editNarration(context, widget.services, n)) return false;
+    final all = await NarrationSession.all(widget.services.settings.dataDir);
+    if (!mounted) return true;
+    setState(() => _narrations = all);
+    _sets.clear();
+    await _loadNotes(_entry);
+    final again = all.where((x) => x.id == n.id).firstOrNull;
+    if (again != null && mounted) await _afterRecording(again, again: widget.services.recordings.items.any((x) => x.narrationId == n.id));
+    return true;
   }
 
   Future<void> _deleteNarration(NarrationSession n, {required bool withInk}) async {
@@ -1438,7 +1471,7 @@ class _PlayerPageState extends State<PlayerPage> {
   }
 
   Future<void> _makeNarration(NarrationSession n, File voice, OriginalSound sound,
-      {required bool send, int beforeMs = 0, int afterMs = 0, String? name}) async {
+      {required bool send, int beforeMs = 0, int afterMs = 0, String? name, Recording? replace}) async {
     final s = widget.services;
     // The annotations of each file (as the player showed them).
     final sets = <NoteSet?>[];
@@ -1482,12 +1515,25 @@ class _PlayerPageState extends State<PlayerPage> {
         );
       },
     ));
-    final f = await done;
+    var f = await done;
     progress.dispose();
     if (!mounted) return;
     if (f == null) {
       _snack(tr('rec.failed'));
       return;
+    }
+    // In place of the one made before: that one goes, this takes its name.
+    if (replace != null && replace.path != f.path) {
+      final recs = s.recordings;
+      final oldName = stemOf(replace.name);
+      recs.forget([replace]);
+      try {
+        await File(replace.path).delete();
+      } catch (e) {
+        DiagLog.log('player', 'old explanation not deleted: $e');
+      }
+      final now = recs.byPath(f.path);
+      if (now != null && await recs.rename(now, oldName)) f = File(now.path);
     }
     if (send) {
       await _sendFile(f);
@@ -1499,6 +1545,8 @@ class _PlayerPageState extends State<PlayerPage> {
   Future<void> _narrationAction(NarrationSession n, String action) async {
     if (action == 'remake') {
       await _afterRecording(n, again: true);
+    } else if (action == 'edit') {
+      await _editNarration(n);
     } else if (action == 'delete') {
       final ok = await showDialog<bool>(
         context: context,
@@ -2081,6 +2129,7 @@ class _PlayerPageState extends State<PlayerPage> {
             onSelected: (a) => unawaited(_narrationAction(n, a)),
             itemBuilder: (_) => [
               PopupMenuItem(value: 'remake', child: Text(tr('rec.remake'))),
+              PopupMenuItem(value: 'edit', child: Text(tr('nedit.menu'))),
               PopupMenuItem(value: 'delete', child: Text(tr('rec.delete_record'), style: const TextStyle(color: LrColors.danger))),
             ],
           ),

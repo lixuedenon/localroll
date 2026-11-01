@@ -117,7 +117,8 @@ struct StampPic {
 struct Mark {
   int id = 0;
   std::shared_ptr<StampPic> pic;  // a stamp: its picture; pts: two corners of its box
-  UINT32 argb2 = 0xFF16A34A;       // a candle: falling colour; pts: open, close, high, low
+  UINT32 argb2 = 0xFFE53935;       // a candle: falling colour; pts: open, close, high, low
+  bool noTurn = false;             // candles and candle stamps stay upright
   int tool = kPen;
   UINT32 argb = 0xFFFF3B30;
   float width = 6;   // line width (pixels)
@@ -157,7 +158,9 @@ HWND g_page = nullptr;
 bool g_draw = false, g_pass = false, g_visible = true;
 int g_tool = kPen, g_level = 1, g_nextId = 1, g_nextNumber = 1;
 UINT32 g_color = 0xFFFF3B30;
-UINT32 g_up = 0xFFE53935, g_down = 0xFF16A34A;
+UINT32 g_up = 0xFF16A34A, g_down = 0xFFE53935;
+int g_candleKind = 0;  // 0 normal, 1 long upper, 2 long lower, 3 bald, 4 doji
+bool g_stampNoTurn = false;
 std::shared_ptr<StampPic> g_stamp;
 bool g_fade = false, g_autoReturn = false, g_penDraw = true, g_highlight = false;
 int g_board = 0;  // 0 none, 1 white, 2 black
@@ -480,12 +483,21 @@ float fadeAlpha(const Mark& m, ULONGLONG now) {
 }
 
 // A candle's high / low a little beyond its body.
-void autoWicks(Mark& m) {
+void autoWicks(Mark& m, int kind) {
   if (m.pts.size() < 2) return;
   const auto o = m.pts[0];
   const float c = m.pts[1].y;
-  const float top = std::min(o.y, c), bot = std::max(o.y, c), tail = std::max((bot - top) * 0.25f, 8.0f);
-  m.pts = {o, D2D1::Point2F(o.x, c), D2D1::Point2F(o.x, top - tail), D2D1::Point2F(o.x, bot + tail)};
+  if (kind == 4) {
+    // Doji: open = close; the drag is how long the wicks are.
+    const float reach = std::max(std::fabs(c - o.y), 12.0f);
+    m.pts = {o, o, D2D1::Point2F(o.x, o.y - reach), D2D1::Point2F(o.x, o.y + reach)};
+    return;
+  }
+  const float top = std::min(o.y, c), bot = std::max(o.y, c), body = bot - top;
+  const float shortT = std::max(body * 0.25f, 8.0f), longT = std::max(body * 2, 40.0f), tiny = std::max(body * 0.1f, 4.0f);
+  const float up = kind == 1 ? longT : kind == 2 ? tiny : kind == 3 ? 0 : shortT;
+  const float down = kind == 2 ? longT : kind == 1 ? tiny : kind == 3 ? 0 : shortT;
+  m.pts = {o, D2D1::Point2F(o.x, c), D2D1::Point2F(o.x, top - up), D2D1::Point2F(o.x, bot + down)};
 }
 
 // "stamp <aspect> <base64 PNG>": the picture of the stamp to place next.
@@ -644,14 +656,16 @@ void render(const RECT* dirty = nullptr) {
       if (br && fill) {
         for (int i = 0; i < 4; ++i) g_rt->DrawLine(c[i], c[(i + 1) % 4], br.p, 1.5f, dash.p);
         const D2D1_POINT_2F top = D2D1::Point2F((c[0].x + c[1].x) / 2, (c[0].y + c[1].y) / 2);
-        g_rt->DrawLine(top, knob, br.p, 1.5f);
+        if (!s->noTurn) g_rt->DrawLine(top, knob, br.p, 1.5f);
         for (auto p : c) {
           const auto r = D2D1::RectF(p.x - 5, p.y - 5, p.x + 5, p.y + 5);
           g_rt->FillRectangle(r, fill.p);
           g_rt->DrawRectangle(r, br.p, 1.5f);
         }
-        g_rt->FillEllipse(D2D1::Ellipse(knob, 6, 6), fill.p);
-        g_rt->DrawEllipse(D2D1::Ellipse(knob, 6, 6), br.p, 1.5f);
+        if (!s->noTurn) {
+          g_rt->FillEllipse(D2D1::Ellipse(knob, 6, 6), fill.p);
+          g_rt->DrawEllipse(D2D1::Ellipse(knob, 6, 6), br.p, 1.5f);
+        }
       }
     }
   }
@@ -790,7 +804,7 @@ void endDrawing() {
     const float px = prev->pts[0].x + prev->dx + prev->size * 1.7f, open = prev->pts[1].y + prev->dy;
     m.size = prev->size;
     m.pts = {D2D1::Point2F(px, open), D2D1::Point2F(px, y)};
-    autoWicks(m);
+    autoWicks(m, g_candleKind == 4 ? 0 : g_candleKind);
   }
   const bool tiny = m.tool != kPen && m.tool != kMarker && m.tool != kStamp && m.tool != kCandle && m.pts.size() >= 2 &&
                     dist(m.pts.front(), m.pts.back()) < 3;
@@ -834,7 +848,7 @@ void onDown(D2D1_POINT_2F p) {
     D2D1_POINT_2F c[4], knob;
     handles(*s, c, knob);
     Drag d = kNone;
-    if (dist(p, knob) < 12) {
+    if (dist(p, knob) < 12 && !s->noTurn) {
       d = kRotating;
     } else if (std::any_of(c, c + 4, [&](D2D1_POINT_2F q) { return dist(p, q) < 10; })) {
       d = kScaling;
@@ -903,13 +917,15 @@ void onDown(D2D1_POINT_2F p) {
       g_draft.pts.push_back(p);
       if (g_tool == kStamp) {
         g_draft.pic = g_stamp;
+        g_draft.noTurn = g_stampNoTurn;
       } else {
         const float cw[] = {10, 16, 24};
         POINT sp{static_cast<LONG>(p.x), static_cast<LONG>(p.y)};
         g_draft.size = cw[g_level] * dpiScaleAt(sp);
         g_draft.argb = g_up;
         g_draft.argb2 = g_down;
-        autoWicks(g_draft);
+        g_draft.noTurn = true;
+        autoWicks(g_draft, g_candleKind);
       }
       g_hasDraft = true;
       g_made = g_draft.id;
@@ -954,7 +970,7 @@ void onMove(D2D1_POINT_2F p) {
       }
       if (d.tool == kCandle) {
         d.pts[1] = D2D1::Point2F(d.pts[0].x, p.y);
-        autoWicks(d);
+        autoWicks(d, g_candleKind);
         RECT after = areaOf(d);
         UnionRect(&before, &before, &after);
         render(&before);
@@ -1108,6 +1124,7 @@ bool wheelOnSelected(const MSLLHOOKSTRUCT* m) {
   g_lastWheel = now;
   RECT before = areaOf(*s);
   if (GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+    if (s->noTurn) return true;
     s->rot = std::round((s->rot + 15.0f * notches) / 15) * 15;
   } else {
     s->scale = std::clamp(s->scale * std::pow(1.1f, static_cast<float>(notches)), 0.1f, 20.0f);
@@ -1348,17 +1365,24 @@ void command(const std::string& line) {
     }
     if (g_tool != kSelect && g_selected) select(0);
   } else if (cmd == "stamp") {
-    // "stamp <aspect> <base64 PNG>"
+    // "stamp <aspect> <upright 0/1> <base64 PNG>"
     const size_t sp = arg.find(' ');
-    if (sp != std::string::npos) {
-      auto pic = decodeStamp(arg.substr(sp + 1), static_cast<float>(std::atof(arg.substr(0, sp).c_str())));
-      if (pic) g_stamp = pic;
+    const size_t sp2 = sp == std::string::npos ? sp : arg.find(' ', sp + 1);
+    if (sp2 != std::string::npos) {
+      auto pic = decodeStamp(arg.substr(sp2 + 1), static_cast<float>(std::atof(arg.substr(0, sp).c_str())));
+      if (pic) {
+        g_stamp = pic;
+        g_stampNoTurn = arg.substr(sp + 1, sp2 - sp - 1) == "1";
+      }
     }
   } else if (cmd == "candle") {
     const size_t sp = arg.find(' ');
     if (sp != std::string::npos) {
       g_up = static_cast<UINT32>(std::strtoul(arg.substr(0, sp).c_str(), nullptr, 16));
-      g_down = static_cast<UINT32>(std::strtoul(arg.substr(sp + 1).c_str(), nullptr, 16));
+      const std::string rest = arg.substr(sp + 1);
+      const size_t sp2 = rest.find(' ');
+      g_down = static_cast<UINT32>(std::strtoul(rest.substr(0, sp2).c_str(), nullptr, 16));
+      g_candleKind = sp2 == std::string::npos ? 0 : std::clamp(std::atoi(rest.substr(sp2 + 1).c_str()), 0, 4);
     }
   } else if (cmd == "color") {
     g_color = static_cast<UINT32>(std::strtoul(arg.c_str(), nullptr, 16));

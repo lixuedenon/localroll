@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 
 import '../../l10n/l10n.dart';
 import '../../services/annotations.dart';
-import '../../services/stamp_library.dart';
+import '../stamps/candle_panel.dart';
 import '../stamps/stamp_picker.dart';
 import '../theme.dart';
 import 'ink_paint.dart';
@@ -133,7 +133,12 @@ class InkEditor extends ChangeNotifier {
     final s = selected;
     if (s != null) {
       remember();
-      s.color = c.toARGB32();
+      // A candle: its rising or falling colour, as it is drawn.
+      if (s.tool == InkTool.candle && !Candles.rising(s)) {
+        s.color2 = c.toARGB32();
+      } else {
+        s.color = c.toARGB32();
+      }
     }
     notifyListeners();
   }
@@ -225,7 +230,8 @@ class InkEditor extends ChangeNotifier {
   String stampName = '';
 
   /// Candles: rising / falling colours.
-  int upColor = Candles.red, downColor = Candles.green;
+  int upColor = Candles.green, downColor = Candles.red;
+  CandleKind candleKind = CandleKind.normal;
 
   /// The picture's width for 1 high (stamps keep their proportions).
   double aspect = 16 / 9;
@@ -255,7 +261,7 @@ class InkEditor extends ChangeNotifier {
         ..size = _candleW[level]
         ..color = upColor
         ..color2 = downColor;
-      Candles.autoWicks(drawing!);
+      Candles.autoWicks(drawing!, candleKind);
       notifyListeners();
       return;
     }
@@ -298,7 +304,7 @@ class InkEditor extends ChangeNotifier {
     if (d.tool == InkTool.candle) {
       // Pressed at the open, let go at the close.
       d.points[1] = Offset(d.points[0].dx, at.dy);
-      Candles.autoWicks(d);
+      Candles.autoWicks(d, candleKind);
       strokes.value++;
       return;
     }
@@ -355,7 +361,7 @@ class InkEditor extends ChangeNotifier {
       d
         ..size = prev.size
         ..points = [Offset(x, open), Offset(x, d.points[0].dy)];
-      Candles.autoWicks(d);
+      Candles.autoWicks(d, candleKind == CandleKind.doji ? CandleKind.normal : candleKind);
     }
     final tiny = d.points.length >= 2 &&
         (d.points.first - d.points.last).distance < 0.002 &&
@@ -542,7 +548,7 @@ class _InkLayerState extends State<InkLayer> {
     final sel = ed.selected;
     if (sel != null && ed.tool != EditTool.select && ed.tool != EditTool.eraser) {
       final knob = InkPainter.rotateKnob(sel, s);
-      if ((p - knob).distance < 12) {
+      if ((p - knob).distance < 12 && !Candles.noTurn(sel)) {
         _drag = _Drag.rotate;
       } else if (InkGeometry.corners(sel, s).any((c) => (p - c).distance < 10)) {
         _drag = _Drag.scale;
@@ -566,7 +572,7 @@ class _InkLayerState extends State<InkLayer> {
         if (sel != null) {
           final knob = InkPainter.rotateKnob(sel, s);
           final corners = InkGeometry.corners(sel, s);
-          if ((p - knob).distance < 12) {
+          if ((p - knob).distance < 12 && !Candles.noTurn(sel)) {
             ed.remember();
             _drag = _Drag.rotate;
           } else if (corners.any((c) => (p - c).distance < 10)) {
@@ -809,10 +815,9 @@ class InkToolbar extends StatelessWidget {
       onPressed: () {
         if (t == EditTool.stamp) {
           unawaited(pickStampInto(context, editor));
+        } else if (t == EditTool.candle) {
+          unawaited(pickCandleInto(context, editor));
         } else {
-          if (t == EditTool.candle) editor
-            ..upColor = StampLibrary.instance.colors.$1
-            ..downColor = StampLibrary.instance.colors.$2;
           editor.setTool(t);
         }
       },

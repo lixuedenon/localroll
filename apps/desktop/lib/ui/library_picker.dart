@@ -1,10 +1,13 @@
 // apps/desktop/lib/ui/library_picker.dart
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:localroll_core/localroll_core.dart';
 
 import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/library_index.dart';
+import '../services/text_index.dart';
 import 'media_thumb.dart';
 import 'theme.dart';
 
@@ -33,22 +36,70 @@ class _LibraryPickerState extends State<_LibraryPicker> {
   MediaKind? _kind;
   final List<MediaItem> _picked = [];
 
+  /// The same search as the library: name, words in the picture, notes,
+  /// what it looks like ("dog"), who is in it.
+  SearchQuery _search = SearchQuery('');
+  Set<String>? _who;
+  Map<String, double> _picHits = const {};
+  Timer? _picSoon;
+  String _picQuery = '';
+
   @override
   void dispose() {
+    _picSoon?.cancel();
     _q.dispose();
     super.dispose();
   }
 
+  void _onSearch(String v) {
+    final s = widget.services;
+    unawaited(s.server.textIndex.load());
+    var words = v;
+    _who = null;
+    if (s.settings.faces) {
+      final split = s.server.people.split(v);
+      if (split != null) {
+        _who = split.$1;
+        words = split.$2;
+      }
+    }
+    _search = SearchQuery(words);
+    _picSoon?.cancel();
+    _picQuery = words;
+    final ix = s.pictureIndexer;
+    if (words.trim().isEmpty || !ix.ready) {
+      _picHits = const {};
+    } else {
+      _picSoon = Timer(const Duration(milliseconds: 400), () async {
+        final hits = await ix.find(words);
+        if (!mounted || _picQuery != words) return;
+        setState(() => _picHits = {for (final (k, sc) in hits) k: sc});
+      });
+    }
+    setState(() {});
+  }
+
   List<MediaItem> _shown() {
-    final q = _q.text.trim().toLowerCase();
+    final idx = widget.services.server.textIndex;
     final all = [
       for (final i in widget.services.library.items)
         if ((i.kind == MediaKind.image || i.kind == MediaKind.video) &&
             (_kind == null || i.kind == _kind) &&
-            (q.isEmpty || i.name.toLowerCase().contains(q) || i.relPath.toLowerCase().contains(q)))
+            (_search.isEmpty || idx.matches(TextIndex.mediaKey(i), i.name, _search) || _picHits.containsKey(TextIndex.mediaKey(i))) &&
+            (_who == null || _who!.contains(TextIndex.mediaKey(i))))
           i,
     ]..sort((a, b) => b.captureMs.compareTo(a.captureMs));
     return all;
+  }
+
+  /// "Pictures 63 % searched": still being looked through.
+  String? _note() {
+    final s = widget.services;
+    final pic = s.pictureIndexer.progress.value;
+    if (s.settings.pictureSearch && pic.total > 0 && pic.done < pic.total) {
+      return tr('pick.indexed', {'n': (pic.done * 100 / pic.total).floor()});
+    }
+    return null;
   }
 
   void _done([MediaItem? one]) {
@@ -72,7 +123,7 @@ class _LibraryPickerState extends State<_LibraryPicker> {
               child: TextField(
                 controller: _q,
                 autofocus: true,
-                onChanged: (_) => setState(() {}),
+                onChanged: _onSearch,
                 decoration: InputDecoration(
                   isDense: true,
                   prefixIcon: const Icon(Icons.search_rounded, size: 18),
@@ -140,7 +191,7 @@ class _LibraryPickerState extends State<_LibraryPicker> {
                   ),
           ),
           const SizedBox(height: 6),
-          Text(tr(widget.multiple ? 'pick.tip_multi' : 'pick.tip_one'), style: const TextStyle(color: LrColors.muted, fontSize: 12)),
+          Text([tr(widget.multiple ? 'pick.tip_multi' : 'pick.tip_one'), ?_note()].join('  ·  '), style: const TextStyle(color: LrColors.muted, fontSize: 12)),
         ]),
       ),
       actions: [

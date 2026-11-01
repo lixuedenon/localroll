@@ -337,10 +337,13 @@ class InkPainter extends CustomPainter {
       }
       final top = (c[0] + c[1]) / 2;
       final knob = rotateKnob(sel, size);
-      canvas
-        ..drawLine(top, knob, line)
-        ..drawCircle(knob, 7, dot)
-        ..drawCircle(knob, 7, line);
+      // Candles stay upright: no knob.
+      if (!Candles.noTurn(sel)) {
+        canvas
+          ..drawLine(top, knob, line)
+          ..drawCircle(knob, 7, dot)
+          ..drawCircle(knob, 7, line);
+      }
     }
     canvas.restore();
   }

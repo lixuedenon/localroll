@@ -55,6 +55,17 @@ class StampPacks {
         StampPart(text: word, at: const Offset(0.58, 0.5), size: 0.55, color: 0xFFFFFFFF),
       ]);
 
+  /// The candle stamps (shown in the candle panel too).
+  static const List<String> singles = ['doji', 'hammer', 'inv_hammer', 'upper_shadow', 'lower_shadow', 'marubozu'];
+  static const List<String> patterns = ['bull_engulf', 'bear_engulf', 'morning_star', 'evening_star', 'three_soldiers', 'three_crows', 'gap'];
+
+  static Stamp? byId(String id) {
+    for (final s in all) {
+      if (s.id == id) return s;
+    }
+    return null;
+  }
+
   static List<Stamp>? _all;
 
   static List<Stamp> get all => _all ??= [
@@ -102,12 +113,18 @@ class StampPacks {
         Stamp(id: 'trend_up', pack: 'finance', shape: _ic('trending_up', role: 'u')),
         Stamp(id: 'trend_down', pack: 'finance', shape: _ic('trending_down', role: 'd')),
         Stamp(id: 'flag', pack: 'finance', shape: _ic('flag')),
-        Stamp(id: 'doji', pack: 'finance', shape: Candles.pattern([(0.5, 0.51, 0.85, 0.15)])),
-        Stamp(id: 'hammer', pack: 'finance', shape: Candles.pattern([(0.72, 0.86, 0.9, 0.1)])),
-        Stamp(id: 'inv_hammer', pack: 'finance', shape: Candles.pattern([(0.14, 0.28, 0.9, 0.1)])),
-        Stamp(id: 'upper_shadow', pack: 'finance', shape: Candles.pattern([(0.3, 0.2, 0.95, 0.15)])),
-        Stamp(id: 'lower_shadow', pack: 'finance', shape: Candles.pattern([(0.7, 0.8, 0.85, 0.05)])),
-        Stamp(id: 'marubozu', pack: 'finance', shape: Candles.pattern([(0.1, 0.9, 0.9, 0.1)])),
+        // One candle each, rising and falling.
+        for (final (id, c) in const [
+          ('doji', (0.5, 0.51, 0.85, 0.15)),
+          ('hammer', (0.72, 0.86, 0.9, 0.1)),
+          ('inv_hammer', (0.14, 0.28, 0.9, 0.1)),
+          ('upper_shadow', (0.2, 0.3, 0.95, 0.15)),
+          ('lower_shadow', (0.7, 0.8, 0.85, 0.05)),
+          ('marubozu', (0.1, 0.9, 0.9, 0.1)),
+        ]) ...[
+          Stamp(id: '${id}_up', pack: 'finance', shape: Candles.pattern([c], role: 'u')),
+          Stamp(id: '${id}_down', pack: 'finance', shape: Candles.pattern([(c.$2, c.$1, c.$3, c.$4)], role: 'd')),
+        ],
         Stamp(id: 'bull_engulf', pack: 'finance', shape: Candles.pattern([(0.6, 0.4, 0.65, 0.35), (0.3, 0.75, 0.8, 0.25)])),
         Stamp(id: 'bear_engulf', pack: 'finance', shape: Candles.pattern([(0.4, 0.6, 0.65, 0.35), (0.75, 0.25, 0.8, 0.2)])),
         Stamp(id: 'morning_star', pack: 'finance', shape: Candles.pattern([(0.85, 0.4, 0.9, 0.35), (0.3, 0.26, 0.35, 0.18), (0.35, 0.8, 0.85, 0.3)])),

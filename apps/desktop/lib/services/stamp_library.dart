@@ -38,12 +38,16 @@ class StampLibrary extends ChangeNotifier {
   final List<String> recent = [];
   final Set<String> favorites = {};
 
-  /// Rising red (else rising green). Null: by language.
-  bool? _redUp;
+  /// Candles: rising / falling colours (rising green, as in US markets,
+  /// unless changed).
+  int upColor = Candles.green, downColor = Candles.red;
 
-  bool get redUp => _redUp ?? const {'zh', 'ja', 'ko'}.contains(PlatformDispatcher.instance.locale.languageCode);
+  bool get redUp => upColor == Candles.red && downColor == Candles.green;
 
-  (int, int) get colors => Candles.colors(redUp);
+  (int, int) get colors => (upColor, downColor);
+
+  /// The candle kind drawn by hand.
+  CandleKind kind = CandleKind.normal;
 
   Future<void> load(Directory dataDir) async {
     final f = _file = File('${dataDir.path}${Platform.pathSeparator}stamps.json');
@@ -59,7 +63,9 @@ class StampLibrary extends ChangeNotifier {
       favorites
         ..clear()
         ..addAll([for (final x in (j['fav'] as List?) ?? const []) '$x']);
-      _redUp = j['redUp'] as bool?;
+      upColor = (j['up'] as num?)?.toInt() ?? Candles.green;
+      downColor = (j['down'] as num?)?.toInt() ?? Candles.red;
+      kind = CandleKind.values.firstWhere((k) => k.name == j['kind'], orElse: () => CandleKind.normal);
     } catch (e) {
       DiagLog.log('stamps', 'not read: $e');
     }
@@ -79,7 +85,9 @@ class StampLibrary extends ChangeNotifier {
           'mine': [for (final m in mine) m.toJson()],
           'recent': recent,
           'fav': [...favorites],
-          'redUp': ?_redUp,
+          'up': upColor,
+          'down': downColor,
+          'kind': kind.name,
         }));
         await tmp.rename(f.path);
       } catch (e) {
@@ -89,7 +97,20 @@ class StampLibrary extends ChangeNotifier {
   }
 
   void setRedUp(bool v) {
-    _redUp = v;
+    final c = Candles.colors(v);
+    upColor = c.$1;
+    downColor = c.$2;
+    _changed();
+  }
+
+  void setColors({int? up, int? down}) {
+    if (up != null) upColor = up;
+    if (down != null) downColor = down;
+    _changed();
+  }
+
+  void setKind(CandleKind k) {
+    kind = k;
     _changed();
   }
 

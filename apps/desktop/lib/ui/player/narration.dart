@@ -732,3 +732,55 @@ Future<List<int>> cameraMask(int side, bool round) async {
   img.dispose();
   return png!.buffer.asUint8List();
 }
+
+/// Cuts [a]..[b] ms out of a recording (marks, moves, the camera bubble's
+/// places): what comes after moves up; the state at [b] carries on from
+/// [a]. Returns the ids of the marks begun inside it (they go too).
+Set<String> cutNarration(NarrationSession n, int a, int b) {
+  final len = b - a;
+  if (len <= 0) return {};
+  int map(int t) => t < a ? t : (t >= b ? t - len : a);
+  final at = sampleAt(n.samples, b);
+  final samples = [
+    for (final x in n.samples)
+      if (x.t < a) x,
+    if (at != null && at.t <= b) NarrationSample.fromJson({...at.toJson(), 't': a}),
+    for (final x in n.samples)
+      if (x.t > b) NarrationSample.fromJson({...x.toJson(), 't': x.t - len}),
+  ];
+  n.samples
+    ..clear()
+    ..addAll(samples);
+  final gone = <String>{};
+  final inks = <NarrationInk>[];
+  for (final i in n.inks) {
+    if (i.startT >= a && i.startT < b) {
+      gone.add(i.ink.id);
+      continue;
+    }
+    inks.add(NarrationInk(file: i.file, ink: i.ink, startT: map(i.startT), times: i.times, removedT: i.removedT == null ? null : map(i.removedT!)));
+  }
+  n.inks
+    ..clear()
+    ..addAll(inks);
+  for (final k in [...n.edited.keys]) {
+    n.edited[k] = map(n.edited[k]!);
+  }
+  final cam = cameraAt(n.camera, b);
+  final moves = [
+    for (final c in n.camera)
+      if (c.t < a) c,
+    if (cam != null) CameraMove(t: a, x: cam.x, y: cam.y, side: cam.side, round: cam.round),
+    for (final c in n.camera)
+      if (c.t > b) CameraMove(t: c.t - len, x: c.x, y: c.y, side: c.side, round: c.round),
+  ];
+  n.camera
+    ..clear()
+    ..addAll(moves);
+  n.lengthMs = math.max(0, n.lengthMs - len);
+  return gone;
+}
+
+/// ffmpeg: [ranges] (ms) as "between(t,a,b)+…".
+String betweens(List<(int, int)> ranges) =>
+    ranges.map((r) => 'between(t,${(r.$1 / 1000).toStringAsFixed(3)},${(r.$2 / 1000).toStringAsFixed(3)})').join('+');

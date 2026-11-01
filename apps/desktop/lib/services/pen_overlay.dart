@@ -6,7 +6,7 @@ import 'dart:ui' show Color, Rect;
 
 import 'package:flutter/foundation.dart';
 import 'package:localroll_core/localroll_core.dart';
-import 'package:localroll_ink/localroll_ink.dart' show StampShape;
+import 'package:localroll_ink/localroll_ink.dart' show CandleKind, StampShape;
 
 import 'win_screen.dart';
 
@@ -168,13 +168,13 @@ class PenOverlay extends ChangeNotifier {
   Future<void> setStamp(StampShape shape) async {
     final png = await shape.toPng(color.toARGB32());
     if (png == null) return;
-    _send('stamp ${shape.aspect.toStringAsFixed(4)} ${base64Encode(png)}');
+    _send('stamp ${shape.aspect.toStringAsFixed(4)} ${shape.noTurn ? 1 : 0} ${base64Encode(png)}');
     setTool('stamp');
   }
 
   /// Candles: rising / falling colours, then the candle tool.
-  void setCandle(int up, int down) {
-    _send('candle ${up.toRadixString(16).padLeft(8, '0')} ${down.toRadixString(16).padLeft(8, '0')}');
+  void setCandle(int up, int down, CandleKind kind) {
+    _send('candle ${up.toRadixString(16).padLeft(8, '0')} ${down.toRadixString(16).padLeft(8, '0')} ${kind.index}');
     setTool('candle');
   }
 

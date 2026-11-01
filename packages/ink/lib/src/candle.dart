@@ -5,28 +5,48 @@ import 'dart:ui';
 import 'ink_mark.dart';
 import 'stamp.dart';
 
+/// How a hand-drawn candle's wicks come out.
+enum CandleKind { normal, longUpper, longLower, bald, doji }
+
 /// Hand-drawn candles (K lines): one mark each. points: open, close,
 /// high, low (0–1 of the picture, same x); size: body width (part of the
 /// picture's height); color rising, color2 falling.
 class Candles {
   static const int red = 0xFFE53935, green = 0xFF16A34A;
 
-  /// Rising red (China, Japan, Korea…), else rising green.
+  /// Rising green, falling red (US / international) unless asked otherwise.
   static (int up, int down) colors(bool redUp) => redUp ? (red, green) : (green, red);
+
+  /// Never turned.
+  static bool noTurn(InkMark m) => m.tool == InkTool.candle || (m.shape?.noTurn ?? false);
 
   static bool rising(InkMark m) => m.points.length >= 2 && m.points[1].dy <= m.points[0].dy;
 
-  /// High / low a little beyond the body.
-  static void autoWicks(InkMark m) {
+  /// High / low from the body, as [kind] says. A doji: open = close, the
+  /// drag sets how long its wicks are.
+  static void autoWicks(InkMark m, [CandleKind kind = CandleKind.normal]) {
     if (m.points.length < 2) return;
-    final o = m.points[0], c = m.points[1];
-    final top = math.min(o.dy, c.dy), bot = math.max(o.dy, c.dy);
-    final tail = math.max((bot - top) * 0.25, 0.012);
-    final hi = Offset(o.dx, top - tail), lo = Offset(o.dx, bot + tail);
+    final o = m.points[0];
+    var c = m.points[1];
+    if (kind == CandleKind.doji) {
+      final reach = math.max((c.dy - o.dy).abs(), 0.02);
+      m.points = [o, o, Offset(o.dx, o.dy - reach), Offset(o.dx, o.dy + reach)];
+      return;
+    }
+    final top = math.min(o.dy, c.dy), bot = math.max(o.dy, c.dy), body = bot - top;
+    final short = math.max(body * 0.25, 0.012), long = math.max(body * 2, 0.06);
+    final (up, down) = switch (kind) {
+      CandleKind.longUpper => (long, math.max(body * 0.1, 0.006)),
+      CandleKind.longLower => (math.max(body * 0.1, 0.006), long),
+      CandleKind.bald => (0.0, 0.0),
+      _ => (short, short),
+    };
+    c = Offset(o.dx, c.dy);
+    final hi = Offset(o.dx, top - up), lo = Offset(o.dx, bot + down);
     if (m.points.length < 4) {
-      m.points = [o, Offset(o.dx, c.dy), hi, lo];
+      m.points = [o, c, hi, lo];
     } else {
-      m.points[1] = Offset(o.dx, c.dy);
+      m.points[1] = c;
       m.points[2] = hi;
       m.points[3] = lo;
     }
@@ -68,20 +88,20 @@ class Candles {
 
   /// A row of candles as one stamp: each (open, close, high, low), 0 at
   /// the bottom, 1 at the top. Rising / falling colours are set on placing.
-  static StampShape pattern(List<(double, double, double, double)> cs) {
+  static StampShape pattern(List<(double, double, double, double)> cs, {String? role}) {
     final n = cs.length;
     final parts = <StampPart>[];
     for (var i = 0; i < n; i++) {
       final (o, c, h, l) = cs[i];
       final x = (i + 0.5) / n, bw = 0.62 / n;
-      final role = c >= o ? 'u' : 'd';
+      final r = role ?? (c >= o ? 'u' : 'd');
       final top = 1.0 - math.max(o, c), bot = 1.0 - math.min(o, c);
-      parts.add(StampPart(polys: [[Offset(x, 1.0 - h), Offset(x, 1.0 - l)]], fill: false, w: 0.035, role: role));
+      parts.add(StampPart(polys: [[Offset(x, 1.0 - h), Offset(x, 1.0 - l)]], fill: false, w: 0.035, role: r));
       parts.add(StampPart(
         polys: [[Offset(x - bw / 2, top), Offset(x + bw / 2, top), Offset(x + bw / 2, math.max(bot, top + 0.02)), Offset(x - bw / 2, math.max(bot, top + 0.02))]],
-        role: role,
+        role: r,
       ));
     }
-    return StampShape(aspect: math.max(0.45, n * 0.42), parts: parts);
+    return StampShape(aspect: math.max(0.45, n * 0.42), parts: parts, noTurn: true);
   }
 }

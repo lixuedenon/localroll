@@ -64,11 +64,11 @@ Future<String?> pickMicrophone(BuildContext context, MicRecorder mic, {String? c
 }
 
 /// What to do with a finished recording.
-enum RecordedChoice { save, saveSend, discard }
+enum RecordedChoice { save, saveSend, discard, edit }
 
 /// The answer: what to do, the original's sound, seconds of the original
 /// before / after the explanation, and the file's name.
-typedef RecordedAnswer = ({RecordedChoice choice, OriginalSound sound, int beforeSec, int afterSec, String name});
+typedef RecordedAnswer = ({RecordedChoice choice, OriginalSound sound, int beforeSec, int afterSec, String name, bool replace});
 
 /// "The explanation is recorded (2:35)": what it holds ([summary]), how
 /// the original's sound goes in, how much of the original comes before /
@@ -85,6 +85,8 @@ Future<RecordedAnswer?> recordedDialog(
   int beforeSec = 5,
   int afterSec = 5,
   bool extendable = false,
+  bool editable = false,
+  bool replaceable = false,
 }) =>
     showDialog<RecordedAnswer>(
       context: context,
@@ -93,8 +95,15 @@ Future<RecordedAnswer?> recordedDialog(
         var s = sound;
         var before = beforeSec.toDouble(), after = afterSec.toDouble();
         final name = TextEditingController(text: defaultName);
-        RecordedAnswer answer(RecordedChoice c) =>
-            (choice: c, sound: s, beforeSec: before.round(), afterSec: after.round(), name: name.text.trim().isEmpty ? defaultName : name.text.trim());
+        var replace = false;
+        RecordedAnswer answer(RecordedChoice c) => (
+              choice: c,
+              sound: s,
+              beforeSec: before.round(),
+              afterSec: after.round(),
+              name: name.text.trim().isEmpty ? defaultName : name.text.trim(),
+              replace: replace,
+            );
         Widget slider(String label, double v, void Function(double) on) => Row(children: [
               SizedBox(width: 120, child: Text(label)),
               Expanded(child: Slider(value: v, max: 30, divisions: 30, label: '${v.round()}s', onChanged: on)),
@@ -137,6 +146,16 @@ Future<RecordedAnswer?> recordedDialog(
                     controller: name,
                     decoration: InputDecoration(labelText: tr('rec.name'), isDense: true),
                   ),
+                  // Made again: a new file, or in place of the one made before.
+                  if (replaceable)
+                    CheckboxListTile(
+                      value: replace,
+                      onChanged: (v) => set(() => replace = v ?? false),
+                      contentPadding: EdgeInsets.zero,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      title: Text(tr('nedit.replace')),
+                      subtitle: Text(tr('nedit.replace_tip')),
+                    ),
                   const SizedBox(height: 10),
                   Text(tr(screen ? 'screen.done_tip' : 'rec.done_tip'), style: const TextStyle(color: LrColors.muted, fontSize: 12.5, height: 1.5)),
                 ]),
@@ -151,6 +170,12 @@ Future<RecordedAnswer?> recordedDialog(
                 )
               else
                 TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('common.cancel'))),
+              if (editable)
+                OutlinedButton.icon(
+                  onPressed: () => Navigator.pop(ctx, answer(RecordedChoice.edit)),
+                  icon: const Icon(Icons.content_cut_rounded, size: 18),
+                  label: Text(tr('nedit.edit_first')),
+                ),
               OutlinedButton(onPressed: () => Navigator.pop(ctx, answer(RecordedChoice.save)), child: Text(tr('clip.save'))),
               FilledButton.icon(
                 onPressed: () => Navigator.pop(ctx, answer(RecordedChoice.saveSend)),

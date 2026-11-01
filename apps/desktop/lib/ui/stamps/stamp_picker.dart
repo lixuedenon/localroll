@@ -34,6 +34,9 @@ Future<PickedStamp?> showStampPicker(BuildContext context, {List<InkMark> drawn 
     showDialog<PickedStamp>(context: context, builder: (_) => _StampPicker(drawn: drawn, aspect: aspect));
 
 String stampName(String id) {
+  for (final (end, word) in const [('_up', 'stamp.rising'), ('_down', 'stamp.falling')]) {
+    if (id.endsWith(end)) return '${tr('stamp.${id.substring(0, id.length - end.length)}')} · ${tr(word)}';
+  }
   if (id.startsWith('my_')) {
     for (final m in StampLibrary.instance.mine) {
       if (m.id == id) return m.name;
@@ -261,7 +264,7 @@ class _StampPickerState extends State<_StampPicker> {
                             decoration: BoxDecoration(color: const Color(0x14FFFFFF), borderRadius: BorderRadius.circular(8)),
                             padding: const EdgeInsets.all(6),
                             child: Column(children: [
-                              Expanded(child: CustomPaint(painter: _StampTile(shape), size: Size.infinite)),
+                              Expanded(child: CustomPaint(painter: StampTile(shape), size: Size.infinite)),
                               const SizedBox(height: 4),
                               Row(children: [
                                 if (_lib.favorites.contains(id)) const Icon(Icons.star_rounded, size: 12, color: LrColors.safelight),
@@ -284,8 +287,8 @@ class _StampPickerState extends State<_StampPicker> {
   }
 }
 
-class _StampTile extends CustomPainter {
-  _StampTile(this.shape) : super(repaint: StampImages.loaded);
+class StampTile extends CustomPainter {
+  StampTile(this.shape) : super(repaint: StampImages.loaded);
 
   final StampShape shape;
 
@@ -293,7 +296,7 @@ class _StampTile extends CustomPainter {
   void paint(Canvas canvas, Size size) => shape.paint(canvas, Offset.zero & size, 0xFFFFFFFF);
 
   @override
-  bool shouldRepaint(_StampTile old) => old.shape != shape;
+  bool shouldRepaint(StampTile old) => old.shape != shape;
 }
 
 /// What was drawn, kept as a stamp (lines, shapes and words; still lines).

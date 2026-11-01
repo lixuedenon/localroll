@@ -115,6 +115,13 @@ Future<void> recordingAction(
         return;
       }
       await openInPlayer(context, s, [src], remake: r.narrationId);
+    case 'edit':
+      final src = r.sourcePath;
+      if (src == null || !File(src).existsSync()) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('recs.source_gone'))));
+        return;
+      }
+      await openInPlayer(context, s, [src], remake: r.narrationId, edit: true);
     case 'delete':
       await deleteRecordings(context, s, [r]);
     case 'reveal':
@@ -425,6 +432,7 @@ class _RecordingsViewState extends State<RecordingsView> {
                 PopupMenuItem(value: 'rename', child: Text(tr('recs.rename'))),
                 PopupMenuItem(value: 'convert', child: Text(tr('convert.menu'))),
                 if (r.kind == RecKind.narration && r.narrationId != null) PopupMenuItem(value: 'remake', child: Text(tr('rec.remake'))),
+                if (r.kind == RecKind.narration && r.narrationId != null) PopupMenuItem(value: 'edit', child: Text(tr('nedit.menu'))),
                 PopupMenuItem(value: 'delete', child: Text(tr('lib.delete'), style: const TextStyle(color: LrColors.danger))),
                 const PopupMenuDivider(),
                 PopupMenuItem(value: 'reveal', child: Text(tr('common.show_in_folder'))),

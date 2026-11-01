@@ -9,11 +9,13 @@ import 'package:window_manager/window_manager.dart';
 
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
+import '../../services/annotations.dart' show CandleKind;
 import '../../services/pen_overlay.dart';
 import '../../services/stamp_library.dart';
 import '../../services/win_screen.dart';
 import '../app_nav.dart';
 import '../player/ink_editor.dart';
+import '../stamps/candle_panel.dart';
 import '../stamps/stamp_picker.dart';
 import '../theme.dart';
 import 'screen_record.dart';
@@ -44,16 +46,32 @@ class _PenToolbarState extends State<PenToolbar> {
     super.dispose();
   }
 
-  /// The stamp panel: the bar grows for it a moment, then back.
-  Future<void> _pickStamp() async {
+  /// A panel (stamps / candles): the bar grows for it a moment, then back.
+  Future<T?> _big<T>(Future<T?> Function() show) async {
     final was = WinScreen.ownRect();
     final k = MediaQuery.devicePixelRatioOf(context);
     if (was != null) {
-      WinScreen.place(Rect.fromLTWH(was.left, was.top, math.max(was.width, 820 * k), math.max(was.height, 640 * k)), onTop: true);
+      WinScreen.place(Rect.fromLTWH(was.left, was.top, math.max(was.width, 820 * k), math.max(was.height, 680 * k)), onTop: true);
     }
-    final r = await showStampPicker(context);
+    final r = await show();
     if (was != null) WinScreen.place(was, onTop: true, activate: false);
+    return r;
+  }
+
+  Future<void> _pickStamp() async {
+    final r = await _big(() => showStampPicker(context));
     if (r != null) await o.setStamp(r.shape);
+  }
+
+  Future<void> _pickCandle() async {
+    final r = await _big(() => showCandlePanel(context));
+    if (r == null) return;
+    final lib = StampLibrary.instance;
+    if (r.stamp != null) {
+      await o.setStamp(r.stamp!.shape);
+    } else {
+      o.setCandle(lib.upColor, lib.downColor, r.kind ?? CandleKind.normal);
+    }
   }
 
   Widget _btn(IconData icon, String tip, VoidCallback? onTap, {bool on = false}) => IconButton(
@@ -135,10 +153,7 @@ class _PenToolbarState extends State<PenToolbar> {
                   for (final t in EditTool.values)
                     _btn(InkToolbar.icon(t), InkToolbar.label(t), () {
                       if (t == EditTool.stamp) return unawaited(_pickStamp());
-                      if (t == EditTool.candle) {
-                        final (up, down) = StampLibrary.instance.colors;
-                        return o.setCandle(up, down);
-                      }
+                      if (t == EditTool.candle) return unawaited(_pickCandle());
                       o.setTool(t.name);
                     }, on: o.draw && o.tool == t.name),
                   PopupMenuButton<Color>(
@@ -312,7 +327,9 @@ class PenSession {
     final c = WinScreen.cursor();
     final scr = screens.firstWhere((s) => s.rect.contains(c), orElse: () => screens.first);
     final k = scr.scale;
-    final w = 1180 * k, h = (tall ? 140 : 76) * k;
+    // Wide enough for every button; on a small screen, two rows.
+    final w = math.min(1480 * k, scr.rect.width - 40 * k);
+    final h = (tall ? 140 : 76) * k * (w < 1480 * k ? 1.75 : 1);
     WinScreen.place(BarPlace.rect(Rect.fromLTWH(scr.rect.center.dx - w / 2, scr.rect.top + 8 * k, w, h)), onTop: true, activate: false);
   }
 }

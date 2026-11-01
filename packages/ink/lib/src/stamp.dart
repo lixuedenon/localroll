@@ -62,9 +62,12 @@ class StampPart {
 /// A stamp's whole picture: parts in a box [aspect] wide for 1 high, or a
 /// picture ([png], base64) for stamps made from an image.
 class StampShape {
-  const StampShape({required this.aspect, this.parts = const [], this.png});
+  const StampShape({required this.aspect, this.parts = const [], this.png, this.noTurn = false});
 
   final double aspect;
+
+  /// Never turned (candles stay upright).
+  final bool noTurn;
   final List<StampPart> parts;
   final String? png;
 
@@ -72,6 +75,7 @@ class StampShape {
   StampShape resolved(int up, int down) => StampShape(
         aspect: aspect,
         png: png,
+        noTurn: noTurn,
         parts: [for (final p in parts) p.role == null ? p : p.withColor(p.role == 'u' ? up : down)],
       );
 
@@ -79,12 +83,14 @@ class StampShape {
         'a': (aspect * 1000).roundToDouble() / 1000,
         if (parts.isNotEmpty) 'p': [for (final p in parts) p.toJson()],
         'png': ?png,
+        if (noTurn) 'nt': 1,
       };
 
   static StampShape fromJson(Map<String, dynamic> j) => StampShape(
         aspect: (j['a'] as num?)?.toDouble() ?? 1,
         parts: [for (final p in (j['p'] as List?) ?? const []) StampPart.fromJson((p as Map).cast<String, dynamic>())],
         png: j['png'] as String?,
+        noTurn: j['nt'] == 1,
       );
 
   /// Where it sits in [box]: as large as fits, its own proportions, in the middle.
