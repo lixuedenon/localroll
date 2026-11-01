@@ -11,13 +11,11 @@ import 'package:localroll_core/localroll_core.dart';
 
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
-import '../../services/annotations.dart';
-import '../../services/library_index.dart';
 import '../../services/video_encoders.dart';
-import '../format.dart';
 import '../theme.dart';
 import 'ink_paint.dart';
 import 'narration.dart';
+import 'player_page.dart' show playerTime;
 
 /// Edits a recorded explanation: where each mark was drawn, the voice;
 /// marks deleted (their annotation too), stretches made silent or cut
