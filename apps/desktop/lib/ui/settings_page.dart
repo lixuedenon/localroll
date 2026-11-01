@@ -212,7 +212,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       ]),
                     ),
                     const Divider(height: 1),
-                    _row(Icons.info_outline_rounded, 'LocalRoll · ${tr('settings.version', {'version': lrVersion})}'),
+                    _row(Icons.info_outline_rounded, '$appName · ${tr('settings.version', {'version': lrVersion})}'),
                   ]),
                 ]),
               ),

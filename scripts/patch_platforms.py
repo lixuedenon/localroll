@@ -59,7 +59,7 @@ IOS_PROMPTS = {
 IOS_LPROJ = [lang["ios"] for lang in LANGUAGES]
 
 IOS_PLIST_KEYS = {
-    "CFBundleDisplayName": "<string>LocalRoll</string>",
+    "CFBundleDisplayName": "<string>Keepnear</string>",
     **{k: f"<string>{escape(MOBILE_EN[v])}</string>" for k, v in IOS_PROMPTS.items()},
     "NSBonjourServices": "<array>\n\t\t<string>_localroll._tcp</string>\n\t</array>",
     "NSAppTransportSecurity": "<dict>\n\t\t<key>NSAllowsLocalNetworking</key>\n\t\t<true/>\n\t</dict>",
@@ -128,7 +128,7 @@ def android_manifest(text: str) -> str:
         text = text.replace("<application", '<application\n        android:usesCleartextTraffic="true"', 1)
     if "requestLegacyExternalStorage" not in text:
         text = text.replace("<application", '<application\n        android:requestLegacyExternalStorage="true"', 1)
-    text = re.sub(r'android:label="[^"]*"', 'android:label="LocalRoll"', text, count=1)
+    text = re.sub(r'android:label="[^"]*"', 'android:label="Keepnear"', text, count=1)
     if ".TransferService" not in text:
         text = text.replace("</application>", "    " + ANDROID_SERVICE + "\n    </application>", 1)
     return text
@@ -206,7 +206,7 @@ def ios_pbxproj(text: str) -> str:
 
 
 def windows_main(text: str) -> str:
-    return text.replace('L"localroll_desktop"', 'L"LocalRoll"')
+    return text.replace('L"localroll_desktop"', 'L"Keepnear"')
 
 
 def main() -> int:

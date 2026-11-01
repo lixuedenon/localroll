@@ -21,7 +21,7 @@
         android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true"
         android:allowBackup="false"
-        android:label="LocalRoll"
+        android:label="Keepnear"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

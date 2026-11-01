@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'theme.dart';
 
 /// Brighter than the theme's cyan, so "online" catches the eye.
-const Color onlineGlow = Color(0xFF39F5A0);
+const Color onlineGlow = Color(0xFF22C55E);
 
 /// One shared, slow "breath" for everything online, so all of them glow
 /// together. 15 frames a second (plenty for a 2.6 s breath), only while

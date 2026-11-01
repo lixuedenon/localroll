@@ -12,8 +12,8 @@ import 'services/discovery.dart';
 import 'services/media_saver.dart';
 import 'services/mobile_settings.dart';
 import 'services/my_library.dart';
+import 'ui/home_look.dart';
 import 'ui/home_page.dart';
-import 'ui/theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -64,8 +64,8 @@ class LocalRollMobileApp extends StatelessWidget {
         return MaterialApp(
           title: appName,
           debugShowCheckedModeBanner: false,
-          theme: buildLrTheme(),
-          themeMode: ThemeMode.dark,
+          theme: buildLightTheme(),
+          themeMode: ThemeMode.light,
           // null = follow the phone's language.
           locale: lang == null ? null : localeForLanguage(lang),
           supportedLocales: appSupportedLocales,

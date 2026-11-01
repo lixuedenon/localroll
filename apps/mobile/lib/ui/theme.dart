@@ -6,17 +6,40 @@ import 'package:flutter/material.dart';
 class LrColors {
   LrColors._();
 
+  // The app is light now (beta.89): pages, cards, lines. The dark look
+  // for full-screen viewers is [DarkColors].
+  static const ink = Color(0xFFEFF4FD);
+  static const surface = Color(0xFFF3F7FE);
+  static const raised = Color(0xFFE6EEFB);
+  static const line = Color(0xFFDDE6F6);
+  static const safelight = Color(0xFF2F7BFF);
+  static const verified = Color(0xFF16A86A);
+  static const text = Color(0xFF0C1E45);
+  static const muted = Color(0xFF6E7F99);
+  static const danger = Color(0xFFE5484D);
+}
+
+/// The old dark "darkroom" colours: full-screen photos, videos, PDFs.
+class DarkColors {
+  DarkColors._();
+
   static const ink = Color(0xFF0F1B1D);
   static const surface = Color(0xFF152427);
   static const raised = Color(0xFF1C3135);
   static const line = Color(0xFF2A4246);
-  static const safelight = Color(0xFFFFB547);
-  static const verified = Color(0xFF5FD4C4);
   static const text = Color(0xFFE6EFEC);
   static const muted = Color(0xFF8EA6A2);
-  static const danger = Color(0xFFFF6B5E);
 }
 
+/// Colours that follow the page (light pages, dark viewers).
+extension LrLook on BuildContext {
+  Color get lrSurface => Theme.of(this).colorScheme.surfaceContainer;
+  Color get lrRaised => Theme.of(this).colorScheme.surfaceContainerHigh;
+  Color get lrLine => Theme.of(this).colorScheme.outlineVariant;
+  Color get lrInk => Theme.of(this).scaffoldBackgroundColor;
+}
+
+/// The dark look, for full-screen photos, videos and documents.
 ThemeData buildLrTheme() {
   const scheme = ColorScheme(
     brightness: Brightness.dark,
@@ -34,18 +57,18 @@ ThemeData buildLrTheme() {
     onError: Color(0xFF2D0500),
     errorContainer: Color(0xFF5C1A13),
     onErrorContainer: Color(0xFFFFDAD4),
-    surface: LrColors.ink,
-    onSurface: LrColors.text,
-    onSurfaceVariant: LrColors.muted,
+    surface: DarkColors.ink,
+    onSurface: DarkColors.text,
+    onSurfaceVariant: DarkColors.muted,
     surfaceContainerLowest: Color(0xFF0B1517),
-    surfaceContainerLow: LrColors.surface,
-    surfaceContainer: LrColors.surface,
-    surfaceContainerHigh: LrColors.raised,
+    surfaceContainerLow: DarkColors.surface,
+    surfaceContainer: DarkColors.surface,
+    surfaceContainerHigh: DarkColors.raised,
     surfaceContainerHighest: Color(0xFF233B40),
-    outline: LrColors.line,
+    outline: DarkColors.line,
     outlineVariant: Color(0xFF223538),
-    inverseSurface: LrColors.text,
-    onInverseSurface: LrColors.ink,
+    inverseSurface: DarkColors.text,
+    onInverseSurface: DarkColors.ink,
     inversePrimary: Color(0xFF7A5300),
   );
 
@@ -57,33 +80,33 @@ ThemeData buildLrTheme() {
     titleLarge: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, letterSpacing: -0.2),
     titleMedium: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
     bodyMedium: const TextStyle(fontSize: 14, height: 1.45),
-    bodySmall: const TextStyle(fontSize: 13, height: 1.4, color: LrColors.muted),
-  ).apply(bodyColor: LrColors.text, displayColor: LrColors.text);
+    bodySmall: const TextStyle(fontSize: 13, height: 1.4, color: DarkColors.muted),
+  ).apply(bodyColor: DarkColors.text, displayColor: DarkColors.text);
 
   return base.copyWith(
-    scaffoldBackgroundColor: LrColors.ink,
+    scaffoldBackgroundColor: DarkColors.ink,
     textTheme: text,
     cardTheme: CardThemeData(
-      color: LrColors.surface,
+      color: DarkColors.surface,
       elevation: 0,
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: const BorderSide(color: LrColors.line),
+        side: const BorderSide(color: DarkColors.line),
       ),
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: LrColors.ink,
-      foregroundColor: LrColors.text,
+      backgroundColor: DarkColors.ink,
+      foregroundColor: DarkColors.text,
       elevation: 0,
       scrolledUnderElevation: 0,
     ),
-    dividerTheme: const DividerThemeData(color: LrColors.line, space: 1, thickness: 1),
+    dividerTheme: const DividerThemeData(color: DarkColors.line, space: 1, thickness: 1),
     dialogTheme: DialogThemeData(
-      backgroundColor: LrColors.raised,
+      backgroundColor: DarkColors.raised,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: LrColors.line),
+        side: const BorderSide(color: DarkColors.line),
       ),
     ),
     filledButtonTheme: FilledButtonThemeData(
@@ -94,34 +117,34 @@ ThemeData buildLrTheme() {
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        foregroundColor: LrColors.text,
-        side: const BorderSide(color: LrColors.line),
+        foregroundColor: DarkColors.text,
+        side: const BorderSide(color: DarkColors.line),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: LrColors.surface,
+      fillColor: DarkColors.surface,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: LrColors.line),
+        borderSide: const BorderSide(color: DarkColors.line),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: LrColors.line),
+        borderSide: const BorderSide(color: DarkColors.line),
       ),
     ),
     snackBarTheme: const SnackBarThemeData(
-      backgroundColor: LrColors.raised,
-      contentTextStyle: TextStyle(color: LrColors.text),
+      backgroundColor: DarkColors.raised,
+      contentTextStyle: TextStyle(color: DarkColors.text),
       behavior: SnackBarBehavior.floating,
     ),
     tooltipTheme: TooltipThemeData(
-      decoration: BoxDecoration(color: LrColors.raised, borderRadius: BorderRadius.circular(6)),
-      textStyle: const TextStyle(color: LrColors.text, fontSize: 12),
+      decoration: BoxDecoration(color: DarkColors.raised, borderRadius: BorderRadius.circular(6)),
+      textStyle: const TextStyle(color: DarkColors.text, fontSize: 12),
     ),
-    progressIndicatorTheme: const ProgressIndicatorThemeData(color: LrColors.safelight, linearTrackColor: LrColors.raised),
+    progressIndicatorTheme: const ProgressIndicatorThemeData(color: LrColors.safelight, linearTrackColor: DarkColors.raised),
     sliderTheme: const SliderThemeData(activeTrackColor: LrColors.safelight, thumbColor: LrColors.safelight),
   );
 }

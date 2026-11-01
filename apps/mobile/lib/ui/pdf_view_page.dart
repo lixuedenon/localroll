@@ -46,13 +46,16 @@ class _PdfViewPageState extends State<PdfViewPage> {
     ));
   }
 
+  // Full screen: the dark look (pictures and pages show best on it).
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => Theme(data: buildLrTheme(), child: Builder(builder: _build));
+
+  Widget _build(BuildContext context) {
     final n = _count;
     final mq = MediaQuery.of(context);
     final width = (mq.size.width * mq.devicePixelRatio * 1.5).round();
     return Scaffold(
-      backgroundColor: LrColors.ink,
+      backgroundColor: DarkColors.ink,
       appBar: AppBar(
         title: Text(_name, overflow: TextOverflow.ellipsis),
         actions: [

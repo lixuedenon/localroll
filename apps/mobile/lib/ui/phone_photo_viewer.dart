@@ -44,8 +44,11 @@ class _PhonePhotoViewerState extends State<PhonePhotoViewer> {
     return '${d.year}-${two(d.month)}-${two(d.day)} ${two(d.hour)}:${two(d.minute)}';
   }
 
+  // Full screen: the dark look (pictures and pages show best on it).
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => Theme(data: buildLrTheme(), child: Builder(builder: _build));
+
+  Widget _build(BuildContext context) {
     final a = widget.assets[_at];
     final backedUp = widget.sent.contains(a.id);
     return Scaffold(

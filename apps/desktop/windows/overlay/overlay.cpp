@@ -121,6 +121,11 @@ struct Sheet {
 struct Page {
   std::vector<Sheet> sheets = std::vector<Sheet>(1);
   int cur = 0;
+  // A window's page: where the window was (its marks move with it), and
+  // whether it is minimised (its marks hidden).
+  RECT at{};
+  bool known = false;
+  bool hidden = false;
   Sheet& sheet() { return sheets[cur]; }
 };
 
@@ -528,7 +533,9 @@ void render(const RECT* dirty = nullptr) {
         if (g) g_rt->DrawGeometry(g.p, br.p, lineWidth(m), round.p);
       }
     };
-    for (const auto& m : sheet().marks) paintAll(m, fadeAlpha(m, now));
+    if (!page().hidden) {
+      for (const auto& m : sheet().marks) paintAll(m, fadeAlpha(m, now));
+    }
     if (g_hasDraft) paintAll(g_draft, 1);
     g_rt->SetTransform(shift);
     if (const Mark* s = findMark(g_selected)) {
@@ -1317,6 +1324,36 @@ LRESULT CALLBACK msgProc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
     const double t = static_cast<double>(GetTickCount64() % 1600) / 1600.0;
     BLENDFUNCTION bf{AC_SRC_OVER, 0, static_cast<BYTE>(110 + 145 * (0.5 + 0.5 * std::cos(t * 2 * 3.14159265))), AC_SRC_ALPHA};
     UpdateLayeredWindow(g_frame, nullptr, nullptr, nullptr, nullptr, nullptr, 0, &bf, ULW_ALPHA);
+  }
+  if (msg == WM_TIMER && wp == kTimerTick && g_perWindow && g_page && IsWindow(g_page) && g_drag == kNone) {
+    // Marks on a window go with it: moved when it moves, hidden while it
+    // is minimised.
+    Page& p = page();
+    const bool iconic = IsIconic(g_page) != 0;
+    if (iconic != p.hidden) {
+      p.hidden = iconic;
+      render();
+    }
+    RECT r{};
+    if (!iconic && GetWindowRect(g_page, &r)) {
+      if (p.known && (r.left != p.at.left || r.top != p.at.top)) {
+        const float dx = static_cast<float>(r.left - p.at.left), dy = static_cast<float>(r.top - p.at.top);
+        auto shiftAll = [&](std::vector<Mark>& ms) {
+          for (auto& m : ms) {
+            m.dx += dx;
+            m.dy += dy;
+          }
+        };
+        for (auto& sh : p.sheets) {
+          shiftAll(sh.marks);
+          for (auto& u : sh.undo) shiftAll(u);
+          for (auto& u : sh.redo) shiftAll(u);
+        }
+        render();
+      }
+      p.at = r;
+      p.known = true;
+    }
   }
   if (msg == WM_TIMER && wp == kTimerTick) {
     // Hold Ctrl while drawing: the mouse goes through for that moment.

@@ -562,8 +562,11 @@ class _ViewerState extends State<_Viewer> {
     super.dispose();
   }
 
+  // Full screen: the dark look (pictures and pages show best on it).
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => Theme(data: buildLrTheme(), child: Builder(builder: _build));
+
+  Widget _build(BuildContext context) {
     return ListenableBuilder(
       listenable: widget.lib,
       builder: (context, _) {

@@ -2,6 +2,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// The home page's light look: a blue sky at the top with soft swirls,
 /// frosted white cards, pastel tiles. (The other pages keep the dark look
@@ -22,7 +23,10 @@ class HomeColors {
   static const glass = Color(0xE6FFFFFF);
 }
 
-/// The home page's theme (light, blue), inside the app's dark one.
+/// The app's look: light, blue (full-screen viewers stay dark).
+ThemeData buildLightTheme() => homeTheme(ThemeData(useMaterial3: true, brightness: Brightness.light));
+
+/// The light blue theme on top of [base].
 ThemeData homeTheme(ThemeData base) {
   final scheme = ColorScheme.fromSeed(seedColor: HomeColors.blue, brightness: Brightness.light).copyWith(
     primary: HomeColors.blue,
@@ -44,6 +48,37 @@ ThemeData homeTheme(ThemeData base) {
       trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
     ),
     textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: HomeColors.blue)),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: HomeColors.skyTop,
+      foregroundColor: Colors.white,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      systemOverlayStyle: SystemUiOverlayStyle.light,
+    ),
+    cardTheme: CardThemeData(
+      color: Colors.white,
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: HomeColors.line)),
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: HomeColors.blue,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        shape: const StadiumBorder(),
+      ),
+    ),
+    dialogTheme: DialogThemeData(backgroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: HomeColors.line)),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: HomeColors.line)),
+    ),
+    snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
+    progressIndicatorTheme: const ProgressIndicatorThemeData(color: HomeColors.blue),
+    chipTheme: base.chipTheme.copyWith(selectedColor: HomeColors.blue.withValues(alpha: 0.15)),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: HomeColors.blue,

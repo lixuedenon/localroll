@@ -2,6 +2,11 @@
 //
 // PC → PC sending end to end: the sender of one test PC sends real files to
 // the receiver of another, over pinned HTTPS on this machine.
+// The first test makes two TLS keys (pure Dart RSA, slow on a busy CI
+// machine): more time than the default 30 s.
+@Timeout(Duration(minutes: 3))
+library;
+
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';

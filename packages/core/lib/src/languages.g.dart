@@ -6,7 +6,7 @@ import 'device_names.dart';
 import 'i18n.dart';
 
 /// The app's shown name (packages/core/l10n/app.json).
-const String appName = 'LocalRoll';
+const String appName = 'Keepnear';
 
 /// From packages/core/l10n/languages.json.
 const List<LrLanguage> generatedLanguages = [
