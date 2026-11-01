@@ -11,6 +11,7 @@ import 'package:localroll_core/localroll_core.dart';
 import '../../app_services.dart';
 import '../../services/annotations.dart';
 import '../../services/library_index.dart';
+import '../../services/loopback.dart';
 import '../../services/recordings.dart';
 import '../../services/video_encoders.dart';
 import 'ink_paint.dart';
@@ -18,6 +19,9 @@ import 'snapshot.dart';
 
 /// How the original's own sound goes into an explanation.
 enum OriginalSound {
+  /// As it is, lowered (to about a third) only while speaking.
+  duck,
+
   /// Turned down to 30 %, under the voice.
   quiet,
 
@@ -531,8 +535,12 @@ class NarrationComposer {
         if (hasVoice) ...[
           '-filter_complex',
           // The voice starts where the explanation starts (after the lead-in).
-          '[1:a]aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo,${preMs > 0 ? 'adelay=$preMs|$preMs,' : ''}apad[v];'
-              '[0:a][v]amix=inputs=2:duration=first:normalize=0[a]',
+          sound == OriginalSound.duck
+              // The original lowered only while the voice speaks.
+              ? '[1:a]aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo,${preMs > 0 ? 'adelay=$preMs|$preMs,' : ''}apad,asplit=2[v][k];'
+                  '[0:a]$mixFormat[o];${duckFilter('o', 'k', 'd')};[d][v]amix=inputs=2:duration=first:normalize=0[a]'
+              : '[1:a]aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo,${preMs > 0 ? 'adelay=$preMs|$preMs,' : ''}apad[v];'
+                  '[0:a][v]amix=inputs=2:duration=first:normalize=0[a]',
           '-map', '0:v', '-map', '[a]',
         ] else ...['-map', '0:v', '-map', '0:a'],
         '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k',

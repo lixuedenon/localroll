@@ -1298,7 +1298,7 @@ class _PlayerPageState extends State<PlayerPage> {
     if (mounted) await _afterRecording(rec.session);
   }
 
-  OriginalSound get _sound => OriginalSound.values.firstWhere((v) => v.name == _memory.sound, orElse: () => OriginalSound.quiet);
+  OriginalSound get _sound => OriginalSound.values.firstWhere((v) => v.name == _memory.sound, orElse: () => OriginalSound.duck);
 
   /// Save / save and send / throw away (asked twice) a recording; [again]:
   /// making a kept one again.

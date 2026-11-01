@@ -1030,5 +1030,15 @@
   "pick.tip_multi": "Nhấp để chọn (theo thứ tự này); nhấp đúp lấy riêng mục đó.",
   "pick.tip_one": "Nhấp để chọn một mục.",
   "pick.ok": "Dùng ({n})",
-  "pick.no_library": "Thư viện không khả dụng."
+  "pick.no_library": "Thư viện không khả dụng.",
+  "screen.mic_volume": "Âm lượng giọng",
+  "screen.with_system": "Ghi cả âm thanh máy tính",
+  "screen.with_system_tip": "Âm thanh video, trang web, ứng dụng (không cần “Stereo Mix”).",
+  "screen.system_missing": "Thiếu trình ghi âm máy tính.",
+  "screen.system_volume": "Âm thanh máy tính",
+  "screen.duck": "Giảm âm máy tính khi tôi nói",
+  "screen.duck_tip": "Còn khoảng 1/3; nửa giây sau khi ngừng nói sẽ trở lại.",
+  "screen.system_failed": "Không ghi được âm máy tính (không có loa?). Tiếp tục ghi không có âm này.",
+  "rec.system_level": "Âm thanh máy tính",
+  "rec.sound_duck": "Giảm khi tôi nói"
 }

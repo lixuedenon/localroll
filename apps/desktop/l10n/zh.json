@@ -1030,5 +1030,15 @@
   "pick.tip_multi": "单击选择（按这个顺序加入），双击直接用这一个。",
   "pick.tip_one": "单击选择一个。",
   "pick.ok": "确定（{n}）",
-  "pick.no_library": "媒体库不可用。"
+  "pick.no_library": "媒体库不可用。",
+  "screen.mic_volume": "人声音量",
+  "screen.with_system": "同时录电脑声音",
+  "screen.with_system_tip": "视频、网页、软件发出的声音（不用打开「立体声混音」）。",
+  "screen.system_missing": "缺少录电脑声音的辅助程序。",
+  "screen.system_volume": "电脑声音",
+  "screen.duck": "我说话时自动压低电脑声音",
+  "screen.duck_tip": "压到约 30%，停下来半秒左右恢复。",
+  "screen.system_failed": "录不了电脑声音（没有扬声器？），先不带电脑声音继续录。",
+  "rec.system_level": "电脑声音",
+  "rec.sound_duck": "说话时压低"
 }

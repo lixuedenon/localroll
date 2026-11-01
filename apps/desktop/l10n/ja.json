@@ -1030,5 +1030,15 @@
   "pick.tip_multi": "クリックで選択（この順番）。ダブルクリックでその 1 つだけ。",
   "pick.tip_one": "クリックして 1 つ選びます。",
   "pick.ok": "決定（{n}）",
-  "pick.no_library": "ライブラリが使えません。"
+  "pick.no_library": "ライブラリが使えません。",
+  "screen.mic_volume": "声の音量",
+  "screen.with_system": "パソコンの音も録音",
+  "screen.with_system_tip": "動画・ウェブ・アプリの音（「ステレオミキサー」は不要）。",
+  "screen.system_missing": "パソコンの音を録る補助プログラムがありません。",
+  "screen.system_volume": "パソコンの音",
+  "screen.duck": "話している間はパソコンの音を下げる",
+  "screen.duck_tip": "約 3 分の 1 に。話し終えて 0.5 秒で元に戻ります。",
+  "screen.system_failed": "パソコンの音を録音できません（スピーカーがない？）。音なしで続けます。",
+  "rec.system_level": "パソコンの音",
+  "rec.sound_duck": "話す間だけ下げる"
 }

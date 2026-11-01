@@ -78,10 +78,16 @@ class PlayerMemory extends ChangeNotifier {
   int screenFps = 30;
   bool screenMic = true;
 
+  /// Screen recordings: the sound the PC plays too; how loud each is
+  /// (0–2, 1 = as it is); the PC's sound lowered while speaking.
+  bool screenSystem = true;
+  double screenMicVol = 1, screenSysVol = 1;
+  bool screenDuck = true;
+
   /// The microphone chosen for explanations, and how the original's sound
   /// goes in ('quiet', 'none', 'full').
   String? mic;
-  String sound = 'quiet';
+  String sound = 'duck';
 
   /// A clip of an annotation starts / ends this many seconds around it.
   int clipBefore = 10;
@@ -145,8 +151,13 @@ class PlayerMemory extends ChangeNotifier {
       screenIndex = (j['screenIndex'] as num?)?.toInt() ?? 0;
       screenFps = (j['screenFps'] as num?)?.toInt() == 60 ? 60 : 30;
       screenMic = j['screenMic'] != false;
+      screenSystem = j['screenSys'] != false;
+      screenMicVol = ((j['screenMicVol'] as num?)?.toDouble() ?? 1).clamp(0.0, 2.0);
+      screenSysVol = ((j['screenSysVol'] as num?)?.toDouble() ?? 1).clamp(0.0, 2.0);
+      screenDuck = j['screenDuck'] != false;
       mic = j['mic'] as String?;
-      sound = j['sound'] as String? ?? 'quiet';
+      // Since beta.90 the default is "lowered only while speaking".
+      sound = j['sound2'] as String? ?? 'duck';
       sideOpen = j['side'] != false;
       sideTab = j['sideTab'] as String? ?? 'list';
       clipBefore = ((j['clipBefore'] as num?)?.toInt() ?? 10).clamp(0, 60);
@@ -247,6 +258,14 @@ class PlayerMemory extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setScreenSound({required bool system, required double micVol, required double sysVol, required bool duck}) {
+    screenSystem = system;
+    screenMicVol = micVol;
+    screenSysVol = sysVol;
+    screenDuck = duck;
+    _save();
+  }
+
   void setScreen({String? mode, int? index, int? fps, bool? mic, String? folder}) {
     if (mode != null) screenMode = mode;
     if (index != null) screenIndex = index;
@@ -329,8 +348,12 @@ class PlayerMemory extends ChangeNotifier {
         'screenIndex': screenIndex,
         'screenFps': screenFps,
         'screenMic': screenMic,
+        'screenSys': screenSystem,
+        'screenMicVol': screenMicVol,
+        'screenSysVol': screenSysVol,
+        'screenDuck': screenDuck,
         'mic': ?mic,
-        'sound': sound,
+        'sound2': sound,
         'clipBefore': clipBefore,
         'side': sideOpen,
         'sideTab': sideTab,

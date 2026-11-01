@@ -14,6 +14,7 @@ import '../../app_services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/annotations.dart';
 import '../../services/library_index.dart';
+import '../../services/loopback.dart';
 import '../../services/mic.dart';
 import '../../services/pen_overlay.dart';
 import '../../services/peers.dart';
@@ -36,7 +37,24 @@ enum ScreenMode { screen, window, area }
 
 /// The choice made before recording.
 class ScreenSetup {
-  const ScreenSetup({required this.mode, required this.screen, this.window, this.area, required this.fps, required this.mic});
+  const ScreenSetup({
+    required this.mode,
+    required this.screen,
+    this.window,
+    this.area,
+    required this.fps,
+    required this.mic,
+    this.system = false,
+    this.micVol = 1,
+    this.sysVol = 1,
+    this.duck = true,
+  });
+
+  /// Also the sound the PC plays; how loud the voice / the PC (1 = as it
+  /// is); the PC's sound lowered while speaking.
+  final bool system;
+  final double micVol, sysVol;
+  final bool duck;
 
   final ScreenMode mode;
   final ScreenInfo screen;
@@ -293,6 +311,12 @@ class ScreenRecorder extends ChangeNotifier {
   final List<({File file, int headMs, int lengthMs})> _voice = [];
   int _voiceStart = 0, _voiceHead = 0;
   File? _voiceFile;
+
+  /// The sound the PC plays, in parts between pauses like the voice.
+  LoopbackRecorder? _sys;
+  final List<({File file, int headMs, int lengthMs})> _sysParts = [];
+  int _sysStart = 0, _sysHead = 0;
+  File? _sysFile;
   final List<_Click> _clicks = [];
   final List<(int, Rect)> _windowAt = [];
   final Map<String, NarrationInk> _inks = {};
@@ -311,6 +335,9 @@ class ScreenRecorder extends ChangeNotifier {
 
   int get elapsedMs => clock.elapsedMilliseconds;
   double level() => _mic?.level() ?? 0;
+
+  /// How loud the PC's sound is now (null: not recorded).
+  double? systemLevel() => _sys == null ? null : _sys!.level();
 
   /// Global keys (also while LocalRoll is in the background):
   /// Ctrl+Shift+R start / stop, Ctrl+Shift+P pause, Ctrl+Shift+D pen.
@@ -355,6 +382,8 @@ class ScreenRecorder extends ChangeNotifier {
     final dir = _dir = await Directory.systemTemp.createTemp('lr_screen_$id');
     _parts.clear();
     _voice.clear();
+    _sysParts.clear();
+    _sys = null;
     _clicks.clear();
     _windowAt.clear();
     _inks.clear();
@@ -409,16 +438,23 @@ class ScreenRecorder extends ChangeNotifier {
 
     final mic = su.mic == null ? null : (_mic = MicRecorder(exe));
     final listening = mic == null ? Future.value(true) : _startVoice();
+    if (su.system) _sys = LoopbackRecorder();
+    final hearing = _sys == null ? Future.value(true) : _startSystem();
     final filming = _cap.start(exe, area, su.fps, enc, File('${dir.path}${Platform.pathSeparator}part_0.mkv'));
     for (var c = 3; c > 0; c--) {
       countdown = c;
       notifyListeners();
       await Future<void>.delayed(const Duration(seconds: 1));
     }
-    final okV = await filming, okA = await listening;
+    final okV = await filming, okA = await listening, okS = await hearing;
     countdown = 0;
+    if (!okS) {
+      _sys = null;
+      _message(tr('screen.system_failed'));
+    }
     if (!okV) {
       await _mic?.stop();
+      await _sys?.stop();
       if (usesOverlay) await PenOverlay.instance.stop();
       await _restore();
       notifyListeners();
@@ -439,6 +475,18 @@ class ScreenRecorder extends ChangeNotifier {
     return _mic!.start(setup!.mic!, f);
   }
 
+  Future<bool> _startSystem() {
+    final f = _sysFile = File('${_dir!.path}${Platform.pathSeparator}system_${_sysParts.length}.wav');
+    return _sys!.start(f);
+  }
+
+  Future<void> _stopSystem() async {
+    final sys = _sys;
+    if (sys == null || !sys.running) return;
+    await sys.stop();
+    _sysParts.add((file: _sysFile!, headMs: _sysHead, lengthMs: clock.elapsedMilliseconds - _sysStart));
+  }
+
   /// The clock goes on; what was filmed / heard before now is cut.
   void _go(Directory dir, int partIndex) {
     final head = _cap.recordedMs;
@@ -447,6 +495,11 @@ class ScreenRecorder extends ChangeNotifier {
       final first = _mic!.firstSound ?? DateTime.now();
       _voiceHead = math.max(0, DateTime.now().difference(first).inMilliseconds);
       _voiceStart = clock.elapsedMilliseconds;
+    }
+    if (_sys?.running ?? false) {
+      final first = _sys!.firstSound ?? DateTime.now();
+      _sysHead = math.max(0, DateTime.now().difference(first).inMilliseconds);
+      _sysStart = clock.elapsedMilliseconds;
     }
     clock.start();
   }
@@ -564,6 +617,7 @@ class ScreenRecorder extends ChangeNotifier {
         await _mic!.stop();
         _voice.add((file: _voiceFile!, headMs: _voiceHead, lengthMs: clock.elapsedMilliseconds - _voiceStart));
       }
+      await _stopSystem();
     } else {
       if (exe == null || enc == null) return;
       final idx = _parts.length;
@@ -573,6 +627,7 @@ class ScreenRecorder extends ChangeNotifier {
         return;
       }
       if (_mic != null) await _startVoice();
+      if (_sys != null && !await _startSystem()) _message(tr('screen.system_failed'));
       paused = false;
       _go(_dir!, idx);
       notifyListeners();
@@ -636,6 +691,7 @@ class ScreenRecorder extends ChangeNotifier {
         await _mic!.stop();
         _voice.add((file: _voiceFile!, headMs: _voiceHead, lengthMs: clock.elapsedMilliseconds - _voiceStart));
       }
+      await _stopSystem();
     }
     recording = false;
     paused = false;
@@ -676,6 +732,8 @@ class ScreenRecorder extends ChangeNotifier {
     final exe = s.ffmpeg.ffmpeg!;
     final voice = File('${dir.path}${Platform.pathSeparator}voice.wav');
     if (_voice.isNotEmpty) await joinVoice(exe, _voice, voice);
+    final system = File('${dir.path}${Platform.pathSeparator}system.wav');
+    if (_sysParts.isNotEmpty) await joinVoice(exe, _sysParts, system);
     while (true) {
       final c = AppNav.instance.navigatorKey.currentContext;
       if (c == null || !c.mounted) return;
@@ -691,7 +749,8 @@ class ScreenRecorder extends ChangeNotifier {
         _message(tr('rec.discarded'));
         return;
       }
-      await _make(c2, length, voice.existsSync() ? voice : null, send: r.choice == RecordedChoice.saveSend, name: r.name, source: _source);
+      await _make(c2, length, voice.existsSync() ? voice : null,
+          system: system.existsSync() ? system : null, send: r.choice == RecordedChoice.saveSend, name: r.name, source: _source);
       return;
     }
   }
@@ -732,7 +791,8 @@ class ScreenRecorder extends ChangeNotifier {
     };
   }
 
-  Future<void> _make(BuildContext context, int length, File? voice, {required bool send, required String name, String source = ''}) async {
+  Future<void> _make(BuildContext context, int length, File? voice,
+      {File? system, required bool send, required String name, String source = ''}) async {
     final s = _s!;
     final maker = _ScreenComposer(s);
     final progress = ValueNotifier<double>(0);
@@ -749,6 +809,10 @@ class ScreenRecorder extends ChangeNotifier {
       front: _front,
       firstPage: _firstPage,
       voice: voice,
+      system: system,
+      micVol: setup!.micVol,
+      sysVol: setup!.sysVol,
+      duck: setup!.duck,
       name: name,
       source: source,
       fps: setup!.fps,
@@ -873,6 +937,10 @@ class _ScreenComposer {
     required List<(int, int)> front,
     required int firstPage,
     required File? voice,
+    File? system,
+    double micVol = 1,
+    double sysVol = 1,
+    bool duck = true,
     required String name,
     String source = '',
     required int fps,
@@ -972,12 +1040,26 @@ class _ScreenComposer {
       final folder = Snapshots.folder(s, screen: true);
       await Directory(folder).create(recursive: true);
       final out = LibraryIndex.uniquePath(folder, sanitizeFileName('$name.mp4'));
+      // The voice and the PC's sound, each at its volume; the PC's lowered
+      // while speaking.
+      final v = voice != null ? 1 : null;
+      final y = system != null ? (v == null ? 1 : 2) : null;
+      String? graph;
+      if (v != null && y != null) {
+        graph = '[$v:a]$mixFormat,volume=${micVol.toStringAsFixed(2)},asplit=2[m][k];'
+            '[$y:a]$mixFormat,volume=${sysVol.toStringAsFixed(2)}[q];'
+            '${duck ? '${duckFilter('q', 'k', 'd')};[d]' : '[q]'}[m]amix=inputs=2:duration=longest:normalize=0[a]';
+      } else if (v != null || y != null) {
+        graph = '[${v ?? y}:a]$mixFormat,volume=${(v != null ? micVol : sysVol).toStringAsFixed(2)}[a]';
+      }
       final ok = await _run(exe, [
         '-hide_banner', '-loglevel', 'error', '-y',
         '-i', joined,
         if (voice != null) ...['-i', voice.path],
-        '-map', '0:v', if (voice != null) ...['-map', '1:a'],
-        '-c:v', 'copy', if (voice != null) ...['-c:a', 'aac', '-b:a', '160k', '-shortest'],
+        if (system != null) ...['-i', system.path],
+        if (graph != null) ...['-filter_complex', graph],
+        '-map', '0:v', if (graph != null) ...['-map', '[a]'],
+        '-c:v', 'copy', if (graph != null) ...['-c:a', 'aac', '-b:a', '160k', '-shortest'],
         '-movflags', '+faststart',
         out,
       ]);
@@ -1076,6 +1158,9 @@ Future<ScreenSetup?> showScreenSetup(BuildContext context, AppServices s, {Scree
   WindowInfo? window = windows.isEmpty ? null : windows.first;
   var fps = m.screenFps;
   var withMic = m.screenMic;
+  var withSystem = m.screenSystem && LoopbackRecorder.available;
+  var micVol = m.screenMicVol, sysVol = m.screenSysVol;
+  var duck = m.screenDuck;
   final mic = MicRecorder(s.ffmpeg.ffmpeg);
   var micName = m.mic;
   // While choosing, LocalRoll stays over the window brought forward.
@@ -1178,6 +1263,25 @@ Future<ScreenSetup?> showScreenSetup(BuildContext context, AppServices s, {Scree
                   child: Text(tr('screen.mic_change')),
                 ),
               ),
+              if (withMic) _volume(tr('screen.mic_volume'), micVol, (v) => set(() => micVol = v)),
+              CheckboxListTile(
+                value: withSystem,
+                onChanged: LoopbackRecorder.available ? (v) => set(() => withSystem = v ?? true) : null,
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                title: Text(tr('screen.with_system')),
+                subtitle: Text(tr(LoopbackRecorder.available ? 'screen.with_system_tip' : 'screen.system_missing')),
+              ),
+              if (withSystem) _volume(tr('screen.system_volume'), sysVol, (v) => set(() => sysVol = v)),
+              if (withSystem && withMic)
+                CheckboxListTile(
+                  value: duck,
+                  onChanged: (v) => set(() => duck = v ?? true),
+                  contentPadding: EdgeInsets.zero,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  title: Text(tr('screen.duck')),
+                  subtitle: Text(tr('screen.duck_tip')),
+                ),
               Row(children: [
                 Text(tr('screen.fps'), style: const TextStyle(color: LrColors.muted)),
                 const SizedBox(width: 12),
@@ -1212,6 +1316,7 @@ Future<ScreenSetup?> showScreenSetup(BuildContext context, AppServices s, {Scree
   }
   if (micName != null) m.setMic(micName);
   m.setScreen(mode: mode.name, index: screen.index, fps: fps, mic: withMic);
+  m.setScreenSound(system: withSystem, micVol: micVol, sysVol: sysVol, duck: duck);
   if (mode == ScreenMode.window && window != null) {
     // Where it is now; the screen it is on.
     final now = WinScreen.windowRect(window!.handle);
@@ -1225,8 +1330,29 @@ Future<ScreenSetup?> showScreenSetup(BuildContext context, AppServices s, {Scree
     area = await _pickArea(context, s, screen);
     if (area == null) return null;
   }
-  return ScreenSetup(mode: mode, screen: screen, window: mode == ScreenMode.window ? window : null, area: area, fps: fps, mic: withMic ? micName : null);
+  return ScreenSetup(
+    mode: mode,
+    screen: screen,
+    window: mode == ScreenMode.window ? window : null,
+    area: area,
+    fps: fps,
+    mic: withMic ? micName : null,
+    system: withSystem,
+    micVol: micVol,
+    sysVol: sysVol,
+    duck: duck,
+  );
 }
+
+/// "Voice volume ——o—— 100 %".
+Widget _volume(String label, double v, ValueChanged<double> on) => Padding(
+      padding: const EdgeInsets.only(left: 40, bottom: 4),
+      child: Row(children: [
+        SizedBox(width: 110, child: Text(label, style: const TextStyle(color: LrColors.muted, fontSize: 12.5))),
+        Expanded(child: Slider(value: v, max: 2, divisions: 20, label: '${(v * 100).round()} %', onChanged: on)),
+        SizedBox(width: 48, child: Text('${(v * 100).round()} %', style: const TextStyle(fontSize: 12.5))),
+      ]),
+    );
 
 /// Point at a window on a still of [screen] (it lights up), click to take it.
 Future<WindowInfo?> _pickWindow(BuildContext context, AppServices s, ScreenInfo screen) async {
@@ -1537,6 +1663,7 @@ class _Bar extends StatelessWidget {
           elapsed: () => r.elapsedMs,
           paused: r.paused,
           level: r.level,
+          systemLevel: r.systemLevel,
           onPause: () => unawaited(r.togglePause()),
           onStop: () => unawaited(r.stop()),
         ),

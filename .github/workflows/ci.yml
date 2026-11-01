@@ -174,6 +174,26 @@ jobs:
           if (-not ($lines | Where-Object { $_ -match '^ready ' })) { Write-Output "::error::lr_overlay did not start: $out"; exit 1 }
           if (-not ($lines | Where-Object { $_ -match '^pixel FF[0-9A-F]{2}0000' })) { Write-Output "::error::lr_overlay drew no text"; exit 1 }
           if (-not ($lines | Where-Object { $_ -match '^pixel FFFAFAF7' })) { Write-Output "::error::lr_overlay drew no board"; exit 1 }
+      - name: Check the PC sound helper
+        shell: pwsh
+        run: |
+          # lr_loopback.exe must be next to the app. CI machines have no
+          # speakers: it must still start and answer (ready, or a clear error).
+          $exe = (Resolve-Path "apps/desktop/build/windows/x64/runner/Release").Path + "\lr_loopback.exe"
+          if (-not (Test-Path $exe)) { Write-Output "::error::lr_loopback.exe missing from the build"; exit 1 }
+          $psi = New-Object System.Diagnostics.ProcessStartInfo $exe
+          $psi.Arguments = "`"$env:RUNNER_TEMP\pc_sound.wav`""
+          $psi.RedirectStandardInput = $true
+          $psi.RedirectStandardOutput = $true
+          $psi.UseShellExecute = $false
+          $p = [System.Diagnostics.Process]::Start($psi)
+          Start-Sleep -Seconds 2
+          $p.StandardInput.WriteLine('stop')
+          $p.StandardInput.Close()
+          $out = $p.StandardOutput.ReadToEnd()
+          if (-not $p.WaitForExit(15000)) { $p.Kill(); Write-Output "::error::lr_loopback did not quit"; exit 1 }
+          Write-Output $out
+          if (-not ($out -match 'ready |error ')) { Write-Output "::error::lr_loopback said nothing: $out"; exit 1 }
       - name: Check onnxruntime.dll
         shell: pwsh
         run: |

@@ -1030,5 +1030,15 @@
   "pick.tip_multi": "Klik untuk memilih (sesuai urutan); klik dua kali mengambil satu itu saja.",
   "pick.tip_one": "Klik salah satu untuk memilih.",
   "pick.ok": "Pakai ({n})",
-  "pick.no_library": "Pustaka tidak tersedia."
+  "pick.no_library": "Pustaka tidak tersedia.",
+  "screen.mic_volume": "Volume suara",
+  "screen.with_system": "Rekam juga suara PC",
+  "screen.with_system_tip": "Suara video, web, dan aplikasi (tanpa “Stereo Mix”).",
+  "screen.system_missing": "Pembantu suara PC tidak ada.",
+  "screen.system_volume": "Suara PC",
+  "screen.duck": "Kecilkan suara PC saat saya bicara",
+  "screen.duck_tip": "Sekitar sepertiga; kembali setengah detik setelah berhenti.",
+  "screen.system_failed": "Suara PC tidak bisa direkam (tidak ada speaker?). Rekaman lanjut tanpanya.",
+  "rec.system_level": "Suara PC",
+  "rec.sound_duck": "Kecil saat bicara"
 }

@@ -123,6 +123,7 @@ Future<RecordedAnswer?> recordedDialog(
                     SegmentedButton<OriginalSound>(
                       showSelectedIcon: false,
                       segments: [
+                        ButtonSegment(value: OriginalSound.duck, label: Text(tr('rec.sound_duck'))),
                         ButtonSegment(value: OriginalSound.quiet, label: Text(tr('rec.sound_quiet'))),
                         ButtonSegment(value: OriginalSound.none, label: Text(tr('rec.sound_none'))),
                         ButtonSegment(value: OriginalSound.full, label: Text(tr('rec.sound_full'))),
@@ -215,7 +216,11 @@ class RecordingBar extends StatefulWidget {
     required this.onPause,
     required this.onStop,
     this.what,
+    this.systemLevel,
   });
+
+  /// How loud the PC's sound is (null: not recorded).
+  final double? Function()? systemLevel;
 
   /// What is being recorded ("Sideloadly", "Whole screen").
   final String? what;
@@ -274,6 +279,20 @@ class _RecordingBarState extends State<RecordingBar> {
           ),
         ],
         const SizedBox(width: 12),
+        // Two meters: the voice, and the PC's sound (when recorded).
+        if (widget.systemLevel?.call() != null) ...[
+          Tooltip(
+            message: tr('rec.system_level'),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              const Icon(Icons.volume_up_rounded, size: 14, color: Colors.white70),
+              const SizedBox(width: 3),
+              _meter(widget.paused ? 0 : (widget.systemLevel!() ?? 0)),
+            ]),
+          ),
+          const SizedBox(width: 8),
+          const Icon(Icons.mic_rounded, size: 14, color: Colors.white70),
+          const SizedBox(width: 3),
+        ],
         Tooltip(
           message: tr('rec.level'),
           child: Container(
@@ -305,3 +324,14 @@ class _RecordingBarState extends State<RecordingBar> {
     );
   }
 }
+
+Widget _meter(double lv) => Container(
+      width: 60,
+      height: 6,
+      decoration: BoxDecoration(color: const Color(0x33FFFFFF), borderRadius: BorderRadius.circular(3)),
+      alignment: Alignment.centerLeft,
+      child: FractionallySizedBox(
+        widthFactor: lv.clamp(0.0, 1.0),
+        child: Container(decoration: BoxDecoration(color: lv > 0.9 ? LrColors.danger : LrColors.verified, borderRadius: BorderRadius.circular(3))),
+      ),
+    );

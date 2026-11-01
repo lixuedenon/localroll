@@ -1030,5 +1030,15 @@
   "pick.tip_multi": "Clic para elegir (en este orden); doble clic toma solo ese.",
   "pick.tip_one": "Haz clic en uno para elegirlo.",
   "pick.ok": "Usar ({n})",
-  "pick.no_library": "La biblioteca no está disponible."
+  "pick.no_library": "La biblioteca no está disponible.",
+  "screen.mic_volume": "Volumen de voz",
+  "screen.with_system": "Grabar también el sonido del PC",
+  "screen.with_system_tip": "Lo que suenan vídeos, webs y apps (sin «Mezcla estéreo»).",
+  "screen.system_missing": "Falta el ayudante de sonido del PC.",
+  "screen.system_volume": "Sonido del PC",
+  "screen.duck": "Bajar el sonido del PC mientras hablo",
+  "screen.duck_tip": "A un tercio aprox.; vuelve medio segundo después de callar.",
+  "screen.system_failed": "No se puede grabar el sonido del PC (¿sin altavoces?). Se graba sin él.",
+  "rec.system_level": "Sonido del PC",
+  "rec.sound_duck": "Baja al hablar"
 }

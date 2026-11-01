@@ -1030,5 +1030,15 @@
   "pick.tip_multi": "Klicken wählt (in dieser Reihenfolge), Doppelklick nimmt nur dieses eine.",
   "pick.tip_one": "Klicken wählt eines.",
   "pick.ok": "Übernehmen ({n})",
-  "pick.no_library": "Die Mediathek ist nicht erreichbar."
+  "pick.no_library": "Die Mediathek ist nicht erreichbar.",
+  "screen.mic_volume": "Stimme",
+  "screen.with_system": "Auch den PC-Ton aufnehmen",
+  "screen.with_system_tip": "Ton aus Videos, Browser und Programmen (kein „Stereomix“ nötig).",
+  "screen.system_missing": "Das Programm für den PC-Ton fehlt.",
+  "screen.system_volume": "PC-Ton",
+  "screen.duck": "PC-Ton leiser, während ich spreche",
+  "screen.duck_tip": "Auf etwa ein Drittel; eine halbe Sekunde nach dem Sprechen wieder normal.",
+  "screen.system_failed": "PC-Ton kann nicht aufgenommen werden (keine Lautsprecher?). Es geht ohne weiter.",
+  "rec.system_level": "PC-Ton",
+  "rec.sound_duck": "Leiser beim Sprechen"
 }

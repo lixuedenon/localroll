@@ -1030,5 +1030,15 @@
   "pick.tip_multi": "चुनने के लिए क्लिक करें (इसी क्रम में); डबल-क्लिक से केवल वही।",
   "pick.tip_one": "चुनने के लिए एक पर क्लिक करें।",
   "pick.ok": "उपयोग करें ({n})",
-  "pick.no_library": "लाइब्रेरी उपलब्ध नहीं है।"
+  "pick.no_library": "लाइब्रेरी उपलब्ध नहीं है।",
+  "screen.mic_volume": "आवाज़ का वॉल्यूम",
+  "screen.with_system": "PC की आवाज़ भी रिकॉर्ड करें",
+  "screen.with_system_tip": "वीडियो, वेब पेज और ऐप की आवाज़ («Stereo Mix» की ज़रूरत नहीं)।",
+  "screen.system_missing": "PC ध्वनि सहायक नहीं मिला।",
+  "screen.system_volume": "PC की आवाज़",
+  "screen.duck": "मेरे बोलते समय PC की आवाज़ कम करें",
+  "screen.duck_tip": "लगभग एक-तिहाई तक; रुकने के आधे सेकंड में वापस।",
+  "screen.system_failed": "PC की आवाज़ रिकॉर्ड नहीं हो सकी (स्पीकर नहीं?)। उसके बिना जारी है।",
+  "rec.system_level": "PC की आवाज़",
+  "rec.sound_duck": "बोलते समय कम"
 }

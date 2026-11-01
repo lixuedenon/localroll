@@ -1030,5 +1030,15 @@
   "pick.tip_multi": "클릭으로 선택(이 순서대로), 더블클릭하면 그것 하나만.",
   "pick.tip_one": "하나를 클릭해 선택하세요.",
   "pick.ok": "사용 ({n})",
-  "pick.no_library": "라이브러리를 사용할 수 없습니다."
+  "pick.no_library": "라이브러리를 사용할 수 없습니다.",
+  "screen.mic_volume": "목소리 볼륨",
+  "screen.with_system": "PC 소리도 녹음",
+  "screen.with_system_tip": "영상, 웹, 앱에서 나오는 소리(“스테레오 믹스” 필요 없음).",
+  "screen.system_missing": "PC 소리 도우미가 없습니다.",
+  "screen.system_volume": "PC 소리",
+  "screen.duck": "말하는 동안 PC 소리 줄이기",
+  "screen.duck_tip": "약 3분의 1로, 말을 멈추면 0.5초 안에 돌아옵니다.",
+  "screen.system_failed": "PC 소리를 녹음할 수 없습니다(스피커 없음?). 없이 계속합니다.",
+  "rec.system_level": "PC 소리",
+  "rec.sound_duck": "말할 때만 줄이기"
 }

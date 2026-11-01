@@ -1030,5 +1030,15 @@
   "pick.tip_multi": "Clic per scegliere (in quest’ordine); doppio clic prende solo quello.",
   "pick.tip_one": "Fai clic su uno per sceglierlo.",
   "pick.ok": "Usa ({n})",
-  "pick.no_library": "La libreria non è disponibile."
+  "pick.no_library": "La libreria non è disponibile.",
+  "screen.mic_volume": "Volume voce",
+  "screen.with_system": "Registra anche l’audio del PC",
+  "screen.with_system_tip": "L’audio di video, pagine web e app (senza «Missaggio stereo»).",
+  "screen.system_missing": "Manca l’aiuto per l’audio del PC.",
+  "screen.system_volume": "Audio del PC",
+  "screen.duck": "Abbassa l’audio del PC quando parlo",
+  "screen.duck_tip": "A circa un terzo; torna mezzo secondo dopo.",
+  "screen.system_failed": "Impossibile registrare l’audio del PC (niente altoparlanti?). Si continua senza.",
+  "rec.system_level": "Audio del PC",
+  "rec.sound_duck": "Più basso quando parlo"
 }

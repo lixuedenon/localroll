@@ -1030,5 +1030,15 @@
   "pick.tip_multi": "單擊選擇（按這個順序加入），雙擊直接用這一個。",
   "pick.tip_one": "單擊選擇一個。",
   "pick.ok": "確定（{n}）",
-  "pick.no_library": "媒體庫不可用。"
+  "pick.no_library": "媒體庫不可用。",
+  "screen.mic_volume": "人聲音量",
+  "screen.with_system": "同時錄電腦聲音",
+  "screen.with_system_tip": "影片、網頁、軟體發出的聲音（不用開「立體聲混音」）。",
+  "screen.system_missing": "缺少錄電腦聲音的輔助程式。",
+  "screen.system_volume": "電腦聲音",
+  "screen.duck": "我說話時自動壓低電腦聲音",
+  "screen.duck_tip": "壓到約 30%，停下來半秒左右恢復。",
+  "screen.system_failed": "錄不了電腦聲音（沒有喇叭？），先不帶電腦聲音繼續錄。",
+  "rec.system_level": "電腦聲音",
+  "rec.sound_duck": "說話時壓低"
 }

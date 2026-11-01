@@ -1030,5 +1030,15 @@
   "pick.tip_multi": "Click to choose (in this order); double-click takes just that one.",
   "pick.tip_one": "Click one to choose it.",
   "pick.ok": "Use these ({n})",
-  "pick.no_library": "The library isn’t available."
+  "pick.no_library": "The library isn’t available.",
+  "screen.mic_volume": "Voice volume",
+  "screen.with_system": "Also record the PC’s sound",
+  "screen.with_system_tip": "What videos, web pages and apps play (no “Stereo Mix” needed).",
+  "screen.system_missing": "The PC sound helper is missing.",
+  "screen.system_volume": "PC sound",
+  "screen.duck": "Lower the PC’s sound while I speak",
+  "screen.duck_tip": "To about a third; back within half a second after you stop.",
+  "screen.system_failed": "The PC’s sound can’t be recorded (no speakers?). Recording goes on without it.",
+  "rec.system_level": "PC sound",
+  "rec.sound_duck": "Lower while I speak"
 }

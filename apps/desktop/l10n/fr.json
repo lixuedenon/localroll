@@ -1030,5 +1030,15 @@
   "pick.tip_multi": "Cliquez pour choisir (dans cet ordre) ; double-clic prend seulement celui-ci.",
   "pick.tip_one": "Cliquez sur un élément pour le choisir.",
   "pick.ok": "Utiliser ({n})",
-  "pick.no_library": "La bibliothèque n’est pas disponible."
+  "pick.no_library": "La bibliothèque n’est pas disponible.",
+  "screen.mic_volume": "Volume de la voix",
+  "screen.with_system": "Enregistrer aussi le son du PC",
+  "screen.with_system_tip": "Le son des vidéos, pages web et applis (pas besoin de « Mixage stéréo »).",
+  "screen.system_missing": "L’assistant du son du PC est absent.",
+  "screen.system_volume": "Son du PC",
+  "screen.duck": "Baisser le son du PC quand je parle",
+  "screen.duck_tip": "À environ un tiers ; revient une demi-seconde après.",
+  "screen.system_failed": "Impossible d’enregistrer le son du PC (pas de haut-parleurs ?). On continue sans.",
+  "rec.system_level": "Son du PC",
+  "rec.sound_duck": "Plus bas quand je parle"
 }

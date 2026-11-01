@@ -54,6 +54,8 @@ add_subdirectory("runner")
 
 # The screen pen's layer (lr_overlay.exe).
 add_subdirectory("overlay")
+# The PC sound recorder (lr_loopback.exe).
+add_subdirectory("loopback")
 
 
 # Generated plugin build rules, which manage building the plugins and adding

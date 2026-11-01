@@ -1030,5 +1030,15 @@
   "pick.tip_multi": "Seçmek için tıklayın (bu sırayla); çift tık yalnızca onu alır.",
   "pick.tip_one": "Seçmek için birine tıklayın.",
   "pick.ok": "Kullan ({n})",
-  "pick.no_library": "Kitaplık kullanılamıyor."
+  "pick.no_library": "Kitaplık kullanılamıyor.",
+  "screen.mic_volume": "Ses düzeyi",
+  "screen.with_system": "PC sesini de kaydet",
+  "screen.with_system_tip": "Videoların, web sayfalarının, uygulamaların sesi (“Stereo Mix” gerekmez).",
+  "screen.system_missing": "PC ses yardımcısı yok.",
+  "screen.system_volume": "PC sesi",
+  "screen.duck": "Konuşurken PC sesini kıs",
+  "screen.duck_tip": "Yaklaşık üçte bire; sustuktan yarım saniye sonra geri gelir.",
+  "screen.system_failed": "PC sesi kaydedilemiyor (hoparlör yok mu?). Onsuz devam ediliyor.",
+  "rec.system_level": "PC sesi",
+  "rec.sound_duck": "Konuşurken kıs"
 }
