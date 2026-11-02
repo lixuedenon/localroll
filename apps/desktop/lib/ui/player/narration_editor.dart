@@ -253,7 +253,7 @@ class _EditorState extends State<_Editor> {
       sp = spans[_si];
       unawaited(_startSpan());
     }
-    final t = sp.from + math.min(e, sp.to - sp.from);
+    final int t = sp.from + math.min<int>(e, sp.to - sp.from);
     // Speaking again: from the start of the stretch.
     if (sp.taking && _takeStart == null) {
       _takeStart = _clock.elapsedMilliseconds;
