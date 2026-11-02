@@ -1127,8 +1127,8 @@
   "nedit.save": "Değişiklikleri kaydet",
   "nedit.menu": "Düzenle…",
   "nedit.edit_first": "Önce düzenle",
-  "nedit.tip": "Oraya gitmek için zaman çizelgesine tıklayın; o çizgiyi silmek için noktaya tıklayın; bir bölüm seçmek için sesin üzerinde sürükleyin.",
-  "nedit.sel_tip": "Sessiz: yalnızca ses gider. Kes: görüntü ve ses gider.",
+  "nedit.tip": "Boşluk oynatır; oraya gitmek için zaman çizelgesine, çizgiyi silmek için noktaya tıklayın; bölüm seçmek için sesin üzerinde sürükleyin.",
+  "nedit.sel_tip": "Sessiz: yalnızca ses. Kes: görüntü ve ses. Yeniden seslendir: aynı görüntüye yeniden konuşun.",
   "nedit.mute": "Sessiz",
   "nedit.cut": "Kes",
   "nedit.cut_title": "Bu {len} kesilsin mi?",
@@ -1155,5 +1155,12 @@
   "candle.one_tip": "Yalnızca bir mum: seçmek için çift tıklayın, sonra renk menüsünden renk seçin.",
   "stamp.rising": "yükseliş",
   "stamp.falling": "düşüş",
-  "pick.indexed": "Resim araması: %{n} hazır"
+  "pick.indexed": "Resim araması: %{n} hazır",
+  "nedit.play": "Oynat (Boşluk)",
+  "nedit.stop": "Durdur (Boşluk)",
+  "nedit.redub": "Bu bölümü yeniden seslendir",
+  "nedit.take_soon": "Önce iki saniye, sonra kayıt…",
+  "nedit.taking": "Kayıt · önce {was} · şimdi {now}",
+  "nedit.take_tip": "Görüntüye bakarak konuşun; bitince Boşluk ya da Durdur. Bölümün sonunda görüntü durup bekler.",
+  "nedit.overlap": "Kesilmiş ya da yeniden seslendirilmiş bir bölümle çakışıyor"
 }

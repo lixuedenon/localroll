@@ -1127,8 +1127,8 @@
   "nedit.save": "儲存修改",
   "nedit.menu": "編輯講解…",
   "nedit.edit_first": "先編輯",
-  "nedit.tip": "點時間軸跳到那一刻；點圓點可刪除那一筆；在聲音波形上拖動選一段。",
-  "nedit.sel_tip": "靜音：只去掉聲音；剪掉：畫面和聲音一起去掉。",
+  "nedit.tip": "空白鍵播放；點時間軸跳到那一刻；點圓點可刪除那一筆；在聲音波形上拖動選一段。",
+  "nedit.sel_tip": "靜音：只去掉聲音；剪掉：畫面和聲音一起去掉；重錄：對著同樣的畫面重新說。",
   "nedit.mute": "靜音",
   "nedit.cut": "剪掉",
   "nedit.cut_title": "剪掉這 {len}？",
@@ -1155,5 +1155,12 @@
   "candle.one_tip": "只改某一根：先按兩下選取它，再在顏色選單裡點顏色。",
   "stamp.rising": "漲",
   "stamp.falling": "跌",
-  "pick.indexed": "圖片內容搜尋：已完成 {n}%"
+  "pick.indexed": "圖片內容搜尋：已完成 {n}%",
+  "nedit.play": "播放（空白鍵）",
+  "nedit.stop": "停止（空白鍵）",
+  "nedit.redub": "重錄這一段",
+  "nedit.take_soon": "先回放前面 2 秒，馬上開始錄音…",
+  "nedit.taking": "錄音中 · 原來 {was} · 已錄 {now}",
+  "nedit.take_tip": "看著畫面說；說完按空白鍵或點「停止」。到這段結尾，畫面會停住等你。",
+  "nedit.overlap": "和已剪掉或已重錄的部分重疊了"
 }

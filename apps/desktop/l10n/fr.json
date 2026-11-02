@@ -1127,8 +1127,8 @@
   "nedit.save": "Garder les modifications",
   "nedit.menu": "Modifier…",
   "nedit.edit_first": "Modifier d’abord",
-  "nedit.tip": "Cliquez sur la frise pour y aller ; sur un point pour supprimer ce trait ; faites glisser sur la voix pour choisir un passage.",
-  "nedit.sel_tip": "Silence : seule la voix part. Couper : image et voix partent.",
+  "nedit.tip": "Espace : lire ; clic sur la frise : y aller ; clic sur un point : supprimer le trait ; glisser sur la voix : choisir un passage.",
+  "nedit.sel_tip": "Silence : la voix seule. Couper : image et voix. Réenregistrer : reparlez sur la même image.",
   "nedit.mute": "Silence",
   "nedit.cut": "Couper",
   "nedit.cut_title": "Couper ces {len} ?",
@@ -1155,5 +1155,12 @@
   "candle.one_tip": "Un seul chandelier : double-cliquez pour le sélectionner, puis choisissez une couleur.",
   "stamp.rising": "hausse",
   "stamp.falling": "baisse",
-  "pick.indexed": "Recherche par image : {n} % prête"
+  "pick.indexed": "Recherche par image : {n} % prête",
+  "nedit.play": "Lire (Espace)",
+  "nedit.stop": "Arrêter (Espace)",
+  "nedit.redub": "Réenregistrer ce passage",
+  "nedit.take_soon": "Deux secondes avant pour se caler, puis ça enregistre…",
+  "nedit.taking": "Enregistrement · avant {was} · maintenant {now}",
+  "nedit.take_tip": "Parlez en regardant l’image ; fini : Espace ou Arrêter. À la fin du passage l’image s’arrête et attend.",
+  "nedit.overlap": "Chevauche un passage déjà coupé ou réenregistré"
 }

@@ -1127,8 +1127,8 @@
   "nedit.save": "변경 저장",
   "nedit.menu": "편집…",
   "nedit.edit_first": "먼저 편집",
-  "nedit.tip": "타임라인을 클릭하면 그 시점으로, 점을 클릭하면 그 획을 삭제, 음성 위를 끌면 구간 선택.",
-  "nedit.sel_tip": "무음: 목소리만 지웁니다. 잘라내기: 화면과 목소리를 함께 지웁니다.",
+  "nedit.tip": "스페이스로 재생, 타임라인 클릭으로 이동, 점 클릭으로 획 삭제, 음성 위를 끌어 구간 선택.",
+  "nedit.sel_tip": "무음: 목소리만. 잘라내기: 화면과 목소리. 다시 녹음: 같은 화면에 다시 말하기.",
   "nedit.mute": "무음",
   "nedit.cut": "잘라내기",
   "nedit.cut_title": "이 {len}을(를) 잘라낼까요?",
@@ -1155,5 +1155,12 @@
   "candle.one_tip": "한 개만 바꾸기: 더블클릭으로 선택한 뒤 색 메뉴에서 고르세요.",
   "stamp.rising": "상승",
   "stamp.falling": "하락",
-  "pick.indexed": "이미지 검색: {n}% 준비됨"
+  "pick.indexed": "이미지 검색: {n}% 준비됨",
+  "nedit.play": "재생(스페이스)",
+  "nedit.stop": "정지(스페이스)",
+  "nedit.redub": "이 구간 다시 녹음",
+  "nedit.take_soon": "앞 2초를 들려준 뒤 녹음…",
+  "nedit.taking": "녹음 중 · 원래 {was} · 지금 {now}",
+  "nedit.take_tip": "화면을 보며 말하고, 끝나면 스페이스나 ‘정지’. 구간 끝에서 화면이 멈춰 기다립니다.",
+  "nedit.overlap": "이미 잘라냈거나 다시 녹음한 구간과 겹칩니다"
 }

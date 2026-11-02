@@ -784,3 +784,39 @@ Set<String> cutNarration(NarrationSession n, int a, int b) {
 /// ffmpeg: [ranges] (ms) as "between(t,a,b)+…".
 String betweens(List<(int, int)> ranges) =>
     ranges.map((r) => 'between(t,${(r.$1 / 1000).toStringAsFixed(3)},${(r.$2 / 1000).toStringAsFixed(3)})').join('+');
+
+/// Holds the picture still at [at] for [extra] ms (a longer voice was
+/// recorded there): everything from [at] on moves [extra] later.
+void freezeNarration(NarrationSession n, int at, int extra) {
+  if (extra <= 0) return;
+  final s = sampleAt(n.samples, at);
+  final samples = [
+    for (final x in n.samples)
+      if (x.t < at) x,
+    if (s != null) ...[
+      NarrationSample.fromJson({...s.toJson(), 't': at}..remove('pl')),
+      NarrationSample.fromJson({...s.toJson(), 't': at + extra}),
+    ],
+    for (final x in n.samples)
+      if (x.t > at) NarrationSample.fromJson({...x.toJson(), 't': x.t + extra}),
+  ];
+  n.samples
+    ..clear()
+    ..addAll(samples);
+  int later(int t) => t >= at ? t + extra : t;
+  final inks = [
+    for (final i in n.inks)
+      NarrationInk(file: i.file, ink: i.ink, startT: later(i.startT), times: i.times, removedT: i.removedT == null ? null : later(i.removedT!)),
+  ];
+  n.inks
+    ..clear()
+    ..addAll(inks);
+  for (final k in [...n.edited.keys]) {
+    n.edited[k] = later(n.edited[k]!);
+  }
+  final moves = [for (final c in n.camera) CameraMove(t: later(c.t), x: c.x, y: c.y, side: c.side, round: c.round)];
+  n.camera
+    ..clear()
+    ..addAll(moves);
+  n.lengthMs += extra;
+}

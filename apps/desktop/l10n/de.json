@@ -1127,8 +1127,8 @@
   "nedit.save": "Änderungen sichern",
   "nedit.menu": "Erklärung bearbeiten…",
   "nedit.edit_first": "Erst bearbeiten",
-  "nedit.tip": "Auf die Zeitleiste klicken, um dorthin zu springen; auf einen Punkt klicken, um den Strich zu löschen; auf der Tonwelle ziehen, um einen Abschnitt zu wählen.",
-  "nedit.sel_tip": "Stumm: nur der Ton geht. Ausschneiden: Bild und Ton gehen.",
+  "nedit.tip": "Leertaste: abspielen; Zeitleiste anklicken: dorthin; Punkt anklicken: Strich löschen; auf der Tonwelle ziehen: Teil wählen.",
+  "nedit.sel_tip": "Stumm: nur der Ton. Ausschneiden: Bild und Ton. Neu sprechen: zum selben Bild neu reden.",
   "nedit.mute": "Stumm",
   "nedit.cut": "Ausschneiden",
   "nedit.cut_title": "Diese {len} ausschneiden?",
@@ -1155,5 +1155,12 @@
   "candle.one_tip": "Nur eine Kerze ändern: doppelklicken zum Auswählen, dann eine Farbe im Farbmenü.",
   "stamp.rising": "steigend",
   "stamp.falling": "fallend",
-  "pick.indexed": "Bildinhalt-Suche: {n} % fertig"
+  "pick.indexed": "Bildinhalt-Suche: {n} % fertig",
+  "nedit.play": "Abspielen (Leertaste)",
+  "nedit.stop": "Stopp (Leertaste)",
+  "nedit.redub": "Diesen Teil neu sprechen",
+  "nedit.take_soon": "Zwei Sekunden davor zum Einstimmen, dann geht es los…",
+  "nedit.taking": "Aufnahme · vorher {was} · jetzt {now}",
+  "nedit.take_tip": "Sprich zum Bild; fertig: Leertaste oder „Stopp“. Am Ende des Teils hält das Bild an und wartet.",
+  "nedit.overlap": "Überschneidet sich mit einem geschnittenen oder neu gesprochenen Teil"
 }

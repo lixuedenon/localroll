@@ -1127,8 +1127,8 @@
   "nedit.save": "Simpan perubahan",
   "nedit.menu": "Edit…",
   "nedit.edit_first": "Edit dulu",
-  "nedit.tip": "Klik garis waktu untuk ke sana; klik titik untuk menghapus coretan itu; seret pada suara untuk memilih bagian.",
-  "nedit.sel_tip": "Bisukan: hanya suara yang hilang. Potong: gambar dan suara hilang.",
+  "nedit.tip": "Spasi memutar; klik garis waktu untuk ke sana; klik titik untuk menghapus coretan; seret pada suara untuk memilih bagian.",
+  "nedit.sel_tip": "Bisukan: hanya suara. Potong: gambar dan suara. Rekam ulang: bicara lagi di gambar yang sama.",
   "nedit.mute": "Bisukan",
   "nedit.cut": "Potong",
   "nedit.cut_title": "Potong {len} ini?",
@@ -1155,5 +1155,12 @@
   "candle.one_tip": "Satu lilin saja: klik dua kali untuk memilih, lalu pilih warna di menu warna.",
   "stamp.rising": "naik",
   "stamp.falling": "turun",
-  "pick.indexed": "Pencarian gambar: {n}% siap"
+  "pick.indexed": "Pencarian gambar: {n}% siap",
+  "nedit.play": "Putar (Spasi)",
+  "nedit.stop": "Berhenti (Spasi)",
+  "nedit.redub": "Rekam ulang bagian ini",
+  "nedit.take_soon": "Dua detik sebelumnya dulu, lalu merekam…",
+  "nedit.taking": "Merekam · sebelumnya {was} · sekarang {now}",
+  "nedit.take_tip": "Bicara sambil melihat gambar; selesai: Spasi atau Berhenti. Di akhir bagian gambar berhenti menunggu.",
+  "nedit.overlap": "Bertumpuk dengan bagian yang sudah dipotong atau direkam ulang"
 }

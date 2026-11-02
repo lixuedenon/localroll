@@ -1127,8 +1127,8 @@
   "nedit.save": "Salva le modifiche",
   "nedit.menu": "Modifica…",
   "nedit.edit_first": "Modifica prima",
-  "nedit.tip": "Clic sulla linea del tempo per andarci; su un punto per cancellare quel segno; trascina sulla voce per scegliere un tratto.",
-  "nedit.sel_tip": "Silenzia: va via solo la voce. Taglia: vanno via immagine e voce.",
+  "nedit.tip": "Spazio riproduce; clic sulla linea del tempo per andarci; clic su un punto per cancellare il segno; trascina sulla voce per scegliere un tratto.",
+  "nedit.sel_tip": "Silenzia: solo la voce. Taglia: immagine e voce. Riregistra: riparla sulla stessa immagine.",
   "nedit.mute": "Silenzia",
   "nedit.cut": "Taglia",
   "nedit.cut_title": "Tagliare questi {len}?",
@@ -1155,5 +1155,12 @@
   "candle.one_tip": "Solo una candela: doppio clic per selezionarla, poi scegli un colore nel menu colori.",
   "stamp.rising": "rialzo",
   "stamp.falling": "ribasso",
-  "pick.indexed": "Ricerca per immagine: {n}% pronta"
+  "pick.indexed": "Ricerca per immagine: {n}% pronta",
+  "nedit.play": "Riproduci (Spazio)",
+  "nedit.stop": "Ferma (Spazio)",
+  "nedit.redub": "Riregistra questo tratto",
+  "nedit.take_soon": "Due secondi prima per entrare, poi si registra…",
+  "nedit.taking": "Registrazione · prima {was} · ora {now}",
+  "nedit.take_tip": "Parla guardando l’immagine; finito: Spazio o Ferma. Alla fine del tratto l’immagine si ferma e aspetta.",
+  "nedit.overlap": "Si sovrappone a un tratto già tagliato o riregistrato"
 }

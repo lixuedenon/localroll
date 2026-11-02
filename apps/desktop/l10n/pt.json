@@ -1127,8 +1127,8 @@
   "nedit.save": "Guardar alterações",
   "nedit.menu": "Editar…",
   "nedit.edit_first": "Editar antes",
-  "nedit.tip": "Clique na linha do tempo para ir até lá; num ponto para apagar esse traço; arraste sobre a voz para escolher um trecho.",
-  "nedit.sel_tip": "Silenciar: só a voz sai. Cortar: imagem e voz saem.",
+  "nedit.tip": "Espaço reproduz; clique na linha do tempo para ir; num ponto para apagar o traço; arraste sobre a voz para escolher um trecho.",
+  "nedit.sel_tip": "Silenciar: só a voz. Cortar: imagem e voz. Regravar: fale de novo sobre a mesma imagem.",
   "nedit.mute": "Silenciar",
   "nedit.cut": "Cortar",
   "nedit.cut_title": "Cortar estes {len}?",
@@ -1155,5 +1155,12 @@
   "candle.one_tip": "Só um candle: clique duas vezes para selecionar e escolha uma cor no menu.",
   "stamp.rising": "alta",
   "stamp.falling": "baixa",
-  "pick.indexed": "Busca por imagem: {n}% pronta"
+  "pick.indexed": "Busca por imagem: {n}% pronta",
+  "nedit.play": "Reproduzir (Espaço)",
+  "nedit.stop": "Parar (Espaço)",
+  "nedit.redub": "Regravar este trecho",
+  "nedit.take_soon": "Dois segundos antes para entrar, depois grava…",
+  "nedit.taking": "Gravando · antes {was} · agora {now}",
+  "nedit.take_tip": "Fale olhando a imagem; ao terminar, Espaço ou Parar. No fim do trecho a imagem para e espera.",
+  "nedit.overlap": "Sobrepõe um trecho já cortado ou regravado"
 }

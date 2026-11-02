@@ -1127,8 +1127,8 @@
   "nedit.save": "Lưu thay đổi",
   "nedit.menu": "Sửa…",
   "nedit.edit_first": "Sửa trước",
-  "nedit.tip": "Nhấp vào dòng thời gian để tới đó; nhấp vào chấm để xóa nét đó; kéo trên phần tiếng để chọn một đoạn.",
-  "nedit.sel_tip": "Tắt tiếng: chỉ bỏ tiếng. Cắt: bỏ cả hình lẫn tiếng.",
+  "nedit.tip": "Phím cách để phát; nhấp dòng thời gian để tới đó; nhấp chấm để xóa nét; kéo trên phần tiếng để chọn đoạn.",
+  "nedit.sel_tip": "Tắt tiếng: chỉ bỏ tiếng. Cắt: cả hình và tiếng. Thu lại: nói lại trên cùng hình.",
   "nedit.mute": "Tắt tiếng",
   "nedit.cut": "Cắt",
   "nedit.cut_title": "Cắt {len} này?",
@@ -1155,5 +1155,12 @@
   "candle.one_tip": "Chỉ đổi một cây nến: nhấp đúp để chọn, rồi chọn màu trong menu màu.",
   "stamp.rising": "tăng",
   "stamp.falling": "giảm",
-  "pick.indexed": "Tìm theo hình: sẵn sàng {n}%"
+  "pick.indexed": "Tìm theo hình: sẵn sàng {n}%",
+  "nedit.play": "Phát (Phím cách)",
+  "nedit.stop": "Dừng (Phím cách)",
+  "nedit.redub": "Thu lại đoạn này",
+  "nedit.take_soon": "Phát 2 giây trước đó, rồi bắt đầu thu…",
+  "nedit.taking": "Đang thu · ban đầu {was} · hiện {now}",
+  "nedit.take_tip": "Vừa xem hình vừa nói; xong thì nhấn phím cách hoặc Dừng. Hết đoạn hình sẽ dừng chờ bạn.",
+  "nedit.overlap": "Trùng với đoạn đã cắt hoặc đã thu lại"
 }

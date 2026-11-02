@@ -1127,8 +1127,8 @@
   "nedit.save": "Keep the changes",
   "nedit.menu": "Edit…",
   "nedit.edit_first": "Edit first",
-  "nedit.tip": "Click the timeline to go there; click a dot to delete that mark; drag on the voice to choose a stretch.",
-  "nedit.sel_tip": "Silent: only the voice goes. Cut: picture and voice go.",
+  "nedit.tip": "Space plays; click the timeline to go there; click a dot to delete that mark; drag on the voice to choose a part.",
+  "nedit.sel_tip": "Silent: only the voice. Cut: picture and voice. Speak again: talk over the same picture.",
   "nedit.mute": "Silent",
   "nedit.cut": "Cut",
   "nedit.cut_title": "Cut these {len}?",
@@ -1155,5 +1155,12 @@
   "candle.one_tip": "Just one candle: double-click it to select it, then pick a colour in the colour menu.",
   "stamp.rising": "rising",
   "stamp.falling": "falling",
-  "pick.indexed": "Picture search: {n}% ready"
+  "pick.indexed": "Picture search: {n}% ready",
+  "nedit.play": "Play (Space)",
+  "nedit.stop": "Stop (Space)",
+  "nedit.redub": "Speak this part again",
+  "nedit.take_soon": "Two seconds before it to get in, then recording…",
+  "nedit.taking": "Recording · was {was} · now {now}",
+  "nedit.take_tip": "Speak along with the picture; when done, Space or Stop. At the end of the part the picture holds and waits.",
+  "nedit.overlap": "It overlaps a part already cut or spoken again"
 }
