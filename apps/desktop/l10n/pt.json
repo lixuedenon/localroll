@@ -1162,5 +1162,15 @@
   "nedit.take_soon": "Dois segundos antes para entrar, depois grava…",
   "nedit.taking": "Gravando · antes {was} · agora {now}",
   "nedit.take_tip": "Fale olhando a imagem; ao terminar, Espaço ou Parar. No fim do trecho a imagem para e espera.",
-  "nedit.overlap": "Sobrepõe um trecho já cortado ou regravado"
+  "nedit.overlap": "Sobrepõe um trecho já cortado ou regravado",
+  "library.layout_tip": "Layout: compacto (os dias seguidos, sem espaços vazios) ou uma linha nova por dia. No compacto, veja por dia / mês / ano; Ctrl + roda do mouse também alterna. Clique na data de uma miniatura para selecionar esse dia.",
+  "library.layout_compact": "Compacto",
+  "library.layout_rows": "Uma linha por dia",
+  "library.zoom_day": "Por dia",
+  "library.zoom_month": "Por mês",
+  "library.zoom_year": "Por ano",
+  "lib.select_month": "Selecionar este mês",
+  "lib.unselect_month": "Desmarcar este mês",
+  "lib.select_year": "Selecionar este ano",
+  "lib.unselect_year": "Desmarcar este ano"
 }

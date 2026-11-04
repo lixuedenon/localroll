@@ -1162,5 +1162,15 @@
   "nedit.take_soon": "Dua detik sebelumnya dulu, lalu merekam…",
   "nedit.taking": "Merekam · sebelumnya {was} · sekarang {now}",
   "nedit.take_tip": "Bicara sambil melihat gambar; selesai: Spasi atau Berhenti. Di akhir bagian gambar berhenti menunggu.",
-  "nedit.overlap": "Bertumpuk dengan bagian yang sudah dipotong atau direkam ulang"
+  "nedit.overlap": "Bertumpuk dengan bagian yang sudah dipotong atau direkam ulang",
+  "library.layout_tip": "Tata letak: ringkas (hari-hari berlanjut tanpa celah, hemat ruang) atau baris baru per hari. Dalam ringkas, lihat per hari / bulan / tahun; Ctrl + roda mouse juga mengganti. Klik tanggal di kotak untuk memilih hari itu.",
+  "library.layout_compact": "Ringkas",
+  "library.layout_rows": "Baris baru per hari",
+  "library.zoom_day": "Per hari",
+  "library.zoom_month": "Per bulan",
+  "library.zoom_year": "Per tahun",
+  "lib.select_month": "Pilih bulan ini",
+  "lib.unselect_month": "Batalkan pilihan bulan ini",
+  "lib.select_year": "Pilih tahun ini",
+  "lib.unselect_year": "Batalkan pilihan tahun ini"
 }

@@ -101,6 +101,28 @@ class _LibraryPageState extends State<LibraryPage> {
   final Set<String> _boxHits = {};
   Timer? _autoScroll;
 
+  // Compact layout: the squares in order, where each day / month / year
+  // starts, and the grid's geometry (for the date at the top and the date
+  // beside the scrollbar).
+  List<_Cell> _flat = const [];
+  List<int> _starts = const [];
+  List<int> _groupOf = const [];
+  int _cols = 1;
+  double _rowH = 1;
+  static const double _gridTop = 8;
+  int _zoomShown = 0;
+
+  /// First square in the top row (-1: at the top, no date bar).
+  final ValueNotifier<int> _topIndex = ValueNotifier(-1);
+
+  /// Scrolling now: show the date beside the scrollbar.
+  final ValueNotifier<bool> _scrollTip = ValueNotifier(false);
+  Timer? _tipTimer;
+
+  /// Ctrl is down: the wheel changes the zoom instead of scrolling.
+  bool _ctrl = false;
+  DateTime _lastZoom = DateTime(0);
+
   /// Search box: words found in photos / files (and their names).
   final TextEditingController _searchCtrl = TextEditingController();
   SearchQuery _search = SearchQuery('');
@@ -201,6 +223,8 @@ class _LibraryPageState extends State<LibraryPage> {
     unawaited(widget.services.server.people.load());
     unawaited(_loadFiles());
     unawaited(_watchFiles());
+    _scroll.addListener(_onScroll);
+    HardwareKeyboard.instance.addHandler(_onKey);
   }
 
   @override
@@ -213,6 +237,10 @@ class _LibraryPageState extends State<LibraryPage> {
     }
     _filesSoon?.cancel();
     _autoScroll?.cancel();
+    _tipTimer?.cancel();
+    HardwareKeyboard.instance.removeHandler(_onKey);
+    _topIndex.dispose();
+    _scrollTip.dispose();
     _focus.dispose();
     _scroll.dispose();
     _searchCtrl.dispose();
@@ -548,6 +576,40 @@ class _LibraryPageState extends State<LibraryPage> {
                   ),
                 if (!_filesTab)
                   HoverTip(
+                    text: tr('library.layout_tip'),
+                    child: PopupMenuButton<String>(
+                      tooltip: '',
+                      onSelected: (v) => s.settings.update((x) {
+                        switch (v) {
+                          case 'compact':
+                            x.libraryCompact = true;
+                          case 'rows':
+                            x.libraryCompact = false;
+                          case 'z0':
+                          case 'z1':
+                          case 'z2':
+                            x.libraryCompact = true;
+                            x.libraryZoom = int.parse(v.substring(1));
+                        }
+                      }),
+                      itemBuilder: (_) => [
+                        CheckedPopupMenuItem(
+                            value: 'compact', checked: s.settings.libraryCompact, child: Text(tr('library.layout_compact'))),
+                        CheckedPopupMenuItem(
+                            value: 'rows', checked: !s.settings.libraryCompact, child: Text(tr('library.layout_rows'))),
+                        const PopupMenuDivider(),
+                        for (final (v, k) in [(0, 'library.zoom_day'), (1, 'library.zoom_month'), (2, 'library.zoom_year')])
+                          CheckedPopupMenuItem(
+                            value: 'z$v',
+                            checked: s.settings.libraryCompact && s.settings.libraryZoom == v,
+                            child: Text(tr(k)),
+                          ),
+                      ],
+                      icon: const Icon(Icons.calendar_view_month_rounded, color: ToolColors.size),
+                    ),
+                  ),
+                if (!_filesTab)
+                  HoverTip(
                     text: tr('library.size_tip'),
                     child: PopupMenuButton<int>(
                       tooltip: '',
@@ -587,7 +649,9 @@ class _LibraryPageState extends State<LibraryPage> {
                     ? FilesView(services: s, document: _filter == _Filter.docs)
                     : items.isEmpty && _visibleFiles().isEmpty
                         ? (_searching ? _noResults(context) : _empty(context))
-                        : _grid(context, items),
+                        : (s.settings.libraryCompact && _search.isEmpty)
+                            ? _compactGrid(context, items)
+                            : _grid(context, items),
               ),
             ],
           ),
@@ -1089,6 +1153,12 @@ class _LibraryPageState extends State<LibraryPage> {
       if (byPicture.isNotEmpty) groups.add((tr('search.group_picture', {'q': q}), byPicture));
     }
     _order = [for (final g in groups) for (final c in g.$2) c.key];
+    if (_flat.isNotEmpty) {
+      _flat = const [];
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _topIndex.value = -1;
+      });
+    }
     final slivers = <Widget>[];
     for (final (title, day) in groups) {
       final photos = day.where((c) => c.media?.kind == MediaKind.image).length;
@@ -1162,15 +1232,21 @@ class _LibraryPageState extends State<LibraryPage> {
         ));
     }
     slivers.add(const SliverToBoxAdapter(child: SizedBox(height: 24)));
-    // Drag with the mouse to select with a box (Ctrl: add to what is
-    // selected).
+    return _boxSelect(context, CustomScrollView(controller: _scroll, slivers: slivers));
+  }
+
+  /// Drag with the mouse to select with a box (Ctrl: add to what is
+  /// selected). [over]: more layers above the grid.
+  Widget _boxSelect(BuildContext context, Widget scroll, {List<Widget> over = const [], PointerSignalEventListener? onSignal}) {
     return Listener(
       onPointerDown: _boxDown,
       onPointerMove: _boxMove,
       onPointerUp: (_) => _boxEnd(),
       onPointerCancel: (_) => _boxEnd(),
+      onPointerSignal: onSignal,
       child: Stack(key: _gridKey, children: [
-        CustomScrollView(controller: _scroll, slivers: slivers),
+        scroll,
+        ...over,
         if (_boxing && _dragNow != null && _downAt != null)
           Positioned.fill(
             child: IgnorePointer(
@@ -1179,6 +1255,314 @@ class _LibraryPageState extends State<LibraryPage> {
           ),
       ]),
     );
+  }
+
+  // ------------------------------------------------------- compact layout
+
+  int _unitKey(DateTime d, int zoom) => switch (zoom) {
+        0 => d.year * 10000 + d.month * 100 + d.day,
+        1 => d.year * 100 + d.month,
+        _ => d.year,
+      };
+
+  String _unitShort(DateTime d, int zoom) => switch (zoom) {
+        0 => formatDayShort(d),
+        1 => formatMonthShort(d),
+        _ => '${d.year}',
+      };
+
+  String _unitFull(DateTime d, int zoom) => switch (zoom) {
+        0 => formatDayFull(d),
+        1 => formatMonthYear(d),
+        _ => '${d.year}',
+      };
+
+  /// Keys of the squares in day / month / year number [g].
+  List<String> _unitKeys(int g) {
+    final end = g + 1 < _starts.length ? _starts[g + 1] : _flat.length;
+    return [for (var i = _starts[g]; i < end; i++) _flat[i].key];
+  }
+
+  void _toggleUnit(int g) {
+    final keys = _unitKeys(g);
+    final whole = keys.every(_selected.contains);
+    _focus.requestFocus();
+    setState(() {
+      if (whole) {
+        _selected.removeAll(keys);
+      } else {
+        _selected.addAll(keys);
+        _anchor = keys.last;
+      }
+    });
+  }
+
+  String _unitTip(int g, bool whole) {
+    final zoom = _zoomShown;
+    final k = zoom == 0 ? 'day' : zoom == 1 ? 'month' : 'year';
+    return tr(whole ? 'lib.unselect_$k' : 'lib.select_$k');
+  }
+
+  /// Days (months, years) run on in one grid: no half-empty rows. Each one's
+  /// first square has a small date label (click it: select that day), and a
+  /// line on its left. The date of the top row stays at the top; while
+  /// scrolling the date shows beside the scrollbar.
+  Widget _compactGrid(BuildContext context, List<MediaItem> items) {
+    final settings = widget.services.settings;
+    final zoom = settings.libraryZoom;
+    final cells = _cells(items);
+    final indexOf = {for (var k = 0; k < items.length; k++) items[k].relPath: k};
+    final starts = <int>[];
+    final groupOf = List<int>.filled(cells.length, 0);
+    int? last;
+    for (var i = 0; i < cells.length; i++) {
+      final k = _unitKey(cells[i].day, zoom);
+      if (k != last) {
+        starts.add(i);
+        last = k;
+      }
+      groupOf[i] = starts.length - 1;
+    }
+    _flat = cells;
+    _starts = starts;
+    _groupOf = groupOf;
+    _zoomShown = zoom;
+    _order = [for (final c in cells) c.key];
+    final extent = switch (zoom) {
+      0 => const [120.0, 180.0, 260.0][settings.thumbSize],
+      1 => 72.0,
+      _ => 44.0,
+    };
+    final theme = Theme.of(context);
+    return LayoutBuilder(builder: (context, box) {
+      const pad = 12.0, gap = 4.0;
+      final w = max(1.0, box.maxWidth - 2 * pad);
+      final cols = max(1, ((w + gap) / (extent + gap)).ceil());
+      final side = (w - gap * (cols - 1)) / cols;
+      _cols = cols;
+      _rowH = side + gap;
+      final grid = CustomScrollView(
+        controller: _scroll,
+        // Ctrl + wheel zooms; the list must not scroll as well.
+        physics: _ctrl ? const NeverScrollableScrollPhysics() : null,
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(pad, _gridTop, pad, 24),
+            sliver: SliverGrid.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: cols,
+                mainAxisSpacing: gap,
+                crossAxisSpacing: gap,
+              ),
+              itemCount: cells.length,
+              itemBuilder: (context, i) {
+                final c = cells[i];
+                final m = c.media;
+                Widget child = m != null ? _cell(context, items, indexOf[m.relPath]!) : _fileCell(context, c.file!);
+                final g = groupOf[i];
+                if (starts[g] == i) child = _labelled(context, child, g, first: i == 0, side: side);
+                return _Box(key: ValueKey(c.key), id: c.key, boxes: _boxes, child: child);
+              },
+            ),
+          ),
+        ],
+      );
+      return _boxSelect(
+        context,
+        grid,
+        onSignal: _onWheel,
+        over: [
+          // The date of the top row.
+          ValueListenableBuilder<int>(
+            valueListenable: _topIndex,
+            builder: (context, top, _) {
+              if (top < 0 || _flat.isEmpty) return const SizedBox.shrink();
+              final g = _groupOf[min(top, _flat.length - 1)];
+              return Positioned(top: 6, left: 16, child: _dateBar(context, theme, g));
+            },
+          ),
+          // The date beside the scrollbar while scrolling.
+          AnimatedBuilder(
+            animation: Listenable.merge([_scroll, _scrollTip]),
+            builder: (context, _) {
+              if (!_scrollTip.value || !_scroll.hasClients || _flat.isEmpty) return const SizedBox.shrink();
+              final p = _scroll.position;
+              if (!p.hasContentDimensions || p.maxScrollExtent < p.viewportDimension * 2) return const SizedBox.shrink();
+              final f = (p.pixels / p.maxScrollExtent).clamp(0.0, 1.0);
+              final mid = p.pixels + p.viewportDimension / 2 - _gridTop;
+              final i = min(_flat.length - 1, max(0, (mid / _rowH).floor() * _cols));
+              final h = box.maxHeight.isFinite ? box.maxHeight : p.viewportDimension;
+              final y = 8 + f * max(0.0, h - 52);
+              return Positioned(
+                top: y,
+                right: 22,
+                child: IgnorePointer(
+                  child: Material(
+                    elevation: 3,
+                    color: theme.colorScheme.inverseSurface,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      child: Text(
+                        zoom == 0 ? formatDayShort(_flat[i].day, withYear: true) : _unitFull(_flat[i].day, zoom),
+                        style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.onInverseSurface),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      );
+    });
+  }
+
+  /// A day's (month's, year's) first square: its date label and a line on
+  /// the left (not on the very first square).
+  Widget _labelled(BuildContext context, Widget child, int g, {required bool first, required double side}) {
+    final keys = _unitKeys(g);
+    final whole = keys.isNotEmpty && keys.every(_selected.contains);
+    final small = side < 60;
+    final primary = Theme.of(context).colorScheme.primary;
+    final d = _flat[_starts[g]].day;
+    return Stack(children: [
+      Positioned.fill(child: child),
+      if (!first) Positioned(left: 0, top: 0, bottom: 0, child: IgnorePointer(child: Container(width: 3, color: primary))),
+      Positioned(
+        left: small ? 2 : 5,
+        top: small ? 2 : 5,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: max(20.0, side - (small ? 4 : 10))),
+          child: Tooltip(
+            message: _unitTip(g, whole),
+            child: Material(
+              color: whole ? primary : Colors.black.withValues(alpha: 0.6),
+              borderRadius: BorderRadius.circular(small ? 4 : 6),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(small ? 4 : 6),
+                onTap: () => _toggleUnit(g),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: small ? 3 : 6, vertical: small ? 1 : 2),
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                    if (!small) ...[
+                      Icon(whole ? Icons.check_circle_rounded : Icons.circle_outlined, size: 12, color: Colors.white),
+                      const SizedBox(width: 4),
+                    ],
+                    Flexible(
+                      child: Text(
+                        _unitShort(d, _zoomShown),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(color: Colors.white, fontSize: small ? 9 : 11, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ]),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ]);
+  }
+
+  /// The bar at the top: the full date of the top row, how many, select it.
+  Widget _dateBar(BuildContext context, ThemeData theme, int g) {
+    final keys = _unitKeys(g);
+    final whole = keys.isNotEmpty && keys.every(_selected.contains);
+    final end = g + 1 < _starts.length ? _starts[g + 1] : _flat.length;
+    var photos = 0, videos = 0, files = 0;
+    for (var i = _starts[g]; i < end; i++) {
+      final c = _flat[i];
+      if (c.file != null) {
+        files++;
+      } else if (c.media!.kind == MediaKind.video) {
+        videos++;
+      } else {
+        photos++;
+      }
+    }
+    return Material(
+      elevation: 3,
+      color: theme.colorScheme.surfaceContainerHigh,
+      borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(4, 2, 14, 2),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          IconButton(
+            tooltip: _unitTip(g, whole),
+            iconSize: 18,
+            visualDensity: VisualDensity.compact,
+            onPressed: () => _toggleUnit(g),
+            icon: Icon(
+              whole ? Icons.check_circle_rounded : Icons.check_circle_outline_rounded,
+              color: whole ? theme.colorScheme.primary : LrColors.muted,
+            ),
+          ),
+          Text(_unitFull(_flat[_starts[g]].day, _zoomShown), style: theme.textTheme.titleSmall),
+          const SizedBox(width: 10),
+          Text(
+            [
+              if (photos > 0) tr('library.n_photos', {'count': photos}),
+              if (videos > 0) tr('library.n_videos', {'count': videos}),
+              if (files > 0) tr('library.n_files', {'count': files}),
+            ].join('   '),
+            style: theme.textTheme.bodySmall,
+          ),
+        ]),
+      ),
+    );
+  }
+
+  void _onScroll() {
+    if (_flat.isEmpty || !_scroll.hasClients) return;
+    final off = _scroll.offset;
+    final row = max(0, ((off - _gridTop) / _rowH).floor());
+    _topIndex.value = off > _rowH * 0.6 ? min(_flat.length - 1, row * _cols) : -1;
+    _scrollTip.value = true;
+    _tipTimer?.cancel();
+    _tipTimer = Timer(const Duration(milliseconds: 900), () {
+      if (mounted) _scrollTip.value = false;
+    });
+  }
+
+  bool _onKey(KeyEvent e) {
+    final c = HardwareKeyboard.instance.isControlPressed;
+    if (c != _ctrl && mounted) {
+      if (_flat.isEmpty) {
+        _ctrl = c;
+      } else {
+        setState(() => _ctrl = c);
+      }
+    }
+    return false;
+  }
+
+  /// Ctrl + wheel: year ↔ month ↔ day (small, medium, large squares).
+  void _onWheel(PointerSignalEvent e) {
+    if (e is! PointerScrollEvent || !HardwareKeyboard.instance.isControlPressed || _flat.isEmpty) return;
+    final now = DateTime.now();
+    if (now.difference(_lastZoom).inMilliseconds < 250 || e.scrollDelta.dy == 0) return;
+    _lastZoom = now;
+    final s = widget.services.settings;
+    // Steps from far to near.
+    const steps = [(2, -1), (1, -1), (0, 0), (0, 1), (0, 2)];
+    var at = steps.indexWhere((x) => x.$1 == s.libraryZoom && (x.$1 != 0 || x.$2 == s.thumbSize));
+    if (at < 0) at = 2;
+    final to = (at + (e.scrollDelta.dy < 0 ? 1 : -1)).clamp(0, steps.length - 1);
+    if (to == at) return;
+    // Keep the top row's square in view.
+    final keep = _topIndex.value < 0 ? 0 : _topIndex.value;
+    s.update((x) {
+      x.libraryZoom = steps[to].$1;
+      if (steps[to].$2 >= 0) x.thumbSize = steps[to].$2;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scroll.hasClients || keep == 0) return;
+      final y = _gridTop + (keep ~/ _cols) * _rowH;
+      _scroll.jumpTo(min(y, _scroll.position.maxScrollExtent));
+    });
   }
 
   // ------------------------------------------------------- box select

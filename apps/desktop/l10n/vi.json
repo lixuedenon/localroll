@@ -1162,5 +1162,15 @@
   "nedit.take_soon": "Phát 2 giây trước đó, rồi bắt đầu thu…",
   "nedit.taking": "Đang thu · ban đầu {was} · hiện {now}",
   "nedit.take_tip": "Vừa xem hình vừa nói; xong thì nhấn phím cách hoặc Dừng. Hết đoạn hình sẽ dừng chờ bạn.",
-  "nedit.overlap": "Trùng với đoạn đã cắt hoặc đã thu lại"
+  "nedit.overlap": "Trùng với đoạn đã cắt hoặc đã thu lại",
+  "library.layout_tip": "Bố cục: gọn (các ngày nối tiếp, không chừa trống, tiết kiệm chỗ) hoặc mỗi ngày một hàng mới. Ở chế độ gọn có thể xem theo ngày / tháng / năm; Ctrl + con lăn chuột cũng chuyển được. Bấm vào ngày trên ô để chọn ngày đó.",
+  "library.layout_compact": "Gọn",
+  "library.layout_rows": "Mỗi ngày một hàng",
+  "library.zoom_day": "Theo ngày",
+  "library.zoom_month": "Theo tháng",
+  "library.zoom_year": "Theo năm",
+  "lib.select_month": "Chọn tháng này",
+  "lib.unselect_month": "Bỏ chọn tháng này",
+  "lib.select_year": "Chọn năm này",
+  "lib.unselect_year": "Bỏ chọn năm này"
 }

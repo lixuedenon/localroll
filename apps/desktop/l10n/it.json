@@ -1162,5 +1162,15 @@
   "nedit.take_soon": "Due secondi prima per entrare, poi si registra…",
   "nedit.taking": "Registrazione · prima {was} · ora {now}",
   "nedit.take_tip": "Parla guardando l’immagine; finito: Spazio o Ferma. Alla fine del tratto l’immagine si ferma e aspetta.",
-  "nedit.overlap": "Si sovrappone a un tratto già tagliato o riregistrato"
+  "nedit.overlap": "Si sovrappone a un tratto già tagliato o riregistrato",
+  "library.layout_tip": "Disposizione: compatta (i giorni di seguito, senza spazi vuoti) o una riga per giorno. In compatta puoi vedere per giorno / mese / anno; anche Ctrl + rotellina cambia. Fai clic sulla data di una miniatura per selezionare quel giorno.",
+  "library.layout_compact": "Compatta",
+  "library.layout_rows": "Una riga per giorno",
+  "library.zoom_day": "Per giorno",
+  "library.zoom_month": "Per mese",
+  "library.zoom_year": "Per anno",
+  "lib.select_month": "Seleziona questo mese",
+  "lib.unselect_month": "Deseleziona questo mese",
+  "lib.select_year": "Seleziona questo anno",
+  "lib.unselect_year": "Deseleziona questo anno"
 }

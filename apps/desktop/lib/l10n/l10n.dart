@@ -46,6 +46,28 @@ String formatMonthYear(DateTime t) {
   }
 }
 
+/// "Oct 9" / "10月9日" (with the year when not this year, or [withYear]).
+String formatDayShort(DateTime t, {bool withYear = false}) {
+  final tag = translator.language == 'zh_Hant' ? 'zh_TW' : translator.language;
+  final year = withYear || t.year != DateTime.now().year;
+  try {
+    return (year ? DateFormat.yMMMd(tag) : DateFormat.MMMd(tag)).format(t);
+  } catch (_) {
+    final md = '${t.month}/${t.day}';
+    return year ? '${t.year}/$md' : md;
+  }
+}
+
+/// "Oct 2026" / "2026年10月".
+String formatMonthShort(DateTime t) {
+  final tag = translator.language == 'zh_Hant' ? 'zh_TW' : translator.language;
+  try {
+    return DateFormat.yMMM(tag).format(t);
+  } catch (_) {
+    return '${t.year}-${t.month.toString().padLeft(2, '0')}';
+  }
+}
+
 /// "Thursday, October 9, 2026" / "2026年10月9日星期四"…
 String formatDayFull(DateTime t) {
   final tag = translator.language == 'zh_Hant' ? 'zh_TW' : translator.language;

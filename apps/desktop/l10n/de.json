@@ -1162,5 +1162,15 @@
   "nedit.take_soon": "Zwei Sekunden davor zum Einstimmen, dann geht es los…",
   "nedit.taking": "Aufnahme · vorher {was} · jetzt {now}",
   "nedit.take_tip": "Sprich zum Bild; fertig: Leertaste oder „Stopp“. Am Ende des Teils hält das Bild an und wartet.",
-  "nedit.overlap": "Überschneidet sich mit einem geschnittenen oder neu gesprochenen Teil"
+  "nedit.overlap": "Überschneidet sich mit einem geschnittenen oder neu gesprochenen Teil",
+  "library.layout_tip": "Anordnung: kompakt (Tage laufen ohne Lücken weiter, spart Platz) oder jeder Tag in einer neuen Zeile. Kompakt lässt sich nach Tag / Monat / Jahr anzeigen; Strg + Mausrad wechselt ebenfalls. Klicke auf das Datum eines Feldes, um diesen Tag auszuwählen.",
+  "library.layout_compact": "Kompakt",
+  "library.layout_rows": "Neue Zeile pro Tag",
+  "library.zoom_day": "Nach Tag",
+  "library.zoom_month": "Nach Monat",
+  "library.zoom_year": "Nach Jahr",
+  "lib.select_month": "Diesen Monat auswählen",
+  "lib.unselect_month": "Auswahl dieses Monats aufheben",
+  "lib.select_year": "Dieses Jahr auswählen",
+  "lib.unselect_year": "Auswahl dieses Jahres aufheben"
 }

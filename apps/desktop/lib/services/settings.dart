@@ -245,6 +245,14 @@ class AppSettings extends ChangeNotifier {
   /// Library thumbnail size: 0 small, 1 medium, 2 large.
   int thumbSize = 1;
 
+  /// Library layout: true = days run on in one grid (a small date label on
+  /// each day's first square); false = each day starts a new row.
+  bool libraryCompact = true;
+
+  /// Compact library: date labels by 0 day, 1 month, 2 year (month and year
+  /// also use smaller squares).
+  int libraryZoom = 0;
+
   /// Paired phones in the family group, grouped into family members.
   /// (PCs and guests are listed separately.)
   FamilyDirectory get family => FamilyDirectory(
@@ -286,6 +294,8 @@ class AppSettings extends ChangeNotifier {
     s.avatarVersion = (j['avatarVersion'] as num?)?.toInt() ?? 0;
     s.folderPerMember = j['folderPerMember'] == true;
     s.thumbSize = ((j['thumbSize'] as num?)?.toInt() ?? 1).clamp(0, 2);
+    s.libraryCompact = j['libraryCompact'] != false;
+    s.libraryZoom = ((j['libraryZoom'] as num?)?.toInt() ?? 0).clamp(0, 2);
     if (s.avatarVersion != 0 && !await s.avatarFile.exists()) s.avatarVersion = 0;
     for (final t in (j['trusted'] as List? ?? const [])) {
       final d = TrustedDevice.fromJson(t as Map<String, dynamic>);
@@ -337,6 +347,8 @@ class AppSettings extends ChangeNotifier {
       'avatarVersion': avatarVersion,
       'folderPerMember': folderPerMember,
       'thumbSize': thumbSize,
+      'libraryCompact': libraryCompact,
+      'libraryZoom': libraryZoom,
       'trusted': trusted.values.map((t) => t.toJson()).toList(),
       'peers': peers.values.map((p) => p.toJson()).toList(),
     }));

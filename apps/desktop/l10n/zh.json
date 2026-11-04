@@ -1162,5 +1162,15 @@
   "nedit.take_soon": "先回放前面 2 秒，马上开始录音…",
   "nedit.taking": "录音中 · 原来 {was} · 已录 {now}",
   "nedit.take_tip": "看着画面说；说完按空格或点「停止」。到这段结尾，画面会停住等你。",
-  "nedit.overlap": "和已剪掉或已重录的部分重叠了"
+  "nedit.overlap": "和已剪掉或已重录的部分重叠了",
+  "library.layout_tip": "排列：紧凑（各天接着排，不留空，省空间）或按天分行。紧凑时可以按天 / 月 / 年看；按住 Ctrl 滚动滚轮也能切换。点格子上的日期选中那一天。",
+  "library.layout_compact": "紧凑排列",
+  "library.layout_rows": "按天分行",
+  "library.zoom_day": "按天",
+  "library.zoom_month": "按月",
+  "library.zoom_year": "按年",
+  "lib.select_month": "选择这个月",
+  "lib.unselect_month": "取消选择这个月",
+  "lib.select_year": "选择这一年",
+  "lib.unselect_year": "取消选择这一年"
 }

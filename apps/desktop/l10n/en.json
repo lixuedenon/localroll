@@ -1162,5 +1162,15 @@
   "nedit.take_soon": "Two seconds before it to get in, then recording…",
   "nedit.taking": "Recording · was {was} · now {now}",
   "nedit.take_tip": "Speak along with the picture; when done, Space or Stop. At the end of the part the picture holds and waits.",
-  "nedit.overlap": "It overlaps a part already cut or spoken again"
+  "nedit.overlap": "It overlaps a part already cut or spoken again",
+  "library.layout_tip": "Layout: compact (days run on with no gaps, saving space) or one row per day. In compact, view by day / month / year; Ctrl + mouse wheel also switches. Click the date on a square to select that day.",
+  "library.layout_compact": "Compact",
+  "library.layout_rows": "A new row for each day",
+  "library.zoom_day": "By day",
+  "library.zoom_month": "By month",
+  "library.zoom_year": "By year",
+  "lib.select_month": "Select this month",
+  "lib.unselect_month": "Unselect this month",
+  "lib.select_year": "Select this year",
+  "lib.unselect_year": "Unselect this year"
 }

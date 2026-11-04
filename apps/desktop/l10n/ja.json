@@ -1162,5 +1162,15 @@
   "nedit.take_soon": "直前 2 秒を再生、そのあと録音…",
   "nedit.taking": "録音中 · 元 {was} · 今 {now}",
   "nedit.take_tip": "映像を見ながら話し、終わったらスペースか「停止」。部分の終わりで映像は止まって待ちます。",
-  "nedit.overlap": "カット済み / 録り直し済みの部分と重なっています"
+  "nedit.overlap": "カット済み / 録り直し済みの部分と重なっています",
+  "library.layout_tip": "並べ方：コンパクト（日ごとに詰めて並べ、すき間なし）または日ごとに改行。コンパクトでは日 / 月 / 年で表示でき、Ctrl + マウスホイールでも切り替えられます。マスの日付をクリックするとその日を選択します。",
+  "library.layout_compact": "コンパクト",
+  "library.layout_rows": "日ごとに改行",
+  "library.zoom_day": "日ごと",
+  "library.zoom_month": "月ごと",
+  "library.zoom_year": "年ごと",
+  "lib.select_month": "この月を選択",
+  "lib.unselect_month": "この月の選択を解除",
+  "lib.select_year": "この年を選択",
+  "lib.unselect_year": "この年の選択を解除"
 }

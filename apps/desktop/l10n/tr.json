@@ -1162,5 +1162,15 @@
   "nedit.take_soon": "Önce iki saniye, sonra kayıt…",
   "nedit.taking": "Kayıt · önce {was} · şimdi {now}",
   "nedit.take_tip": "Görüntüye bakarak konuşun; bitince Boşluk ya da Durdur. Bölümün sonunda görüntü durup bekler.",
-  "nedit.overlap": "Kesilmiş ya da yeniden seslendirilmiş bir bölümle çakışıyor"
+  "nedit.overlap": "Kesilmiş ya da yeniden seslendirilmiş bir bölümle çakışıyor",
+  "library.layout_tip": "Düzen: sıkı (günler boşluksuz art arda, yer kazandırır) ya da her gün yeni satır. Sıkı düzende gün / ay / yıl olarak görün; Ctrl + fare tekerleği de değiştirir. O günü seçmek için kutudaki tarihe tıklayın.",
+  "library.layout_compact": "Sıkı",
+  "library.layout_rows": "Her gün yeni satır",
+  "library.zoom_day": "Güne göre",
+  "library.zoom_month": "Aya göre",
+  "library.zoom_year": "Yıla göre",
+  "lib.select_month": "Bu ayı seç",
+  "lib.unselect_month": "Bu ayın seçimini kaldır",
+  "lib.select_year": "Bu yılı seç",
+  "lib.unselect_year": "Bu yılın seçimini kaldır"
 }
