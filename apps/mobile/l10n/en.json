@@ -507,5 +507,16 @@
   "settings.log_send": "Send to a PC",
   "home.tagline": "Send · Back up · Scan · Browse your PC",
   "pclib.stalled": "Getting it from {pc} stopped. Check the network and try again.",
-  "pclib.fetching": "Getting it from {pc}…"
+  "pclib.fetching": "Getting it from {pc}…",
+  "player.play": "Play",
+  "player.pause": "Pause",
+  "player.frame_back": "Back one frame (hold to keep going)",
+  "player.frame_fwd": "Forward one frame (hold to keep going)",
+  "player.speed": "Speed",
+  "player.ab_set_a": "A-B loop: tap to set the start, A",
+  "player.ab_set_b": "Tap again to set the end, B, and loop",
+  "player.ab_clear": "Stop the A-B loop",
+  "player.zoom_reset": "Reset",
+  "player.fullscreen": "Full screen",
+  "player.exit_fullscreen": "Exit full screen"
 }

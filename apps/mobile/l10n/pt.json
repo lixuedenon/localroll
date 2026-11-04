@@ -507,5 +507,16 @@
   "settings.log_send": "Enviar para um PC",
   "home.tagline": "Enviar · Backup · Digitalizar · Ver o PC",
   "pclib.stalled": "O download de {pc} parou. Verifique a rede e tente de novo.",
-  "pclib.fetching": "Buscando de {pc}…"
+  "pclib.fetching": "Buscando de {pc}…",
+  "player.play": "Reproduzir",
+  "player.pause": "Pausar",
+  "player.frame_back": "Voltar um quadro (segure para continuar)",
+  "player.frame_fwd": "Avançar um quadro (segure para continuar)",
+  "player.speed": "Velocidade",
+  "player.ab_set_a": "Repetição A-B: toque para marcar o início, A",
+  "player.ab_set_b": "Toque de novo para marcar o fim, B, e repetir",
+  "player.ab_clear": "Parar a repetição A-B",
+  "player.zoom_reset": "Restaurar",
+  "player.fullscreen": "Tela cheia",
+  "player.exit_fullscreen": "Sair da tela cheia"
 }

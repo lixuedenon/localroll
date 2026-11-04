@@ -507,5 +507,16 @@
   "settings.log_send": "Invia a un PC",
   "home.tagline": "Invia · Backup · Scansiona · Sfoglia il PC",
   "pclib.stalled": "Il download da {pc} si è fermato. Controlla la rete e riprova.",
-  "pclib.fetching": "Recupero da {pc}…"
+  "pclib.fetching": "Recupero da {pc}…",
+  "player.play": "Riproduci",
+  "player.pause": "Pausa",
+  "player.frame_back": "Indietro di un fotogramma (tieni premuto per continuare)",
+  "player.frame_fwd": "Avanti di un fotogramma (tieni premuto per continuare)",
+  "player.speed": "Velocità",
+  "player.ab_set_a": "Ciclo A-B: tocca per fissare l'inizio, A",
+  "player.ab_set_b": "Tocca di nuovo per fissare la fine, B, e ripetere",
+  "player.ab_clear": "Togli il ciclo A-B",
+  "player.zoom_reset": "Ripristina",
+  "player.fullscreen": "Schermo intero",
+  "player.exit_fullscreen": "Esci da schermo intero"
 }

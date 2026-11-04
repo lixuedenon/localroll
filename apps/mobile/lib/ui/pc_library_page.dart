@@ -17,6 +17,7 @@ import '../services/phone_server.dart';
 import 'cleanup_page.dart' show formatSize;
 import 'first_page_view.dart';
 import 'open_file.dart';
+import 'lr_video.dart';
 import 'theme.dart';
 
 /// The PC's library on this phone: browse by day, open, play, save to this
@@ -657,7 +658,7 @@ class _PhotoViewState extends State<_PhotoView> {
     if (_live && live != null) {
       return GestureDetector(
         onTap: () => setState(() => _live = false),
-        child: _VideoView(lib: widget.lib, path: live, loop: false, onEnd: () => setState(() => _live = false)),
+        child: _VideoView(lib: widget.lib, path: live, loop: false, controls: false, onEnd: () => setState(() => _live = false)),
       );
     }
     return Stack(children: [
@@ -695,7 +696,8 @@ class _PhotoViewState extends State<_PhotoView> {
 }
 
 class _VideoView extends StatefulWidget {
-  const _VideoView({super.key, required this.lib, required this.path, this.loop = false, this.onEnd, this.onSave});
+  const _VideoView(
+      {super.key, required this.lib, required this.path, this.loop = false, this.onEnd, this.onSave, this.controls = true});
 
   final PcLibrary lib;
   final String path;
@@ -704,6 +706,9 @@ class _VideoView extends StatefulWidget {
 
   /// "Save to this phone" (the PC converts what the phone can't play).
   final VoidCallback? onSave;
+
+  /// The full player controls (off for a live photo's moment).
+  final bool controls;
 
   @override
   State<_VideoView> createState() => _VideoViewState();
@@ -789,19 +794,23 @@ class _VideoViewState extends State<_VideoView> {
     }
     final c = _c;
     if (c == null) return const Center(child: CircularProgressIndicator());
-    return GestureDetector(
-      onTap: () => unawaited(c.value.isPlaying ? c.pause() : c.play()),
-      child: Stack(alignment: Alignment.bottomCenter, children: [
-        Center(child: AspectRatio(aspectRatio: c.value.aspectRatio, child: VideoPlayer(c))),
-        VideoProgressIndicator(c, allowScrubbing: true, padding: const EdgeInsets.fromLTRB(12, 12, 12, 24)),
-        ValueListenableBuilder(
-          valueListenable: c,
-          builder: (_, v, _) => v.isPlaying
-              ? const SizedBox.shrink()
-              : const Center(child: Icon(Icons.play_circle_outline_rounded, color: Colors.white70, size: 72)),
-        ),
-      ]),
-    );
+    // A live photo's moment plays plainly (tap goes back to the photo).
+    if (!widget.controls) {
+      return GestureDetector(
+        onTap: () => unawaited(c.value.isPlaying ? c.pause() : c.play()),
+        child: Stack(alignment: Alignment.bottomCenter, children: [
+          Center(child: AspectRatio(aspectRatio: c.value.aspectRatio, child: VideoPlayer(c))),
+          VideoProgressIndicator(c, allowScrubbing: true, padding: const EdgeInsets.fromLTRB(12, 12, 12, 24)),
+          ValueListenableBuilder(
+            valueListenable: c,
+            builder: (_, v, _) => v.isPlaying
+                ? const SizedBox.shrink()
+                : const Center(child: Icon(Icons.play_circle_outline_rounded, color: Colors.white70, size: 72)),
+          ),
+        ]),
+      );
+    }
+    return LrVideo(controller: c);
   }
 }
 

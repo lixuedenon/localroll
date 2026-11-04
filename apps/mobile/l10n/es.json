@@ -507,5 +507,16 @@
   "settings.log_send": "Enviar a un PC",
   "home.tagline": "Enviar · Copiar · Escanear · Ver el PC",
   "pclib.stalled": "La descarga desde {pc} se detuvo. Revisa la red e inténtalo de nuevo.",
-  "pclib.fetching": "Obteniendo de {pc}…"
+  "pclib.fetching": "Obteniendo de {pc}…",
+  "player.play": "Reproducir",
+  "player.pause": "Pausa",
+  "player.frame_back": "Un fotograma atrás (mantén para seguir)",
+  "player.frame_fwd": "Un fotograma adelante (mantén para seguir)",
+  "player.speed": "Velocidad",
+  "player.ab_set_a": "Bucle A-B: toca para marcar el inicio, A",
+  "player.ab_set_b": "Toca otra vez para marcar el final, B, y repetir",
+  "player.ab_clear": "Quitar el bucle A-B",
+  "player.zoom_reset": "Restablecer",
+  "player.fullscreen": "Pantalla completa",
+  "player.exit_fullscreen": "Salir de pantalla completa"
 }

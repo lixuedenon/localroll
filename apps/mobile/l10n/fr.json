@@ -507,5 +507,16 @@
   "settings.log_send": "Envoyer à un PC",
   "home.tagline": "Envoyer · Sauvegarder · Scanner · Parcourir le PC",
   "pclib.stalled": "Le téléchargement depuis {pc} s’est arrêté. Vérifiez le réseau et réessayez.",
-  "pclib.fetching": "Récupération depuis {pc}…"
+  "pclib.fetching": "Récupération depuis {pc}…",
+  "player.play": "Lecture",
+  "player.pause": "Pause",
+  "player.frame_back": "Image précédente (maintenir pour continuer)",
+  "player.frame_fwd": "Image suivante (maintenir pour continuer)",
+  "player.speed": "Vitesse",
+  "player.ab_set_a": "Boucle A-B : touchez pour fixer le début, A",
+  "player.ab_set_b": "Touchez encore pour fixer la fin, B, et boucler",
+  "player.ab_clear": "Arrêter la boucle A-B",
+  "player.zoom_reset": "Réinitialiser",
+  "player.fullscreen": "Plein écran",
+  "player.exit_fullscreen": "Quitter le plein écran"
 }

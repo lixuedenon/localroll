@@ -7,6 +7,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:video_player/video_player.dart';
 
 import '../l10n/l10n.dart';
+import 'lr_video.dart';
 import 'theme.dart';
 
 /// What the person chose in the viewer.
@@ -181,18 +182,6 @@ class _VideoState extends State<_Video> {
     if (_failed) return Center(child: Text(tr('mylib.cannot_open'), style: const TextStyle(color: LrColors.muted)));
     final c = _c;
     if (c == null) return const Center(child: CircularProgressIndicator());
-    return GestureDetector(
-      onTap: () => unawaited(c.value.isPlaying ? c.pause() : c.play()),
-      child: Stack(alignment: Alignment.bottomCenter, children: [
-        Center(child: AspectRatio(aspectRatio: c.value.aspectRatio, child: VideoPlayer(c))),
-        VideoProgressIndicator(c, allowScrubbing: true, padding: const EdgeInsets.fromLTRB(12, 12, 12, 24)),
-        ValueListenableBuilder(
-          valueListenable: c,
-          builder: (_, v, _) => v.isPlaying
-              ? const SizedBox.shrink()
-              : const Center(child: Icon(Icons.play_circle_outline_rounded, color: Colors.white70, size: 72)),
-        ),
-      ]),
-    );
+    return LrVideo(controller: c);
   }
 }

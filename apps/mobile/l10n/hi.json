@@ -507,5 +507,16 @@
   "settings.log_send": "कंप्यूटर पर भेजें",
   "home.tagline": "भेजें · बैकअप · स्कैन · PC देखें",
   "pclib.stalled": "{pc} से डाउनलोड रुक गया। नेटवर्क जाँचें और फिर कोशिश करें।",
-  "pclib.fetching": "{pc} से लाया जा रहा है…"
+  "pclib.fetching": "{pc} से लाया जा रहा है…",
+  "player.play": "चलाएँ",
+  "player.pause": "रोकें",
+  "player.frame_back": "एक फ़्रेम पीछे (लगातार के लिए दबाए रखें)",
+  "player.frame_fwd": "एक फ़्रेम आगे (लगातार के लिए दबाए रखें)",
+  "player.speed": "गति",
+  "player.ab_set_a": "A-B लूप: शुरुआत A तय करने के लिए टैप करें",
+  "player.ab_set_b": "अंत B तय करने के लिए फिर टैप करें, लूप शुरू",
+  "player.ab_clear": "A-B लूप बंद करें",
+  "player.zoom_reset": "पहले जैसा",
+  "player.fullscreen": "पूरी स्क्रीन",
+  "player.exit_fullscreen": "पूरी स्क्रीन से बाहर"
 }

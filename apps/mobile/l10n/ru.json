@@ -507,5 +507,16 @@
   "settings.log_send": "Отправить на ПК",
   "home.tagline": "Отправка · Копия · Скан · Просмотр ПК",
   "pclib.stalled": "Загрузка с {pc} остановилась. Проверьте сеть и попробуйте снова.",
-  "pclib.fetching": "Загрузка с {pc}…"
+  "pclib.fetching": "Загрузка с {pc}…",
+  "player.play": "Воспроизвести",
+  "player.pause": "Пауза",
+  "player.frame_back": "На кадр назад (удерживайте — дальше)",
+  "player.frame_fwd": "На кадр вперёд (удерживайте — дальше)",
+  "player.speed": "Скорость",
+  "player.ab_set_a": "Повтор A-B: нажмите, чтобы задать начало A",
+  "player.ab_set_b": "Нажмите ещё раз — конец B, начнётся повтор",
+  "player.ab_clear": "Отключить повтор A-B",
+  "player.zoom_reset": "Сбросить",
+  "player.fullscreen": "Во весь экран",
+  "player.exit_fullscreen": "Выйти из полноэкранного режима"
 }

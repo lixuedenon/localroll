@@ -507,5 +507,16 @@
   "settings.log_send": "PC로 보내기",
   "home.tagline": "보내기 · 백업 · 스캔 · PC 보기",
   "pclib.stalled": "{pc}에서 받기가 멈췄습니다. 네트워크를 확인하고 다시 시도하세요.",
-  "pclib.fetching": "{pc}에서 가져오는 중…"
+  "pclib.fetching": "{pc}에서 가져오는 중…",
+  "player.play": "재생",
+  "player.pause": "일시정지",
+  "player.frame_back": "한 프레임 뒤로(길게 누르면 계속)",
+  "player.frame_fwd": "한 프레임 앞으로(길게 누르면 계속)",
+  "player.speed": "속도",
+  "player.ab_set_a": "A-B 반복: 눌러서 시작점 A 지정",
+  "player.ab_set_b": "다시 눌러 끝점 B 지정, 반복 시작",
+  "player.ab_clear": "A-B 반복 해제",
+  "player.zoom_reset": "원래대로",
+  "player.fullscreen": "전체 화면",
+  "player.exit_fullscreen": "전체 화면 종료"
 }

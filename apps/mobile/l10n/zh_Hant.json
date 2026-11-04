@@ -507,5 +507,16 @@
   "settings.log_send": "傳送到電腦",
   "home.tagline": "傳輸 · 備份 · 掃描 · 瀏覽電腦",
   "pclib.stalled": "從「{pc}」取檔案卡住了，請檢查網路後再試。",
-  "pclib.fetching": "正在從「{pc}」取檔案…"
+  "pclib.fetching": "正在從「{pc}」取檔案…",
+  "player.play": "播放",
+  "player.pause": "暫停",
+  "player.frame_back": "後退一格（按住連續）",
+  "player.frame_fwd": "前進一格（按住連續）",
+  "player.speed": "速度",
+  "player.ab_set_a": "A-B 循環：點一下設起點 A",
+  "player.ab_set_b": "再點一下設終點 B，開始循環",
+  "player.ab_clear": "取消 A-B 循環",
+  "player.zoom_reset": "還原",
+  "player.fullscreen": "全螢幕",
+  "player.exit_fullscreen": "離開全螢幕"
 }

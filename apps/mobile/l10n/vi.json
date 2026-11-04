@@ -507,5 +507,16 @@
   "settings.log_send": "Gửi tới máy tính",
   "home.tagline": "Gửi · Sao lưu · Quét · Xem máy tính",
   "pclib.stalled": "Việc tải từ {pc} bị dừng. Kiểm tra mạng rồi thử lại.",
-  "pclib.fetching": "Đang lấy từ {pc}…"
+  "pclib.fetching": "Đang lấy từ {pc}…",
+  "player.play": "Phát",
+  "player.pause": "Tạm dừng",
+  "player.frame_back": "Lùi một khung hình (giữ để tiếp tục)",
+  "player.frame_fwd": "Tiến một khung hình (giữ để tiếp tục)",
+  "player.speed": "Tốc độ",
+  "player.ab_set_a": "Lặp A-B: chạm để đặt điểm đầu A",
+  "player.ab_set_b": "Chạm lần nữa để đặt điểm cuối B và lặp",
+  "player.ab_clear": "Bỏ lặp A-B",
+  "player.zoom_reset": "Đặt lại",
+  "player.fullscreen": "Toàn màn hình",
+  "player.exit_fullscreen": "Thoát toàn màn hình"
 }

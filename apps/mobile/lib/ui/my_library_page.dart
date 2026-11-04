@@ -18,6 +18,7 @@ import 'cleanup_page.dart' show formatSize;
 import 'first_page_view.dart';
 import 'open_file.dart';
 import 'send_files_page.dart';
+import 'lr_video.dart';
 import 'theme.dart';
 
 /// "My files": everything that arrived on this phone and its own scans,
@@ -763,19 +764,7 @@ class _VideoState extends State<_Video> {
     if (_failed) return Center(child: Text(tr('mylib.cannot_open'), style: const TextStyle(color: LrColors.muted)));
     final c = _c;
     if (c == null) return const Center(child: CircularProgressIndicator());
-    return GestureDetector(
-      onTap: () => unawaited(c.value.isPlaying ? c.pause() : c.play()),
-      child: Stack(alignment: Alignment.bottomCenter, children: [
-        Center(child: AspectRatio(aspectRatio: c.value.aspectRatio, child: VideoPlayer(c))),
-        VideoProgressIndicator(c, allowScrubbing: true, padding: const EdgeInsets.fromLTRB(12, 12, 12, 24)),
-        ValueListenableBuilder(
-          valueListenable: c,
-          builder: (_, v, _) => v.isPlaying
-              ? const SizedBox.shrink()
-              : const Center(child: Icon(Icons.play_circle_outline_rounded, color: Colors.white70, size: 72)),
-        ),
-      ]),
-    );
+    return LrVideo(controller: c);
   }
 }
 

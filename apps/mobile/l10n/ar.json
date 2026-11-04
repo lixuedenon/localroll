@@ -507,5 +507,16 @@
   "settings.log_send": "إرسال إلى كمبيوتر",
   "home.tagline": "نقل · نسخ احتياطي · مسح · تصفح الحاسوب",
   "pclib.stalled": "توقف التنزيل من {pc}. تحقق من الشبكة وحاول مرة أخرى.",
-  "pclib.fetching": "جارٍ الأخذ من {pc}…"
+  "pclib.fetching": "جارٍ الأخذ من {pc}…",
+  "player.play": "تشغيل",
+  "player.pause": "إيقاف مؤقت",
+  "player.frame_back": "إطار واحد للخلف (اضغط مطولًا للاستمرار)",
+  "player.frame_fwd": "إطار واحد للأمام (اضغط مطولًا للاستمرار)",
+  "player.speed": "السرعة",
+  "player.ab_set_a": "تكرار A-B: انقر لتحديد البداية A",
+  "player.ab_set_b": "انقر مرة أخرى لتحديد النهاية B وبدء التكرار",
+  "player.ab_clear": "إيقاف تكرار A-B",
+  "player.zoom_reset": "إعادة الضبط",
+  "player.fullscreen": "ملء الشاشة",
+  "player.exit_fullscreen": "الخروج من ملء الشاشة"
 }

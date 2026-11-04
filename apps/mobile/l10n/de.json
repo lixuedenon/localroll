@@ -507,5 +507,16 @@
   "settings.log_send": "An einen PC senden",
   "home.tagline": "Senden · Sichern · Scannen · PC durchsuchen",
   "pclib.stalled": "Die Übertragung von {pc} ist hängen geblieben. Netzwerk prüfen und erneut versuchen.",
-  "pclib.fetching": "Wird von {pc} geholt…"
+  "pclib.fetching": "Wird von {pc} geholt…",
+  "player.play": "Abspielen",
+  "player.pause": "Pause",
+  "player.frame_back": "Ein Bild zurück (halten für weiter)",
+  "player.frame_fwd": "Ein Bild vor (halten für weiter)",
+  "player.speed": "Tempo",
+  "player.ab_set_a": "A-B-Schleife: tippen setzt den Anfang A",
+  "player.ab_set_b": "Nochmals tippen setzt das Ende B und wiederholt",
+  "player.ab_clear": "A-B-Schleife beenden",
+  "player.zoom_reset": "Zurücksetzen",
+  "player.fullscreen": "Vollbild",
+  "player.exit_fullscreen": "Vollbild beenden"
 }

@@ -507,5 +507,16 @@
   "settings.log_send": "Bir PC’ye gönder",
   "home.tagline": "Gönder · Yedekle · Tara · PC’ye göz at",
   "pclib.stalled": "{pc} üzerinden alma durdu. Ağı kontrol edip tekrar deneyin.",
-  "pclib.fetching": "{pc} üzerinden alınıyor…"
+  "pclib.fetching": "{pc} üzerinden alınıyor…",
+  "player.play": "Oynat",
+  "player.pause": "Duraklat",
+  "player.frame_back": "Bir kare geri (sürdürmek için basılı tutun)",
+  "player.frame_fwd": "Bir kare ileri (sürdürmek için basılı tutun)",
+  "player.speed": "Hız",
+  "player.ab_set_a": "A-B döngüsü: başlangıç A için dokunun",
+  "player.ab_set_b": "Bitiş B için tekrar dokunun, döngü başlar",
+  "player.ab_clear": "A-B döngüsünü kapat",
+  "player.zoom_reset": "Sıfırla",
+  "player.fullscreen": "Tam ekran",
+  "player.exit_fullscreen": "Tam ekrandan çık"
 }

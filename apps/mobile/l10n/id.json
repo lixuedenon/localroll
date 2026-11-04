@@ -507,5 +507,16 @@
   "settings.log_send": "Kirim ke PC",
   "home.tagline": "Kirim · Cadangkan · Pindai · Jelajahi PC",
   "pclib.stalled": "Pengambilan dari {pc} terhenti. Periksa jaringan lalu coba lagi.",
-  "pclib.fetching": "Mengambil dari {pc}…"
+  "pclib.fetching": "Mengambil dari {pc}…",
+  "player.play": "Putar",
+  "player.pause": "Jeda",
+  "player.frame_back": "Mundur satu bingkai (tahan untuk terus)",
+  "player.frame_fwd": "Maju satu bingkai (tahan untuk terus)",
+  "player.speed": "Kecepatan",
+  "player.ab_set_a": "Ulang A-B: ketuk untuk menetapkan awal, A",
+  "player.ab_set_b": "Ketuk lagi untuk menetapkan akhir, B, lalu ulang",
+  "player.ab_clear": "Hentikan ulang A-B",
+  "player.zoom_reset": "Atur ulang",
+  "player.fullscreen": "Layar penuh",
+  "player.exit_fullscreen": "Keluar layar penuh"
 }

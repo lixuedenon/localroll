@@ -507,5 +507,16 @@
   "settings.log_send": "ส่งไปยังคอมพิวเตอร์",
   "home.tagline": "ส่ง · สำรอง · สแกน · ดูคอมพิวเตอร์",
   "pclib.stalled": "การดึงไฟล์จาก {pc} หยุดค้าง ตรวจสอบเครือข่ายแล้วลองใหม่",
-  "pclib.fetching": "กำลังดึงจาก {pc}…"
+  "pclib.fetching": "กำลังดึงจาก {pc}…",
+  "player.play": "เล่น",
+  "player.pause": "หยุดชั่วคราว",
+  "player.frame_back": "ถอยหลังหนึ่งเฟรม (กดค้างเพื่อทำต่อ)",
+  "player.frame_fwd": "เดินหน้าหนึ่งเฟรม (กดค้างเพื่อทำต่อ)",
+  "player.speed": "ความเร็ว",
+  "player.ab_set_a": "วนซ้ำ A-B: แตะเพื่อตั้งจุดเริ่ม A",
+  "player.ab_set_b": "แตะอีกครั้งเพื่อตั้งจุดจบ B แล้ววนซ้ำ",
+  "player.ab_clear": "ยกเลิกการวนซ้ำ A-B",
+  "player.zoom_reset": "คืนค่า",
+  "player.fullscreen": "เต็มจอ",
+  "player.exit_fullscreen": "ออกจากเต็มจอ"
 }
