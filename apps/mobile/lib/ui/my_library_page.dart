@@ -464,13 +464,12 @@ class _Thumb extends StatelessWidget {
 /// A photo kept as a file in LocalRoll's folder (not in the photo
 /// library): drawn straight from the file; its name if it can't be.
 class _FilePhoto extends StatelessWidget {
-  const _FilePhoto({required this.item, this.size, this.fit = BoxFit.cover});
+  const _FilePhoto({required this.item, this.size});
 
   final MyItem item;
 
   /// Decoded at about this width (thumbnails); null = full size.
   final int? size;
-  final BoxFit fit;
 
   static final Map<String, Future<String?>> _paths = {};
 
@@ -484,7 +483,7 @@ class _FilePhoto extends StatelessWidget {
           }
           return Image.file(
             File(path),
-            fit: fit,
+            fit: BoxFit.cover,
             cacheWidth: size,
             gaplessPlayback: true,
             errorBuilder: (_, _, _) => _FileTile(item: item),
