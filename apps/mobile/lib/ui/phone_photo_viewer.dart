@@ -7,6 +7,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:video_player/video_player.dart';
 
 import '../l10n/l10n.dart';
+import 'inked_photo.dart';
 import 'lr_video.dart';
 import 'theme.dart';
 
@@ -123,7 +124,7 @@ class _PhotoState extends State<_Photo> {
                 ? Center(child: Text(tr('mylib.cannot_open'), style: const TextStyle(color: LrColors.muted)))
                 : const Center(child: CircularProgressIndicator());
           }
-          return InteractiveViewer(maxScale: 6, child: Center(child: Image.memory(b, fit: BoxFit.contain, gaplessPlayback: true)));
+          return InkedPhoto(image: MemoryImage(b), inkKey: 'asset:${widget.asset.id}');
         },
       );
 }
@@ -182,6 +183,6 @@ class _VideoState extends State<_Video> {
     if (_failed) return Center(child: Text(tr('mylib.cannot_open'), style: const TextStyle(color: LrColors.muted)));
     final c = _c;
     if (c == null) return const Center(child: CircularProgressIndicator());
-    return LrVideo(controller: c);
+    return LrVideo(controller: c, inkKey: 'asset:${widget.asset.id}');
   }
 }

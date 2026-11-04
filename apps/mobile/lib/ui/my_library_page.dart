@@ -18,6 +18,7 @@ import 'cleanup_page.dart' show formatSize;
 import 'first_page_view.dart';
 import 'open_file.dart';
 import 'send_files_page.dart';
+import 'inked_photo.dart';
 import 'lr_video.dart';
 import 'theme.dart';
 
@@ -692,7 +693,18 @@ class _Photo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => item.assetId == null
-      ? InteractiveViewer(maxScale: 6, child: Center(child: _FilePhoto(item: item, size: 2560, fit: BoxFit.contain)))
+      ? FutureBuilder<String?>(
+          future: MyLibrary.instance.pathOf(item),
+          builder: (context, s) {
+            final path = s.data;
+            if (path == null) {
+              return s.connectionState == ConnectionState.done
+                  ? Center(child: Text(tr('mylib.cannot_open'), style: const TextStyle(color: LrColors.muted)))
+                  : const Center(child: CircularProgressIndicator());
+            }
+            return InkedPhoto(image: FileImage(File(path)), inkKey: 'my:${item.id}');
+          },
+        )
       : FutureBuilder<Uint8List?>(
         future: _load(),
         builder: (context, s) {
@@ -702,7 +714,7 @@ class _Photo extends StatelessWidget {
                 ? Center(child: Text(tr('mylib.cannot_open'), style: const TextStyle(color: LrColors.muted)))
                 : const Center(child: CircularProgressIndicator());
           }
-          return InteractiveViewer(maxScale: 6, child: Center(child: Image.memory(b, fit: BoxFit.contain)));
+          return InkedPhoto(image: MemoryImage(b), inkKey: 'asset:${item.assetId}');
         },
       );
 }
@@ -764,7 +776,8 @@ class _VideoState extends State<_Video> {
     if (_failed) return Center(child: Text(tr('mylib.cannot_open'), style: const TextStyle(color: LrColors.muted)));
     final c = _c;
     if (c == null) return const Center(child: CircularProgressIndicator());
-    return LrVideo(controller: c);
+    final id = widget.item.assetId;
+    return LrVideo(controller: c, inkKey: id != null ? 'asset:$id' : 'my:${widget.item.id}');
   }
 }
 

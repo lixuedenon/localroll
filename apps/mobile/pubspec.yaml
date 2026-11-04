@@ -17,6 +17,9 @@ dependencies:
   intl: any
   localroll_core:
     path: ../../packages/core
+  # Marks and stamps (drawing on photos / videos), shared with the PC.
+  localroll_ink:
+    path: ../../packages/ink
 
   # Reads ORIGINAL files straight from the photo library (no transcoding,
   # no waiting like Safari's file picker).

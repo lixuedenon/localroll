@@ -17,6 +17,7 @@ import '../services/phone_server.dart';
 import 'cleanup_page.dart' show formatSize;
 import 'first_page_view.dart';
 import 'open_file.dart';
+import 'inked_photo.dart';
 import 'lr_video.dart';
 import 'theme.dart';
 
@@ -677,7 +678,7 @@ class _PhotoViewState extends State<_PhotoView> {
                 const Center(child: CircularProgressIndicator()),
               ]);
             }
-            return InteractiveViewer(maxScale: 6, child: Center(child: Image.memory(b, gaplessPlayback: true)));
+            return InkedPhoto(image: MemoryImage(b), inkKey: 'pc:${widget.lib.desktop.id}:${widget.item.path}');
           },
         ),
       ),
@@ -810,7 +811,7 @@ class _VideoViewState extends State<_VideoView> {
         ]),
       );
     }
-    return LrVideo(controller: c);
+    return LrVideo(controller: c, inkKey: 'pc:${widget.lib.desktop.id}:${widget.path}');
   }
 }
 

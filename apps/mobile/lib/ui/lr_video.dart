@@ -4,9 +4,13 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:localroll_ink/localroll_ink.dart';
 import 'package:video_player/video_player.dart';
 
 import '../l10n/l10n.dart';
+import '../services/phone_notes.dart';
+import 'ink_editor_page.dart';
+import 'inked_photo.dart' show InkPenButton;
 
 /// The phone's video player: speed, one frame at a time, A-B loop, pinch to
 /// zoom, full screen. The video itself plays on the system's player (no
@@ -15,9 +19,12 @@ import '../l10n/l10n.dart';
 /// Tap: show / hide the controls. Pinch: zoom in, drag to move; double tap:
 /// back to the whole picture.
 class LrVideo extends StatefulWidget {
-  const LrVideo({super.key, required this.controller, this.fullScreen = false});
+  const LrVideo({super.key, required this.controller, this.fullScreen = false, this.inkKey});
 
   final VideoPlayerController controller;
+
+  /// Where its drawings are kept (null: no drawing on it).
+  final String? inkKey;
 
   /// Shown in the full-screen page (its button leaves full screen).
   final bool fullScreen;
@@ -179,12 +186,29 @@ class _LrVideoState extends State<LrVideo> {
       opaque: true,
       pageBuilder: (_, _, _) => Scaffold(
         backgroundColor: Colors.black,
-        body: SafeArea(child: LrVideo(controller: _c, fullScreen: true)),
+        body: SafeArea(child: LrVideo(controller: _c, fullScreen: true, inkKey: widget.inkKey)),
       ),
     ));
     await SystemChrome.setPreferredOrientations(DeviceOrientation.values);
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     if (mounted) setState(() {});
+  }
+
+  /// Pause and draw on this frame.
+  Future<void> _draw() async {
+    final key = widget.inkKey;
+    if (key == null) return;
+    _hide?.cancel();
+    if (_c.value.isPlaying) await _c.pause();
+    if (!mounted) return;
+    await openInkEditor(
+      context,
+      inkKey: key,
+      aspect: _c.value.aspectRatio,
+      background: VideoPlayer(_c),
+      atMs: _c.value.position.inMilliseconds,
+    );
+    _touch();
   }
 
   String _time(Duration d) {
@@ -222,7 +246,29 @@ class _LrVideoState extends State<LrVideo> {
               final z = _zoom.value.getMaxScaleOnAxis() > 1.01;
               if (z != _zoomed) setState(() => _zoomed = z);
             },
-            child: Center(child: AspectRatio(aspectRatio: c.value.aspectRatio, child: VideoPlayer(c))),
+            child: Center(
+              child: AspectRatio(
+                aspectRatio: c.value.aspectRatio,
+                child: Stack(fit: StackFit.expand, children: [
+                  VideoPlayer(c),
+                  // What was drawn, at its moment.
+                  if (widget.inkKey != null)
+                    ListenableBuilder(
+                      listenable: PhoneNotes.instance,
+                      builder: (_, _) => IgnorePointer(
+                        child: CustomPaint(
+                          painter: InkPainter(
+                            notes: PhoneNotes.instance.of(widget.inkKey!),
+                            video: true,
+                            ms: () => c.value.position.inMilliseconds,
+                            repaint: c,
+                          ),
+                        ),
+                      ),
+                    ),
+                ]),
+              ),
+            ),
           ),
         ),
       ),
@@ -279,6 +325,9 @@ class _LrVideoState extends State<LrVideo> {
           round(Icons.skip_next_rounded, tr('player.frame_fwd'), () => unawaited(_step(1)), onHold: () => _holdStep(1)),
         ]),
       ),
+      // Draw on this frame.
+      if (widget.inkKey != null)
+        Positioned(left: 10, top: 10, child: InkPenButton(onPressed: () => unawaited(_draw()))),
       // Zoomed in: how much; tap to see the whole picture again.
       if (_zoomed)
         Positioned(

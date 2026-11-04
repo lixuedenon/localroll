@@ -5,5 +5,7 @@ library;
 
 export 'src/candle.dart';
 export 'src/ink_mark.dart';
+export 'src/ink_paint.dart';
+export 'src/note.dart';
 export 'src/stamp.dart';
 export 'src/stamp_packs.dart';
