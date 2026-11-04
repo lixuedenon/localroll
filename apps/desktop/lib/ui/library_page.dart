@@ -224,7 +224,7 @@ class _LibraryPageState extends State<LibraryPage> {
     unawaited(_loadFiles());
     unawaited(_watchFiles());
     _scroll.addListener(_onScroll);
-    HardwareKeyboard.instance.addHandler(_onKey);
+    HardwareKeyboard.instance.addHandler(_onCtrlKey);
   }
 
   @override
@@ -238,7 +238,7 @@ class _LibraryPageState extends State<LibraryPage> {
     _filesSoon?.cancel();
     _autoScroll?.cancel();
     _tipTimer?.cancel();
-    HardwareKeyboard.instance.removeHandler(_onKey);
+    HardwareKeyboard.instance.removeHandler(_onCtrlKey);
     _topIndex.dispose();
     _scrollTip.dispose();
     _focus.dispose();
@@ -1237,7 +1237,7 @@ class _LibraryPageState extends State<LibraryPage> {
 
   /// Drag with the mouse to select with a box (Ctrl: add to what is
   /// selected). [over]: more layers above the grid.
-  Widget _boxSelect(BuildContext context, Widget scroll, {List<Widget> over = const [], PointerSignalEventListener? onSignal}) {
+  Widget _boxSelect(BuildContext context, Widget scroll, {List<Widget> over = const [], void Function(PointerSignalEvent)? onSignal}) {
     return Listener(
       onPointerDown: _boxDown,
       onPointerMove: _boxMove,
@@ -1527,7 +1527,7 @@ class _LibraryPageState extends State<LibraryPage> {
     });
   }
 
-  bool _onKey(KeyEvent e) {
+  bool _onCtrlKey(KeyEvent e) {
     final c = HardwareKeyboard.instance.isControlPressed;
     if (c != _ctrl && mounted) {
       if (_flat.isEmpty) {
