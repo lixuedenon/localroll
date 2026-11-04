@@ -40,7 +40,18 @@ jobs:
       contents: write
     outputs:
       created: ${{ steps.gen.outputs.created }}
+      # A push whose commit message has a line "release: v0.1.0-beta.N"
+      # also publishes that Release (no tag push or manual run needed).
+      tag: ${{ steps.tag.outputs.tag }}
     steps:
+      - id: tag
+        name: Release asked for in the commit message?
+        env:
+          MSG: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.head_commit.message || '' }}
+        run: |
+          tag=$(printf '%s\n' "$MSG" | sed -n 's/^release: *\(v[0-9][0-9A-Za-z.-]*\) *$/\1/p' | head -1)
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "release tag: ${tag:-none}"
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
@@ -127,7 +138,9 @@ jobs:
           done
 
   build-windows:
-    needs: analyze
+    needs: [bootstrap, analyze]
+    env:
+      LR_VERSION: ${{ inputs.release || needs.bootstrap.outputs.tag || (startsWith(github.ref, 'refs/tags/') && github.ref_name) || format('dev.{0}', github.run_number) }}
     # Flutter 3.35 only generates for VS 2022; windows-latest now ships VS 2026.
     runs-on: windows-2022
     steps:
@@ -309,7 +322,9 @@ jobs:
           path: apps/desktop/build/windows/x64/runner/Release
 
   build-android:
-    needs: analyze
+    needs: [bootstrap, analyze]
+    env:
+      LR_VERSION: ${{ inputs.release || needs.bootstrap.outputs.tag || (startsWith(github.ref, 'refs/tags/') && github.ref_name) || format('dev.{0}', github.run_number) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -349,7 +364,9 @@ jobs:
           path: apps/mobile/build/app/outputs/flutter-apk/app-release.apk
 
   build-ios:
-    needs: analyze
+    needs: [bootstrap, analyze]
+    env:
+      LR_VERSION: ${{ inputs.release || needs.bootstrap.outputs.tag || (startsWith(github.ref, 'refs/tags/') && github.ref_name) || format('dev.{0}', github.run_number) }}
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -391,8 +408,8 @@ jobs:
 
   # Tag push (v*) → GitHub Release with the three downloads for testers.
   release:
-    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.release != '')
-    needs: [build-windows, build-android, build-ios]
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.release != '') || needs.bootstrap.outputs.tag != ''
+    needs: [bootstrap, build-windows, build-android, build-ios]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -410,7 +427,7 @@ jobs:
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ inputs.release || github.ref_name }}
+          TAG: ${{ inputs.release || needs.bootstrap.outputs.tag || github.ref_name }}
         run: |
           cat > notes.md <<'NOTES'
           ## 下载 / Downloads
