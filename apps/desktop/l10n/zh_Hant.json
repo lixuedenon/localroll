@@ -1172,5 +1172,9 @@
   "lib.select_month": "選取這個月",
   "lib.unselect_month": "取消選取這個月",
   "lib.select_year": "選取這一年",
-  "lib.unselect_year": "取消選取這一年"
+  "lib.unselect_year": "取消選取這一年",
+  "sedit.title": "編輯錄影",
+  "sedit.menu": "編輯錄影…",
+  "sedit.delete_mark_tip": "這一筆會從錄影裡刪除（錄下的畫面本身不變）。",
+  "sedit.cut_tip_marks": "這一段的畫面和聲音都會去掉，後面的接上來。這段裡畫的 {n} 筆也會刪除。"
 }

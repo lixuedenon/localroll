@@ -1172,5 +1172,9 @@
   "lib.select_month": "选择这个月",
   "lib.unselect_month": "取消选择这个月",
   "lib.select_year": "选择这一年",
-  "lib.unselect_year": "取消选择这一年"
+  "lib.unselect_year": "取消选择这一年",
+  "sedit.title": "编辑录屏",
+  "sedit.menu": "编辑录屏…",
+  "sedit.delete_mark_tip": "这一笔会从录屏里删掉（录的画面本身不变）。",
+  "sedit.cut_tip_marks": "这一段的画面和声音都会去掉，后面的接上来。这段里画的 {n} 笔也会删掉。"
 }

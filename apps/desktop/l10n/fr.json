@@ -1172,5 +1172,9 @@
   "lib.select_month": "Sélectionner ce mois",
   "lib.unselect_month": "Désélectionner ce mois",
   "lib.select_year": "Sélectionner cette année",
-  "lib.unselect_year": "Désélectionner cette année"
+  "lib.unselect_year": "Désélectionner cette année",
+  "sedit.title": "Modifier l’enregistrement d’écran",
+  "sedit.menu": "Modifier l’enregistrement…",
+  "sedit.delete_mark_tip": "Ce tracé sera retiré de l’enregistrement (l’image filmée ne change pas).",
+  "sedit.cut_tip_marks": "L’image et le son de ce passage sont retirés, la suite est rapprochée. Les {n} tracés dessinés dedans sont aussi retirés."
 }

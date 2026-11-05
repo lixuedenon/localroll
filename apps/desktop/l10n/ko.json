@@ -1172,5 +1172,9 @@
   "lib.select_month": "이 달 선택",
   "lib.unselect_month": "이 달 선택 해제",
   "lib.select_year": "이 해 선택",
-  "lib.unselect_year": "이 해 선택 해제"
+  "lib.unselect_year": "이 해 선택 해제",
+  "sedit.title": "화면 녹화 편집",
+  "sedit.menu": "녹화 편집…",
+  "sedit.delete_mark_tip": "이 획을 녹화에서 지웁니다(녹화된 화면 자체는 그대로입니다).",
+  "sedit.cut_tip_marks": "이 구간의 화면과 소리를 없애고 뒤를 이어 붙입니다. 이 구간에 그린 {n}개의 획도 지워집니다."
 }

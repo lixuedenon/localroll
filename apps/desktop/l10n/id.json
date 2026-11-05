@@ -1172,5 +1172,9 @@
   "lib.select_month": "Pilih bulan ini",
   "lib.unselect_month": "Batalkan pilihan bulan ini",
   "lib.select_year": "Pilih tahun ini",
-  "lib.unselect_year": "Batalkan pilihan tahun ini"
+  "lib.unselect_year": "Batalkan pilihan tahun ini",
+  "sedit.title": "Edit rekaman layar",
+  "sedit.menu": "Edit rekaman…",
+  "sedit.delete_mark_tip": "Goresan ini akan dihapus dari rekaman (yang terekam tetap sama).",
+  "sedit.cut_tip_marks": "Gambar dan suara bagian ini dihapus dan sisanya digeser maju. {n} goresan yang digambar di bagian ini juga dihapus."
 }

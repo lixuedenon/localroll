@@ -1172,5 +1172,9 @@
   "lib.select_month": "Seleziona questo mese",
   "lib.unselect_month": "Deseleziona questo mese",
   "lib.select_year": "Seleziona questo anno",
-  "lib.unselect_year": "Deseleziona questo anno"
+  "lib.unselect_year": "Deseleziona questo anno",
+  "sedit.title": "Modifica registrazione schermo",
+  "sedit.menu": "Modifica registrazione…",
+  "sedit.delete_mark_tip": "Questo segno verrà tolto dalla registrazione (ciò che è stato filmato resta uguale).",
+  "sedit.cut_tip_marks": "Immagine e audio di questo tratto vengono tolti e il resto si avvicina. Vengono tolti anche i {n} segni disegnati qui."
 }

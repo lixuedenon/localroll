@@ -1172,5 +1172,9 @@
   "lib.select_month": "この月を選択",
   "lib.unselect_month": "この月の選択を解除",
   "lib.select_year": "この年を選択",
-  "lib.unselect_year": "この年の選択を解除"
+  "lib.unselect_year": "この年の選択を解除",
+  "sedit.title": "画面録画を編集",
+  "sedit.menu": "録画を編集…",
+  "sedit.delete_mark_tip": "この線を録画から消します（録画された画面自体は変わりません）。",
+  "sedit.cut_tip_marks": "この区間の映像と音声を取り除き、後ろを詰めます。この区間に描いた {n} 本の線も消えます。"
 }

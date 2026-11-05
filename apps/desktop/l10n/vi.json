@@ -1172,5 +1172,9 @@
   "lib.select_month": "Chọn tháng này",
   "lib.unselect_month": "Bỏ chọn tháng này",
   "lib.select_year": "Chọn năm này",
-  "lib.unselect_year": "Bỏ chọn năm này"
+  "lib.unselect_year": "Bỏ chọn năm này",
+  "sedit.title": "Sửa bản ghi màn hình",
+  "sedit.menu": "Sửa bản ghi…",
+  "sedit.delete_mark_tip": "Nét này sẽ bị xóa khỏi bản ghi (hình đã ghi không đổi).",
+  "sedit.cut_tip_marks": "Hình và tiếng của đoạn này bị bỏ, phần sau dồn lên. {n} nét vẽ trong đoạn này cũng bị xóa."
 }

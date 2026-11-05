@@ -1172,5 +1172,9 @@
   "lib.select_month": "Select this month",
   "lib.unselect_month": "Unselect this month",
   "lib.select_year": "Select this year",
-  "lib.unselect_year": "Unselect this year"
+  "lib.unselect_year": "Unselect this year",
+  "sedit.title": "Edit screen recording",
+  "sedit.menu": "Edit recording…",
+  "sedit.delete_mark_tip": "This mark will be taken out of the recording (what was filmed stays as it is).",
+  "sedit.cut_tip_marks": "The picture and sound of this stretch go and what follows moves up. The {n} marks drawn in it go too."
 }

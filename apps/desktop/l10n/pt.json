@@ -1172,5 +1172,9 @@
   "lib.select_month": "Selecionar este mês",
   "lib.unselect_month": "Desmarcar este mês",
   "lib.select_year": "Selecionar este ano",
-  "lib.unselect_year": "Desmarcar este ano"
+  "lib.unselect_year": "Desmarcar este ano",
+  "sedit.title": "Editar gravação de tela",
+  "sedit.menu": "Editar gravação…",
+  "sedit.delete_mark_tip": "Este traço será removido da gravação (o que foi gravado não muda).",
+  "sedit.cut_tip_marks": "A imagem e o som deste trecho são removidos e o resto se junta. Os {n} traços desenhados nele também são removidos."
 }

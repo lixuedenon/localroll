@@ -1172,5 +1172,9 @@
   "lib.select_month": "Bu ayı seç",
   "lib.unselect_month": "Bu ayın seçimini kaldır",
   "lib.select_year": "Bu yılı seç",
-  "lib.unselect_year": "Bu yılın seçimini kaldır"
+  "lib.unselect_year": "Bu yılın seçimini kaldır",
+  "sedit.title": "Ekran kaydını düzenle",
+  "sedit.menu": "Kaydı düzenle…",
+  "sedit.delete_mark_tip": "Bu çizim kayıttan çıkarılır (kaydedilen görüntü aynı kalır).",
+  "sedit.cut_tip_marks": "Bu bölümün görüntüsü ve sesi çıkarılır, sonrası öne kayar. İçinde çizilen {n} çizim de silinir."
 }

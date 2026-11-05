@@ -1172,5 +1172,9 @@
   "lib.select_month": "Diesen Monat auswählen",
   "lib.unselect_month": "Auswahl dieses Monats aufheben",
   "lib.select_year": "Dieses Jahr auswählen",
-  "lib.unselect_year": "Auswahl dieses Jahres aufheben"
+  "lib.unselect_year": "Auswahl dieses Jahres aufheben",
+  "sedit.title": "Bildschirmaufnahme bearbeiten",
+  "sedit.menu": "Aufnahme bearbeiten…",
+  "sedit.delete_mark_tip": "Diese Markierung wird aus der Aufnahme entfernt (das Gefilmte bleibt unverändert).",
+  "sedit.cut_tip_marks": "Bild und Ton dieses Abschnitts werden entfernt, der Rest rückt nach. Die {n} darin gezeichneten Markierungen werden ebenfalls entfernt."
 }

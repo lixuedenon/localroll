@@ -35,6 +35,7 @@ import '../theme.dart';
 import 'camera_button.dart';
 import 'pen_bar.dart';
 import 'recordings_view.dart';
+import 'screen_editor.dart';
 
 /// What is recorded.
 enum ScreenMode { screen, window, area }
@@ -247,9 +248,13 @@ class _Capture {
 
 /// One stretch of video filmed between pauses.
 class _Part {
-  _Part(this.file, this.startT, this.headMs);
+  _Part(this.file, this.startT, this.headMs, {this.still = false});
 
   final File file;
+
+  /// Its picture at [headMs] held for its length (made by editing: the
+  /// picture waits while a stretch is spoken again, longer).
+  final bool still;
 
   /// When it starts in the recording.
   final int startT;
@@ -945,6 +950,15 @@ class ScreenRecorder extends ChangeNotifier {
     if (_voice.isNotEmpty) await joinVoice(exe, _voice, voice);
     final system = File('${dir.path}${Platform.pathSeparator}system.wav');
     if (_sysParts.isNotEmpty) await joinVoice(exe, _sysParts, system);
+    // Kept first: then it can be edited before it is made, and made again.
+    final id = DateTime.now().millisecondsSinceEpoch.toRadixString(36);
+    final name = _defaultName();
+    await _keepSession(id, length, name, voice: voice.existsSync() ? voice : null, system: system.existsSync() ? system : null);
+    if (_dir == null) {
+      final c = AppNav.instance.navigatorKey.currentContext;
+      if (c != null && c.mounted) await afterScreenSession(c, s, id, defaultName: name);
+      return;
+    }
     while (true) {
       final c = AppNav.instance.navigatorKey.currentContext;
       if (c == null || !c.mounted) return;
@@ -1257,17 +1271,20 @@ class _ScreenComposer {
       for (var i = 0; i < pieces.length && !_cancelled; i++) {
         final p = pieces[i];
         final len = p.endT - p.startT;
-        final local = p.part.headMs + (p.startT - p.part.startT);
+        final still = p.part.still;
+        final local = still ? p.part.headMs : p.part.headMs + (p.startT - p.part.startT);
         final c = p.crop;
         final out = '${dir.path}${sep}p$i.mp4';
         final frames = (len / 1000 * ofps).ceil() + 1;
         final args = [
           '-hide_banner', '-loglevel', 'error', '-y',
-          '-ss', _secs(local), '-t', _secs(len + 200), '-i', p.part.file.path,
+          '-ss', _secs(local), '-t', still ? '0.2' : _secs(len + 200), '-i', p.part.file.path,
           '-f', 'rawvideo', '-pix_fmt', 'rgba', '-s', '${ow}x$oh', '-framerate', '$ofps', '-i', 'pipe:0',
           '-filter_complex',
           '[0:v]crop=${_even(c.width)}:${_even(c.height)}:${c.left.round()}:${c.top.round()},'
-              'scale=$w:$h:force_original_aspect_ratio=decrease,pad=$w:$h:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=$fps,setpts=PTS-STARTPTS[base];'
+              'scale=$w:$h:force_original_aspect_ratio=decrease,pad=$w:$h:(ow-iw)/2:(oh-ih)/2,setsar=1,'
+              '${still ? 'trim=end_frame=1,setpts=PTS-STARTPTS,tpad=stop_mode=clone:stop_duration=${_secs(len + 200)},' : ''}'
+              'fps=$fps,setpts=PTS-STARTPTS[base];'
               '[1:v]scale=$w:$h,format=rgba[ov];[base][ov]overlay=0:0:eof_action=repeat,format=nv12[v]',
           '-map', '[v]',
           ...H264Encoders.args(enc, high: true, width: w, height: h, fps: fps.toDouble()),
@@ -2059,7 +2076,7 @@ class ScreenSession {
     );
     final parts = [
       for (final p in (json['parts'] as List? ?? const []))
-        _Part(_file(p['f'] as String), (p['s'] as num).toInt(), (p['h'] as num).toInt())..lengthMs = (p['l'] as num).toInt(),
+        _Part(_file(p['f'] as String), (p['s'] as num).toInt(), (p['h'] as num).toInt(), still: p['still'] == 1)..lengthMs = (p['l'] as num).toInt(),
     ];
     final voice = json['voice'] is String ? _file(json['voice'] as String) : null;
     final system = json['system'] is String ? _file(json['system'] as String) : null;
@@ -2095,25 +2112,88 @@ class ScreenSession {
   }
 }
 
-/// "Make again" on a screen recording: the video made anew from what was
-/// kept (a new file; the old one stays).
-Future<void> remakeScreen(BuildContext context, AppServices s, String id) async {
-  final session = await ScreenSession.load(s.settings.dataDir, id);
-  if (!context.mounted) return;
-  if (session == null) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('recs.raw_gone'))));
+/// After a screen recording (or "make again" / "edit" in My recordings):
+/// asked what to do — edit first, save, save and send, throw away — and
+/// done from the kept material.
+Future<void> afterScreenSession(BuildContext context, AppServices s, String id,
+    {bool again = false, String? defaultName, bool editFirst = false}) async {
+  var edit = editFirst;
+  while (true) {
+    final c = AppNav.instance.navigatorKey.currentContext ?? (context.mounted ? context : null);
+    if (c == null || !c.mounted) return;
+    final session = await ScreenSession.load(s.settings.dataDir, id);
+    if (!c.mounted) return;
+    if (session == null) {
+      ScaffoldMessenger.of(c).showSnackBar(SnackBar(content: Text(tr('recs.raw_gone'))));
+      return;
+    }
+    if (edit) {
+      edit = false;
+      await editScreenRecording(c, s, session);
+      continue;
+    }
+    final made = s.recordings.items.where((x) => x.kind == RecKind.screen && x.narrationId == id).lastOrNull;
+    final r = await recordedDialog(c, session.length, OriginalSound.none,
+        screen: true,
+        again: again,
+        editable: true,
+        replaceable: made != null,
+        defaultName: made != null ? '${stemOf(made.name)}${tr('nedit.suffix')}' : (defaultName ?? session.name));
+    if (r == null) return;
+    final c2 = AppNav.instance.navigatorKey.currentContext;
+    if (c2 == null || !c2.mounted) return;
+    if (r.choice == RecordedChoice.edit) {
+      edit = true;
+      again = made != null || again;
+      continue;
+    }
+    if (r.choice == RecordedChoice.discard) {
+      final ok = await confirmDiscard(c2, drew: false);
+      if (ok == null) continue;
+      try {
+        await session.dir.delete(recursive: true);
+      } catch (_) {}
+      if (c2.mounted) ScaffoldMessenger.of(c2).showSnackBar(SnackBar(content: Text(tr('rec.discarded'))));
+      return;
+    }
+    final progress = ValueNotifier<double>(0);
+    VoidCallback cancel = () {};
+    final done = session.make(s, name: r.name, onProgress: (p) => progress.value = p, onCancel: (x) => cancel = x);
+    _showMaking(c2, done, progress, () => cancel());
+    var f = await done;
+    progress.dispose();
+    final c3 = AppNav.instance.navigatorKey.currentContext;
+    if (c3 == null || !c3.mounted) return;
+    final messenger = ScaffoldMessenger.of(c3);
+    if (f == null) {
+      messenger.showSnackBar(SnackBar(content: Text(tr('rec.failed'))));
+      return;
+    }
+    // In place of the one made before: that one goes, this takes its name.
+    if (r.replace && made != null && made.path != f.path) {
+      final recs = s.recordings;
+      final oldName = stemOf(made.name);
+      recs.forget([made]);
+      try {
+        await File(made.path).delete();
+      } catch (e) {
+        DiagLog.log('screen', 'old recording not deleted: $e');
+      }
+      final now = recs.byPath(f.path);
+      if (now != null && await recs.rename(now, oldName)) f = File(now.path);
+    }
+    if (r.choice == RecordedChoice.saveSend) {
+      final lib = s.library;
+      final root = '${lib.rootPath}${Platform.pathSeparator}';
+      final item = f.path.toLowerCase().startsWith(root.toLowerCase())
+          ? lib.findByRel(f.path.substring(root.length).replaceAll(Platform.pathSeparator, '/'))
+          : null;
+      final name = f.path.split(Platform.pathSeparator).last;
+      final file = item != null ? SendFile.fromLibrary(lib, item) : SendFile.plain(f, name);
+      if (file != null && c3.mounted) await sendToPc(c3, s, [file], name);
+      return;
+    }
+    if (c3.mounted) showSavedBar(c3, s, f);
     return;
   }
-  final progress = ValueNotifier<double>(0);
-  VoidCallback cancel = () {};
-  final done = session.make(s, name: session.name, onProgress: (p) => progress.value = p, onCancel: (c) => cancel = c);
-  _showMaking(context, done, progress, () => cancel());
-  final f = await done;
-  progress.dispose();
-  if (!context.mounted) return;
-  if (f == null) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('rec.failed'))));
-    return;
-  }
-  showSavedBar(context, s, f);
 }
