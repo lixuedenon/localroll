@@ -10,6 +10,7 @@ import 'stamp_icons.g.dart';
 part 'packs/art.dart';
 part 'packs/draw.dart';
 part 'packs/school.dart';
+part 'packs/sports.dart';
 
 /// A ready-made stamp. Its name: the app's text 'stamp.<id>'.
 class Stamp {
@@ -24,13 +25,14 @@ class Stamp {
 
 /// The packs that come with LocalRoll.
 class StampPacks {
-  static const List<String> packs = ['basic', 'finance', 'kids', 'math', 'physics', 'chem', 'bio', 'geo', 'history', 'lang', 'code', 'callig', 'music', 'art', 'photo', 'dance'];
+  static const List<String> packs = ['basic', 'finance', 'kids', 'math', 'physics', 'chem', 'bio', 'geo', 'history', 'lang', 'code', 'callig', 'music', 'art', 'photo', 'dance', 'tactics', 'fields', 'fitness', 'golf'];
 
   /// The packs by kind (the panel shows a kind, then its packs).
   static const Map<String, List<String>> kinds = {
     'general': ['basic', 'finance', 'kids'],
     'school': ['math', 'physics', 'chem', 'bio', 'geo', 'history', 'lang', 'code', 'callig'],
     'art': ['music', 'art', 'photo', 'dance'],
+    'sports': ['tactics', 'fields', 'fitness', 'golf'],
   };
 
   static Map<String, List<List<Offset>>>? _icons;
@@ -145,5 +147,6 @@ class StampPacks {
         Stamp(id: 'gap', pack: 'finance', shape: Candles.pattern([(0.1, 0.35, 0.4, 0.05), (0.55, 0.8, 0.85, 0.5)])),
         ..._schoolStamps(),
         ..._artStamps(),
+        ..._sportsStamps(),
       ];
 }
