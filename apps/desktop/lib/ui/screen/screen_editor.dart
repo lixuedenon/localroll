@@ -894,7 +894,7 @@ class _StageState extends State<_Stage> {
       }));
     }
     if (!_ready) return;
-    final want = p.still ? p.head : p.head + math.min(widget.t - p.start, p.len);
+    final int want = p.still ? p.head : p.head + math.min<int>(widget.t - p.start, p.len);
     final now = _player.state.position.inMilliseconds;
     if (widget.playing && !p.still) {
       if (!_player.state.playing) unawaited(_player.play());
