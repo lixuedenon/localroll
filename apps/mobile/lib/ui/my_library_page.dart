@@ -18,7 +18,6 @@ import 'cleanup_page.dart' show formatSize;
 import 'first_page_view.dart';
 import 'open_file.dart';
 import 'send_files_page.dart';
-import 'inked_photo.dart';
 import 'lr_video.dart';
 import 'theme.dart';
 
@@ -464,12 +463,13 @@ class _Thumb extends StatelessWidget {
 /// A photo kept as a file in LocalRoll's folder (not in the photo
 /// library): drawn straight from the file; its name if it can't be.
 class _FilePhoto extends StatelessWidget {
-  const _FilePhoto({required this.item, this.size});
+  const _FilePhoto({required this.item, this.size, this.fit = BoxFit.cover});
 
   final MyItem item;
 
   /// Decoded at about this width (thumbnails); null = full size.
   final int? size;
+  final BoxFit fit;
 
   static final Map<String, Future<String?>> _paths = {};
 
@@ -483,7 +483,7 @@ class _FilePhoto extends StatelessWidget {
           }
           return Image.file(
             File(path),
-            fit: BoxFit.cover,
+            fit: fit,
             cacheWidth: size,
             gaplessPlayback: true,
             errorBuilder: (_, _, _) => _FileTile(item: item),
@@ -692,18 +692,7 @@ class _Photo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => item.assetId == null
-      ? FutureBuilder<String?>(
-          future: MyLibrary.instance.pathOf(item),
-          builder: (context, s) {
-            final path = s.data;
-            if (path == null) {
-              return s.connectionState == ConnectionState.done
-                  ? Center(child: Text(tr('mylib.cannot_open'), style: const TextStyle(color: LrColors.muted)))
-                  : const Center(child: CircularProgressIndicator());
-            }
-            return InkedPhoto(image: FileImage(File(path)), inkKey: 'my:${item.id}');
-          },
-        )
+      ? InteractiveViewer(maxScale: 6, child: Center(child: _FilePhoto(item: item, size: 2560, fit: BoxFit.contain)))
       : FutureBuilder<Uint8List?>(
         future: _load(),
         builder: (context, s) {
@@ -713,7 +702,7 @@ class _Photo extends StatelessWidget {
                 ? Center(child: Text(tr('mylib.cannot_open'), style: const TextStyle(color: LrColors.muted)))
                 : const Center(child: CircularProgressIndicator());
           }
-          return InkedPhoto(image: MemoryImage(b), inkKey: 'asset:${item.assetId}');
+          return InteractiveViewer(maxScale: 6, child: Center(child: Image.memory(b, fit: BoxFit.contain)));
         },
       );
 }
@@ -776,7 +765,13 @@ class _VideoState extends State<_Video> {
     final c = _c;
     if (c == null) return const Center(child: CircularProgressIndicator());
     final id = widget.item.assetId;
-    return LrVideo(controller: c, inkKey: id != null ? 'asset:$id' : 'my:${widget.item.id}');
+    return LrVideo(
+      controller: c,
+      inkKey: id != null ? 'asset:$id' : 'my:${widget.item.id}',
+      source: () async => id != null
+          ? (await (await AssetEntity.fromId(id))?.file)?.path
+          : await MyLibrary.instance.pathOf(widget.item),
+    );
   }
 }
 

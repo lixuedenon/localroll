@@ -543,5 +543,18 @@
   "ink.keep_editing": "Çizmeye devam",
   "ink.width": "Kalınlık",
   "ink.hint_select": "Seçmek için bir çizgiye dokunun: tek parmakla taşıyın, iki parmakla boyutlandırın ve döndürün",
-  "ink.hint_draw": "Tek parmakla çizin; çizileni taşımak için önce soldaki ele (Seç) dokunun"
+  "ink.hint_draw": "Tek parmakla çizin; çizileni taşımak için önce soldaki ele (Seç) dokunun",
+  "clip.making_ink": "Çizimli klip hazırlanıyor…",
+  "clip.failed": "Klip oluşturulamadı",
+  "clip.length": "Süre {time}",
+  "clip.before": "Önce",
+  "clip.after": "Sonra",
+  "clip.seconds": "{n} sn",
+  "clip.title": "Bu çizim klip olarak",
+  "clip.hint": "Çizimin içinde olduğu bir video yapar; çizimden birkaç saniye önceden birkaç saniye sonrasına kadar, her oynatıcıda görünür.",
+  "clip.nothing": "Bu anda henüz çizim yok — önce bir şey çizin",
+  "clip.file_name": "Çizim klibi",
+  "clip.saved_album": "Fotoğraflar'a kaydedildi",
+  "clip.save_album": "Fotoğraflar'a kaydet",
+  "clip.send": "Gönder"
 }

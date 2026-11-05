@@ -8,6 +8,7 @@ import 'package:localroll_core/localroll_core.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'l10n/l10n.dart';
+import 'services/clip_maker.dart';
 import 'services/discovery.dart';
 import 'services/media_saver.dart';
 import 'services/mobile_settings.dart';
@@ -22,6 +23,8 @@ Future<void> main() async {
   final settings = await MobileSettings.load();
   // Discovery starts after the photo permission prompt (see HomePage).
   final discovery = DesktopDiscovery();
+  ClipEnv.settings = settings;
+  ClipEnv.discovery = discovery;
   runApp(LocalRollMobileApp(settings: settings, discovery: discovery));
 }
 

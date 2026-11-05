@@ -543,5 +543,18 @@
   "ink.keep_editing": "描き続ける",
   "ink.width": "太さ",
   "ink.hint_select": "線をタップして選択：1 本指で移動、2 本指で拡大縮小・回転",
-  "ink.hint_draw": "1 本指で描く。描いたものを動かすときは左の手のアイコン（選択）を先にタップ"
+  "ink.hint_draw": "1 本指で描く。描いたものを動かすときは左の手のアイコン（選択）を先にタップ",
+  "clip.making_ink": "描いたもの付きのクリップを作成中…",
+  "clip.failed": "クリップを作成できませんでした",
+  "clip.length": "長さ {time}",
+  "clip.before": "前",
+  "clip.after": "後",
+  "clip.seconds": "{n} 秒",
+  "clip.title": "描いた部分を動画に",
+  "clip.hint": "描いたものを焼き込んだ動画を作ります（描く数秒前から数秒後まで）。相手はどのプレーヤーでも見られます。",
+  "clip.nothing": "この時点にはまだ何も描かれていません。先に描いてください",
+  "clip.file_name": "描き込みクリップ",
+  "clip.saved_album": "写真に保存しました",
+  "clip.save_album": "写真に保存",
+  "clip.send": "送信"
 }

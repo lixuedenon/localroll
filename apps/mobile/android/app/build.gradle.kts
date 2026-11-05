@@ -55,3 +55,10 @@ android {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // A part of a video with the drawings laid in (ClipMaker.kt).
+    implementation("androidx.media3:media3-transformer:1.4.1")
+    implementation("androidx.media3:media3-effect:1.4.1")
+    implementation("androidx.media3:media3-common:1.4.1")
+}

@@ -543,5 +543,18 @@
   "ink.keep_editing": "Keep drawing",
   "ink.width": "Thickness",
   "ink.hint_select": "Tap a mark to pick it: drag with one finger, resize and turn with two",
-  "ink.hint_draw": "Draw with one finger; to move a mark, first tap the hand (Select) on the left"
+  "ink.hint_draw": "Draw with one finger; to move a mark, first tap the hand (Select) on the left",
+  "clip.making_ink": "Making the clip with the drawings…",
+  "clip.failed": "The clip couldn’t be made",
+  "clip.length": "Length {time}",
+  "clip.before": "Before",
+  "clip.after": "After",
+  "clip.seconds": "{n} s",
+  "clip.title": "This drawing as a clip",
+  "clip.hint": "Makes a video with the drawing in it, from a few seconds before to a few seconds after, so anyone sees the drawing in any player.",
+  "clip.nothing": "Nothing drawn at this moment yet — draw something first",
+  "clip.file_name": "Drawing clip",
+  "clip.saved_album": "Saved to Photos",
+  "clip.save_album": "Save to Photos",
+  "clip.send": "Send"
 }

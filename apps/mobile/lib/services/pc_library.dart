@@ -454,6 +454,29 @@ class PcLibrary extends ChangeNotifier {
   }
 
   /// A plain local address the system player can open for [path].
+  /// A copy of the PC's video [path] on this phone (temporary folder), for
+  /// making a clip of a drawing. Null when it could not be fetched.
+  Future<String?> videoCopy(String path) async {
+    final dir = Directory('${(await getTemporaryDirectory()).path}/pcvideo');
+    if (await dir.exists()) await dir.delete(recursive: true);
+    await dir.create(recursive: true);
+    final dot = path.lastIndexOf('.');
+    final f = File('${dir.path}/v${dot < 0 ? '.mp4' : path.substring(dot)}');
+    final client = HttpClient();
+    try {
+      final req = await client.getUrl(await playable(path));
+      final res = await req.close();
+      if (res.statusCode >= 400) return null;
+      await res.pipe(f.openWrite());
+      return f.path;
+    } catch (e) {
+      DiagLog.log('pclib', 'video copy failed: $e');
+      return null;
+    } finally {
+      client.close();
+    }
+  }
+
   Future<Uri> playable(String path) async {
     final r = _relay ??= await _startRelay();
     return Uri(scheme: 'http', host: '127.0.0.1', port: r.port, path: '/v/$_relayKey', queryParameters: {'p': path});

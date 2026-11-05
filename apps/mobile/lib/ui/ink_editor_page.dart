@@ -1,22 +1,39 @@
 // apps/mobile/lib/ui/ink_editor_page.dart
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:localroll_ink/localroll_ink.dart';
 
 import '../l10n/l10n.dart';
+import '../services/clip_maker.dart';
+import '../services/file_sender.dart';
 import '../services/phone_notes.dart';
+import 'send_files_page.dart';
 
-/// Opens the drawing page for a photo (or a paused video at [atMs]) and
-/// keeps what was drawn. [background]: the picture, filling its box.
+/// What making a clip of a video needs: its file (fetched when asked) and
+/// its picture size and length.
+class ClipSource {
+  const ClipSource({required this.file, required this.width, required this.height, required this.durationMs});
+
+  final Future<String?> Function() file;
+  final int width;
+  final int height;
+  final int durationMs;
+}
+
+/// Opens the drawing page for a paused video at [atMs] and keeps what was
+/// drawn. [background]: the picture, filling its box. [clip]: the drawing
+/// can be saved / sent as a part of the video.
 Future<void> openInkEditor(
   BuildContext context, {
   required String inkKey,
   required double aspect,
   required Widget background,
   int? atMs,
+  ClipSource? clip,
 }) async {
   final notes = await PhoneNotes.instance.load(inkKey);
   if (!context.mounted) return;
@@ -27,9 +44,35 @@ Future<void> openInkEditor(
       aspect: aspect,
       background: background,
       atMs: atMs,
+      clip: clip,
+      onSave: (notes) => PhoneNotes.instance.save(inkKey, notes),
     ),
   ));
   if (out != null) await PhoneNotes.instance.save(inkKey, out);
+}
+
+/// The round "draw on it" button over videos.
+class InkPenButton extends StatelessWidget {
+  const InkPenButton({super.key, required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) => Tooltip(
+        message: tr('ink.draw'),
+        child: Material(
+          color: Colors.black54,
+          shape: const CircleBorder(),
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: onPressed,
+            child: const Padding(
+              padding: EdgeInsets.all(12),
+              child: Icon(Icons.draw_rounded, color: Colors.white, size: 24),
+            ),
+          ),
+        ),
+      );
 }
 
 /// Drawing on a photo or a paused video frame, by touch.
@@ -38,11 +81,25 @@ Future<void> openInkEditor(
 /// fingers to resize and turn it. Marks are kept as parts of the picture
 /// (0–1), the same as on the PC.
 class InkEditorPage extends StatefulWidget {
-  const InkEditorPage({super.key, required this.notes, required this.aspect, required this.background, this.atMs});
+  const InkEditorPage({
+    super.key,
+    required this.notes,
+    required this.aspect,
+    required this.background,
+    this.atMs,
+    this.clip,
+    this.onSave,
+  });
 
   final List<Note> notes;
   final double aspect;
   final Widget background;
+
+  /// A video: the drawing can be saved / sent as a part of it.
+  final ClipSource? clip;
+
+  /// Keeps the drawings (before a clip is made from them).
+  final Future<void> Function(List<Note> notes)? onSave;
 
   /// A video: drawn at this moment (null: a photo).
   final int? atMs;
@@ -388,14 +445,102 @@ class _InkEditorPageState extends State<InkEditorPage> {
     }
   }
 
-  void _done() {
+  List<Note> _result() {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final out = [
+    return [
       for (final n in _notes)
         if (n.inks.isNotEmpty) n,
       if (_current.inks.isNotEmpty) _current..modifiedMs = now,
     ];
-    Navigator.of(context).pop(out);
+  }
+
+  void _done() => Navigator.of(context).pop(_result());
+
+  /// Saves the drawings, then makes the part of the video around them
+  /// (what was drawn now; else what shows at this moment), with the
+  /// seconds before / after picked here.
+  Future<void> _clip() async {
+    final src = widget.clip;
+    if (src == null) return;
+    final all = _result();
+    final mine = _current.inks.isNotEmpty
+        ? [_current]
+        : [for (final n in all) if (n.shownAt(widget.atMs ?? 0)) n];
+    if (mine.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('clip.nothing'))));
+      return;
+    }
+    final (from0, to0) = drawingSpan(mine);
+    final (b0, a0) = await ClipAround.load();
+    if (!mounted) return;
+    final pick = await showModalBottomSheet<(int, int, bool)>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => _ClipSheet(before: b0, after: a0, spanMs: to0 - from0, durationMs: src.durationMs, fromMs: from0, toMs: to0),
+    );
+    if (pick == null || !mounted) return;
+    final (before, after, send) = pick;
+    await ClipAround.save(before, after);
+    await widget.onSave?.call(all);
+    _changed = false;
+    final fromMs = math.max(0, from0 - before * 1000);
+    final toMs = src.durationMs > 0 ? math.min(src.durationMs, to0 + after * 1000) : to0 + after * 1000;
+    if (!mounted) return;
+    final progress = showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        content: Row(children: [
+          const CircularProgressIndicator(),
+          const SizedBox(width: 18),
+          Expanded(child: Text(tr('clip.making_ink'))),
+        ]),
+      ),
+    );
+    File? made;
+    Object? error;
+    try {
+      final input = await src.file();
+      if (input == null) throw StateError('no file');
+      made = await ClipMaker.make(
+        input: input,
+        width: src.width,
+        height: src.height,
+        fromMs: fromMs,
+        toMs: toMs,
+        notes: all,
+      );
+    } catch (e) {
+      error = e;
+    }
+    if (!mounted) return;
+    Navigator.of(context).pop();
+    await progress;
+    if (!mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    if (made == null) {
+      messenger.showSnackBar(SnackBar(content: Text(tr('clip.failed'))));
+      debugPrint('clip failed: $error');
+      return;
+    }
+    final title = '${tr('clip.file_name')}_${DateTime.now().millisecondsSinceEpoch ~/ 1000}.mp4';
+    if (!send) {
+      try {
+        await ClipMaker.saveToAlbum(made, title);
+        messenger.showSnackBar(SnackBar(content: Text(tr('clip.saved_album'))));
+      } catch (e) {
+        messenger.showSnackBar(SnackBar(content: Text(tr('clip.failed'))));
+        debugPrint('clip save failed: $e');
+      }
+      return;
+    }
+    final settings = ClipEnv.settings, discovery = ClipEnv.discovery;
+    if (settings == null || discovery == null) return;
+    final named = await made.rename('${made.parent.path}/$title');
+    if (!mounted) return;
+    final FileSender? sender = await pickFileTarget(context, settings, discovery, [named]);
+    if (sender == null || !mounted) return;
+    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => SendFilesPage(sender: sender)));
   }
 
   Future<void> _leave() async {
@@ -444,6 +589,12 @@ class _InkEditorPageState extends State<InkEditorPage> {
               onPressed: _redo.isEmpty ? null : _doRedo,
               icon: const Icon(Icons.redo_rounded),
             ),
+            if (widget.clip != null)
+              IconButton(
+                tooltip: tr('clip.title'),
+                onPressed: () => unawaited(_clip()),
+                icon: const Icon(Icons.movie_creation_outlined),
+              ),
             TextButton(onPressed: _done, child: Text(tr('ink.done'))),
           ],
         ),
@@ -547,4 +698,81 @@ class _InkEditorPageState extends State<InkEditorPage> {
       ),
     );
   }
+}
+
+/// Seconds before / after the drawing (0–30 each), then save or send.
+class _ClipSheet extends StatefulWidget {
+  const _ClipSheet({
+    required this.before,
+    required this.after,
+    required this.spanMs,
+    required this.durationMs,
+    required this.fromMs,
+    required this.toMs,
+  });
+
+  final int before, after, spanMs, durationMs, fromMs, toMs;
+
+  @override
+  State<_ClipSheet> createState() => _ClipSheetState();
+}
+
+class _ClipSheetState extends State<_ClipSheet> {
+  late int _b = widget.before, _a = widget.after;
+
+  String _len() {
+    final from = math.max(0, widget.fromMs - _b * 1000);
+    var to = widget.toMs + _a * 1000;
+    if (widget.durationMs > 0) to = math.min(widget.durationMs, to);
+    final s = ((to - from) / 1000).round();
+    return '${s ~/ 60}:${(s % 60).toString().padLeft(2, '0')}';
+  }
+
+  Widget _row(String label, int v, ValueChanged<int> on) => Row(children: [
+        SizedBox(width: 64, child: Text(label)),
+        Expanded(
+          child: Slider(
+            value: v.toDouble(),
+            max: ClipAround.max.toDouble(),
+            divisions: ClipAround.max,
+            label: tr('clip.seconds', {'n': v}),
+            onChanged: (x) => setState(() => on(x.round())),
+          ),
+        ),
+        SizedBox(width: 48, child: Text(tr('clip.seconds', {'n': v}), textAlign: TextAlign.end)),
+      ]);
+
+  @override
+  Widget build(BuildContext context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(tr('clip.title'), style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 4),
+            Text(tr('clip.hint'), style: const TextStyle(fontSize: 12.5)),
+            const SizedBox(height: 12),
+            _row(tr('clip.before'), _b, (v) => _b = v),
+            _row(tr('clip.after'), _a, (v) => _a = v),
+            Text(tr('clip.length', {'time': _len()})),
+            const SizedBox(height: 14),
+            Row(children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => Navigator.pop(context, (_b, _a, false)),
+                  icon: const Icon(Icons.download_rounded),
+                  label: Text(tr('clip.save_album')),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () => Navigator.pop(context, (_b, _a, true)),
+                  icon: const Icon(Icons.send_rounded),
+                  label: Text(tr('clip.send')),
+                ),
+              ),
+            ]),
+          ]),
+        ),
+      );
 }

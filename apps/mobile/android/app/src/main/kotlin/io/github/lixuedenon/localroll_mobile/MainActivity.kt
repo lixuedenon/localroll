@@ -75,6 +75,28 @@ class MainActivity : FlutterActivity() {
                     }
                 }.start()
             }
+        // A part of a video with the drawings laid in (see lib/services/clip_maker.dart).
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "localroll/clip")
+            .setMethodCallHandler { call, result ->
+                if (call.method != "make") {
+                    result.notImplemented()
+                    return@setMethodCallHandler
+                }
+                val input = call.argument<String>("input")
+                val output = call.argument<String>("output")
+                if (input == null || output == null) {
+                    result.error("arg", "input / output missing", null)
+                    return@setMethodCallHandler
+                }
+                val start = (call.argument<Number>("startMs") ?: 0).toLong()
+                val end = (call.argument<Number>("endMs") ?: 0).toLong()
+                val overlays = call.argument<List<Map<String, Any?>>>("overlays") ?: listOf()
+                ClipMaker.make(this, input, output, start, end, overlays) { err ->
+                    runOnUiThread {
+                        if (err == null) result.success(true) else result.error("clip", err, null)
+                    }
+                }
+            }
         // Background transfer (see lib/services/background_transfer.dart).
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "localroll/background")
             .setMethodCallHandler { call, result ->

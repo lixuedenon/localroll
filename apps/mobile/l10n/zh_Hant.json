@@ -543,5 +543,18 @@
   "ink.keep_editing": "繼續畫",
   "ink.width": "粗細",
   "ink.hint_select": "點一筆選取它：一根手指拖動，兩根手指縮放和旋轉",
-  "ink.hint_draw": "一根手指畫；要移動已畫的，先點左邊的手形「選擇」"
+  "ink.hint_draw": "一根手指畫；要移動已畫的，先點左邊的手形「選擇」",
+  "clip.making_ink": "正在產生含塗鴉的片段…",
+  "clip.failed": "片段產生失敗",
+  "clip.length": "長度 {time}",
+  "clip.before": "之前",
+  "clip.after": "之後",
+  "clip.seconds": "{n} 秒",
+  "clip.title": "塗鴉這一段",
+  "clip.hint": "產生一段帶塗鴉的影片：從塗鴉前幾秒到塗鴉後幾秒，對方用什麼播放器都看得到塗鴉。",
+  "clip.nothing": "這一刻還沒有塗鴉，先畫一筆",
+  "clip.file_name": "塗鴉片段",
+  "clip.saved_album": "已儲存到相簿",
+  "clip.save_album": "儲存到相簿",
+  "clip.send": "傳送"
 }

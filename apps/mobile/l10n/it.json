@@ -543,5 +543,18 @@
   "ink.keep_editing": "Continua a disegnare",
   "ink.width": "Spessore",
   "ink.hint_select": "Tocca un segno per sceglierlo: trascina con un dito, ridimensiona e ruota con due",
-  "ink.hint_draw": "Disegna con un dito; per spostare un segno tocca prima la mano (Seleziona) a sinistra"
+  "ink.hint_draw": "Disegna con un dito; per spostare un segno tocca prima la mano (Seleziona) a sinistra",
+  "clip.making_ink": "Creazione della clip con i disegni…",
+  "clip.failed": "Impossibile creare la clip",
+  "clip.length": "Durata {time}",
+  "clip.before": "Prima",
+  "clip.after": "Dopo",
+  "clip.seconds": "{n} s",
+  "clip.title": "Questo disegno come clip",
+  "clip.hint": "Crea un video con il disegno impresso, da qualche secondo prima a qualche secondo dopo: si vede in qualsiasi lettore.",
+  "clip.nothing": "In questo momento non c'è ancora nulla di disegnato: disegna prima qualcosa",
+  "clip.file_name": "Clip con disegno",
+  "clip.saved_album": "Salvato in Foto",
+  "clip.save_album": "Salva in Foto",
+  "clip.send": "Invia"
 }

@@ -543,5 +543,18 @@
   "ink.keep_editing": "Seguir dibujando",
   "ink.width": "Grosor",
   "ink.hint_select": "Toca un trazo para elegirlo: arrastra con un dedo; con dos, cambia el tamaño y gíralo",
-  "ink.hint_draw": "Dibuja con un dedo; para mover un trazo, toca antes la mano (Seleccionar) de la izquierda"
+  "ink.hint_draw": "Dibuja con un dedo; para mover un trazo, toca antes la mano (Seleccionar) de la izquierda",
+  "clip.making_ink": "Creando el clip con los dibujos…",
+  "clip.failed": "No se pudo crear el clip",
+  "clip.length": "Duración {time}",
+  "clip.before": "Antes",
+  "clip.after": "Después",
+  "clip.seconds": "{n} s",
+  "clip.title": "Este dibujo como clip",
+  "clip.hint": "Crea un vídeo con el dibujo dentro, desde unos segundos antes hasta unos segundos después; se ve en cualquier reproductor.",
+  "clip.nothing": "Aún no hay nada dibujado en este momento: dibuja algo primero",
+  "clip.file_name": "Clip con dibujo",
+  "clip.saved_album": "Guardado en Fotos",
+  "clip.save_album": "Guardar en Fotos",
+  "clip.send": "Enviar"
 }

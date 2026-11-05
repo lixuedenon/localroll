@@ -543,5 +543,18 @@
   "ink.keep_editing": "Lanjut menggambar",
   "ink.width": "Ketebalan",
   "ink.hint_select": "Ketuk goresan untuk memilihnya: geser dengan satu jari, ubah ukuran dan putar dengan dua",
-  "ink.hint_draw": "Gambar dengan satu jari; untuk memindahkan goresan, ketuk dulu ikon tangan (Pilih) di kiri"
+  "ink.hint_draw": "Gambar dengan satu jari; untuk memindahkan goresan, ketuk dulu ikon tangan (Pilih) di kiri",
+  "clip.making_ink": "Membuat klip dengan gambar…",
+  "clip.failed": "Klip gagal dibuat",
+  "clip.length": "Durasi {time}",
+  "clip.before": "Sebelum",
+  "clip.after": "Sesudah",
+  "clip.seconds": "{n} dtk",
+  "clip.title": "Gambar ini sebagai klip",
+  "clip.hint": "Membuat video dengan gambar di dalamnya, dari beberapa detik sebelum hingga beberapa detik sesudah, terlihat di pemutar apa pun.",
+  "clip.nothing": "Belum ada gambar pada momen ini — gambar dulu",
+  "clip.file_name": "Klip gambar",
+  "clip.saved_album": "Tersimpan di Foto",
+  "clip.save_album": "Simpan ke Foto",
+  "clip.send": "Kirim"
 }

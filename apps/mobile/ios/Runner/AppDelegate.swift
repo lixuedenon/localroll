@@ -38,6 +38,9 @@ import UIKit
     if let reg = engineBridge.pluginRegistry.registrar(forPlugin: "LocalRollFiles") {
       FilePreview.register(messenger: reg.messenger())
     }
+    if let reg = engineBridge.pluginRegistry.registrar(forPlugin: "LocalRollClip") {
+      ClipMaker.register(messenger: reg.messenger())
+    }
   }
 }
 
@@ -438,5 +441,129 @@ final class FilePreview: NSObject, QLPreviewControllerDataSource {
     var top = (windows.first { $0.isKeyWindow } ?? windows.first)?.rootViewController
     while let p = top?.presentedViewController { top = p }
     return top
+  }
+}
+
+/// A part of a video with still pictures (the drawings) laid over it for
+/// stretches of time, made with AVFoundation (see
+/// lib/services/clip_maker.dart). Channel: localroll/clip.
+enum ClipMaker {
+  static func register(messenger: FlutterBinaryMessenger) {
+    let ch = FlutterMethodChannel(name: "localroll/clip", binaryMessenger: messenger)
+    ch.setMethodCallHandler { call, result in
+      guard call.method == "make",
+            let a = call.arguments as? [String: Any],
+            let input = a["input"] as? String,
+            let output = a["output"] as? String else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      let startMs = (a["startMs"] as? NSNumber)?.int64Value ?? 0
+      let endMs = (a["endMs"] as? NSNumber)?.int64Value ?? 0
+      let overlays = a["overlays"] as? [[String: Any]] ?? []
+      make(input: input, output: output, startMs: startMs, endMs: endMs, overlays: overlays) { err in
+        DispatchQueue.main.async {
+          if let err = err {
+            result(FlutterError(code: "clip", message: err, details: nil))
+          } else {
+            result(true)
+          }
+        }
+      }
+    }
+  }
+
+  static func make(input: String, output: String, startMs: Int64, endMs: Int64,
+                   overlays: [[String: Any]], done: @escaping (String?) -> Void) {
+    let asset = AVURLAsset(url: URL(fileURLWithPath: input))
+    guard let vTrack = asset.tracks(withMediaType: .video).first else {
+      done("no video track")
+      return
+    }
+    let total = asset.duration
+    let start = CMTime(value: CMTimeValue(startMs), timescale: 1000)
+    var end = CMTime(value: CMTimeValue(endMs), timescale: 1000)
+    if CMTimeCompare(end, total) > 0 { end = total }
+    let range = CMTimeRange(start: start, end: end)
+    let comp = AVMutableComposition()
+    guard let cv = comp.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid) else {
+      done("no composition track")
+      return
+    }
+    do {
+      try cv.insertTimeRange(range, of: vTrack, at: .zero)
+      if let aTrack = asset.tracks(withMediaType: .audio).first,
+         let ca = comp.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid) {
+        try ca.insertTimeRange(range, of: aTrack, at: .zero)
+      }
+    } catch {
+      done(error.localizedDescription)
+      return
+    }
+    // Upright, as it is shown.
+    let t = vTrack.preferredTransform
+    let box = CGRect(origin: .zero, size: vTrack.naturalSize).applying(t)
+    let size = CGSize(width: abs(box.width), height: abs(box.height))
+    let upright = t.concatenating(CGAffineTransform(translationX: -box.origin.x, y: -box.origin.y))
+
+    let instr = AVMutableVideoCompositionInstruction()
+    instr.timeRange = CMTimeRange(start: .zero, duration: range.duration)
+    let li = AVMutableVideoCompositionLayerInstruction(assetTrack: cv)
+    li.setTransform(upright, at: .zero)
+    instr.layerInstructions = [li]
+    let vc = AVMutableVideoComposition()
+    vc.instructions = [instr]
+    vc.renderSize = size
+    let fps = vTrack.nominalFrameRate > 0 ? Int32(min(max(vTrack.nominalFrameRate.rounded(), 1), 60)) : 30
+    vc.frameDuration = CMTime(value: 1, timescale: fps)
+
+    // The drawings: each picture shown only for its stretch.
+    let frame = CGRect(origin: .zero, size: size)
+    let parent = CALayer()
+    parent.frame = frame
+    parent.isGeometryFlipped = true
+    let video = CALayer()
+    video.frame = frame
+    parent.addSublayer(video)
+    let dur = max(CMTimeGetSeconds(range.duration), 0.001)
+    for o in overlays {
+      guard let p = o["path"] as? String, let img = UIImage(contentsOfFile: p)?.cgImage else { continue }
+      let s = ((o["startMs"] as? NSNumber)?.doubleValue ?? 0) / 1000
+      let e = ((o["endMs"] as? NSNumber)?.doubleValue ?? 0) / 1000
+      let l = CALayer()
+      l.frame = frame
+      l.contents = img
+      l.contentsGravity = .resize
+      l.opacity = 0
+      let an = CAKeyframeAnimation(keyPath: "opacity")
+      an.calculationMode = .discrete
+      an.values = [0, 1, 0]
+      an.keyTimes = [0, NSNumber(value: min(max(s / dur, 0), 1)), NSNumber(value: min(max(e / dur, 0), 1)), 1]
+      an.beginTime = AVCoreAnimationBeginTimeAtZero
+      an.duration = dur
+      an.isRemovedOnCompletion = false
+      an.fillMode = .both
+      l.add(an, forKey: "shown")
+      parent.addSublayer(l)
+    }
+    vc.animationTool = AVVideoCompositionCoreAnimationTool(postProcessingAsVideoLayer: video, in: parent)
+
+    let url = URL(fileURLWithPath: output)
+    try? FileManager.default.removeItem(at: url)
+    guard let ex = AVAssetExportSession(asset: comp, presetName: AVAssetExportPresetHighestQuality) else {
+      done("no export session")
+      return
+    }
+    ex.outputURL = url
+    ex.outputFileType = .mp4
+    ex.videoComposition = vc
+    ex.shouldOptimizeForNetworkUse = true
+    ex.exportAsynchronously {
+      if ex.status == .completed {
+        done(nil)
+      } else {
+        done(ex.error?.localizedDescription ?? "export status \(ex.status.rawValue)")
+      }
+    }
   }
 }

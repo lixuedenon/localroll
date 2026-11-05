@@ -543,5 +543,18 @@
   "ink.keep_editing": "Weiterzeichnen",
   "ink.width": "Strichstärke",
   "ink.hint_select": "Tippe auf ein Zeichen zum Auswählen: mit einem Finger verschieben, mit zwei skalieren und drehen",
-  "ink.hint_draw": "Mit einem Finger zeichnen; zum Verschieben zuerst links die Hand (Auswählen) antippen"
+  "ink.hint_draw": "Mit einem Finger zeichnen; zum Verschieben zuerst links die Hand (Auswählen) antippen",
+  "clip.making_ink": "Ausschnitt mit Zeichnungen wird erstellt …",
+  "clip.failed": "Ausschnitt nicht möglich",
+  "clip.length": "Länge {time}",
+  "clip.before": "Davor",
+  "clip.after": "Danach",
+  "clip.seconds": "{n} s",
+  "clip.title": "Diese Zeichnung als Clip",
+  "clip.hint": "Erstellt ein Video mit eingebrannter Zeichnung, von einigen Sekunden davor bis einige Sekunden danach – sichtbar in jedem Player.",
+  "clip.nothing": "An dieser Stelle ist noch nichts gezeichnet – zuerst zeichnen",
+  "clip.file_name": "Zeichnungs-Clip",
+  "clip.saved_album": "In Fotos gespeichert",
+  "clip.save_album": "In Fotos speichern",
+  "clip.send": "Senden"
 }

@@ -10,7 +10,6 @@ import 'package:video_player/video_player.dart';
 import '../l10n/l10n.dart';
 import '../services/phone_notes.dart';
 import 'ink_editor_page.dart';
-import 'inked_photo.dart' show InkPenButton;
 
 /// The phone's video player: speed, one frame at a time, A-B loop, pinch to
 /// zoom, full screen. The video itself plays on the system's player (no
@@ -19,12 +18,15 @@ import 'inked_photo.dart' show InkPenButton;
 /// Tap: show / hide the controls. Pinch: zoom in, drag to move; double tap:
 /// back to the whole picture.
 class LrVideo extends StatefulWidget {
-  const LrVideo({super.key, required this.controller, this.fullScreen = false, this.inkKey});
+  const LrVideo({super.key, required this.controller, this.fullScreen = false, this.inkKey, this.source});
 
   final VideoPlayerController controller;
 
   /// Where its drawings are kept (null: no drawing on it).
   final String? inkKey;
+
+  /// Its file on this phone (fetched when asked), for clips of a drawing.
+  final Future<String?> Function()? source;
 
   /// Shown in the full-screen page (its button leaves full screen).
   final bool fullScreen;
@@ -186,7 +188,7 @@ class _LrVideoState extends State<LrVideo> {
       opaque: true,
       pageBuilder: (_, _, _) => Scaffold(
         backgroundColor: Colors.black,
-        body: SafeArea(child: LrVideo(controller: _c, fullScreen: true, inkKey: widget.inkKey)),
+        body: SafeArea(child: LrVideo(controller: _c, fullScreen: true, inkKey: widget.inkKey, source: widget.source)),
       ),
     ));
     await SystemChrome.setPreferredOrientations(DeviceOrientation.values);
@@ -207,6 +209,14 @@ class _LrVideoState extends State<LrVideo> {
       aspect: _c.value.aspectRatio,
       background: VideoPlayer(_c),
       atMs: _c.value.position.inMilliseconds,
+      clip: widget.source == null
+          ? null
+          : ClipSource(
+              file: widget.source!,
+              width: _c.value.size.width.round(),
+              height: _c.value.size.height.round(),
+              durationMs: _c.value.duration.inMilliseconds,
+            ),
     );
     _touch();
   }
