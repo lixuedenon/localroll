@@ -17,7 +17,6 @@ import androidx.media3.effect.OverlayEffect
 import androidx.media3.effect.TextureOverlay
 import androidx.media3.transformer.Composition
 import androidx.media3.transformer.EditedMediaItem
-import androidx.media3.transformer.EditedMediaItemSequence
 import androidx.media3.transformer.Effects
 import androidx.media3.transformer.ExportException
 import androidx.media3.transformer.ExportResult
@@ -93,10 +92,6 @@ object ClipMaker {
                     .build()
                 val effects = Effects(listOf(), listOf(OverlayEffect(ImmutableList.of<TextureOverlay>(overlay))))
                 val edited = EditedMediaItem.Builder(item).setEffects(effects).build()
-                val composition = Composition.Builder(EditedMediaItemSequence(edited))
-                    // HDR phone videos come out as ordinary video every player shows.
-                    .setHdrMode(Composition.HDR_MODE_TONE_MAP_HDR_TO_SDR_USING_OPEN_GL)
-                    .build()
                 val transformer = Transformer.Builder(ctx)
                     .setVideoMimeType(MimeTypes.VIDEO_H264)
                     .addListener(object : Transformer.Listener {
@@ -105,7 +100,7 @@ object ClipMaker {
                             done(exportException.message ?: "export failed")
                     })
                     .build()
-                transformer.start(composition, output)
+                transformer.start(edited, output)
             } catch (e: Exception) {
                 done(e.message ?: e.toString())
             }
