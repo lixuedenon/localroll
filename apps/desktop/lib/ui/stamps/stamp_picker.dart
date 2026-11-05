@@ -212,10 +212,32 @@ class _StampPickerState extends State<_StampPicker> {
             child: Row(children: [
               _chip('recent', tr('stamp.recent')),
               _chip('fav', tr('stamp.favorites')),
-              for (final p in StampPacks.packs) _chip(p, tr('stamp.pack_$p')),
+              // A kind (general, school…): its first pack, its packs below.
+              for (final k in StampPacks.kinds.entries)
+                Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: ChoiceChip(
+                    label: Text(tr('stamp.kind_${k.key}')),
+                    selected: _q.text.isEmpty && k.value.contains(_tab),
+                    onSelected: (_) => setState(() {
+                      _q.clear();
+                      if (!k.value.contains(_tab)) _tab = k.value.first;
+                    }),
+                  ),
+                ),
               _chip('mine', tr('stamp.mine')),
             ]),
           ),
+          // The packs of the kind chosen.
+          for (final k in StampPacks.kinds.values)
+            if (_q.text.isEmpty && k.contains(_tab))
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(children: [for (final p in k) _chip(p, tr('stamp.pack_$p'))]),
+                ),
+              ),
           const SizedBox(height: 8),
           if (_q.text.isEmpty && _tab == 'finance')
             Row(children: [
