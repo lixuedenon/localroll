@@ -27,7 +27,7 @@ StampShape _writingGrid({bool diagonals = false, bool nine = false}) => _sh(1, [
 
 List<Stamp> _schoolStamps() {
   Stamp s(String id, String pack, StampShape shape) => Stamp(id: id, pack: pack, shape: shape);
-  StampShape ic(String name, {int? color}) => _ic(name, color: color);
+  StampShape ic(String name, {int? color}) => StampPacks._ic(name, color: color);
   // A word in a circle (circuit meters).
   StampShape inCircle(String t) => _sh(1, [_ln([_ci(0.5, 0.5, 0.4)], w: 0.06), _tx(t, size: 0.42)]);
   return [
