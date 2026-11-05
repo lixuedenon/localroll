@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' show PlatformDispatcher;
 
+import 'package:flutter/foundation.dart' show LicenseEntryWithLineBreaks, LicenseRegistry;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:localroll_core/localroll_core.dart';
@@ -37,6 +38,7 @@ Future<void> main(List<String> args) async {
     exit(await checkModels(args[1]));
   }
   WidgetsFlutterBinding.ensureInitialized();
+  _addLicenses();
   // Photos / videos handed over by Explorer ("Open with").
   final files = existingFiles(args);
   // Only ever one LocalRoll, decided before anything shows: a copy already
@@ -294,4 +296,21 @@ Future<int> checkModels(String out) async {
     f.writeAsStringSync('face models: failed: $e\n');
     return 1;
   }
+}
+
+/// Parts that ship with the app but aren't Dart packages (those list
+/// themselves): shown on the licenses page too.
+void _addLicenses() {
+  LicenseRegistry.addLicense(() async* {
+    yield const LicenseEntryWithLineBreaks(['Material Symbols'], '''Material Symbols, Copyright Google LLC.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use these files except in compliance with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
+Used here: the icon shapes of some stamps, turned into outlines.''');
+    yield const LicenseEntryWithLineBreaks(['FFmpeg'], '''FFmpeg is free software licensed under the GNU Lesser General Public License (LGPL) version 2.1 or later. This app ships an unmodified LGPL build of FFmpeg as a separate program (ffmpeg.exe), from https://github.com/BtbN/FFmpeg-Builds. Its source code is available at https://ffmpeg.org/download.html. You may replace the bundled ffmpeg.exe with your own build.''');
+    yield const LicenseEntryWithLineBreaks(['libmpv'], '''mpv / libmpv is licensed under the GNU Lesser General Public License (LGPL) version 2.1 or later. This app uses it as an unmodified shared library (bundled by media_kit); its source code is available at https://github.com/mpv-player/mpv. You may replace the bundled library with your own build.''');
+  });
 }

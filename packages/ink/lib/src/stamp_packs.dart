@@ -28,6 +28,31 @@ class Stamp {
 class StampPacks {
   static const List<String> packs = ['basic', 'finance', 'kids', 'math', 'physics', 'chem', 'bio', 'geo', 'history', 'lang', 'code', 'callig', 'music', 'art', 'photo', 'dance', 'tactics', 'fields', 'fitness', 'golf', 'tutorial', 'business', 'shop', 'interior', 'engineering', 'auto', 'legal', 'medical', 'traffic', 'cooking', 'gaming', 'astro'];
 
+  /// Stamps whose words are asked for when placed (a number, a price, a
+  /// year…; the word in the picture is only an example).
+  static const Set<String> editable = {
+    'hist_label', 'chem_element', 'geo_scale', 'mus_time', 'mus_jianpu', 'fit_sets', 'tac_red', 'tac_blue', 'dance_spot',
+    'dance_count', 'callig_order', 'tut_step', 'tut_key', 'tut_key_c', 'biz_high', 'biz_mid', 'biz_low', 'biz_seal_done',
+    'biz_seal_wip', 'biz_seal_hold', 'shop_price', 'shop_was', 'shop_burst', 'shop_new', 'shop_limited', 'shop_sale',
+    'shop_countdown', 'int_dim', 'int_area', 'eng_tolerance', 'law_checked', 'law_returned', 'law_pending', 'law_page',
+  };
+
+  /// [shape] with its words replaced, in order ([words]: one per word part).
+  static StampShape withWords(StampShape shape, List<String> words) {
+    var k = 0;
+    return StampShape(
+      aspect: shape.aspect,
+      png: shape.png,
+      noTurn: shape.noTurn,
+      parts: [
+        for (final p in shape.parts)
+          p.text == null
+              ? p
+              : StampPart(polys: p.polys, fill: p.fill, w: p.w, color: p.color, role: p.role, text: k < words.length ? words[k++] : p.text, at: p.at, size: p.size),
+      ],
+    );
+  }
+
   /// The packs by kind (the panel shows a kind, then its packs).
   static const Map<String, List<String>> kinds = {
     'general': ['basic', 'finance', 'kids'],

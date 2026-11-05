@@ -209,6 +209,11 @@ class _SettingsPageState extends State<SettingsPage> {
                           icon: const Icon(Icons.privacy_tip_outlined),
                           label: Text(tr('privacy.title')),
                         ),
+                        OutlinedButton.icon(
+                          onPressed: () => showOpenLicenses(context),
+                          icon: const Icon(Icons.gavel_rounded),
+                          label: Text(tr('licenses.title')),
+                        ),
                       ]),
                     ),
                     const Divider(height: 1),
@@ -331,5 +336,45 @@ Future<void> showPrivacy(BuildContext context) => showDialog<void>(
           ),
         ),
         actions: [FilledButton(onPressed: () => Navigator.pop(c), child: Text(tr('common.ok')))],
+      ),
+    );
+
+/// The parts made by others that ship with the app, and their licenses.
+Future<void> showOpenLicenses(BuildContext context) => showDialog<void>(
+      context: context,
+      builder: (c) => AlertDialog(
+        icon: const Icon(Icons.gavel_rounded, size: 32),
+        title: Text(tr('licenses.title')),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 560),
+          child: SingleChildScrollView(
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Padding(padding: const EdgeInsets.only(bottom: 12), child: Text(tr('licenses.intro'))),
+              for (final (name, license, use) in const [
+                ('Material Symbols (Google)', 'Apache License 2.0', 'stamps'),
+                ('FFmpeg', 'LGPL 2.1+', 'ffmpeg'),
+                ('libmpv / media_kit', 'LGPL 2.1+ / MIT', 'player'),
+                ('PDFium / pdfrx', 'BSD-3-Clause / MIT', 'pdf'),
+                ('ONNX Runtime', 'MIT', 'onnx'),
+                ('Flutter', 'BSD-3-Clause', 'flutter'),
+              ])
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text.rich(TextSpan(children: [
+                    TextSpan(text: '$name  ', style: const TextStyle(fontWeight: FontWeight.w600)),
+                    TextSpan(text: '$license\n'),
+                    TextSpan(text: tr('licenses.use_$use'), style: Theme.of(c).textTheme.bodySmall),
+                  ])),
+                ),
+            ]),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => showLicensePage(context: c, applicationName: appName, applicationVersion: lrVersion),
+            child: Text(tr('licenses.all')),
+          ),
+          FilledButton(onPressed: () => Navigator.pop(c), child: Text(tr('common.ok'))),
+        ],
       ),
     );

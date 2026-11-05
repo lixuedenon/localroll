@@ -6,13 +6,17 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:localroll_core/localroll_core.dart' show sanitizeFileName;
 
 import '../../l10n/l10n.dart';
 import '../../services/annotations.dart';
+import '../../services/peers.dart' show SendFile;
 import '../../services/stamp_library.dart';
 import '../../services/win_dialogs.dart';
 import '../player/ink_editor.dart';
 import '../player/ink_paint.dart';
+import '../screen/pen_bar.dart' show PenSession;
+import '../send_page.dart';
 import '../theme.dart';
 
 /// A stamp chosen: its picture (rising / falling colours set) and name.
@@ -77,9 +81,10 @@ class _StampPickerState extends State<_StampPicker> {
     final all = _all;
     final q = _q.text.trim().toLowerCase();
     if (q.isNotEmpty) {
+      final hidden = {for (final s in StampPacks.all) if (_lib.hiddenPacks.contains(s.pack)) s.id};
       return [
         for (final id in all.keys)
-          if (stampName(id).toLowerCase().contains(q) || id.replaceAll('_', ' ').contains(q)) id,
+          if (!hidden.contains(id) && (stampName(id).toLowerCase().contains(q) || id.replaceAll('_', ' ').contains(q))) id,
       ];
     }
     return switch (_tab) {
@@ -90,12 +95,130 @@ class _StampPickerState extends State<_StampPicker> {
     };
   }
 
-  void _pick(String id) {
+  Future<void> _pick(String id) async {
     final (up, down) = _lib.colors;
-    final shape = _all[id];
+    var shape = _all[id];
     if (shape == null) return;
+    // A number, a price, a year…: its words first.
+    if (StampPacks.editable.contains(id)) {
+      final words = await _askWords(shape);
+      if (words == null || !mounted) return;
+      shape = StampPacks.withWords(shape, words);
+    }
     _lib.used(id);
+    if (!mounted) return;
     Navigator.pop(context, (id: id, shape: shape.resolved(up, down), name: stampName(id)));
+  }
+
+  /// The words of [shape] (filled in with its own); null: cancelled.
+  Future<List<String>?> _askWords(StampShape shape) async {
+    final ctls = [for (final p in shape.parts) if (p.text != null) TextEditingController(text: p.text)];
+    final r = await showDialog<List<String>>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr('stamp.words_title')),
+        content: SizedBox(
+          width: 360,
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            for (var k = 0; k < ctls.length; k++)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: TextField(
+                  controller: ctls[k],
+                  autofocus: k == 0,
+                  decoration: const InputDecoration(isDense: true, border: OutlineInputBorder()),
+                  onSubmitted: (_) => Navigator.pop(ctx, [for (final c in ctls) c.text]),
+                ),
+              ),
+          ]),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('common.cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, [for (final c in ctls) c.text]), child: Text(tr('common.ok'))),
+        ],
+      ),
+    );
+    for (final c in ctls) {
+      c.dispose();
+    }
+    return r;
+  }
+
+  /// Turn packs on / off (off: not shown here).
+  Future<void> _managePacks() async {
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, set) => AlertDialog(
+          title: Text(tr('stamp.packs_title')),
+          content: SizedBox(
+            width: 520,
+            height: 440,
+            child: ListView(children: [
+              for (final k in StampPacks.kinds.entries) ...[
+                Padding(
+                  padding: const EdgeInsets.only(top: 8, bottom: 2),
+                  child: Text(tr('stamp.kind_${k.key}'), style: const TextStyle(fontWeight: FontWeight.w600)),
+                ),
+                Wrap(spacing: 6, runSpacing: 4, children: [
+                  for (final p in k.value)
+                    FilterChip(
+                      label: Text(tr('stamp.pack_$p')),
+                      selected: !_lib.hiddenPacks.contains(p),
+                      onSelected: (v) => set(() => _lib.setPackShown(p, v)),
+                    ),
+                ]),
+              ],
+            ]),
+          ),
+          actions: [FilledButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('common.ok')))],
+        ),
+      ),
+    );
+    if (!mounted) return;
+    setState(() {
+      if (_lib.hiddenPacks.contains(_tab)) _tab = 'recent';
+    });
+  }
+
+  Future<void> _exportMine() async {
+    if (_lib.mine.isEmpty) return;
+    final path = await WinDialogs.saveFile(suggestedName: '${tr('stamp.my_default')}.lrstamps', typeLabel: tr('stamp.file_type'), extensions: const ['lrstamps']);
+    if (path == null) return;
+    try {
+      await File(path).writeAsString(_lib.exportMine());
+      if (mounted) ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('stamp.exported', {'n': _lib.mine.length}))));
+    } catch (_) {
+      if (mounted) ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('stamp.import_failed'))));
+    }
+  }
+
+  Future<void> _importMine() async {
+    final files = await WinDialogs.pickFiles(multiple: true, typeLabel: tr('stamp.file_type'), extensions: const ['lrstamps', 'json']);
+    var n = 0;
+    var bad = false;
+    for (final f in files) {
+      try {
+        n += _lib.importMine(await File(f).readAsString());
+      } catch (_) {
+        bad = true;
+      }
+    }
+    if (!mounted || files.isEmpty) return;
+    setState(() => _tab = 'mine');
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(bad && n == 0 ? tr('stamp.import_failed') : tr('stamp.imported', {'n': n}))));
+  }
+
+  /// The user's stamps as a file, sent to another PC / phone.
+  Future<void> _sendMine() async {
+    final s = PenSession.instance.services;
+    if (_lib.mine.isEmpty || s == null) return;
+    final name = '${sanitizeFileName(tr('stamp.my_default'))}.lrstamps';
+    final f = File('${Directory.systemTemp.path}${Platform.pathSeparator}$name');
+    await f.writeAsString(_lib.exportMine());
+    final sf = SendFile.plain(f, name);
+    if (sf == null || !mounted) return;
+    await sendToPc(context, s, [sf], name);
   }
 
   Future<void> _menu(String id, Offset at) async {
@@ -202,6 +325,7 @@ class _StampPickerState extends State<_StampPicker> {
             decoration: InputDecoration(isDense: true, prefixIcon: const Icon(Icons.search_rounded, size: 18), hintText: tr('stamp.search'), border: const OutlineInputBorder()),
           ),
         ),
+        IconButton(tooltip: tr('stamp.packs_title'), onPressed: _managePacks, icon: const Icon(Icons.tune_rounded)),
       ]),
       content: SizedBox(
         width: 720,
@@ -214,6 +338,7 @@ class _StampPickerState extends State<_StampPicker> {
               _chip('fav', tr('stamp.favorites')),
               // A kind (general, school…): its first pack, its packs below.
               for (final k in StampPacks.kinds.entries)
+                if (k.value.any((p) => !_lib.hiddenPacks.contains(p)))
                 Padding(
                   padding: const EdgeInsets.only(right: 6),
                   child: ChoiceChip(
@@ -221,7 +346,7 @@ class _StampPickerState extends State<_StampPicker> {
                     selected: _q.text.isEmpty && k.value.contains(_tab),
                     onSelected: (_) => setState(() {
                       _q.clear();
-                      if (!k.value.contains(_tab)) _tab = k.value.first;
+                      if (!k.value.contains(_tab)) _tab = k.value.firstWhere((p) => !_lib.hiddenPacks.contains(p));
                     }),
                   ),
                 ),
@@ -235,7 +360,7 @@ class _StampPickerState extends State<_StampPicker> {
                 padding: const EdgeInsets.only(top: 6),
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  child: Row(children: [for (final p in k) _chip(p, tr('stamp.pack_$p'))]),
+                  child: Row(children: [for (final p in k) if (!_lib.hiddenPacks.contains(p)) _chip(p, tr('stamp.pack_$p'))]),
                 ),
               ),
           const SizedBox(height: 8),
@@ -263,6 +388,9 @@ class _StampPickerState extends State<_StampPicker> {
                 icon: const Icon(Icons.gesture_rounded, size: 18),
                 label: Text(tr('stamp.from_drawn')),
               ),
+              TextButton.icon(onPressed: _importMine, icon: const Icon(Icons.file_open_outlined, size: 18), label: Text(tr('stamp.import'))),
+              TextButton.icon(onPressed: _lib.mine.isEmpty ? null : _exportMine, icon: const Icon(Icons.save_alt_rounded, size: 18), label: Text(tr('stamp.export'))),
+              TextButton.icon(onPressed: _lib.mine.isEmpty ? null : _sendMine, icon: const Icon(Icons.send_rounded, size: 18), label: Text(tr('stamp.send'))),
             ]),
           const SizedBox(height: 8),
           Expanded(
@@ -279,7 +407,7 @@ class _StampPickerState extends State<_StampPicker> {
                         waitDuration: const Duration(milliseconds: 500),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(8),
-                          onTap: () => _pick(id),
+                          onTap: () => unawaited(_pick(id)),
                           onSecondaryTapDown: (d) => _menu(id, d.globalPosition),
                           onLongPress: () => _menu(id, MediaQuery.sizeOf(context).center(Offset.zero)),
                           child: Container(

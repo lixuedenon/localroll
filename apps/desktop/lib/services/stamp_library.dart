@@ -38,6 +38,9 @@ class StampLibrary extends ChangeNotifier {
   final List<String> recent = [];
   final Set<String> favorites = {};
 
+  /// Packs not shown in the stamp panel (turned off there).
+  final Set<String> hiddenPacks = {};
+
   /// Candles: rising / falling colours (rising green, as in US markets,
   /// unless changed).
   int upColor = Candles.green, downColor = Candles.red;
@@ -63,6 +66,9 @@ class StampLibrary extends ChangeNotifier {
       favorites
         ..clear()
         ..addAll([for (final x in (j['fav'] as List?) ?? const []) '$x']);
+      hiddenPacks
+        ..clear()
+        ..addAll([for (final x in (j['hide'] as List?) ?? const []) '$x']);
       upColor = (j['up'] as num?)?.toInt() ?? Candles.green;
       downColor = (j['down'] as num?)?.toInt() ?? Candles.red;
       kind = CandleKind.values.firstWhere((k) => k.name == j['kind'], orElse: () => CandleKind.normal);
@@ -85,6 +91,7 @@ class StampLibrary extends ChangeNotifier {
           'mine': [for (final m in mine) m.toJson()],
           'recent': recent,
           'fav': [...favorites],
+          'hide': [...hiddenPacks],
           'up': upColor,
           'down': downColor,
           'kind': kind.name,
@@ -121,6 +128,35 @@ class StampLibrary extends ChangeNotifier {
       ..insert(0, id);
     if (recent.length > 24) recent.removeRange(24, recent.length);
     _changed();
+  }
+
+  void setPackShown(String pack, bool shown) {
+    shown ? hiddenPacks.remove(pack) : hiddenPacks.add(pack);
+    _changed();
+  }
+
+  /// The user's own stamps as a file's contents (to keep or send).
+  String exportMine([List<MyStamp>? only]) => jsonEncode({
+        'localrollStamps': 1,
+        'stamps': [for (final m in only ?? mine) m.toJson()],
+      });
+
+  /// Adds the stamps in [text] (an exported file); how many were added.
+  /// Ones already here (same name and picture) are skipped.
+  int importMine(String text) {
+    final j = jsonDecode(text);
+    if (j is! Map || j['localrollStamps'] == null) throw const FormatException('not a stamp file');
+    var n = 0;
+    for (final x in (j['stamps'] as List?) ?? const []) {
+      final m = MyStamp.fromJson(x);
+      if (m == null) continue;
+      final pic = jsonEncode(m.shape.toJson());
+      if (mine.any((o) => o.name == m.name && jsonEncode(o.shape.toJson()) == pic)) continue;
+      mine.add(MyStamp(id: 'my_${DateTime.now().microsecondsSinceEpoch.toRadixString(36)}$n', name: m.name, shape: m.shape));
+      n++;
+    }
+    if (n > 0) _changed();
+    return n;
   }
 
   void toggleFavorite(String id) {
