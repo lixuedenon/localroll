@@ -107,7 +107,6 @@ struct StampPic {
   std::vector<BYTE> px;
   UINT w = 0, h = 0;
   float aspect = 1;
-  int no = 0;  // which "stamp" command it came with (reports name it)
   void* rt = nullptr;
   ID2D1Bitmap* bmp = nullptr;
   ~StampPic() {
@@ -201,90 +200,6 @@ void emit(const std::string& line) {
   std::fputs(line.c_str(), stdout);
   std::fputc('\n', stdout);
   std::fflush(stdout);
-}
-
-// ---------------------------------------------------------------- reports
-// While a recording keeps the marks apart from the picture ("report 1"),
-// every change of what is shown is written out: "mark <json>" when a mark
-// appears or changes, "gone <id>" when it goes, "board <0|1|2> l t r b".
-bool g_report = false, g_reportDirty = false;
-int g_reportTick = 0, g_stampNo = 0, g_lastBoard = 0;
-RECT g_lastBoardRect{};
-std::map<int, std::string> g_reported;
-
-std::string utf8(const std::wstring& w) {
-  if (w.empty()) return {};
-  const int n = WideCharToMultiByte(CP_UTF8, 0, w.data(), static_cast<int>(w.size()), nullptr, 0, nullptr, nullptr);
-  std::string out(static_cast<size_t>(std::max(n, 0)), '\0');
-  if (n > 0) WideCharToMultiByte(CP_UTF8, 0, w.data(), static_cast<int>(w.size()), out.data(), n, nullptr, nullptr);
-  return out;
-}
-
-std::string jsonText(const std::string& in) {
-  std::string out;
-  for (const unsigned char c : in) {
-    if (c == '"' || c == '\\') {
-      out += '\\';
-      out += static_cast<char>(c);
-    } else if (c < 0x20) {
-      char b[8];
-      std::snprintf(b, sizeof b, "\\u%04x", c);
-      out += b;
-    } else {
-      out += static_cast<char>(c);
-    }
-  }
-  return out;
-}
-
-std::string num(float v, int digits = 1) {
-  char b[40];
-  std::snprintf(b, sizeof b, "%.*f", digits, static_cast<double>(v));
-  return b;
-}
-
-std::string markJson(const Mark& m, long long pg) {
-  std::string j = "{\"id\":" + std::to_string(m.id) + ",\"t\":\"" + utf8(kToolNames[m.tool]) + "\",\"c\":" +
-                  std::to_string(m.argb) + ",\"c2\":" + std::to_string(m.argb2) + ",\"w\":" + num(m.width) +
-                  ",\"s\":" + num(m.size) + ",\"p\":[";
-  for (size_t i = 0; i < m.pts.size(); ++i) {
-    if (i) j += ',';
-    j += num(m.pts[i].x) + "," + num(m.pts[i].y);
-  }
-  j += "],\"n\":" + std::to_string(m.number) + ",\"dx\":" + num(m.dx) + ",\"dy\":" + num(m.dy) + ",\"k\":" + num(m.scale, 3) +
-       ",\"r\":" + num(m.rot, 2) + ",\"fade\":" + (m.fades ? "1" : "0") + ",\"up\":" + (m.noTurn ? "1" : "0") +
-       ",\"pic\":" + std::to_string(m.pic ? m.pic->no : 0) + ",\"pg\":" + std::to_string(pg);
-  if (!m.text.empty()) j += ",\"text\":\"" + jsonText(utf8(m.text)) + "\"";
-  return j + "}";
-}
-
-// What is shown now, against what was last written out.
-void reportDiff() {
-  g_reportDirty = false;
-  std::map<int, std::string> now;
-  const long long pg = static_cast<long long>(reinterpret_cast<INT_PTR>(g_page));
-  if (g_visible) {
-    Page& pa = g_pages[g_page];
-    if (!pa.hidden) {
-      for (const auto& m : pa.sheet().marks) now[m.id] = markJson(m, pg);
-    }
-    if (g_hasDraft) now[g_draft.id] = markJson(g_draft, pg);
-  }
-  for (const auto& [id, j] : now) {
-    const auto it = g_reported.find(id);
-    if (it == g_reported.end() || it->second != j) emit("mark " + j);
-  }
-  for (const auto& [id, j] : g_reported) {
-    if (!now.count(id)) emit("gone " + std::to_string(id));
-  }
-  g_reported.swap(now);
-  const int b = g_visible ? g_board : 0;
-  if (b != g_lastBoard || (b && !EqualRect(&g_boardRect, &g_lastBoardRect))) {
-    emit("board " + std::to_string(b) + " " + std::to_string(g_boardRect.left) + " " + std::to_string(g_boardRect.top) + " " +
-         std::to_string(g_boardRect.right) + " " + std::to_string(g_boardRect.bottom));
-    g_lastBoard = b;
-    g_lastBoardRect = g_boardRect;
-  }
 }
 
 void emitState() {
@@ -763,7 +678,6 @@ void render(const RECT* dirty = nullptr) {
     g_d2d->CreateDCRenderTarget(&props, g_rt.put());
   }
   present(dirty ? &d : nullptr);
-  g_reportDirty = true;
 }
 
 // The layer pixels a mark covers (with room for its handles).
@@ -1442,16 +1356,6 @@ void command(const std::string& line) {
       }
       emitState();
     }
-  } else if (cmd == "report") {
-    // A recording keeps the marks apart: write out every change from now.
-    g_report = arg == "1";
-    g_reported.clear();
-    g_lastBoard = 0;
-    g_reportDirty = g_report;
-  } else if (cmd == "capture") {
-    // "capture 0": the marks stay out of screen recordings (drawn in later).
-    const BOOL ok = SetWindowDisplayAffinity(g_layer, arg == "0" ? WDA_EXCLUDEFROMCAPTURE : WDA_NONE);
-    emit(std::string("capture ") + (ok ? "ok" : "fail"));
   } else if (cmd == "mode") {
     setMode(arg == "draw");
   } else if (cmd == "tool") {
@@ -1467,7 +1371,6 @@ void command(const std::string& line) {
     if (sp2 != std::string::npos) {
       auto pic = decodeStamp(arg.substr(sp2 + 1), static_cast<float>(std::atof(arg.substr(0, sp).c_str())));
       if (pic) {
-        pic->no = ++g_stampNo;
         g_stamp = pic;
         g_stampNoTurn = arg.substr(sp + 1, sp2 - sp - 1) == "1";
       }
@@ -1670,7 +1573,6 @@ LRESULT CALLBACK msgProc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
     }
     if (any || gone) render();
     if (gone) emitState();
-    if (g_report && g_reportDirty && (++g_reportTick % 2) == 0) reportDiff();
     return 0;
   }
   return DefWindowProcW(h, msg, wp, lp);

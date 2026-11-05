@@ -90,7 +90,6 @@ class PenOverlay extends ChangeNotifier {
       _send('pages ${perWindow ? 'window' : 'screen'}');
       board = 0;
       highlight = false;
-      stampsSent.clear();
       return true;
     } catch (e) {
       DiagLog.log('pen', 'helper not started: $e');
@@ -141,28 +140,8 @@ class PenOverlay extends ChangeNotifier {
         }
       case 'error':
         DiagLog.log('pen', line.trim());
-      case 'mark':
-      case 'gone':
-      case 'board':
-      case 'capture':
-        onReport?.call(line.trim());
     }
   }
-
-  /// A recording keeping the marks apart: hears "mark <json>", "gone <id>",
-  /// "board <0|1|2> l t r b" and "capture ok|fail".
-  void Function(String line)? onReport;
-
-  /// The stamps handed over, in order (a reported mark names its stamp by
-  /// number, from 1): the shape and the colour it was drawn in.
-  final List<(StampShape, int)> stampsSent = [];
-
-  /// Write out every change of the marks (see [onReport]).
-  void report(bool on) => _send('report ${on ? 1 : 0}');
-
-  /// Whether the marks are filmed by screen recordings (false: they are
-  /// drawn in afterwards; "capture ok" / "capture fail" answers).
-  void capture(bool on) => _send('capture ${on ? 1 : 0}');
 
   void _send(String cmd) {
     try {
@@ -189,7 +168,6 @@ class PenOverlay extends ChangeNotifier {
   Future<void> setStamp(StampShape shape) async {
     final png = await shape.toPng(color.toARGB32());
     if (png == null) return;
-    stampsSent.add((shape, color.toARGB32()));
     _send('stamp ${shape.aspect.toStringAsFixed(4)} ${shape.noTurn ? 1 : 0} ${base64Encode(png)}');
     setTool('stamp');
   }

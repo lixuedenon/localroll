@@ -47,8 +47,7 @@ class Recording {
   final int lengthMs;
   int size;
 
-  /// An explanation: its recording (voice, marks), to make it again. A
-  /// screen recording: its raw material (`screenSessionFolder`).
+  /// An explanation: its recording (voice, marks), to make it again.
   final String? narrationId;
 
   /// Names of the devices it was sent to.

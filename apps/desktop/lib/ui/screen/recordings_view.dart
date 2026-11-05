@@ -21,7 +21,6 @@ import '../player/player_page.dart';
 import '../send_page.dart';
 import '../theme.dart';
 import '../trash_actions.dart';
-import 'screen_record.dart' show screenSessionFolder;
 
 String _len(int ms) {
   final d = Duration(milliseconds: ms);
@@ -159,13 +158,7 @@ Future<void> deleteRecordings(BuildContext context, AppServices s, List<Recordin
   // Gone from the list at once (and back if the deletion is undone).
   s.recordings.refresh();
   if (n == 0 || !context.mounted) return;
-  final raw = [
-    for (final r in list)
-      if (r.narrationId != null)
-        r.kind == RecKind.screen
-            ? screenSessionFolder(s.settings.dataDir, r.narrationId!)
-            : NarrationSession.folderOf(s.settings.dataDir, r.narrationId!),
-  ];
+  final raw = [for (final r in list) ?r.narrationId];
   if (raw.isEmpty) return;
   final also = await showDialog<bool>(
     context: context,
@@ -183,9 +176,9 @@ Future<void> deleteRecordings(BuildContext context, AppServices s, List<Recordin
     ),
   );
   if (also != true) return;
-  for (final d in raw) {
+  for (final id in raw) {
     try {
-      await d.delete(recursive: true);
+      await NarrationSession.folderOf(s.settings.dataDir, id).delete(recursive: true);
     } catch (_) {}
   }
   s.recordings.forget([for (final r in list) if (r.narrationId != null && !r.exists) r]);
