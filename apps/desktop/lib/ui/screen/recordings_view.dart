@@ -21,7 +21,7 @@ import '../player/player_page.dart';
 import '../send_page.dart';
 import '../theme.dart';
 import '../trash_actions.dart';
-import 'screen_record.dart' show screenSessionFolder;
+import 'screen_record.dart' show ScreenSession, remakeScreen, screenSessionFolder;
 
 String _len(int ms) {
   final d = Duration(milliseconds: ms);
@@ -106,6 +106,10 @@ Future<void> recordingAction(
       final item = recs.itemOf(r);
       await convertWithDialog(context, s, items: [?item], path: item == null ? r.path : null, video: r.video);
     case 'remake':
+      if (r.kind == RecKind.screen && r.narrationId != null) {
+        await remakeScreen(context, s, r.narrationId!);
+        return;
+      }
       if (onRemake != null) {
         await onRemake(r);
         return;
@@ -439,6 +443,8 @@ class _RecordingsViewState extends State<RecordingsView> {
                 PopupMenuItem(value: 'rename', child: Text(tr('recs.rename'))),
                 PopupMenuItem(value: 'convert', child: Text(tr('convert.menu'))),
                 if (r.kind == RecKind.narration && r.narrationId != null) PopupMenuItem(value: 'remake', child: Text(tr('rec.remake'))),
+                if (r.kind == RecKind.screen && r.narrationId != null && ScreenSession.exists(s.settings.dataDir, r.narrationId!))
+                  PopupMenuItem(value: 'remake', child: Text(tr('rec.remake'))),
                 if (r.kind == RecKind.narration && r.narrationId != null) PopupMenuItem(value: 'edit', child: Text(tr('nedit.menu'))),
                 PopupMenuItem(value: 'delete', child: Text(tr('lib.delete'), style: const TextStyle(color: LrColors.danger))),
                 const PopupMenuDivider(),

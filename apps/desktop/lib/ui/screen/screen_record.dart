@@ -1098,30 +1098,7 @@ class ScreenRecorder extends ChangeNotifier {
       fps: setup!.fps,
       onProgress: (p) => progress.value = p,
     );
-    unawaited(showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) {
-        unawaited(done.whenComplete(() {
-          if (ctx.mounted) Navigator.of(ctx).pop();
-        }));
-        return AlertDialog(
-          title: Text(tr('screen.making')),
-          content: SizedBox(
-            width: 360,
-            child: ValueListenableBuilder<double>(
-              valueListenable: progress,
-              builder: (_, p, _) => Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                LinearProgressIndicator(value: p <= 0 ? null : p),
-                const SizedBox(height: 8),
-                Text('${(p * 100).round()}%', style: const TextStyle(color: LrColors.muted)),
-              ]),
-            ),
-          ),
-          actions: [TextButton(onPressed: maker.cancel, child: Text(tr('common.cancel')))],
-        );
-      },
-    ));
+    _showMaking(context, done, progress, maker.cancel);
     final f = await done;
     progress.dispose();
     if (f != null) {
@@ -2008,4 +1985,135 @@ class _Bar extends StatelessWidget {
       ]),
     );
   }
+}
+
+/// "Making the video…" with its progress, until [done].
+void _showMaking(BuildContext context, Future<Object?> done, ValueNotifier<double> progress, VoidCallback cancel) {
+  unawaited(showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    builder: (ctx) {
+      unawaited(done.whenComplete(() {
+        if (ctx.mounted) Navigator.of(ctx).pop();
+      }));
+      return AlertDialog(
+        title: Text(tr('screen.making')),
+        content: SizedBox(
+          width: 360,
+          child: ValueListenableBuilder<double>(
+            valueListenable: progress,
+            builder: (_, p, _) => Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+              LinearProgressIndicator(value: p <= 0 ? null : p),
+              const SizedBox(height: 8),
+              Text('${(p * 100).round()}%', style: const TextStyle(color: LrColors.muted)),
+            ]),
+          ),
+        ),
+        actions: [TextButton(onPressed: cancel, child: Text(tr('common.cancel')))],
+      );
+    },
+  ));
+}
+
+/// A screen recording's kept material, read back (see `_keepSession`).
+class ScreenSession {
+  ScreenSession._(this.id, this.dir, this.json);
+
+  final String id;
+  final Directory dir;
+  final Map<String, dynamic> json;
+
+  static Future<ScreenSession?> load(Directory dataDir, String id) async {
+    final dir = screenSessionFolder(dataDir, id);
+    final f = File('${dir.path}${Platform.pathSeparator}session.json');
+    try {
+      final j = jsonDecode(await f.readAsString());
+      return j is Map<String, dynamic> ? ScreenSession._(id, dir, j) : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static bool exists(Directory dataDir, String id) =>
+      File('${screenSessionFolder(dataDir, id).path}${Platform.pathSeparator}session.json').existsSync();
+
+  File _file(String name) => File('${dir.path}${Platform.pathSeparator}$name');
+  static Rect _rect(Object? v) {
+    final l = [for (final x in (v as List? ?? const [0, 0, 0, 0])) (x as num).toDouble()];
+    return Rect.fromLTRB(l[0], l[1], l[2], l[3]);
+  }
+
+  String get name => json['name'] as String? ?? '';
+  int get length => (json['length'] as num?)?.toInt() ?? 0;
+  List<NarrationInk> get inks => [for (final i in (json['inks'] as List? ?? const [])) NarrationInk.fromJson(i as Map<String, dynamic>)];
+
+  /// Makes the video again (a new file beside the others).
+  /// [onCancel] gets what stops it.
+  Future<File?> make(AppServices s, {required String name, required void Function(double) onProgress, void Function(VoidCallback cancel)? onCancel}) {
+    final sc = json['screen'] as Map<String, dynamic>? ?? const {};
+    final screen = ScreenInfo(
+      index: (sc['index'] as num?)?.toInt() ?? 0,
+      rect: _rect(sc['rect']),
+      primary: sc['primary'] == true,
+      scale: (sc['scale'] as num?)?.toDouble() ?? 1,
+    );
+    final parts = [
+      for (final p in (json['parts'] as List? ?? const []))
+        _Part(_file(p['f'] as String), (p['s'] as num).toInt(), (p['h'] as num).toInt())..lengthMs = (p['l'] as num).toInt(),
+    ];
+    final voice = json['voice'] is String ? _file(json['voice'] as String) : null;
+    final system = json['system'] is String ? _file(json['system'] as String) : null;
+    final m = _ScreenComposer(s);
+    onCancel?.call(m.cancel);
+    return m.make(
+      parts: parts,
+      length: length,
+      area: _rect(json['area']),
+      screen: screen,
+      windowAt: [for (final w in (json['windowAt'] as List? ?? const [])) ((w[0] as num).toInt(), _rect((w as List).sublist(1)))],
+      clicks: [
+        for (final c in (json['clicks'] as List? ?? const []))
+          _Click((c[0] as num).toInt(), Offset((c[1] as num).toDouble(), (c[2] as num).toDouble()), c[3] == 1),
+      ],
+      inks: inks,
+      fades: {for (final e in (json['fades'] as Map? ?? const {}).entries) e.key as String: e.value == true},
+      pageOf: {for (final e in (json['pageOf'] as Map? ?? const {}).entries) e.key as String: (e.value as num).toInt()},
+      front: [for (final f in (json['front'] as List? ?? const [])) ((f[0] as num).toInt(), (f[1] as num).toInt())],
+      firstPage: (json['firstPage'] as num?)?.toInt() ?? 0,
+      boards: [for (final b in (json['boards'] as List? ?? const [])) ((b[0] as num).toInt(), (b[1] as num).toInt(), _rect((b as List).sublist(2)))],
+      voice: voice != null && voice.existsSync() ? voice : null,
+      system: system != null && system.existsSync() ? system : null,
+      micVol: (json['micVol'] as num?)?.toDouble() ?? 1,
+      sysVol: (json['sysVol'] as num?)?.toDouble() ?? 1,
+      duck: json['duck'] != false,
+      name: name,
+      source: json['source'] as String? ?? '',
+      fps: (json['fps'] as num?)?.toInt() ?? 30,
+      sessionId: id,
+      onProgress: onProgress,
+    );
+  }
+}
+
+/// "Make again" on a screen recording: the video made anew from what was
+/// kept (a new file; the old one stays).
+Future<void> remakeScreen(BuildContext context, AppServices s, String id) async {
+  final session = await ScreenSession.load(s.settings.dataDir, id);
+  if (!context.mounted) return;
+  if (session == null) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('recs.raw_gone'))));
+    return;
+  }
+  final progress = ValueNotifier<double>(0);
+  VoidCallback cancel = () {};
+  final done = session.make(s, name: session.name, onProgress: (p) => progress.value = p, onCancel: (c) => cancel = c);
+  _showMaking(context, done, progress, () => cancel());
+  final f = await done;
+  progress.dispose();
+  if (!context.mounted) return;
+  if (f == null) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('rec.failed'))));
+    return;
+  }
+  showSavedBar(context, s, f);
 }
