@@ -39,6 +39,12 @@ import 'recordings_view.dart';
 /// What is recorded.
 enum ScreenMode { screen, window, area }
 
+/// Where a screen recording's raw material is kept (the filmed parts
+/// without the pen's marks, the sounds, the marks, the clicks), so the video
+/// can be made again and changed: `<data>\screen_sessions\<id>`.
+Directory screenSessionFolder(Directory dataDir, String id) =>
+    Directory('${dataDir.path}${Platform.pathSeparator}screen_sessions${Platform.pathSeparator}$id');
+
 /// The choice made before recording.
 class ScreenSetup {
   const ScreenSetup({
@@ -328,6 +334,21 @@ class ScreenRecorder extends ChangeNotifier {
   final List<(int, Rect)> _windowAt = [];
   final Map<String, NarrationInk> _inks = {};
   final Map<String, bool> _fades = {};
+
+  /// The screen pen's marks are kept apart from the picture (drawn in when
+  /// the video is made, so they can be changed later). False when Windows
+  /// could not keep them out of the recording (then they are filmed).
+  bool _apart = false;
+
+  /// The pen's marks as the helper reports them: its id → the key of the
+  /// mark's current version in [_inks], and when it last changed.
+  final Map<String, String> _inkKey = {};
+  final Map<String, int> _changedAt = {};
+  final Set<String> _drawingKeys = {};
+  int _inkSeq = 0;
+
+  /// White / black board over time: (when, 0 none / 1 white / 2 black, where).
+  final List<(int, int, Rect)> _boards = [];
   Set<String> _lastIds = {};
   Timer? _poll;
   Rect? _savedWindow;
@@ -398,6 +419,11 @@ class ScreenRecorder extends ChangeNotifier {
     _windowAt.clear();
     _inks.clear();
     _fades.clear();
+    _inkKey.clear();
+    _changedAt.clear();
+    _drawingKeys.clear();
+    _boards.clear();
+    _apart = false;
     _pages.clear();
     _inkPage.clear();
     _front.clear();
@@ -468,6 +494,13 @@ class ScreenRecorder extends ChangeNotifier {
     final listening = mic == null ? Future.value(true) : _startVoice();
     if (su.system) _sys = LoopbackRecorder();
     final hearing = _sys == null ? Future.value(true) : _startSystem();
+    if (usesOverlay) {
+      // The pen's marks stay out of the picture; drawn in when it is made.
+      final o = PenOverlay.instance;
+      o.onReport = _onReport;
+      _apart = true;
+      o.capture(false);
+    }
     final filming = _cap.start(exe, area, su.fps, enc, File('${dir.path}${Platform.pathSeparator}part_0.mkv'));
     for (var c = 3; c > 0; c--) {
       countdown = c;
@@ -496,6 +529,7 @@ class ScreenRecorder extends ChangeNotifier {
     }
     if (!okA) _message(tr('rec.mic_failed'));
     _go(dir, 0);
+    if (usesOverlay && _apart) PenOverlay.instance.report(true);
     recording = true;
     notifyListeners();
     _poll = Timer.periodic(const Duration(milliseconds: 16), (_) => _tick());
@@ -597,6 +631,128 @@ class ScreenRecorder extends ChangeNotifier {
         }
       }
     }
+  }
+
+  // ------------------------------------------------- the pen's marks
+
+  void _onReport(String line) {
+    final sp = line.indexOf(' ');
+    final kind = sp < 0 ? line : line.substring(0, sp);
+    final rest = sp < 0 ? '' : line.substring(sp + 1);
+    final t = clock.elapsedMilliseconds;
+    switch (kind) {
+      case 'capture':
+        if (rest != 'ok') {
+          _apart = false;
+          DiagLog.log('screen', 'pen marks are filmed (capture $rest)');
+        }
+      case 'gone':
+        if (!_apart) return;
+        final key = _inkKey.remove(rest);
+        if (key != null) _inks[key]?.removedT ??= t;
+      case 'board':
+        if (!_apart) return;
+        final v = [for (final x in rest.split(' ')) int.tryParse(x) ?? 0];
+        if (v.length >= 5) _boards.add((t, v[0], Rect.fromLTRB(v[1].toDouble(), v[2].toDouble(), v[3].toDouble(), v[4].toDouble())));
+      case 'mark':
+        if (!_apart || !recording) return;
+        try {
+          _onMark(jsonDecode(rest) as Map<String, dynamic>, t);
+        } catch (e) {
+          DiagLog.log('screen', 'pen mark not read: $e');
+        }
+    }
+  }
+
+  /// A mark appeared or changed. While it is being drawn its points grow
+  /// (kept with their times, so it is drawn again as it was); changed
+  /// later (moved, turned, recoloured): the old one goes, the new one
+  /// shows from now.
+  void _onMark(Map<String, dynamic> j, int t) {
+    final oid = '${j['id']}';
+    final key = _inkKey[oid];
+    final old = key == null ? null : _inks[key];
+    final last = _changedAt[oid] ?? t;
+    _changedAt[oid] = t;
+    if (old != null && old.removedT == null) {
+      final ink = _overlayInk(j, key!);
+      if (ink == null) return;
+      final n = ink.points.length;
+      // Being drawn: updates keep coming (a pause of half a second ends it).
+      if (_drawingKeys.contains(key) && t - last < 450) {
+        final times = List.of(old.times);
+        if (ink.tool == InkTool.pen || ink.tool == InkTool.marker) {
+          while (times.length < n) {
+            times.add(t - old.startT);
+          }
+          if (times.length > n) times.removeRange(n, times.length);
+        } else {
+          times
+            ..clear()
+            ..addAll(n <= 1 ? const [0] : [0, for (var i = 1; i < n; i++) t - old.startT]);
+        }
+        _inks[key] = NarrationInk(file: 0, ink: ink, startT: old.startT, times: times);
+        return;
+      }
+      _drawingKeys.remove(key);
+      if (t - old.startT < 300 && old.times.length <= 1) {
+        // Moved just now as well: the same new version.
+        _inks[key] = NarrationInk(file: 0, ink: ink, startT: old.startT, times: [0]);
+        return;
+      }
+      old.removedT = t;
+    }
+    final k = 'o${oid}_${_inkSeq++}';
+    final ink = _overlayInk(j, k);
+    if (ink == null) return;
+    _inkKey[oid] = k;
+    _fades[k] = j['fade'] == 1;
+    _inkPage[k] = 0;
+    // New: points so far all at once; a mark brought back / moved: whole.
+    final n = ink.points.length;
+    final fresh = old == null;
+    _inks[k] = NarrationInk(file: 0, ink: ink, startT: t, times: fresh && n > 1 ? List.filled(n, 0) : [0]);
+    if (fresh) _drawingKeys.add(k);
+  }
+
+  /// A reported mark (screen pixels) as a mark on the recorded screen
+  /// (parts of its width / height).
+  InkMark? _overlayInk(Map<String, dynamic> j, String id) {
+    final scr = setup!.screen.rect;
+    final w = math.max(1.0, scr.width), h = math.max(1.0, scr.height);
+    final tool = InkTool.values.where((x) => x.name == j['t']).firstOrNull;
+    if (tool == null) return null;
+    final p = (j['p'] as List? ?? const []).map((v) => (v as num).toDouble()).toList();
+    final pts = [for (var i = 0; i + 1 < p.length; i += 2) Offset((p[i] - scr.left) / w, (p[i + 1] - scr.top) / h)];
+    if (pts.isEmpty) return null;
+    final lw = (j['w'] as num? ?? 6).toDouble(), sz = (j['s'] as num? ?? 36).toDouble();
+    StampShape? shape;
+    var color = (j['c'] as num? ?? 0xFFFF3B30).toInt();
+    if (tool == InkTool.stamp) {
+      final no = (j['pic'] as num? ?? 0).toInt();
+      final sent = PenOverlay.instance.stampsSent;
+      if (no < 1 || no > sent.length) return null;
+      shape = sent[no - 1].$1;
+      color = sent[no - 1].$2;
+    }
+    return InkMark(
+      id: id,
+      tool: tool,
+      color: color,
+      // The pen's highlighter is 4× its width (at 38 %); marks draw it 3×.
+      width: (tool == InkTool.marker ? lw * 4 / 3 : lw) / h,
+      // A number's circle is 0.9 of its size there.
+      size: (tool == InkTool.number ? sz * 0.9 : sz) / h,
+      points: pts,
+      text: j['text'] as String?,
+      number: (j['n'] as num?)?.toInt(),
+      dx: (j['dx'] as num? ?? 0).toDouble() / w,
+      dy: (j['dy'] as num? ?? 0).toDouble() / h,
+      scale: (j['k'] as num? ?? 1).toDouble(),
+      rotation: (j['r'] as num? ?? 0).toDouble() * math.pi / 180,
+      shape: shape,
+      color2: tool == InkTool.candle ? (j['c2'] as num?)?.toInt() : null,
+    );
   }
 
   Timer? _snapTimer;
@@ -734,6 +890,8 @@ class ScreenRecorder extends ChangeNotifier {
     pen = false;
     if (usesOverlay) {
       final o = PenOverlay.instance;
+      o.report(false);
+      o.onReport = null;
       o.removeListener(_onOverlay);
       o.border(null);
       await o.stop();
@@ -814,6 +972,72 @@ class ScreenRecorder extends ChangeNotifier {
     } catch (_) {}
   }
 
+  /// Made: the raw material is kept (not thrown away), so the video can be
+  /// made again and changed later.
+  Future<void> _keepSession(String id, int length, String name, {File? voice, File? system}) async {
+    final s = _s, dir = _dir, su = setup;
+    if (s == null || dir == null || su == null) return;
+    final sep = Platform.pathSeparator;
+    final to = screenSessionFolder(s.settings.dataDir, id);
+    try {
+      // Only what making it needs: the parts and the joined sounds.
+      for (final e in dir.listSync()) {
+        final n = e.path.split(sep).last;
+        if (n.startsWith('voice_') || n.startsWith('system_') || n.startsWith('pen_')) {
+          try {
+            e.deleteSync(recursive: true);
+          } catch (_) {}
+        }
+      }
+      await to.parent.create(recursive: true);
+      try {
+        await dir.rename(to.path);
+      } catch (_) {
+        // Another drive: copied, then removed.
+        await to.create(recursive: true);
+        for (final e in dir.listSync()) {
+          if (e is File) await e.copy('${to.path}$sep${e.path.split(sep).last}');
+        }
+        await dir.delete(recursive: true);
+      }
+      final scr = su.screen;
+      List<double> r4(Rect r) => [r.left, r.top, r.right, r.bottom];
+      final json = {
+        'version': 1,
+        'mode': su.mode.name,
+        'screen': {'index': scr.index, 'rect': r4(scr.rect), 'scale': scr.scale, 'primary': scr.primary},
+        'area': r4(area),
+        'fps': su.fps,
+        'micVol': su.micVol,
+        'sysVol': su.sysVol,
+        'duck': su.duck,
+        'length': length,
+        'name': name,
+        'source': _source,
+        'marksApart': _apart,
+        'parts': [
+          for (final p in _parts) {'f': p.file.path.split(sep).last, 's': p.startT, 'h': p.headMs, 'l': p.lengthMs},
+        ],
+        'voice': ?(voice == null ? null : voice.path.split(sep).last),
+        'system': ?(system == null ? null : system.path.split(sep).last),
+        'clicks': [for (final c in _clicks) [c.t, c.at.dx, c.at.dy, if (c.right) 1 else 0]],
+        'windowAt': [for (final (t, r) in _windowAt) [t, ...r4(r)]],
+        'inks': [for (final i in _inks.values) i.toJson()],
+        'fades': _fades,
+        'pageOf': _inkPage,
+        'front': [for (final (t, w) in _front) [t, w]],
+        'firstPage': _firstPage,
+        'boards': [for (final (t, m, r) in _boards) [t, m, ...r4(r)]],
+      };
+      await File('${to.path}${sep}session.json').writeAsString(jsonEncode(json));
+      _dir = null;
+      DiagLog.log('screen', 'raw material kept ($id)');
+    } catch (e) {
+      DiagLog.log('screen', 'raw material not kept: $e');
+      await _cleanup();
+    }
+  }
+
   /// "Window recording_Sideloadly_20261031-1146", "Screen recording_…",
   /// "Area recording_…".
   String _defaultName() {
@@ -849,7 +1073,10 @@ class ScreenRecorder extends ChangeNotifier {
     final s = _s!;
     final maker = _ScreenComposer(s);
     final progress = ValueNotifier<double>(0);
+    final sessionId = DateTime.now().millisecondsSinceEpoch.toRadixString(36);
     final done = maker.make(
+      boards: _apart ? _boards : const [],
+      sessionId: sessionId,
       parts: _parts,
       length: length,
       area: area,
@@ -897,7 +1124,11 @@ class ScreenRecorder extends ChangeNotifier {
     ));
     final f = await done;
     progress.dispose();
-    await _cleanup();
+    if (f != null) {
+      await _keepSession(sessionId, length, name, voice: voice, system: system);
+    } else {
+      await _cleanup();
+    }
     final c = AppNav.instance.navigatorKey.currentContext;
     if (c == null || !c.mounted) return;
     final messenger = ScaffoldMessenger.of(c);
@@ -998,6 +1229,8 @@ class _ScreenComposer {
     String source = '',
     required int fps,
     required void Function(double) onProgress,
+    List<(int, int, Rect)> boards = const [],
+    String? sessionId,
   }) async {
     final exe = s.ffmpeg.ffmpeg;
     final enc = await s.converter.encoders.best();
@@ -1070,7 +1303,7 @@ class _ScreenComposer {
           for (var f = 0; f < frames && !_cancelled; f++) {
             final t = p.startT + (f * 1000 / ofps).round();
             final rec = ui.PictureRecorder();
-            _paint(Canvas(rec), size, t, area, screen, c, clicks, inks, fades, _pageAt(t, front, firstPage), pageOf);
+            _paint(Canvas(rec), size, t, area, screen, c, clicks, inks, fades, _pageAt(t, front, firstPage), pageOf, boards);
             final img = await rec.endRecording().toImage(ow, oh);
             final bytes = await img.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
             img.dispose();
@@ -1118,7 +1351,7 @@ class _ScreenComposer {
       ]);
       if (!ok || !File(out).existsSync()) return null;
       onProgress(1);
-      return Snapshots.done(s, File(out), video: true, kind: RecKind.screen, source: source, lengthMs: length);
+      return Snapshots.done(s, File(out), video: true, kind: RecKind.screen, source: source, lengthMs: length, narrationId: sessionId);
     } catch (e) {
       DiagLog.log('screen', 'not made: $e');
       return null;
@@ -1141,7 +1374,7 @@ class _ScreenComposer {
 
   /// Pen marks (of [page]) and click circles at [t], on the finished frame.
   void _paint(Canvas c, Size out, int t, Rect area, ScreenInfo screen, Rect crop, List<_Click> clicks, List<NarrationInk> inks, Map<String, bool> fades,
-      int page, Map<String, int> pageOf) {
+      int page, Map<String, int> pageOf, [List<(int, int, Rect)> boards = const []]) {
     final fit = math.min(out.width / crop.width, out.height / crop.height);
     final padX = (out.width - crop.width * fit) / 2, padY = (out.height - crop.height * fit) / 2;
     c.save();
@@ -1150,6 +1383,15 @@ class _ScreenComposer {
     c.scale(fit);
     // From screen pixels to the filmed area's pixels, minus the framing.
     c.translate(-area.left - crop.left, -area.top - crop.top);
+    // The white / black board under the marks.
+    (int, int, Rect)? board;
+    for (final b in boards) {
+      if (b.$1 > t) break;
+      board = b;
+    }
+    if (board != null && board.$2 != 0) {
+      c.drawRect(board.$3, Paint()..color = board.$2 == 1 ? const Color(0xFFFAFAF7) : const Color(0xFF1E2A24));
+    }
     // Pen marks (drawn over the whole screen they were made on).
     c.save();
     c.translate(screen.rect.left, screen.rect.top);
