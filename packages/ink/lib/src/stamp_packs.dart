@@ -11,6 +11,7 @@ part 'packs/art.dart';
 part 'packs/draw.dart';
 part 'packs/school.dart';
 part 'packs/sports.dart';
+part 'packs/work.dart';
 
 /// A ready-made stamp. Its name: the app's text 'stamp.<id>'.
 class Stamp {
@@ -25,7 +26,7 @@ class Stamp {
 
 /// The packs that come with LocalRoll.
 class StampPacks {
-  static const List<String> packs = ['basic', 'finance', 'kids', 'math', 'physics', 'chem', 'bio', 'geo', 'history', 'lang', 'code', 'callig', 'music', 'art', 'photo', 'dance', 'tactics', 'fields', 'fitness', 'golf'];
+  static const List<String> packs = ['basic', 'finance', 'kids', 'math', 'physics', 'chem', 'bio', 'geo', 'history', 'lang', 'code', 'callig', 'music', 'art', 'photo', 'dance', 'tactics', 'fields', 'fitness', 'golf', 'tutorial', 'business', 'shop', 'interior', 'engineering', 'auto', 'legal', 'medical', 'traffic', 'cooking', 'gaming', 'astro'];
 
   /// The packs by kind (the panel shows a kind, then its packs).
   static const Map<String, List<String>> kinds = {
@@ -33,6 +34,7 @@ class StampPacks {
     'school': ['math', 'physics', 'chem', 'bio', 'geo', 'history', 'lang', 'code', 'callig'],
     'art': ['music', 'art', 'photo', 'dance'],
     'sports': ['tactics', 'fields', 'fitness', 'golf'],
+    'work': ['tutorial', 'business', 'shop', 'interior', 'engineering', 'auto', 'legal', 'medical', 'traffic', 'cooking', 'gaming', 'astro'],
   };
 
   static Map<String, List<List<Offset>>>? _icons;
@@ -148,5 +150,6 @@ class StampPacks {
         ..._schoolStamps(),
         ..._artStamps(),
         ..._sportsStamps(),
+        ..._workStamps(),
       ];
 }
