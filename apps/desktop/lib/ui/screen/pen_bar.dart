@@ -69,7 +69,39 @@ class _PenToolbarState extends State<PenToolbar> {
 
   Future<void> _pickStamp() async {
     final r = await _big(() => showStampPicker(context));
-    if (r != null) await o.setStamp(r.shape);
+    if (r == null) return;
+    if (r.id == StampLibrary.candleDraw) return _pickCandle();
+    await o.setStamp(r.shape);
+  }
+
+  /// The toolbar's own stamps (up to three, one click each), and a fold.
+  List<Widget> _quick() {
+    final lib = StampLibrary.instance;
+    return [
+      if (lib.quickShown)
+        for (final id in lib.quick)
+          GestureDetector(
+            onSecondaryTapUp: (d) => unawaited(quickMenu(context, id, d.globalPosition, () => _big(() => showStampPicker(context)))),
+            child: IconButton(
+              tooltip: stampName(id),
+              onPressed: () {
+                final q = quickStamp(id);
+                if (q == null) {
+                  unawaited(_pickCandle());
+                } else {
+                  unawaited(o.setStamp(q.shape));
+                }
+              },
+              icon: StampThumb(id: id, size: 22),
+            ),
+          ),
+      IconButton(
+        tooltip: tr(lib.quickShown ? 'stamp.quick_fold' : 'stamp.quick_unfold'),
+        visualDensity: VisualDensity.compact,
+        onPressed: () => lib.setQuickShown(!lib.quickShown),
+        icon: Icon(lib.quickShown ? Icons.chevron_left_rounded : Icons.chevron_right_rounded, size: 18, color: Colors.white54),
+      ),
+    ];
   }
 
   Future<void> _pickCandle() async {
@@ -132,7 +164,7 @@ class _PenToolbarState extends State<PenToolbar> {
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-        listenable: o,
+        listenable: Listenable.merge([o, StampLibrary.instance]),
         builder: (context, _) => Container(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
           decoration: BoxDecoration(
@@ -164,11 +196,13 @@ class _PenToolbarState extends State<PenToolbar> {
                   ),
                   const SizedBox(width: 4),
                   for (final t in EditTool.values)
-                    _btn(InkToolbar.icon(t), InkToolbar.label(t), () {
-                      if (t == EditTool.stamp) return unawaited(_pickStamp());
-                      if (t == EditTool.candle) return unawaited(_pickCandle());
-                      o.setTool(t.name);
-                    }, on: o.draw && o.tool == t.name),
+                    if (t != EditTool.candle) ...[
+                      _btn(InkToolbar.icon(t), InkToolbar.label(t), () {
+                        if (t == EditTool.stamp) return unawaited(_pickStamp());
+                        o.setTool(t.name);
+                      }, on: o.draw && o.tool == t.name),
+                      if (t == EditTool.stamp) ..._quick(),
+                    ],
                   PopupMenuButton<Color>(
                     tooltip: tr('ink.color'),
                     onSelected: o.setColor,

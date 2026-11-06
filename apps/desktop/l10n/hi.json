@@ -1631,5 +1631,12 @@
   "panel.start": "रिकॉर्डिंग शुरू",
   "panel.pause": "रोकें",
   "panel.resume": "जारी रखें",
-  "panel.stop": "रोकें और सहेजें"
+  "panel.stop": "रोकें और सहेजें",
+  "stamp.kind_trend": "ट्रेंडिंग",
+  "stamp.quick_on": "टूलबार पर रखें",
+  "stamp.quick_off": "टूलबार से हटाएँ",
+  "stamp.quick_swap": "बदलें…",
+  "stamp.quick_fold": "त्वरित स्टैम्प छिपाएँ",
+  "stamp.quick_unfold": "त्वरित स्टैम्प दिखाएँ (पैनल में राइट-क्लिक कर जोड़ें)",
+  "stamp.candle_draw": "कैंडल हाथ से बनाएँ"
 }

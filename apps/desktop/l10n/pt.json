@@ -1631,5 +1631,12 @@
   "panel.start": "Gravar",
   "panel.pause": "Pausar",
   "panel.resume": "Continuar",
-  "panel.stop": "Parar e salvar"
+  "panel.stop": "Parar e salvar",
+  "stamp.kind_trend": "Em alta",
+  "stamp.quick_on": "Pôr na barra",
+  "stamp.quick_off": "Tirar da barra",
+  "stamp.quick_swap": "Trocar…",
+  "stamp.quick_fold": "Ocultar carimbos rápidos",
+  "stamp.quick_unfold": "Mostrar carimbos rápidos (clique direito no painel para adicionar)",
+  "stamp.candle_draw": "Desenhar velas à mão"
 }

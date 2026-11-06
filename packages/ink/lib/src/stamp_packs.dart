@@ -28,9 +28,12 @@ class Stamp {
 /// The packs that come with LocalRoll.
 class StampPacks {
   static const List<String> packs = [
-    'basic', 'finance', 'kids', 'r_math', 'r_phys', 'r_chem', 'r_bio', 'r_med', 'r_gene', 'r_ai', 'r_earth', 'history', 'lang', 'callig',
-    'r_art', 'r_music', 'music', 'photo', 'dance', 'tactics', 'fields', 'fitness', 'golf', 'elec', 'road', 'tutorial', 'business', 'shop',
-    'interior', 'auto', 'legal', 'cooking', 'gaming',
+    'c_basic', 'c_kids', 'finance', 'c_money',
+    't_ai', 't_robot', 't_ev', 't_space', 't_frontier', 't_energy', 't_health', 't_creator', 't_pay',
+    'r_math', 'r_phys', 'r_chem', 'r_bio', 'r_med', 'r_gene', 'r_ai', 'r_earth', 'c_hist', 'c_lang', 'c_callig',
+    'r_art', 'r_music', 'c_photo', 'c_dance',
+    'c_tactics', 'c_fields', 'c_balls', 'c_sports', 'c_fitness', 'c_events',
+    'elec', 'road', 'c_tut', 'c_biz', 'c_shop', 'c_home', 'c_auto', 'c_legal', 'c_cook', 'c_game',
   ];
 
   /// Stamps whose words are asked for when placed (a number, a price, a
@@ -60,16 +63,16 @@ class StampPacks {
   }
 
   /// The packs by kind (the panel shows a kind, then its packs).
-  /// (The older line-drawn math / physics / chemistry / biology / geography /
-  /// coding / art / medical / traffic / engineering / astronomy packs were
-  /// replaced by the realistic, coloured ones; their stamps stay readable in
+  /// (All the older line-drawn packs except finance — the candles — were
+  /// replaced by realistic, coloured ones; their stamps stay readable in
   /// saved marks but are no longer offered.)
   static const Map<String, List<String>> kinds = {
-    'general': ['basic', 'finance', 'kids'],
-    'school': ['r_math', 'r_phys', 'r_chem', 'r_bio', 'r_med', 'r_gene', 'r_ai', 'r_earth', 'history', 'lang', 'callig'],
-    'art': ['r_art', 'r_music', 'music', 'photo', 'dance'],
-    'sports': ['tactics', 'fields', 'fitness', 'golf'],
-    'work': ['elec', 'road', 'tutorial', 'business', 'shop', 'interior', 'auto', 'legal', 'cooking', 'gaming'],
+    'general': ['c_basic', 'c_kids', 'finance', 'c_money'],
+    'trend': ['t_ai', 't_robot', 't_ev', 't_space', 't_frontier', 't_energy', 't_health', 't_creator', 't_pay'],
+    'school': ['r_math', 'r_phys', 'r_chem', 'r_bio', 'r_med', 'r_gene', 'r_ai', 'r_earth', 'c_hist', 'c_lang', 'c_callig'],
+    'art': ['r_art', 'r_music', 'c_photo', 'c_dance'],
+    'sports': ['c_tactics', 'c_fields', 'c_balls', 'c_sports', 'c_fitness', 'c_events'],
+    'work': ['elec', 'road', 'c_tut', 'c_biz', 'c_shop', 'c_home', 'c_auto', 'c_legal', 'c_cook', 'c_game'],
   };
 
   /// Packs shown in the panel.

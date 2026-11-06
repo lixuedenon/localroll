@@ -1631,5 +1631,12 @@
   "panel.start": "Grabar",
   "panel.pause": "Pausa",
   "panel.resume": "Seguir",
-  "panel.stop": "Parar y guardar"
+  "panel.stop": "Parar y guardar",
+  "stamp.kind_trend": "Tendencias",
+  "stamp.quick_on": "Poner en la barra",
+  "stamp.quick_off": "Quitar de la barra",
+  "stamp.quick_swap": "Cambiar…",
+  "stamp.quick_fold": "Ocultar sellos rápidos",
+  "stamp.quick_unfold": "Mostrar sellos rápidos (clic derecho en el panel para añadir)",
+  "stamp.candle_draw": "Dibujar velas a mano"
 }

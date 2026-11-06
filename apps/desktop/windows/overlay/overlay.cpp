@@ -930,15 +930,54 @@ void endDrawing() {
   if (g_autoReturn) setMode(false);
 }
 
+// A one-click mark (stamp, check, cross, number) clicked onto another mark
+// is held a moment, in case it is the first click of a double-click (which
+// selects): it no longer flashes up and away.
+bool g_heldOn = false, g_firing = false;
+ULONGLONG g_heldUntil = 0;
+D2D1_POINT_2F g_heldAt{};
+
+void onDown(D2D1_POINT_2F p);
+void onUp();
+
+// The held mark goes down now.
+void fireHeld() {
+  if (!g_heldOn) return;
+  g_heldOn = false;
+  g_firing = true;
+  g_lastDown = 0;
+  onDown(g_heldAt);
+  if (g_drag == kDrawing) onUp();
+  g_firing = false;
+  g_made = 0;
+  g_lastDown = 0;
+}
+
 void onDown(D2D1_POINT_2F p) {
   const ULONGLONG now = GetTickCount64();
   POINT pt{static_cast<LONG>(p.x), static_cast<LONG>(p.y)};
   const bool twice = now - g_lastDown < 400 && std::abs(pt.x - g_lastAt.x) < 8 && std::abs(pt.y - g_lastAt.y) < 8;
+  bool heldBack = false;
+  if (g_heldOn) {
+    if (twice) {
+      g_heldOn = false;
+      heldBack = true;
+    } else {
+      fireHeld();
+    }
+  }
   g_lastDown = now;
   g_lastAt = pt;
   const int made = g_made;
   g_made = 0;
-  if (twice && g_tool != kText) {
+  const bool oneClick = g_tool == kCheck || g_tool == kCross || g_tool == kNumber || (g_tool == kStamp && g_stamp);
+  if (!g_firing && !twice && oneClick && !findMark(g_selected) && topAt(p)) {
+    g_heldOn = true;
+    g_heldAt = p;
+    g_heldUntil = now + 380;
+    return;
+  }
+  if ((twice || heldBack) && g_tool != kText) {
     if (made) dropMade(made);
     if (Mark* hit = topAt(p)) {
       if (hit->id == g_selected) {
@@ -1698,6 +1737,7 @@ LRESULT CALLBACK msgProc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
       p.known = true;
     }
   }
+  if (msg == WM_TIMER && wp == kTimerTick && g_heldOn && GetTickCount64() >= g_heldUntil) fireHeld();
   if (msg == WM_TIMER && wp == kTimerTick) {
     // Hold Ctrl while drawing: the mouse goes through for that moment.
     if (g_draw && g_drag == kNone) {

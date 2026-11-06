@@ -18,6 +18,7 @@ import '../player/ink_paint.dart';
 import '../screen/pen_bar.dart' show PenSession;
 import '../send_page.dart';
 import '../theme.dart';
+import 'candle_panel.dart';
 
 /// A stamp chosen: its picture (rising / falling colours set) and name.
 typedef PickedStamp = ({String id, StampShape shape, String name});
@@ -25,7 +26,8 @@ typedef PickedStamp = ({String id, StampShape shape, String name});
 /// Choose a stamp, then place it on the picture being drawn on.
 Future<void> pickStampInto(BuildContext context, InkEditor editor) async {
   final r = await showStampPicker(context, drawn: editor.inks, aspect: editor.aspect);
-  if (r == null) return;
+  if (r == null || !context.mounted) return;
+  if (r.id == StampLibrary.candleDraw) return pickCandleInto(context, editor);
   editor
             ..upColor = StampLibrary.instance.colors.$1
             ..downColor = StampLibrary.instance.colors.$2;
@@ -41,6 +43,7 @@ String stampName(String id) {
   for (final (end, word) in const [('_up', 'stamp.rising'), ('_down', 'stamp.falling')]) {
     if (id.endsWith(end)) return '${tr('stamp.${id.substring(0, id.length - end.length)}')} · ${tr(word)}';
   }
+  if (id == StampLibrary.candleDraw) return tr('stamp.candle_draw');
   if (id.startsWith('my_')) {
     for (final m in StampLibrary.instance.mine) {
       if (m.id == id) return m.name;
@@ -69,7 +72,7 @@ class _StampPicker extends StatefulWidget {
 class _StampPickerState extends State<_StampPicker> {
   final TextEditingController _q = TextEditingController();
   final StampLibrary _lib = StampLibrary.instance;
-  late String _tab = _lib.recent.isEmpty ? 'basic' : 'recent';
+  late String _tab = _lib.recent.isEmpty ? 'c_basic' : 'recent';
 
   @override
   void dispose() {
@@ -80,6 +83,7 @@ class _StampPickerState extends State<_StampPicker> {
   /// Every stamp there is, by id.
   Map<String, StampShape> get _all => {
         for (final s in StampPacks.all) s.id: s.shape,
+        StampLibrary.candleDraw: candleDrawShape,
         for (final m in _lib.mine) m.id: m.shape,
       };
 
@@ -104,12 +108,17 @@ class _StampPickerState extends State<_StampPicker> {
       'recent' => [for (final id in _lib.recent) if (all.containsKey(id)) id],
       'fav' => [for (final id in all.keys) if (_lib.favorites.contains(id)) id],
       'mine' => [for (final m in _lib.mine) m.id],
-      _ => [for (final s in StampPacks.all) if (s.pack == _tab) s.id],
+      _ => [if (_tab == 'finance') StampLibrary.candleDraw, for (final s in StampPacks.all) if (s.pack == _tab) s.id],
     };
   }
 
   Future<void> _pick(String id) async {
     final (up, down) = _lib.colors;
+    // Drawing candles by hand: the caller opens the candle panel.
+    if (id == StampLibrary.candleDraw) {
+      Navigator.pop(context, (id: id, shape: candleDrawShape, name: stampName(id)));
+      return;
+    }
     var shape = _all[id];
     if (shape == null) return;
     // A number, a price, a year…: its words first.
@@ -241,12 +250,14 @@ class _StampPickerState extends State<_StampPicker> {
       position: RelativeRect.fromLTRB(at.dx, at.dy, at.dx, at.dy),
       items: [
         PopupMenuItem(value: 'fav', child: Text(tr(_lib.favorites.contains(id) ? 'stamp.unfavorite' : 'stamp.favorite'))),
+        PopupMenuItem(value: 'quick', child: Text(tr(_lib.quick.contains(id) ? 'stamp.quick_off' : 'stamp.quick_on'))),
         if (mine) PopupMenuItem(value: 'rename', child: Text(tr('ink.rename'))),
         if (mine) PopupMenuItem(value: 'delete', child: Text(tr('ink.delete'))),
       ],
     );
     if (!mounted || v == null) return;
     if (v == 'fav') _lib.toggleFavorite(id);
+    if (v == 'quick') _lib.quick.contains(id) ? _lib.unpinQuick(id) : _lib.pinQuick(id);
     if (v == 'delete') _lib.remove(id);
     if (v == 'rename') {
       final n = await _askName(stampName(id));
@@ -585,5 +596,69 @@ Future<StampShape?> shapeFromPicture(File f, {required bool removeWhite}) async 
     return StampShape(aspect: w / h, png: base64Encode(png.buffer.asUint8List()));
   } catch (_) {
     return null;
+  }
+}
+
+/// The picture for "draw candles by hand" (a rising and a falling candle).
+final StampShape candleDrawShape = Candles.pattern(const [(0.7, 0.35, 0.85, 0.2), (0.35, 0.75, 0.9, 0.25)]);
+
+/// A stamp drawn small (toolbar buttons).
+class StampThumb extends StatelessWidget {
+  const StampThumb({super.key, required this.id, this.size = 24});
+
+  final String id;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final lib = StampLibrary.instance;
+    StampShape? shape;
+    if (id == StampLibrary.candleDraw) {
+      shape = candleDrawShape;
+    } else if (id.startsWith('my_')) {
+      for (final m in lib.mine) {
+        if (m.id == id) shape = m.shape;
+      }
+    } else {
+      shape = StampPacks.byId(id)?.shape;
+    }
+    if (shape == null) return Icon(Icons.help_outline_rounded, size: size, color: Colors.white54);
+    final (up, down) = lib.colors;
+    return SizedBox(width: size, height: size, child: CustomPaint(painter: StampTile(shape.resolved(up, down))));
+  }
+}
+
+/// The stamp chosen for a toolbar button ([id]): its picture and name, or
+/// null for drawing candles by hand (and unknown ids).
+PickedStamp? quickStamp(String id) {
+  if (id == StampLibrary.candleDraw) return null;
+  final lib = StampLibrary.instance;
+  final (up, down) = lib.colors;
+  if (id.startsWith('my_')) {
+    for (final m in lib.mine) {
+      if (m.id == id) return (id: id, shape: m.shape, name: m.name);
+    }
+    return null;
+  }
+  final s = StampPacks.byId(id);
+  return s == null ? null : (id: id, shape: s.shape.resolved(up, down), name: stampName(id));
+}
+
+/// Right-click on a toolbar stamp: another one in its place, or off the
+/// toolbar ([pick]: how the stamp panel is opened there).
+Future<void> quickMenu(BuildContext context, String id, Offset at, Future<PickedStamp?> Function() pick) async {
+  final lib = StampLibrary.instance;
+  final v = await showMenu<String>(
+    context: context,
+    position: RelativeRect.fromLTRB(at.dx, at.dy, at.dx, at.dy),
+    items: [
+      PopupMenuItem(value: 'swap', child: Text(tr('stamp.quick_swap'))),
+      PopupMenuItem(value: 'off', child: Text(tr('stamp.quick_off'))),
+    ],
+  );
+  if (v == 'off') lib.unpinQuick(id);
+  if (v == 'swap') {
+    final r = await pick();
+    if (r != null) lib.pinQuick(r.id, at: lib.quick.indexOf(id));
   }
 }

@@ -1631,5 +1631,12 @@
   "panel.start": "녹화 시작",
   "panel.pause": "일시정지",
   "panel.resume": "계속",
-  "panel.stop": "중지 후 저장"
+  "panel.stop": "중지 후 저장",
+  "stamp.kind_trend": "트렌드",
+  "stamp.quick_on": "도구 막대에 놓기",
+  "stamp.quick_off": "도구 막대에서 제거",
+  "stamp.quick_swap": "다른 것으로…",
+  "stamp.quick_fold": "자주 쓰는 스탬프 접기",
+  "stamp.quick_unfold": "자주 쓰는 스탬프 표시 (패널에서 우클릭해 추가)",
+  "stamp.candle_draw": "캔들 손으로 그리기"
 }

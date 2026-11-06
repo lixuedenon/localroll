@@ -52,3 +52,39 @@ def tile(txt, bg='#4dabf7', fg='#fff', s=56):
 def weather_cloud(x=0, y=0, c='#cfd8e3'):
     return (f'<g transform="translate({x} {y})"><ellipse cx="70" cy="74" rx="44" ry="22" fill="{c}"/>'
             f'<circle cx="54" cy="62" r="20" fill="{c}"/><circle cx="80" cy="54" r="24" fill="{c}"/></g>')
+
+
+def rbox(bg, inner, r=26):
+    """A coloured rounded square with something white on it."""
+    return f'<rect x="8" y="8" width="124" height="124" rx="{r}" fill="{bg}"/>{inner}'
+
+
+def disc(bg, inner, ring=None):
+    s = f'<circle cx="70" cy="70" r="62" fill="{bg}"/>'
+    if ring:
+        s += f'<circle cx="70" cy="70" r="56" fill="none" stroke="{ring}" stroke-width="4"/>'
+    return s + inner
+
+
+def ribbon(txt, bg, fg='#fff', s=30):
+    return (f'<path d="M6 40 H134 L122 70 L134 100 H6 L18 70Z" fill="{bg}"/>' + T(70, 70 + s * 0.36, s, txt, fg))
+
+
+def label(txt, bg, fg='#fff', s=34, w=140, h=70):
+    return f'<rect x="4" y="4" width="{w-8}" height="{h-8}" rx="{(h-8)/2}" fill="{bg}"/>' + T(w / 2, h / 2 + s * 0.36, s, txt, fg)
+
+
+def seal(txt, color, s=28):
+    return (f'<rect x="10" y="30" width="120" height="80" rx="10" fill="none" stroke="{color}" stroke-width="7" transform="rotate(-8 70 70)"/>'
+            f'<g transform="rotate(-8 70 70)">' + T(70, 70 + s * 0.36, s, txt, color) + '</g>')
+
+
+def fig(color, limbs, head):
+    """A sports pictogram: thick limbs (polylines) and a round head."""
+    hx, hy = head
+    return (''.join(f'<polyline points="{p}" fill="none" stroke="{color}" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>' for p in limbs)
+            + f'<circle cx="{hx}" cy="{hy}" r="11" fill="{color}"/>')
+
+
+def player(color, num, edge='#fff'):
+    return f'<circle cx="70" cy="70" r="58" fill="{color}" stroke="{edge}" stroke-width="6"/>' + T(70, 70 + 52 * 0.36, 52, num, '#fff')

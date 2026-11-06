@@ -1631,5 +1631,12 @@
   "panel.start": "Mulai rekam",
   "panel.pause": "Jeda",
   "panel.resume": "Lanjut",
-  "panel.stop": "Berhenti & simpan"
+  "panel.stop": "Berhenti & simpan",
+  "stamp.kind_trend": "Tren",
+  "stamp.quick_on": "Taruh di bilah alat",
+  "stamp.quick_off": "Hapus dari bilah alat",
+  "stamp.quick_swap": "Ganti…",
+  "stamp.quick_fold": "Lipat stempel cepat",
+  "stamp.quick_unfold": "Tampilkan stempel cepat (klik kanan di panel untuk menambah)",
+  "stamp.candle_draw": "Gambar lilin manual"
 }

@@ -1631,5 +1631,12 @@
   "panel.start": "Aufnahme starten",
   "panel.pause": "Pause",
   "panel.resume": "Weiter",
-  "panel.stop": "Stoppen und speichern"
+  "panel.stop": "Stoppen und speichern",
+  "stamp.kind_trend": "Trends",
+  "stamp.quick_on": "In die Leiste",
+  "stamp.quick_off": "Aus der Leiste entfernen",
+  "stamp.quick_swap": "Ändern…",
+  "stamp.quick_fold": "Schnellstempel einklappen",
+  "stamp.quick_unfold": "Schnellstempel zeigen (im Feld rechtsklicken zum Hinzufügen)",
+  "stamp.candle_draw": "Kerzen von Hand zeichnen"
 }

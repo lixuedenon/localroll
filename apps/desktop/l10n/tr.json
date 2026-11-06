@@ -1631,5 +1631,12 @@
   "panel.start": "Kaydı başlat",
   "panel.pause": "Duraklat",
   "panel.resume": "Devam",
-  "panel.stop": "Durdur ve kaydet"
+  "panel.stop": "Durdur ve kaydet",
+  "stamp.kind_trend": "Trendler",
+  "stamp.quick_on": "Araç çubuğuna koy",
+  "stamp.quick_off": "Araç çubuğundan kaldır",
+  "stamp.quick_swap": "Değiştir…",
+  "stamp.quick_fold": "Hızlı damgaları gizle",
+  "stamp.quick_unfold": "Hızlı damgaları göster (eklemek için panelde sağ tıklayın)",
+  "stamp.candle_draw": "Mumları elle çiz"
 }

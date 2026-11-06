@@ -1631,5 +1631,12 @@
   "panel.start": "開始錄製",
   "panel.pause": "暫停",
   "panel.resume": "繼續",
-  "panel.stop": "停止並儲存"
+  "panel.stop": "停止並儲存",
+  "stamp.kind_trend": "熱門",
+  "stamp.quick_on": "放到工具列",
+  "stamp.quick_off": "從工具列移除",
+  "stamp.quick_swap": "換一個…",
+  "stamp.quick_fold": "收起常用圖章",
+  "stamp.quick_unfold": "展開常用圖章（在圖章面板裡右鍵圖章可放到這裡）",
+  "stamp.candle_draw": "手畫 K 線"
 }

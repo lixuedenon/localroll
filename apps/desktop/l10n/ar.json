@@ -1631,5 +1631,12 @@
   "panel.start": "بدء التسجيل",
   "panel.pause": "إيقاف مؤقت",
   "panel.resume": "استئناف",
-  "panel.stop": "إيقاف وحفظ"
+  "panel.stop": "إيقاف وحفظ",
+  "stamp.kind_trend": "رائج",
+  "stamp.quick_on": "ضع في الشريط",
+  "stamp.quick_off": "إزالة من الشريط",
+  "stamp.quick_swap": "تغيير…",
+  "stamp.quick_fold": "طي الأختام السريعة",
+  "stamp.quick_unfold": "عرض الأختام السريعة (انقر بزر الفأرة الأيمن في اللوحة للإضافة)",
+  "stamp.candle_draw": "رسم الشموع يدويًا"
 }

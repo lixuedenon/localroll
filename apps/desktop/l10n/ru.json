@@ -1631,5 +1631,12 @@
   "panel.start": "Начать запись",
   "panel.pause": "Пауза",
   "panel.resume": "Продолжить",
-  "panel.stop": "Остановить и сохранить"
+  "panel.stop": "Остановить и сохранить",
+  "stamp.kind_trend": "Тренды",
+  "stamp.quick_on": "На панель",
+  "stamp.quick_off": "Убрать с панели",
+  "stamp.quick_swap": "Заменить…",
+  "stamp.quick_fold": "Скрыть быстрые штампы",
+  "stamp.quick_unfold": "Показать быстрые штампы (правый клик в панели, чтобы добавить)",
+  "stamp.candle_draw": "Рисовать свечи вручную"
 }

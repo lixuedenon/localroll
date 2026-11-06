@@ -1631,5 +1631,12 @@
   "panel.start": "Start recording",
   "panel.pause": "Pause",
   "panel.resume": "Resume",
-  "panel.stop": "Stop and save"
+  "panel.stop": "Stop and save",
+  "stamp.kind_trend": "Trending",
+  "stamp.quick_on": "Put on toolbar",
+  "stamp.quick_off": "Remove from toolbar",
+  "stamp.quick_swap": "Change…",
+  "stamp.quick_fold": "Fold toolbar stamps",
+  "stamp.quick_unfold": "Show toolbar stamps (right-click a stamp in the panel to put it here)",
+  "stamp.candle_draw": "Draw candles by hand"
 }

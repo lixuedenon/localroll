@@ -1631,5 +1631,12 @@
   "panel.start": "เริ่มบันทึก",
   "panel.pause": "หยุดชั่วคราว",
   "panel.resume": "ทำต่อ",
-  "panel.stop": "หยุดและบันทึก"
+  "panel.stop": "หยุดและบันทึก",
+  "stamp.kind_trend": "มาแรง",
+  "stamp.quick_on": "วางบนแถบเครื่องมือ",
+  "stamp.quick_off": "เอาออกจากแถบเครื่องมือ",
+  "stamp.quick_swap": "เปลี่ยน…",
+  "stamp.quick_fold": "ซ่อนตราประทับด่วน",
+  "stamp.quick_unfold": "แสดงตราประทับด่วน (คลิกขวาในแผงเพื่อเพิ่ม)",
+  "stamp.candle_draw": "วาดแท่งเทียนเอง"
 }

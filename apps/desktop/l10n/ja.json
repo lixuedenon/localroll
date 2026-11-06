@@ -1631,5 +1631,12 @@
   "panel.start": "録画開始",
   "panel.pause": "一時停止",
   "panel.resume": "再開",
-  "panel.stop": "停止して保存"
+  "panel.stop": "停止して保存",
+  "stamp.kind_trend": "トレンド",
+  "stamp.quick_on": "ツールバーに置く",
+  "stamp.quick_off": "ツールバーから外す",
+  "stamp.quick_swap": "別のものに…",
+  "stamp.quick_fold": "よく使うスタンプをたたむ",
+  "stamp.quick_unfold": "よく使うスタンプを表示（パネルで右クリックして追加）",
+  "stamp.candle_draw": "ローソク足を手描き"
 }

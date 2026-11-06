@@ -41,6 +41,36 @@ class StampLibrary extends ChangeNotifier {
   /// Packs not shown in the stamp panel (turned off there).
   final Set<String> hiddenPacks = {};
 
+  /// Up to three stamps on the toolbar itself (one click to use);
+  /// [candleDraw] there means drawing candles by hand.
+  final List<String> quick = [];
+  static const int quickMax = 3;
+  static const String candleDraw = 'candle_draw';
+
+  /// The toolbar's stamp buttons shown (else folded away).
+  bool quickShown = true;
+
+  /// Puts [id] on the toolbar (full: in place of the oldest), or in slot [at].
+  void pinQuick(String id, {int? at}) {
+    quick.remove(id);
+    if (at != null && at < quick.length) {
+      quick[at] = id;
+    } else {
+      if (quick.length >= quickMax) quick.removeAt(0);
+      quick.add(id);
+    }
+    _changed();
+  }
+
+  void unpinQuick(String id) {
+    if (quick.remove(id)) _changed();
+  }
+
+  void setQuickShown(bool v) {
+    quickShown = v;
+    _changed();
+  }
+
   /// Candles: rising / falling colours (rising green, as in US markets,
   /// unless changed).
   int upColor = Candles.green, downColor = Candles.red;
@@ -69,6 +99,10 @@ class StampLibrary extends ChangeNotifier {
       hiddenPacks
         ..clear()
         ..addAll([for (final x in (j['hide'] as List?) ?? const []) '$x']);
+      quick
+        ..clear()
+        ..addAll([for (final x in (j['quick'] as List?) ?? const [candleDraw]) '$x'].take(quickMax));
+      quickShown = j['quickShown'] != false;
       upColor = (j['up'] as num?)?.toInt() ?? Candles.green;
       downColor = (j['down'] as num?)?.toInt() ?? Candles.red;
       kind = CandleKind.values.firstWhere((k) => k.name == j['kind'], orElse: () => CandleKind.normal);
@@ -92,6 +126,8 @@ class StampLibrary extends ChangeNotifier {
           'recent': recent,
           'fav': [...favorites],
           'hide': [...hiddenPacks],
+          'quick': quick,
+          'quickShown': quickShown,
           'up': upColor,
           'down': downColor,
           'kind': kind.name,

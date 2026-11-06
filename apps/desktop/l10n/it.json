@@ -1631,5 +1631,12 @@
   "panel.start": "Avvia",
   "panel.pause": "Pausa",
   "panel.resume": "Riprendi",
-  "panel.stop": "Ferma e salva"
+  "panel.stop": "Ferma e salva",
+  "stamp.kind_trend": "Tendenze",
+  "stamp.quick_on": "Metti nella barra",
+  "stamp.quick_off": "Togli dalla barra",
+  "stamp.quick_swap": "Cambia…",
+  "stamp.quick_fold": "Nascondi timbri rapidi",
+  "stamp.quick_unfold": "Mostra timbri rapidi (clic destro nel pannello per aggiungere)",
+  "stamp.candle_draw": "Disegna candele a mano"
 }

@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 
 import '../../l10n/l10n.dart';
 import '../../services/annotations.dart';
+import '../../services/stamp_library.dart';
 import '../stamps/candle_panel.dart';
 import '../stamps/stamp_picker.dart';
 import '../theme.dart';
@@ -508,6 +509,12 @@ class _InkLayerState extends State<InkLayer> {
   DateTime _lastDown = DateTime(0);
   Offset _lastAt = Offset.zero;
   String? _clickMade;
+
+  /// A one-click mark (stamp, ✓, ✗, number) clicked onto another mark:
+  /// held a moment, in case it is the first click of a double-click
+  /// (which selects) — it no longer flashes up and away.
+  Timer? _held;
+  Offset? _heldAt;
   Offset _from = Offset.zero;
   InkMark? _start;
   final TextEditingController _text = TextEditingController();
@@ -524,6 +531,7 @@ class _InkLayerState extends State<InkLayer> {
 
   @override
   void dispose() {
+    _held?.cancel();
     _endTyping();
     _text.dispose();
     _textFocus.dispose();
@@ -555,6 +563,15 @@ class _InkLayerState extends State<InkLayer> {
     _lastAt = p;
     final made = _clickMade;
     _clickMade = null;
+    var heldBack = _held?.isActive ?? false;
+    _held?.cancel();
+    _held = null;
+    // Not a double-click after all (elsewhere): the held mark goes down now.
+    if (heldBack && !twice && _heldAt != null) {
+      ed.begin(_heldAt!);
+      ed.end();
+      heldBack = false;
+    }
     ed.aspect = s.height <= 0 ? 16 / 9 : s.width / s.height;
     // A selected candle: its high / open / close / low handles.
     final sc = ed.selected;
@@ -569,7 +586,7 @@ class _InkLayerState extends State<InkLayer> {
         }
       }
     }
-    if (twice && ed.tool != EditTool.text) {
+    if ((twice || heldBack) && ed.tool != EditTool.text) {
       if (made != null) ed.dropMade(made);
       final hit = ed.topAt(p, s);
       if (hit != null) {
@@ -643,6 +660,16 @@ class _InkLayerState extends State<InkLayer> {
         }
         _startTyping();
       default:
+        const oneClick = {EditTool.stamp, EditTool.check, EditTool.cross, EditTool.number};
+        if (oneClick.contains(ed.tool) && ed.topAt(p, s) != null) {
+          final at = _heldAt = _n(p, s);
+          _held = Timer(const Duration(milliseconds: 380), () {
+            if (!mounted) return;
+            ed.begin(at);
+            ed.end();
+          });
+          return;
+        }
         _drag = _Drag.draw;
         final before = ed.inks.length;
         ed.begin(_n(p, s));
@@ -849,6 +876,39 @@ class InkToolbar extends StatelessWidget {
 
   static String label(EditTool t) => tr('ink.tool_${t.name}');
 
+  /// The toolbar's own stamps (up to three, one click each), and a fold.
+  List<Widget> _quick(BuildContext context) {
+    final lib = StampLibrary.instance;
+    return [
+      if (lib.quickShown)
+        for (final id in lib.quick)
+          GestureDetector(
+            onSecondaryTapUp: (d) => unawaited(quickMenu(context, id, d.globalPosition, () => showStampPicker(context))),
+            child: IconButton(
+              tooltip: stampName(id),
+              onPressed: () {
+                final q = quickStamp(id);
+                if (q == null) {
+                  unawaited(pickCandleInto(context, editor));
+                  return;
+                }
+                editor
+                  ..upColor = lib.colors.$1
+                  ..downColor = lib.colors.$2;
+                editor.setStamp(q.shape, q.name);
+              },
+              icon: StampThumb(id: id, size: 22),
+            ),
+          ),
+      IconButton(
+        tooltip: tr(lib.quickShown ? 'stamp.quick_fold' : 'stamp.quick_unfold'),
+        visualDensity: VisualDensity.compact,
+        onPressed: () => lib.setQuickShown(!lib.quickShown),
+        icon: Icon(lib.quickShown ? Icons.chevron_left_rounded : Icons.chevron_right_rounded, size: 18, color: Colors.white54),
+      ),
+    ];
+  }
+
   Widget _tool(BuildContext context, EditTool t) {
     final on = editor.tool == t;
     return IconButton(
@@ -869,7 +929,7 @@ class InkToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-        listenable: editor,
+        listenable: Listenable.merge([editor, StampLibrary.instance]),
         builder: (context, _) => Container(
           margin: const EdgeInsets.only(top: 8),
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -879,7 +939,9 @@ class InkToolbar extends StatelessWidget {
             border: Border.all(color: const Color(0x33FFFFFF)),
           ),
           child: Wrap(crossAxisAlignment: WrapCrossAlignment.center, alignment: WrapAlignment.center, children: [
-            for (final t in EditTool.values) _tool(context, t),
+            // Candles are in the stamp panel now (finance), or a toolbar stamp.
+            for (final t in EditTool.values)
+              if (t != EditTool.candle) ...[_tool(context, t), if (t == EditTool.stamp) ..._quick(context)],
             const SizedBox(width: 6),
             PopupMenuButton<Color>(
               tooltip: tr('ink.color'),

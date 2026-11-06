@@ -1631,5 +1631,12 @@
   "panel.start": "Démarrer",
   "panel.pause": "Pause",
   "panel.resume": "Reprendre",
-  "panel.stop": "Arrêter et enregistrer"
+  "panel.stop": "Arrêter et enregistrer",
+  "stamp.kind_trend": "Tendances",
+  "stamp.quick_on": "Mettre dans la barre",
+  "stamp.quick_off": "Retirer de la barre",
+  "stamp.quick_swap": "Changer…",
+  "stamp.quick_fold": "Masquer les tampons rapides",
+  "stamp.quick_unfold": "Afficher les tampons rapides (clic droit dans le panneau pour ajouter)",
+  "stamp.candle_draw": "Dessiner des bougies à la main"
 }

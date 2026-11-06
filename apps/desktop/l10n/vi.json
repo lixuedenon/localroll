@@ -1631,5 +1631,12 @@
   "panel.start": "Bắt đầu ghi",
   "panel.pause": "Tạm dừng",
   "panel.resume": "Tiếp tục",
-  "panel.stop": "Dừng và lưu"
+  "panel.stop": "Dừng và lưu",
+  "stamp.kind_trend": "Xu hướng",
+  "stamp.quick_on": "Đưa lên thanh công cụ",
+  "stamp.quick_off": "Gỡ khỏi thanh công cụ",
+  "stamp.quick_swap": "Đổi…",
+  "stamp.quick_fold": "Thu gọn dấu nhanh",
+  "stamp.quick_unfold": "Hiện dấu nhanh (nhấp phải trong bảng để thêm)",
+  "stamp.candle_draw": "Vẽ nến bằng tay"
 }
