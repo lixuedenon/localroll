@@ -1612,5 +1612,12 @@
   "licenses.use_player": "Pemutaran video",
   "licenses.use_pdf": "Tampilan PDF",
   "licenses.use_onnx": "Pengenalan wajah & konten di perangkat",
-  "licenses.use_flutter": "Kerangka aplikasi"
+  "licenses.use_flutter": "Kerangka aplikasi",
+  "home.tagline": "HP ⇄ PC · Cadangan · Putar · Rekam, semua di perangkat Anda",
+  "home.quick": "Mulai cepat",
+  "home.q_transfer": "HP ⇄ PC · PC ⇄ PC",
+  "home.q_library": "Foto, video, dan file",
+  "home.q_convert": "HEIC, HEVC… ke format umum",
+  "home.q_player": "Video, foto, PDF dengan coretan",
+  "home.q_screen": "Layar, pelajaran, pena layar"
 }

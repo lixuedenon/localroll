@@ -1612,5 +1612,12 @@
   "licenses.use_player": "Lecture vidéo",
   "licenses.use_pdf": "Affichage PDF",
   "licenses.use_onnx": "Reconnaissance locale des visages et contenus",
-  "licenses.use_flutter": "Cadre de l’application"
+  "licenses.use_flutter": "Cadre de l’application",
+  "home.tagline": "Téléphone ⇄ PC · Sauvegarde · Lecture · Enregistrement, tout chez vous",
+  "home.quick": "Démarrage rapide",
+  "home.q_transfer": "Téléphone ⇄ PC · PC ⇄ PC",
+  "home.q_library": "Photos, vidéos et fichiers",
+  "home.q_convert": "HEIC, HEVC… vers des formats courants",
+  "home.q_player": "Vidéos, photos, PDF et annotations",
+  "home.q_screen": "Écran, leçons, dessiner à l’écran"
 }

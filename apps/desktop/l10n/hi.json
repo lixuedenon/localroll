@@ -1612,5 +1612,12 @@
   "licenses.use_player": "वीडियो प्लेबैक",
   "licenses.use_pdf": "PDF देखना",
   "licenses.use_onnx": "डिवाइस पर चेहरा व सामग्री पहचान",
-  "licenses.use_flutter": "ऐप फ्रेमवर्क"
+  "licenses.use_flutter": "ऐप फ्रेमवर्क",
+  "home.tagline": "फ़ोन ⇄ पीसी · बैकअप · प्ले · रिकॉर्ड, सब आपके डिवाइस पर",
+  "home.quick": "त्वरित शुरुआत",
+  "home.q_transfer": "फ़ोन ⇄ पीसी · पीसी ⇄ पीसी",
+  "home.q_library": "फ़ोटो, वीडियो और फ़ाइलें",
+  "home.q_convert": "HEIC, HEVC… आम फ़ॉर्मैट में",
+  "home.q_player": "वीडियो, फ़ोटो, PDF पर निशान लगाएँ",
+  "home.q_screen": "स्क्रीन, पाठ, स्क्रीन पेन"
 }

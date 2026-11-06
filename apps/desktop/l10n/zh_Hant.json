@@ -1612,5 +1612,12 @@
   "licenses.use_player": "影片播放",
   "licenses.use_pdf": "PDF 顯示",
   "licenses.use_onnx": "本機人臉與內容辨識",
-  "licenses.use_flutter": "介面框架"
+  "licenses.use_flutter": "介面框架",
+  "home.tagline": "手機電腦互傳 · 備份 · 播放 · 錄屏，全在本機",
+  "home.quick": "快速開始",
+  "home.q_transfer": "手機 ⇄ 電腦 · 電腦 ⇄ 電腦",
+  "home.q_library": "照片、影片、檔案都在這",
+  "home.q_convert": "HEIC、HEVC 等轉成通用格式",
+  "home.q_player": "影片照片 PDF，邊看邊畫",
+  "home.q_screen": "錄螢幕、錄講解、螢幕畫筆"
 }

@@ -1612,5 +1612,12 @@
   "licenses.use_player": "Reprodução de vídeo",
   "licenses.use_pdf": "Visualização de PDF",
   "licenses.use_onnx": "Reconhecimento local de rostos e conteúdo",
-  "licenses.use_flutter": "Framework do app"
+  "licenses.use_flutter": "Framework do app",
+  "home.tagline": "Celular ⇄ PC · Backup · Reproduzir · Gravar, tudo no seu aparelho",
+  "home.quick": "Início rápido",
+  "home.q_transfer": "Celular ⇄ PC · PC ⇄ PC",
+  "home.q_library": "Fotos, vídeos e arquivos",
+  "home.q_convert": "HEIC, HEVC… para formatos comuns",
+  "home.q_player": "Vídeos, fotos, PDF com anotações",
+  "home.q_screen": "Tela, aulas, caneta na tela"
 }

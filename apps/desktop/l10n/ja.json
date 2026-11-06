@@ -1612,5 +1612,12 @@
   "licenses.use_player": "動画再生",
   "licenses.use_pdf": "PDF 表示",
   "licenses.use_onnx": "端末内の顔・内容認識",
-  "licenses.use_flutter": "アプリの基盤"
+  "licenses.use_flutter": "アプリの基盤",
+  "home.tagline": "スマホ⇄PC・バックアップ・再生・録画、すべて手元で",
+  "home.quick": "クイックスタート",
+  "home.q_transfer": "スマホ ⇄ PC · PC ⇄ PC",
+  "home.q_library": "写真・動画・ファイルはここに",
+  "home.q_convert": "HEIC・HEVC などを汎用形式に",
+  "home.q_player": "動画・写真・PDF、見ながら書き込み",
+  "home.q_screen": "画面録画・解説録画・画面ペン"
 }

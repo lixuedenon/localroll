@@ -1612,5 +1612,12 @@
   "licenses.use_player": "เล่นวิดีโอ",
   "licenses.use_pdf": "แสดง PDF",
   "licenses.use_onnx": "จดจำใบหน้าและเนื้อหาในเครื่อง",
-  "licenses.use_flutter": "เฟรมเวิร์กของแอป"
+  "licenses.use_flutter": "เฟรมเวิร์กของแอป",
+  "home.tagline": "มือถือ ⇄ พีซี · สำรอง · เล่น · บันทึก ทั้งหมดในเครื่องคุณ",
+  "home.quick": "เริ่มต้นด่วน",
+  "home.q_transfer": "มือถือ ⇄ พีซี · พีซี ⇄ พีซี",
+  "home.q_library": "รูป วิดีโอ และไฟล์",
+  "home.q_convert": "HEIC, HEVC… เป็นรูปแบบทั่วไป",
+  "home.q_player": "วิดีโอ รูป PDF พร้อมขีดเขียน",
+  "home.q_screen": "หน้าจอ บทเรียน ปากกาบนจอ"
 }

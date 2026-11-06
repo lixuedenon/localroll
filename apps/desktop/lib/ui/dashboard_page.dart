@@ -22,7 +22,6 @@ import 'format.dart';
 import 'library_recovery.dart';
 import 'media_thumb.dart';
 import 'send_page.dart';
-import 'theme.dart';
 import 'trash_actions.dart';
 import 'player/player_page.dart';
 
@@ -89,70 +88,92 @@ class _DashboardPageState extends State<DashboardPage> {
       builder: (context, _) {
         final items = s.library.items;
         final total = items.fold<int>(0, (sum, i) => sum + i.size);
-        return Scaffold(
-          body: ListView(
-            padding: const EdgeInsets.fromLTRB(36, 28, 36, 36),
-            children: [
-              _header(context),
-              // What LocalRoll can do (until the person says they know).
-              if (s.settings.showFeatures) ...[const SizedBox(height: 18), FeatureCard(services: s)],
-              // Library folder unreachable: say so first, with what can be done.
-              if (s.library.offline) LibraryRecovery(services: s),
-              const SizedBox(height: 22),
-              // Three numbers, each a way in.
-              IntrinsicHeight(
-                child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                  Expanded(child: _stat(tr('nav.library'), tr('home.items_size', {'count': items.length, 'size': formatBytes(total)}),
-                      sub: tr('home.open_library'), onTap: () => AppNav.instance.selectTab(AppNav.library))),
-                  const SizedBox(width: 14),
-                  Expanded(child: _diskStat(items)),
-                  const SizedBox(width: 14),
-                  Expanded(child: _statusStat()),
-                ]),
+        // Home is light (bright blue, white cards); the other pages keep
+        // their look for now.
+        return Theme(
+          data: _Look.theme(Theme.of(context)),
+          child: Scaffold(
+            backgroundColor: _Look.page,
+            body: DecoratedBox(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFFEFF4FF), Color(0xFFF7F9FD), Color(0xFFEFF7FB)]),
               ),
-              const SizedBox(height: 24),
-              _devicesGrid(context),
-              const SizedBox(height: 24),
-              _box(context, width: 2000, child: _recent(context, items)),
-              if (_issues().isNotEmpty) ...[
-                const SizedBox(height: 16),
-                KeyedSubtree(key: _attentionKey, child: _box(context, width: 2000, child: _attention(context), border: LrColors.safelight)),
-              ],
-            ],
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(28, 22, 28, 32),
+                children: [
+                  _header(context),
+                  const SizedBox(height: 16),
+                  _banner(),
+                  // What LocalRoll can do (until the person says they know).
+                  if (s.settings.showFeatures) ...[const SizedBox(height: 18), FeatureCard(services: s)],
+                  // Library folder unreachable: say so first, with what can be done.
+                  if (s.library.offline) LibraryRecovery(services: s),
+                  const SizedBox(height: 18),
+                  // Three numbers, each a way in.
+                  IntrinsicHeight(
+                    child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                      Expanded(
+                        child: _stat(Icons.storage_rounded, const [Color(0xFF5B8CFF), Color(0xFF2F5BEA)], tr('nav.library'),
+                            tr('home.items_size', {'count': items.length, 'size': formatBytes(total)}),
+                            sub: tr('home.open_library'), onTap: () => AppNav.instance.selectTab(AppNav.library)),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(child: _diskStat(items)),
+                      const SizedBox(width: 16),
+                      Expanded(child: _statusStat()),
+                    ]),
+                  ),
+                  const SizedBox(height: 22),
+                  _quick(),
+                  const SizedBox(height: 22),
+                  _devicesGrid(context),
+                  const SizedBox(height: 22),
+                  _box(context, width: 2000, child: _recent(context, items)),
+                  if (_issues().isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    KeyedSubtree(key: _attentionKey, child: _box(context, width: 2000, child: _attention(context), border: _Look.amber)),
+                  ],
+                ],
+              ),
+            ),
           ),
         );
       },
     );
   }
 
-  Widget _stat(String kicker, String title, {String? sub, Color? subColor, Widget? extra, VoidCallback? onTap}) => Material(
-        color: LrColors.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: const BorderSide(color: LrColors.line)),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
+  Widget _stat(IconData icon, List<Color> tint, String kicker, String title,
+          {String? sub, Color? subColor, Color? titleColor, Widget? extra, VoidCallback? onTap}) =>
+      _Card(
+        onTap: onTap,
+        padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          _Badge(icon: icon, colors: tint, size: 52),
+          const SizedBox(width: 16),
+          Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(kicker, overflow: TextOverflow.ellipsis, style: const TextStyle(color: LrColors.muted, fontSize: 13)),
-              const SizedBox(height: 6),
-              Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
-              if (extra != null) ...[const SizedBox(height: 8), extra],
+              Text(kicker, overflow: TextOverflow.ellipsis, style: const TextStyle(color: _Look.muted, fontSize: 13)),
+              const SizedBox(height: 4),
+              Text(title, style: TextStyle(fontSize: 21, fontWeight: FontWeight.w700, color: titleColor ?? _Look.text)),
+              if (extra != null) ...[const SizedBox(height: 10), extra],
               if (sub != null) ...[
                 const SizedBox(height: 6),
-                Text(sub, style: TextStyle(color: subColor ?? LrColors.safelight, fontSize: 13)),
+                Text(sub, style: TextStyle(color: subColor ?? _Look.blue, fontSize: 13, fontWeight: FontWeight.w500)),
               ],
             ]),
           ),
-        ),
+        ]),
       );
 
   Widget _diskStat(List<MediaItem> items) {
     final s = widget.services;
     final d = _disk;
-    if (d == null) return _stat(tr('home.disk'), tr('home.disk_unknown'));
+    const tint = [Color(0xFF4FA3FF), Color(0xFF1D6FE8)];
+    if (d == null) return _stat(Icons.dns_rounded, tint, tr('home.disk'), tr('home.disk_unknown'));
     final low = d.free < d.total * 0.1;
     return _stat(
+      Icons.dns_rounded,
+      tint,
       '${tr('home.disk')} · ${s.library.rootPath}',
       tr('home.disk_free_short', {'free': formatBytes(d.free)}),
       extra: ClipRRect(
@@ -160,8 +181,8 @@ class _DashboardPageState extends State<DashboardPage> {
         child: LinearProgressIndicator(
           value: d.total == 0 ? 0 : 1 - d.free / d.total,
           minHeight: 6,
-          color: low ? LrColors.danger : LrColors.verified,
-          backgroundColor: LrColors.raised,
+          color: low ? _Look.red : _Look.blue,
+          backgroundColor: const Color(0xFFE3E9F5),
         ),
       ),
       onTap: () => revealInExplorer(s.library.rootPath),
@@ -181,10 +202,13 @@ class _DashboardPageState extends State<DashboardPage> {
     }
 
     return _stat(
+      n == 0 ? Icons.verified_user_rounded : Icons.error_rounded,
+      n == 0 ? const [Color(0xFF3DDC97), Color(0xFF12A86B)] : const [Color(0xFFFFC56B), Color(0xFFF08A1C)],
       tr('home.status'),
       n == 0 ? tr('home.all_good_short') : tr('home.issues', {'count': n}),
+      titleColor: n == 0 ? _Look.green : _Look.amberText,
       sub: n == 0 ? tr('home.all_good_sub') : (n == 1 ? '${issues.first.$2} ›' : '${tr('home.issues_see')} ›'),
-      subColor: n == 0 ? LrColors.muted : LrColors.safelight,
+      subColor: n == 0 ? _Look.muted : _Look.amberText,
       onTap: n == 0 ? null : (n == 1 && issues.first.$3 != null ? issues.first.$3 : showList),
     );
   }
@@ -200,7 +224,7 @@ class _DashboardPageState extends State<DashboardPage> {
       });
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
-        Text(tr('nav.devices'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+        _sectionTitle(Icons.devices_rounded, tr('nav.devices')),
         const Spacer(),
         TextButton.icon(
           onPressed: () => showAddDevice(context, s),
@@ -210,7 +234,7 @@ class _DashboardPageState extends State<DashboardPage> {
       ]),
       const SizedBox(height: 8),
       if (ids.isEmpty)
-        Text(tr('home.devices_none'), style: const TextStyle(color: LrColors.muted))
+        Text(tr('home.devices_none'), style: const TextStyle(color: _Look.muted))
       else
         LayoutBuilder(builder: (context, c) {
           final cols = (c.maxWidth / 260).floor().clamp(1, 5);
@@ -230,44 +254,35 @@ class _DashboardPageState extends State<DashboardPage> {
     final isPc = p != null || isDesktopPlatform(t?.platform ?? '');
     final online = s.isOnline(id);
     final family = t?.familyMember ?? true;
-    return Material(
-      color: LrColors.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: online ? onlineGlow.withValues(alpha: 0.7) : LrColors.line, width: online ? 1.5 : 1),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: () => AppNav.instance.openDevice(id),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(children: [
+    return _Card(
+      onTap: () => AppNav.instance.openDevice(id),
+      border: online ? _Look.green.withValues(alpha: 0.6) : null,
+      padding: const EdgeInsets.all(12),
+      child: Row(children: [
             if (p != null)
               DeviceBadge(icon: p.icon, color: p.color, size: 40)
             else
               CircleAvatar(
                 radius: 20,
-                backgroundColor: LrColors.raised,
+                backgroundColor: const Color(0xFFE8EEFB),
                 child: Icon(isPc ? Icons.computer_rounded : Icons.smartphone_rounded,
-                    size: 20, color: online ? onlineGlow : LrColors.muted),
+                    size: 20, color: online ? _Look.green : _Look.muted),
               ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(s.deviceName(id), overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text(s.deviceName(id), overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w600, color: _Look.text)),
                 Text(
                   [
                     tr(online ? 'dev.online' : 'dev.offline'),
                     tr(family ? 'dev.role_family' : 'dev.role_guest'),
                   ].join(' · '),
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 12, color: online ? onlineGlow : LrColors.muted),
+                  style: TextStyle(fontSize: 12, color: online ? _Look.green : _Look.muted),
                 ),
               ]),
             ),
           ]),
-        ),
-      ),
     );
   }
 
@@ -277,19 +292,19 @@ class _DashboardPageState extends State<DashboardPage> {
     final theme = Theme.of(context);
     final online = s.onlineDevices.length;
     final ok = s.server.running && !s.library.offline;
-    final color = ok ? LrColors.verified : LrColors.danger;
+    final color = ok ? _Look.green : _Look.red;
     return Row(children: [
       DeviceBadge(
         icon: st.iconKey,
         color: st.colorValue,
         image: st.avatarVersion != 0 ? FileImage(st.avatarFile) : null,
-        size: 64,
+        size: 56,
       ),
       const SizedBox(width: 18),
       Expanded(
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(tr('identity.title'), style: theme.textTheme.bodySmall?.copyWith(color: LrColors.muted)),
-          Text(st.deviceName, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700)),
+          Text(tr('identity.title'), style: theme.textTheme.bodySmall?.copyWith(color: _Look.muted)),
+          Text(st.deviceName, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700, color: _Look.text)),
         ]),
       ),
       // The pill itself breathes while devices are online.
@@ -297,11 +312,12 @@ class _DashboardPageState extends State<DashboardPage> {
         Breathing(
           online: online > 0,
           radius: 999,
+          color: Colors.white,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
             child: Text(
               tr('home.status_online', {'count': online}),
-              style: TextStyle(color: online > 0 ? onlineGlow : LrColors.muted, fontSize: 13, fontWeight: FontWeight.w600),
+              style: TextStyle(color: online > 0 ? _Look.green : _Look.muted, fontSize: 13, fontWeight: FontWeight.w600),
             ),
           ),
         )
@@ -318,16 +334,109 @@ class _DashboardPageState extends State<DashboardPage> {
     ]);
   }
 
+  Widget _sectionTitle(IconData icon, String t) => Row(mainAxisSize: MainAxisSize.min, children: [
+        Icon(icon, size: 20, color: _Look.blue),
+        const SizedBox(width: 8),
+        Text(t, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: _Look.text)),
+      ]);
+
+  /// The big band at the top: the name, what it does, and a picture made
+  /// of the app's own pieces (files, photos, video, PDF going between a
+  /// computer and a phone).
+  Widget _banner() => ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          height: 168,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [Color(0xFFE6EEFF), Color(0xFFCFE0FF), Color(0xFF9FC2FF)],
+            ),
+          ),
+          child: Stack(children: [
+            // Soft light streaks.
+            Positioned(
+              right: -60,
+              top: -80,
+              child: Container(
+                width: 420,
+                height: 420,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(colors: [Color(0x88FFFFFF), Color(0x00FFFFFF)]),
+                ),
+              ),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: -30,
+              child: Transform.rotate(
+                angle: -0.06,
+                child: Container(height: 60, decoration: const BoxDecoration(gradient: LinearGradient(colors: [Color(0x00FFFFFF), Color(0x66FFFFFF), Color(0x00FFFFFF)]))),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(34, 24, 24, 24),
+              child: Row(children: [
+                Expanded(
+                  flex: 5,
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
+                    ShaderMask(
+                      shaderCallback: (r) => const LinearGradient(colors: [Color(0xFF0E2A8C), Color(0xFF2F6BFF)]).createShader(r),
+                      child: const Text(appName,
+                          style: TextStyle(fontSize: 46, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic, color: Colors.white, letterSpacing: -1, height: 1.05)),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(tr('home.tagline'),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF1B3A8F), fontStyle: FontStyle.italic)),
+                    const SizedBox(height: 10),
+                    Container(
+                      width: 200,
+                      height: 4,
+                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(4), gradient: const LinearGradient(colors: [Color(0xFF2F6BFF), Color(0x002F6BFF)])),
+                    ),
+                  ]),
+                ),
+                const Expanded(flex: 4, child: _BannerArt()),
+              ]),
+            ),
+          ]),
+        ),
+      );
+
+  /// The main things to do, one bright card each.
+  Widget _quick() {
+    final cards = [
+      (Icons.send_rounded, tr('nav.transfer'), tr('home.q_transfer'), const [Color(0xFFE3ECFF), Color(0xFFCBDCFF)], const Color(0xFF2F6BFF), AppNav.devices),
+      (Icons.photo_library_rounded, tr('nav.library'), tr('home.q_library'), const [Color(0xFFDDF7EA), Color(0xFFC3EFD8)], const Color(0xFF16A36A), AppNav.library),
+      (Icons.autorenew_rounded, tr('nav.convert'), tr('home.q_convert'), const [Color(0xFFEDE5FF), Color(0xFFDCCDFF)], const Color(0xFF7B4DEB), AppNav.convert),
+      (Icons.play_arrow_rounded, tr('nav.player'), tr('home.q_player'), const [Color(0xFFFFF0DC), Color(0xFFFFE0B8)], const Color(0xFFF07A12), AppNav.player),
+      (Icons.fit_screen_rounded, tr('nav.screen'), tr('home.q_screen'), const [Color(0xFFDDF6F6), Color(0xFFC0EEEE)], const Color(0xFF119C9C), AppNav.screen),
+    ];
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      _sectionTitle(Icons.bolt_rounded, tr('home.quick')),
+      const SizedBox(height: 12),
+      LayoutBuilder(builder: (context, c) {
+        final cols = c.maxWidth > 1000 ? 5 : (c.maxWidth > 640 ? 3 : 2);
+        final w = (c.maxWidth - (cols - 1) * 14) / cols;
+        return Wrap(spacing: 14, runSpacing: 14, children: [
+          for (final (icon, title, sub, bg, fg, tab) in cards)
+            SizedBox(width: w, child: _QuickCard(icon: icon, title: title, sub: sub, bg: bg, fg: fg, onTap: () => AppNav.instance.selectTab(tab))),
+        ]);
+      }),
+    ]);
+  }
+
   Widget _box(BuildContext context, {required double width, required Widget child, Color? border}) => ConstrainedBox(
         constraints: BoxConstraints(minWidth: 300, maxWidth: width),
         child: Container(
           width: width,
           padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: LrColors.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: border ?? LrColors.line),
-          ),
+          decoration: _Look.card(border: border),
           child: child,
         ),
       );
@@ -335,12 +444,12 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget _title(String t, [String? side]) => Padding(
         padding: const EdgeInsets.only(bottom: 12),
         child: Row(children: [
-          Text(t, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+          _sectionTitle(Icons.schedule_rounded, t),
           const SizedBox(width: 10),
           if (side != null)
             Expanded(
               child: Text(side,
-                  overflow: TextOverflow.ellipsis, style: const TextStyle(color: LrColors.muted, fontSize: 12)),
+                  overflow: TextOverflow.ellipsis, style: const TextStyle(color: _Look.muted, fontSize: 12)),
             ),
         ]),
       );
@@ -357,7 +466,7 @@ class _DashboardPageState extends State<DashboardPage> {
     if (latest.isEmpty) {
       return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         _title(tr('home.recent')),
-        Text(tr('home.recent_none'), style: const TextStyle(color: LrColors.muted)),
+        Text(tr('home.recent_none'), style: const TextStyle(color: _Look.muted)),
       ]);
     }
     final shown = latest.take(6).toList();
@@ -385,17 +494,32 @@ class _DashboardPageState extends State<DashboardPage> {
           child: TextButton(onPressed: AppNav.instance.openLibraryRecent, child: Text(tr('home.see_all'))),
         ),
       ]),
-      Row(children: [
+      Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         for (var i = 0; i < 6; i++) ...[
-          if (i > 0) const SizedBox(width: 8),
+          if (i > 0) const SizedBox(width: 12),
           Expanded(
-            child: AspectRatio(
-              aspectRatio: 1,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: i < shown.length ? _recentTile(context, shown[i].$2, shown[i].$3, media) : Container(color: LrColors.raised),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              AspectRatio(
+                aspectRatio: 1.3,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: i < shown.length ? const [BoxShadow(color: Color(0x1A1D3B8A), blurRadius: 8, offset: Offset(0, 3))] : null,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: i < shown.length ? _recentTile(context, shown[i].$2, shown[i].$3, media) : Container(color: const Color(0xFFEFF2F8)),
+                  ),
+                ),
               ),
-            ),
+              if (i < shown.length) ...[
+                const SizedBox(height: 8),
+                Text(shown[i].$2?.name ?? shown[i].$3!.name,
+                    maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, color: _Look.text, fontWeight: FontWeight.w500)),
+                Text(formatDate(DateTime.fromMillisecondsSinceEpoch(shown[i].$1)),
+                    maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: _Look.muted)),
+              ],
+            ]),
           ),
         ],
       ]),
@@ -430,20 +554,9 @@ class _DashboardPageState extends State<DashboardPage> {
             modified: f.modified,
             services: s,
             icon: Container(
-              color: LrColors.raised,
+              color: const Color(0xFFEFF2F8),
               alignment: Alignment.center,
-              child: const Icon(Icons.insert_drive_file_rounded, size: 32, color: LrColors.muted),
-            ),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              color: Colors.black54,
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-              child: Text(f.name,
-                  maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: Colors.white)),
+              child: const Icon(Icons.insert_drive_file_rounded, size: 32, color: _Look.muted),
             ),
           ),
         ]),
@@ -521,9 +634,9 @@ class _DashboardPageState extends State<DashboardPage> {
       _title(tr('home.attention')),
       if (issues.isEmpty)
         Row(children: [
-          const Icon(Icons.verified_rounded, color: LrColors.verified, size: 20),
+          const Icon(Icons.verified_rounded, color: _Look.green, size: 20),
           const SizedBox(width: 8),
-          Text(tr('home.all_good'), style: const TextStyle(color: LrColors.verified)),
+          Text(tr('home.all_good'), style: const TextStyle(color: _Look.green)),
         ])
       else
         for (final (icon, text, onTap) in issues)
@@ -533,13 +646,247 @@ class _DashboardPageState extends State<DashboardPage> {
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 6),
               child: Row(children: [
-                Icon(icon, color: LrColors.safelight, size: 20),
+                Icon(icon, color: _Look.amberText, size: 20),
                 const SizedBox(width: 10),
-                Expanded(child: Text(text, style: const TextStyle(fontSize: 14))),
-                if (onTap != null) const Icon(Icons.chevron_right_rounded, color: LrColors.muted),
+                Expanded(child: Text(text, style: const TextStyle(fontSize: 14, color: _Look.text))),
+                if (onTap != null) const Icon(Icons.chevron_right_rounded, color: _Look.muted),
               ]),
             ),
           ),
     ]);
   }
+}
+
+/// Home's colors (light).
+class _Look {
+  _Look._();
+
+  static const page = Color(0xFFF3F6FC);
+  static const text = Color(0xFF16213E);
+  static const muted = Color(0xFF6B7A99);
+  static const blue = Color(0xFF2F6BFF);
+  static const green = Color(0xFF12A35F);
+  static const red = Color(0xFFE5484D);
+  static const amber = Color(0xFFF5A524);
+  static const amberText = Color(0xFFC46A00);
+
+  static BoxDecoration card({Color? border}) => BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: border ?? const Color(0xFFE6ECF7), width: border == null ? 1 : 1.5),
+        boxShadow: const [BoxShadow(color: Color(0x141D3B8A), blurRadius: 18, offset: Offset(0, 6))],
+      );
+
+  static ThemeData theme(ThemeData dark) {
+    final scheme = ColorScheme.fromSeed(seedColor: blue, brightness: Brightness.light).copyWith(primary: blue, surface: Colors.white, onSurface: text);
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: scheme,
+      fontFamily: dark.textTheme.bodyMedium?.fontFamily,
+      fontFamilyFallback: dark.textTheme.bodyMedium?.fontFamilyFallback,
+      scaffoldBackgroundColor: page,
+      tooltipTheme: dark.tooltipTheme,
+    );
+  }
+}
+
+/// A white card, raised a little; lifts more under the mouse.
+class _Card extends StatefulWidget {
+  const _Card({required this.child, this.onTap, this.border, this.padding = const EdgeInsets.all(16)});
+
+  final Widget child;
+  final VoidCallback? onTap;
+  final Color? border;
+  final EdgeInsets padding;
+
+  @override
+  State<_Card> createState() => _CardState();
+}
+
+class _CardState extends State<_Card> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) => MouseRegion(
+        cursor: widget.onTap == null ? MouseCursor.defer : SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 160),
+            transform: Matrix4.translationValues(0, _hover && widget.onTap != null ? -2 : 0, 0),
+            padding: widget.padding,
+            decoration: _Look.card(border: widget.border).copyWith(
+              boxShadow: [BoxShadow(color: const Color(0xFF1D3B8A).withValues(alpha: _hover && widget.onTap != null ? 0.14 : 0.08), blurRadius: 18, offset: const Offset(0, 6))],
+            ),
+            child: widget.child,
+          ),
+        ),
+      );
+}
+
+/// A round icon on a soft gradient.
+class _Badge extends StatelessWidget {
+  const _Badge({required this.icon, required this.colors, this.size = 48});
+
+  final IconData icon;
+  final List<Color> colors;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: colors),
+          boxShadow: [BoxShadow(color: colors.last.withValues(alpha: 0.35), blurRadius: 12, offset: const Offset(0, 4))],
+        ),
+        child: Icon(icon, color: Colors.white, size: size * 0.5),
+      );
+}
+
+/// One of the main things to do: a bright card with a big icon.
+class _QuickCard extends StatefulWidget {
+  const _QuickCard({required this.icon, required this.title, required this.sub, required this.bg, required this.fg, required this.onTap});
+
+  final IconData icon;
+  final String title;
+  final String sub;
+  final List<Color> bg;
+  final Color fg;
+  final VoidCallback onTap;
+
+  @override
+  State<_QuickCard> createState() => _QuickCardState();
+}
+
+class _QuickCardState extends State<_QuickCard> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) => MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 160),
+            height: 96,
+            transform: Matrix4.translationValues(0, _hover ? -3 : 0, 0),
+            padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: widget.bg),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.8), width: 1.5),
+              boxShadow: [BoxShadow(color: widget.fg.withValues(alpha: _hover ? 0.28 : 0.14), blurRadius: _hover ? 20 : 14, offset: const Offset(0, 6))],
+            ),
+            child: Row(children: [
+              Icon(widget.icon, size: 44, color: widget.fg),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(widget.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: _Look.text)),
+                  const SizedBox(height: 4),
+                  Text(widget.sub, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: _Look.muted, height: 1.3)),
+                ]),
+              ),
+              Container(
+                width: 26,
+                height: 26,
+                decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.85)),
+                child: Icon(Icons.chevron_right_rounded, size: 20, color: widget.fg),
+              ),
+            ]),
+          ),
+        ),
+      );
+}
+
+/// The banner's picture: a computer and a phone, with files, photos, video
+/// and PDF floating between them — drawn from icons, nothing copied.
+class _BannerArt extends StatelessWidget {
+  const _BannerArt();
+
+  Widget _chip(IconData icon, List<Color> colors, double size, double angle) => Transform.rotate(
+        angle: angle,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(size * 0.28),
+            gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: colors),
+            boxShadow: [BoxShadow(color: colors.last.withValues(alpha: 0.4), blurRadius: 14, offset: const Offset(0, 6))],
+          ),
+          child: Icon(icon, color: Colors.white, size: size * 0.55),
+        ),
+      );
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(builder: (context, c) {
+        final w = c.maxWidth, h = c.maxHeight;
+        if (w < 240) return const SizedBox.shrink();
+        return Stack(clipBehavior: Clip.none, children: [
+          // Computer.
+          Positioned(
+            right: w * 0.12,
+            top: h * 0.08,
+            child: Container(
+              width: 190,
+              height: 118,
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A2440),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: const [BoxShadow(color: Color(0x401A2440), blurRadius: 20, offset: Offset(0, 10))],
+              ),
+              padding: const EdgeInsets.all(6),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5),
+                  gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF3D7BFF), Color(0xFF1B3FB8)]),
+                ),
+                child: const Icon(Icons.play_circle_fill_rounded, color: Colors.white, size: 46),
+              ),
+            ),
+          ),
+          Positioned(
+            right: w * 0.12 - 14,
+            top: h * 0.08 + 118,
+            child: Container(
+              width: 218,
+              height: 9,
+              decoration: const BoxDecoration(color: Color(0xFFB9C6E4), borderRadius: BorderRadius.vertical(bottom: Radius.circular(8))),
+            ),
+          ),
+          // Phone.
+          Positioned(
+            right: 0,
+            top: h * 0.24,
+            child: Container(
+              width: 58,
+              height: 104,
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A2440),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: const [BoxShadow(color: Color(0x401A2440), blurRadius: 16, offset: Offset(0, 8))],
+              ),
+              padding: const EdgeInsets.all(4),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(9),
+                  gradient: const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF63A0FF), Color(0xFF2A55D6)]),
+                ),
+                child: const Icon(Icons.swap_horiz_rounded, color: Colors.white, size: 26),
+              ),
+            ),
+          ),
+          // What travels between them.
+          Positioned(left: w * 0.02, top: h * 0.30, child: _chip(Icons.folder_rounded, const [Color(0xFF5AA9FF), Color(0xFF2F6BFF)], 46, -0.12)),
+          Positioned(left: w * 0.22, top: -h * 0.04, child: _chip(Icons.play_arrow_rounded, const [Color(0xFFA78BFA), Color(0xFF7C4DFF)], 42, 0)),
+          Positioned(left: w * 0.20, bottom: -h * 0.02, child: _chip(Icons.picture_as_pdf_rounded, const [Color(0xFFFF7A7A), Color(0xFFE5383B)], 40, 0.14)),
+          Positioned(right: w * 0.10 + 150, top: -h * 0.10, child: _chip(Icons.image_rounded, const [Color(0xFFFFC56B), Color(0xFFFF8A3D)], 40, 0.18)),
+        ]);
+      });
 }

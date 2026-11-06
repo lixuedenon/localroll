@@ -1612,5 +1612,12 @@
   "licenses.use_player": "Videowiedergabe",
   "licenses.use_pdf": "PDF-Anzeige",
   "licenses.use_onnx": "Lokale Gesichts- und Inhaltserkennung",
-  "licenses.use_flutter": "App-Framework"
+  "licenses.use_flutter": "App-Framework",
+  "home.tagline": "Handy ⇄ PC · Backup · Abspielen · Aufnehmen – alles bei dir",
+  "home.quick": "Schnellstart",
+  "home.q_transfer": "Handy ⇄ PC · PC ⇄ PC",
+  "home.q_library": "Fotos, Videos und Dateien",
+  "home.q_convert": "HEIC, HEVC … in gängige Formate",
+  "home.q_player": "Videos, Fotos, PDF – mit Markierungen",
+  "home.q_screen": "Bildschirm, Erklärvideos, Stift"
 }

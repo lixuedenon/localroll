@@ -1612,5 +1612,12 @@
   "licenses.use_player": "동영상 재생",
   "licenses.use_pdf": "PDF 보기",
   "licenses.use_onnx": "기기 내 얼굴·내용 인식",
-  "licenses.use_flutter": "앱 프레임워크"
+  "licenses.use_flutter": "앱 프레임워크",
+  "home.tagline": "폰⇄PC · 백업 · 재생 · 녹화, 모두 내 기기에서",
+  "home.quick": "빠른 시작",
+  "home.q_transfer": "폰 ⇄ PC · PC ⇄ PC",
+  "home.q_library": "사진·동영상·파일 모두 여기",
+  "home.q_convert": "HEIC·HEVC 등을 범용 형식으로",
+  "home.q_player": "동영상·사진·PDF, 보면서 표시",
+  "home.q_screen": "화면·강의 녹화, 화면 펜"
 }

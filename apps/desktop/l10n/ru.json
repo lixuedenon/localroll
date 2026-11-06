@@ -1612,5 +1612,12 @@
   "licenses.use_player": "Воспроизведение видео",
   "licenses.use_pdf": "Просмотр PDF",
   "licenses.use_onnx": "Локальное распознавание лиц и содержимого",
-  "licenses.use_flutter": "Основа приложения"
+  "licenses.use_flutter": "Основа приложения",
+  "home.tagline": "Телефон ⇄ ПК · Копии · Плеер · Запись — всё у вас",
+  "home.quick": "Быстрый старт",
+  "home.q_transfer": "Телефон ⇄ ПК · ПК ⇄ ПК",
+  "home.q_library": "Фото, видео и файлы",
+  "home.q_convert": "HEIC, HEVC… в обычные форматы",
+  "home.q_player": "Видео, фото, PDF с пометками",
+  "home.q_screen": "Экран, уроки, перо на экране"
 }

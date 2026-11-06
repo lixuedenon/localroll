@@ -1612,5 +1612,12 @@
   "licenses.use_player": "Video oynatma",
   "licenses.use_pdf": "PDF görüntüleme",
   "licenses.use_onnx": "Cihazda yüz ve içerik tanıma",
-  "licenses.use_flutter": "Uygulama çatısı"
+  "licenses.use_flutter": "Uygulama çatısı",
+  "home.tagline": "Telefon ⇄ PC · Yedek · Oynat · Kaydet, hepsi cihazınızda",
+  "home.quick": "Hızlı başlangıç",
+  "home.q_transfer": "Telefon ⇄ PC · PC ⇄ PC",
+  "home.q_library": "Fotoğraf, video ve dosyalar",
+  "home.q_convert": "HEIC, HEVC… yaygın biçimlere",
+  "home.q_player": "Video, fotoğraf, PDF ve notlar",
+  "home.q_screen": "Ekran, ders, ekran kalemi"
 }

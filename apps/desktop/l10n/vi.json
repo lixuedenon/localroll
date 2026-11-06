@@ -1612,5 +1612,12 @@
   "licenses.use_player": "Phát video",
   "licenses.use_pdf": "Xem PDF",
   "licenses.use_onnx": "Nhận diện khuôn mặt và nội dung trên máy",
-  "licenses.use_flutter": "Khung ứng dụng"
+  "licenses.use_flutter": "Khung ứng dụng",
+  "home.tagline": "Điện thoại ⇄ PC · Sao lưu · Phát · Ghi hình, tất cả trên máy bạn",
+  "home.quick": "Bắt đầu nhanh",
+  "home.q_transfer": "Điện thoại ⇄ PC · PC ⇄ PC",
+  "home.q_library": "Ảnh, video và tệp",
+  "home.q_convert": "HEIC, HEVC… sang định dạng phổ biến",
+  "home.q_player": "Video, ảnh, PDF kèm vẽ chú thích",
+  "home.q_screen": "Màn hình, bài giảng, bút vẽ"
 }

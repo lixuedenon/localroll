@@ -1612,5 +1612,12 @@
   "licenses.use_player": "تشغيل الفيديو",
   "licenses.use_pdf": "عرض PDF",
   "licenses.use_onnx": "التعرف على الوجوه والمحتوى على الجهاز",
-  "licenses.use_flutter": "إطار التطبيق"
+  "licenses.use_flutter": "إطار التطبيق",
+  "home.tagline": "الهاتف ⇄ الحاسوب · نسخ احتياطي · تشغيل · تسجيل، كله على أجهزتك",
+  "home.quick": "بدء سريع",
+  "home.q_transfer": "الهاتف ⇄ الحاسوب · حاسوب ⇄ حاسوب",
+  "home.q_library": "الصور والفيديو والملفات",
+  "home.q_convert": "HEIC وHEVC… إلى صيغ شائعة",
+  "home.q_player": "فيديو وصور وPDF مع التعليق عليها",
+  "home.q_screen": "الشاشة، الشروح، القلم"
 }

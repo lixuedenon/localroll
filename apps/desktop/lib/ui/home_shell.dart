@@ -2,6 +2,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:localroll_core/localroll_core.dart' show appName;
 
 import '../app_services.dart';
 import '../l10n/l10n.dart';
@@ -130,14 +131,19 @@ class AppRail extends StatelessWidget {
       builder: (context, _) {
         final receiving = s.hub.transfers.any((t) => t.fraction != null && t.fraction! < 1);
         return Container(
-          width: 96,
+          width: 184,
           decoration: const BoxDecoration(
-            color: LrColors.surface,
-            border: Border(right: BorderSide(color: LrColors.line)),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF2563F0), Color(0xFF1A4FD6), Color(0xFF1640B8)],
+            ),
           ),
           child: Column(
             children: [
-              const SizedBox(height: 14),
+              const SizedBox(height: 22),
+              const _Logo(),
+              const SizedBox(height: 22),
               _RailItem(
                 icon: Icons.home_outlined,
                 selectedIcon: Icons.home_rounded,
@@ -201,13 +207,35 @@ class AppRail extends StatelessWidget {
                 quiet: true,
                 onTap: () => confirmExit(s),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
             ],
           ),
         );
       },
     );
   }
+}
+
+/// The app's mark and name at the top of the rail.
+class _Logo extends StatelessWidget {
+  const _Logo();
+
+  @override
+  Widget build(BuildContext context) => Column(children: [
+        Container(
+          width: 58,
+          height: 58,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF7DD3FC), Color(0xFF3B82F6), Color(0xFF6D28D9)]),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.9), width: 2.5),
+            boxShadow: const [BoxShadow(color: Color(0x5532E0C4), blurRadius: 16, spreadRadius: 1)],
+          ),
+          child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 36),
+        ),
+        const SizedBox(height: 8),
+        const Text(appName, style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: -0.3)),
+      ]);
 }
 
 /// Rail entry. The selected one glows like a safelight; nothing else moves.
@@ -294,74 +322,59 @@ class _RailItemState extends State<_RailItem> with SingleTickerProviderStateMixi
   Widget _item(BuildContext context) {
     final sel = widget.selected;
     final color = sel
-        ? const Color(0xFF2B1A00)
+        ? Colors.white
         : widget.quiet
-            ? (_hover ? LrColors.danger : LrColors.muted)
-            : (_hover ? LrColors.text : LrColors.muted);
+            ? (_hover ? const Color(0xFFFFC2BD) : Colors.white.withValues(alpha: 0.72))
+            : Colors.white.withValues(alpha: _hover ? 1 : 0.86);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         onEnter: (_) => setState(() => _hover = true),
         onExit: (_) => setState(() => _hover = false),
         child: GestureDetector(
           onTap: widget.onTap,
-          child: Column(
-            children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                curve: Curves.easeOut,
-                width: 60,
-                height: 36,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(18),
-                  color: sel ? LrColors.safelight : (_hover ? LrColors.raised : Colors.transparent),
-                  boxShadow: sel ? const [BoxShadow(color: Color(0x66FFB547), blurRadius: 16)] : null,
-                ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  clipBehavior: Clip.none,
-                  children: [
-                    Icon(sel ? widget.selectedIcon : widget.icon, color: color, size: 22),
-                    if (widget.dot)
-                      Positioned(
-                        right: 12,
-                        top: 6,
-                        child: Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(color: LrColors.verified, shape: BoxShape.circle),
-                        ),
-                      ),
-                    if (widget.count > 0)
-                      Positioned(
-                        right: 4,
-                        top: 2,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                          decoration: BoxDecoration(
-                            color: LrColors.verified,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text('${widget.count}',
-                              style: const TextStyle(color: Color(0xFF00201C), fontSize: 10, fontWeight: FontWeight.w700)),
-                        ),
-                      ),
-                  ],
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOut,
+            height: widget.quiet ? 40 : 48,
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              gradient: sel ? const LinearGradient(colors: [Color(0xFF4D8BFF), Color(0xFF3374FF)]) : null,
+              color: sel ? null : (_hover ? Colors.white.withValues(alpha: 0.10) : Colors.transparent),
+              boxShadow: sel ? const [BoxShadow(color: Color(0x55102A80), blurRadius: 14, offset: Offset(0, 5))] : null,
+            ),
+            child: Row(children: [
+              Stack(clipBehavior: Clip.none, children: [
+                Icon(sel ? widget.selectedIcon : widget.icon, color: color, size: widget.quiet ? 20 : 23),
+                if (widget.dot)
+                  Positioned(
+                    right: -3,
+                    top: -2,
+                    child: Container(
+                      width: 9,
+                      height: 9,
+                      decoration: BoxDecoration(color: LrColors.safelight, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 1.5)),
+                    ),
+                  ),
+              ]),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(
+                  widget.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: widget.quiet ? 13 : 15, fontWeight: sel ? FontWeight.w700 : FontWeight.w500, color: color),
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                widget.label,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
-                  color: sel ? LrColors.text : color,
+              if (widget.count > 0)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                  decoration: BoxDecoration(color: LrColors.safelight, borderRadius: BorderRadius.circular(8)),
+                  child: Text('${widget.count}', style: const TextStyle(color: Color(0xFF2B1A00), fontSize: 11, fontWeight: FontWeight.w700)),
                 ),
-              ),
-            ],
+            ]),
           ),
         ),
       ),

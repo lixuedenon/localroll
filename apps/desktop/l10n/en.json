@@ -1612,5 +1612,12 @@
   "licenses.use_player": "Video playback",
   "licenses.use_pdf": "PDF viewing",
   "licenses.use_onnx": "On-device face & content recognition",
-  "licenses.use_flutter": "App framework"
+  "licenses.use_flutter": "App framework",
+  "home.tagline": "Phone ⇄ PC · Backup · Play · Record — all on your own devices",
+  "home.quick": "Quick start",
+  "home.q_transfer": "Phone ⇄ PC · PC ⇄ PC",
+  "home.q_library": "All your photos, videos and files",
+  "home.q_convert": "HEIC, HEVC… to formats that open anywhere",
+  "home.q_player": "Videos, photos, PDF — mark them up",
+  "home.q_screen": "Screen, lessons, draw on screen"
 }
