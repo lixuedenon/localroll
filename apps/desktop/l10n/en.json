@@ -1621,5 +1621,15 @@
   "home.q_player": "Videos, photos, PDF — mark them up",
   "home.q_screen": "Screen, lessons, draw on screen",
   "ink.renumber": "Renumber 1, 2, 3… (select a number and type a digit to change it)",
-  "library.tagline": "Photos, videos and files in one place — browse and play anytime"
+  "library.tagline": "Photos, videos and files in one place — browse and play anytime",
+  "settings.old_pen_bar": "Old screen pen toolbar",
+  "settings.old_pen_bar_sub": "On: the whole window becomes the toolbar while drawing or recording (the old way). Off: tools in a floating panel; Keepnear stays as it is and can be drawn on too",
+  "panel.flat": "Lay flat",
+  "panel.upright": "Stand upright",
+  "panel.small": "Shrink to a small button",
+  "panel.big": "Show the tools",
+  "panel.start": "Start recording",
+  "panel.pause": "Pause",
+  "panel.resume": "Resume",
+  "panel.stop": "Stop and save"
 }

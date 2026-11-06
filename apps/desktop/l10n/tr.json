@@ -1621,5 +1621,15 @@
   "home.q_player": "Video, fotoğraf, PDF ve notlar",
   "home.q_screen": "Ekran, ders, ekran kalemi",
   "ink.renumber": "Yeniden numarala (numarayı seçip rakam yazarak değiştirin)",
-  "library.tagline": "Fotoğraf, video ve dosyalar tek yerde — istediğiniz an göz atın, oynatın"
+  "library.tagline": "Fotoğraf, video ve dosyalar tek yerde — istediğiniz an göz atın, oynatın",
+  "settings.old_pen_bar": "Eski ekran kalemi araç çubuğu",
+  "settings.old_pen_bar_sub": "Açık: çizerken/kaydederken tüm pencere araç çubuğu olur (eski yol). Kapalı: araçlar yüzen panelde; Keepnear olduğu gibi kalır, üzerine de çizilebilir",
+  "panel.flat": "Yatay",
+  "panel.upright": "Dikey",
+  "panel.small": "Küçük düğmeye küçült",
+  "panel.big": "Araçları göster",
+  "panel.start": "Kaydı başlat",
+  "panel.pause": "Duraklat",
+  "panel.resume": "Devam",
+  "panel.stop": "Durdur ve kaydet"
 }

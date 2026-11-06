@@ -1621,5 +1621,15 @@
   "home.q_player": "Video, foto, PDF con annotazioni",
   "home.q_screen": "Schermo, lezioni, penna",
   "ink.renumber": "Rinumera (seleziona un numero e digita una cifra per cambiarlo)",
-  "library.tagline": "Foto, video e file in un unico posto: sfoglia e riproduci quando vuoi"
+  "library.tagline": "Foto, video e file in un unico posto: sfoglia e riproduci quando vuoi",
+  "settings.old_pen_bar": "Vecchia barra della penna",
+  "settings.old_pen_bar_sub": "Sì: tutta la finestra diventa la barra durante disegno o registrazione (come prima). No: strumenti in un pannello mobile; Keepnear resta com’è e ci si può disegnare sopra",
+  "panel.flat": "Orizzontale",
+  "panel.upright": "Verticale",
+  "panel.small": "Riduci a pulsante",
+  "panel.big": "Mostra strumenti",
+  "panel.start": "Avvia",
+  "panel.pause": "Pausa",
+  "panel.resume": "Riprendi",
+  "panel.stop": "Ferma e salva"
 }

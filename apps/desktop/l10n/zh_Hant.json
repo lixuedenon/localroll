@@ -1621,5 +1621,15 @@
   "home.q_player": "影片照片 PDF，邊看邊畫",
   "home.q_screen": "錄螢幕、錄講解、螢幕畫筆",
   "ink.renumber": "重新排號（選中一個編號按數字鍵可改號）",
-  "library.tagline": "照片、影片、檔案都在這裡，隨時瀏覽和播放"
+  "library.tagline": "照片、影片、檔案都在這裡，隨時瀏覽和播放",
+  "settings.old_pen_bar": "螢幕畫筆用舊工具列",
+  "settings.old_pen_bar_sub": "開：畫筆和錄屏時整個視窗變成工具列（以前的方式）。關：工具在單獨的浮動面板裡，Keepnear 視窗不變，也能在它上面畫",
+  "panel.flat": "橫著放",
+  "panel.upright": "豎著放",
+  "panel.small": "收起成小圓鈕",
+  "panel.big": "展開工具面板",
+  "panel.start": "開始錄製",
+  "panel.pause": "暫停",
+  "panel.resume": "繼續",
+  "panel.stop": "停止並儲存"
 }

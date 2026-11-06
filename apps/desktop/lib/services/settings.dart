@@ -249,6 +249,10 @@ class AppSettings extends ChangeNotifier {
   /// each day's first square); false = each day starts a new row.
   bool libraryCompact = true;
 
+  /// The screen pen's tools in LocalRoll's own window, shrunk to a bar (the
+  /// old way); else a floating panel of its own and LocalRoll stays as it is.
+  bool oldPenBar = false;
+
   /// Compact library: date labels by 0 day, 1 month, 2 year (month and year
   /// also use smaller squares).
   int libraryZoom = 0;
@@ -295,6 +299,7 @@ class AppSettings extends ChangeNotifier {
     s.folderPerMember = j['folderPerMember'] == true;
     s.thumbSize = ((j['thumbSize'] as num?)?.toInt() ?? 1).clamp(0, 2);
     s.libraryCompact = j['libraryCompact'] != false;
+    s.oldPenBar = j['oldPenBar'] == true;
     s.libraryZoom = ((j['libraryZoom'] as num?)?.toInt() ?? 0).clamp(0, 2);
     if (s.avatarVersion != 0 && !await s.avatarFile.exists()) s.avatarVersion = 0;
     for (final t in (j['trusted'] as List? ?? const [])) {
@@ -348,6 +353,7 @@ class AppSettings extends ChangeNotifier {
       'folderPerMember': folderPerMember,
       'thumbSize': thumbSize,
       'libraryCompact': libraryCompact,
+      'oldPenBar': oldPenBar,
       'libraryZoom': libraryZoom,
       'trusted': trusted.values.map((t) => t.toJson()).toList(),
       'peers': peers.values.map((p) => p.toJson()).toList(),

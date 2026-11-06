@@ -1621,5 +1621,15 @@
   "home.q_player": "Video, ảnh, PDF kèm vẽ chú thích",
   "home.q_screen": "Màn hình, bài giảng, bút vẽ",
   "ink.renumber": "Đánh số lại (chọn số rồi gõ chữ số để đổi)",
-  "library.tagline": "Ảnh, video và tệp ở một nơi — xem và phát bất cứ lúc nào"
+  "library.tagline": "Ảnh, video và tệp ở một nơi — xem và phát bất cứ lúc nào",
+  "settings.old_pen_bar": "Thanh công cụ bút màn hình cũ",
+  "settings.old_pen_bar_sub": "Bật: cả cửa sổ thành thanh công cụ khi vẽ/ghi (cách cũ). Tắt: công cụ trong bảng nổi; Keepnear giữ nguyên và vẽ lên được",
+  "panel.flat": "Nằm ngang",
+  "panel.upright": "Dọc",
+  "panel.small": "Thu thành nút nhỏ",
+  "panel.big": "Mở công cụ",
+  "panel.start": "Bắt đầu ghi",
+  "panel.pause": "Tạm dừng",
+  "panel.resume": "Tiếp tục",
+  "panel.stop": "Dừng và lưu"
 }

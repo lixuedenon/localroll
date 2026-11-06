@@ -10,6 +10,7 @@ import 'package:window_manager/window_manager.dart';
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/annotations.dart' show CandleKind;
+import '../../services/pen_controls.dart';
 import '../../services/pen_overlay.dart';
 import '../../services/stamp_library.dart';
 import '../../services/win_screen.dart';
@@ -18,16 +19,24 @@ import '../player/ink_editor.dart';
 import '../stamps/candle_panel.dart';
 import '../stamps/stamp_picker.dart';
 import '../theme.dart';
+import 'float_panel.dart';
 import 'screen_record.dart';
 
 /// The screen pen's tools (LocalRoll's window, kept out of recordings):
 /// the mouse button lets the mouse through to the apps; any drawing tool
 /// draws. Undo / redo, pages, board, light around the mouse, options.
 class PenToolbar extends StatefulWidget {
-  const PenToolbar({super.key, this.extra = const []});
+  const PenToolbar({super.key, this.extra = const [], this.controls, this.vertical = false});
 
   /// More buttons at the end (end the pen…).
   final List<Widget> extra;
+
+  /// What it works (null: the pen itself; the floating panel passes its
+  /// stand-in).
+  final PenControls? controls;
+
+  /// Buttons in columns (the panel standing upright).
+  final bool vertical;
 
   @override
   State<PenToolbar> createState() => _PenToolbarState();
@@ -37,7 +46,7 @@ class _PenToolbarState extends State<PenToolbar> {
   final TextEditingController _words = TextEditingController();
   final FocusNode _wordsFocus = FocusNode();
 
-  PenOverlay get o => PenOverlay.instance;
+  PenControls get o => widget.controls ?? PenOverlay.instance;
 
   @override
   void dispose() {
@@ -133,7 +142,11 @@ class _PenToolbarState extends State<PenToolbar> {
           ),
           child: o.textAt != null
               ? _typing()
-              : Wrap(crossAxisAlignment: WrapCrossAlignment.center, alignment: WrapAlignment.center, children: [
+              : Wrap(
+                  direction: widget.vertical ? Axis.vertical : Axis.horizontal,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  alignment: WrapAlignment.center,
+                  children: [
                   const BarGrip(),
                   // On / off: operate the computer, or back to the pen in use.
                   Tooltip(
@@ -271,6 +284,8 @@ class PenSession {
       if (ctx != null) ScaffoldMessenger.maybeOf(ctx)?.showSnackBar(SnackBar(content: Text(tr('pen.missing'))));
       return false;
     }
+    // The floating panel: LocalRoll stays as it is (and can be drawn on).
+    if (FloatPanel.wanted && await _startFloating()) return true;
     _saved = WinScreen.ownPlaceRect();
     AppNav.instance.fullscreen.value = true;
     await windowManager.setMinimumSize(const Size(200, 40));
@@ -292,9 +307,37 @@ class PenSession {
     return true;
   }
 
+  /// The tools are in the floating panel (LocalRoll's window untouched).
+  bool floating = false;
+
+  Future<bool> _startFloating() async {
+    final o = PenOverlay.instance;
+    if (!o.running) o.perWindow = false;
+    if (!await o.start()) return false;
+    final panel = FloatPanel.instance;
+    panel.onGone = () {
+      if (active && floating) unawaited(stop());
+    };
+    if (!await panel.start('pen')) {
+      await o.stop();
+      return false;
+    }
+    active = true;
+    floating = true;
+    o.setDraw(true);
+    DiagLog.log('pen', 'drawing on the screen (floating panel)');
+    return true;
+  }
+
   Future<void> stop() async {
     if (!active) return;
     active = false;
+    if (floating) {
+      floating = false;
+      await FloatPanel.instance.stop();
+      await PenOverlay.instance.stop();
+      return;
+    }
     await PenOverlay.instance.stop();
     await _restore();
   }
@@ -302,6 +345,8 @@ class PenSession {
   /// A recording takes over (the marks and the pen stay).
   void handOver() {
     active = false;
+    // The floating panel stays: the recording uses it.
+    floating = false;
     AppNav.instance.navigatorKey.currentState?.popUntil((r) => r.settings.name != 'pen-bar');
   }
 

@@ -27,6 +27,7 @@ import 'ui/boot_screen.dart';
 import 'ui/home_shell.dart';
 import 'ui/player/player_home.dart';
 import 'ui/player/player_page.dart';
+import 'ui/screen/float_panel.dart';
 import 'ui/screen/screen_record.dart';
 import 'ui/theme.dart';
 import 'ui/title_bar.dart';
@@ -37,6 +38,9 @@ Future<void> main(List<String> args) async {
   if (args.length == 2 && args.first == '--check-models') {
     exit(await checkModels(args[1]));
   }
+  // The screen pen's floating panel: a second, small copy of LocalRoll
+  // that only shows the pen's tools (LocalRoll started it).
+  if (args.contains(panelFlag)) return runPenPanel(args);
   WidgetsFlutterBinding.ensureInitialized();
   _addLicenses();
   // Photos / videos handed over by Explorer ("Open with").

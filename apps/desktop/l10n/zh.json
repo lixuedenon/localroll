@@ -1621,5 +1621,15 @@
   "home.q_player": "视频照片 PDF，边看边画",
   "home.q_screen": "录屏幕、录讲解、屏幕画笔",
   "ink.renumber": "重新排号（选中一个编号按数字键可改号）",
-  "library.tagline": "照片、视频、文件都在这里，随时浏览和播放"
+  "library.tagline": "照片、视频、文件都在这里，随时浏览和播放",
+  "settings.old_pen_bar": "屏幕画笔用旧工具条",
+  "settings.old_pen_bar_sub": "开：画笔和录屏时整个窗口变成工具条（以前的方式）。关：工具在单独的浮动面板里，Keepnear 窗口不变，也能在它上面画",
+  "panel.flat": "横着放",
+  "panel.upright": "竖着放",
+  "panel.small": "收起成小圆钮",
+  "panel.big": "展开工具面板",
+  "panel.start": "开始录制",
+  "panel.pause": "暂停",
+  "panel.resume": "继续",
+  "panel.stop": "停止并保存"
 }

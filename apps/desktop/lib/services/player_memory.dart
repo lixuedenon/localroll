@@ -108,6 +108,9 @@ class PlayerMemory extends ChangeNotifier {
   /// top middle).
   Offset? barAt;
 
+  /// The floating pen panel stands upright (else lies flat).
+  bool barVertical = false;
+
   /// The screen pen's draw / operate key (Windows key code).
   int penKey = 0x77;
 
@@ -178,6 +181,7 @@ class PlayerMemory extends ChangeNotifier {
       final bx = (j['barX'] as num?)?.toDouble(), by = (j['barY'] as num?)?.toDouble();
       barAt = bx == null || by == null ? null : Offset(bx, by);
       penKey = (j['penKey'] as num?)?.toInt() ?? 0x77;
+      barVertical = j['barVert'] == true;
       narrationAfter = ((j['narrAfter'] as num?)?.toInt() ?? 5).clamp(0, 30);
       last = RecentEntry.fromJson(j['last']);
       lastKey = j['lastKey'] as String?;
@@ -301,6 +305,11 @@ class PlayerMemory extends ChangeNotifier {
     _save();
   }
 
+  void setBarVertical(bool v) {
+    barVertical = v;
+    _save();
+  }
+
   void setPenKey(int vk) {
     penKey = vk;
     _save();
@@ -389,6 +398,7 @@ class PlayerMemory extends ChangeNotifier {
         if (barAt != null) 'barX': barAt!.dx,
         if (barAt != null) 'barY': barAt!.dy,
         'penKey': penKey,
+        'barVert': barVertical,
         'narrAfter': narrationAfter,
         'last': ?last?.toJson(),
         'lastKey': ?lastKey,

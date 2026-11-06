@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:localroll_core/localroll_core.dart';
 import 'package:localroll_ink/localroll_ink.dart' show CandleKind, StampShape;
 
+import 'pen_controls.dart';
 import 'win_screen.dart';
 
 /// The screen pen: LocalRoll's small helper (lr_overlay.exe, next to
@@ -15,7 +16,7 @@ import 'win_screen.dart';
 /// on the real screen (a recording simply records them); in "operate"
 /// mode the mouse goes through to the apps while the marks stay. One page
 /// per window. LocalRoll's own window is the toolbar.
-class PenOverlay extends ChangeNotifier {
+class PenOverlay extends ChangeNotifier implements PenControls {
   PenOverlay._();
 
   static final PenOverlay instance = PenOverlay._();
@@ -268,6 +269,10 @@ class PenOverlay extends ChangeNotifier {
     _send('togglekey $vk');
     notifyListeners();
   }
+
+  /// The window that is LocalRoll's (clicks on it are not drawing): the
+  /// floating panel's when there is one.
+  void own(int hwnd) => _send('own $hwnd');
 
   /// Start on this window's page.
   void page(int hwnd) => _send('page $hwnd');

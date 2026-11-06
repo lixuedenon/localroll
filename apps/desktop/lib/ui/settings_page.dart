@@ -96,6 +96,15 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                       ]),
                     ),
+                    _row(
+                      Icons.brush_rounded,
+                      tr('settings.old_pen_bar'),
+                      sub: tr('settings.old_pen_bar_sub'),
+                      trailing: Switch(
+                        value: s.settings.oldPenBar,
+                        onChanged: (v) => s.settings.update((x) => x.oldPenBar = v),
+                      ),
+                    ),
                   ]),
                   _group(theme, tr('settings.receiving'), [
                     // Who needs "Accept" is decided per device (family / guest).

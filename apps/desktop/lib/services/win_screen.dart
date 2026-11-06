@@ -201,11 +201,14 @@ class WinScreen {
   }
 
   /// LocalRoll's own window (0: not found).
+  /// This program's window title (the floating pen panel has its own).
+  static String title = appName;
+
   static int ownWindow() {
     final u = _user32;
     if (u == null) return 0;
     final find = u.lookupFunction<IntPtr Function(Pointer<Utf16>, Pointer<Utf16>), int Function(Pointer<Utf16>, Pointer<Utf16>)>('FindWindowW');
-    final cls = 'FLUTTER_RUNNER_WIN32_WINDOW'.toNativeUtf16(), title = appName.toNativeUtf16();
+    final cls = 'FLUTTER_RUNNER_WIN32_WINDOW'.toNativeUtf16(), title = WinScreen.title.toNativeUtf16();
     try {
       final h = find(cls, title);
       return h != 0 ? h : find(nullptr, title);

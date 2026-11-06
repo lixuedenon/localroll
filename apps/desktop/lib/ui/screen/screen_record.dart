@@ -33,6 +33,7 @@ import '../player/snapshot.dart';
 import '../send_page.dart';
 import '../theme.dart';
 import 'camera_button.dart';
+import 'float_panel.dart';
 import 'pen_bar.dart';
 import 'recordings_view.dart';
 import 'screen_editor.dart';
@@ -312,6 +313,9 @@ class ScreenRecorder extends ChangeNotifier {
   bool usesOverlay = false;
   Rect? _framed;
 
+  /// The controls are in the floating panel (LocalRoll's window untouched).
+  bool _floating = false;
+
   void _onOverlay() {
     final on = PenOverlay.instance.draw;
     if (!recording || on == pen) return;
@@ -443,6 +447,7 @@ class ScreenRecorder extends ChangeNotifier {
 
     // The bar: small, on top, at the top of the screen recorded, never in the video.
     final fromPen = PenSession.instance.active;
+    final fromFloating = fromPen && PenSession.instance.floating;
     if (fromPen) {
       // Drawing on the screen already: the recording takes the pen over.
       _savedWindow = PenSession.instance.savedWindow;
@@ -450,13 +455,33 @@ class ScreenRecorder extends ChangeNotifier {
     } else {
       _savedWindow = WinScreen.ownPlaceRect();
     }
-    AppNav.instance.fullscreen.value = true;
-    await windowManager.setMinimumSize(const Size(200, 40));
-    // The toolbar is moved by its grip only; never resized.
-    await windowManager.setResizable(false);
-    WinScreen.excludeFromCapture(true);
     final o = PenOverlay.instance;
     usesOverlay = PenOverlay.available && (o.running || await o.start());
+    // The floating panel: LocalRoll's window stays as it is — it can be
+    // recorded, shown and drawn on like any other.
+    _floating = usesOverlay && (fromFloating || FloatPanel.wanted);
+    if (_floating) {
+      final panel = FloatPanel.instance;
+      panel.onGone = () {
+        if (armed) {
+          unawaited(cancel());
+        } else if (recording) {
+          unawaited(stop());
+        }
+      };
+      if (!await panel.start('record')) _floating = false;
+    }
+    if (_floating) {
+      _savedWindow = null;
+      // LocalRoll in front is a window like any other (its own marks).
+      if (fg == _own) _page = _own;
+    } else {
+      AppNav.instance.fullscreen.value = true;
+      await windowManager.setMinimumSize(const Size(200, 40));
+      // The toolbar is moved by its grip only; never resized.
+      await windowManager.setResizable(false);
+      WinScreen.excludeFromCapture(true);
+    }
     if (usesOverlay) {
       o.setDraw(false);
       // A window: the marks follow it (its dialogs too); else one layer.
@@ -467,8 +492,10 @@ class ScreenRecorder extends ChangeNotifier {
       o.removeListener(_onOverlay);
       o.addListener(_onOverlay);
     }
-    _placeBar();
-    AppNav.instance.navigatorKey.currentState?.push(MaterialPageRoute(settings: const RouteSettings(name: 'screen-record'), builder: (_) => const ScreenRecordPage()));
+    if (!_floating) {
+      _placeBar();
+      AppNav.instance.navigatorKey.currentState?.push(MaterialPageRoute(settings: const RouteSettings(name: 'screen-record'), builder: (_) => const ScreenRecordPage()));
+    }
     // A window: in front, so nothing else is filmed over it.
     if (su.mode == ScreenMode.window && su.window != null) {
       WinScreen.bringToFront(su.window!.handle);
@@ -577,6 +604,7 @@ class ScreenRecorder extends ChangeNotifier {
   }
 
   void _placeBar() {
+    if (_floating) return;
     final scr = setup!.screen;
     final k = scr.scale;
     final tools = usesOverlay && pen;
@@ -600,7 +628,7 @@ class ScreenRecorder extends ChangeNotifier {
     final l = WinScreen.down(0x01), r = WinScreen.down(0x02);
     if (!pen && ((l && !_left) || (r && !_right))) {
       final at = WinScreen.cursor();
-      final own = WinScreen.ownRect();
+      final own = _floating ? FloatPanel.instance.rect : WinScreen.ownRect();
       if (own == null || !own.contains(at)) _clicks.add(_Click(t, at, r && !_right));
     }
     _left = l;
@@ -618,7 +646,8 @@ class ScreenRecorder extends ChangeNotifier {
       }
       // The window in use (LocalRoll's own bar / pen screen does not count).
       final fg = WinScreen.foreground();
-      if (fg != 0 && fg != _own && !pen && fg != _page) {
+      final own = _floating ? FloatPanel.instance.hwnd : _own;
+      if (fg != 0 && fg != own && !pen && fg != _page) {
         _page = fg;
         _front.add((t, fg));
       }
@@ -926,6 +955,11 @@ class ScreenRecorder extends ChangeNotifier {
   }
 
   Future<void> _restore() async {
+    if (_floating) {
+      _floating = false;
+      await FloatPanel.instance.stop();
+      return;
+    }
     WinScreen.excludeFromCapture(false);
     final r = _savedWindow;
     if (r != null) WinScreen.place(r, onTop: false);

@@ -1621,5 +1621,15 @@
   "home.q_player": "動画・写真・PDF、見ながら書き込み",
   "home.q_screen": "画面録画・解説録画・画面ペン",
   "ink.renumber": "番号を振り直す（番号を選んで数字キーで変更）",
-  "library.tagline": "写真・動画・ファイルをここで。いつでも閲覧・再生"
+  "library.tagline": "写真・動画・ファイルをここで。いつでも閲覧・再生",
+  "settings.old_pen_bar": "画面ペンに旧ツールバーを使う",
+  "settings.old_pen_bar_sub": "オン：描画・録画中はウィンドウ全体がツールバーに（従来）。オフ：ツールは浮動パネルに。Keepnear はそのままで、その上にも描けます",
+  "panel.flat": "横向きに",
+  "panel.upright": "縦向きに",
+  "panel.small": "小さなボタンにたたむ",
+  "panel.big": "ツールを開く",
+  "panel.start": "録画開始",
+  "panel.pause": "一時停止",
+  "panel.resume": "再開",
+  "panel.stop": "停止して保存"
 }

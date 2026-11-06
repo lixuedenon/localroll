@@ -1621,5 +1621,15 @@
   "home.q_player": "Videos, Fotos, PDF – mit Markierungen",
   "home.q_screen": "Bildschirm, Erklärvideos, Stift",
   "ink.renumber": "Neu nummerieren (Nummer wählen und Ziffer tippen zum Ändern)",
-  "library.tagline": "Fotos, Videos und Dateien an einem Ort – jederzeit ansehen und abspielen"
+  "library.tagline": "Fotos, Videos und Dateien an einem Ort – jederzeit ansehen und abspielen",
+  "settings.old_pen_bar": "Alte Bildschirmstift-Leiste",
+  "settings.old_pen_bar_sub": "An: Beim Zeichnen/Aufnehmen wird das ganze Fenster zur Leiste (wie früher). Aus: Werkzeuge in einem schwebenden Feld; Keepnear bleibt und man kann darauf zeichnen",
+  "panel.flat": "Waagerecht",
+  "panel.upright": "Senkrecht",
+  "panel.small": "Zu kleinem Knopf verkleinern",
+  "panel.big": "Werkzeuge zeigen",
+  "panel.start": "Aufnahme starten",
+  "panel.pause": "Pause",
+  "panel.resume": "Weiter",
+  "panel.stop": "Stoppen und speichern"
 }

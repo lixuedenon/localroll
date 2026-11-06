@@ -1621,5 +1621,15 @@
   "home.q_player": "Vídeos, fotos, PDF com anotações",
   "home.q_screen": "Tela, aulas, caneta na tela",
   "ink.renumber": "Renumerar (selecione um número e digite um dígito para mudar)",
-  "library.tagline": "Fotos, vídeos e arquivos num só lugar: veja e reproduza quando quiser"
+  "library.tagline": "Fotos, vídeos e arquivos num só lugar: veja e reproduza quando quiser",
+  "settings.old_pen_bar": "Barra antiga da caneta de tela",
+  "settings.old_pen_bar_sub": "Sim: a janela inteira vira a barra ao desenhar ou gravar (como antes). Não: ferramentas num painel flutuante; o Keepnear fica como está e dá para desenhar nele",
+  "panel.flat": "Horizontal",
+  "panel.upright": "Vertical",
+  "panel.small": "Recolher num botão",
+  "panel.big": "Mostrar ferramentas",
+  "panel.start": "Gravar",
+  "panel.pause": "Pausar",
+  "panel.resume": "Continuar",
+  "panel.stop": "Parar e salvar"
 }

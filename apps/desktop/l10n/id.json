@@ -1621,5 +1621,15 @@
   "home.q_player": "Video, foto, PDF dengan coretan",
   "home.q_screen": "Layar, pelajaran, pena layar",
   "ink.renumber": "Nomori ulang (pilih nomor lalu ketik angka untuk mengubah)",
-  "library.tagline": "Foto, video, dan file di satu tempat — lihat dan putar kapan saja"
+  "library.tagline": "Foto, video, dan file di satu tempat — lihat dan putar kapan saja",
+  "settings.old_pen_bar": "Bilah alat pena layar lama",
+  "settings.old_pen_bar_sub": "Aktif: seluruh jendela jadi bilah alat saat menggambar/merekam (cara lama). Mati: alat di panel mengambang; Keepnear tetap dan bisa digambari",
+  "panel.flat": "Mendatar",
+  "panel.upright": "Tegak",
+  "panel.small": "Kecilkan jadi tombol",
+  "panel.big": "Tampilkan alat",
+  "panel.start": "Mulai rekam",
+  "panel.pause": "Jeda",
+  "panel.resume": "Lanjut",
+  "panel.stop": "Berhenti & simpan"
 }

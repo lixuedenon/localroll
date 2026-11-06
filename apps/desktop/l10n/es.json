@@ -1621,5 +1621,15 @@
   "home.q_player": "Vídeos, fotos, PDF y anotaciones",
   "home.q_screen": "Pantalla, lecciones, dibujar",
   "ink.renumber": "Renumerar (selecciona un número y pulsa una cifra para cambiarlo)",
-  "library.tagline": "Fotos, vídeos y archivos en un lugar: mira y reproduce cuando quieras"
+  "library.tagline": "Fotos, vídeos y archivos en un lugar: mira y reproduce cuando quieras",
+  "settings.old_pen_bar": "Barra antigua del lápiz de pantalla",
+  "settings.old_pen_bar_sub": "Sí: toda la ventana se vuelve la barra al dibujar o grabar (como antes). No: herramientas en un panel flotante; Keepnear queda igual y se puede dibujar sobre él",
+  "panel.flat": "Horizontal",
+  "panel.upright": "Vertical",
+  "panel.small": "Reducir a un botón",
+  "panel.big": "Mostrar herramientas",
+  "panel.start": "Grabar",
+  "panel.pause": "Pausa",
+  "panel.resume": "Seguir",
+  "panel.stop": "Parar y guardar"
 }

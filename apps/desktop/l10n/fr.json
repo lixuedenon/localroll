@@ -1621,5 +1621,15 @@
   "home.q_player": "Vidéos, photos, PDF et annotations",
   "home.q_screen": "Écran, leçons, dessiner à l’écran",
   "ink.renumber": "Renuméroter (sélectionnez un numéro et tapez un chiffre pour le changer)",
-  "library.tagline": "Photos, vidéos et fichiers au même endroit, à parcourir et lire à tout moment"
+  "library.tagline": "Photos, vidéos et fichiers au même endroit, à parcourir et lire à tout moment",
+  "settings.old_pen_bar": "Ancienne barre du stylo écran",
+  "settings.old_pen_bar_sub": "Oui : toute la fenêtre devient la barre pendant le dessin ou l’enregistrement (ancien mode). Non : outils dans un panneau flottant ; Keepnear reste tel quel et on peut dessiner dessus",
+  "panel.flat": "Horizontal",
+  "panel.upright": "Vertical",
+  "panel.small": "Réduire en petit bouton",
+  "panel.big": "Afficher les outils",
+  "panel.start": "Démarrer",
+  "panel.pause": "Pause",
+  "panel.resume": "Reprendre",
+  "panel.stop": "Arrêter et enregistrer"
 }
