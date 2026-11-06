@@ -373,8 +373,8 @@ class _PanelPlace {
       size = Size(w, (76 * (w < 1480 * k ? 1.75 : 1) + BarTips.line + 34) * k);
     }
     final want = at ?? Offset(scr.rect.center.dx - size.width / 2, scr.rect.top + 8 * k);
-    final x = want.dx.clamp(scr.rect.left, math.max<double>(scr.rect.left, scr.rect.right - size.width));
-    final y = want.dy.clamp(scr.rect.top, math.max<double>(scr.rect.top, scr.rect.bottom - size.height));
+    final x = want.dx.clamp(scr.rect.left, math.max<double>(scr.rect.left, scr.rect.right - size.width)).toDouble();
+    final y = want.dy.clamp(scr.rect.top, math.max<double>(scr.rect.top, scr.rect.bottom - size.height)).toDouble();
     WinScreen.place(Rect.fromLTWH(x, y, size.width, size.height), onTop: true, activate: false);
   }
 
