@@ -582,7 +582,7 @@ class ScreenRecorder extends ChangeNotifier {
     final tools = usesOverlay && pen;
     // With the pen's tools: wide enough for every button, else two rows.
     final w = tools ? math.min(1480 * k, scr.rect.width - 40 * k) : 860 * k;
-    final h = (tools ? 140 * (w < 1480 * k ? 1.75 : 1) : 64) * k;
+    final h = ((tools ? 140 * (w < 1480 * k ? 1.75 : 1) : 64) + BarTips.line) * k;
     WinScreen.place(BarPlace.rect(Rect.fromLTWH(scr.rect.center.dx - w / 2, scr.rect.top + 12 * k, w, h)), onTop: true, activate: false);
   }
 
@@ -1904,15 +1904,17 @@ class ScreenRecordPage extends StatelessWidget {
             return Scaffold(
               backgroundColor: LrColors.ink,
               body: Center(
-                child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  bar,
-                  if (r.pen) ...[const SizedBox(height: 6), const Material(color: Colors.transparent, child: PenToolbar())],
-                ]),
+                child: BarTips(
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    bar,
+                    if (r.pen) ...[const SizedBox(height: 6), const Material(color: Colors.transparent, child: PenToolbar())],
+                  ]),
+                ),
               ),
             );
           }
           if (!r.pen || r.editor == null) {
-            return Scaffold(backgroundColor: LrColors.ink, body: Center(child: bar));
+            return Scaffold(backgroundColor: LrColors.ink, body: Center(child: BarTips(child: bar)));
           }
           final ed = r.editor!;
           return Scaffold(

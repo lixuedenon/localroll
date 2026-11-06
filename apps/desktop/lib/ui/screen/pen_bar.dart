@@ -329,7 +329,7 @@ class PenSession {
     final k = scr.scale;
     // Wide enough for every button; on a small screen, two rows.
     final w = math.min(1480 * k, scr.rect.width - 40 * k);
-    final h = (tall ? 140 : 76) * k * (w < 1480 * k ? 1.75 : 1);
+    final h = ((tall ? 140 : 76) * (w < 1480 * k ? 1.75 : 1) + BarTips.line) * k;
     WinScreen.place(BarPlace.rect(Rect.fromLTWH(scr.rect.center.dx - w / 2, scr.rect.top + 8 * k, w, h)), onTop: true, activate: false);
   }
 }
@@ -354,7 +354,7 @@ class _PenBarPage extends StatelessWidget {
                   }
                   return KeyEventResult.ignored;
                 },
-                child: PenToolbar(extra: [
+                child: BarTips(child: PenToolbar(extra: [
                   const _ShotButton(),
                   const SizedBox(width: 6),
                   Padding(
@@ -366,7 +366,7 @@ class _PenBarPage extends StatelessWidget {
                       label: Text(tr('pen.end')),
                     ),
                   ),
-                ]),
+                ])),
               ),
             ),
           ),
@@ -499,5 +499,64 @@ class _BarGripState extends State<BarGrip> with WindowListener {
             ),
           ),
         ),
+      );
+}
+
+/// The bar is a small window: a tooltip can't show outside it (the name was
+/// cut off). So the name of what the mouse is over shows in a line under
+/// the buttons instead — taken from the buttons' own tooltips.
+class BarTips extends StatefulWidget {
+  const BarTips({super.key, required this.child});
+
+  final Widget child;
+
+  /// The line's height (the window is this much taller).
+  static const double line = 18;
+
+  @override
+  State<BarTips> createState() => _BarTipsState();
+}
+
+class _BarTipsState extends State<BarTips> {
+  final GlobalKey _key = GlobalKey();
+  String? _tip;
+
+  void _hover(Offset at) {
+    String? found;
+    void visit(Element e) {
+      final w = e.widget;
+      if (w is Tooltip) {
+        final box = e.renderObject;
+        if (box is RenderBox && box.attached && box.hasSize && (box.localToGlobal(Offset.zero) & box.size).contains(at)) {
+          final m = w.message ?? w.richMessage?.toPlainText();
+          // The innermost one wins (visited last).
+          if (m != null && m.isNotEmpty) found = m;
+        }
+      }
+      e.visitChildren(visit);
+    }
+
+    _key.currentContext?.visitChildElements(visit);
+    if (found != _tip) setState(() => _tip = found);
+  }
+
+  @override
+  Widget build(BuildContext context) => MouseRegion(
+        onHover: (e) => _hover(e.position),
+        onExit: (_) {
+          if (_tip != null) setState(() => _tip = null);
+        },
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          TooltipVisibility(visible: false, child: KeyedSubtree(key: _key, child: widget.child)),
+          SizedBox(
+            height: BarTips.line,
+            child: Text(
+              _tip ?? '',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Colors.white70, fontSize: 12, height: 1.3),
+            ),
+          ),
+        ]),
       );
 }
