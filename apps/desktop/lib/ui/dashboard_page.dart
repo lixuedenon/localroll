@@ -20,6 +20,7 @@ import 'device_badge.dart';
 import 'files_view.dart';
 import 'format.dart';
 import 'library_recovery.dart';
+import 'library_tools.dart';
 import 'light_look.dart';
 import 'media_thumb.dart';
 import 'send_page.dart';
@@ -208,9 +209,9 @@ class _DashboardPageState extends State<DashboardPage> {
       tr('home.status'),
       n == 0 ? tr('home.all_good_short') : tr('home.issues', {'count': n}),
       titleColor: n == 0 ? LightLook.green : LightLook.amberText,
-      sub: n == 0 ? tr('home.all_good_sub') : (n == 1 ? '${issues.first.$2} ›' : '${tr('home.issues_see')} ›'),
-      subColor: n == 0 ? LightLook.muted : LightLook.amberText,
-      onTap: n == 0 ? null : (n == 1 && issues.first.$3 != null ? issues.first.$3 : showList),
+      sub: n == 0 ? '${tr('home.report_tap')} ›' : (n == 1 ? '${issues.first.$2} ›' : '${tr('home.issues_see')} ›'),
+      subColor: n == 0 ? LightLook.blue : LightLook.amberText,
+      onTap: n == 0 ? () => unawaited(showBackupReport(context, widget.services)) : (n == 1 && issues.first.$3 != null ? issues.first.$3 : showList),
     );
   }
 

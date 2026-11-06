@@ -16,6 +16,7 @@ import '../services/network.dart';
 import '../services/peers.dart';
 import '../services/picture_model.dart';
 import '../services/received_files.dart';
+import '../services/smart_query.dart';
 import '../services/text_index.dart';
 import '../services/text_indexer.dart';
 import '../services/win_dialogs.dart';
@@ -25,6 +26,7 @@ import 'files_view.dart';
 import 'format.dart';
 import 'hover_tip.dart';
 import 'library_recovery.dart';
+import 'library_tools.dart';
 import 'light_look.dart';
 import 'media_thumb.dart';
 import 'people_page.dart';
@@ -140,11 +142,19 @@ class _LibraryPageState extends State<LibraryPage> {
   /// In the person / named people being shown (always true when none).
   bool _keepKey(String key) => (_person == null || _personItems.contains(key)) && (_who == null || _who!.contains(key));
 
+  /// The search said in ordinary words: when / what taken out.
+  SmartQuery _smart = const SmartQuery(rest: '');
+
+  /// A smart album chosen (screenshots, receipts…): what it looks like.
+  _Category? _cat;
+
   void _onSearch(String v) {
     final s = widget.services;
     unawaited(s.server.textIndex.load());
     setState(() {
-      var words = v;
+      _cat = null;
+      _smart = SmartQuery.parse(v);
+      var words = _smart.rest;
       _who = null;
       if (s.settings.faces) {
         final split = s.server.people.split(v);
@@ -157,6 +167,21 @@ class _LibraryPageState extends State<LibraryPage> {
       _findPictures(words);
       // Results come from everything: photos, videos and files.
       if (_searching && _filesTab) _filter = _Filter.all;
+      _clearSelection();
+    });
+  }
+
+  /// A smart album: found by what the photo looks like (and its words /
+  /// name), on this PC.
+  void _openCategory(_Category c) {
+    _searchCtrl.text = tr(c.label);
+    setState(() {
+      _smart = const SmartQuery(rest: '');
+      _search = SearchQuery('');
+      _who = null;
+      _cat = c;
+      _findPictures(c.looks);
+      _filter = _Filter.all;
       _clearSelection();
     });
   }
@@ -301,11 +326,14 @@ class _LibraryPageState extends State<LibraryPage> {
   List<ReceivedFile> _visibleFiles() {
     // Files carry no sender: hidden while one person is picked.
     if (_filter != _Filter.all || _member != null) return const [];
+    // A smart album, or photos / videos asked for: no files.
+    if (_cat != null || _smart.kind != null) return const [];
     var list = _files;
     if (_onlyRecent) {
       final since = DateTime.now().subtract(const Duration(hours: 24));
       list = [for (final f in list) if (f.arrived.isAfter(since)) f];
     }
+    if (_smart.hasWhen) list = [for (final f in list) if (_smart.contains(f.arrived)) f];
     if (!_search.isEmpty) {
       final idx = widget.services.server.textIndex;
       final files = widget.services.server.files;
@@ -372,6 +400,26 @@ class _LibraryPageState extends State<LibraryPage> {
     if (_onlyRecent) {
       final since = DateTime.now().subtract(const Duration(hours: 24)).millisecondsSinceEpoch;
       list = [for (final i in list) if (i.receivedMs > since) i];
+    }
+    if (_smart.hasWhen || _smart.kind != null) {
+      list = [
+        for (final i in list)
+          if ((_smart.kind == null || i.kind == _smart.kind) &&
+              (!_smart.hasWhen || _smart.contains(DateTime.fromMillisecondsSinceEpoch(i.captureMs > 0 ? i.captureMs : i.receivedMs))))
+            i,
+      ];
+    }
+    final cat = _cat;
+    if (cat != null) {
+      final idx = widget.services.server.textIndex;
+      list = [
+        for (final i in list)
+          if (i.kind == MediaKind.image &&
+              (_picHits.containsKey(TextIndex.mediaKey(i)) ||
+                  cat.names.any((w) => i.name.toLowerCase().contains(w)) ||
+                  cat.words.any((w) => idx.matches(TextIndex.mediaKey(i), i.name, SearchQuery(w)))))
+            i,
+      ];
     }
     if (!_search.isEmpty) {
       final idx = widget.services.server.textIndex;
@@ -500,6 +548,11 @@ class _LibraryPageState extends State<LibraryPage> {
               if (_selecting) ...[
                 // Photos / videos and files alike.
                 IconButton(
+                  tooltip: tr('aipack.title'),
+                  icon: const Icon(Icons.smart_toy_outlined),
+                  onPressed: () => unawaited(packForAi(context, s, chosenMedia, _chosenFiles())),
+                ),
+                IconButton(
                   tooltip: tr('lib.export'),
                   icon: const Icon(Icons.drive_file_move_rounded),
                   onPressed: () => _export(chosenMedia, _chosenFiles()),
@@ -538,6 +591,20 @@ class _LibraryPageState extends State<LibraryPage> {
                 ),
               ] else ...[
                 _searchBox(),
+                PopupMenuButton<_Category>(
+                  tooltip: tr('smart.title'),
+                  onSelected: _openCategory,
+                  itemBuilder: (_) => [for (final c in _categories) PopupMenuItem(value: c, child: Row(children: [Icon(c.icon, size: 18), const SizedBox(width: 10), Text(tr(c.label))]))],
+                  icon: const Icon(Icons.auto_awesome_rounded, color: ToolColors.people),
+                ),
+                if (!_filesTab)
+                  HoverTip(
+                    text: tr('clean.tip'),
+                    child: IconButton(
+                      onPressed: () => unawaited(showCleanup(context, s)),
+                      icon: const Icon(Icons.cleaning_services_rounded, color: ToolColors.trash),
+                    ),
+                  ),
                 const SizedBox(width: 8),
                 // New arrivals from a phone or PC can have old capture dates
                 // and land far down the list; "by arrival" puts them on top.
@@ -2212,3 +2279,27 @@ class _HeroArt extends StatelessWidget {
         ]),
       );
 }
+
+/// A smart album: shown by what the photo looks like (searched on this
+/// PC), plus words in it and in its name.
+class _Category {
+  const _Category(this.label, this.icon, this.looks, {this.words = const [], this.names = const []});
+
+  final String label;
+  final IconData icon;
+  final String looks;
+  final List<String> words;
+  final List<String> names;
+}
+
+const List<_Category> _categories = [
+  _Category('smart.screens', Icons.screenshot_rounded, 'a screenshot of a phone or computer screen', names: ['screenshot', '截屏', '截图', 'screen shot']),
+  _Category('smart.receipts', Icons.receipt_long_rounded, 'a photo of a paper receipt or invoice', words: ['发票', '合计', '小计', 'receipt', 'invoice', 'total']),
+  _Category('smart.ids', Icons.badge_rounded, 'a photo of an id card, passport or driver license', words: ['身份证', 'passport', '驾驶证', 'license']),
+  _Category('smart.docs', Icons.description_rounded, 'a photo of a printed document page with text'),
+  _Category('smart.boards', Icons.developer_board_rounded, 'a whiteboard or blackboard with writing'),
+  _Category('smart.food', Icons.restaurant_rounded, 'a photo of food on a plate'),
+  _Category('smart.pets', Icons.pets_rounded, 'a photo of a cat or a dog'),
+  _Category('smart.scenery', Icons.landscape_rounded, 'a landscape photo of mountains, sea or sky'),
+  _Category('smart.people', Icons.groups_rounded, 'a group photo of several people'),
+];

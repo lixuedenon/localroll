@@ -123,6 +123,17 @@ class LrClient {
   /// Shows [text] in a small text window on the other side.
   Future<void> sendText(String text) async => _send('POST', LrProtocol.pathText, json: {'text': text});
 
+  /// The other side's clipboard text (null: empty, or an older version).
+  Future<String?> clipboard() async {
+    try {
+      final j = await _send('GET', LrProtocol.pathClipboard, timeout: const Duration(seconds: 5));
+      final t = j['text'];
+      return t is String && t.isNotEmpty ? t : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Cheap signed-in request: fails with 401 when the other side no longer
   /// knows us.
   Future<void> ping() async =>

@@ -17,6 +17,7 @@ import '../services/live_service.dart';
 import '../services/mobile_settings.dart';
 import '../services/phone_names.dart';
 import 'phone_name_dialog.dart';
+import '../services/clipboard_sync.dart';
 import '../services/my_library.dart';
 import '../services/phone_server.dart';
 import '../services/uploader.dart';
@@ -1027,6 +1028,35 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   /// Home: the devices (one row), what still needs backing up, three
   /// actions, notices when there are any, and what arrived lately.
+  /// Clipboard sync with the computer: this phone's copied text there, or
+  /// the computer's copied text here (ready to paste).
+  Widget _clipboard(BuildContext context, PairedDesktop d) {
+    Future<void> run(bool send) async {
+      final m = ScaffoldMessenger.maybeOf(context);
+      try {
+        if (send) {
+          final ok = await ClipboardSync.send(widget.settings, widget.discovery, d);
+          m?.showSnackBar(SnackBar(content: Text(tr(ok ? 'clip.sent' : 'clip.empty', {'pc': d.name}))));
+        } else {
+          final t = await ClipboardSync.take(widget.settings, widget.discovery, d);
+          m?.showSnackBar(SnackBar(content: Text(t == null ? tr('clip.pc_empty', {'pc': d.name}) : tr('clip.taken'))));
+        }
+      } catch (_) {
+        m?.showSnackBar(SnackBar(content: Text(tr('clip.failed', {'pc': d.name}))));
+      }
+    }
+
+    return GlassCard(
+      child: Row(children: [
+        const Icon(Icons.content_paste_rounded, color: HomeColors.blue),
+        const SizedBox(width: 10),
+        Expanded(child: Text(tr('clip.title'), style: const TextStyle(fontWeight: FontWeight.w700, color: HomeColors.ink))),
+        TextButton(onPressed: () => unawaited(run(true)), child: Text(tr('clip.send'))),
+        TextButton(onPressed: () => unawaited(run(false)), child: Text(tr('clip.take'))),
+      ]),
+    );
+  }
+
   Widget _home(BuildContext context, PairedDesktop? d) {
     final base = Theme.of(context);
     final last = d == null ? null : widget.settings.lastBackup(d.id);
@@ -1207,6 +1237,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   _autoBanner(context),
                   const SizedBox(height: 16),
                   card,
+                  if (d != null) ...[const SizedBox(height: 12), _clipboard(context, d)],
                   const SizedBox(height: 14),
                   Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Expanded(

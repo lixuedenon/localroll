@@ -18,6 +18,7 @@ import 'format.dart';
 import 'receive_page.dart' show NetworkCheck;
 import 'send_page.dart';
 import 'text_window.dart';
+import 'guest_page.dart';
 import 'theme.dart';
 
 /// One paired device as the Devices page shows it (a phone or a PC; a PC
@@ -174,6 +175,12 @@ class _DevicesPageState extends State<DevicesPage> {
                         icon: const Icon(Icons.radar_rounded, size: 18),
                         label: Text(tr('send.search')),
                       ),
+                    const SizedBox(width: 10),
+                    OutlinedButton.icon(
+                      onPressed: () => unawaited(showGuestTransfer(context, s)),
+                      icon: const Icon(Icons.qr_code_2_rounded, size: 18),
+                      label: Text(tr('guest.button')),
+                    ),
                     const SizedBox(width: 10),
                     FilledButton.icon(
                       onPressed: () => showAddDevice(context, s),

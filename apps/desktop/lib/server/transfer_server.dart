@@ -6,6 +6,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:localroll_core/localroll_core.dart';
 
 import '../services/file_actions.dart';
@@ -848,7 +849,19 @@ class TransferServer extends ChangeNotifier {
         if (text is! String || text.isEmpty) return _json(res, 400, {'error': 'bad_request'});
         if (text.length > LrProtocol.maxText) return _json(res, 413, {'error': 'too_large'});
         hub.textReceived(device.name, text);
+        // Clipboard sync: what the phone sent is ready to paste here too.
+        unawaited(Clipboard.setData(ClipboardData(text: text)).catchError((Object _) {}));
         return _json(res, 200, {'ok': true});
+      }
+      // Clipboard sync: the phone takes what is copied on this PC.
+      if (req.method == 'GET' && path == LrProtocol.pathClipboard) {
+        String? text;
+        try {
+          text = (await Clipboard.getData(Clipboard.kTextPlain))?.text;
+        } catch (_) {}
+        if (text != null && text.length > LrProtocol.maxText) text = text.substring(0, LrProtocol.maxText);
+        DiagLog.log('clipboard', '${device.name} took the clipboard');
+        return _json(res, 200, {'text': text ?? ''});
       }
       if (path == LrProtocol.pathLive && WebSocketTransformer.isUpgradeRequest(req)) {
         if (!secure && device.secure) return _json(res, 426, {'error': 'upgrade_required'});

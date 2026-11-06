@@ -53,6 +53,9 @@ class LrProtocol {
   /// POST {text}: a piece of text (pasted / typed) shown on the other side
   /// in a small text window. Signed in, at most [maxText] characters.
   static const String pathText = '/api/v1/text';
+
+  /// The other side's clipboard text (GET; trusted devices only).
+  static const String pathClipboard = '/api/v1/clipboard';
   static const int maxText = 1000000;
 
   /// "I'm here" / "I'm leaving" (signed in). The answer lists the other

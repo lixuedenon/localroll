@@ -25,6 +25,7 @@ import 'services/phone_formats.dart';
 import 'services/receive_hub.dart';
 import 'services/settings.dart';
 import 'services/stamp_library.dart';
+import 'services/guest_server.dart';
 import 'services/text_indexer.dart';
 import 'services/tls_identity.dart';
 import 'ui/pdf_thumb.dart';
@@ -81,6 +82,8 @@ class AppServices {
   /// Search by what pictures show: the model (downloaded when the person
   /// turns it on) and the background reading.
   /// The player: where videos were left, recent files (this PC only).
+  /// Visitors without LocalRoll: the browser page (while the guest window is open).
+  late final GuestServer guest = GuestServer(this);
   late final PlayerMemory player = PlayerMemory(File('${settings.dataDir.path}${Platform.pathSeparator}player.json'));
   /// Screen recordings, explanations, clips, screenshots.
   late final Recordings recordings = Recordings(library: library, dataDir: settings.dataDir, memory: player);
