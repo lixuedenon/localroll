@@ -1620,5 +1620,6 @@
   "home.q_convert": "HEIC, HEVC… to formats that open anywhere",
   "home.q_player": "Videos, photos, PDF — mark them up",
   "home.q_screen": "Screen, lessons, draw on screen",
-  "ink.renumber": "Renumber 1, 2, 3… (select a number and type a digit to change it)"
+  "ink.renumber": "Renumber 1, 2, 3… (select a number and type a digit to change it)",
+  "library.tagline": "Photos, videos and files in one place — browse and play anytime"
 }

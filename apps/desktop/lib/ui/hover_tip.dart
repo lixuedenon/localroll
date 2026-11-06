@@ -53,10 +53,10 @@ class TipTitle extends StatelessWidget {
           child: Text(
             text,
             style: (style ?? Theme.of(context).appBarTheme.titleTextStyle ?? const TextStyle(fontSize: 20)).copyWith(
-              color: color,
+              color: style?.color ?? color,
               decoration: TextDecoration.underline,
               decorationStyle: TextDecorationStyle.dashed,
-              decorationColor: color.withValues(alpha: 0.7),
+              decorationColor: (style?.color ?? color).withValues(alpha: 0.5),
             ),
           ),
         ),

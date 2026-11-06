@@ -25,11 +25,11 @@ import 'files_view.dart';
 import 'format.dart';
 import 'hover_tip.dart';
 import 'library_recovery.dart';
+import 'light_look.dart';
 import 'media_thumb.dart';
 import 'people_page.dart';
 import 'select_by_dialog.dart';
 import 'send_page.dart';
-import 'theme.dart';
 import 'trash_actions.dart';
 import 'trash_page.dart';
 import 'player/player_page.dart';
@@ -345,6 +345,18 @@ class _LibraryPageState extends State<LibraryPage> {
   /// Only what arrived recently ("Just received"), still ordered by date.
   bool _onlyRecent = false;
 
+  /// The disk the library is on (the storage card).
+  ({int free, int total})? _disk;
+  String? _diskOf;
+
+  void _checkDisk(String root) {
+    if (_diskOf == root) return;
+    _diskOf = root;
+    unawaited(diskSpace(root).then((d) {
+      if (mounted) setState(() => _disk = d);
+    }));
+  }
+
   /// Arrivals of the last 24 hours not yet looked at: old photos sent today
   /// sit far down the timeline, so they are offered at the top as well.
   List<MediaItem> _recent(List<MediaItem> all) {
@@ -452,21 +464,24 @@ class _LibraryPageState extends State<LibraryPage> {
           _selected.removeWhere((k) => !shown.contains(k));
         }
         final chosenMedia = _selected.isEmpty ? const <MediaItem>[] : [for (final i in items) if (_selected.contains(i.relPath)) i];
-        return Focus(
-          focusNode: _focus,
-          autofocus: true,
-          onKeyEvent: (_, e) => _onKey(e, items),
-          child: Scaffold(
-          appBar: AppBar(
+        _checkDisk(s.library.rootPath);
+        final bar = AppBar(
+            automaticallyImplyLeading: false,
+            primary: false,
+            toolbarHeight: 58,
+            backgroundColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+            elevation: 0,
+            scrolledUnderElevation: 0,
+            titleSpacing: 12,
             title: _selecting
                 ? Text(tr('lib.selected_size', {'count': _selected.length + _copies.length, 'size': formatBytes(_selectedSize(chosenMedia))}))
                 : Row(children: [
-                    // Rest the mouse on it: how to use the library.
-                    TipTitle(text: tr('nav.library'), tip: tr('library.title_tip')),
+                    _filters(all),
                     if (!_onlyRecent && _recent(all).isNotEmpty) ...[
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                       ActionChip(
-                        avatar: const Icon(Icons.fiber_new_rounded, size: 18, color: LrColors.safelight),
+                        avatar: const Icon(Icons.fiber_new_rounded, size: 18, color: LightLook.amberText),
                         label: Text(tr('lib.recent_chip', {'count': _recent(all).length})),
                         onPressed: () => setState(() => _onlyRecent = true),
                       ),
@@ -523,19 +538,6 @@ class _LibraryPageState extends State<LibraryPage> {
                 ),
               ] else ...[
                 _searchBox(),
-                const SizedBox(width: 8),
-                SegmentedButton<_Filter>(
-                  segments: [
-                    ButtonSegment(value: _Filter.all, label: Text(tr('library.filter_all'))),
-                    ButtonSegment(value: _Filter.photos, label: Text(tr('library.filter_photos'))),
-                    ButtonSegment(value: _Filter.videos, label: Text(tr('library.filter_videos'))),
-                    ButtonSegment(value: _Filter.made, label: Text(tr('recs.title'))),
-                    ButtonSegment(value: _Filter.docs, label: Text(tr('library.filter_docs'))),
-                    ButtonSegment(value: _Filter.other, label: Text(tr('library.filter_other'))),
-                  ],
-                  selected: {_filter},
-                  onSelectionChanged: (v) => setState(() => _filter = v.first),
-                ),
                 const SizedBox(width: 8),
                 // New arrivals from a phone or PC can have old capture dates
                 // and land far down the list; "by arrival" puts them on top.
@@ -639,25 +641,178 @@ class _LibraryPageState extends State<LibraryPage> {
               ],
               const SizedBox(width: 8),
             ],
-          ),
-          body: Column(
-            children: [
-              ..._banners(context, items.length + _visibleFiles().length),
-              Expanded(
-                child: _filesTab
-                    // Documents / other files from PCs: a file list, not photos.
-                    ? FilesView(services: s, document: _filter == _Filter.docs)
-                    : items.isEmpty && _visibleFiles().isEmpty
-                        ? (_searching ? _noResults(context) : _empty(context))
-                        : (s.settings.libraryCompact && _search.isEmpty)
-                            ? _compactGrid(context, items)
-                            : _grid(context, items),
+          );
+        // Light look: a band at the top (name + the disk), the tools on a
+        // white strip, the photos on a white card.
+        return Theme(
+          data: LightLook.theme(Theme.of(context)),
+          child: Focus(
+            focusNode: _focus,
+            autofocus: true,
+            onKeyEvent: (_, e) => _onKey(e, items),
+            child: Scaffold(
+              backgroundColor: LightLook.page,
+              body: DecoratedBox(
+                decoration: LightLook.wash,
+                child: Column(
+                  children: [
+                    if (!_selecting) _hero(context, all),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(20, _selecting ? 16 : 0, 20, 0),
+                      child: Container(decoration: LightLook.card(), clipBehavior: Clip.antiAlias, child: bar),
+                    ),
+                    ..._banners(context, items.length + _visibleFiles().length),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 18),
+                        child: Container(
+                          decoration: LightLook.card(),
+                          clipBehavior: Clip.antiAlias,
+                          child: _filesTab
+                              // Documents / other files from PCs: a file list, not photos.
+                              ? FilesView(services: s, document: _filter == _Filter.docs)
+                              : items.isEmpty && _visibleFiles().isEmpty
+                                  ? (_searching ? _noResults(context) : _empty(context))
+                                  : (s.settings.libraryCompact && _search.isEmpty)
+                                      ? _compactGrid(context, items)
+                                      : _grid(context, items),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
+            ),
           ),
         );
       },
+    );
+  }
+
+  /// What to show: round, bright buttons (photos / videos with how many).
+  Widget _filters(List<MediaItem> all) {
+    final photos = all.where((i) => i.kind == MediaKind.image).length;
+    final videos = all.where((i) => i.kind == MediaKind.video).length;
+    final list = [
+      (_Filter.all, Icons.apps_rounded, tr('library.filter_all'), all.length),
+      (_Filter.photos, Icons.landscape_rounded, tr('library.filter_photos'), photos),
+      (_Filter.videos, Icons.play_circle_rounded, tr('library.filter_videos'), videos),
+      (_Filter.made, Icons.videocam_rounded, tr('recs.title'), null),
+      (_Filter.docs, Icons.description_rounded, tr('library.filter_docs'), null),
+      (_Filter.other, Icons.folder_rounded, tr('library.filter_other'), null),
+    ];
+    return Flexible(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(children: [
+          for (final (f, icon, label, n) in list)
+            Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: _Pill(
+                icon: icon,
+                label: n == null ? label : '$label ($n)',
+                on: _filter == f,
+                onTap: () => setState(() => _filter = f),
+              ),
+            ),
+        ]),
+      ),
+    );
+  }
+
+  /// The band at the top: the name (rest the mouse on it: how to use the
+  /// library) and the disk it is on.
+  Widget _hero(BuildContext context, List<MediaItem> all) {
+    final s = widget.services;
+    final total = all.fold<int>(0, (n, i) => n + i.size);
+    final d = _disk;
+    final used = d == null || d.total == 0 ? null : 1 - d.free / d.total;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 14),
+      child: SizedBox(
+        height: 124,
+        child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: DecoratedBox(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(colors: [Color(0xFFE3ECFF), Color(0xFFCFE0FF), Color(0xFFB4D0FF)]),
+                ),
+                child: Row(children: [
+                  const SizedBox(width: 18),
+                  const _HeroArt(),
+                  const SizedBox(width: 18),
+                  Expanded(
+                    child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      TipTitle(
+                        text: tr('nav.library'),
+                        tip: tr('library.title_tip'),
+                        style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w800, color: LightLook.text, letterSpacing: -0.5),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(tr('library.tagline'),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 15, color: Color(0xFF2A4A9A), fontWeight: FontWeight.w500)),
+                    ]),
+                  ),
+                ]),
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          SizedBox(
+            width: 360,
+            child: Container(
+              decoration: LightLook.card(),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+              child: Row(children: [
+                SizedBox(
+                  width: 82,
+                  height: 82,
+                  child: Stack(alignment: Alignment.center, children: [
+                    SizedBox.expand(
+                      child: CircularProgressIndicator(
+                        value: used ?? 0,
+                        strokeWidth: 9,
+                        strokeCap: StrokeCap.round,
+                        backgroundColor: const Color(0xFFE3E9F5),
+                        color: (used ?? 0) > 0.9 ? LightLook.red : LightLook.green,
+                      ),
+                    ),
+                    const LightBadge(icon: Icons.folder_rounded, colors: [Color(0xFF5B8CFF), Color(0xFF2F5BEA)], size: 46),
+                  ]),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(tr('home.items_size', {'count': all.length, 'size': formatBytes(total)}),
+                        maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: LightLook.text)),
+                    const SizedBox(height: 3),
+                    Text(
+                      d == null ? tr('home.disk_unknown') : tr('home.disk_free_short', {'free': formatBytes(d.free)}),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 13, color: LightLook.muted),
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 30,
+                      child: FilledButton.icon(
+                        style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 12), visualDensity: VisualDensity.compact),
+                        onPressed: () => revealInExplorer(s.library.rootPath),
+                        icon: const Icon(Icons.folder_open_rounded, size: 16),
+                        label: Text(tr('common.show_in_folder'), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      ),
+                    ),
+                  ]),
+                ),
+              ]),
+            ),
+          ),
+        ]),
+      ),
     );
   }
 
@@ -899,7 +1054,7 @@ class _LibraryPageState extends State<LibraryPage> {
   Widget _personBanner(BuildContext context, Widget Function(IconData, Color, String, List<Widget>) banner, int found) {
     final s = widget.services;
     final p = s.server.people.person(_person!)!;
-    return banner(Icons.face_rounded, LrColors.verified, tr('people.showing', {'name': personLabel(p), 'count': found}), [
+    return banner(Icons.face_rounded, LightLook.green, tr('people.showing', {'name': personLabel(p), 'count': found}), [
       TextButton(onPressed: () => namePerson(context, s, p.id), child: Text(tr(p.name == null ? 'people.name' : 'people.rename'))),
       const SizedBox(width: 4),
       TextButton(onPressed: _openPeople, child: Text(tr('people.everyone'))),
@@ -931,7 +1086,7 @@ class _LibraryPageState extends State<LibraryPage> {
           const SizedBox(height: 10),
           Text(tr('search.none', {'q': _searchCtrl.text.trim()})),
           const SizedBox(height: 4),
-          Text(_searchNote(), textAlign: TextAlign.center, style: const TextStyle(color: LrColors.muted, fontSize: 12.5)),
+          Text(_searchNote(), textAlign: TextAlign.center, style: const TextStyle(color: LightLook.muted, fontSize: 12.5)),
         ]),
       );
 
@@ -939,7 +1094,7 @@ class _LibraryPageState extends State<LibraryPage> {
     final lib = widget.services.library;
     final theme = Theme.of(context);
     Widget banner(IconData icon, Color color, String text, List<Widget> actions) => Container(
-          margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          margin: const EdgeInsets.fromLTRB(20, 10, 20, 0),
           padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.12),
@@ -959,7 +1114,7 @@ class _LibraryPageState extends State<LibraryPage> {
       // Searching for the first time: offer picture search, saying plainly
       // what the download is for and that nothing else depends on it.
       if (!_search.isEmpty && !s.settings.pictureSearch && !s.settings.pictureAsked)
-        banner(Icons.image_search_rounded, LrColors.verified,
+        banner(Icons.image_search_rounded, LightLook.green,
             tr('search.picture_offer', {'size': formatBytes(PictureModel.downloadSize)}), [
           TextButton(
             onPressed: () => s.settings.update((x) => x.pictureAsked = true),
@@ -969,7 +1124,7 @@ class _LibraryPageState extends State<LibraryPage> {
           FilledButton(onPressed: _enablePictures, child: Text(tr('search.picture_enable'))),
         ]),
       if (dl != null)
-        banner(Icons.downloading_rounded, LrColors.verified,
+        banner(Icons.downloading_rounded, LightLook.green,
             tr('search.picture_downloading', {'done': formatBytes(dl.$1), 'total': formatBytes(dl.$2)}), const []),
       if (_person != null) _personBanner(context, banner, found),
       if (_searching)
@@ -978,14 +1133,14 @@ class _LibraryPageState extends State<LibraryPage> {
           TextButton(onPressed: _clearSearch, child: Text(tr('search.clear'))),
         ]),
       if (_onlyRecent)
-        banner(Icons.schedule_rounded, LrColors.safelight, tr('lib.recent_only'), [
+        banner(Icons.schedule_rounded, LightLook.amberText, tr('lib.recent_only'), [
           TextButton(onPressed: () => setState(() => _onlyRecent = false), child: Text(tr('lib.recent_all'))),
         ]),
       // Unplugged drive / deleted or moved folder: what can be done.
       if (lib.offline) LibraryRecovery(services: widget.services),
       // Converted copies picked with "Select by…" are not in the grid.
       if (_copies.isNotEmpty)
-        banner(Icons.auto_fix_high_rounded, LrColors.safelight,
+        banner(Icons.auto_fix_high_rounded, LightLook.amberText,
             tr('lib.copies_selected', {'count': _copies.length, 'size': formatBytes(_copies.values.fold(0, (a, b) => a + b))}), [
           TextButton(onPressed: () => setState(_copies.clear), child: Text(tr('lib.copies_drop'))),
         ]),
@@ -1191,7 +1346,7 @@ class _LibraryPageState extends State<LibraryPage> {
                   },
                   icon: Icon(
                     whole ? Icons.check_circle_rounded : Icons.check_circle_outline_rounded,
-                    color: whole ? theme.colorScheme.primary : LrColors.muted,
+                    color: whole ? theme.colorScheme.primary : LightLook.muted,
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -1497,7 +1652,7 @@ class _LibraryPageState extends State<LibraryPage> {
             onPressed: () => _toggleUnit(g),
             icon: Icon(
               whole ? Icons.check_circle_rounded : Icons.check_circle_outline_rounded,
-              color: whole ? theme.colorScheme.primary : LrColors.muted,
+              color: whole ? theme.colorScheme.primary : LightLook.muted,
             ),
           ),
           Text(_unitFull(_flat[_starts[g]].day, _zoomShown), style: theme.textTheme.titleSmall),
@@ -1738,9 +1893,9 @@ class _LibraryPageState extends State<LibraryPage> {
                 modified: f.modified,
                 services: s,
                 icon: Container(
-                  color: LrColors.raised,
+                  color: const Color(0xFFEFF2F8),
                   alignment: Alignment.center,
-                  child: Icon(_iconFor(f.name), size: 40, color: LrColors.muted),
+                  child: Icon(_iconFor(f.name), size: 40, color: LightLook.muted),
                 ),
               ),
             ),
@@ -1981,4 +2136,79 @@ class _BoxPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_BoxPainter old) => old.rect != rect || old.color != color;
+}
+
+/// A filter button: white, blue when on.
+class _Pill extends StatelessWidget {
+  const _Pill({required this.icon, required this.label, required this.on, required this.onTap});
+
+  final IconData icon;
+  final String label;
+  final bool on;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Material(
+        color: on ? LightLook.blue : Colors.white,
+        shape: StadiumBorder(side: BorderSide(color: on ? LightLook.blue : const Color(0xFFDDE5F3))),
+        elevation: on ? 2 : 0,
+        shadowColor: LightLook.blue.withValues(alpha: 0.4),
+        child: InkWell(
+          customBorder: const StadiumBorder(),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              Icon(icon, size: 17, color: on ? Colors.white : LightLook.blue),
+              const SizedBox(width: 6),
+              Text(label, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: on ? Colors.white : LightLook.text)),
+            ]),
+          ),
+        ),
+      );
+}
+
+/// The band's picture: a folder with a photo, a film and a note floating
+/// around it — drawn from icons.
+class _HeroArt extends StatelessWidget {
+  const _HeroArt();
+
+  Widget _chip(IconData icon, List<Color> colors, double size, double angle) => Transform.rotate(
+        angle: angle,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(size * 0.28),
+            gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: colors),
+            boxShadow: [BoxShadow(color: colors.last.withValues(alpha: 0.4), blurRadius: 10, offset: const Offset(0, 4))],
+          ),
+          child: Icon(icon, color: Colors.white, size: size * 0.56),
+        ),
+      );
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        width: 150,
+        height: 110,
+        child: Stack(clipBehavior: Clip.none, children: [
+          Positioned(
+            left: 4,
+            bottom: 6,
+            child: Container(
+              width: 120,
+              height: 22,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(60),
+                gradient: RadialGradient(colors: [const Color(0xFF7FB2FF).withValues(alpha: 0.7), const Color(0x007FB2FF)]),
+              ),
+            ),
+          ),
+          Positioned(left: 18, top: 18, child: _chip(Icons.folder_rounded, const [Color(0xFF6FB1FF), Color(0xFF2F6BFF)], 82, -0.06)),
+          const Positioned(left: 46, top: 44, child: Icon(Icons.play_arrow_rounded, color: Colors.white, size: 34)),
+          Positioned(left: 86, top: 0, child: _chip(Icons.image_rounded, const [Color(0xFFFFC56B), Color(0xFFFF8A3D)], 34, 0.18)),
+          Positioned(right: 0, top: 40, child: _chip(Icons.movie_rounded, const [Color(0xFFA78BFA), Color(0xFF7C4DFF)], 32, -0.12)),
+          Positioned(left: 0, top: 4, child: _chip(Icons.music_note_rounded, const [Color(0xFF63E6BE), Color(0xFF12B886)], 28, -0.2)),
+        ]),
+      );
 }

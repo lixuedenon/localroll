@@ -1620,5 +1620,6 @@
   "home.q_convert": "HEIC、HEVC 等转成通用格式",
   "home.q_player": "视频照片 PDF，边看边画",
   "home.q_screen": "录屏幕、录讲解、屏幕画笔",
-  "ink.renumber": "重新排号（选中一个编号按数字键可改号）"
+  "ink.renumber": "重新排号（选中一个编号按数字键可改号）",
+  "library.tagline": "照片、视频、文件都在这里，随时浏览和播放"
 }

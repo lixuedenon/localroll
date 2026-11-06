@@ -1626,6 +1626,7 @@ const Map<String, Map<String, String>> translations = {
     'home.q_player': 'Videos, photos, PDF — mark them up',
     'home.q_screen': 'Screen, lessons, draw on screen',
     'ink.renumber': 'Renumber 1, 2, 3… (select a number and type a digit to change it)',
+    'library.tagline': 'Photos, videos and files in one place — browse and play anytime',
   },
   'zh': {
     'nav.library': '媒体库',
@@ -3250,6 +3251,7 @@ const Map<String, Map<String, String>> translations = {
     'home.q_player': '视频照片 PDF，边看边画',
     'home.q_screen': '录屏幕、录讲解、屏幕画笔',
     'ink.renumber': '重新排号（选中一个编号按数字键可改号）',
+    'library.tagline': '照片、视频、文件都在这里，随时浏览和播放',
   },
   'zh_Hant': {
     'nav.library': '媒體庫',
@@ -4874,6 +4876,7 @@ const Map<String, Map<String, String>> translations = {
     'home.q_player': '影片照片 PDF，邊看邊畫',
     'home.q_screen': '錄螢幕、錄講解、螢幕畫筆',
     'ink.renumber': '重新排號（選中一個編號按數字鍵可改號）',
+    'library.tagline': '照片、影片、檔案都在這裡，隨時瀏覽和播放',
   },
   'ja': {
     'nav.library': 'ライブラリ',
@@ -6498,6 +6501,7 @@ const Map<String, Map<String, String>> translations = {
     'home.q_player': '動画・写真・PDF、見ながら書き込み',
     'home.q_screen': '画面録画・解説録画・画面ペン',
     'ink.renumber': '番号を振り直す（番号を選んで数字キーで変更）',
+    'library.tagline': '写真・動画・ファイルをここで。いつでも閲覧・再生',
   },
   'ko': {
     'nav.library': '라이브러리',
@@ -8122,6 +8126,7 @@ const Map<String, Map<String, String>> translations = {
     'home.q_player': '동영상·사진·PDF, 보면서 표시',
     'home.q_screen': '화면·강의 녹화, 화면 펜',
     'ink.renumber': '번호 다시 매기기 (번호 선택 후 숫자 키로 변경)',
+    'library.tagline': '사진·동영상·파일을 한곳에서, 언제든 보고 재생',
   },
   'es': {
     'nav.library': 'Biblioteca',
@@ -9746,6 +9751,7 @@ const Map<String, Map<String, String>> translations = {
     'home.q_player': 'Vídeos, fotos, PDF y anotaciones',
     'home.q_screen': 'Pantalla, lecciones, dibujar',
     'ink.renumber': 'Renumerar (selecciona un número y pulsa una cifra para cambiarlo)',
+    'library.tagline': 'Fotos, vídeos y archivos en un lugar: mira y reproduce cuando quieras',
   },
   'fr': {
     'nav.library': 'Bibliothèque',
@@ -11370,6 +11376,7 @@ const Map<String, Map<String, String>> translations = {
     'home.q_player': 'Vidéos, photos, PDF et annotations',
     'home.q_screen': 'Écran, leçons, dessiner à l’écran',
     'ink.renumber': 'Renuméroter (sélectionnez un numéro et tapez un chiffre pour le changer)',
+    'library.tagline': 'Photos, vidéos et fichiers au même endroit, à parcourir et lire à tout moment',
   },
   'de': {
     'nav.library': 'Mediathek',
@@ -12994,6 +13001,7 @@ const Map<String, Map<String, String>> translations = {
     'home.q_player': 'Videos, Fotos, PDF – mit Markierungen',
     'home.q_screen': 'Bildschirm, Erklärvideos, Stift',
     'ink.renumber': 'Neu nummerieren (Nummer wählen und Ziffer tippen zum Ändern)',
+    'library.tagline': 'Fotos, Videos und Dateien an einem Ort – jederzeit ansehen und abspielen',
   },
   'pt': {
     'nav.library': 'Biblioteca',
@@ -14618,6 +14626,7 @@ const Map<String, Map<String, String>> translations = {
     'home.q_player': 'Vídeos, fotos, PDF com anotações',
     'home.q_screen': 'Tela, aulas, caneta na tela',
     'ink.renumber': 'Renumerar (selecione um número e digite um dígito para mudar)',
+    'library.tagline': 'Fotos, vídeos e arquivos num só lugar: veja e reproduza quando quiser',
   },
   'ru': {
     'nav.library': 'Медиатека',
@@ -16242,6 +16251,7 @@ const Map<String, Map<String, String>> translations = {
     'home.q_player': 'Видео, фото, PDF с пометками',
     'home.q_screen': 'Экран, уроки, перо на экране',
     'ink.renumber': 'Перенумеровать (выберите номер и нажмите цифру, чтобы изменить)',
+    'library.tagline': 'Фото, видео и файлы в одном месте — смотрите в любое время',
   },
   'it': {
     'nav.library': 'Libreria',
@@ -17866,6 +17876,7 @@ const Map<String, Map<String, String>> translations = {
     'home.q_player': 'Video, foto, PDF con annotazioni',
     'home.q_screen': 'Schermo, lezioni, penna',
     'ink.renumber': 'Rinumera (seleziona un numero e digita una cifra per cambiarlo)',
+    'library.tagline': 'Foto, video e file in un unico posto: sfoglia e riproduci quando vuoi',
   },
   'ar': {
     'nav.library': 'المكتبة',
@@ -19490,6 +19501,7 @@ const Map<String, Map<String, String>> translations = {
     'home.q_player': 'فيديو وصور وPDF مع التعليق عليها',
     'home.q_screen': 'الشاشة، الشروح، القلم',
     'ink.renumber': 'إعادة الترقيم (حدد رقمًا واكتب رقمًا لتغييره)',
+    'library.tagline': 'الصور والفيديو والملفات في مكان واحد، تصفّح وشغّل متى شئت',
   },
   'hi': {
     'nav.library': 'लाइब्रेरी',
@@ -21114,6 +21126,7 @@ const Map<String, Map<String, String>> translations = {
     'home.q_player': 'वीडियो, फ़ोटो, PDF पर निशान लगाएँ',
     'home.q_screen': 'स्क्रीन, पाठ, स्क्रीन पेन',
     'ink.renumber': 'फिर से क्रमांक दें (नंबर चुनकर अंक दबाएँ तो बदलेगा)',
+    'library.tagline': 'फ़ोटो, वीडियो और फ़ाइलें एक जगह — कभी भी देखें और चलाएँ',
   },
   'id': {
     'nav.library': 'Pustaka',
@@ -22738,6 +22751,7 @@ const Map<String, Map<String, String>> translations = {
     'home.q_player': 'Video, foto, PDF dengan coretan',
     'home.q_screen': 'Layar, pelajaran, pena layar',
     'ink.renumber': 'Nomori ulang (pilih nomor lalu ketik angka untuk mengubah)',
+    'library.tagline': 'Foto, video, dan file di satu tempat — lihat dan putar kapan saja',
   },
   'vi': {
     'nav.library': 'Thư viện',
@@ -24362,6 +24376,7 @@ const Map<String, Map<String, String>> translations = {
     'home.q_player': 'Video, ảnh, PDF kèm vẽ chú thích',
     'home.q_screen': 'Màn hình, bài giảng, bút vẽ',
     'ink.renumber': 'Đánh số lại (chọn số rồi gõ chữ số để đổi)',
+    'library.tagline': 'Ảnh, video và tệp ở một nơi — xem và phát bất cứ lúc nào',
   },
   'th': {
     'nav.library': 'คลังสื่อ',
@@ -25986,6 +26001,7 @@ const Map<String, Map<String, String>> translations = {
     'home.q_player': 'วิดีโอ รูป PDF พร้อมขีดเขียน',
     'home.q_screen': 'หน้าจอ บทเรียน ปากกาบนจอ',
     'ink.renumber': 'เรียงเลขใหม่ (เลือกหมายเลขแล้วกดตัวเลขเพื่อเปลี่ยน)',
+    'library.tagline': 'รูป วิดีโอ และไฟล์อยู่ที่เดียว ดูและเล่นได้ทุกเมื่อ',
   },
   'tr': {
     'nav.library': 'Kitaplık',
@@ -27610,5 +27626,6 @@ const Map<String, Map<String, String>> translations = {
     'home.q_player': 'Video, fotoğraf, PDF ve notlar',
     'home.q_screen': 'Ekran, ders, ekran kalemi',
     'ink.renumber': 'Yeniden numarala (numarayı seçip rakam yazarak değiştirin)',
+    'library.tagline': 'Fotoğraf, video ve dosyalar tek yerde — istediğiniz an göz atın, oynatın',
   },
 };

@@ -1620,5 +1620,6 @@
   "home.q_convert": "HEIC, HEVC… vers des formats courants",
   "home.q_player": "Vidéos, photos, PDF et annotations",
   "home.q_screen": "Écran, leçons, dessiner à l’écran",
-  "ink.renumber": "Renuméroter (sélectionnez un numéro et tapez un chiffre pour le changer)"
+  "ink.renumber": "Renuméroter (sélectionnez un numéro et tapez un chiffre pour le changer)",
+  "library.tagline": "Photos, vidéos et fichiers au même endroit, à parcourir et lire à tout moment"
 }

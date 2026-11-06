@@ -20,6 +20,7 @@ import 'device_badge.dart';
 import 'files_view.dart';
 import 'format.dart';
 import 'library_recovery.dart';
+import 'light_look.dart';
 import 'media_thumb.dart';
 import 'send_page.dart';
 import 'trash_actions.dart';
@@ -91,9 +92,9 @@ class _DashboardPageState extends State<DashboardPage> {
         // Home is light (bright blue, white cards); the other pages keep
         // their look for now.
         return Theme(
-          data: _Look.theme(Theme.of(context)),
+          data: LightLook.theme(Theme.of(context)),
           child: Scaffold(
-            backgroundColor: _Look.page,
+            backgroundColor: LightLook.page,
             body: DecoratedBox(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFFEFF4FF), Color(0xFFF7F9FD), Color(0xFFEFF7FB)]),
@@ -131,7 +132,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   _box(context, width: 2000, child: _recent(context, items)),
                   if (_issues().isNotEmpty) ...[
                     const SizedBox(height: 16),
-                    KeyedSubtree(key: _attentionKey, child: _box(context, width: 2000, child: _attention(context), border: _Look.amber)),
+                    KeyedSubtree(key: _attentionKey, child: _box(context, width: 2000, child: _attention(context), border: LightLook.amber)),
                   ],
                 ],
               ),
@@ -144,21 +145,21 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _stat(IconData icon, List<Color> tint, String kicker, String title,
           {String? sub, Color? subColor, Color? titleColor, Widget? extra, VoidCallback? onTap}) =>
-      _Card(
+      LightCard(
         onTap: onTap,
         padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          _Badge(icon: icon, colors: tint, size: 52),
+          LightBadge(icon: icon, colors: tint, size: 52),
           const SizedBox(width: 16),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(kicker, overflow: TextOverflow.ellipsis, style: const TextStyle(color: _Look.muted, fontSize: 13)),
+              Text(kicker, overflow: TextOverflow.ellipsis, style: const TextStyle(color: LightLook.muted, fontSize: 13)),
               const SizedBox(height: 4),
-              Text(title, style: TextStyle(fontSize: 21, fontWeight: FontWeight.w700, color: titleColor ?? _Look.text)),
+              Text(title, style: TextStyle(fontSize: 21, fontWeight: FontWeight.w700, color: titleColor ?? LightLook.text)),
               if (extra != null) ...[const SizedBox(height: 10), extra],
               if (sub != null) ...[
                 const SizedBox(height: 6),
-                Text(sub, style: TextStyle(color: subColor ?? _Look.blue, fontSize: 13, fontWeight: FontWeight.w500)),
+                Text(sub, style: TextStyle(color: subColor ?? LightLook.blue, fontSize: 13, fontWeight: FontWeight.w500)),
               ],
             ]),
           ),
@@ -181,7 +182,7 @@ class _DashboardPageState extends State<DashboardPage> {
         child: LinearProgressIndicator(
           value: d.total == 0 ? 0 : 1 - d.free / d.total,
           minHeight: 6,
-          color: low ? _Look.red : _Look.blue,
+          color: low ? LightLook.red : LightLook.blue,
           backgroundColor: const Color(0xFFE3E9F5),
         ),
       ),
@@ -206,9 +207,9 @@ class _DashboardPageState extends State<DashboardPage> {
       n == 0 ? const [Color(0xFF3DDC97), Color(0xFF12A86B)] : const [Color(0xFFFFC56B), Color(0xFFF08A1C)],
       tr('home.status'),
       n == 0 ? tr('home.all_good_short') : tr('home.issues', {'count': n}),
-      titleColor: n == 0 ? _Look.green : _Look.amberText,
+      titleColor: n == 0 ? LightLook.green : LightLook.amberText,
       sub: n == 0 ? tr('home.all_good_sub') : (n == 1 ? '${issues.first.$2} ›' : '${tr('home.issues_see')} ›'),
-      subColor: n == 0 ? _Look.muted : _Look.amberText,
+      subColor: n == 0 ? LightLook.muted : LightLook.amberText,
       onTap: n == 0 ? null : (n == 1 && issues.first.$3 != null ? issues.first.$3 : showList),
     );
   }
@@ -234,7 +235,7 @@ class _DashboardPageState extends State<DashboardPage> {
       ]),
       const SizedBox(height: 8),
       if (ids.isEmpty)
-        Text(tr('home.devices_none'), style: const TextStyle(color: _Look.muted))
+        Text(tr('home.devices_none'), style: const TextStyle(color: LightLook.muted))
       else
         LayoutBuilder(builder: (context, c) {
           final cols = (c.maxWidth / 260).floor().clamp(1, 5);
@@ -254,9 +255,9 @@ class _DashboardPageState extends State<DashboardPage> {
     final isPc = p != null || isDesktopPlatform(t?.platform ?? '');
     final online = s.isOnline(id);
     final family = t?.familyMember ?? true;
-    return _Card(
+    return LightCard(
       onTap: () => AppNav.instance.openDevice(id),
-      border: online ? _Look.green.withValues(alpha: 0.6) : null,
+      border: online ? LightLook.green.withValues(alpha: 0.6) : null,
       padding: const EdgeInsets.all(12),
       child: Row(children: [
             if (p != null)
@@ -266,19 +267,19 @@ class _DashboardPageState extends State<DashboardPage> {
                 radius: 20,
                 backgroundColor: const Color(0xFFE8EEFB),
                 child: Icon(isPc ? Icons.computer_rounded : Icons.smartphone_rounded,
-                    size: 20, color: online ? _Look.green : _Look.muted),
+                    size: 20, color: online ? LightLook.green : LightLook.muted),
               ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(s.deviceName(id), overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w600, color: _Look.text)),
+                Text(s.deviceName(id), overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w600, color: LightLook.text)),
                 Text(
                   [
                     tr(online ? 'dev.online' : 'dev.offline'),
                     tr(family ? 'dev.role_family' : 'dev.role_guest'),
                   ].join(' · '),
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 12, color: online ? _Look.green : _Look.muted),
+                  style: TextStyle(fontSize: 12, color: online ? LightLook.green : LightLook.muted),
                 ),
               ]),
             ),
@@ -292,7 +293,7 @@ class _DashboardPageState extends State<DashboardPage> {
     final theme = Theme.of(context);
     final online = s.onlineDevices.length;
     final ok = s.server.running && !s.library.offline;
-    final color = ok ? _Look.green : _Look.red;
+    final color = ok ? LightLook.green : LightLook.red;
     return Row(children: [
       DeviceBadge(
         icon: st.iconKey,
@@ -303,8 +304,8 @@ class _DashboardPageState extends State<DashboardPage> {
       const SizedBox(width: 18),
       Expanded(
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(tr('identity.title'), style: theme.textTheme.bodySmall?.copyWith(color: _Look.muted)),
-          Text(st.deviceName, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700, color: _Look.text)),
+          Text(tr('identity.title'), style: theme.textTheme.bodySmall?.copyWith(color: LightLook.muted)),
+          Text(st.deviceName, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700, color: LightLook.text)),
         ]),
       ),
       // The pill itself breathes while devices are online.
@@ -317,7 +318,7 @@ class _DashboardPageState extends State<DashboardPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
             child: Text(
               tr('home.status_online', {'count': online}),
-              style: TextStyle(color: online > 0 ? _Look.green : _Look.muted, fontSize: 13, fontWeight: FontWeight.w600),
+              style: TextStyle(color: online > 0 ? LightLook.green : LightLook.muted, fontSize: 13, fontWeight: FontWeight.w600),
             ),
           ),
         )
@@ -335,9 +336,9 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _sectionTitle(IconData icon, String t) => Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(icon, size: 20, color: _Look.blue),
+        Icon(icon, size: 20, color: LightLook.blue),
         const SizedBox(width: 8),
-        Text(t, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: _Look.text)),
+        Text(t, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: LightLook.text)),
       ]);
 
   /// The big band at the top: the name, what it does, and a picture made
@@ -436,7 +437,7 @@ class _DashboardPageState extends State<DashboardPage> {
         child: Container(
           width: width,
           padding: const EdgeInsets.all(20),
-          decoration: _Look.card(border: border),
+          decoration: LightLook.card(border: border),
           child: child,
         ),
       );
@@ -449,7 +450,7 @@ class _DashboardPageState extends State<DashboardPage> {
           if (side != null)
             Expanded(
               child: Text(side,
-                  overflow: TextOverflow.ellipsis, style: const TextStyle(color: _Look.muted, fontSize: 12)),
+                  overflow: TextOverflow.ellipsis, style: const TextStyle(color: LightLook.muted, fontSize: 12)),
             ),
         ]),
       );
@@ -466,7 +467,7 @@ class _DashboardPageState extends State<DashboardPage> {
     if (latest.isEmpty) {
       return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         _title(tr('home.recent')),
-        Text(tr('home.recent_none'), style: const TextStyle(color: _Look.muted)),
+        Text(tr('home.recent_none'), style: const TextStyle(color: LightLook.muted)),
       ]);
     }
     final shown = latest.take(6).toList();
@@ -515,9 +516,9 @@ class _DashboardPageState extends State<DashboardPage> {
               if (i < shown.length) ...[
                 const SizedBox(height: 8),
                 Text(shown[i].$2?.name ?? shown[i].$3!.name,
-                    maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, color: _Look.text, fontWeight: FontWeight.w500)),
+                    maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, color: LightLook.text, fontWeight: FontWeight.w500)),
                 Text(formatDate(DateTime.fromMillisecondsSinceEpoch(shown[i].$1)),
-                    maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: _Look.muted)),
+                    maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: LightLook.muted)),
               ],
             ]),
           ),
@@ -556,7 +557,7 @@ class _DashboardPageState extends State<DashboardPage> {
             icon: Container(
               color: const Color(0xFFEFF2F8),
               alignment: Alignment.center,
-              child: const Icon(Icons.insert_drive_file_rounded, size: 32, color: _Look.muted),
+              child: const Icon(Icons.insert_drive_file_rounded, size: 32, color: LightLook.muted),
             ),
           ),
         ]),
@@ -634,9 +635,9 @@ class _DashboardPageState extends State<DashboardPage> {
       _title(tr('home.attention')),
       if (issues.isEmpty)
         Row(children: [
-          const Icon(Icons.verified_rounded, color: _Look.green, size: 20),
+          const Icon(Icons.verified_rounded, color: LightLook.green, size: 20),
           const SizedBox(width: 8),
-          Text(tr('home.all_good'), style: const TextStyle(color: _Look.green)),
+          Text(tr('home.all_good'), style: const TextStyle(color: LightLook.green)),
         ])
       else
         for (final (icon, text, onTap) in issues)
@@ -646,105 +647,15 @@ class _DashboardPageState extends State<DashboardPage> {
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 6),
               child: Row(children: [
-                Icon(icon, color: _Look.amberText, size: 20),
+                Icon(icon, color: LightLook.amberText, size: 20),
                 const SizedBox(width: 10),
-                Expanded(child: Text(text, style: const TextStyle(fontSize: 14, color: _Look.text))),
-                if (onTap != null) const Icon(Icons.chevron_right_rounded, color: _Look.muted),
+                Expanded(child: Text(text, style: const TextStyle(fontSize: 14, color: LightLook.text))),
+                if (onTap != null) const Icon(Icons.chevron_right_rounded, color: LightLook.muted),
               ]),
             ),
           ),
     ]);
   }
-}
-
-/// Home's colors (light).
-class _Look {
-  _Look._();
-
-  static const page = Color(0xFFF3F6FC);
-  static const text = Color(0xFF16213E);
-  static const muted = Color(0xFF6B7A99);
-  static const blue = Color(0xFF2F6BFF);
-  static const green = Color(0xFF12A35F);
-  static const red = Color(0xFFE5484D);
-  static const amber = Color(0xFFF5A524);
-  static const amberText = Color(0xFFC46A00);
-
-  static BoxDecoration card({Color? border}) => BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: border ?? const Color(0xFFE6ECF7), width: border == null ? 1 : 1.5),
-        boxShadow: const [BoxShadow(color: Color(0x141D3B8A), blurRadius: 18, offset: Offset(0, 6))],
-      );
-
-  static ThemeData theme(ThemeData dark) {
-    final scheme = ColorScheme.fromSeed(seedColor: blue, brightness: Brightness.light).copyWith(primary: blue, surface: Colors.white, onSurface: text);
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: scheme,
-      fontFamily: dark.textTheme.bodyMedium?.fontFamily,
-      fontFamilyFallback: dark.textTheme.bodyMedium?.fontFamilyFallback,
-      scaffoldBackgroundColor: page,
-      tooltipTheme: dark.tooltipTheme,
-    );
-  }
-}
-
-/// A white card, raised a little; lifts more under the mouse.
-class _Card extends StatefulWidget {
-  const _Card({required this.child, this.onTap, this.border, this.padding = const EdgeInsets.all(16)});
-
-  final Widget child;
-  final VoidCallback? onTap;
-  final Color? border;
-  final EdgeInsets padding;
-
-  @override
-  State<_Card> createState() => _CardState();
-}
-
-class _CardState extends State<_Card> {
-  bool _hover = false;
-
-  @override
-  Widget build(BuildContext context) => MouseRegion(
-        cursor: widget.onTap == null ? MouseCursor.defer : SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _hover = true),
-        onExit: (_) => setState(() => _hover = false),
-        child: GestureDetector(
-          onTap: widget.onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 160),
-            transform: Matrix4.translationValues(0, _hover && widget.onTap != null ? -2 : 0, 0),
-            padding: widget.padding,
-            decoration: _Look.card(border: widget.border).copyWith(
-              boxShadow: [BoxShadow(color: const Color(0xFF1D3B8A).withValues(alpha: _hover && widget.onTap != null ? 0.14 : 0.08), blurRadius: 18, offset: const Offset(0, 6))],
-            ),
-            child: widget.child,
-          ),
-        ),
-      );
-}
-
-/// A round icon on a soft gradient.
-class _Badge extends StatelessWidget {
-  const _Badge({required this.icon, required this.colors, this.size = 48});
-
-  final IconData icon;
-  final List<Color> colors;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) => Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: colors),
-          boxShadow: [BoxShadow(color: colors.last.withValues(alpha: 0.35), blurRadius: 12, offset: const Offset(0, 4))],
-        ),
-        child: Icon(icon, color: Colors.white, size: size * 0.5),
-      );
 }
 
 /// One of the main things to do: a bright card with a big icon.
@@ -788,9 +699,9 @@ class _QuickCardState extends State<_QuickCard> {
               const SizedBox(width: 12),
               Expanded(
                 child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(widget.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: _Look.text)),
+                  Text(widget.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: LightLook.text)),
                   const SizedBox(height: 4),
-                  Text(widget.sub, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: _Look.muted, height: 1.3)),
+                  Text(widget.sub, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: LightLook.muted, height: 1.3)),
                 ]),
               ),
               Container(

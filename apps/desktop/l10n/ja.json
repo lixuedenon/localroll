@@ -1620,5 +1620,6 @@
   "home.q_convert": "HEIC・HEVC などを汎用形式に",
   "home.q_player": "動画・写真・PDF、見ながら書き込み",
   "home.q_screen": "画面録画・解説録画・画面ペン",
-  "ink.renumber": "番号を振り直す（番号を選んで数字キーで変更）"
+  "ink.renumber": "番号を振り直す（番号を選んで数字キーで変更）",
+  "library.tagline": "写真・動画・ファイルをここで。いつでも閲覧・再生"
 }
