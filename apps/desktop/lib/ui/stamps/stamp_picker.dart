@@ -47,8 +47,14 @@ String stampName(String id) {
     }
     return '';
   }
-  return tr('stamp.$id');
+  return StampPacks.realName(id, chinese: _chinese) ?? tr('stamp.$id');
 }
+
+/// The realistic stamps have Chinese and English names only.
+bool get _chinese => translator.language.startsWith('zh');
+
+/// A pack's name.
+String packName(String pack) => StampPacks.realPackName(pack, chinese: _chinese) ?? tr('stamp.pack_$pack');
 
 class _StampPicker extends StatefulWidget {
   const _StampPicker({required this.drawn, required this.aspect});
@@ -81,10 +87,17 @@ class _StampPickerState extends State<_StampPicker> {
     final all = _all;
     final q = _q.text.trim().toLowerCase();
     if (q.isNotEmpty) {
-      final hidden = {for (final s in StampPacks.all) if (_lib.hiddenPacks.contains(s.pack)) s.id};
+      final hidden = {for (final s in StampPacks.all) if (_lib.hiddenPacks.contains(s.pack) || !StampPacks.offered.contains(s.pack)) s.id};
+      bool hit(String id) {
+        if (stampName(id).toLowerCase().contains(q) || id.replaceAll('_', ' ').contains(q)) return true;
+        // Realistic stamps: found by either name.
+        final n = StampPacks.realNames(id);
+        return n != null && (n.$1.contains(q) || n.$2.toLowerCase().contains(q));
+      }
+
       return [
         for (final id in all.keys)
-          if (!hidden.contains(id) && (stampName(id).toLowerCase().contains(q) || id.replaceAll('_', ' ').contains(q))) id,
+          if (!hidden.contains(id) && hit(id)) id,
       ];
     }
     return switch (_tab) {
@@ -163,7 +176,7 @@ class _StampPickerState extends State<_StampPicker> {
                 Wrap(spacing: 6, runSpacing: 4, children: [
                   for (final p in k.value)
                     FilterChip(
-                      label: Text(tr('stamp.pack_$p')),
+                      label: Text(packName(p)),
                       selected: !_lib.hiddenPacks.contains(p),
                       onSelected: (v) => set(() => _lib.setPackShown(p, v)),
                     ),
@@ -360,7 +373,7 @@ class _StampPickerState extends State<_StampPicker> {
                 padding: const EdgeInsets.only(top: 6),
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  child: Row(children: [for (final p in k) if (!_lib.hiddenPacks.contains(p)) _chip(p, tr('stamp.pack_$p'))]),
+                  child: Row(children: [for (final p in k) if (!_lib.hiddenPacks.contains(p)) _chip(p, packName(p))]),
                 ),
               ),
           const SizedBox(height: 8),

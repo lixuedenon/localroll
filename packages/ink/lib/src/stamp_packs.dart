@@ -9,6 +9,7 @@ import 'stamp_icons.g.dart';
 
 part 'packs/art.dart';
 part 'packs/draw.dart';
+part 'packs/real.g.dart';
 part 'packs/school.dart';
 part 'packs/sports.dart';
 part 'packs/work.dart';
@@ -26,11 +27,16 @@ class Stamp {
 
 /// The packs that come with LocalRoll.
 class StampPacks {
-  static const List<String> packs = ['basic', 'finance', 'kids', 'math', 'physics', 'chem', 'bio', 'geo', 'history', 'lang', 'code', 'callig', 'music', 'art', 'photo', 'dance', 'tactics', 'fields', 'fitness', 'golf', 'tutorial', 'business', 'shop', 'interior', 'engineering', 'auto', 'legal', 'medical', 'traffic', 'cooking', 'gaming', 'astro'];
+  static const List<String> packs = [
+    'basic', 'finance', 'kids', 'r_math', 'r_phys', 'r_chem', 'r_bio', 'r_med', 'r_gene', 'r_ai', 'r_earth', 'history', 'lang', 'callig',
+    'r_art', 'r_music', 'music', 'photo', 'dance', 'tactics', 'fields', 'fitness', 'golf', 'elec', 'road', 'tutorial', 'business', 'shop',
+    'interior', 'auto', 'legal', 'cooking', 'gaming',
+  ];
 
   /// Stamps whose words are asked for when placed (a number, a price, a
   /// year…; the word in the picture is only an example).
-  static const Set<String> editable = {
+  static final Set<String> editable = {
+    ..._realEditable,
     'hist_label', 'chem_element', 'geo_scale', 'mus_time', 'mus_jianpu', 'fit_sets', 'tac_red', 'tac_blue', 'dance_spot',
     'dance_count', 'callig_order', 'tut_step', 'tut_key', 'tut_key_c', 'biz_high', 'biz_mid', 'biz_low', 'biz_seal_done',
     'biz_seal_wip', 'biz_seal_hold', 'shop_price', 'shop_was', 'shop_burst', 'shop_new', 'shop_limited', 'shop_sale',
@@ -54,13 +60,50 @@ class StampPacks {
   }
 
   /// The packs by kind (the panel shows a kind, then its packs).
+  /// (The older line-drawn math / physics / chemistry / biology / geography /
+  /// coding / art / medical / traffic / engineering / astronomy packs were
+  /// replaced by the realistic, coloured ones; their stamps stay readable in
+  /// saved marks but are no longer offered.)
   static const Map<String, List<String>> kinds = {
     'general': ['basic', 'finance', 'kids'],
-    'school': ['math', 'physics', 'chem', 'bio', 'geo', 'history', 'lang', 'code', 'callig'],
-    'art': ['music', 'art', 'photo', 'dance'],
+    'school': ['r_math', 'r_phys', 'r_chem', 'r_bio', 'r_med', 'r_gene', 'r_ai', 'r_earth', 'history', 'lang', 'callig'],
+    'art': ['r_art', 'r_music', 'music', 'photo', 'dance'],
     'sports': ['tactics', 'fields', 'fitness', 'golf'],
-    'work': ['tutorial', 'business', 'shop', 'interior', 'engineering', 'auto', 'legal', 'medical', 'traffic', 'cooking', 'gaming', 'astro'],
+    'work': ['elec', 'road', 'tutorial', 'business', 'shop', 'interior', 'auto', 'legal', 'cooking', 'gaming'],
   };
+
+  /// Packs shown in the panel.
+  static final Set<String> offered = {for (final k in kinds.values) ...k};
+
+  // The realistic, coloured stamps: drawn as pictures, named in Chinese and
+  // English only (other languages show the English name).
+  static Map<String, dynamic>? _realData;
+  static Map<String, dynamic> get _real => _realData ??= jsonDecode(_realJson) as Map<String, dynamic>;
+  static Map<String, (String, String)>? _realNameMap;
+  static Map<String, (String, String)> get _realNames => _realNameMap ??= {
+        for (final s in _real['stamps'] as List) (s['id'] as String): (s['zh'] as String, s['en'] as String),
+      };
+  static Set<String> get _realEditable => {for (final s in _real['stamps'] as List) if (s['ed'] == 1) s['id'] as String};
+
+  /// A realistic stamp's name (null: not one of them).
+  static String? realName(String id, {required bool chinese}) {
+    final n = _realNames[id];
+    return n == null ? null : (chinese ? n.$1 : n.$2);
+  }
+
+  /// Both names of a realistic stamp (for search), or null.
+  static (String, String)? realNames(String id) => _realNames[id];
+
+  /// A realistic pack's name (null: not one of them).
+  static String? realPackName(String pack, {required bool chinese}) {
+    final p = (_real['packs'] as Map<String, dynamic>)[pack] as List?;
+    return p == null ? null : (chinese ? p[0] : p[1]) as String;
+  }
+
+  static List<Stamp> _realStamps() => [
+        for (final s in _real['stamps'] as List)
+          Stamp(id: s['id'] as String, pack: s['p'] as String, shape: StampShape.fromJson((s['s'] as Map).cast<String, dynamic>())),
+      ];
 
   static Map<String, List<List<Offset>>>? _icons;
 
@@ -176,5 +219,6 @@ class StampPacks {
         ..._artStamps(),
         ..._sportsStamps(),
         ..._workStamps(),
+        ..._realStamps(),
       ];
 }
