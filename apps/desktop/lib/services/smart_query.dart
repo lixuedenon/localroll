@@ -42,19 +42,19 @@ class SmartQuery {
     // Days and weeks.
     if (take(RegExp(r'今天|today', caseSensitive: false), (_) {})) {
       from = day(n);
-      to = from!.add(const Duration(days: 1));
+      to = from.add(const Duration(days: 1));
     } else if (take(RegExp(r'昨天|yesterday', caseSensitive: false), (_) {})) {
       to = day(n);
-      from = to!.subtract(const Duration(days: 1));
+      from = to.subtract(const Duration(days: 1));
     } else if (take(RegExp(r'前天'), (_) {})) {
       to = day(n).subtract(const Duration(days: 1));
-      from = to!.subtract(const Duration(days: 1));
+      from = to.subtract(const Duration(days: 1));
     } else if (take(RegExp(r'这周|本周|this week', caseSensitive: false), (_) {})) {
       from = day(n).subtract(Duration(days: n.weekday - 1));
-      to = from!.add(const Duration(days: 7));
+      to = from.add(const Duration(days: 7));
     } else if (take(RegExp(r'上周|上个?星期|last week', caseSensitive: false), (_) {})) {
       to = day(n).subtract(Duration(days: n.weekday - 1));
-      from = to!.subtract(const Duration(days: 7));
+      from = to.subtract(const Duration(days: 7));
     } else if (take(RegExp(r'最近|近来|recent(ly)?', caseSensitive: false), (_) {})) {
       from = day(n).subtract(const Duration(days: 30));
     }
@@ -96,16 +96,16 @@ class SmartQuery {
         from = DateTime(y, month!);
         to = DateTime(y, month! + 1);
         // "3月" alone, still to come this year: last year's.
-        if (year == null && from!.isAfter(n)) {
+        if (year == null && from.isAfter(n)) {
           from = DateTime(y - 1, month!);
           to = DateTime(y - 1, month! + 1);
         }
       } else if (months != null) {
-        from = DateTime(y, months!.first);
-        to = DateTime(y, months!.last + 1);
-        if (year == null && from!.isAfter(n)) {
-          from = DateTime(y - 1, months!.first);
-          to = DateTime(y - 1, months!.last + 1);
+        from = DateTime(y, months.first);
+        to = DateTime(y, months.last + 1);
+        if (year == null && from.isAfter(n)) {
+          from = DateTime(y - 1, months.first);
+          to = DateTime(y - 1, months.last + 1);
         }
       } else if (year != null) {
         from = DateTime(y);
