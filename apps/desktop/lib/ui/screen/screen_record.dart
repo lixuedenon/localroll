@@ -448,7 +448,7 @@ class ScreenRecorder extends ChangeNotifier {
       _savedWindow = PenSession.instance.savedWindow;
       PenSession.instance.handOver();
     } else {
-      _savedWindow = WinScreen.ownRect();
+      _savedWindow = WinScreen.ownPlaceRect();
     }
     AppNav.instance.fullscreen.value = true;
     await windowManager.setMinimumSize(const Size(200, 40));
@@ -1648,7 +1648,7 @@ Widget _volume(String label, double v, ValueChanged<double> on) => Padding(
 Future<WindowInfo?> _pickWindow(BuildContext context, AppServices s, ScreenInfo screen) async {
   final exe = s.ffmpeg.ffmpeg;
   if (exe == null) return null;
-  final saved = WinScreen.ownRect();
+  final saved = WinScreen.ownPlaceRect();
   final list = [for (final w in WinScreen.windows()) if (w.rect.overlaps(screen.rect)) w];
   final shot = await _Gdi.still(exe, screen);
   if (shot == null) return null;
@@ -1766,7 +1766,7 @@ Future<Rect?> _pickArea(BuildContext context, AppServices s, ScreenInfo screen) 
     }
     if (!context.mounted) return null;
   }
-  final saved = WinScreen.ownRect();
+  final saved = WinScreen.ownPlaceRect();
   final shot = await _Gdi.still(exe, screen);
   if (shot == null) return null;
   AppNav.instance.fullscreen.value = true;

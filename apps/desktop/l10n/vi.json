@@ -1619,5 +1619,6 @@
   "home.q_library": "Ảnh, video và tệp",
   "home.q_convert": "HEIC, HEVC… sang định dạng phổ biến",
   "home.q_player": "Video, ảnh, PDF kèm vẽ chú thích",
-  "home.q_screen": "Màn hình, bài giảng, bút vẽ"
+  "home.q_screen": "Màn hình, bài giảng, bút vẽ",
+  "ink.renumber": "Đánh số lại (chọn số rồi gõ chữ số để đổi)"
 }

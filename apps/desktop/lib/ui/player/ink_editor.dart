@@ -43,7 +43,6 @@ class InkEditor extends ChangeNotifier {
     // Continue the real-time line of an annotation being changed.
     final last = this.inks.fold<int>(0, (m, i) => math.max(m, (i.wallMs ?? 0) + i.drawMs));
     _wallBase = last == 0 ? 0 : last + 1000;
-    _number = 1 + this.inks.fold<int>(0, (m, i) => math.max(m, i.number ?? 0));
   }
 
   final bool video;
@@ -76,7 +75,50 @@ class InkEditor extends ChangeNotifier {
   /// A text being typed (its mark).
   String? typingId;
 
-  int _number = 1;
+  /// The next number: the smallest one not on the page (5 deleted: 5 again).
+  int get _nextNumber {
+    final used = {for (final i in inks) if (i.number != null) i.number!};
+    var n = 1;
+    while (used.contains(n)) {
+      n++;
+    }
+    return n;
+  }
+
+  bool get hasNumbers => inks.any((i) => i.tool == InkTool.number);
+
+  int _typedAt = 0;
+  String? _typedOn;
+
+  /// A digit typed while a number is selected: it becomes that number;
+  /// digits typed quickly one after another make one number (1, 2 → 12).
+  /// False: nothing to change.
+  bool typeDigit(int d) {
+    final s = selected;
+    if (s == null || s.tool != InkTool.number) return false;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final more = _typedOn == s.id && now - _typedAt < 1200;
+    final n = more ? (s.number ?? 0) * 10 + d : d;
+    _typedAt = now;
+    _typedOn = s.id;
+    if (n <= 0 || n > 999) return true;
+    if (!more) remember();
+    s.number = n;
+    notifyListeners();
+    return true;
+  }
+
+  /// Numbers 1, 2, 3… again, in the order they were put down.
+  void renumber() {
+    if (!hasNumbers) return;
+    remember();
+    var n = 1;
+    for (final i in inks) {
+      if (i.tool == InkTool.number) i.number = n++;
+    }
+    notifyListeners();
+  }
+
   bool get isEmpty => inks.isEmpty;
   bool get canUndo => _undoInks.isNotEmpty;
   bool get canRedo => _redoInks.isNotEmpty;
@@ -268,7 +310,7 @@ class InkEditor extends ChangeNotifier {
     if (t == InkTool.check || t == InkTool.cross || t == InkTool.number) {
       remember();
       final i = _new(t, at);
-      if (t == InkTool.number) i.number = _number++;
+      if (t == InkTool.number) i.number = _nextNumber;
       inks.add(i);
       notifyListeners();
       return;
@@ -429,7 +471,6 @@ class InkEditor extends ChangeNotifier {
     if (gone != null) {
       inks.remove(gone);
       if (_undoInks.isNotEmpty) _undoInks.removeLast();
-      if (gone.number != null) _number = gone.number!;
     }
     sessionStart.remove(id);
     sessionTimes.remove(id);
@@ -890,6 +931,13 @@ class InkToolbar extends StatelessWidget {
               icon: const Icon(Icons.redo_rounded, size: 20),
               color: Colors.white,
             ),
+            if (editor.hasNumbers)
+              IconButton(
+                tooltip: tr('ink.renumber'),
+                onPressed: editor.renumber,
+                icon: const Icon(Icons.format_list_numbered_rounded, size: 20),
+                color: Colors.white,
+              ),
             IconButton(
               tooltip: tr('ink.clear'),
               onPressed: editor.isEmpty ? null : editor.clear,

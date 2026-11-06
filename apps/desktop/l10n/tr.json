@@ -1619,5 +1619,6 @@
   "home.q_library": "Fotoğraf, video ve dosyalar",
   "home.q_convert": "HEIC, HEVC… yaygın biçimlere",
   "home.q_player": "Video, fotoğraf, PDF ve notlar",
-  "home.q_screen": "Ekran, ders, ekran kalemi"
+  "home.q_screen": "Ekran, ders, ekran kalemi",
+  "ink.renumber": "Yeniden numarala (numarayı seçip rakam yazarak değiştirin)"
 }

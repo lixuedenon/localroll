@@ -556,5 +556,6 @@
   "clip.file_name": "描き込みクリップ",
   "clip.saved_album": "写真に保存しました",
   "clip.save_album": "写真に保存",
-  "clip.send": "送信"
+  "clip.send": "送信",
+  "home.me_shown": "この端末 · PCに表示される名前（タップで変更）"
 }

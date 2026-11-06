@@ -1619,5 +1619,6 @@
   "home.q_library": "사진·동영상·파일 모두 여기",
   "home.q_convert": "HEIC·HEVC 등을 범용 형식으로",
   "home.q_player": "동영상·사진·PDF, 보면서 표시",
-  "home.q_screen": "화면·강의 녹화, 화면 펜"
+  "home.q_screen": "화면·강의 녹화, 화면 펜",
+  "ink.renumber": "번호 다시 매기기 (번호 선택 후 숫자 키로 변경)"
 }

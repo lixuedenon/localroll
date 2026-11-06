@@ -48,7 +48,7 @@ class _PenToolbarState extends State<PenToolbar> {
 
   /// A panel (stamps / candles): the bar grows for it a moment, then back.
   Future<T?> _big<T>(Future<T?> Function() show) async {
-    final was = WinScreen.ownRect();
+    final was = WinScreen.ownPlaceRect();
     final k = MediaQuery.devicePixelRatioOf(context);
     if (was != null) {
       WinScreen.place(Rect.fromLTWH(was.left, was.top, math.max(was.width, 820 * k), math.max(was.height, 680 * k)), onTop: true);
@@ -193,6 +193,7 @@ class _PenToolbarState extends State<PenToolbar> {
                   _btn(Icons.undo_rounded, tr('ink.undo'), o.canUndo ? o.undo : null),
                   _btn(Icons.redo_rounded, tr('ink.redo'), o.canRedo ? o.redo : null),
                   if (o.selected) _btn(Icons.delete_outline_rounded, tr('ink.delete'), o.deleteSelected),
+                  if (o.hasNumbers) _btn(Icons.format_list_numbered_rounded, tr('ink.renumber'), o.renumber),
                   _btn(Icons.delete_sweep_rounded, tr('pen.clear_page'), o.clearPage),
                   _btn(Icons.note_add_outlined, tr('pen.new_page'), o.newPage),
                   if (o.sheets > 1) ...[
@@ -270,7 +271,7 @@ class PenSession {
       if (ctx != null) ScaffoldMessenger.maybeOf(ctx)?.showSnackBar(SnackBar(content: Text(tr('pen.missing'))));
       return false;
     }
-    _saved = WinScreen.ownRect();
+    _saved = WinScreen.ownPlaceRect();
     AppNav.instance.fullscreen.value = true;
     await windowManager.setMinimumSize(const Size(200, 40));
     // The toolbar is moved by its grip only; never resized.
@@ -433,7 +434,7 @@ class BarPlace {
   }
 
   static void save() {
-    final r = WinScreen.ownRect();
+    final r = WinScreen.ownPlaceRect();
     if (r != null) PenSession.instance.services?.player.setBarAt(r.topLeft);
   }
 }

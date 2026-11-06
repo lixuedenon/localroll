@@ -34,6 +34,9 @@ class PenOverlay extends ChangeNotifier {
   Color color = const Color(0xFFFF3B30);
   int level = 1;
   bool canUndo = false, canRedo = false, selected = false;
+
+  /// Numbers on this sheet (offer "renumber").
+  bool hasNumbers = false;
   int sheet = 1, sheets = 1;
 
   /// 0 none, 1 white board, 2 black board.
@@ -132,6 +135,7 @@ class PenOverlay extends ChangeNotifier {
           selected = parts[4] == '1';
           sheet = int.tryParse(parts[5]) ?? 1;
           sheets = int.tryParse(parts[6]) ?? 1;
+          hasNumbers = parts.length > 7 && parts[7] == '1';
           notifyListeners();
         }
       case 'text':
@@ -216,6 +220,9 @@ class PenOverlay extends ChangeNotifier {
   void redo() => _send('redo');
   void clearPage() => _send('clear');
   void deleteSelected() => _send('delete');
+
+  /// Numbers 1, 2, 3… again, in the order they were put down.
+  void renumber() => _send('renumber');
   void newPage() => _send('newpage');
   void prevPage() => _send('prevpage');
   void nextPage() => _send('nextpage');

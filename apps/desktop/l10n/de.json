@@ -1619,5 +1619,6 @@
   "home.q_library": "Fotos, Videos und Dateien",
   "home.q_convert": "HEIC, HEVC … in gängige Formate",
   "home.q_player": "Videos, Fotos, PDF – mit Markierungen",
-  "home.q_screen": "Bildschirm, Erklärvideos, Stift"
+  "home.q_screen": "Bildschirm, Erklärvideos, Stift",
+  "ink.renumber": "Neu nummerieren (Nummer wählen und Ziffer tippen zum Ändern)"
 }

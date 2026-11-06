@@ -556,5 +556,6 @@
   "clip.file_name": "塗鴉片段",
   "clip.saved_album": "已儲存到相簿",
   "clip.save_album": "儲存到相簿",
-  "clip.send": "傳送"
+  "clip.send": "傳送",
+  "home.me_shown": "本機 · 電腦上顯示這個名字，點一下改名"
 }

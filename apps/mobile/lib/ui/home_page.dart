@@ -1161,7 +1161,46 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       ),
                     ),
                   ]),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
+                  // This phone: the name the computers see it by; tap to change.
+                  ListenableBuilder(
+                    listenable: widget.settings,
+                    builder: (context, _) => Material(
+                      color: Colors.white.withValues(alpha: 0.18),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: BorderSide(color: Colors.white.withValues(alpha: 0.45)),
+                      ),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(16),
+                        onTap: () => unawaited(editPhoneName(context, widget.settings, widget.discovery)),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
+                          child: Row(children: [
+                            Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.9)),
+                              child: const Icon(Icons.smartphone_rounded, color: HomeColors.blue, size: 20),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                Text(widget.settings.deviceName,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w700)),
+                                Text(tr('home.me_shown'),
+                                    maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Color(0xDDFFFFFF), fontSize: 12.5)),
+                              ]),
+                            ),
+                            const Icon(Icons.edit_rounded, color: Colors.white, size: 18),
+                          ]),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   DeviceStrip(settings: widget.settings, discovery: widget.discovery, onTap: _onDevice, onAdd: _openConnect, light: true),
                   ReceivingBanner(server: _server),
                   _lostBanner(context),

@@ -329,6 +329,24 @@ class WinScreen {
     return h == 0 ? null : windowRect(h);
   }
 
+  /// LocalRoll's window as [place] takes it (with the invisible resize
+  /// borders): for putting it back exactly where it was. ([ownRect] is the
+  /// frame as seen, a few pixels smaller each side — putting that back
+  /// shrank the window a little every time.)
+  static Rect? ownPlaceRect() {
+    final u = _user32;
+    final h = ownWindow();
+    if (u == null || h == 0) return null;
+    if (u.lookupFunction<Int32 Function(IntPtr), int Function(int)>('IsIconic')(h) != 0) return null;
+    final r = calloc<_RECT>();
+    try {
+      if (u.lookupFunction<Int32 Function(IntPtr, Pointer<_RECT>), int Function(int, Pointer<_RECT>)>('GetWindowRect')(h, r) == 0) return null;
+      return Rect.fromLTRB(r.ref.left.toDouble(), r.ref.top.toDouble(), r.ref.right.toDouble(), r.ref.bottom.toDouble());
+    } finally {
+      calloc.free(r);
+    }
+  }
+
   /// The mouse, in screen pixels.
   static Offset cursor() {
     final u = _user32;

@@ -558,6 +558,7 @@ const Map<String, Map<String, String>> translations = {
     'clip.saved_album': 'Saved to Photos',
     'clip.save_album': 'Save to Photos',
     'clip.send': 'Send',
+    'home.me_shown': 'This phone · how computers see it — tap to rename',
   },
   'zh': {
     'common.cancel': '取消',
@@ -1114,6 +1115,7 @@ const Map<String, Map<String, String>> translations = {
     'clip.saved_album': '已保存到相册',
     'clip.save_album': '保存到相册',
     'clip.send': '发送',
+    'home.me_shown': '本机 · 电脑上显示这个名字，点一下改名',
   },
   'zh_Hant': {
     'common.cancel': '取消',
@@ -1670,6 +1672,7 @@ const Map<String, Map<String, String>> translations = {
     'clip.saved_album': '已儲存到相簿',
     'clip.save_album': '儲存到相簿',
     'clip.send': '傳送',
+    'home.me_shown': '本機 · 電腦上顯示這個名字，點一下改名',
   },
   'ja': {
     'common.cancel': 'キャンセル',
@@ -2226,6 +2229,7 @@ const Map<String, Map<String, String>> translations = {
     'clip.saved_album': '写真に保存しました',
     'clip.save_album': '写真に保存',
     'clip.send': '送信',
+    'home.me_shown': 'この端末 · PCに表示される名前（タップで変更）',
   },
   'ko': {
     'common.cancel': '취소',
@@ -2782,6 +2786,7 @@ const Map<String, Map<String, String>> translations = {
     'clip.saved_album': '사진에 저장했습니다',
     'clip.save_album': '사진에 저장',
     'clip.send': '보내기',
+    'home.me_shown': '이 폰 · PC에 보이는 이름 (탭하여 변경)',
   },
   'es': {
     'common.cancel': 'Cancelar',
@@ -3338,6 +3343,7 @@ const Map<String, Map<String, String>> translations = {
     'clip.saved_album': 'Guardado en Fotos',
     'clip.save_album': 'Guardar en Fotos',
     'clip.send': 'Enviar',
+    'home.me_shown': 'Este móvil · así lo ven los PC; toca para cambiar',
   },
   'fr': {
     'common.cancel': 'Annuler',
@@ -3894,6 +3900,7 @@ const Map<String, Map<String, String>> translations = {
     'clip.saved_album': 'Enregistré dans Photos',
     'clip.save_album': 'Enregistrer dans Photos',
     'clip.send': 'Envoyer',
+    'home.me_shown': 'Ce téléphone · nom vu par les PC, touchez pour changer',
   },
   'de': {
     'common.cancel': 'Abbrechen',
@@ -4450,6 +4457,7 @@ const Map<String, Map<String, String>> translations = {
     'clip.saved_album': 'In Fotos gespeichert',
     'clip.save_album': 'In Fotos speichern',
     'clip.send': 'Senden',
+    'home.me_shown': 'Dieses Handy · so sehen es die PCs – tippen zum Ändern',
   },
   'pt': {
     'common.cancel': 'Cancelar',
@@ -5006,6 +5014,7 @@ const Map<String, Map<String, String>> translations = {
     'clip.saved_album': 'Salvo em Fotos',
     'clip.save_album': 'Salvar em Fotos',
     'clip.send': 'Enviar',
+    'home.me_shown': 'Este celular · nome visto pelos PCs; toque para mudar',
   },
   'ru': {
     'common.cancel': 'Отмена',
@@ -5562,6 +5571,7 @@ const Map<String, Map<String, String>> translations = {
     'clip.saved_album': 'Сохранено в «Фото»',
     'clip.save_album': 'Сохранить в «Фото»',
     'clip.send': 'Отправить',
+    'home.me_shown': 'Этот телефон · так его видят ПК, нажмите для изменения',
   },
   'it': {
     'common.cancel': 'Annulla',
@@ -6118,6 +6128,7 @@ const Map<String, Map<String, String>> translations = {
     'clip.saved_album': 'Salvato in Foto',
     'clip.save_album': 'Salva in Foto',
     'clip.send': 'Invia',
+    'home.me_shown': 'Questo telefono · nome visto dai PC, tocca per cambiare',
   },
   'ar': {
     'common.cancel': 'إلغاء',
@@ -6674,6 +6685,7 @@ const Map<String, Map<String, String>> translations = {
     'clip.saved_album': 'تم الحفظ في الصور',
     'clip.save_album': 'حفظ في الصور',
     'clip.send': 'إرسال',
+    'home.me_shown': 'هذا الهاتف · الاسم الذي تراه الحواسيب، انقر للتغيير',
   },
   'hi': {
     'common.cancel': 'रद्द करें',
@@ -7230,6 +7242,7 @@ const Map<String, Map<String, String>> translations = {
     'clip.saved_album': 'फ़ोटो में सहेजा गया',
     'clip.save_album': 'फ़ोटो में सहेजें',
     'clip.send': 'भेजें',
+    'home.me_shown': 'यह फ़ोन · पीसी पर यही नाम दिखता है, बदलने हेतु टैप करें',
   },
   'id': {
     'common.cancel': 'Batal',
@@ -7786,6 +7799,7 @@ const Map<String, Map<String, String>> translations = {
     'clip.saved_album': 'Tersimpan di Foto',
     'clip.save_album': 'Simpan ke Foto',
     'clip.send': 'Kirim',
+    'home.me_shown': 'HP ini · nama yang terlihat di PC, ketuk untuk ganti',
   },
   'vi': {
     'common.cancel': 'Hủy',
@@ -8342,6 +8356,7 @@ const Map<String, Map<String, String>> translations = {
     'clip.saved_album': 'Đã lưu vào Ảnh',
     'clip.save_album': 'Lưu vào Ảnh',
     'clip.send': 'Gửi',
+    'home.me_shown': 'Máy này · tên hiển thị trên máy tính, chạm để đổi',
   },
   'th': {
     'common.cancel': 'ยกเลิก',
@@ -8898,6 +8913,7 @@ const Map<String, Map<String, String>> translations = {
     'clip.saved_album': 'บันทึกลงรูปภาพแล้ว',
     'clip.save_album': 'บันทึกลงรูปภาพ',
     'clip.send': 'ส่ง',
+    'home.me_shown': 'เครื่องนี้ · ชื่อที่พีซีเห็น แตะเพื่อเปลี่ยน',
   },
   'tr': {
     'common.cancel': 'İptal',
@@ -9454,5 +9470,6 @@ const Map<String, Map<String, String>> translations = {
     'clip.saved_album': 'Fotoğraflar\'a kaydedildi',
     'clip.save_album': 'Fotoğraflar\'a kaydet',
     'clip.send': 'Gönder',
+    'home.me_shown': 'Bu telefon · bilgisayarların gördüğü ad, değiştirmek için dokunun',
   },
 };

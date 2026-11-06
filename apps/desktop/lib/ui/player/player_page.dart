@@ -561,6 +561,9 @@ class _PlayerPageState extends State<PlayerPage> {
         ed.deleteSelected();
         return KeyEventResult.handled;
       }
+      // A selected number: a digit key changes it.
+      final digit = _digitOf(k);
+      if (digit != null && ed.typeDigit(digit)) return KeyEventResult.handled;
       if (k == LogicalKeyboardKey.escape) {
         unawaited(_finishDraw());
         return KeyEventResult.handled;
@@ -2523,4 +2526,20 @@ class _InfoPanelState extends State<_InfoPanel> {
       ),
     );
   }
+}
+
+/// 0–9 from the top row or the number pad (null: not a digit).
+int? _digitOf(LogicalKeyboardKey k) {
+  const top = [
+    LogicalKeyboardKey.digit0, LogicalKeyboardKey.digit1, LogicalKeyboardKey.digit2, LogicalKeyboardKey.digit3, LogicalKeyboardKey.digit4,
+    LogicalKeyboardKey.digit5, LogicalKeyboardKey.digit6, LogicalKeyboardKey.digit7, LogicalKeyboardKey.digit8, LogicalKeyboardKey.digit9,
+  ];
+  const pad = [
+    LogicalKeyboardKey.numpad0, LogicalKeyboardKey.numpad1, LogicalKeyboardKey.numpad2, LogicalKeyboardKey.numpad3, LogicalKeyboardKey.numpad4,
+    LogicalKeyboardKey.numpad5, LogicalKeyboardKey.numpad6, LogicalKeyboardKey.numpad7, LogicalKeyboardKey.numpad8, LogicalKeyboardKey.numpad9,
+  ];
+  final a = top.indexOf(k);
+  if (a >= 0) return a;
+  final b = pad.indexOf(k);
+  return b >= 0 ? b : null;
 }

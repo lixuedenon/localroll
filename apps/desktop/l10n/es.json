@@ -1619,5 +1619,6 @@
   "home.q_library": "Fotos, vídeos y archivos",
   "home.q_convert": "HEIC, HEVC… a formatos comunes",
   "home.q_player": "Vídeos, fotos, PDF y anotaciones",
-  "home.q_screen": "Pantalla, lecciones, dibujar"
+  "home.q_screen": "Pantalla, lecciones, dibujar",
+  "ink.renumber": "Renumerar (selecciona un número y pulsa una cifra para cambiarlo)"
 }

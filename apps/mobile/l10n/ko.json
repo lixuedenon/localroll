@@ -556,5 +556,6 @@
   "clip.file_name": "그리기 클립",
   "clip.saved_album": "사진에 저장했습니다",
   "clip.save_album": "사진에 저장",
-  "clip.send": "보내기"
+  "clip.send": "보내기",
+  "home.me_shown": "이 폰 · PC에 보이는 이름 (탭하여 변경)"
 }

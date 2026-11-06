@@ -52,6 +52,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <map>
+#include <set>
 #include <memory>
 #include <string>
 #include <thread>
@@ -157,7 +158,10 @@ RECT g_virt{};  // all screens, pixels
 std::map<HWND, Page> g_pages;
 HWND g_page = nullptr;
 bool g_draw = false, g_pass = false, g_visible = true;
-int g_tool = kPen, g_level = 1, g_nextId = 1, g_nextNumber = 1;
+int g_tool = kPen, g_level = 1, g_nextId = 1;
+// A selected number being typed: when the last digit came, and on which.
+ULONGLONG g_typedAt = 0;
+int g_typedOn = 0;
 UINT32 g_color = 0xFFFF3B30;
 UINT32 g_up = 0xFF16A34A, g_down = 0xFFE53935;
 int g_candleKind = 0;  // 0 normal, 1 long upper, 2 long lower, 3 bald, 4 doji
@@ -287,12 +291,29 @@ void reportDiff() {
   }
 }
 
+int nextNumber() {
+  std::set<int> used;
+  for (const auto& m : sheet().marks) {
+    if (m.tool == kNumber) used.insert(m.number);
+  }
+  int n = 1;
+  while (used.count(n)) ++n;
+  return n;
+}
+
+bool hasNumbers() {
+  for (const auto& m : sheet().marks) {
+    if (m.tool == kNumber) return true;
+  }
+  return false;
+}
+
 void emitState() {
   Page& p = page();
   Sheet& s = p.sheet();
   char b[160];
-  std::snprintf(b, sizeof b, "state %s %d %d %d %d %d", g_draw ? "draw" : "operate", s.undo.empty() ? 0 : 1,
-                s.redo.empty() ? 0 : 1, g_selected != 0 ? 1 : 0, p.cur + 1, static_cast<int>(p.sheets.size()));
+  std::snprintf(b, sizeof b, "state %s %d %d %d %d %d %d", g_draw ? "draw" : "operate", s.undo.empty() ? 0 : 1,
+                s.redo.empty() ? 0 : 1, g_selected != 0 ? 1 : 0, p.cur + 1, static_cast<int>(p.sheets.size()), hasNumbers() ? 1 : 0);
   emit(b);
 }
 
@@ -808,6 +829,10 @@ void setMode(bool draw) {
   emitState();
 }
 
+// The next number: the smallest one not on this sheet (5 deleted: 5 again).
+int nextNumber();
+bool hasNumbers();
+
 void remember() {
   auto& s = sheet();
   s.undo.push_back(s.marks);
@@ -843,7 +868,6 @@ void dropMade(int id) {
   auto& s = sheet();
   auto it = std::find_if(s.marks.begin(), s.marks.end(), [id](const Mark& m) { return m.id == id; });
   if (it == s.marks.end()) return;
-  if (it->tool == kNumber) g_nextNumber = it->number;
   s.marks.erase(it);
   if (!s.undo.empty()) s.undo.pop_back();
 }
@@ -986,7 +1010,7 @@ void onDown(D2D1_POINT_2F p) {
     case kNumber: {
       remember();
       Mark m = newMark(g_tool, p);
-      if (g_tool == kNumber) m.number = g_nextNumber++;
+      if (g_tool == kNumber) m.number = nextNumber();
       m.doneAt = now;
       sheet().marks.push_back(m);
       g_made = m.id;
@@ -1191,6 +1215,27 @@ LRESULT CALLBACK keyHook(int code, WPARAM wp, LPARAM lp) {
       if (vk == VK_ESCAPE) {
         select(0);
         return 1;
+      }
+      // A selected number: a digit key changes it (1, 2 quickly: 12).
+      const int d = vk >= '0' && vk <= '9' ? vk - '0' : (vk >= VK_NUMPAD0 && vk <= VK_NUMPAD9 ? vk - VK_NUMPAD0 : -1);
+      if (d >= 0) {
+        if (Mark* s = findMark(g_selected); s && s->tool == kNumber) {
+          const ULONGLONG now = GetTickCount64();
+          const bool more = g_typedOn == s->id && now - g_typedAt < 1200;
+          const int n = more ? s->number * 10 + d : d;
+          g_typedAt = now;
+          g_typedOn = s->id;
+          if (n > 0 && n <= 999) {
+            if (!more) remember();
+            RECT before = areaOf(*s);
+            s->number = n;
+            RECT after = areaOf(*s);
+            UnionRect(&before, &before, &after);
+            render(&before);
+            emitState();
+          }
+          return 1;
+        }
       }
     }
   }
@@ -1513,6 +1558,16 @@ void command(const std::string& line) {
     emitState();
   } else if (cmd == "delete") {
     deleteSelected();
+  } else if (cmd == "renumber") {
+    if (hasNumbers()) {
+      remember();
+      int n = 1;
+      for (auto& m : sheet().marks) {
+        if (m.tool == kNumber) m.number = n++;
+      }
+      render();
+    }
+    emitState();
   } else if (cmd == "newpage") {
     auto& p = page();
     p.sheets.emplace_back();
