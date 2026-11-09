@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
@@ -15,8 +16,12 @@ import 'received_files.dart';
 
 /// A guest's file (shared with them, or received from them).
 class GuestFile {
-  GuestFile(this.path, this.name, this.size);
+  GuestFile(this.path, this.name, this.size) : id = ++_next;
 
+  static int _next = 0;
+
+  /// Stays the same while the list changes (the page asks by it).
+  final int id;
   final String path;
   final String name;
   final int size;
@@ -121,15 +126,19 @@ class GuestServer extends ChangeNotifier {
     notifyListeners();
   }
 
-  void share(List<File> files) {
-    for (final f in files) {
-      if (shared.any((x) => x.path == f.path)) continue;
+  void share(List<String> paths) {
+    for (final p in paths) {
+      if (shared.any((x) => x.path == p)) continue;
       try {
-        shared.add(GuestFile(f.path, f.uri.pathSegments.last, f.lengthSync()));
+        final f = File(p);
+        shared.add(GuestFile(p, p.split(RegExp(r'[\\/]')).last, f.lengthSync()));
       } catch (_) {}
     }
     notifyListeners();
   }
+
+  /// All shared files fit in one plain .zip (no ZIP64: under 4 GB).
+  bool get zipOk => shared.length > 1 && shared.fold<int>(0, (n, f) => n + f.size) < 0xF0000000;
 
   void unshare(GuestFile f) {
     shared.remove(f);
@@ -156,19 +165,22 @@ class GuestServer extends ChangeNotifier {
     if (req.method == 'GET' && path == '/api/list') {
       return _json(r, 200, {
         'ok': true,
-        'files': [for (var i = 0; i < shared.length; i++) {'i': i, 'name': shared[i].name, 'size': shared[i].size}],
+        'files': [for (final f in shared) {'i': f.id, 'name': f.name, 'size': f.size}],
+        'zip': zipOk,
       });
     }
     if (req.method == 'GET' && path.startsWith('/api/get/')) {
       final i = int.tryParse(path.substring(9));
-      if (i == null || i < 0 || i >= shared.length) return _json(r, 404, {'ok': false});
-      final f = shared[i];
-      r.headers.contentType = ContentType.binary;
+      final f = shared.where((x) => x.id == i).firstOrNull;
+      if (f == null) return _json(r, 404, {'ok': false});
+      // The real type: the phone then knows a photo is a photo (gallery).
+      r.headers.contentType = ContentType.parse(mimeOf(f.name));
       r.headers.set('Content-Disposition', "attachment; filename*=UTF-8''${Uri.encodeComponent(f.name)}");
       r.headers.contentLength = f.size;
       await r.addStream(File(f.path).openRead());
       return r.close();
     }
+    if (req.method == 'GET' && path == '/api/zip') return _zip(r);
     if (req.method == 'POST' && path == '/api/offer') return _offer(req, guest);
     if (req.method == 'PUT' && path == '/api/up') return _upload(req, guest);
     return _json(r, 404, {'ok': false});
@@ -283,6 +295,93 @@ class GuestServer extends ChangeNotifier {
     return _json(req.response, 200, {'ok': true});
   }
 
+  /// Everything shared, as one .zip streamed as it is read (stored, not
+  /// compressed: photos and videos are compressed already).
+  Future<void> _zip(HttpResponse r) async {
+    if (!zipOk) return _json(r, 404, {'ok': false});
+    final now = DateTime.now();
+    r.headers.contentType = ContentType.parse('application/zip');
+    r.headers.set('Content-Disposition', "attachment; filename*=UTF-8''${Uri.encodeComponent('Keepnear-${now.month}-${now.day}.zip')}");
+    final dosTime = (now.hour << 11) | (now.minute << 5) | (now.second ~/ 2);
+    final dosDate = ((now.year - 1980) << 9) | (now.month << 5) | now.day;
+    final central = BytesBuilder();
+    var offset = 0;
+    final names = <String>{};
+    for (final f in List.of(shared)) {
+      var name = f.name;
+      for (var k = 2; !names.add(name); k++) {
+        final dot = f.name.lastIndexOf('.');
+        name = dot > 0 ? '${f.name.substring(0, dot)} ($k)${f.name.substring(dot)}' : '${f.name} ($k)';
+      }
+      final n = utf8.encode(name);
+      final head = ByteData(30)
+        ..setUint32(0, 0x04034b50, Endian.little)
+        ..setUint16(4, 20, Endian.little)
+        ..setUint16(6, 0x0808, Endian.little) // sizes after the data; UTF-8 names
+        ..setUint16(8, 0, Endian.little)
+        ..setUint16(10, dosTime, Endian.little)
+        ..setUint16(12, dosDate, Endian.little)
+        ..setUint16(26, n.length, Endian.little);
+      r.add(head.buffer.asUint8List());
+      r.add(n);
+      var crc = 0xFFFFFFFF, size = 0;
+      await for (final chunk in File(f.path).openRead()) {
+        crc = _crc32(crc, chunk);
+        size += chunk.length;
+        r.add(chunk);
+      }
+      crc ^= 0xFFFFFFFF;
+      final desc = ByteData(16)
+        ..setUint32(0, 0x08074b50, Endian.little)
+        ..setUint32(4, crc, Endian.little)
+        ..setUint32(8, size, Endian.little)
+        ..setUint32(12, size, Endian.little);
+      r.add(desc.buffer.asUint8List());
+      final c = ByteData(46)
+        ..setUint32(0, 0x02014b50, Endian.little)
+        ..setUint16(4, 20, Endian.little)
+        ..setUint16(6, 20, Endian.little)
+        ..setUint16(8, 0x0808, Endian.little)
+        ..setUint16(12, dosTime, Endian.little)
+        ..setUint16(14, dosDate, Endian.little)
+        ..setUint32(16, crc, Endian.little)
+        ..setUint32(20, size, Endian.little)
+        ..setUint32(24, size, Endian.little)
+        ..setUint16(28, n.length, Endian.little)
+        ..setUint32(42, offset, Endian.little);
+      central
+        ..add(c.buffer.asUint8List())
+        ..add(n);
+      offset += 30 + n.length + size + 16;
+    }
+    final cd = central.takeBytes();
+    final end = ByteData(22)
+      ..setUint32(0, 0x06054b50, Endian.little)
+      ..setUint16(8, names.length, Endian.little)
+      ..setUint16(10, names.length, Endian.little)
+      ..setUint32(12, cd.length, Endian.little)
+      ..setUint32(16, offset, Endian.little);
+    r.add(cd);
+    r.add(end.buffer.asUint8List());
+    DiagLog.log('guest', 'a guest downloaded the zip (${names.length} files)');
+    await r.close();
+  }
+
+  static final List<int> _crcTable = List.generate(256, (n) {
+    var c = n;
+    for (var k = 0; k < 8; k++) {
+      c = (c & 1) != 0 ? 0xEDB88320 ^ (c >> 1) : c >> 1;
+    }
+    return c;
+  });
+
+  static int _crc32(int crc, List<int> data) {
+    for (final b in data) {
+      crc = _crcTable[(crc ^ b) & 0xFF] ^ (crc >> 8);
+    }
+    return crc;
+  }
+
   Future<void> _json(HttpResponse r, int status, Map<String, Object?> body) async {
     r.statusCode = status;
     r.headers.contentType = ContentType.json;
@@ -300,6 +399,34 @@ class _DigestSink implements Sink<Digest> {
   @override
   void close() {}
 }
+
+/// The type a browser needs to know what a file is.
+String mimeOf(String name) => switch (extensionOf(name)) {
+      'jpg' || 'jpeg' => 'image/jpeg',
+      'png' => 'image/png',
+      'gif' => 'image/gif',
+      'webp' => 'image/webp',
+      'heic' => 'image/heic',
+      'heif' => 'image/heif',
+      'bmp' => 'image/bmp',
+      'mp4' || 'm4v' => 'video/mp4',
+      'mov' => 'video/quicktime',
+      'webm' => 'video/webm',
+      '3gp' => 'video/3gpp',
+      'mp3' => 'audio/mpeg',
+      'm4a' => 'audio/mp4',
+      'wav' => 'audio/wav',
+      'pdf' => 'application/pdf',
+      'txt' => 'text/plain; charset=utf-8',
+      'doc' => 'application/msword',
+      'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'xls' => 'application/vnd.ms-excel',
+      'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'ppt' => 'application/vnd.ms-powerpoint',
+      'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'zip' => 'application/zip',
+      _ => 'application/octet-stream',
+    };
 
 /// Adds a firewall rule for the guest page's port (asks for admin once;
 /// skipped when the rule is there).
@@ -340,6 +467,18 @@ String guestPage({required bool zh}) {
           'none': '暂时没有',
           'keep': '传送时请不要关闭这个页面或锁屏',
           'connected': '已连接到',
+          'dl': '下载',
+          'all': '全部下载',
+          'zip': '打包下载（一个 zip）',
+          'saved': '已下载',
+          'failed': '没下载成功，再点一次',
+          'open': '打开',
+          'save': '保存到手机',
+          'press': '长按上面的照片 →「存储到照片」/「保存图片」',
+          'ios': '<b>存进相册：</b>一张照片——下载后长按照片 →「存储到照片」。<br><b>很多照片 / 视频：</b>点「打包下载」→ 打开「文件」App →「下载」→ 点一下 zip 解开 → 打开解出的文件夹 → 右上角「选择」→ 全选 → 分享 →「存储 N 个项目」，一次全部进相册。<br>PDF / Office：下载后点「打开」查看，或「保存到手机」存进「文件」App。',
+          'android': '下载的照片和视频会出现在相册的「Download / 下载」相册里，不用再一张张保存；其他文件在「文件管理 → Download」。下载后也可以点「打开」查看。',
+          'pc': '文件会存到这台电脑的「下载」文件夹。',
+          'app': '常传的话，装 Keepnear App，照片会直接存进相册。',
         }
       : {
           'title': 'Keepnear guest transfer',
@@ -357,6 +496,18 @@ String guestPage({required bool zh}) {
           'none': 'Nothing yet',
           'keep': 'Keep this page open (and the screen on) while sending',
           'connected': 'Connected to',
+          'dl': 'Download',
+          'all': 'Download all',
+          'zip': 'Download as one zip',
+          'saved': 'Downloaded',
+          'failed': 'Failed — tap again',
+          'open': 'Open',
+          'save': 'Save to phone',
+          'press': 'Long-press the photo above → "Save to Photos" / "Download image"',
+          'ios': '<b>Into Photos:</b> one photo — after downloading, long-press it → "Save to Photos".<br><b>Many photos / videos:</b> tap "Download as one zip" → Files app → Downloads → tap the zip to unpack → open the folder → Select → Select All → Share → "Save N Items".<br>PDF / Office: tap "Open" to view, or "Save to phone" to keep it in Files.',
+          'android': 'Downloaded photos and videos show up in your gallery (album "Download"); other files are in Files → Download. You can also tap "Open".',
+          'pc': 'Files are saved to this computer\'s Downloads folder.',
+          'app': 'Sending often? With the Keepnear app, photos go straight into your photo library.',
         };
   final js = jsonEncode(t);
   return '''<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -369,13 +520,18 @@ input[type=text],input[type=tel]{width:100%;font-size:20px;padding:12px;border:2
 button,.btn{display:block;width:100%;font-size:18px;padding:14px;border:0;border-radius:12px;background:#2f6bff;color:#fff;font-weight:600;cursor:pointer;text-align:center}
 .muted{color:#6b7a99;font-size:14px}.err{color:#e5484d;margin-top:8px}.row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #eef1f7;gap:8px}
 .row a{color:#2f6bff;font-weight:600;text-decoration:none;white-space:nowrap}.bar{height:6px;background:#e3e9f5;border-radius:3px;overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;background:#2fb344;width:0}
-.hide{display:none}.name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hide{display:none}.name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.sb{width:auto;display:inline-block;font-size:15px;padding:8px 14px;border-radius:10px;white-space:nowrap}.sb.light{background:#e8efff;color:#2f6bff}
+.item{border-bottom:1px solid #eef1f7;padding:8px 0}.item .row{border:0;padding:2px 0}.prev{max-width:100%;border-radius:10px;margin-top:6px;display:block}
+.tip{background:#f3f7ff;border-radius:12px;padding:12px;font-size:14px;line-height:1.6;color:#33415e;margin-top:12px}.ok{color:#2fb344;font-weight:600;white-space:nowrap}
+.btns{display:flex;gap:8px;margin-top:10px}.btns .sb{flex:1;text-align:center}
 </style></head><body><div class="wrap"><h1>${t['title']}</h1>
 <div id="join" class="card"><div class="muted" id="lc"></div><input id="code" type="tel" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
 <input id="name" type="text" maxlength="30"><button id="go"></button><div id="err" class="err"></div></div>
 <div id="main" class="hide"><div class="card"><div class="muted" id="pc"></div><h3 id="ls"></h3>
 <label class="btn" for="files" id="lp"></label><input id="files" type="file" multiple class="hide"><div class="muted" id="lk" style="margin-top:10px"></div><div id="up"></div></div>
-<div class="card"><h3 id="lg"></h3><div id="list" class="muted"></div></div></div></div>
+<div class="card"><h3 id="lg"></h3><div id="list" class="muted"></div><div class="btns"><button class="sb" id="ball"></button><a class="sb btn light hide" id="bzip"></a></div>
+<div class="tip" id="tip"></div></div></div></div>
 <script>
 const T=$js;let tok='';const q=new URLSearchParams(location.search);
 const \$=id=>document.getElementById(id);\$('lc').textContent=T.code;\$('name').placeholder=T.name;\$('go').textContent=T.join;
@@ -386,10 +542,35 @@ async function join(){const r=await fetch('/api/join',{method:'POST',body:JSON.s
 if(r.status==429){\$('err').textContent=T.wait;return}const j=await r.json().catch(()=>({}));if(!j.ok){\$('err').textContent=T.bad;return}
 tok=j.token;\$('join').classList.add('hide');\$('main').classList.remove('hide');\$('pc').textContent=T.connected+' '+j.pc;list();setInterval(list,5000)}
 \$('go').onclick=join;
+const ua=navigator.userAgent,IOS=/iP(hone|ad|od)/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),AND=/Android/i.test(ua);
+\$('tip').innerHTML=(IOS?T.ios:AND?T.android:T.pc)+(IOS||AND?'<br><span class="muted">'+T.app+'</span>':'');\$('ball').textContent=T.all;\$('bzip').textContent=T.zip;
+let files=[],sig='';const st={};const BIG=300*1048576;
+const isImg=n=>/\\.(jpe?g|png|gif|webp|heic|heif|bmp)\$/i.test(n);
+const u=f=>'/api/get/'+f.i+'?t='+encodeURIComponent(tok);
 async function list(){const r=await fetch('/api/list?t='+encodeURIComponent(tok));const j=await r.json().catch(()=>({}));if(!j.ok)return;
-const l=\$('list');l.innerHTML='';if(!j.files.length){l.textContent=T.none;return}
-for(const f of j.files){const d=document.createElement('div');d.className='row';d.innerHTML='<span class="name"></span><a></a>';d.querySelector('span').textContent=f.name+' · '+size(f.size);
-const a=d.querySelector('a');a.textContent='⬇';a.href='/api/get/'+f.i+'?t='+encodeURIComponent(tok);a.setAttribute('download',f.name);l.appendChild(d)}}
+files=j.files;\$('bzip').href='/api/zip?t='+encodeURIComponent(tok);\$('bzip').classList.toggle('hide',!j.zip);\$('ball').classList.toggle('hide',files.length<2||IOS);
+const ns=JSON.stringify(files);if(ns!==sig){sig=ns;draw()}}
+function save(url,name){const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove()}
+function draw(){const l=\$('list');l.innerHTML='';if(!files.length){l.textContent=T.none;return}
+for(const f of files){const s=st[f.i]||{};const d=document.createElement('div');d.className='item';
+d.innerHTML='<div class="row"><span class="name"></span><span class="act"></span></div>';d.querySelector('.name').textContent=f.name+' · '+size(f.size);
+const act=d.querySelector('.act');
+if(s.s=='run'){act.innerHTML='<span class="muted" id="t'+f.i+'">0%</span>';d.insertAdjacentHTML('beforeend','<div class="bar"><i id="p'+f.i+'"></i></div>')}
+else if(s.s=='done'){act.innerHTML='<span class="ok">✓ '+T.saved+'</span>';
+ if(s.url&&!isImg(f.name)){const o=document.createElement('a');o.className='sb btn light';o.style.marginLeft='6px';o.textContent=T.open;o.href=s.url;o.target='_blank';act.appendChild(o);
+  if(IOS){const b=document.createElement('button');b.className='sb light';b.style.marginLeft='6px';b.textContent=T.save;b.onclick=()=>save(s.url,f.name);act.appendChild(b)}}
+ if(s.url&&isImg(f.name)){const im=document.createElement('img');im.className='prev';im.src=s.url;d.appendChild(im);if(IOS||AND)d.insertAdjacentHTML('beforeend','<div class="muted">'+T.press+'</div>')}}
+else{const b=document.createElement('button');b.className='sb';b.textContent=s.s=='err'?T.failed:T.dl;b.onclick=()=>dl(f);act.appendChild(b)}
+l.appendChild(d)}}
+async function dl(f){const s=st[f.i];if(s&&s.s=='run')return;
+if(f.size>BIG){save(u(f),f.name);st[f.i]={s:'done'};draw();return}
+st[f.i]={s:'run'};draw();
+try{const r=await fetch(u(f));if(!r.ok)throw 0;const rd=r.body.getReader(),parts=[];let got=0;
+for(;;){const x=await rd.read();if(x.done)break;parts.push(x.value);got+=x.value.length;const p=Math.min(100,Math.round(got*100/Math.max(1,f.size)));
+const e=document.getElementById('p'+f.i);if(e)e.style.width=p+'%';const t=document.getElementById('t'+f.i);if(t)t.textContent=p+'%'}
+const url=URL.createObjectURL(new Blob(parts,{type:r.headers.get('content-type')||''}));
+if(!IOS)save(url,f.name);st[f.i]={s:'done',url}}catch(e){st[f.i]={s:'err'}}draw()}
+\$('ball').onclick=async()=>{for(const f of files){const s=st[f.i];if(!s||s.s=='err')await dl(f)}};
 \$('files').onchange=async e=>{const fs=[...e.target.files];if(!fs.length)return;const up=\$('up');up.innerHTML='<div class="muted">'+T.asking+'</div>';
 const r=await fetch('/api/offer?t='+encodeURIComponent(tok),{method:'POST',body:JSON.stringify({files:fs.map(f=>({name:f.name,size:f.size}))})});
 const j=await r.json().catch(()=>({}));if(!j.ok){up.innerHTML='<div class="err">'+T.declined+'</div>';e.target.value='';return}up.innerHTML='';

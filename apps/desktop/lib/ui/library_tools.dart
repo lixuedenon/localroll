@@ -12,6 +12,7 @@ import '../services/network.dart' show revealInExplorer;
 import '../services/text_index.dart';
 import '../services/win_dialogs.dart';
 import 'format.dart';
+import 'media_thumb.dart';
 import 'theme.dart';
 import 'trash_actions.dart';
 
@@ -76,6 +77,57 @@ class _Cleanup extends StatefulWidget {
 
 class _CleanupState extends State<_Cleanup> {
   final Set<MediaItem> _picked = {};
+  final Set<String> _open = {};
+
+  /// One suggestion: its picture (click: see it bigger), ticked = delete.
+  Widget _thumb(MediaItem i) {
+    final on = _picked.contains(i);
+    return Tooltip(
+      message: '${i.name} · ${formatBytes(i.size)}',
+      child: SizedBox(
+        width: 64,
+        height: 64,
+        child: Stack(fit: StackFit.expand, children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: GestureDetector(
+              onTap: () => _preview(i),
+              child: Opacity(
+                opacity: on ? 1 : 0.45,
+                child: MediaThumb(key: ValueKey(i.relPath), item: i, library: widget.s.library, ffmpeg: widget.s.ffmpeg),
+              ),
+            ),
+          ),
+          Positioned(
+            right: 2,
+            top: 2,
+            child: GestureDetector(
+              onTap: () => setState(() => on ? _picked.remove(i) : _picked.add(i)),
+              child: Icon(on ? Icons.check_circle : Icons.radio_button_unchecked_rounded,
+                  size: 20, color: on ? LrColors.safelight : Colors.white, shadows: const [Shadow(color: Colors.black54, blurRadius: 4)]),
+            ),
+          ),
+          if (i.kind == MediaKind.video)
+            const Positioned(left: 3, bottom: 2, child: Icon(Icons.play_circle_fill_rounded, size: 16, color: Colors.white)),
+        ]),
+      ),
+    );
+  }
+
+  void _preview(MediaItem i) => showDialog<void>(
+        context: context,
+        builder: (c) => Dialog(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 820, maxHeight: 560),
+              child: i.kind == MediaKind.image && const {'jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'}.contains(i.name.split('.').last.toLowerCase())
+                  ? Image.file(File(widget.s.library.absPath(i)), fit: BoxFit.contain)
+                  : SizedBox(width: 640, height: 480, child: MediaThumb(item: i, library: widget.s.library, ffmpeg: widget.s.ffmpeg)),
+            ),
+            Padding(padding: const EdgeInsets.all(10), child: Text('${i.name} · ${formatBytes(i.size)}')),
+          ]),
+        ),
+      );
 
   @override
   void initState() {
@@ -105,12 +157,25 @@ class _CleanupState extends State<_Cleanup> {
                 onChanged: list.isEmpty ? null : (v) => setState(() => v == true ? _picked.addAll(list) : _picked.removeAll(list)),
                 title: Text(tr(key, {'count': list.length, 'size': formatBytes(list.fold<int>(0, (n, i) => n + i.size))})),
               ),
-              for (final i in list.take(5))
+              if (list.isNotEmpty)
                 Padding(
-                  padding: const EdgeInsets.only(left: 40, bottom: 2),
-                  child: Text('${i.name} · ${formatBytes(i.size)}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: LrColors.muted)),
+                  padding: const EdgeInsets.only(left: 40),
+                  child: Wrap(spacing: 6, runSpacing: 6, children: [
+                    for (final i in list.take(_open.contains(key) ? list.length : 12)) _thumb(i),
+                    if (list.length > 12 && !_open.contains(key))
+                      InkWell(
+                        onTap: () => setState(() => _open.add(key)),
+                        borderRadius: BorderRadius.circular(6),
+                        child: Container(
+                          width: 64,
+                          height: 64,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(6)),
+                          child: Text('+${list.length - 12}', style: const TextStyle(fontWeight: FontWeight.w700)),
+                        ),
+                      ),
+                  ]),
                 ),
-              if (list.length > 5) const Padding(padding: EdgeInsets.only(left: 40), child: Text('…', style: TextStyle(color: LrColors.muted))),
             ],
           ]),
         ),

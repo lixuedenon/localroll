@@ -245,6 +245,12 @@ class _LibraryPageState extends State<LibraryPage> {
     widget.services.server.files.changes.addListener(_reloadFilesSoon);
     AppNav.instance.libraryRecent.addListener(_showRecent);
     if (AppNav.instance.takeLibraryRecent()) _byReceived = true;
+    final asked = AppNav.instance.libraryMember.value;
+    if (asked != null) {
+      _member = asked;
+      AppNav.instance.libraryMember.value = null;
+    }
+    AppNav.instance.libraryMember.addListener(_showMember);
     unawaited(widget.services.server.people.load());
     unawaited(_loadFiles());
     unawaited(_watchFiles());
@@ -257,6 +263,7 @@ class _LibraryPageState extends State<LibraryPage> {
     widget.services.hub.removeListener(_onHub);
     widget.services.server.files.changes.removeListener(_reloadFilesSoon);
     AppNav.instance.libraryRecent.removeListener(_showRecent);
+    AppNav.instance.libraryMember.removeListener(_showMember);
     for (final w in _watches) {
       unawaited(w.cancel());
     }
@@ -272,6 +279,19 @@ class _LibraryPageState extends State<LibraryPage> {
     _picSoon?.cancel();
     _hovered.dispose();
     super.dispose();
+  }
+
+  /// "Their photos" on Devices: one person's / device's photos.
+  void _showMember() {
+    final m = AppNav.instance.libraryMember.value;
+    if (!mounted || m == null) return;
+    AppNav.instance.libraryMember.value = null;
+    setState(() {
+      _filter = _Filter.all;
+      _member = m;
+      _clearSelection();
+    });
+    if (_scroll.hasClients) _scroll.jumpTo(0);
   }
 
   /// "See all" on Home: everything, newest arrival first, from the top.
@@ -1887,10 +1907,10 @@ class _LibraryPageState extends State<LibraryPage> {
 
   // ------------------------------------------------------- squares
 
-  /// The round "select" button at the top left: on hover, or always once
-  /// selecting; ticked when selected.
+  /// The round "select" button at the top right (the top left is where a
+  /// day's date sits): on hover, or always once selecting; ticked when selected.
   Widget _selectButton(String key, bool selected) => Positioned(
-        left: 4,
+        right: 4,
         top: 4,
         child: ValueListenableBuilder<String?>(
           valueListenable: _hovered,
@@ -1988,8 +2008,8 @@ class _LibraryPageState extends State<LibraryPage> {
             ),
             if (f.owner?.private ?? false)
               Positioned(
-                right: 2,
-                top: 2,
+                right: 30,
+                top: 4,
                 child: Tooltip(
                   message: tr('family.sender_tip', {
                     'name': s.settings.family.memberOf(f.owner!.deviceId) ?? f.owner!.deviceName,
@@ -2102,8 +2122,8 @@ class _LibraryPageState extends State<LibraryPage> {
             // "Sender only": hover the lock to see who that is.
             if (item.private && item.deviceId != null)
               Positioned(
-                right: 2,
-                top: 2,
+                right: 30,
+                top: 4,
                 child: Tooltip(
                   message: tr('family.sender_tip', {'name': _memberOf(s.settings.family, item)}),
                   child: const Padding(

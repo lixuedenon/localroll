@@ -66,7 +66,41 @@ class DeviceStrip extends StatelessWidget {
       height: h,
       child: ListView(
         scrollDirection: Axis.horizontal,
+        clipBehavior: Clip.none,
         children: [
+          // Add a device: first, orange and labelled, so it is seen.
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: Center(
+              child: Material(
+                color: Colors.transparent,
+                child: Ink(
+                  height: h - 4,
+                  decoration: ShapeDecoration(
+                    shape: const StadiumBorder(),
+                    gradient: const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFFFFC94A), Color(0xFFF7A91A)]),
+                    shadows: [
+                      BoxShadow(color: const Color(0xFFFFC94A).withValues(alpha: 0.45), spreadRadius: 3),
+                      const BoxShadow(color: Color(0x40000000), blurRadius: 10, offset: Offset(0, 4)),
+                    ],
+                  ),
+                  child: InkWell(
+                    customBorder: const StadiumBorder(),
+                    onTap: onAdd,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(10, 0, 16, 0),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        Icon(Icons.add_circle_rounded, size: big ? 30 : 26, color: const Color(0xFF2A1A00)),
+                        const SizedBox(width: 6),
+                        Text(tr('home.add_device'),
+                            style: TextStyle(fontWeight: FontWeight.w800, fontSize: big ? 16 : 14, color: const Color(0xFF2A1A00))),
+                      ]),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
           for (final d in list)
             Padding(
               padding: const EdgeInsets.only(right: 8),
@@ -103,23 +137,6 @@ class DeviceStrip extends StatelessWidget {
                 ),
               ),
             ),
-          Center(
-            child: SizedBox(
-              width: h - 4,
-              height: h - 4,
-              child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  shape: const CircleBorder(),
-                  padding: EdgeInsets.zero,
-                  foregroundColor: light ? Colors.white : null,
-                  backgroundColor: light ? Colors.white.withValues(alpha: 0.18) : null,
-                  side: light ? BorderSide(color: Colors.white.withValues(alpha: 0.6), width: 1.2) : null,
-                ),
-                onPressed: onAdd,
-                child: Icon(Icons.add_rounded, semanticLabel: tr('home.add_device')),
-              ),
-            ),
-          ),
         ],
       ),
     );

@@ -1698,5 +1698,18 @@
   "report.nohash": "{count} 個舊文件還沒有校驗碼（不參與去重）",
   "report.files_ok": "媒體庫文件都在",
   "report.tip": "超過 7 天沒備份的手機標成黃色。手機上還有多少沒備份，在手機首頁能看到。",
-  "home.report_tap": "查看備份體檢"
+  "home.report_tap": "查看備份體檢",
+  "dev.info": "裝置資訊",
+  "dev.type": "裝置類型",
+  "dev.ip": "IP 位址",
+  "dev.paired": "配對時間",
+  "dev.got_from": "從它收到",
+  "dev.photos": "照片",
+  "dev.videos": "影片",
+  "dev.files": "檔案",
+  "dev.see_library": "在媒體庫裡看它的照片",
+  "dev.note_title": "傳輸說明",
+  "dev.note": "支援斷點續傳、傳完校驗。所有資料只在你的區域網路裡傳，不經過任何伺服器。",
+  "guest.from_library": "從媒體庫選",
+  "guest.from_folder": "從資料夾選"
 }

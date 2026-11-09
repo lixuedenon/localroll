@@ -1698,5 +1698,18 @@
   "report.nohash": "{count} 个旧文件还没有校验码（不参与去重）",
   "report.files_ok": "媒体库文件都在",
   "report.tip": "超过 7 天没备份的手机标成黄色。手机上还有多少没备份，在手机首页能看到。",
-  "home.report_tap": "查看备份体检"
+  "home.report_tap": "查看备份体检",
+  "dev.info": "设备信息",
+  "dev.type": "设备类型",
+  "dev.ip": "IP 地址",
+  "dev.paired": "配对时间",
+  "dev.got_from": "从它收到",
+  "dev.photos": "照片",
+  "dev.videos": "视频",
+  "dev.files": "文件",
+  "dev.see_library": "在媒体库里看它的照片",
+  "dev.note_title": "传输说明",
+  "dev.note": "支持断点续传、传完校验。所有数据只在你的本地网络里传，不经过任何服务器。",
+  "guest.from_library": "从媒体库选",
+  "guest.from_folder": "从文件夹选"
 }

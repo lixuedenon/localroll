@@ -1698,5 +1698,18 @@
   "report.nohash": "{count} older files have no checksum yet (not deduplicated)",
   "report.files_ok": "All library files are in place",
   "report.tip": "Phones not backed up for 7+ days are marked yellow. How much is still not backed up shows on the phone's home screen.",
-  "home.report_tap": "Backup check-up"
+  "home.report_tap": "Backup check-up",
+  "dev.info": "Device info",
+  "dev.type": "Type",
+  "dev.ip": "IP address",
+  "dev.paired": "Paired",
+  "dev.got_from": "Received from it",
+  "dev.photos": "Photos",
+  "dev.videos": "Videos",
+  "dev.files": "Files",
+  "dev.see_library": "See its photos in the library",
+  "dev.note_title": "How it works",
+  "dev.note": "Transfers resume after interruptions and are checked when done. Everything stays on your local network — no servers.",
+  "guest.from_library": "From library",
+  "guest.from_folder": "From folders"
 }

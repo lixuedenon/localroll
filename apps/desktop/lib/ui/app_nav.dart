@@ -63,6 +63,14 @@ class AppNav extends ChangeNotifier {
     return r;
   }
 
+  /// The library showing one person's / device's photos (from Devices).
+  final ValueNotifier<String?> libraryMember = ValueNotifier(null);
+
+  void openLibraryMember(String member) {
+    libraryMember.value = member;
+    selectTab(library);
+  }
+
   void openDevice(String id) {
     deviceFocus.value = id;
     selectTab(devices);

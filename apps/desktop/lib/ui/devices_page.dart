@@ -8,6 +8,7 @@ import 'package:localroll_core/localroll_core.dart';
 import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/peers.dart';
+import '../services/received_files.dart' show ReceivedFile;
 import '../services/settings.dart';
 import '../services/win_dialogs.dart';
 import 'add_device_dialog.dart';
@@ -152,48 +153,42 @@ class _DevicesPageState extends State<DevicesPage> {
         ];
         final sel = all.where((d) => d.id == _selected).firstOrNull;
         return Scaffold(
-          body: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          backgroundColor: _Look.page,
+          body: Stack(children: [
+            const Positioned.fill(child: IgnorePointer(child: CustomPaint(painter: _Streaks()))),
+            Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(28, 22, 28, 28),
                 children: [
-                  Row(children: [
-                    Text(tr('dev.title'), style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700)),
+                  Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                    Text(tr('dev.title'),
+                        style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: -0.5)),
                     const SizedBox(width: 14),
                     Expanded(
-                      child: Text(tr('dev.hint'),
-                          overflow: TextOverflow.ellipsis, style: const TextStyle(color: LrColors.muted, fontSize: 13)),
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 5),
+                        child: Text(tr('dev.hint'), overflow: TextOverflow.ellipsis, style: const TextStyle(color: _Look.soft, fontSize: 13.5)),
+                      ),
                     ),
                     if (s.peers.scanning)
                       const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12),
-                        child: SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
+                        padding: EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                        child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
                       )
                     else
-                      OutlinedButton.icon(
-                        onPressed: s.peers.scan,
-                        icon: const Icon(Icons.radar_rounded, size: 18),
-                        label: Text(tr('send.search')),
-                      ),
+                      _glassButton(Icons.radar_rounded, tr('send.search'), s.peers.scan),
                     const SizedBox(width: 10),
-                    OutlinedButton.icon(
-                      onPressed: () => unawaited(showGuestTransfer(context, s)),
-                      icon: const Icon(Icons.qr_code_2_rounded, size: 18),
-                      label: Text(tr('guest.button')),
-                    ),
-                    const SizedBox(width: 10),
-                    FilledButton.icon(
-                      onPressed: () => showAddDevice(context, s),
-                      icon: const Icon(Icons.add_rounded, size: 18),
-                      label: Text(tr('dev.add')),
-                    ),
+                    _glassButton(Icons.qr_code_2_rounded, tr('guest.button'), () => unawaited(showGuestTransfer(context, s))),
+                    const SizedBox(width: 12),
+                    _addButton(() => showAddDevice(context, s)),
                   ]),
                   const SizedBox(height: 16),
                   NetworkCheck(services: s),
                   _group(tr('dev.family'), tr('dev.family_hint'), family),
                   _group(tr('dev.guests'), tr('dev.guests_hint'), guests),
                   const SizedBox(height: 18),
-                  Text(tr('send.nearby'), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                  Text(tr('send.nearby'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
                   const SizedBox(height: 8),
                   if (nearby.isEmpty)
                     Text(s.peers.scanning ? tr('send.searching') : tr('send.none_nearby'),
@@ -207,10 +202,13 @@ class _DevicesPageState extends State<DevicesPage> {
                         child: Text(_showHidden ? tr('send.hide_forgotten') : tr('send.show_forgotten', {'count': hidden.length})),
                       ),
                     ),
+                  const SizedBox(height: 22),
+                  _note(),
                 ],
               ),
             ),
             if (sel != null) _drawer(context, sel),
+          ]),
           ]),
         );
       },
@@ -221,9 +219,9 @@ class _DevicesPageState extends State<DevicesPage> {
         padding: const EdgeInsets.only(top: 14),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(crossAxisAlignment: CrossAxisAlignment.baseline, textBaseline: TextBaseline.alphabetic, children: [
-            Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+            Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
             const SizedBox(width: 10),
-            Expanded(child: Text(hint, style: const TextStyle(color: LrColors.muted, fontSize: 12))),
+            Expanded(child: Text(hint, style: const TextStyle(color: _Look.soft, fontSize: 12.5))),
           ]),
           const SizedBox(height: 8),
           if (list.isEmpty) Text(tr('dev.none'), style: const TextStyle(color: LrColors.muted, fontSize: 13)),
@@ -255,11 +253,11 @@ class _DevicesPageState extends State<DevicesPage> {
         margin: const EdgeInsets.only(left: 8),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: LrColors.raised,
-          borderRadius: BorderRadius.circular(12),
+          color: Colors.white.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(999),
           border: color == null ? null : Border.all(color: color),
         ),
-        child: Text(text, style: TextStyle(fontSize: 12, color: color)),
+        child: Text(text, style: TextStyle(fontSize: 12.5, color: color ?? const Color(0xFFDCE6F2))),
       );
 
   Widget _row(_Dev d) {
@@ -267,30 +265,41 @@ class _DevicesPageState extends State<DevicesPage> {
     final job = widget.services.sender.jobs.where((j) => j.peer.id == d.id && !j.over).firstOrNull;
     final t = d.trusted;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Material(
-        color: selected ? LrColors.raised : LrColors.surface,
+        color: selected ? _Look.teal.withValues(alpha: 0.08) : _Look.glass,
+        shadowColor: _Look.teal,
+        elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(
-            color: selected ? LrColors.safelight : (d.online ? onlineGlow.withValues(alpha: 0.5) : LrColors.line),
-            width: selected ? 1.5 : 1,
-          ),
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(color: selected ? _Look.teal : _Look.edge, width: selected ? 2 : 1),
         ),
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(18),
           onTap: () => setState(() => _selected = selected ? null : d.id),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
             child: Row(children: [
-              _avatar(d, 40),
-              const SizedBox(width: 14),
+              _avatar(d, 50),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(d.name, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 2),
+                  Text(d.name,
+                      overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Colors.white)),
+                  const SizedBox(height: 3),
                   if (job == null)
-                    Text(_status(d), style: TextStyle(fontSize: 12, color: d.online ? onlineGlow : LrColors.muted))
+                    Row(children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(shape: BoxShape.circle, color: d.online ? _Look.green : _Look.soft),
+                      ),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(_status(d),
+                            overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, color: d.online ? _Look.green : _Look.soft)),
+                      ),
+                    ])
                   else
                     Text(jobStatus(job).$1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12, color: jobStatus(job).$2)),
                 ]),
@@ -298,9 +307,10 @@ class _DevicesPageState extends State<DevicesPage> {
               if (t != null) _chip(tr(d.family ? 'dev.role_family' : 'dev.role_guest')),
               if (t != null && !d.isPc) _chip(tr('family.access_${t.libraryAccess.name}')),
               const SizedBox(width: 12),
-              _sendButton(d),
               const SizedBox(width: 4),
-              const Icon(Icons.chevron_right_rounded, color: LrColors.muted),
+              _sendButton(d),
+              const SizedBox(width: 6),
+              const Icon(Icons.chevron_right_rounded, color: _Look.soft),
             ]),
           ),
         ),
@@ -312,7 +322,14 @@ class _DevicesPageState extends State<DevicesPage> {
   Widget _sendButton(_Dev d) {
     final target = d.target;
     if (target == null) {
-      return OutlinedButton(onPressed: null, child: Text(tr('dev.send')));
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), color: Colors.white.withValues(alpha: 0.06)),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Text(tr('dev.send'), style: const TextStyle(color: Color(0xFF6F8398), fontWeight: FontWeight.w700, fontSize: 15)),
+          const Icon(Icons.arrow_drop_down_rounded, color: Color(0xFF6F8398), size: 20),
+        ]),
+      );
     }
     return PopupMenuButton<String>(
       tooltip: tr('dev.send'),
@@ -323,11 +340,15 @@ class _DevicesPageState extends State<DevicesPage> {
         if (d.isPc) PopupMenuItem(value: 'text', child: Text(tr('send.text'))),
       ],
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: LrColors.safelight)),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          gradient: const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF2B8CFF), Color(0xFF1468E0)]),
+          boxShadow: [BoxShadow(color: const Color(0xFF2B8CFF).withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))],
+        ),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Text(tr('dev.send'), style: const TextStyle(color: LrColors.safelight, fontWeight: FontWeight.w600)),
-          const Icon(Icons.arrow_drop_down_rounded, color: LrColors.safelight, size: 20),
+          Text(tr('dev.send'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 15)),
+          const Icon(Icons.arrow_drop_down_rounded, color: Colors.white, size: 20),
         ]),
       ),
     );
@@ -347,14 +368,14 @@ class _DevicesPageState extends State<DevicesPage> {
   }
 
   Widget _nearbyRow(FoundPc f) => Padding(
-        padding: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.only(bottom: 10),
         child: Material(
-          color: LrColors.surface,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: LrColors.line)),
+          color: _Look.glass,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18), side: const BorderSide(color: _Look.edge)),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
             child: Row(children: [
-              DeviceBadge(icon: f.info?.icon, color: f.info?.color, size: 40),
+              DeviceBadge(icon: f.info?.icon, color: f.info?.color, size: 44),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -370,9 +391,92 @@ class _DevicesPageState extends State<DevicesPage> {
 
   // ------------------------------------------------------------- details
 
+  Widget _head(String t) => Padding(
+        padding: const EdgeInsets.only(top: 20, bottom: 6),
+        child: Text(t, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800)),
+      );
+
+  Widget _kv(String k, String v, {Color? dot}) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(children: [
+          if (dot != null) ...[
+            Container(width: 10, height: 10, decoration: BoxDecoration(shape: BoxShape.circle, color: dot)),
+            const SizedBox(width: 8),
+          ],
+          Text(k, style: const TextStyle(color: _Look.soft, fontSize: 14)),
+          const Spacer(),
+          Flexible(child: Text(v, textAlign: TextAlign.right, style: const TextStyle(color: Color(0xFFDCE6F2), fontSize: 14))),
+        ]),
+      );
+
+  Widget _glassButton(IconData icon, String label, VoidCallback onTap) => Material(
+        color: Colors.white.withValues(alpha: 0.06),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: BorderSide(color: Colors.white.withValues(alpha: 0.14))),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              Icon(icon, size: 18, color: Colors.white),
+              const SizedBox(width: 8),
+              Text(label, style: const TextStyle(color: Colors.white, fontSize: 14)),
+            ]),
+          ),
+        ),
+      );
+
+  Widget _addButton(VoidCallback onTap) => Material(
+        color: Colors.transparent,
+        child: Ink(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFFFFC94A), Color(0xFFF7A91A)]),
+            boxShadow: [BoxShadow(color: const Color(0xFFF7A91A).withValues(alpha: 0.35), blurRadius: 18, offset: const Offset(0, 5))],
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                const Icon(Icons.add_rounded, size: 20, color: Color(0xFF2A1A00)),
+                const SizedBox(width: 6),
+                Text(tr('dev.add'), style: const TextStyle(color: Color(0xFF2A1A00), fontWeight: FontWeight.w800, fontSize: 15)),
+              ]),
+            ),
+          ),
+        ),
+      );
+
+  /// What sending here means (the reference's "how it works" card).
+  Widget _note() => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        decoration: BoxDecoration(
+          color: _Look.glass,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: _Look.edge),
+        ),
+        child: Row(children: [
+          const Icon(Icons.verified_user_rounded, size: 34, color: _Look.teal),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(tr('dev.note_title'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15)),
+              const SizedBox(height: 3),
+              Text(tr('dev.note'), style: const TextStyle(color: _Look.soft, fontSize: 13)),
+            ]),
+          ),
+          const SizedBox(width: 16),
+          const Icon(Icons.laptop_rounded, size: 40, color: Color(0xFF8CC8FF)),
+          const Icon(Icons.sync_alt_rounded, size: 26, color: _Look.teal),
+          const Icon(Icons.smartphone_rounded, size: 40, color: Color(0xFF8CC8FF)),
+        ]),
+      );
+
   Widget _label(String t) => Padding(
         padding: const EdgeInsets.only(top: 18, bottom: 6),
-        child: Text(t, style: const TextStyle(color: LrColors.muted, fontSize: 13)),
+        child: Text(t, style: const TextStyle(color: _Look.soft, fontSize: 13)),
       );
 
   Widget _drawer(BuildContext context, _Dev d) {
@@ -382,35 +486,74 @@ class _DevicesPageState extends State<DevicesPage> {
     final member = t == null ? null : s.settings.family.memberOf(d.id);
     final there = s.peers.familyAt[d.id];
     final lastJob = s.sender.jobs.where((j) => j.peer.id == d.id).lastOrNull;
+    final mine = s.library.items.where((i) => i.deviceId == d.id);
+    final photos = mine.where((i) => i.kind == MediaKind.image).length;
+    final videos = mine.where((i) => i.kind == MediaKind.video).length;
     return Container(
       width: 360,
-      decoration: const BoxDecoration(
-        color: LrColors.surface,
-        border: Border(left: BorderSide(color: LrColors.line)),
+      margin: const EdgeInsets.fromLTRB(0, 16, 16, 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [const Color(0xFF2F8CC8).withValues(alpha: 0.2), Colors.white.withValues(alpha: 0.04)],
+        ),
+        border: Border.all(color: const Color(0x4078C8FF)),
       ),
-      child: ListView(padding: const EdgeInsets.all(22), children: [
-        Row(children: [
-          Breathing(online: d.online, radius: 999, child: Padding(padding: const EdgeInsets.all(3), child: _avatar(d, 52))),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(d.name, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 2),
-              Text(
-                [
-                  _status(d),
-                  if (t != null) tr('settings.paired_on', {'date': formatDate(DateTime.fromMillisecondsSinceEpoch(t.pairedMs))}),
-                ].join(' · '),
-                style: TextStyle(fontSize: 12.5, color: d.online ? onlineGlow : LrColors.muted),
-              ),
-            ]),
-          ),
-          IconButton(
+      child: ListView(padding: const EdgeInsets.fromLTRB(22, 12, 22, 22), children: [
+        Align(
+          alignment: Alignment.centerRight,
+          child: IconButton(
             tooltip: tr('common.close'),
             onPressed: () => setState(() => _selected = null),
-            icon: const Icon(Icons.close_rounded),
+            icon: const Icon(Icons.close_rounded, color: _Look.soft),
           ),
-        ]),
+        ),
+        Center(child: Breathing(online: d.online, radius: 999, child: Padding(padding: const EdgeInsets.all(4), child: _avatar(d, 96)))),
+        const SizedBox(height: 12),
+        Text(d.name, textAlign: TextAlign.center, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: Colors.white)),
+        const SizedBox(height: 8),
+        Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(999),
+              color: d.online ? const Color(0xFF1D9A52) : Colors.white.withValues(alpha: 0.1),
+            ),
+            child: Text(tr(d.online ? 'dev.online' : 'dev.offline'),
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+          ),
+        ),
+        _head(tr('dev.info')),
+        _kv(tr('dev.type'), tr(d.isPc ? 'dev.kind_pc' : 'dev.kind_phone')),
+        _kv(tr('dev.ip'), d.target?.hosts.firstOrNull ?? '—'),
+        if (t != null) _kv(tr('dev.paired'), formatDate(DateTime.fromMillisecondsSinceEpoch(t.pairedMs))),
+        if (t != null) ...[
+          _head(tr('dev.got_from')),
+          _kv(tr('dev.photos'), '$photos', dot: const Color(0xFF8B5CF6)),
+          _kv(tr('dev.videos'), '$videos', dot: const Color(0xFFEF4444)),
+          FutureBuilder<List<ReceivedFile>>(
+            future: s.server.files.list(),
+            builder: (context, snap) => _kv(tr('dev.files'),
+                snap.data == null ? '…' : '${snap.data!.where((f) => f.owner?.deviceId == d.id).length}',
+                dot: const Color(0xFFF59E0B)),
+          ),
+          if (photos + videos > 0)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(46),
+                  backgroundColor: const Color(0xFF1F6FD8),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                onPressed: () => AppNav.instance.openLibraryMember(s.settings.family.memberOf(d.id) ?? d.name),
+                icon: const Icon(Icons.photo_library_rounded, size: 18),
+                label: Text(tr('dev.see_library')),
+              ),
+            ),
+        ],
         if (t != null) ...[
           _label(tr('dev.identity')),
           SegmentedButton<bool>(
@@ -711,4 +854,57 @@ class _DevicesPageState extends State<DevicesPage> {
     final t = name?.trim();
     return t == null || t.isEmpty ? null : t;
   }
+}
+
+/// The look of this page (dark blue glass, as the reference design).
+abstract final class _Look {
+  static const Color page = Color(0xFF081424);
+  static const Color glass = Color(0x0BFFFFFF);
+  static const Color edge = Color(0x17FFFFFF);
+  static const Color soft = Color(0xFF8EA4BA);
+  static const Color teal = Color(0xFF2FD3C2);
+  static const Color green = Color(0xFF3EE08A);
+}
+
+/// Soft curved bands of light across the top right, drawn (no picture):
+/// sharp at any window size.
+class _Streaks extends CustomPainter {
+  const _Streaks();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width, h = size.height;
+    canvas.drawRect(
+      Offset.zero & size,
+      Paint()
+        ..shader = RadialGradient(
+          center: const Alignment(0.55, -1.1),
+          radius: 1.1,
+          colors: [const Color(0xFF0F4C6E).withValues(alpha: 0.9), const Color(0x000F4C6E)],
+        ).createShader(Offset.zero & size),
+    );
+    void band(double x0, double y0, double x1, double y1, double cx, double cy, double width, Color c, double blur) {
+      final path = Path()
+        ..moveTo(w * x0, h * y0)
+        ..quadraticBezierTo(w * cx, h * cy, w * x1, h * y1);
+      canvas.drawPath(
+        path,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = width
+          ..strokeCap = StrokeCap.round
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, blur)
+          ..shader = LinearGradient(colors: [c.withValues(alpha: 0), c, c.withValues(alpha: 0)])
+              .createShader(Rect.fromPoints(Offset(w * x0, h * y0), Offset(w * x1, h * y1))),
+      );
+    }
+
+    band(0.30, -0.05, 1.05, 0.35, 0.70, 0.02, 60, const Color(0x2A3FA9F5), 30);
+    band(0.42, -0.08, 1.05, 0.22, 0.78, -0.02, 18, const Color(0x3A5CC8FF), 8);
+    band(0.55, -0.05, 1.05, 0.12, 0.85, -0.03, 6, const Color(0x5590E0FF), 3);
+    band(0.20, 0.02, 1.05, 0.55, 0.62, 0.12, 120, const Color(0x1A2FD3C2), 50);
+  }
+
+  @override
+  bool shouldRepaint(_Streaks old) => false;
 }

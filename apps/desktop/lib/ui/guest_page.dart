@@ -12,6 +12,7 @@ import '../services/guest_server.dart';
 import '../services/win_dialogs.dart';
 import 'app_nav.dart';
 import 'format.dart';
+import 'library_picker.dart';
 import 'theme.dart';
 
 /// Guests without LocalRoll: a QR code / short address + code for their
@@ -93,7 +94,12 @@ class _GuestDialogState extends State<_GuestDialog> {
 
   Future<void> _share() async {
     final files = await WinDialogs.pickFiles(title: tr('guest.share'));
-    g.share([for (final f in files) File(f)]);
+    g.share(files);
+  }
+
+  Future<void> _shareLibrary() async {
+    final paths = await pickFromLibrary(context, widget.s);
+    if (paths != null) g.share(paths);
   }
 
   String _left() {
@@ -169,7 +175,8 @@ class _GuestDialogState extends State<_GuestDialog> {
                 Row(children: [
                   Text(tr('guest.shared'), style: const TextStyle(fontWeight: FontWeight.w600)),
                   const Spacer(),
-                  TextButton.icon(onPressed: _share, icon: const Icon(Icons.add_rounded, size: 18), label: Text(tr('guest.share'))),
+                  TextButton.icon(onPressed: _shareLibrary, icon: const Icon(Icons.photo_library_outlined, size: 18), label: Text(tr('guest.from_library'))),
+                  TextButton.icon(onPressed: _share, icon: const Icon(Icons.folder_open_outlined, size: 18), label: Text(tr('guest.from_folder'))),
                 ]),
                 if (g.shared.isEmpty) Text(tr('guest.shared_none'), style: const TextStyle(color: LrColors.muted, fontSize: 13)),
                 for (final f in g.shared)
