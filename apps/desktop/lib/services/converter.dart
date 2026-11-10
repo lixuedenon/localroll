@@ -117,15 +117,15 @@ class ConverterService extends ChangeNotifier {
   }
 
   /// A file outside the library (a recording, a file opened in the player).
-  void enqueueFile(String path, ConvertFormat format) {
+  void enqueueFile(String path, ConvertFormat? format, {ConvertPreset preset = ConvertPreset.compatible}) {
     final name = path.split(Platform.pathSeparator).last;
-    final video = format.kind != FormatKind.image;
+    final video = format == null ? MediaKind.fromName(name) == MediaKind.video : format.kind != FormatKind.image;
     final f = File(path);
     final ms = f.existsSync() ? f.lastModifiedSync().millisecondsSinceEpoch : DateTime.now().millisecondsSinceEpoch;
     final item = MediaItem(relPath: '', name: name, size: f.existsSync() ? f.lengthSync() : 0, kind: video ? MediaKind.video : MediaKind.image, captureMs: ms, receivedMs: ms);
     final lib = library.rootPath;
     final inLib = lib.isNotEmpty && path.toLowerCase().startsWith('${lib.toLowerCase()}${Platform.pathSeparator}');
-    jobs.insert(0, ConvertJob(item, ConvertPreset.compatible, format: format, path: path, root: inLib ? lib : null));
+    jobs.insert(0, ConvertJob(item, preset, format: format, path: path, root: inLib ? lib : null));
     notifyListeners();
     _pump();
   }

@@ -24,6 +24,7 @@ import 'library_tools.dart';
 import 'light_look.dart';
 import 'media_thumb.dart';
 import 'send_page.dart';
+import 'tools/tools.dart';
 import 'trash_actions.dart';
 import 'player/player_page.dart';
 
@@ -410,28 +411,12 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
       );
 
-  /// The main things to do, one bright card each.
-  Widget _quick() {
-    final cards = [
-      (Icons.send_rounded, tr('nav.transfer'), tr('home.q_transfer'), const [Color(0xFFE3ECFF), Color(0xFFCBDCFF)], const Color(0xFF2F6BFF), AppNav.devices),
-      (Icons.photo_library_rounded, tr('nav.library'), tr('home.q_library'), const [Color(0xFFDDF7EA), Color(0xFFC3EFD8)], const Color(0xFF16A36A), AppNav.library),
-      (Icons.autorenew_rounded, tr('nav.convert'), tr('home.q_convert'), const [Color(0xFFEDE5FF), Color(0xFFDCCDFF)], const Color(0xFF7B4DEB), AppNav.convert),
-      (Icons.play_arrow_rounded, tr('nav.player'), tr('home.q_player'), const [Color(0xFFFFF0DC), Color(0xFFFFE0B8)], const Color(0xFFF07A12), AppNav.player),
-      (Icons.fit_screen_rounded, tr('nav.screen'), tr('home.q_screen'), const [Color(0xFFDDF6F6), Color(0xFFC0EEEE)], const Color(0xFF119C9C), AppNav.screen),
-    ];
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _sectionTitle(Icons.bolt_rounded, tr('home.quick')),
-      const SizedBox(height: 12),
-      LayoutBuilder(builder: (context, c) {
-        final cols = c.maxWidth > 1000 ? 5 : (c.maxWidth > 640 ? 3 : 2);
-        final w = (c.maxWidth - (cols - 1) * 14) / cols;
-        return Wrap(spacing: 14, runSpacing: 14, children: [
-          for (final (icon, title, sub, bg, fg, tab) in cards)
-            SizedBox(width: w, child: _QuickCard(icon: icon, title: title, sub: sub, bg: bg, fg: fg, onTap: () => AppNav.instance.selectTab(tab))),
-        ]);
-      }),
-    ]);
-  }
+  /// Everyday tools: one click, or drop files on one.
+  Widget _quick() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        _sectionTitle(Icons.handyman_rounded, tr('home.tools')),
+        const SizedBox(height: 12),
+        ToolsGrid(services: widget.services),
+      ]);
 
   Widget _box(BuildContext context, {required double width, required Widget child, Color? border}) => ConstrainedBox(
         constraints: BoxConstraints(minWidth: 300, maxWidth: width),
@@ -657,64 +642,6 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
     ]);
   }
-}
-
-/// One of the main things to do: a bright card with a big icon.
-class _QuickCard extends StatefulWidget {
-  const _QuickCard({required this.icon, required this.title, required this.sub, required this.bg, required this.fg, required this.onTap});
-
-  final IconData icon;
-  final String title;
-  final String sub;
-  final List<Color> bg;
-  final Color fg;
-  final VoidCallback onTap;
-
-  @override
-  State<_QuickCard> createState() => _QuickCardState();
-}
-
-class _QuickCardState extends State<_QuickCard> {
-  bool _hover = false;
-
-  @override
-  Widget build(BuildContext context) => MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _hover = true),
-        onExit: (_) => setState(() => _hover = false),
-        child: GestureDetector(
-          onTap: widget.onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 160),
-            height: 96,
-            transform: Matrix4.translationValues(0, _hover ? -3 : 0, 0),
-            padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: widget.bg),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.8), width: 1.5),
-              boxShadow: [BoxShadow(color: widget.fg.withValues(alpha: _hover ? 0.28 : 0.14), blurRadius: _hover ? 20 : 14, offset: const Offset(0, 6))],
-            ),
-            child: Row(children: [
-              Icon(widget.icon, size: 44, color: widget.fg),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(widget.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: LightLook.text)),
-                  const SizedBox(height: 4),
-                  Text(widget.sub, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: LightLook.muted, height: 1.3)),
-                ]),
-              ),
-              Container(
-                width: 26,
-                height: 26,
-                decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.85)),
-                child: Icon(Icons.chevron_right_rounded, size: 20, color: widget.fg),
-              ),
-            ]),
-          ),
-        ),
-      );
 }
 
 /// The banner's picture: a computer and a phone, with files, photos, video

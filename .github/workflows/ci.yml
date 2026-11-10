@@ -316,6 +316,30 @@ jobs:
           $flt = (& $ff -hide_banner -filters) -join "`n"
           if ($flt -notmatch 'zscale') { Write-Output "::warning::bundled ffmpeg has no zscale: HDR videos are converted without tone mapping" }
           Rename-Item "$release/localroll_desktop.exe" "LocalRoll.exe" -ErrorAction SilentlyContinue
+      - name: Check the PDF builder
+        shell: pwsh
+        run: |
+          # lr_pdf.exe (PDF tools) with the bundled pdfium.dll: a page from a
+          # photo, then that page turned and signed.
+          $dir = (Resolve-Path "apps/desktop/build/windows/x64/runner/Release").Path
+          if (-not (Test-Path "$dir\lr_pdf.exe")) { Write-Output "::error::lr_pdf.exe missing from the build"; exit 1 }
+          $t = $env:RUNNER_TEMP
+          & "$dir\ffmpeg\ffmpeg.exe" -hide_banner -loglevel error -y -f lavfi -i "color=c=red:s=200x300" -frames:v 1 "$t\p.jpg"
+          [IO.File]::WriteAllBytes("$t\s.bgra", [byte[]](@(0,0,255,255) * 16))
+          Set-Content -Path "$t\a.txt" -Encoding utf8 -Value "OUT $t\a.pdf`nIMAGE $t\p.jpg|595|842|50|50|200|300"
+          Set-Content -Path "$t\b.txt" -Encoding utf8 -Value "OUT $t\b.pdf`nDOC $t\a.pdf`nPAGE 0|0|1`nSTAMP $t\s.bgra|4|4|0.1|0.1|0.2|0.1"
+          foreach ($plan in @('a', 'b')) {
+            $psi = New-Object System.Diagnostics.ProcessStartInfo "$dir\lr_pdf.exe"
+            $psi.Arguments = "`"$t\$plan.txt`""
+            $psi.RedirectStandardOutput = $true
+            $psi.UseShellExecute = $false
+            $p = [System.Diagnostics.Process]::Start($psi)
+            $out = $p.StandardOutput.ReadToEnd()
+            if (-not $p.WaitForExit(30000)) { $p.Kill(); Write-Output "::error::lr_pdf did not finish"; exit 1 }
+            Write-Output "${plan}: $out"
+            if (-not ($out -match '^ok 1')) { Write-Output "::error::lr_pdf ($plan): $out"; exit 1 }
+            if ((Get-Item "$t\$plan.pdf").Length -lt 200) { Write-Output "::error::lr_pdf ($plan) wrote an empty PDF"; exit 1 }
+          }
       - uses: actions/upload-artifact@v4
         with:
           name: LocalRoll-Windows

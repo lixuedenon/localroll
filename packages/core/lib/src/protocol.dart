@@ -60,6 +60,10 @@ class LrProtocol {
   /// Phone → PC: how much the phone still has to back up there (shown on
   /// the PC: "230 not backed up yet, reported today 18:02").
   static const String pathBackupStatus = '/api/v1/backup-status';
+
+  /// Phone → PC: a Word / Excel / PowerPoint file in the body (?name=…);
+  /// the answer is the PDF the PC's Office made (phones can't).
+  static const String pathOfficePdf = '/api/v1/tools/office-pdf';
   static const int maxText = 1000000;
 
   /// "I'm here" / "I'm leaving" (signed in). The answer lists the other

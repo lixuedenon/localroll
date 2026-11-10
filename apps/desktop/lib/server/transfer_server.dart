@@ -19,6 +19,7 @@ import '../services/received_files.dart';
 import '../services/people.dart';
 import '../services/picture_index.dart';
 import '../services/text_index.dart';
+import '../services/file_tools.dart' show OfficePdf;
 import '../services/transfer_log.dart';
 import '../services/settings.dart';
 import '../l10n/l10n.dart';
@@ -594,6 +595,41 @@ class TransferServer extends ChangeNotifier {
   /// Phones asked to back up while they were away: asked when they connect.
   final Map<String, DateTime> _backupAsked = {};
 
+  /// A phone's Office file made into a PDF here (by this PC's Office).
+  Future<void> _officePdf(HttpRequest req, TrustedDevice device) async {
+    final res = req.response;
+    final name = sanitizeFileName(req.uri.queryParameters['name'] ?? 'document.docx');
+    if (!OfficePdf.handles(name)) return _json(res, 400, {'error': 'not_office'});
+    if (!await OfficePdf.available()) return _json(res, 409, {'error': 'no_office'});
+    final tmp = await Directory.systemTemp.createTemp('lr_office');
+    try {
+      final src = File('${tmp.path}${Platform.pathSeparator}$name');
+      final sink = src.openWrite();
+      var n = 0;
+      await for (final chunk in req) {
+        n += chunk.length;
+        if (n > 200 * 1024 * 1024) {
+          await sink.close();
+          return _json(res, 413, {'error': 'too_big'});
+        }
+        sink.add(chunk);
+      }
+      await sink.close();
+      final dot = name.lastIndexOf('.');
+      final out = '${tmp.path}${Platform.pathSeparator}${dot > 0 ? name.substring(0, dot) : name}.pdf';
+      final err = await OfficePdf.convert(src.path, out);
+      if (err != null) return _json(res, 500, {'error': 'convert_failed'});
+      DiagLog.log('tools', '${device.name}: an Office file made into a PDF');
+      res.statusCode = 200;
+      res.headers.contentType = ContentType('application', 'pdf');
+      res.contentLength = await File(out).length();
+      await res.addStream(File(out).openRead());
+      await res.close();
+    } finally {
+      unawaited(tmp.delete(recursive: true).then((_) {}, onError: (_) {}));
+    }
+  }
+
   /// "Back up now" from this PC: the phone (Keepnear open on it) starts
   /// backing up here. Not connected: asked as soon as it connects (within
   /// an hour). True: told now.
@@ -913,6 +949,7 @@ class TransferServer extends ChangeNotifier {
       if (req.method == 'POST' && path == LrProtocol.pathMembership) {
         return await _membership(req, device);
       }
+      if (req.method == 'POST' && path == LrProtocol.pathOfficePdf) return _officePdf(req, device);
       if (req.method == 'POST' && path == LrProtocol.pathBackupStatus) {
         final body = await _readJson(req);
         final n = body['pending'];

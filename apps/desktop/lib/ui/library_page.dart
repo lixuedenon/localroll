@@ -33,6 +33,7 @@ import 'people_page.dart';
 import 'select_by_dialog.dart';
 import 'send_page.dart';
 import 'trash_actions.dart';
+import 'tools/tools.dart';
 import 'trash_page.dart';
 import 'player/player_page.dart';
 
@@ -1310,6 +1311,7 @@ class _LibraryPageState extends State<LibraryPage> {
               _selected.contains(item.relPath) ? tr('lib.unselect') : tr('lib.select')),
         ),
         const PopupMenuDivider(),
+        for (final t in _toolsFor(targets)) PopupMenuItem(value: 'tool:${t.name}', child: _menuRow(t.icon, t.title)),
         PopupMenuItem(value: 'convert', child: _menuRow(Icons.auto_fix_high_rounded, tr('convert.menu'))),
         PopupMenuItem(value: 'export', child: _menuRow(Icons.drive_file_move_rounded, tr('lib.export'))),
         PopupMenuItem(value: 'send', child: _menuRow(Icons.send_rounded, tr('send.to_pc'))),
@@ -1326,6 +1328,11 @@ class _LibraryPageState extends State<LibraryPage> {
     );
     if (!mounted || choice == null) return;
     final s = widget.services;
+    if (choice.startsWith('tool:')) {
+      final t = Tool.values.firstWhere((x) => x.name == choice.substring(5));
+      await openTool(this.context, s, t, paths: [for (final i in targets) s.library.absPath(i)]);
+      return;
+    }
     switch (choice) {
       case 'open':
         await openLibraryItems(this.context, s, items, index);
@@ -1343,6 +1350,15 @@ class _LibraryPageState extends State<LibraryPage> {
         final ok = await convertWithDialog(this.context, s, items: targets, video: targets.every((i) => i.kind == MediaKind.video));
         if (ok && mounted) setState(_clearSelection);
     }
+  }
+
+  /// The tools that fit what was right-clicked.
+  static List<Tool> _toolsFor(List<MediaItem> items) {
+    if (items.every((i) => i.kind == MediaKind.image)) {
+      return [if (items.length == 1) Tool.editImage, Tool.heicJpg, Tool.photosPdf, Tool.compressPhoto];
+    }
+    if (items.every((i) => i.kind == MediaKind.video)) return [Tool.cutVideo, Tool.compressVideo, Tool.videoToAudio];
+    return const [];
   }
 
   Widget _menuRow(IconData icon, String text, {bool danger = false}) {
@@ -2074,6 +2090,8 @@ class _LibraryPageState extends State<LibraryPage> {
           value: 'select',
           child: _menuRow(Icons.check_circle_outline_rounded, _selected.contains(key) ? tr('lib.unselect') : tr('lib.select')),
         ),
+        if (Tool.pdfTools.takes(f.path)) PopupMenuItem(value: 'tool:pdfTools', child: _menuRow(Tool.pdfTools.icon, Tool.pdfTools.title)),
+        if (Tool.officePdf.takes(f.path)) PopupMenuItem(value: 'tool:officePdf', child: _menuRow(Tool.officePdf.icon, Tool.officePdf.title)),
         PopupMenuItem(value: 'export', child: _menuRow(Icons.drive_file_move_rounded, tr('lib.export'))),
         PopupMenuItem(value: 'send', child: _menuRow(Icons.send_rounded, tr('send.to_pc'))),
         PopupMenuItem(value: 'rename', child: _menuRow(Icons.drive_file_rename_outline_rounded, tr('files.rename'))),
@@ -2083,6 +2101,11 @@ class _LibraryPageState extends State<LibraryPage> {
       ],
     );
     if (!mounted || choice == null) return;
+    if (choice.startsWith('tool:')) {
+      final t = Tool.values.firstWhere((x) => x.name == choice.substring(5));
+      await openTool(this.context, widget.services, t, paths: _selected.contains(key) ? _chosenFiles() : [f.path]);
+      return;
+    }
     switch (choice) {
       case 'open':
         await openReceivedFile(this.context, widget.services, f.path);

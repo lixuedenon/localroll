@@ -38,6 +38,43 @@ class MainActivity : FlutterActivity() {
                         result.success(if (set.isNullOrBlank()) model else set)
                     }
                     "preview" -> result.success(false)
+                    "toJpeg" -> {
+                        // Any photo (HEIC too, Android 9+) as an upright JPEG.
+                        val path = call.argument<String>("path") ?: ""
+                        val maxSide = call.argument<Int>("maxSide") ?: 0
+                        val quality = call.argument<Int>("quality") ?: 92
+                        Thread {
+                            try {
+                                var bmp: Bitmap? = if (Build.VERSION.SDK_INT >= 28) {
+                                    android.graphics.ImageDecoder.decodeBitmap(
+                                        android.graphics.ImageDecoder.createSource(File(path))
+                                    ) { d, info, _ ->
+                                        d.allocator = android.graphics.ImageDecoder.ALLOCATOR_SOFTWARE
+                                        val w = info.size.width
+                                        val h = info.size.height
+                                        val long = maxOf(w, h)
+                                        if (maxSide in 1 until long) {
+                                            val k = maxSide.toDouble() / long
+                                            d.setTargetSize(maxOf(1, (w * k).toInt()), maxOf(1, (h * k).toInt()))
+                                        }
+                                    }
+                                } else {
+                                    android.graphics.BitmapFactory.decodeFile(path)
+                                }
+                                if (bmp == null) {
+                                    runOnUiThread { result.success(null) }
+                                } else {
+                                    val out = ByteArrayOutputStream()
+                                    bmp.compress(Bitmap.CompressFormat.JPEG, quality, out)
+                                    bmp.recycle()
+                                    val bytes = out.toByteArray()
+                                    runOnUiThread { result.success(bytes) }
+                                }
+                            } catch (e: Exception) {
+                                runOnUiThread { result.success(null) }
+                            }
+                        }.start()
+                    }
                     "openGallery" -> {
                         // The phone's gallery app (whichever it is).
                         try {
@@ -110,7 +147,8 @@ class MainActivity : FlutterActivity() {
                 val start = (call.argument<Number>("startMs") ?: 0).toLong()
                 val end = (call.argument<Number>("endMs") ?: 0).toLong()
                 val overlays = call.argument<List<Map<String, Any?>>>("overlays") ?: listOf()
-                ClipMaker.make(this, input, output, start, end, overlays) { err ->
+                val maxSide = (call.argument<Number>("maxSide") ?: 0).toInt()
+                ClipMaker.make(this, input, output, start, end, overlays, maxSide) { err ->
                     runOnUiThread {
                         if (err == null) result.success(true) else result.error("clip", err, null)
                     }

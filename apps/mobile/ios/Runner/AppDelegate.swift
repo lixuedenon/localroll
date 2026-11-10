@@ -388,6 +388,31 @@ final class FilePreview: NSObject, QLPreviewControllerDataSource {
         result(UIDevice.current.name)
       case "preview":
         result(shared.show(path: args["path"] as? String ?? ""))
+      case "toJpeg":
+        // Any photo (HEIC too) as an upright JPEG, at most maxSide pixels.
+        let path = args["path"] as? String ?? ""
+        let maxSide = (args["maxSide"] as? NSNumber)?.doubleValue ?? 0
+        let quality = (args["quality"] as? NSNumber)?.doubleValue ?? 92
+        DispatchQueue.global(qos: .userInitiated).async {
+          var data: Data? = nil
+          if let img = UIImage(contentsOfFile: path) {
+            var size = img.size
+            let long = max(size.width, size.height)
+            if maxSide > 0 && long > CGFloat(maxSide) {
+              let k = CGFloat(maxSide) / long
+              size = CGSize(width: floor(size.width * k), height: floor(size.height * k))
+            }
+            let fmt = UIGraphicsImageRendererFormat.default()
+            fmt.scale = 1
+            let upright = UIGraphicsImageRenderer(size: size, format: fmt).image { _ in
+              img.draw(in: CGRect(origin: .zero, size: size))
+            }
+            data = upright.jpegData(compressionQuality: CGFloat(quality / 100))
+          }
+          DispatchQueue.main.async {
+            result(data.map { FlutterStandardTypedData(bytes: $0) })
+          }
+        }
       case "openGallery":
         // The Photos app.
         guard let u = URL(string: "photos-redirect://") else {
@@ -468,7 +493,8 @@ enum ClipMaker {
       let startMs = (a["startMs"] as? NSNumber)?.int64Value ?? 0
       let endMs = (a["endMs"] as? NSNumber)?.int64Value ?? 0
       let overlays = a["overlays"] as? [[String: Any]] ?? []
-      make(input: input, output: output, startMs: startMs, endMs: endMs, overlays: overlays) { err in
+      let maxSide = (a["maxSide"] as? NSNumber)?.doubleValue ?? 0
+      make(input: input, output: output, startMs: startMs, endMs: endMs, overlays: overlays, maxSide: maxSide) { err in
         DispatchQueue.main.async {
           if let err = err {
             result(FlutterError(code: "clip", message: err, details: nil))
@@ -481,7 +507,7 @@ enum ClipMaker {
   }
 
   static func make(input: String, output: String, startMs: Int64, endMs: Int64,
-                   overlays: [[String: Any]], done: @escaping (String?) -> Void) {
+                   overlays: [[String: Any]], maxSide: Double = 0, done: @escaping (String?) -> Void) {
     let asset = AVURLAsset(url: URL(fileURLWithPath: input))
     guard let vTrack = asset.tracks(withMediaType: .video).first else {
       done("no video track")
@@ -510,8 +536,15 @@ enum ClipMaker {
     // Upright, as it is shown.
     let t = vTrack.preferredTransform
     let box = CGRect(origin: .zero, size: vTrack.naturalSize).applying(t)
-    let size = CGSize(width: abs(box.width), height: abs(box.height))
-    let upright = t.concatenating(CGAffineTransform(translationX: -box.origin.x, y: -box.origin.y))
+    var size = CGSize(width: abs(box.width), height: abs(box.height))
+    var upright = t.concatenating(CGAffineTransform(translationX: -box.origin.x, y: -box.origin.y))
+    // Smaller ("compress"): the longer side at most maxSide.
+    let long = max(size.width, size.height)
+    if maxSide > 0 && long > CGFloat(maxSide) {
+      let k = CGFloat(maxSide) / long
+      upright = upright.concatenating(CGAffineTransform(scaleX: k, y: k))
+      size = CGSize(width: floor(size.width * k / 2) * 2, height: floor(size.height * k / 2) * 2)
+    }
 
     let instr = AVMutableVideoCompositionInstruction()
     instr.timeRange = CMTimeRange(start: .zero, duration: range.duration)

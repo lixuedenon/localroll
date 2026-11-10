@@ -66,6 +66,7 @@ class ClipMaker {
     required int fromMs,
     required int toMs,
     required List<Note> notes,
+    int maxSide = 0,
   }) async {
     final dir = Directory('${(await getTemporaryDirectory()).path}/clips');
     if (await dir.exists()) await dir.delete(recursive: true);
@@ -113,6 +114,7 @@ class ClipMaker {
       'width': width,
       'height': height,
       'overlays': overlays,
+      'maxSide': maxSide,
     });
     if (!await out.exists()) throw StateError('no clip');
     return out;

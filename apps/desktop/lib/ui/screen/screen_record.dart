@@ -1780,6 +1780,41 @@ class _WindowPickerState extends State<_WindowPicker> {
 }
 
 /// Drag a box on a still of the screen (LocalRoll covers that screen for it).
+/// "Snip": the screen under the mouse is frozen, a box is dragged over the
+/// part wanted, that part comes back as a PNG (Keepnear itself left out).
+Future<File?> snipScreen(BuildContext context, AppServices s) async {
+  final exe = s.ffmpeg.ffmpeg;
+  final screens = WinScreen.screens();
+  if (exe == null || screens.isEmpty) return null;
+  final c = WinScreen.cursor();
+  final screen = screens.firstWhere((x) => x.rect.contains(c), orElse: () => screens.first);
+  final saved = WinScreen.ownPlaceRect();
+  final shot = await _Gdi.still(exe, screen);
+  if (shot == null || !context.mounted) return null;
+  AppNav.instance.fullscreen.value = true;
+  await windowManager.setMinimumSize(const Size(200, 40));
+  WinScreen.place(screen.rect, onTop: true);
+  if (!context.mounted) return null;
+  final picked = await Navigator.of(context).push<Rect>(MaterialPageRoute(builder: (_) => _AreaPicker(shot: shot)));
+  AppNav.instance.fullscreen.value = false;
+  if (saved != null) WinScreen.place(saved, onTop: false);
+  await windowManager.setMinimumSize(const Size(960, 620));
+  if (picked == null) {
+    try {
+      await shot.delete();
+    } catch (_) {}
+    return null;
+  }
+  final out = File('${Directory.systemTemp.path}${Platform.pathSeparator}lr_snip_${DateTime.now().microsecondsSinceEpoch}.png');
+  final crop = 'crop=iw*${picked.width.toStringAsFixed(5)}:ih*${picked.height.toStringAsFixed(5)}:'
+      'iw*${picked.left.toStringAsFixed(5)}:ih*${picked.top.toStringAsFixed(5)}';
+  await Process.run(exe, ['-hide_banner', '-loglevel', 'error', '-y', '-i', shot.path, '-vf', crop, out.path]);
+  try {
+    await shot.delete();
+  } catch (_) {}
+  return out.existsSync() ? out : null;
+}
+
 Future<Rect?> _pickArea(BuildContext context, AppServices s, ScreenInfo screen) async {
   final exe = s.ffmpeg.ffmpeg;
   if (exe == null) return null;

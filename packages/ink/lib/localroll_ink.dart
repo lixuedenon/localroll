@@ -9,3 +9,5 @@ export 'src/ink_paint.dart';
 export 'src/note.dart';
 export 'src/stamp.dart';
 export 'src/stamp_packs.dart';
+export 'src/tools/photo_edit.dart';
+export 'src/tools/signature_pad.dart';

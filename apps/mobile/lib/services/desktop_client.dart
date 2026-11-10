@@ -139,6 +139,31 @@ class DesktopClient {
     }
   }
 
+  /// [file] (Word / Excel / PowerPoint) made into a PDF by the PC's Office:
+  /// the PDF's bytes. Throws [LrHttpException] (409: no Office there).
+  Future<List<int>> officeToPdf(File file, String name) async {
+    final uri = Uri(scheme: secure ? 'https' : 'http', host: host, port: port, path: LrProtocol.pathOfficePdf, queryParameters: {'name': name});
+    final req = await _http.openUrl('POST', uri).timeout(const Duration(seconds: 20));
+    if (deviceId != null) req.headers.set(LrProtocol.headerDeviceId, deviceId!);
+    if (token != null) req.headers.set(LrProtocol.headerToken, token!);
+    req.headers.contentType = ContentType.binary;
+    req.contentLength = await file.length();
+    await req.addStream(file.openRead());
+    final res = await req.close().timeout(const Duration(minutes: 4));
+    final bytes = <int>[];
+    await for (final c in res.timeout(const Duration(minutes: 4))) {
+      bytes.addAll(c);
+    }
+    if (res.statusCode >= 400) {
+      Map<String, dynamic> body = const {};
+      try {
+        body = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
+      } catch (_) {}
+      throw LrHttpException(res.statusCode, body);
+    }
+    return bytes;
+  }
+
   /// How much this phone still has to back up to this PC (shown there).
   Future<void> backupStatus(int pending, int bytes) async {
     try {

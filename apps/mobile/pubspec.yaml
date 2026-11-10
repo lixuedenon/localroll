@@ -30,6 +30,7 @@ dependencies:
 
   # QR pairing (Apple Vision on iOS, ML Kit on Android).
   mobile_scanner: '>=7.0.0 <8.0.0'
+  qr_flutter: ^4.1.0
 
   # Keep the screen on during long transfers.
   wakelock_plus: '>=1.2.0 <2.0.0'

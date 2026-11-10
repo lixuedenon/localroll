@@ -40,6 +40,7 @@ object ClipMaker {
         startMs: Long,
         endMs: Long,
         overlays: List<Map<String, Any?>>,
+        maxSide: Int,
         done: (String?) -> Unit,
     ) {
         // The picture as shown (upright): drawings are laid over it at that size.
@@ -90,7 +91,20 @@ object ClipMaker {
                             .build()
                     )
                     .build()
-                val effects = Effects(listOf(), listOf(OverlayEffect(ImmutableList.of<TextureOverlay>(overlay))))
+                // Smaller ("compress"): the longer side at most maxSide.
+                val video = mutableListOf<androidx.media3.common.Effect>()
+                val long = maxOf(w, h)
+                if (maxSide in 1 until long && w > 0 && h > 0) {
+                    val k = maxSide.toDouble() / long
+                    video.add(
+                        androidx.media3.effect.Presentation.createForWidthAndHeight(
+                            ((w * k).toInt() / 2) * 2, ((h * k).toInt() / 2) * 2,
+                            androidx.media3.effect.Presentation.LAYOUT_SCALE_TO_FIT,
+                        )
+                    )
+                }
+                if (pieces.isNotEmpty()) video.add(OverlayEffect(ImmutableList.of<TextureOverlay>(overlay)))
+                val effects = Effects(listOf(), video)
                 val edited = EditedMediaItem.Builder(item).setEffects(effects).build()
                 val transformer = Transformer.Builder(ctx)
                     .setVideoMimeType(MimeTypes.VIDEO_H264)

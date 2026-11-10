@@ -60,6 +60,8 @@ add_subdirectory("loopback")
 add_subdirectory("camera")
 # Picking a part of the screen by pointing (lr_pick.exe).
 add_subdirectory("pick")
+# Building PDFs: pages, turning, signatures, photos (lr_pdf.exe).
+add_subdirectory("pdf")
 
 
 # Generated plugin build rules, which manage building the plugins and adding

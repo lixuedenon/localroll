@@ -41,6 +41,7 @@ import 'send_target.dart';
 import 'settings_page.dart';
 import 'simple_home.dart';
 import 'theme.dart';
+import 'tools_page.dart';
 import 'transfer_page.dart';
 
 /// Photo library grid: pick photos/videos and send them to the PC.
@@ -1304,6 +1305,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       ),
                     ),
                   ]),
+                  PhoneToolsGrid(settings: widget.settings, discovery: widget.discovery),
                   _recentStrip(context),
                 ],
               ),

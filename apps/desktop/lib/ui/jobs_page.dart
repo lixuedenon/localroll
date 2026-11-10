@@ -1,4 +1,5 @@
 // apps/desktop/lib/ui/jobs_page.dart
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -7,12 +8,12 @@ import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/converter.dart';
 import '../services/network.dart';
-import '../services/peers.dart';
 import 'app_nav.dart';
 import 'player/player_entry.dart';
 import 'player/player_page.dart';
-import 'send_page.dart';
+import 'send_paths.dart';
 import 'theme.dart';
+import 'tools/tools.dart';
 
 /// Convert: the queue of conversions started from the library or viewer.
 class JobsPage extends StatelessWidget {
@@ -48,6 +49,10 @@ class JobsPage extends StatelessWidget {
               ),
             ]),
             const SizedBox(height: 18),
+            ToolsGrid(services: s, all: true),
+            const SizedBox(height: 22),
+            Text(tr('jobs.queue'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 10),
             if (!s.ffmpeg.available) ...[
               _box(
                 border: LrColors.safelight,
@@ -169,14 +174,18 @@ class _JobTile extends StatelessWidget {
                 final out = job.outputPath!;
                 if (a == 'open') openInPlayer(context, services, [out]);
                 if (a == 'send') {
-                  final f = SendFile.plain(File(out), out.split(Platform.pathSeparator).last);
-                  if (f != null) sendToPc(context, services, [f], out.split(Platform.pathSeparator).last);
+                  unawaited(() async {
+                    final ids = await pickDevices(context, services, count: 1, first: out.split(Platform.pathSeparator).last);
+                    if (ids != null && ids.isNotEmpty && context.mounted) await sendPathsTo(context, services, ids, [out]);
+                  }());
                 }
+                if (a == 'guest') services.guest.share([out]);
                 if (a == 'reveal') revealInExplorer(out);
               },
               itemBuilder: (_) => [
                 if (PlayerEntry.playable(job.outputPath!)) PopupMenuItem(value: 'open', child: Text(tr('recs.play'))),
-                PopupMenuItem(value: 'send', child: Text(tr('player.send'))),
+                PopupMenuItem(value: 'send', child: Text(tr('tool.send'))),
+                PopupMenuItem(value: 'guest', child: Text(tr('tool.to_guest'))),
                 const PopupMenuDivider(),
                 PopupMenuItem(value: 'reveal', child: Text(tr('common.show_in_folder'))),
               ],
