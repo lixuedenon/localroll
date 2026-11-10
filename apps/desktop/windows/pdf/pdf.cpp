@@ -20,6 +20,7 @@
 // the text of pages taken from PDFs stays text (a signature is laid on top).
 
 #include <windows.h>
+#include <shellapi.h>
 
 #include <cmath>
 #include <cstdio>
