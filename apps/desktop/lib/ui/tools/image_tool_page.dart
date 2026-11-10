@@ -10,6 +10,7 @@ import '../../app_services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/file_tools.dart';
 import '../send_paths.dart';
+import '../send_page.dart' show baseNameOf;
 import 'tools.dart';
 
 /// A photo's editor (crop, turn, colour, squares over private parts,

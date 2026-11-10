@@ -20,6 +20,7 @@ import '../light_dialog.dart';
 import '../light_look.dart';
 import '../screen/screen_record.dart' show snipScreen;
 import '../send_paths.dart';
+import '../send_page.dart' show baseNameOf;
 import 'image_tool_page.dart';
 import 'pdf_tool_page.dart';
 import 'qr_tool.dart';

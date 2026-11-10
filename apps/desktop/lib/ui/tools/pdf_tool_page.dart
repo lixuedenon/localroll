@@ -15,6 +15,7 @@ import '../../l10n/l10n.dart';
 import '../../services/file_tools.dart';
 import '../../services/win_dialogs.dart';
 import '../light_look.dart';
+import '../send_page.dart' show baseNameOf;
 import 'tools.dart';
 
 class _Doc {
@@ -350,13 +351,14 @@ class _PdfToolPageState extends State<PdfToolPage> {
     final target = _picked.length == 1 ? _picked.first : (_pages.isNotEmpty ? _pages.first : null);
     if (target == null) return;
     var sig = _lastSig;
-    if (sig != null) {
+    final shown = sig;
+    if (shown != null) {
       final again = await showDialog<bool>(
         context: context,
         builder: (c) => AlertDialog(
           title: Text(tr('pdf.sign')),
           content: Column(mainAxisSize: MainAxisSize.min, children: [
-            Container(color: Colors.white, padding: const EdgeInsets.all(8), height: 90, child: Image.memory(sig.png)),
+            Container(color: Colors.white, padding: const EdgeInsets.all(8), height: 90, child: Image.memory(shown.png)),
           ]),
           actions: [
             TextButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('pdf.sign_new'))),

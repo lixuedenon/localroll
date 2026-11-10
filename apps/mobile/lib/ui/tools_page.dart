@@ -426,7 +426,7 @@ class _VideoToolPageState extends State<_VideoToolPage> {
     super.initState();
     _v.initialize().then((_) {
       if (!mounted) return;
-      setState(() => _keep = RangeValues(0, _v.value.duration.inMilliseconds.toDouble().clamp(1, double.infinity)));
+      setState(() => _keep = RangeValues(0, _v.value.duration.inMilliseconds.toDouble().clamp(1.0, double.infinity)));
     });
     _v.addListener(() {
       if (!mounted) return;

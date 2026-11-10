@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 import 'package:localroll_core/localroll_core.dart';
 
 import '../app_services.dart';
+import '../ui/send_page.dart' show baseNameOf;
 import 'library_index.dart';
 import 'video_encoders.dart';
 

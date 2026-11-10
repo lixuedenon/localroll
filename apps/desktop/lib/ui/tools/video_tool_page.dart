@@ -10,6 +10,7 @@ import '../../app_services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/file_tools.dart';
 import '../../services/win_dialogs.dart';
+import '../send_page.dart' show baseNameOf;
 import 'tools.dart';
 
 /// Cut a video (keep a part), make it smaller, only its sound, a GIF; or
@@ -45,7 +46,7 @@ class _VideoToolPageState extends State<VideoToolPage> {
         if (!mounted) return;
         setState(() {
           _length = d;
-          _keep = RangeValues(0, d.inMilliseconds.toDouble().clamp(1, double.infinity));
+          _keep = RangeValues(0, d.inMilliseconds.toDouble().clamp(1.0, double.infinity));
         });
       }))
       ..add(_player.stream.position.listen((p) {
@@ -202,7 +203,7 @@ class _VideoToolPageState extends State<VideoToolPage> {
                   Text('${_clock(_now.inMilliseconds)} / ${_clock(len)}', style: const TextStyle(color: Colors.white70)),
                   const SizedBox(width: 16),
                   TextButton(
-                    onPressed: () => setState(() => _keep = RangeValues(_now.inMilliseconds.toDouble().clamp(0, _keep.end - 100), _keep.end)),
+                    onPressed: () => setState(() => _keep = RangeValues(_now.inMilliseconds.toDouble().clamp(0.0, _keep.end - 100), _keep.end)),
                     child: Text(tr('video.start_here')),
                   ),
                   TextButton(
