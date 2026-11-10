@@ -307,12 +307,18 @@ class PlayerDropTarget extends StatefulWidget {
 class _PlayerDropTargetState extends State<PlayerDropTarget> {
   bool _over = false;
 
+  // On the Transfers page, files dropped on a device are sent to it.
+  bool get _transfers => AppNav.instance.tab == AppNav.devices;
+
   @override
   Widget build(BuildContext context) => DropTarget(
-        onDragEntered: (_) => setState(() => _over = true),
+        onDragEntered: (_) {
+          if (!_transfers) setState(() => _over = true);
+        },
         onDragExited: (_) => setState(() => _over = false),
         onDragDone: (d) {
           setState(() => _over = false);
+          if (_transfers) return;
           final paths = [for (final f in d.files) f.path];
           final media = [for (final p in existingFiles(paths)) if (PlayerEntry.playable(p)) p];
           if (media.isEmpty) {

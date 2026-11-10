@@ -58,6 +58,9 @@ class LiveMessage {
   /// phone browsing it loads it again at once.
   static String library() => jsonEncode({'t': 'lib'});
 
+  /// PC → phone: "back up to me now" (the PC's "Back up now" button).
+  static String backup() => jsonEncode({'t': 'backup'});
+
   List<OnlineDevice> get online => OnlineDevice.listFrom(json);
   OnlineDevice? get device {
     final d = json['d'];

@@ -15,6 +15,7 @@ import 'services/library_index.dart';
 import 'services/network.dart';
 import 'services/pdf_text.dart';
 import 'services/peers.dart';
+import 'services/transfer_log.dart';
 import 'services/face_engine.dart';
 import 'services/face_indexer.dart';
 import 'services/picture_index.dart';
@@ -63,6 +64,9 @@ class AppServices {
   /// Other PCs: finding, pairing, sending.
   late final PeerDirectory peers = PeerDirectory(settings: settings, server: server);
   late final PeerSender sender = PeerSender(settings: settings, peers: peers);
+
+  /// What was sent and received (the Transfers page lists it).
+  late final TransferLog transferLog = TransferLog(settings.dataDir);
 
   /// Reads the text in photos and files in the background, for searching.
   late final TextIndexer textIndexer = TextIndexer(
@@ -243,6 +247,32 @@ class AppServices {
     // A phone can be sent to while LocalRoll is open on it; a PC while it answers.
     s.sender.isOnline = (id) => s.settings.peers.containsKey(id) ? s.isOnline(id) : s.phoneTarget(id) != null;
     await s.sender.loadHeld();
+    await s.transferLog.load();
+    server.log = s.transferLog;
+    // Sends that ended go into the history (a paused one is not over yet).
+    s.sender.addListener(() {
+      for (final j in s.sender.jobs) {
+        if (!j.over || j.paused || j.started == null && j.state == SendJobState.cancelled) continue;
+        s.transferLog.outDone(
+          jobId: j.id,
+          deviceId: j.peer.id,
+          name: j.peer.name,
+          title: j.title,
+          started: j.started ?? j.finished ?? DateTime.now(),
+          files: j.files.length,
+          done: j.sentFiles + j.skippedFiles,
+          bytes: j.sentBytes,
+          media: j.files.where((f) => f.kind != MediaKind.other).length,
+          result: switch (j.state) {
+            SendJobState.done => 'ok',
+            SendJobState.cancelled => 'cancelled',
+            _ => j.sentFiles + j.skippedFiles > 0 ? 'partial' : 'failed',
+          },
+          paths: [for (final f in j.files) f.path],
+        );
+      }
+    });
+    s.sender.onTextSent = (p, text) => s.transferLog.outText(p.id, p.name, text);
     await s.player.load();
     await StampLibrary.instance.load(s.settings.dataDir);
     await s.recordings.load();

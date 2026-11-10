@@ -21,6 +21,38 @@ class OpenWith {
   static String get _exe => Platform.resolvedExecutable;
   static String get _exeName => _exe.split(Platform.pathSeparator).last;
 
+  /// Explorer's right-click "Send to → Keepnear": a shortcut in the user's
+  /// SendTo folder starting this copy with [sendFlag] and the files.
+  static const String sendFlag = '--send';
+
+  static Future<void> registerSendTo() async {
+    if (!Platform.isWindows) return;
+    final appData = Platform.environment['APPDATA'];
+    if (appData == null) return;
+    final sep = Platform.pathSeparator;
+    final link = '$appData${sep}Microsoft${sep}Windows${sep}SendTo${sep}Keepnear.lnk';
+    final mark = File('$appData${sep}Microsoft${sep}Windows${sep}SendTo${sep}.keepnear');
+    try {
+      // Made for this copy already.
+      if (File(link).existsSync() && mark.existsSync() && mark.readAsStringSync() == _exe) return;
+      String q(String v) => v.replaceAll("'", "''");
+      final r = await Process.run('powershell', [
+        '-NoProfile',
+        '-NonInteractive',
+        '-Command',
+        "\$s=(New-Object -ComObject WScript.Shell).CreateShortcut('${q(link)}');"
+            "\$s.TargetPath='${q(_exe)}';\$s.Arguments='$sendFlag';\$s.IconLocation='${q(_exe)},0';\$s.Save()",
+      ]);
+      if (r.exitCode == 0) {
+        mark.writeAsStringSync(_exe);
+        try {
+          await Process.run('attrib', ['+h', mark.path]);
+        } catch (_) {}
+        DiagLog.log('app', 'Send to → Keepnear added');
+      }
+    } catch (_) {}
+  }
+
   static Future<void> register() async {
     if (!Platform.isWindows) return;
     try {

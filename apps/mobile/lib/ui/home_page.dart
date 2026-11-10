@@ -80,6 +80,28 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   /// Home: what is not on the PC yet, and how much cleanup could free.
   BackupPlan? _pending;
+
+  /// The backup screen is open (the PC's "Back up now" doesn't open another).
+  bool _backingUp = false;
+
+  /// What was last told to each PC about the backup left (not again and
+  /// again: only when it changed, or every 10 minutes).
+  final Map<String, (int, DateTime)> _reported = {};
+
+  Future<void> _reportPending(PairedDesktop d, BackupPlan plan) async {
+    final n = plan.assets.length;
+    final last = _reported[d.id];
+    if (last != null && last.$1 == n && DateTime.now().difference(last.$2) < const Duration(minutes: 10)) return;
+    try {
+      final c = await connectToDesktop(widget.settings, d, discovered: widget.discovery.found);
+      try {
+        await c.backupStatus(n, plan.totalBytes);
+        _reported[d.id] = (n, DateTime.now());
+      } finally {
+        c.close();
+      }
+    } catch (_) {}
+  }
   int _freeable = -1;
   bool _counting = false;
   final Map<String, Future<Uint8List?>> _thumbs = {};
@@ -98,6 +120,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     // The PC says photos were deleted there: ask it now ("not backed up any
     // more" shows without a pull-down).
     _lostSub = widget.settings.lostAdded.listen(_onLostNews);
+    // The PC's "Back up now".
+    _live.onBackupAsked = (pcId) {
+      if (!mounted || _backingUp || widget.settings.current?.id != pcId) return;
+      unawaited(() async {
+        if (_pending == null) await _refreshHome();
+        if (!mounted || _backingUp) return;
+        ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('home.pc_asked_backup'))));
+        await _backupNow();
+      }());
+    };
     _live.onChanged = (pcId) {
       if (mounted) unawaited(refreshPairedLooks(widget.settings, widget.discovery, now: true, only: pcId));
     };
@@ -640,6 +672,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         _pending = plan;
         _freeable = sizes.values.fold<int>(0, (a, b) => a + b);
       });
+      if (d != null) unawaited(_reportPending(d, plan));
     } catch (_) {
     } finally {
       if (mounted) setState(() => _counting = false);
@@ -1332,9 +1365,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('home.all_backed_up'))));
       return;
     }
-    await Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => TransferPage(settings: widget.settings, discovery: widget.discovery, desktop: d, assets: pending.assets),
-    ));
+    _backingUp = true;
+    try {
+      await Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => TransferPage(settings: widget.settings, discovery: widget.discovery, desktop: d, assets: pending.assets),
+      ));
+    } finally {
+      _backingUp = false;
+    }
     if (mounted) unawaited(_refreshHome());
   }
 

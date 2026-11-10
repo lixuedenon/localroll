@@ -59,6 +59,20 @@ class GuestServer extends ChangeNotifier {
   /// Guests who joined (names they gave).
   final Set<String> guests = {};
 
+  /// When each guest's page last asked anything (it asks every 5 s while
+  /// open): quiet for long, its page was left (screen off, another app).
+  final Map<String, DateTime> seen = {};
+
+  /// Guests whose page says it is moving files right now.
+  final Set<String> busy = {};
+
+  /// The page of [guest] was left (not heard from for 15 s).
+  bool away(String guest) => DateTime.now().difference(seen[guest] ?? DateTime(2000)) > const Duration(seconds: 15);
+
+  /// Closed and opened again within the code's time: same code, guests stay
+  /// connected.
+  DateTime? _codeValid;
+
   /// Asks the person at this PC; true: accept.
   Future<bool> Function(GuestOffer offer)? ask;
 
@@ -88,12 +102,17 @@ class GuestServer extends ChangeNotifier {
     }
     final http = _http;
     if (http == null) return false;
-    code = (Random.secure().nextInt(900000) + 100000).toString();
+    final valid = _codeValid;
+    if (code.isEmpty || valid == null || DateTime.now().isAfter(valid)) {
+      code = (Random.secure().nextInt(900000) + 100000).toString();
+      _tokens.clear();
+      _allowed.clear();
+      guests.clear();
+      seen.clear();
+      busy.clear();
+      received.clear();
+    }
     addresses = await localIPv4Addresses();
-    _tokens.clear();
-    _allowed.clear();
-    guests.clear();
-    received.clear();
     http.listen((req) => unawaited(_handle(req).catchError((Object e) {
           DiagLog.log('guest', 'request failed: $e');
           try {
@@ -111,15 +130,21 @@ class GuestServer extends ChangeNotifier {
   void extend() {
     until = DateTime.now().add(life);
     _timer?.cancel();
-    _timer = Timer(life, () => unawaited(stop()));
+    _timer = Timer(life, () => unawaited(stop(expired: true)));
     notifyListeners();
   }
 
-  Future<void> stop() async {
+  /// Closes the page. Not [expired]: the code and who joined are kept until
+  /// the time runs out (opened again: guests carry on).
+  Future<void> stop({bool expired = false}) async {
     _timer?.cancel();
     final http = _http;
     _http = null;
-    _tokens.clear();
+    _codeValid = expired ? null : until;
+    if (expired) {
+      _tokens.clear();
+      code = '';
+    }
     until = null;
     await http?.close(force: true);
     if (http != null) DiagLog.log('guest', 'guest page closed');
@@ -160,8 +185,13 @@ class GuestServer extends ChangeNotifier {
     }
     if (req.method == 'POST' && path == '/api/join') return _join(req);
     final guest = _tokens[req.uri.queryParameters['t'] ?? ''];
-    if (guest == null) return _json(r, 403, {'ok': false});
+    if (guest == null) return _json(r, 403, {'ok': false, 'gone': true});
     extend();
+    final wasAway = away(guest);
+    seen[guest] = DateTime.now();
+    final b = req.uri.queryParameters['busy'];
+    final busyChanged = b == '1' ? busy.add(guest) : (b == '0' && busy.remove(guest));
+    if (wasAway || busyChanged) notifyListeners();
     if (req.method == 'GET' && path == '/api/list') {
       return _json(r, 200, {
         'ok': true,
@@ -209,6 +239,7 @@ class GuestServer extends ChangeNotifier {
     final token = base64Url.encode(List.generate(18, (_) => Random.secure().nextInt(256)));
     _tokens[token] = guest;
     guests.add(guest);
+    seen[guest] = DateTime.now();
     notifyListeners();
     DiagLog.log('guest', 'a guest joined');
     return _json(req.response, 200, {'ok': true, 'token': token, 'pc': s.settings.deviceName});
@@ -268,6 +299,8 @@ class GuestServer extends ChangeNotifier {
       try {
         await part.delete();
       } catch (_) {}
+      // Cut off (screen locked…): the page may send it again.
+      allowed.add(name);
       return _json(req.response, 500, {'ok': false});
     }
     await part.rename(dest);
@@ -290,6 +323,7 @@ class GuestServer extends ChangeNotifier {
       ));
     }
     received.insert(0, GuestFile(dest, name, length));
+    s.transferLog.inFile('guest', guest, dest, length, media: kind != MediaKind.other);
     notifyListeners();
     DiagLog.log('guest', 'received a file from a guest (${length ~/ 1024} KB)');
     return _json(req.response, 200, {'ok': true});
@@ -433,9 +467,12 @@ String mimeOf(String name) => switch (extensionOf(name)) {
 Future<bool> allowGuestPort(int port) async {
   if (!Platform.isWindows) return false;
   try {
-    final has = await Process.run('netsh', ['advfirewall', 'firewall', 'show', 'rule', 'name=LocalRoll Guest $port']);
+    final has = await Process.run('netsh', ['advfirewall', 'firewall', 'show', 'rule', 'name=Keepnear Guest $port']);
     if (has.exitCode == 0 && '${has.stdout}'.contains('$port')) return true;
-    final cmd = 'netsh advfirewall firewall add rule name=\\"LocalRoll Guest $port\\" dir=in action=allow protocol=TCP localport=$port profile=private,domain';
+    // Every network type: Windows often marks a home Wi-Fi "Public". Safe
+    // enough: the page answers only while it is open, and only to the code.
+    final cmd = 'netsh advfirewall firewall delete rule name=\\"LocalRoll Guest $port\\" & '
+        'netsh advfirewall firewall add rule name=\\"Keepnear Guest $port\\" dir=in action=allow protocol=TCP localport=$port profile=any';
     final r = await Process.run('powershell', [
       '-NoProfile',
       '-Command',
@@ -479,6 +516,11 @@ String guestPage({required bool zh}) {
           'android': '下载的照片和视频会出现在相册的「Download / 下载」相册里，不用再一张张保存；其他文件在「文件管理 → Download」。下载后也可以点「打开」查看。',
           'pc': '文件会存到这台电脑的「下载」文件夹。',
           'app': '常传的话，装 Keepnear App，照片会直接存进相册。',
+          'busy': '正在传输，请不要关闭这个网页，也不要锁屏',
+          'alldone': '✓ 全部完成，可以关闭了',
+          'cut': '传输被中断了（手机锁屏或切到了别的 App）',
+          'go_on': '继续',
+          'gone': '电脑已关闭访客传输，请在电脑上重新打开，再扫一次码',
         }
       : {
           'title': 'Keepnear guest transfer',
@@ -508,6 +550,11 @@ String guestPage({required bool zh}) {
           'android': 'Downloaded photos and videos show up in your gallery (album "Download"); other files are in Files → Download. You can also tap "Open".',
           'pc': 'Files are saved to this computer\'s Downloads folder.',
           'app': 'Sending often? With the Keepnear app, photos go straight into your photo library.',
+          'busy': 'Transferring — keep this page open and the screen on',
+          'alldone': '✓ All done — you can close this page',
+          'cut': 'The transfer was interrupted (screen locked or another app opened)',
+          'go_on': 'Continue',
+          'gone': 'The computer closed guest transfer. Open it there again and scan the code again',
         };
   final js = jsonEncode(t);
   return '''<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -525,7 +572,11 @@ button,.btn{display:block;width:100%;font-size:18px;padding:14px;border:0;border
 .item{border-bottom:1px solid #eef1f7;padding:8px 0}.item .row{border:0;padding:2px 0}.prev{max-width:100%;border-radius:10px;margin-top:6px;display:block}
 .tip{background:#f3f7ff;border-radius:12px;padding:12px;font-size:14px;line-height:1.6;color:#33415e;margin-top:12px}.ok{color:#2fb344;font-weight:600;white-space:nowrap}
 .btns{display:flex;gap:8px;margin-top:10px}.btns .sb{flex:1;text-align:center}
-</style></head><body><div class="wrap"><h1>${t['title']}</h1>
+#banner{position:sticky;top:0;z-index:9;border-radius:14px;padding:12px 14px;margin-bottom:12px;font-weight:600;display:flex;align-items:center;gap:10px}
+#banner.busy{background:#fff4d6;color:#8a5a00;border:1px solid #f5c451}#banner.done{background:#e3f7ec;color:#1d7a43}#banner.cut{background:#ffe3e3;color:#b42318}
+#banner .sb{margin-left:auto}#ns{position:fixed;width:2px;height:2px;opacity:.01;left:0;bottom:0;pointer-events:none}
+</style></head><body><div class="wrap"><h1>${t['title']}</h1><div id="banner" class="hide"></div>
+<video id="ns" muted playsinline loop src="data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAMpbW9vdgAAAGxtdmhkAAAAAAAAAAAAAAAAAAAD6AAAB9AAAQAAAQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAlN0cmFrAAAAXHRraGQAAAADAAAAAAAAAAAAAAABAAAAAAAAB9AAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAABAAAAAQAAAAAAAkZWR0cwAAABxlbHN0AAAAAAAAAAEAAAfQAAAAAAABAAAAAAHLbWRpYQAAACBtZGhkAAAAAAAAAAAAAAAAAABAAAAAgABVxAAAAAAALWhkbHIAAAAAAAAAAHZpZGUAAAAAAAAAAAAAAABWaWRlb0hhbmRsZXIAAAABdm1pbmYAAAAUdm1oZAAAAAEAAAAAAAAAAAAAACRkaW5mAAAAHGRyZWYAAAAAAAAAAQAAAAx1cmwgAAAAAQAAATZzdGJsAAAAtnN0c2QAAAAAAAAAAQAAAKZhdmMxAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAABAAEABIAAAASAAAAAAAAAABFUxhdmM2MC4zMS4xMDIgbGlieDI2NAAAAAAAAAAAAAAAGP//AAAALGF2Y0MBQsAK/+EAFWdCwAraewEQAAADABAAAAMAIPEiagEABGjOD8gAAAAQcGFzcAAAAAEAAAABAAAAFGJ0cnQAAAAAAAAKSAAACkgAAAAYc3R0cwAAAAAAAAABAAAAAgAAQAAAAAAUc3RzcwAAAAAAAAABAAAAAQAAABxzdHNjAAAAAAAAAAEAAAABAAAAAgAAAAEAAAAcc3RzegAAAAAAAAAAAAAAAgAAAogAAAAKAAAAFHN0Y28AAAAAAAAAAQAAA1kAAABidWR0YQAAAFptZXRhAAAAAAAAACFoZGxyAAAAAAAAAABtZGlyYXBwbAAAAAAAAAAAAAAAAC1pbHN0AAAAJal0b28AAAAdZGF0YQAAAAEAAAAATGF2ZjYwLjE2LjEwMAAAAAhmcmVlAAACmm1kYXQAAAJxBgX//23cRem95tlIt5Ys2CDZI+7veDI2NCAtIGNvcmUgMTY0IHIzMTA4IDMxZTE5ZjkgLSBILjI2NC9NUEVHLTQgQVZDIGNvZGVjIC0gQ29weWxlZnQgMjAwMy0yMDIzIC0gaHR0cDovL3d3dy52aWRlb2xhbi5vcmcveDI2NC5odG1sIC0gb3B0aW9uczogY2FiYWM9MCByZWY9MSBkZWJsb2NrPTE6LTM6LTMgYW5hbHlzZT0weDE6MHgxMTEgbWU9aGV4IHN1Ym1lPTIgcHN5PTEgcHN5X3JkPTIuMDA6MC43MCBtaXhlZF9yZWY9MCBtZV9yYW5nZT0xNiBjaHJvbWFfbWU9MSB0cmVsbGlzPTAgOHg4ZGN0PTAgY3FtPTAgZGVhZHpvbmU9MjEsMTEgZmFzdF9wc2tpcD0xIGNocm9tYV9xcF9vZmZzZXQ9MCB0aHJlYWRzPTEgbG9va2FoZWFkX3RocmVhZHM9MSBzbGljZWRfdGhyZWFkcz0wIG5yPTAgZGVjaW1hdGU9MSBpbnRlcmxhY2VkPTAgYmx1cmF5X2NvbXBhdD0wIGNvbnN0cmFpbmVkX2ludHJhPTAgYmZyYW1lcz0wIHdlaWdodHA9MCBrZXlpbnQ9MjUwIGtleWludF9taW49MSBzY2VuZWN1dD00MCBpbnRyYV9yZWZyZXNoPTAgcmNfbG9va2FoZWFkPTEwIHJjPWNyZiBtYnRyZWU9MSBjcmY9MjMuMCBxY29tcD0wLjYwIHFwbWluPTAgcXBtYXg9NjkgcXBzdGVwPTQgaXBfcmF0aW89MS40MCBhcT0xOjEuMjAAgAAAAA9liIQF85///w9FAAFXn4AAAAAGQZogF851"></video>
 <div id="join" class="card"><div class="muted" id="lc"></div><input id="code" type="tel" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
 <input id="name" type="text" maxlength="30"><button id="go"></button><div id="err" class="err"></div></div>
 <div id="main" class="hide"><div class="card"><div class="muted" id="pc"></div><h3 id="ls"></h3>
@@ -540,14 +591,27 @@ if(q.get('c'))\$('code').value=q.get('c');
 function size(n){return n>1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n/1024))+' KB'}
 async function join(){const r=await fetch('/api/join',{method:'POST',body:JSON.stringify({code:\$('code').value,name:\$('name').value})});
 if(r.status==429){\$('err').textContent=T.wait;return}const j=await r.json().catch(()=>({}));if(!j.ok){\$('err').textContent=T.bad;return}
-tok=j.token;\$('join').classList.add('hide');\$('main').classList.remove('hide');\$('pc').textContent=T.connected+' '+j.pc;list();setInterval(list,5000)}
+tok=j.token;\$('err').textContent='';\$('join').classList.add('hide');\$('main').classList.remove('hide');\$('pc').textContent=T.connected+' '+j.pc;list();if(!poll)poll=setInterval(list,5000)}
+let poll=0,act=0,cut=false;
+async function lost(){const c=\$('code').value;if(c.length==6){const r=await fetch('/api/join',{method:'POST',body:JSON.stringify({code:c,name:\$('name').value})}).catch(()=>null);
+const j=r?await r.json().catch(()=>({})):{};if(j.ok){tok=j.token;return}}
+tok='';\$('main').classList.add('hide');\$('join').classList.remove('hide');\$('err').textContent=T.gone;banner()}
+function awake(on){const v=\$('ns');try{if(on){const p=v.play();if(p)p.catch(()=>{})}else v.pause()}catch(e){}}
+function banner(){const b=\$('banner');if(cut){b.className='cut';b.innerHTML='<span></span><button class="sb">'+T.go_on+'</button>';b.querySelector('span').textContent=T.cut;b.querySelector('button').onclick=goOn;return}
+if(act>0){b.className='busy';b.textContent=T.busy;awake(true);return}awake(false);
+if(b.className=='busy'){b.className='done';b.textContent=T.alldone;return}if(b.className!='done')b.className='hide'}
+function busy(d){act=Math.max(0,act+d);banner()}
+let pend=[];
+async function goOn(){cut=false;banner();for(const f of files){const s=st[f.i];if(s&&s.s=='err')await dl(f)}if(pend.length)await sendFiles(pend.splice(0))}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){list();banner()}});
 \$('go').onclick=join;
 const ua=navigator.userAgent,IOS=/iP(hone|ad|od)/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),AND=/Android/i.test(ua);
 \$('tip').innerHTML=(IOS?T.ios:AND?T.android:T.pc)+(IOS||AND?'<br><span class="muted">'+T.app+'</span>':'');\$('ball').textContent=T.all;\$('bzip').textContent=T.zip;
 let files=[],sig='';const st={};const BIG=300*1048576;
 const isImg=n=>/\\.(jpe?g|png|gif|webp|heic|heif|bmp)\$/i.test(n);
 const u=f=>'/api/get/'+f.i+'?t='+encodeURIComponent(tok);
-async function list(){const r=await fetch('/api/list?t='+encodeURIComponent(tok));const j=await r.json().catch(()=>({}));if(!j.ok)return;
+async function list(){if(!tok)return;const r=await fetch('/api/list?t='+encodeURIComponent(tok)+'&busy='+(act>0?1:0)).catch(()=>null);if(!r)return;
+if(r.status==403){await lost();return}const j=await r.json().catch(()=>({}));if(!j.ok)return;
 files=j.files;\$('bzip').href='/api/zip?t='+encodeURIComponent(tok);\$('bzip').classList.toggle('hide',!j.zip);\$('ball').classList.toggle('hide',files.length<2||IOS);
 const ns=JSON.stringify(files);if(ns!==sig){sig=ns;draw()}}
 function save(url,name){const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove()}
@@ -564,21 +628,25 @@ else{const b=document.createElement('button');b.className='sb';b.textContent=s.s
 l.appendChild(d)}}
 async function dl(f){const s=st[f.i];if(s&&s.s=='run')return;
 if(f.size>BIG){save(u(f),f.name);st[f.i]={s:'done'};draw();return}
-st[f.i]={s:'run'};draw();
+st[f.i]={s:'run'};draw();busy(1);
 try{const r=await fetch(u(f));if(!r.ok)throw 0;const rd=r.body.getReader(),parts=[];let got=0;
 for(;;){const x=await rd.read();if(x.done)break;parts.push(x.value);got+=x.value.length;const p=Math.min(100,Math.round(got*100/Math.max(1,f.size)));
 const e=document.getElementById('p'+f.i);if(e)e.style.width=p+'%';const t=document.getElementById('t'+f.i);if(t)t.textContent=p+'%'}
 const url=URL.createObjectURL(new Blob(parts,{type:r.headers.get('content-type')||''}));
-if(!IOS)save(url,f.name);st[f.i]={s:'done',url}}catch(e){st[f.i]={s:'err'}}draw()}
+if(!IOS)save(url,f.name);st[f.i]={s:'done',url}}catch(e){st[f.i]={s:'err'};if(document.hidden)cut=true}busy(-1);draw()}
 \$('ball').onclick=async()=>{for(const f of files){const s=st[f.i];if(!s||s.s=='err')await dl(f)}};
-\$('files').onchange=async e=>{const fs=[...e.target.files];if(!fs.length)return;const up=\$('up');up.innerHTML='<div class="muted">'+T.asking+'</div>';
+\$('files').onchange=async e=>{const fs=[...e.target.files];e.target.value='';if(!fs.length)return;const up=\$('up');up.innerHTML='<div class="muted">'+T.asking+'</div>';
 const r=await fetch('/api/offer?t='+encodeURIComponent(tok),{method:'POST',body:JSON.stringify({files:fs.map(f=>({name:f.name,size:f.size}))})});
-const j=await r.json().catch(()=>({}));if(!j.ok){up.innerHTML='<div class="err">'+T.declined+'</div>';e.target.value='';return}up.innerHTML='';
-for(const f of fs){const d=document.createElement('div');d.style.marginTop='10px';d.innerHTML='<div class="name"></div><div class="bar"><i></i></div>';d.querySelector('.name').textContent=f.name;up.appendChild(d);
-await new Promise(res=>{const x=new XMLHttpRequest();x.open('PUT','/api/up?t='+encodeURIComponent(tok)+'&b='+encodeURIComponent(j.batch)+'&n='+encodeURIComponent(f.name));
+const j=await r.json().catch(()=>({}));if(!j.ok){up.innerHTML='<div class="err">'+T.declined+'</div>';return}up.innerHTML='';
+await sendFiles(fs.map(f=>({f,b:j.batch,d:null})))};
+async function sendFiles(items){const up=\$('up');busy(1);
+for(const it of items){const f=it.f;let d=it.d;if(!d){d=document.createElement('div');d.style.marginTop='10px';d.innerHTML='<div class="name"></div><div class="bar"><i></i></div>';up.appendChild(d);it.d=d}
+d.querySelector('.name').textContent=f.name;
+const ok=await new Promise(res=>{const x=new XMLHttpRequest();x.open('PUT','/api/up?t='+encodeURIComponent(tok)+'&b='+encodeURIComponent(it.b)+'&n='+encodeURIComponent(f.name));
 x.upload.onprogress=ev=>{if(ev.lengthComputable)d.querySelector('i').style.width=(ev.loaded*100/ev.total)+'%'};
-x.onload=x.onerror=()=>{d.querySelector('i').style.width='100%';d.querySelector('.name').textContent=f.name+' ✓ '+T.done;res()};x.send(f)})}
-e.target.value=''};
+x.onload=()=>res(x.status==200);x.onerror=x.onabort=()=>res(false);x.send(f)});
+if(ok){d.querySelector('i').style.width='100%';d.querySelector('.name').textContent=f.name+' ✓ '+T.done}else{pend.push(it);d.querySelector('.name').textContent=f.name+' ✕';cut=true}}
+busy(-1)}
 if(q.get('c')&&q.get('c').length==6)join();
 </script></body></html>''';
 }

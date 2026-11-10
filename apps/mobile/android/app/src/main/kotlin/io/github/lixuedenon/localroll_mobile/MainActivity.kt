@@ -38,6 +38,25 @@ class MainActivity : FlutterActivity() {
                         result.success(if (set.isNullOrBlank()) model else set)
                     }
                     "preview" -> result.success(false)
+                    "openGallery" -> {
+                        // The phone's gallery app (whichever it is).
+                        try {
+                            val i = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_GALLERY)
+                            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            startActivity(i)
+                            result.success(true)
+                        } catch (e: Exception) {
+                            try {
+                                val v = Intent(Intent.ACTION_VIEW)
+                                v.type = "image/*"
+                                v.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                startActivity(v)
+                                result.success(true)
+                            } catch (e2: Exception) {
+                                result.success(false)
+                            }
+                        }
+                    }
                     "openUrl" -> {
                         val url = call.argument<String>("url") ?: ""
                         if (!url.startsWith("https://")) {

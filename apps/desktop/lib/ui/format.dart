@@ -19,3 +19,13 @@ String formatDate(DateTime t) =>
 String formatMonth(DateTime t) => formatMonthYear(t);
 
 String _2(int n) => n.toString().padLeft(2, '0');
+
+/// "Today 18:02", "Yesterday 21:10", "Nov 3 09:15".
+String formatWhen(DateTime t) {
+  final now = DateTime.now();
+  final hm = '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+  final today = DateTime(now.year, now.month, now.day);
+  if (!t.isBefore(today)) return tr('when.today', {'time': hm});
+  if (!t.isBefore(today.subtract(const Duration(days: 1)))) return tr('when.yesterday', {'time': hm});
+  return '${formatDayShort(t)} $hm';
+}

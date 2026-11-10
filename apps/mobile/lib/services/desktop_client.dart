@@ -139,6 +139,15 @@ class DesktopClient {
     }
   }
 
+  /// How much this phone still has to back up to this PC (shown there).
+  Future<void> backupStatus(int pending, int bytes) async {
+    try {
+      await _send('POST', LrProtocol.pathBackupStatus, json: {'pending': pending, 'bytes': bytes}, timeout: const Duration(seconds: 5));
+    } on LrHttpException catch (e) {
+      if (e.status != 404) rethrow; // an older PC
+    }
+  }
+
   /// Join ([family] true; waits up to 2 minutes for the PC's owner to agree)
   /// or leave the PC's family group. Returns the membership now.
   Future<bool> membership({required bool family}) async =>

@@ -242,6 +242,9 @@ class AppSettings extends ChangeNotifier {
   /// <year>/<month>.
   bool folderPerMember = false;
 
+  /// Mouse resting on a video in the library plays it (muted).
+  bool hoverPreview = true;
+
   /// Library thumbnail size: 0 small, 1 medium, 2 large.
   int thumbSize = 1;
 
@@ -297,6 +300,7 @@ class AppSettings extends ChangeNotifier {
     s.colorValue = (j['colorValue'] as num?)?.toInt() ?? DeviceLook.randomColor();
     s.avatarVersion = (j['avatarVersion'] as num?)?.toInt() ?? 0;
     s.folderPerMember = j['folderPerMember'] == true;
+    s.hoverPreview = j['hoverPreview'] != false;
     s.thumbSize = ((j['thumbSize'] as num?)?.toInt() ?? 1).clamp(0, 2);
     s.libraryCompact = j['libraryCompact'] != false;
     s.oldPenBar = j['oldPenBar'] == true;
@@ -351,6 +355,7 @@ class AppSettings extends ChangeNotifier {
       'colorValue': colorValue,
       'avatarVersion': avatarVersion,
       'folderPerMember': folderPerMember,
+      'hoverPreview': hoverPreview,
       'thumbSize': thumbSize,
       'libraryCompact': libraryCompact,
       'oldPenBar': oldPenBar,

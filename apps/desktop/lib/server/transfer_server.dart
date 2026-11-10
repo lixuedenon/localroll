@@ -19,6 +19,7 @@ import '../services/received_files.dart';
 import '../services/people.dart';
 import '../services/picture_index.dart';
 import '../services/text_index.dart';
+import '../services/transfer_log.dart';
 import '../services/settings.dart';
 import '../l10n/l10n.dart';
 import 'port_mux.dart';
@@ -396,6 +397,12 @@ class TransferServer extends ChangeNotifier {
           if (id != device.id) ?_describe(id),
       ],
     ));
+    final asked = _backupAsked.remove(device.id);
+    if (asked != null && DateTime.now().difference(asked) < const Duration(hours: 1)) {
+      try {
+        ws.add(LiveMessage.backup());
+      } catch (_) {}
+    }
     if (!wasOnline) {
       notifyListeners();
       onPresence?.call(device.id, true);
@@ -577,6 +584,36 @@ class TransferServer extends ChangeNotifier {
 
   /// A second copy of the app was started with these files (this PC only).
   void Function(List<String> paths)? onOpenRequested;
+
+  /// "Send to → Keepnear" in Explorer: these files, to a device to choose.
+  void Function(List<String> paths)? onSendRequested;
+
+  /// The transfer history (what arrives is written into it).
+  TransferLog? log;
+
+  /// Phones asked to back up while they were away: asked when they connect.
+  final Map<String, DateTime> _backupAsked = {};
+
+  /// "Back up now" from this PC: the phone (Keepnear open on it) starts
+  /// backing up here. Not connected: asked as soon as it connects (within
+  /// an hour). True: told now.
+  bool askBackup(String id) {
+    final conns = _live[id] ?? const <_LiveConn>[];
+    var told = false;
+    for (final c in conns) {
+      try {
+        c.ws.add(LiveMessage.backup());
+        told = true;
+      } catch (_) {}
+    }
+    if (told) {
+      _backupAsked.remove(id);
+    } else {
+      _backupAsked[id] = DateTime.now();
+    }
+    DiagLog.log('backup', 'asked ${told ? '' : '(later) '}a phone to back up');
+    return told;
+  }
   int _failedPinAttempts = 0;
 
   /// Tap-to-pair requests; the UI shows an Allow / Deny dialog for each.
@@ -735,7 +772,12 @@ class TransferServer extends ChangeNotifier {
           }
           final j = jsonDecode(utf8.decode(bytes));
           final paths = [for (final p in (j is Map && j['paths'] is List ? j['paths'] as List : const [])) if (p is String) p];
-          onOpenRequested?.call(paths.take(500).toList());
+          final list = paths.take(5000).toList();
+          if (j is Map && j['send'] == true) {
+            onSendRequested?.call(list);
+          } else {
+            onOpenRequested?.call(list.take(500).toList());
+          }
           return _json(res, 200, {'ok': true});
         } catch (_) {
           return _json(res, 400, {'ok': false});
@@ -849,6 +891,7 @@ class TransferServer extends ChangeNotifier {
         if (text is! String || text.isEmpty) return _json(res, 400, {'error': 'bad_request'});
         if (text.length > LrProtocol.maxText) return _json(res, 413, {'error': 'too_large'});
         hub.textReceived(device.name, text);
+        log?.inText(device.id, device.name, text);
         // Clipboard sync: what the phone sent is ready to paste here too.
         unawaited(Clipboard.setData(ClipboardData(text: text)).catchError((Object _) {}));
         return _json(res, 200, {'ok': true});
@@ -869,6 +912,13 @@ class TransferServer extends ChangeNotifier {
       }
       if (req.method == 'POST' && path == LrProtocol.pathMembership) {
         return await _membership(req, device);
+      }
+      if (req.method == 'POST' && path == LrProtocol.pathBackupStatus) {
+        final body = await _readJson(req);
+        final n = body['pending'];
+        if (n is! int || n < 0) return _json(res, 400, {'error': 'bad_request'});
+        log?.phoneReported(device.id, n, body['bytes'] is int ? body['bytes'] as int : 0);
+        return _json(res, 200, {'ok': true});
       }
       if (req.method == 'POST' && path == LrProtocol.pathPresence) {
         final body = await _readJson(req);
@@ -1518,6 +1568,8 @@ class TransferServer extends ChangeNotifier {
       if (free != null) _free = free - need;
     }
     DiagLog.log('receive', '${device.name}: session, ${body.files.length} files, ${results.values.where((r) => r.status == OfferStatus.duplicate).length} already here');
+    log?.inSession(device.id, device.name, body.files.length, body.files.fold<int>(0, (n, f) => n + (f.size ?? f.sizeHint ?? 0)),
+        results.values.where((r) => r.status == OfferStatus.duplicate).length);
     return _json(req.response, 200, SessionResponse(sessionId: sessionId, results: results).toJson());
   }
 
@@ -1770,6 +1822,7 @@ class TransferServer extends ChangeNotifier {
     hub.progress(t, length);
     t.savedPath = dest;
     hub.setState(t, TransferState.saved);
+    log?.inFile(device.id, device.name, dest, length, media: true);
     _announceAdded();
     return _json(req.response, 200, CompleteResponse(saved: true, path: rel).toJson());
   }
@@ -1808,6 +1861,7 @@ class TransferServer extends ChangeNotifier {
     t.savedPath = dest;
     hub.setState(t, TransferState.saved);
     hub.fileSaved(dest);
+    log?.inFile(device.id, device.name, dest, await File(dest).length(), media: false);
     return _json(req.response, 200, CompleteResponse(saved: true, path: rel).toJson());
   }
 

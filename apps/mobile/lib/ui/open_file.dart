@@ -120,6 +120,16 @@ class FileOpener {
     }
   }
 
+  /// The phone's photo app (Photos / Gallery).
+  static Future<bool> openGallery() async {
+    try {
+      return await _ch.invokeMethod<bool>('openGallery') ?? false;
+    } catch (e) {
+      DiagLog.log('files', 'open gallery failed: $e');
+      return false;
+    }
+  }
+
   static Future<bool> openUrl(String url) async {
     try {
       return await _ch.invokeMethod<bool>('openUrl', {'url': url}) ?? false;

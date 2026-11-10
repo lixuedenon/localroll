@@ -56,6 +56,10 @@ class LrProtocol {
 
   /// The other side's clipboard text (GET; trusted devices only).
   static const String pathClipboard = '/api/v1/clipboard';
+
+  /// Phone → PC: how much the phone still has to back up there (shown on
+  /// the PC: "230 not backed up yet, reported today 18:02").
+  static const String pathBackupStatus = '/api/v1/backup-status';
   static const int maxText = 1000000;
 
   /// "I'm here" / "I'm leaving" (signed in). The answer lists the other

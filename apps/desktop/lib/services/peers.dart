@@ -706,6 +706,10 @@ class SendJob {
   DateTime? finished;
   bool _cancel = false;
 
+  /// Stopped by "Pause" (cancelled, to be sent again by "Resume": what
+  /// already arrived is skipped).
+  bool paused = false;
+
   int get processed => sentFiles + skippedFiles + failedFiles;
   bool get active => state == SendJobState.converting || state == SendJobState.connecting || state == SendJobState.sending;
   bool get over => state == SendJobState.done || state == SendJobState.failed || state == SendJobState.cancelled;
@@ -900,6 +904,7 @@ class PeerSender extends ChangeNotifier {
       c = await _connect(p);
       if (c == null) return 'peer_offline';
       await c.sendText(text);
+      onTextSent?.call(p, text);
       return null;
     } on PeerError catch (e) {
       return e.code;
@@ -910,6 +915,28 @@ class PeerSender extends ChangeNotifier {
     } finally {
       c?.close();
     }
+  }
+
+  /// A text went out (the history notes it).
+  void Function(PeerPc p, String text)? onTextSent;
+
+  /// Pause: stopped now; [resume] sends it again from where it was.
+  void pause(SendJob j) {
+    if (j.over) return;
+    j.paused = true;
+    cancel(j);
+  }
+
+  /// A paused send given up: stays cancelled.
+  void drop(SendJob j) {
+    j.paused = false;
+    notifyListeners();
+  }
+
+  void resume(SendJob j) {
+    if (!j.over) return;
+    j.paused = false;
+    resend(j);
   }
 
   /// Send a failed or cancelled job again (what already arrived is skipped).

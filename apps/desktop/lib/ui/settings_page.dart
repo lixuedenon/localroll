@@ -12,6 +12,7 @@ import '../services/network.dart';
 import 'app_nav.dart';
 import 'feature_list.dart';
 import 'identity_card.dart';
+import 'media_thumb.dart';
 import 'search_settings.dart';
 import 'theme.dart';
 
@@ -147,6 +148,18 @@ class _SettingsPageState extends State<SettingsPage> {
                           child: Text(tr('common.open')),
                         ),
                       ]),
+                    ),
+                    const Divider(height: 1),
+                    SwitchListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                      secondary: const Icon(Icons.slow_motion_video_rounded),
+                      value: s.settings.hoverPreview,
+                      onChanged: (v) {
+                        MediaThumb.hoverPreview = v;
+                        s.settings.update((x) => x.hoverPreview = v);
+                      },
+                      title: Text(tr('settings.hover_preview')),
+                      subtitle: Text(tr('settings.hover_preview_hint')),
                     ),
                     const Divider(height: 1),
                     SwitchListTile(

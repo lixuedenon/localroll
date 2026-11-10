@@ -388,6 +388,13 @@ final class FilePreview: NSObject, QLPreviewControllerDataSource {
         result(UIDevice.current.name)
       case "preview":
         result(shared.show(path: args["path"] as? String ?? ""))
+      case "openGallery":
+        // The Photos app.
+        guard let u = URL(string: "photos-redirect://") else {
+          result(false)
+          return
+        }
+        UIApplication.shared.open(u, options: [:]) { ok in result(ok) }
       case "openUrl":
         guard let s = args["url"] as? String, s.hasPrefix("https://"), let u = URL(string: s) else {
           result(false)

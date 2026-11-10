@@ -8,6 +8,7 @@ import 'package:window_manager/window_manager.dart';
 import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/receive_hub.dart';
+import '../services/run_flag.dart';
 import 'app_nav.dart';
 import 'theme.dart';
 import 'transfers_panel.dart';
@@ -250,6 +251,7 @@ Future<void> confirmExit(AppServices services) async {
       await windowManager.hide();
     } catch (_) {}
     await services.shutdown();
+    RunFlag.clear();
     try {
       await windowManager.destroy().timeout(const Duration(seconds: 2));
     } catch (_) {}

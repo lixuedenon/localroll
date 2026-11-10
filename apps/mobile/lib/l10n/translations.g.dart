@@ -564,6 +564,9 @@ const Map<String, Map<String, String>> translations = {
     'clip.empty': 'Nothing copied on this phone',
     'clip.pc_empty': 'Nothing copied on {pc}',
     'clip.taken': 'Copied — ready to paste',
+    'home.pc_asked_backup': 'The PC asked for a backup — starting…',
+    'received.open_photos': 'Open Photos',
+    'received.open_files': 'Open files',
   },
   'zh': {
     'common.cancel': '取消',
@@ -1126,6 +1129,9 @@ const Map<String, Map<String, String>> translations = {
     'clip.empty': '手机上没有复制的文字',
     'clip.pc_empty': '{pc} 上没有复制的文字',
     'clip.taken': '已复制，可以粘贴了',
+    'home.pc_asked_backup': '电脑请你备份，正在开始…',
+    'received.open_photos': '打开相册',
+    'received.open_files': '打开文件',
   },
   'zh_Hant': {
     'common.cancel': '取消',
@@ -1688,6 +1694,9 @@ const Map<String, Map<String, String>> translations = {
     'clip.empty': '手機上沒有複製的文字',
     'clip.pc_empty': '{pc} 上沒有複製的文字',
     'clip.taken': '已複製，可以貼上了',
+    'home.pc_asked_backup': '電腦請你備份，正在開始…',
+    'received.open_photos': '打開相簿',
+    'received.open_files': '打開檔案',
   },
   'ja': {
     'common.cancel': 'キャンセル',
@@ -2250,6 +2259,9 @@ const Map<String, Map<String, String>> translations = {
     'clip.empty': 'Nothing copied on this phone',
     'clip.pc_empty': 'Nothing copied on {pc}',
     'clip.taken': 'Copied — ready to paste',
+    'home.pc_asked_backup': 'The PC asked for a backup — starting…',
+    'received.open_photos': 'Open Photos',
+    'received.open_files': 'Open files',
   },
   'ko': {
     'common.cancel': '취소',
@@ -2812,6 +2824,9 @@ const Map<String, Map<String, String>> translations = {
     'clip.empty': 'Nothing copied on this phone',
     'clip.pc_empty': 'Nothing copied on {pc}',
     'clip.taken': 'Copied — ready to paste',
+    'home.pc_asked_backup': 'The PC asked for a backup — starting…',
+    'received.open_photos': 'Open Photos',
+    'received.open_files': 'Open files',
   },
   'es': {
     'common.cancel': 'Cancelar',
@@ -3374,6 +3389,9 @@ const Map<String, Map<String, String>> translations = {
     'clip.empty': 'Nothing copied on this phone',
     'clip.pc_empty': 'Nothing copied on {pc}',
     'clip.taken': 'Copied — ready to paste',
+    'home.pc_asked_backup': 'The PC asked for a backup — starting…',
+    'received.open_photos': 'Open Photos',
+    'received.open_files': 'Open files',
   },
   'fr': {
     'common.cancel': 'Annuler',
@@ -3936,6 +3954,9 @@ const Map<String, Map<String, String>> translations = {
     'clip.empty': 'Nothing copied on this phone',
     'clip.pc_empty': 'Nothing copied on {pc}',
     'clip.taken': 'Copied — ready to paste',
+    'home.pc_asked_backup': 'The PC asked for a backup — starting…',
+    'received.open_photos': 'Open Photos',
+    'received.open_files': 'Open files',
   },
   'de': {
     'common.cancel': 'Abbrechen',
@@ -4498,6 +4519,9 @@ const Map<String, Map<String, String>> translations = {
     'clip.empty': 'Nothing copied on this phone',
     'clip.pc_empty': 'Nothing copied on {pc}',
     'clip.taken': 'Copied — ready to paste',
+    'home.pc_asked_backup': 'The PC asked for a backup — starting…',
+    'received.open_photos': 'Open Photos',
+    'received.open_files': 'Open files',
   },
   'pt': {
     'common.cancel': 'Cancelar',
@@ -5060,6 +5084,9 @@ const Map<String, Map<String, String>> translations = {
     'clip.empty': 'Nothing copied on this phone',
     'clip.pc_empty': 'Nothing copied on {pc}',
     'clip.taken': 'Copied — ready to paste',
+    'home.pc_asked_backup': 'The PC asked for a backup — starting…',
+    'received.open_photos': 'Open Photos',
+    'received.open_files': 'Open files',
   },
   'ru': {
     'common.cancel': 'Отмена',
@@ -5622,6 +5649,9 @@ const Map<String, Map<String, String>> translations = {
     'clip.empty': 'Nothing copied on this phone',
     'clip.pc_empty': 'Nothing copied on {pc}',
     'clip.taken': 'Copied — ready to paste',
+    'home.pc_asked_backup': 'The PC asked for a backup — starting…',
+    'received.open_photos': 'Open Photos',
+    'received.open_files': 'Open files',
   },
   'it': {
     'common.cancel': 'Annulla',
@@ -6184,6 +6214,9 @@ const Map<String, Map<String, String>> translations = {
     'clip.empty': 'Nothing copied on this phone',
     'clip.pc_empty': 'Nothing copied on {pc}',
     'clip.taken': 'Copied — ready to paste',
+    'home.pc_asked_backup': 'The PC asked for a backup — starting…',
+    'received.open_photos': 'Open Photos',
+    'received.open_files': 'Open files',
   },
   'ar': {
     'common.cancel': 'إلغاء',
@@ -6746,6 +6779,9 @@ const Map<String, Map<String, String>> translations = {
     'clip.empty': 'Nothing copied on this phone',
     'clip.pc_empty': 'Nothing copied on {pc}',
     'clip.taken': 'Copied — ready to paste',
+    'home.pc_asked_backup': 'The PC asked for a backup — starting…',
+    'received.open_photos': 'Open Photos',
+    'received.open_files': 'Open files',
   },
   'hi': {
     'common.cancel': 'रद्द करें',
@@ -7308,6 +7344,9 @@ const Map<String, Map<String, String>> translations = {
     'clip.empty': 'Nothing copied on this phone',
     'clip.pc_empty': 'Nothing copied on {pc}',
     'clip.taken': 'Copied — ready to paste',
+    'home.pc_asked_backup': 'The PC asked for a backup — starting…',
+    'received.open_photos': 'Open Photos',
+    'received.open_files': 'Open files',
   },
   'id': {
     'common.cancel': 'Batal',
@@ -7870,6 +7909,9 @@ const Map<String, Map<String, String>> translations = {
     'clip.empty': 'Nothing copied on this phone',
     'clip.pc_empty': 'Nothing copied on {pc}',
     'clip.taken': 'Copied — ready to paste',
+    'home.pc_asked_backup': 'The PC asked for a backup — starting…',
+    'received.open_photos': 'Open Photos',
+    'received.open_files': 'Open files',
   },
   'vi': {
     'common.cancel': 'Hủy',
@@ -8432,6 +8474,9 @@ const Map<String, Map<String, String>> translations = {
     'clip.empty': 'Nothing copied on this phone',
     'clip.pc_empty': 'Nothing copied on {pc}',
     'clip.taken': 'Copied — ready to paste',
+    'home.pc_asked_backup': 'The PC asked for a backup — starting…',
+    'received.open_photos': 'Open Photos',
+    'received.open_files': 'Open files',
   },
   'th': {
     'common.cancel': 'ยกเลิก',
@@ -8994,6 +9039,9 @@ const Map<String, Map<String, String>> translations = {
     'clip.empty': 'Nothing copied on this phone',
     'clip.pc_empty': 'Nothing copied on {pc}',
     'clip.taken': 'Copied — ready to paste',
+    'home.pc_asked_backup': 'The PC asked for a backup — starting…',
+    'received.open_photos': 'Open Photos',
+    'received.open_files': 'Open files',
   },
   'tr': {
     'common.cancel': 'İptal',
@@ -9556,5 +9604,8 @@ const Map<String, Map<String, String>> translations = {
     'clip.empty': 'Nothing copied on this phone',
     'clip.pc_empty': 'Nothing copied on {pc}',
     'clip.taken': 'Copied — ready to paste',
+    'home.pc_asked_backup': 'The PC asked for a backup — starting…',
+    'received.open_photos': 'Open Photos',
+    'received.open_files': 'Open files',
   },
 };

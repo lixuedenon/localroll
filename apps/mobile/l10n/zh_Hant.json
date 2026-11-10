@@ -562,5 +562,8 @@
   "clip.sent": "已傳到 {pc}，那邊可以直接貼上",
   "clip.empty": "手機上沒有複製的文字",
   "clip.pc_empty": "{pc} 上沒有複製的文字",
-  "clip.taken": "已複製，可以貼上了"
+  "clip.taken": "已複製，可以貼上了",
+  "home.pc_asked_backup": "電腦請你備份，正在開始…",
+  "received.open_photos": "打開相簿",
+  "received.open_files": "打開檔案"
 }

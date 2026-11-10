@@ -190,7 +190,27 @@ class _GuestDialogState extends State<_GuestDialog> {
                   ),
                 const Divider(height: 28),
                 Text(tr('guest.received', {'count': g.received.length}), style: const TextStyle(fontWeight: FontWeight.w600)),
-                if (g.guests.isNotEmpty) Text(tr('guest.joined', {'names': g.guests.join('、')}), style: const TextStyle(color: LrColors.muted, fontSize: 13)),
+                for (final name in g.guests)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Row(children: [
+                      Icon(Icons.circle, size: 10, color: g.away(name) ? LrColors.safelight : LrColors.verified),
+                      const SizedBox(width: 8),
+                      Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          tr(g.away(name) ? 'guest.away' : (g.busy.contains(name) ? 'guest.moving' : 'guest.here')),
+                          style: TextStyle(color: g.away(name) ? LrColors.safelight : LrColors.muted, fontSize: 13),
+                        ),
+                      ),
+                    ]),
+                  ),
+                if (g.guests.any(g.away))
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(tr('guest.keep_open'), style: const TextStyle(color: LrColors.muted, fontSize: 12)),
+                  ),
                 for (final f in g.received.take(8))
                   ListTile(
                     dense: true,

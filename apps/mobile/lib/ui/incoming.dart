@@ -9,6 +9,7 @@ import '../l10n/l10n.dart';
 import '../services/media_saver.dart';
 import '../services/phone_server.dart';
 import 'breathing.dart';
+import 'open_file.dart';
 import 'theme.dart';
 
 /// Ready-made reasons for declining (keys in the language files).
@@ -127,13 +128,21 @@ Future<void> showReceived(BuildContext context, Receiving r, {VoidCallback? onOp
           ],
         ]),
         actions: [
-          if (onOpen != null)
+          if (r.toAlbum > 0)
+            TextButton(
+              onPressed: () {
+                Navigator.pop(c);
+                unawaited(FileOpener.openGallery());
+              },
+              child: Text(tr('received.open_photos')),
+            ),
+          if (onOpen != null && r.toFiles > 0)
             TextButton(
               onPressed: () {
                 Navigator.pop(c);
                 onOpen();
               },
-              child: Text(tr('mylib.view')),
+              child: Text(tr('received.open_files')),
             ),
           FilledButton(onPressed: () => Navigator.pop(c), child: Text(tr('common.ok'))),
         ],

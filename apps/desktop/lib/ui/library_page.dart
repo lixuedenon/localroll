@@ -1507,6 +1507,22 @@ class _LibraryPageState extends State<LibraryPage> {
         _ => d.year,
       };
 
+  /// A square's date label: short, so it never reaches the "select" circle.
+  /// Days: "Nov 9" (another year: with the year); small squares only the day
+  /// ("9"), the month where it changes ("11月"), the year where it changes.
+  String _label(DateTime d, DateTime? before, int zoom, {required bool small}) {
+    final thisYear = d.year == DateTime.now().year;
+    if (zoom != 0) return zoom == 1 && small ? _monthName(d) : _unitShort(d, zoom);
+    if (!small) return formatDayShort(d); // with the year when not this year
+    if (before == null ? !thisYear : before.year != d.year) return '${d.year}';
+    if (before == null || before.month != d.month) return _monthName(d);
+    return '${d.day}';
+  }
+
+  static String _monthName(DateTime d) => translator.language.startsWith('zh') || translator.language.startsWith('ja')
+      ? '${d.month}月'
+      : const ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.month - 1];
+
   String _unitShort(DateTime d, int zoom) => switch (zoom) {
         0 => formatDayShort(d),
         1 => formatMonthShort(d),
@@ -1668,14 +1684,17 @@ class _LibraryPageState extends State<LibraryPage> {
     final small = side < 60;
     final primary = Theme.of(context).colorScheme.primary;
     final d = _flat[_starts[g]].day;
+    final before = g > 0 ? _flat[_starts[g - 1]].day : null;
     return Stack(children: [
       Positioned.fill(child: child),
-      if (!first) Positioned(left: 0, top: 0, bottom: 0, child: IgnorePointer(child: Container(width: 3, color: primary))),
+      // Every day's first square: a line on its left (where a day starts).
+      Positioned(left: 0, top: 0, bottom: 0, child: IgnorePointer(child: Container(width: 3, color: primary))),
       Positioned(
-        left: small ? 2 : 5,
+        left: small ? 3 : 5,
         top: small ? 2 : 5,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: max(20.0, side - (small ? 4 : 10))),
+          // At most half the square: the top right is the "select" circle's.
+          constraints: BoxConstraints(maxWidth: max(18.0, side / 2)),
           child: Tooltip(
             message: _unitTip(g, whole),
             child: Material(
@@ -1693,7 +1712,7 @@ class _LibraryPageState extends State<LibraryPage> {
                     ],
                     Flexible(
                       child: Text(
-                        _unitShort(d, _zoomShown),
+                        _label(d, before, _zoomShown, small: small),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(color: Colors.white, fontSize: small ? 9 : 11, fontWeight: FontWeight.w600),
@@ -2008,8 +2027,8 @@ class _LibraryPageState extends State<LibraryPage> {
             ),
             if (f.owner?.private ?? false)
               Positioned(
-                right: 30,
-                top: 4,
+                right: 3,
+                bottom: 2,
                 child: Tooltip(
                   message: tr('family.sender_tip', {
                     'name': s.settings.family.memberOf(f.owner!.deviceId) ?? f.owner!.deviceName,
@@ -2122,14 +2141,11 @@ class _LibraryPageState extends State<LibraryPage> {
             // "Sender only": hover the lock to see who that is.
             if (item.private && item.deviceId != null)
               Positioned(
-                right: 30,
-                top: 4,
+                right: item.kind == MediaKind.video ? 32 : 6,
+                bottom: 6,
                 child: Tooltip(
                   message: tr('family.sender_tip', {'name': _memberOf(s.settings.family, item)}),
-                  child: const Padding(
-                    padding: EdgeInsets.all(2),
-                    child: Icon(Icons.lock_rounded, size: 16, color: Colors.white, shadows: [Shadow(color: Colors.black54, blurRadius: 4)]),
-                  ),
+                  child: const SizedBox(width: 18, height: 18),
                 ),
               ),
             // Drawn on in the player: how many annotations.

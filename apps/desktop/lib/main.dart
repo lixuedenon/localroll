@@ -29,6 +29,8 @@ import 'ui/player/player_home.dart';
 import 'ui/player/player_page.dart';
 import 'ui/screen/float_panel.dart';
 import 'ui/screen/screen_record.dart';
+import 'services/run_flag.dart';
+import 'ui/media_thumb.dart';
 import 'ui/theme.dart';
 import 'ui/title_bar.dart';
 
@@ -45,20 +47,27 @@ Future<void> main(List<String> args) async {
   _addLicenses();
   // Photos / videos handed over by Explorer ("Open with").
   final files = existingFiles(args);
+  // Explorer's "Send to → Keepnear": files and folders, to send.
+  final sending = args.contains(OpenWith.sendFlag);
+  final toSend = [
+    for (final p in args)
+      if (!p.startsWith('--') && FileSystemEntity.typeSync(p) != FileSystemEntityType.notFound) p,
+  ];
   // Only ever one LocalRoll, decided before anything shows: a copy already
   // running (it answers on this PC) gets the files and comes to the front;
   // this one quits at once. Checked three ways: it answers, the Windows
   // mutex, the lock file.
-  if (await _handOver(files, rounds: 1)) exit(0);
+  if (sending ? await _openInRunningCopy(toSend, rounds: 1, send: true) : await _handOver(files, rounds: 1)) exit(0);
   if (!SingleInstance.claim() || !await AppSettings.acquireInstanceLock()) {
     // It may still be starting (Explorer opens one copy per file): keep trying
     // a few seconds. Only if it can't be reached, say so in a small window.
-    if (await _handOver(files, rounds: 16)) exit(0);
+    if (sending ? await _openInRunningCopy(toSend, send: true) : await _handOver(files, rounds: 16)) exit(0);
     runApp(const _AlreadyRunningApp());
     return;
   }
   Boot.mark('one copy');
   await _startLog();
+  await RunFlag.start();
   Boot.logReady();
   Boot.mark('log');
   MediaKit.ensureInitialized();
@@ -86,6 +95,7 @@ Future<void> main(List<String> args) async {
   // Something to look at at once, while the rest gets ready.
   runApp(const BootApp());
   final services = await AppServices.create();
+  MediaThumb.hoverPreview = services.settings.hoverPreview;
   services.server.onShowRequested = _bringToFront;
   services.server.onOpenRequested = (paths) {
     unawaited(_bringToFront());
@@ -93,11 +103,19 @@ Future<void> main(List<String> args) async {
   };
   // After the first screens: written in the language LocalRoll shows.
   unawaited(Future<void>.delayed(const Duration(seconds: 5), OpenWith.register));
+  unawaited(Future<void>.delayed(const Duration(seconds: 8), OpenWith.registerSendTo));
+  services.server.onSendRequested = (paths) {
+    unawaited(_bringToFront());
+    sendFromExplorer(services, paths);
+  };
+  if (sending && toSend.isNotEmpty) {
+    WidgetsBinding.instance.addPostFrameCallback((_) => sendFromExplorer(services, toSend));
+  }
   runApp(LocalRollApp(services: services));
   WidgetsBinding.instance.addPostFrameCallback((_) => Boot.mark('first screen'));
   // Ctrl+Shift+R / P / D for recording the screen, from anywhere.
   ScreenRecorder.instance.watchKeys(services);
-  if (files.isNotEmpty) PlayerLauncher.request(services, files);
+  if (files.isNotEmpty && !sending) PlayerLauncher.request(services, files);
 }
 
 /// Diagnostics log (stays on this PC; exported from Settings on purpose):
@@ -155,8 +173,8 @@ Future<bool> _handOver(List<String> files, {required int rounds}) =>
 /// Hands [files] to the copy that is already running (on this PC only).
 /// Explorer starts one copy per file when several are opened at once, and
 /// the first may still be starting: tried for a few seconds.
-Future<bool> _openInRunningCopy(List<String> files, {int rounds = 16}) async {
-  final body = utf8.encode(jsonEncode({'paths': files}));
+Future<bool> _openInRunningCopy(List<String> files, {int rounds = 16, bool send = false}) async {
+  final body = utf8.encode(jsonEncode({'paths': files, if (send) 'send': true}));
   for (var round = 0; round < rounds; round++) {
     final saved = await AppSettings.savedPort();
     final ports = {?saved, LrProtocol.defaultPort, ...LrProtocol.fallbackPorts};

@@ -12,6 +12,9 @@ import '../services/library_index.dart';
 
 /// Grid cell: JPEG/PNG decoded directly, HEIC/video via a cached ffmpeg thumbnail.
 class MediaThumb extends StatefulWidget {
+  /// Settings: play videos when the mouse rests on them.
+  static bool hoverPreview = true;
+
   const MediaThumb({
     super.key,
     required this.item,
@@ -36,6 +39,9 @@ class _MediaThumbState extends State<MediaThumb> {
   Timer? _hover;
   bool _live = false;
 
+  /// Its picture could not be made (a damaged or odd file): not played.
+  bool _bad = false;
+
   bool get _isVideo => widget.item.kind == MediaKind.video;
 
   /// What to play on hover, or null.
@@ -46,10 +52,12 @@ class _MediaThumbState extends State<MediaThumb> {
   }
 
   void _enter() {
-    if (_previewPath == null) return;
+    if (_previewPath == null || _bad) return;
+    if (_isVideo && !MediaThumb.hoverPreview) return;
     _hover?.cancel();
-    // A short pause, so sweeping the mouse across the grid starts nothing.
-    _hover = Timer(Duration(milliseconds: _isVideo ? 450 : 250), () {
+    // A pause, so sweeping the mouse across the grid starts nothing (and
+    // the player is not opened and closed in a rush).
+    _hover = Timer(Duration(milliseconds: _isVideo ? 700 : 250), () {
       if (!mounted) return;
       if (_playingNow != this) _playingNow?._stop();
       _playingNow = this;
@@ -82,7 +90,10 @@ class _MediaThumbState extends State<MediaThumb> {
 
   /// A file that just arrived (a recording just saved) may not give a
   /// picture at once: tried again a few times.
-  Future<File?> _load() => retryWhileNull(() => widget.ffmpeg.thumbnail(widget.item));
+  Future<File?> _load() => retryWhileNull(() => widget.ffmpeg.thumbnail(widget.item)).then((f) {
+        _bad = f == null;
+        return f;
+      });
 
   @override
   void didUpdateWidget(MediaThumb old) {
@@ -137,11 +148,12 @@ class _MediaThumbState extends State<MediaThumb> {
             child: Icon(Icons.play_circle_fill, color: Colors.white, size: 22,
                 shadows: [Shadow(blurRadius: 4, color: Colors.black54)]),
           ),
+        // Bottom right: the top right is where "select" sits.
         if (widget.item.private)
-          const Positioned(
-            right: 6,
-            top: 6,
-            child: Icon(Icons.lock_rounded, color: Colors.white, size: 18,
+          Positioned(
+            right: widget.item.kind == MediaKind.video ? 32 : 6,
+            bottom: 6,
+            child: const Icon(Icons.lock_rounded, color: Colors.white, size: 18,
                 shadows: [Shadow(blurRadius: 4, color: Colors.black54)]),
           ),
         // Live Photo: the same concentric-rings mark iPhone uses.
@@ -207,7 +219,13 @@ class _HoverPlayer {
   void play(Object owner, String path, {required bool loop, VoidCallback? onDone}) {
     _owner = owner;
     _onDone = loop ? null : onDone;
-    DiagLog.log('ui', 'video preview start');
+    // Which file (type, size): if the player ever takes the app down, the
+    // log's last line says with what.
+    var size = 0;
+    try {
+      size = File(path).lengthSync();
+    } catch (_) {}
+    DiagLog.log('ui', 'video preview start .${path.split('.').last.toLowerCase()} ${size ~/ (1024 * 1024)} MB');
     unawaited(player.setPlaylistMode(loop ? PlaylistMode.loop : PlaylistMode.none));
     unawaited(player.open(Media(path)));
   }

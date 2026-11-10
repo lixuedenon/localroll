@@ -562,5 +562,8 @@
   "clip.sent": "Sent to {pc} — ready to paste there",
   "clip.empty": "Nothing copied on this phone",
   "clip.pc_empty": "Nothing copied on {pc}",
-  "clip.taken": "Copied — ready to paste"
+  "clip.taken": "Copied — ready to paste",
+  "home.pc_asked_backup": "The PC asked for a backup — starting…",
+  "received.open_photos": "Open Photos",
+  "received.open_files": "Open files"
 }

@@ -75,6 +75,9 @@ class LiveService extends ChangeNotifier {
   /// PC [pcId] says photos were deleted there: ask it for /changes now.
   void Function(String pcId)? onChanged;
 
+  /// The PC's "Back up now": start backing up to it.
+  void Function(String pcId)? onBackupAsked;
+
   /// Devices seen online since this phone came on; and when that was.
   final Set<String> _seenUp = {};
   DateTime _startedAt = DateTime.fromMillisecondsSinceEpoch(0);
@@ -218,6 +221,9 @@ class LiveService extends ChangeNotifier {
         return;
       case 'added':
         _added.add(pcId);
+        return;
+      case 'backup':
+        onBackupAsked?.call(pcId);
         return;
     }
     _recompute();

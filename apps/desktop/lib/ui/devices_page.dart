@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:localroll_core/localroll_core.dart';
 
@@ -20,12 +21,15 @@ import 'receive_page.dart' show NetworkCheck;
 import 'send_page.dart';
 import 'text_window.dart';
 import 'guest_page.dart';
+import 'net_check.dart';
+import 'send_paths.dart';
+import 'transfer_records.dart';
 import 'theme.dart';
 
 /// One paired device as the Devices page shows it (a phone or a PC; a PC
 /// can be both trusted here and a send target there).
 class _Dev {
-  _Dev({required this.id, required this.name, required this.isPc, required this.online, this.trusted, this.peer, this.phone});
+  _Dev({required this.id, required this.name, required this.isPc, required this.online, this.trusted, this.peer, this.phone, this.later});
 
   final String id;
   final String name;
@@ -39,8 +43,14 @@ class _Dev {
 
   bool get family => trusted?.familyMember ?? true;
 
-  /// Where "Send" goes (null: can't send now).
-  PeerPc? get target => isPc ? peer : phone;
+  /// A phone not open now: sends wait for it.
+  final PeerPc? later;
+
+  /// Where "Send" goes (a phone not open: it waits until it is).
+  PeerPc? get target => isPc ? peer : (phone ?? later);
+
+  /// It takes files right now.
+  bool get ready => isPc ? online : phone != null;
 }
 
 /// Devices: everything paired (family / guests), sending to them, what each
@@ -59,6 +69,13 @@ class _DevicesPageState extends State<DevicesPage> {
   bool _looking = false;
   bool _showHidden = false;
   String? _selected;
+
+  /// Ticking several devices to send to them together.
+  bool _multi = false;
+  final Set<String> _picked = {};
+
+  /// A device files are being dragged over.
+  String? _dropOn;
 
   // "Online" turns off by itself after a while: look again now and then.
   late final Timer _tick = Timer.periodic(const Duration(seconds: 15), (_) {
@@ -126,6 +143,7 @@ class _DevicesPageState extends State<DevicesPage> {
         trusted: t,
         peer: p,
         phone: isPc ? null : s.phoneTarget(id),
+        later: isPc ? null : sendTargetFor(s, id),
       ));
     }
     out.sort((a, b) {
@@ -179,12 +197,28 @@ class _DevicesPageState extends State<DevicesPage> {
                     else
                       _glassButton(Icons.radar_rounded, tr('send.search'), s.peers.scan),
                     const SizedBox(width: 10),
+                    _glassButton(Icons.health_and_safety_outlined, tr('net.title'), () => unawaited(showNetCheck(context, s))),
+                    const SizedBox(width: 10),
                     _glassButton(Icons.qr_code_2_rounded, tr('guest.button'), () => unawaited(showGuestTransfer(context, s))),
                     const SizedBox(width: 12),
                     _addButton(() => showAddDevice(context, s)),
                   ]),
                   const SizedBox(height: 16),
                   NetworkCheck(services: s),
+                  TransferRecords(services: s),
+                  const SizedBox(height: 12),
+                  _receiving(),
+                  Row(children: [
+                    const Spacer(),
+                    TextButton.icon(
+                      onPressed: () => setState(() {
+                        _multi = !_multi;
+                        _picked.clear();
+                      }),
+                      icon: Icon(_multi ? Icons.check_box_rounded : Icons.check_box_outline_blank_rounded, size: 18, color: _Look.soft),
+                      label: Text(tr(_multi ? 'dev.multi_done' : 'dev.multi'), style: const TextStyle(color: _Look.soft)),
+                    ),
+                  ]),
                   _group(tr('dev.family'), tr('dev.family_hint'), family),
                   _group(tr('dev.guests'), tr('dev.guests_hint'), guests),
                   const SizedBox(height: 18),
@@ -204,11 +238,14 @@ class _DevicesPageState extends State<DevicesPage> {
                     ),
                   const SizedBox(height: 22),
                   _note(),
+                  if (_multi && _picked.isNotEmpty) const SizedBox(height: 70),
                 ],
               ),
             ),
             if (sel != null) _drawer(context, sel),
           ]),
+            if (_multi && _picked.isNotEmpty)
+              Positioned(left: 28, right: sel != null ? 464 : 28, bottom: 16, child: _multiBar(all)),
           ]),
         );
       },
@@ -264,15 +301,26 @@ class _DevicesPageState extends State<DevicesPage> {
     final selected = d.id == _selected;
     final job = widget.services.sender.jobs.where((j) => j.peer.id == d.id && !j.over).firstOrNull;
     final t = d.trusted;
-    return Padding(
+    final drop = _dropOn == d.id;
+    final rep = widget.services.transferLog.backup[d.id];
+    return DropTarget(
+      enable: d.target != null,
+      onDragEntered: (_) => setState(() => _dropOn = d.id),
+      onDragExited: (_) => setState(() => _dropOn = null),
+      onDragDone: (e) {
+        setState(() => _dropOn = null);
+        final paths = [for (final f in e.files) f.path];
+        if (paths.isNotEmpty) unawaited(sendPathsTo(context, widget.services, [d.id], paths));
+      },
+      child: Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Material(
-        color: selected ? _Look.teal.withValues(alpha: 0.08) : _Look.glass,
+        color: drop ? const Color(0x1AFFC94A) : (selected ? _Look.teal.withValues(alpha: 0.08) : _Look.glass),
         shadowColor: _Look.teal,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
-          side: BorderSide(color: selected ? _Look.teal : _Look.edge, width: selected ? 2 : 1),
+          side: BorderSide(color: drop ? const Color(0xFFFFC94A) : (selected ? _Look.teal : _Look.edge), width: selected || drop ? 2 : 1),
         ),
         child: InkWell(
           borderRadius: BorderRadius.circular(18),
@@ -280,6 +328,13 @@ class _DevicesPageState extends State<DevicesPage> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
             child: Row(children: [
+              if (_multi) ...[
+                Checkbox(
+                  value: _picked.contains(d.id),
+                  onChanged: d.target == null ? null : (v) => setState(() => v == true ? _picked.add(d.id) : _picked.remove(d.id)),
+                ),
+                const SizedBox(width: 6),
+              ],
               _avatar(d, 50),
               const SizedBox(width: 16),
               Expanded(
@@ -296,8 +351,18 @@ class _DevicesPageState extends State<DevicesPage> {
                       ),
                       const SizedBox(width: 6),
                       Flexible(
-                        child: Text(_status(d),
-                            overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, color: d.online ? _Look.green : _Look.soft)),
+                        child: Text.rich(
+                          TextSpan(children: [
+                            TextSpan(text: _status(d)),
+                            if (!d.isPc && rep != null)
+                              TextSpan(
+                                text: ' · ${tr(rep.pending == 0 ? 'dev.all_backed_up' : 'dev.left_to_backup', {'count': rep.pending, 'when': formatWhen(rep.when)})}',
+                                style: TextStyle(color: rep.pending == 0 ? _Look.green : const Color(0xFFFFC94A)),
+                              ),
+                          ]),
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 13, color: d.online ? _Look.green : _Look.soft),
+                        ),
                       ),
                     ])
                   else
@@ -308,6 +373,11 @@ class _DevicesPageState extends State<DevicesPage> {
               if (t != null && !d.isPc) _chip(tr('family.access_${t.libraryAccess.name}')),
               const SizedBox(width: 12),
               const SizedBox(width: 4),
+              if (drop)
+                Padding(
+                  padding: const EdgeInsets.only(right: 10),
+                  child: Text(tr('dev.drop_here'), style: const TextStyle(color: Color(0xFFFFC94A), fontWeight: FontWeight.w700)),
+                ),
               _sendButton(d),
               const SizedBox(width: 6),
               const Icon(Icons.chevron_right_rounded, color: _Look.soft),
@@ -315,6 +385,63 @@ class _DevicesPageState extends State<DevicesPage> {
           ),
         ),
       ),
+    ),
+    );
+  }
+
+  /// "This PC is receiving…" — receiving needs nothing to do.
+  Widget _receiving() => Container(
+        margin: const EdgeInsets.only(bottom: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: _Look.teal.withValues(alpha: 0.07),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: _Look.teal.withValues(alpha: 0.35)),
+        ),
+        child: Row(children: [
+          Container(width: 9, height: 9, decoration: const BoxDecoration(shape: BoxShape.circle, color: _Look.green)),
+          const SizedBox(width: 10),
+          Expanded(child: Text(tr('dev.receiving_note'), style: const TextStyle(color: Color(0xFFC8D6E5), fontSize: 13.5))),
+        ]),
+      );
+
+  /// Several devices ticked: send to them together.
+  Widget _multiBar(List<_Dev> all) {
+    final names = [for (final d in all) if (_picked.contains(d.id)) d.name];
+    Future<void> go(bool folder) async {
+      final List<String> paths;
+      if (folder) {
+        final dir = await WinDialogs.pickFolder(title: tr('send.folder'));
+        paths = dir == null ? const [] : [dir];
+      } else {
+        paths = await WinDialogs.pickFiles(title: tr('send.files'));
+      }
+      if (paths.isEmpty || !mounted) return;
+      final n = await sendPathsTo(context, widget.services, _picked.toList(), paths);
+      if (n > 0 && mounted) {
+        setState(() {
+          _multi = false;
+          _picked.clear();
+        });
+      }
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF12305A),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0x662B8CFF)),
+        boxShadow: const [BoxShadow(color: Color(0x66000000), blurRadius: 18, offset: Offset(0, 6))],
+      ),
+      child: Row(children: [
+        Text(tr('dev.picked', {'count': names.length}), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+        const SizedBox(width: 10),
+        Expanded(child: Text(names.join('、'), overflow: TextOverflow.ellipsis, style: const TextStyle(color: _Look.soft))),
+        OutlinedButton(onPressed: () => go(true), child: Text(tr('send.folder'))),
+        const SizedBox(width: 8),
+        FilledButton(onPressed: () => go(false), child: Text(tr('send.files'))),
+      ]),
     );
   }
 
@@ -332,22 +459,25 @@ class _DevicesPageState extends State<DevicesPage> {
       );
     }
     return PopupMenuButton<String>(
-      tooltip: tr('dev.send'),
+      tooltip: d.ready ? tr('dev.send') : tr('dev.send_later_tip'),
       onSelected: (v) => _send(d, v),
       itemBuilder: (_) => [
         PopupMenuItem(value: 'files', child: Text(tr('send.files'))),
         PopupMenuItem(value: 'folder', child: Text(tr('send.folder'))),
-        if (d.isPc) PopupMenuItem(value: 'text', child: Text(tr('send.text'))),
+        if (d.isPc && d.ready) PopupMenuItem(value: 'text', child: Text(tr('send.text'))),
       ],
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          gradient: const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF2B8CFF), Color(0xFF1468E0)]),
-          boxShadow: [BoxShadow(color: const Color(0xFF2B8CFF).withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))],
+          color: d.ready ? null : const Color(0x402B8CFF),
+          gradient: d.ready
+              ? const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF2B8CFF), Color(0xFF1468E0)])
+              : null,
+          boxShadow: d.ready ? [BoxShadow(color: const Color(0xFF2B8CFF).withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))] : null,
         ),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Text(tr('dev.send'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 15)),
+          Text(tr(d.ready ? 'dev.send' : 'dev.send_later'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 15)),
           const Icon(Icons.arrow_drop_down_rounded, color: Colors.white, size: 20),
         ]),
       ),
@@ -403,11 +533,16 @@ class _DevicesPageState extends State<DevicesPage> {
             Container(width: 10, height: 10, decoration: BoxDecoration(shape: BoxShape.circle, color: dot)),
             const SizedBox(width: 8),
           ],
-          Text(k, style: const TextStyle(color: _Look.soft, fontSize: 14)),
-          const Spacer(),
-          Flexible(child: Text(v, textAlign: TextAlign.right, style: const TextStyle(color: Color(0xFFDCE6F2), fontSize: 14))),
+          SizedBox(width: 110, child: Text(k, style: const TextStyle(color: _Look.soft, fontSize: 14))),
+          Expanded(
+            child: Text(v, maxLines: 1, softWrap: false, overflow: TextOverflow.fade, textAlign: TextAlign.right,
+                style: const TextStyle(color: Color(0xFFDCE6F2), fontSize: 14)),
+          ),
         ]),
       );
+
+  static String _dateTime(DateTime t) =>
+      '${formatDate(t)} ${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
 
   Widget _glassButton(IconData icon, String label, VoidCallback onTap) => Material(
         color: Colors.white.withValues(alpha: 0.06),
@@ -489,8 +624,9 @@ class _DevicesPageState extends State<DevicesPage> {
     final mine = s.library.items.where((i) => i.deviceId == d.id);
     final photos = mine.where((i) => i.kind == MediaKind.image).length;
     final videos = mine.where((i) => i.kind == MediaKind.video).length;
+    final seen = s.server.lastSeen[d.id];
     return Container(
-      width: 360,
+      width: 420,
       margin: const EdgeInsets.fromLTRB(0, 16, 16, 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
@@ -510,7 +646,7 @@ class _DevicesPageState extends State<DevicesPage> {
             icon: const Icon(Icons.close_rounded, color: _Look.soft),
           ),
         ),
-        Center(child: Breathing(online: d.online, radius: 999, child: Padding(padding: const EdgeInsets.all(4), child: _avatar(d, 96)))),
+        Center(child: Breathing(online: d.online, radius: 999, child: Padding(padding: const EdgeInsets.all(4), child: _avatar(d, 84)))),
         const SizedBox(height: 12),
         Text(d.name, textAlign: TextAlign.center, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: Colors.white)),
         const SizedBox(height: 8),
@@ -528,7 +664,8 @@ class _DevicesPageState extends State<DevicesPage> {
         _head(tr('dev.info')),
         _kv(tr('dev.type'), tr(d.isPc ? 'dev.kind_pc' : 'dev.kind_phone')),
         _kv(tr('dev.ip'), d.target?.hosts.firstOrNull ?? '—'),
-        if (t != null) _kv(tr('dev.paired'), formatDate(DateTime.fromMillisecondsSinceEpoch(t.pairedMs))),
+        if (t != null) _kv(tr('dev.paired'), _dateTime(DateTime.fromMillisecondsSinceEpoch(t.pairedMs))),
+        if (!d.online && seen != null) _kv(tr('dev.last_seen'), formatWhen(seen)),
         if (t != null) ...[
           _head(tr('dev.got_from')),
           _kv(tr('dev.photos'), '$photos', dot: const Color(0xFF8B5CF6)),
