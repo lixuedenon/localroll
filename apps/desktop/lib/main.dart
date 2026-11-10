@@ -31,6 +31,7 @@ import 'ui/screen/float_panel.dart';
 import 'ui/screen/screen_record.dart';
 import 'services/run_flag.dart';
 import 'ui/media_thumb.dart';
+import 'ui/send_paths.dart';
 import 'ui/theme.dart';
 import 'ui/title_bar.dart';
 

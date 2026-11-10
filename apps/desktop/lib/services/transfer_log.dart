@@ -6,6 +6,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:localroll_core/localroll_core.dart';
 
+import 'settings.dart' show randomId;
+
 /// One transfer, as the "Transfers" page lists it afterwards: who, which
 /// way, how much, how it ended.
 class TransferRecord {
