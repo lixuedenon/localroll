@@ -220,6 +220,9 @@ class AppSettings extends ChangeNotifier {
   /// Conversions made before beta.115 (_converted) were added to the library.
   bool convertedShown = false;
 
+  /// The key for "Snip & read text" anywhere in Windows (SnipKey name).
+  String snipKey = 'ctrlAltX';
+
   /// Receive from paired devices without asking. Off: each device's first
   /// transfer waits for "Accept" on this PC (then 30 minutes free).
   bool autoAccept = true;
@@ -297,6 +300,7 @@ class AppSettings extends ChangeNotifier {
     s.toolsFolder = j['toolsFolder'] as String?;
     s.toolSaveTo = j['toolSaveTo'] as String? ?? 'library';
     s.convertedShown = j['convertedShown'] == true;
+    s.snipKey = j['snipKey'] as String? ?? 'ctrlAltX';
     s.recentSeenMs = (j['recentSeenMs'] as num?)?.toInt() ?? 0;
     s.autoAccept = j['autoAccept'] != false;
     s.textSearch = j['textSearch'] != false;
@@ -356,6 +360,7 @@ class AppSettings extends ChangeNotifier {
       if (toolsFolder != null) 'toolsFolder': toolsFolder,
       'toolSaveTo': toolSaveTo,
       if (convertedShown) 'convertedShown': true,
+      'snipKey': snipKey,
       'hiddenPeers': hiddenPeers.toList(),
       'recentSeenMs': recentSeenMs,
       'autoAccept': autoAccept,

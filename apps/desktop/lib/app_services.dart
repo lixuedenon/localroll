@@ -11,6 +11,8 @@ import 'services/annotations.dart';
 import 'services/boot.dart';
 import 'services/converter.dart';
 import 'services/tool_outputs.dart';
+import 'services/global_keys.dart';
+import 'ui/tools/tools.dart' show Tool, snipFromKey;
 import 'services/ffmpeg.dart';
 import 'services/library_index.dart';
 import 'services/network.dart';
@@ -92,6 +94,15 @@ class AppServices {
 
   /// What the tools made (and from what); puts results into the library.
   late final ToolRecords tools = ToolRecords(this);
+
+  /// The "Snip & read text" key, as Settings says; false: another program
+  /// already uses it.
+  Future<bool> applySnipKey() async {
+    final key = SnipKey.of(settings.snipKey);
+    final ok = await GlobalKeys.setSnip(key, () => unawaited(snipFromKey(this)));
+    Tool.snipKeyLabel = ok && key != SnipKey.off ? key.label.replaceAll(' ', '') : '';
+    return ok;
+  }
   late final PlayerMemory player = PlayerMemory(File('${settings.dataDir.path}${Platform.pathSeparator}player.json'));
   /// Screen recordings, explanations, clips, screenshots.
   late final Recordings recordings = Recordings(library: library, dataDir: settings.dataDir, memory: player);
@@ -285,6 +296,7 @@ class AppServices {
     converter.outPathFor = (src, ext) => toolOutPath(s, src, '', ext);
     converter.onDone = (src, out) => unawaited(s.tools.saved([out], tool: 'convert', sources: {out: src}));
     unawaited(s.tools.showOldConversions());
+    unawaited(s.applySnipKey());
     await StampLibrary.instance.load(s.settings.dataDir);
     await s.recordings.load();
     s.recordings.watch(s.sender);

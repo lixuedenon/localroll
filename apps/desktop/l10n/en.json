@@ -1992,5 +1992,10 @@
   "tool.records_more": "All {count}",
   "tool.records_less": "Show less",
   "tool.open_folder": "Open the tools folder",
-  "tool.convert_name": "Conversion"
+  "tool.convert_name": "Conversion",
+  "settings.snip_key": "Snip & read text key",
+  "settings.snip_key_hint": "Press it anywhere to box part of the screen and read its text (works with Keepnear in the background)",
+  "settings.snip_key_taken": "Another program already uses this key; pick another",
+  "settings.snip_key_off": "Off",
+  "settings.tool_save": "Tool results go to"
 }

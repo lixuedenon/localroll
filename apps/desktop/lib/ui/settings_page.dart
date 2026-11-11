@@ -15,6 +15,8 @@ import 'identity_card.dart';
 import 'media_thumb.dart';
 import 'search_settings.dart';
 import 'theme.dart';
+import '../services/global_keys.dart';
+import 'tools/tools.dart' show ToolSaveChip;
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key, required this.services});
@@ -121,6 +123,44 @@ class _SettingsPageState extends State<SettingsPage> {
                   ]),
                   // Text in photos and files, for the search box.
                   _group(theme, tr('search.title'), [SearchSettings(services: s)]),
+                  // The tools: the snip key anywhere in Windows, where results go.
+                  _group(theme, tr('nav.convert'), [
+                    ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                      leading: const Icon(Icons.keyboard_rounded),
+                      title: Text(tr('settings.snip_key')),
+                      subtitle: ValueListenableBuilder<bool?>(
+                        valueListenable: GlobalKeys.snipOk,
+                        builder: (_, ok, _) => Text(
+                          ok == false ? tr('settings.snip_key_taken') : tr('settings.snip_key_hint'),
+                          style: TextStyle(color: ok == false ? LrColors.danger : null),
+                        ),
+                      ),
+                      trailing: DropdownButton<SnipKey>(
+                        value: SnipKey.of(s.settings.snipKey),
+                        underline: const SizedBox.shrink(),
+                        onChanged: (v) async {
+                          if (v == null) return;
+                          await s.settings.update((x) => x.snipKey = v.name);
+                          final ok = await s.applySnipKey();
+                          if (mounted) setState(() {});
+                          if (!ok) _toast(tr('settings.snip_key_taken'));
+                        },
+                        items: [
+                          for (final k in SnipKey.values)
+                            DropdownMenuItem(value: k, child: Text(k == SnipKey.off ? tr('settings.snip_key_off') : k.label)),
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                      leading: const Icon(Icons.save_alt_rounded),
+                      title: Text(tr('settings.tool_save')),
+                      subtitle: Text(tr('tool.save_to_tip')),
+                      trailing: ToolSaveChip(services: s, dark: true),
+                    ),
+                  ]),
                   _group(theme, tr('settings.g_storage'), [
                     _row(Icons.photo_library_outlined, tr('settings.library_folder'), sub: tr('settings.library_hint')),
                     Padding(

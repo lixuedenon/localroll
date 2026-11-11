@@ -6,6 +6,7 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:localroll_core/localroll_core.dart';
+import 'package:window_manager/window_manager.dart';
 
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
@@ -51,7 +52,10 @@ enum Tool {
   final ToolInput input;
 
   String get title => tr('tool.$name');
-  String get sub => tr('tool.${name}_sub');
+  String get sub => this == snipText && snipKeyLabel.isNotEmpty ? '${tr('tool.${name}_sub')} · $snipKeyLabel' : tr('tool.${name}_sub');
+
+  /// The snip key now in use ("Ctrl+Alt+X"), '' when off.
+  static String snipKeyLabel = '';
 
   /// The file types it takes (without dots), for the file dialog.
   List<String>? get extensions => switch (input) {
@@ -496,4 +500,38 @@ Future<void> showSnipResult(BuildContext context, AppServices s, File shot) asyn
       ]),
     ),
   );
+}
+
+bool _snipping = false;
+
+/// The snip key was pressed anywhere in Windows: box part of the screen,
+/// read its words; then Keepnear goes back to how it was (hidden,
+/// minimized or open).
+Future<void> snipFromKey(AppServices s) async {
+  if (_snipping) return;
+  _snipping = true;
+  try {
+    final ctx = AppNav.instance.navigatorKey.currentContext;
+    if (ctx == null) return;
+    final wasVisible = await windowManager.isVisible();
+    final wasMinimized = await windowManager.isMinimized();
+    s.tools.current = Tool.snipText.name;
+    DiagLog.log('tools', 'snip from the global key');
+    if (!ctx.mounted) return;
+    final shot = await snipScreen(ctx, s);
+    if (shot != null && ctx.mounted) {
+      await windowManager.focus();
+      if (!ctx.mounted) return;
+      await showSnipResult(ctx, s, shot);
+    }
+    if (!wasVisible) {
+      await windowManager.hide();
+    } else if (wasMinimized) {
+      await windowManager.minimize();
+    }
+  } catch (e) {
+    DiagLog.log('tools', 'snip from the key failed: $e');
+  } finally {
+    _snipping = false;
+  }
 }

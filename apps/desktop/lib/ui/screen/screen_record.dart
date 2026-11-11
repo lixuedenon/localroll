@@ -1793,7 +1793,13 @@ Future<File?> snipScreen(BuildContext context, AppServices s) async {
   if (shot == null || !context.mounted) return null;
   AppNav.instance.fullscreen.value = true;
   await windowManager.setMinimumSize(const Size(200, 40));
+  // From the global key, Keepnear may be hidden or minimized.
+  if (!await windowManager.isVisible() || await windowManager.isMinimized()) {
+    await windowManager.restore();
+    await windowManager.show();
+  }
   WinScreen.place(screen.rect, onTop: true);
+  await windowManager.focus();
   if (!context.mounted) return null;
   final picked = await Navigator.of(context).push<Rect>(MaterialPageRoute(builder: (_) => _AreaPicker(shot: shot)));
   AppNav.instance.fullscreen.value = false;
