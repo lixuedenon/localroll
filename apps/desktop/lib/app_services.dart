@@ -10,6 +10,7 @@ import 'server/transfer_server.dart';
 import 'services/annotations.dart';
 import 'services/boot.dart';
 import 'services/converter.dart';
+import 'services/tool_outputs.dart';
 import 'services/ffmpeg.dart';
 import 'services/library_index.dart';
 import 'services/network.dart';
@@ -88,6 +89,9 @@ class AppServices {
   /// The player: where videos were left, recent files (this PC only).
   /// Visitors without LocalRoll: the browser page (while the guest window is open).
   late final GuestServer guest = GuestServer(this);
+
+  /// What the tools made (and from what); puts results into the library.
+  late final ToolRecords tools = ToolRecords(this);
   late final PlayerMemory player = PlayerMemory(File('${settings.dataDir.path}${Platform.pathSeparator}player.json'));
   /// Screen recordings, explanations, clips, screenshots.
   late final Recordings recordings = Recordings(library: library, dataDir: settings.dataDir, memory: player);
@@ -274,6 +278,13 @@ class AppServices {
     });
     s.sender.onTextSent = (p, text) => s.transferLog.outText(p.id, p.name, text);
     await s.player.load();
+    await s.tools.load();
+    // Tool results: the library's tools folder (its other files are listed
+    // with the received files); conversions go there too.
+    server.files.toolsDir = () => toolsFolderOf(s);
+    converter.outPathFor = (src, ext) => toolOutPath(s, src, '', ext);
+    converter.onDone = (src, out) => unawaited(s.tools.saved([out], tool: 'convert', sources: {out: src}));
+    unawaited(s.tools.showOldConversions());
     await StampLibrary.instance.load(s.settings.dataDir);
     await s.recordings.load();
     s.recordings.watch(s.sender);

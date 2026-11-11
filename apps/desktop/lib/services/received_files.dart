@@ -75,6 +75,10 @@ class ReceivedFiles {
   /// The Documents (true) / Other (false) folder, made if needed.
   final Future<String> Function({required bool document}) folderPath;
 
+  /// The tools' results folder (its photos and videos are in the library;
+  /// its other files are listed here as documents). Null: none.
+  String? Function()? toolsDir;
+
   Map<String, FileOwner>? _owners;
   List<ReceivedFile>? _list;
   DateTime _listedAt = DateTime.fromMillisecondsSinceEpoch(0);
@@ -216,10 +220,19 @@ class ReceivedFiles {
     if (cached != null && DateTime.now().difference(_listedAt) < const Duration(seconds: 5)) return cached;
     final owners = await _loadOwners();
     final out = <ReceivedFile>[];
-    for (final doc in [true, false]) {
+    // Documents, Other files, and the tools' results that are not photos
+    // or videos (those are in the library).
+    for (final where in [true, false, null]) {
+      final doc = where ?? true;
       final String dir;
       try {
-        dir = await folderPath(document: doc);
+        if (where == null) {
+          final t = toolsDir?.call();
+          if (t == null || !await Directory(t).exists()) continue;
+          dir = t;
+        } else {
+          dir = await folderPath(document: where);
+        }
       } catch (_) {
         continue;
       }
@@ -229,6 +242,7 @@ class ReceivedFiles {
           final inside = e.path.substring(dir.length);
           final name = inside.split(_sep).last;
           if (inside.split(_sep).any((p) => p.startsWith('.')) || name.toLowerCase() == 'desktop.ini') continue;
+          if (where == null && MediaKind.fromName(name) != MediaKind.other) continue;
           try {
             final st = await e.stat();
             final rel = relOf(e.path);

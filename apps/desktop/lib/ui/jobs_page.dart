@@ -13,6 +13,7 @@ import 'player/player_entry.dart';
 import 'player/player_page.dart';
 import 'send_paths.dart';
 import 'theme.dart';
+import 'tools/tool_records.dart';
 import 'tools/tools.dart';
 
 /// Convert: the queue of conversions started from the library or viewer.
@@ -42,12 +43,9 @@ class JobsPage extends StatelessWidget {
               if (c.jobs.any((j) => j.state == JobState.done || j.state == JobState.failed))
                 TextButton(onPressed: c.clearFinished, child: Text(tr('common.clear_finished'))),
               const SizedBox(width: 8),
-              OutlinedButton.icon(
-                onPressed: () => _openConverted(s),
-                icon: const Icon(Icons.folder_open, size: 18),
-                label: Text(tr('common.open')),
-              ),
             ]),
+            const SizedBox(height: 14),
+            ToolRecordsView(services: s),
             const SizedBox(height: 18),
             ToolsGrid(services: s, all: true),
             const SizedBox(height: 22),
@@ -101,15 +99,6 @@ class JobsPage extends StatelessWidget {
       ),
     );
   }
-}
-
-/// The _converted folder (made first, so Explorer has something to open).
-Future<void> _openConverted(AppServices s) async {
-  final dir = Directory('${s.library.rootPath}${Platform.pathSeparator}_converted');
-  try {
-    await dir.create(recursive: true);
-  } catch (_) {}
-  await revealInExplorer(dir.path);
 }
 
 Widget _box({required Widget child, Color? border, EdgeInsets padding = const EdgeInsets.all(18)}) => Container(

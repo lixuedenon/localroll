@@ -106,6 +106,24 @@ class _FilesViewState extends State<FilesView> {
       }
     } catch (_) {}
     out.sort((a, b) => b.modified.compareTo(a.modified));
+    // Documents: the tools' results folder is listed first (PDFs made by
+    // the tools are kept there).
+    final tools = widget.document ? widget.services.server.files.toolsDir?.call() : null;
+    if (tools != null) {
+      try {
+        final d = Directory(tools);
+        if (await d.exists()) {
+          var size = 0, children = 0;
+          await for (final f in d.list(recursive: true, followLinks: false)) {
+            if (f is File) {
+              children++;
+              size += await f.length();
+            }
+          }
+          out.insert(0, _Entry(d, (await d.stat()).modified, size, children));
+        }
+      } catch (_) {}
+    }
     if (!mounted) return;
     setState(() {
       _dir = dir;

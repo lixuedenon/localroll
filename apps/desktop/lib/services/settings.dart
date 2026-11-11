@@ -210,6 +210,16 @@ class AppSettings extends ChangeNotifier {
   String? docsFolder;
   String? otherFolder;
 
+  /// The tools' results folder inside the library ("Keepnear Tools"),
+  /// named once like the two above. Part of the library view.
+  String? toolsFolder;
+
+  /// Where the tools' results go: library / beside / both (ToolSaveTo).
+  String toolSaveTo = 'library';
+
+  /// Conversions made before beta.115 (_converted) were added to the library.
+  bool convertedShown = false;
+
   /// Receive from paired devices without asking. Off: each device's first
   /// transfer waits for "Accept" on this PC (then 30 minutes free).
   bool autoAccept = true;
@@ -284,6 +294,9 @@ class AppSettings extends ChangeNotifier {
     s.libraryPath = j['libraryPath'] as String? ?? _defaultLibraryPath();
     s.docsFolder = j['docsFolder'] as String?;
     s.otherFolder = j['otherFolder'] as String?;
+    s.toolsFolder = j['toolsFolder'] as String?;
+    s.toolSaveTo = j['toolSaveTo'] as String? ?? 'library';
+    s.convertedShown = j['convertedShown'] == true;
     s.recentSeenMs = (j['recentSeenMs'] as num?)?.toInt() ?? 0;
     s.autoAccept = j['autoAccept'] != false;
     s.textSearch = j['textSearch'] != false;
@@ -340,6 +353,9 @@ class AppSettings extends ChangeNotifier {
       'libraryPath': libraryPath,
       if (docsFolder != null) 'docsFolder': docsFolder,
       if (otherFolder != null) 'otherFolder': otherFolder,
+      if (toolsFolder != null) 'toolsFolder': toolsFolder,
+      'toolSaveTo': toolSaveTo,
+      if (convertedShown) 'convertedShown': true,
       'hiddenPeers': hiddenPeers.toList(),
       'recentSeenMs': recentSeenMs,
       'autoAccept': autoAccept,

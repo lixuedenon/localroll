@@ -132,6 +132,7 @@ class _VideoToolPageState extends State<VideoToolPage> {
         backgroundColor: const Color(0xFF1D2633),
         title: Text(baseNameOf(_files[_at]), overflow: TextOverflow.ellipsis),
         actions: [
+          ToolSaveChip(services: s, dark: true),
           if (_files.length > 1)
             TextButton.icon(onPressed: _join, icon: const Icon(Icons.merge_rounded), label: Text(tr('video.join', {'count': _files.length}))),
           TextButton.icon(

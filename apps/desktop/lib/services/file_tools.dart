@@ -8,34 +8,12 @@ import 'dart:ui' as ui;
 import 'package:localroll_core/localroll_core.dart';
 
 import '../app_services.dart';
-import '../ui/send_page.dart' show baseNameOf;
-import 'library_index.dart';
 import 'video_encoders.dart';
+
+export 'tool_outputs.dart' show toolOutPath;
 
 // The "tools" (Home's everyday tools, the Tools page): what they do on this
 // PC. Originals are never changed; a new file is made beside them.
-
-/// Where a tool's result goes: beside [src]; a file of the library goes to
-/// the received-files folder's "Keepnear" folder (the library keeps only
-/// what came from devices). [suffix] e.g. "-signed"; [ext] without the dot.
-String toolOutPath(AppServices s, String src, String suffix, String ext) {
-  final sep = Platform.pathSeparator;
-  final lib = s.library.rootPath;
-  var dir = File(src).parent.path;
-  if (lib.isNotEmpty && src.toLowerCase().startsWith('${lib.toLowerCase()}$sep')) {
-    dir = '${s.server.folderPath}${sep}Keepnear';
-  }
-  try {
-    Directory(dir).createSync(recursive: true);
-  } catch (_) {
-    dir = '${Directory.systemTemp.path}${sep}Keepnear';
-    Directory(dir).createSync(recursive: true);
-  }
-  final name = baseNameOf(src);
-  final dot = name.lastIndexOf('.');
-  final stem = dot > 0 ? name.substring(0, dot) : name;
-  return LibraryIndex.uniquePath(dir, sanitizeFileName('$stem$suffix.$ext'));
-}
 
 // ------------------------------------------------------------- PDF builder
 

@@ -401,6 +401,7 @@ class _PdfToolPageState extends State<PdfToolPage> {
           title: Text(_title, overflow: TextOverflow.ellipsis),
           backgroundColor: Colors.white,
           actions: [
+            ToolSaveChip(services: s),
             TextButton(onPressed: busy ? null : () => _saveOne(ask: true), child: Text(tr('tool.save_as'))),
             const SizedBox(width: 6),
             FilledButton.icon(

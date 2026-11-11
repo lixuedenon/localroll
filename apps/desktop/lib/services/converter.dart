@@ -104,6 +104,13 @@ class ConverterService extends ChangeNotifier {
   final List<ConvertJob> jobs = [];
   bool _pumping = false;
 
+  /// Where a result goes (the tools' place: the library's tools folder or
+  /// beside the original); null: the old places.
+  String Function(String src, String ext)? outPathFor;
+
+  /// A conversion finished: [out] made from [src].
+  void Function(String src, String out)? onDone;
+
   int get pending => jobs.where((j) => j.state == JobState.queued || j.state == JobState.running).length;
 
   void enqueue(Iterable<MediaItem> items, ConvertPreset preset, {ConvertFormat? format}) {
@@ -261,6 +268,7 @@ class ConverterService extends ChangeNotifier {
       } catch (_) {}
       job.progress = 1;
       job.state = JobState.done;
+      onDone?.call(src, out);
     } catch (e) {
       job.state = JobState.failed;
       job.error = e.toString();
@@ -272,6 +280,11 @@ class ConverterService extends ChangeNotifier {
     final sep = Platform.pathSeparator;
     final t = job.item.captureTime;
     final fmt = job.format;
+    final place = outPathFor;
+    if (place != null) {
+      final src = job.path.isNotEmpty ? job.path : library.absPath(job.item);
+      return place(src, fmt?.ext ?? (job.item.kind == MediaKind.video ? 'mp4' : 'jpg'));
+    }
     final root = job.root;
     final String folder;
     if (root == null || root.isEmpty) {

@@ -66,7 +66,11 @@ class _ImageToolPageState extends State<ImageToolPage> {
     final b = _bytes;
     return Scaffold(
       backgroundColor: const Color(0xFF141B26),
-      appBar: AppBar(backgroundColor: const Color(0xFF1D2633), title: Text(baseNameOf(widget.path), overflow: TextOverflow.ellipsis)),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF1D2633),
+        title: Text(baseNameOf(widget.path), overflow: TextOverflow.ellipsis),
+        actions: [ToolSaveChip(services: s, dark: true), const SizedBox(width: 12)],
+      ),
       body: b == null
           ? Center(child: _error == null ? const CircularProgressIndicator() : Text(_error!, style: const TextStyle(color: Colors.white)))
           : PhotoEditor(
@@ -82,6 +86,7 @@ class _ImageToolPageState extends State<ImageToolPage> {
                   Icons.send_rounded,
                   (jpeg) async {
                     final out = await _write(jpeg);
+                    await s.tools.saved([out]);
                     if (!mounted) return;
                     final ids = await pickDevices(context, s, count: 1, first: baseNameOf(out));
                     if (ids != null && ids.isNotEmpty && mounted) await sendPathsTo(context, s, ids, [out]);

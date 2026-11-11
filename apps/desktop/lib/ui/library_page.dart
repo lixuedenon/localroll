@@ -341,6 +341,12 @@ class _LibraryPageState extends State<LibraryPage> {
         _watches.add(Directory(dir).watch(recursive: true).listen((_) => _reloadFilesSoon(), onError: (_) {}));
       } catch (_) {}
     }
+    try {
+      final tools = widget.services.server.files.toolsDir?.call();
+      if (tools != null && await Directory(tools).exists()) {
+        _watches.add(Directory(tools).watch(recursive: true).listen((_) => _reloadFilesSoon(), onError: (_) {}));
+      }
+    } catch (_) {}
   }
 
   /// Received files that belong on the "All" timeline now.
@@ -1300,6 +1306,9 @@ class _LibraryPageState extends State<LibraryPage> {
         ? items.where((i) => _selected.contains(i.relPath)).toList()
         : [item];
     final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    // Made by a tool: where its original is.
+    final made = targets.length == 1 ? widget.services.tools.of(widget.services.library.absPath(item)) : null;
+    final source = made?.src;
     final choice = await showMenu<String>(
       context: context,
       position: RelativeRect.fromRect(at & const Size(1, 1), Offset.zero & overlay.size),
@@ -1317,6 +1326,11 @@ class _LibraryPageState extends State<LibraryPage> {
         PopupMenuItem(value: 'send', child: _menuRow(Icons.send_rounded, tr('send.to_pc'))),
         if (targets.length == 1)
           PopupMenuItem(value: 'reveal', child: _menuRow(Icons.folder_open_rounded, tr('common.show_in_folder'))),
+        if (source != null)
+          PopupMenuItem(
+            value: 'source',
+            child: _menuRow(Icons.source_rounded, tr('tool.open_source', {'name': source.split(Platform.pathSeparator).last})),
+          ),
         const PopupMenuDivider(),
         PopupMenuItem(
           value: 'delete',
@@ -1344,6 +1358,12 @@ class _LibraryPageState extends State<LibraryPage> {
         await _sendToPc(targets);
       case 'reveal':
         revealInExplorer(s.library.absPath(item));
+      case 'source':
+        if (source != null && File(source).existsSync()) {
+          revealInExplorer(source);
+        } else {
+          ScaffoldMessenger.of(this.context).showSnackBar(SnackBar(content: Text(tr('tool.source_gone'))));
+        }
       case 'delete':
         await _delete(targets);
       case 'convert':

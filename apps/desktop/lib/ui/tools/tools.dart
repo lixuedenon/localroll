@@ -11,6 +11,7 @@ import '../../app_services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/converter.dart';
 import '../../services/file_tools.dart';
+import '../../services/tool_outputs.dart';
 import '../../services/network.dart' show revealInExplorer;
 import '../../services/win_dialogs.dart';
 import '../app_nav.dart';
@@ -172,6 +173,7 @@ class _ToolsGridState extends State<ToolsGrid> {
 /// Opens [tool] on [paths] (none: asks where the files are — the library or
 /// a folder on this PC).
 Future<void> openTool(BuildContext context, AppServices s, Tool tool, {List<String>? paths}) async {
+  s.tools.current = tool.name;
   var files = paths;
   if (tool.input != ToolInput.none) {
     files ??= await _pickInputs(context, s, tool);
@@ -327,12 +329,18 @@ Future<void> _officePdf(BuildContext context, AppServices s, List<String> docs) 
 
 /// Done: the new files, and what to do with them — open, show in the
 /// folder, send to devices, give to a guest.
-Future<void> showToolResult(BuildContext context, AppServices s, List<String> outs, {String? note}) => showDialog<void>(
+Future<void> showToolResult(BuildContext context, AppServices s, List<String> outs, {String? note}) async {
+  // Into the library / files list, a copy beside the original if wanted,
+  // and into the tools' record.
+  await s.tools.saved(outs);
+  if (!context.mounted) return;
+  final where = savedWhere(s, outs.first);
+  return showDialog<void>(
       context: context,
       builder: (c) => LightDialog(
         icon: Icons.check_circle_rounded,
         title: tr('tool.done_title'),
-        subtitle: note ?? tr('tool.done_sub', {'count': outs.length}),
+        subtitle: '${note ?? tr('tool.done_sub', {'count': outs.length})}\n$where',
         actions: [
           OutlinedButton.icon(
             onPressed: () {
@@ -375,9 +383,61 @@ Future<void> showToolResult(BuildContext context, AppServices s, List<String> ou
               ]),
             ),
           if (outs.length > 8) Text('… +${outs.length - 8}', style: const TextStyle(color: LightLook.muted)),
+          const SizedBox(height: 6),
+          Align(alignment: Alignment.centerLeft, child: ToolSaveChip(services: s)),
         ]),
       ),
     );
+}
+
+/// "Saved in the library (Keepnear Tools)" / "Saved next to the original".
+String savedWhere(AppServices s, String out) {
+  final tools = toolsFolderOf(s);
+  final inTools = tools != null && out.toLowerCase().startsWith('${tools.toLowerCase()}${Platform.pathSeparator}');
+  final r = s.tools.of(out);
+  if (inTools) {
+    return tr(r?.copy != null ? 'tool.saved_both' : 'tool.saved_library', {'folder': tools.split(Platform.pathSeparator).last});
+  }
+  return tr('tool.saved_beside');
+}
+
+/// Where the tools' results go: the library (default), next to the
+/// original, or both. Kept for next time.
+class ToolSaveChip extends StatelessWidget {
+  const ToolSaveChip({super.key, required this.services, this.dark = false});
+
+  final AppServices services;
+
+  /// On the tools' dark pages.
+  final bool dark;
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+        listenable: services.settings,
+        builder: (context, _) {
+          final now = ToolSaveTo.of(services.settings.toolSaveTo);
+          final fg = dark ? Colors.white70 : LightLook.muted;
+          return PopupMenuButton<ToolSaveTo>(
+            tooltip: tr('tool.save_to_tip'),
+            initialValue: now,
+            onSelected: (v) => unawaited(services.settings.update((x) => x.toolSaveTo = v.name)),
+            itemBuilder: (_) => [
+              for (final v in ToolSaveTo.values)
+                CheckedPopupMenuItem(value: v, checked: v == now, child: Text(tr('tool.save_${v.name}'))),
+            ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                Icon(Icons.save_alt_rounded, size: 16, color: fg),
+                const SizedBox(width: 6),
+                Text('${tr('tool.save_to')}${tr('tool.save_${now.name}')}', style: TextStyle(fontSize: 13, color: fg)),
+                Icon(Icons.arrow_drop_down_rounded, size: 20, color: fg),
+              ]),
+            ),
+          );
+        },
+      );
+}
 
 /// A snip: the picture, the words read in it (Windows' own reader), copy /
 /// save / send.
