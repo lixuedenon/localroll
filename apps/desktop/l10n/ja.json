@@ -1997,5 +1997,7 @@
   "settings.snip_key_hint": "どこでも押すと画面の一部を囲んで文字を読み取ります（Keepnear がバックグラウンドでも動作）",
   "settings.snip_key_taken": "このキーは別のプログラムが使っています。別のキーを選んでください",
   "settings.snip_key_off": "オフ",
-  "settings.tool_save": "ツールの保存先"
+  "settings.tool_save": "ツールの保存先",
+  "files.pdf_thumb_making": "プレビューを作成中（通常は数秒〜1 分）",
+  "files.pdf_thumb_later": "プレビューは後で自動的に表示されます（約 1 分後に再試行）。パスワード付きや破損した PDF には表示されません"
 }

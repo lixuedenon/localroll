@@ -1997,5 +1997,7 @@
   "settings.snip_key_hint": "Appuyez n’importe où pour encadrer une partie de l’écran et lire son texte (même avec Keepnear en arrière-plan)",
   "settings.snip_key_taken": "Un autre programme utilise déjà ce raccourci ; choisissez-en un autre",
   "settings.snip_key_off": "Désactivé",
-  "settings.tool_save": "Les résultats des outils vont dans"
+  "settings.tool_save": "Les résultats des outils vont dans",
+  "files.pdf_thumb_making": "Aperçu en cours, en général de quelques secondes à une minute",
+  "files.pdf_thumb_later": "L’aperçu apparaîtra tout seul (nouvel essai dans une minute environ) ; les PDF protégés par mot de passe ou endommagés n’en ont pas"
 }

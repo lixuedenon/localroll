@@ -1997,5 +1997,7 @@
   "settings.snip_key_hint": "Tekan di mana saja untuk membingkai sebagian layar dan membaca teksnya (berfungsi meski Keepnear di latar belakang)",
   "settings.snip_key_taken": "Program lain sudah memakai tombol ini; pilih yang lain",
   "settings.snip_key_off": "Mati",
-  "settings.tool_save": "Hasil alat disimpan ke"
+  "settings.tool_save": "Hasil alat disimpan ke",
+  "files.pdf_thumb_making": "Membuat pratinjau, biasanya beberapa detik hingga satu menit",
+  "files.pdf_thumb_later": "Pratinjau akan muncul sendiri (dicoba lagi sekitar satu menit lagi); PDF dengan kata sandi atau yang rusak tidak menampilkannya"
 }

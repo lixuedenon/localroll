@@ -1997,5 +1997,7 @@
   "settings.snip_key_hint": "Nhấn ở bất cứ đâu để khoanh một phần màn hình và đọc chữ trong đó (vẫn dùng được khi Keepnear chạy nền)",
   "settings.snip_key_taken": "Chương trình khác đã dùng phím này; hãy chọn phím khác",
   "settings.snip_key_off": "Tắt",
-  "settings.tool_save": "Kết quả công cụ lưu vào"
+  "settings.tool_save": "Kết quả công cụ lưu vào",
+  "files.pdf_thumb_making": "Đang tạo bản xem trước, thường vài giây đến một phút",
+  "files.pdf_thumb_later": "Bản xem trước sẽ tự hiện (thử lại sau khoảng một phút); PDF có mật khẩu hoặc bị hỏng sẽ không có"
 }

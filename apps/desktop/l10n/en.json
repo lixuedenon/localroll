@@ -1997,5 +1997,7 @@
   "settings.snip_key_hint": "Press it anywhere to box part of the screen and read its text (works with Keepnear in the background)",
   "settings.snip_key_taken": "Another program already uses this key; pick another",
   "settings.snip_key_off": "Off",
-  "settings.tool_save": "Tool results go to"
+  "settings.tool_save": "Tool results go to",
+  "files.pdf_thumb_making": "Making a preview, usually a few seconds to a minute",
+  "files.pdf_thumb_later": "The preview will appear by itself (tried again in about a minute); PDFs with a password or damaged ones show none"
 }

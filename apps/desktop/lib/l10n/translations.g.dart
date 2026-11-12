@@ -2003,6 +2003,8 @@ const Map<String, Map<String, String>> translations = {
     'settings.snip_key_taken': 'Another program already uses this key; pick another',
     'settings.snip_key_off': 'Off',
     'settings.tool_save': 'Tool results go to',
+    'files.pdf_thumb_making': 'Making a preview, usually a few seconds to a minute',
+    'files.pdf_thumb_later': 'The preview will appear by itself (tried again in about a minute); PDFs with a password or damaged ones show none',
   },
   'zh': {
     'nav.library': '媒体库',
@@ -4004,6 +4006,8 @@ const Map<String, Map<String, String>> translations = {
     'settings.snip_key_taken': '这个快捷键已被别的程序占用，请换一个',
     'settings.snip_key_off': '不用快捷键',
     'settings.tool_save': '工具结果保存到',
+    'files.pdf_thumb_making': '正在生成预览，通常几秒到一分钟',
+    'files.pdf_thumb_later': '预览稍后自动生成（约 1 分钟后再试）；有密码或损坏的 PDF 不显示预览',
   },
   'zh_Hant': {
     'nav.library': '媒體庫',
@@ -6005,6 +6009,8 @@ const Map<String, Map<String, String>> translations = {
     'settings.snip_key_taken': '這個快速鍵已被其他程式佔用，請換一個',
     'settings.snip_key_off': '不用快速鍵',
     'settings.tool_save': '工具結果儲存到',
+    'files.pdf_thumb_making': '正在產生預覽，通常幾秒到一分鐘',
+    'files.pdf_thumb_later': '預覽稍後自動產生（約 1 分鐘後再試）；有密碼或損壞的 PDF 不顯示預覽',
   },
   'ja': {
     'nav.library': 'ライブラリ',
@@ -8006,6 +8012,8 @@ const Map<String, Map<String, String>> translations = {
     'settings.snip_key_taken': 'このキーは別のプログラムが使っています。別のキーを選んでください',
     'settings.snip_key_off': 'オフ',
     'settings.tool_save': 'ツールの保存先',
+    'files.pdf_thumb_making': 'プレビューを作成中（通常は数秒〜1 分）',
+    'files.pdf_thumb_later': 'プレビューは後で自動的に表示されます（約 1 分後に再試行）。パスワード付きや破損した PDF には表示されません',
   },
   'ko': {
     'nav.library': '라이브러리',
@@ -10007,6 +10015,8 @@ const Map<String, Map<String, String>> translations = {
     'settings.snip_key_taken': '다른 프로그램이 이 키를 사용 중입니다. 다른 키를 고르세요',
     'settings.snip_key_off': '끄기',
     'settings.tool_save': '도구 결과 저장 위치',
+    'files.pdf_thumb_making': '미리보기 만드는 중(보통 몇 초~1분)',
+    'files.pdf_thumb_later': '미리보기는 잠시 후 자동으로 나타납니다(약 1분 뒤 다시 시도). 비밀번호가 있거나 손상된 PDF는 표시되지 않습니다',
   },
   'es': {
     'nav.library': 'Biblioteca',
@@ -12008,6 +12018,8 @@ const Map<String, Map<String, String>> translations = {
     'settings.snip_key_taken': 'Otro programa ya usa este atajo; elige otro',
     'settings.snip_key_off': 'Desactivado',
     'settings.tool_save': 'Los resultados de herramientas van a',
+    'files.pdf_thumb_making': 'Creando la vista previa, suele tardar de unos segundos a un minuto',
+    'files.pdf_thumb_later': 'La vista previa aparecerá sola (se reintenta en un minuto aprox.); los PDF con contraseña o dañados no la muestran',
   },
   'fr': {
     'nav.library': 'Bibliothèque',
@@ -14009,6 +14021,8 @@ const Map<String, Map<String, String>> translations = {
     'settings.snip_key_taken': 'Un autre programme utilise déjà ce raccourci ; choisissez-en un autre',
     'settings.snip_key_off': 'Désactivé',
     'settings.tool_save': 'Les résultats des outils vont dans',
+    'files.pdf_thumb_making': 'Aperçu en cours, en général de quelques secondes à une minute',
+    'files.pdf_thumb_later': 'L’aperçu apparaîtra tout seul (nouvel essai dans une minute environ) ; les PDF protégés par mot de passe ou endommagés n’en ont pas',
   },
   'de': {
     'nav.library': 'Mediathek',
@@ -16010,6 +16024,8 @@ const Map<String, Map<String, String>> translations = {
     'settings.snip_key_taken': 'Ein anderes Programm nutzt diese Taste bereits; bitte eine andere wählen',
     'settings.snip_key_off': 'Aus',
     'settings.tool_save': 'Werkzeug-Ergebnisse kommen nach',
+    'files.pdf_thumb_making': 'Vorschau wird erstellt, meist einige Sekunden bis eine Minute',
+    'files.pdf_thumb_later': 'Die Vorschau erscheint von selbst (neuer Versuch in etwa einer Minute); passwortgeschützte oder beschädigte PDFs zeigen keine',
   },
   'pt': {
     'nav.library': 'Biblioteca',
@@ -18011,6 +18027,8 @@ const Map<String, Map<String, String>> translations = {
     'settings.snip_key_taken': 'Outro programa já usa este atalho; escolha outro',
     'settings.snip_key_off': 'Desativado',
     'settings.tool_save': 'Os resultados das ferramentas vão para',
+    'files.pdf_thumb_making': 'Criando a prévia, geralmente de alguns segundos a um minuto',
+    'files.pdf_thumb_later': 'A prévia aparece sozinha (nova tentativa em cerca de um minuto); PDFs com senha ou danificados não mostram',
   },
   'ru': {
     'nav.library': 'Медиатека',
@@ -20012,6 +20030,8 @@ const Map<String, Map<String, String>> translations = {
     'settings.snip_key_taken': 'Эти клавиши уже заняты другой программой; выберите другие',
     'settings.snip_key_off': 'Выкл.',
     'settings.tool_save': 'Результаты инструментов сохраняются в',
+    'files.pdf_thumb_making': 'Создаётся превью — обычно от нескольких секунд до минуты',
+    'files.pdf_thumb_later': 'Превью появится само (повтор примерно через минуту); у PDF с паролем или повреждённых его не будет',
   },
   'it': {
     'nav.library': 'Libreria',
@@ -22013,6 +22033,8 @@ const Map<String, Map<String, String>> translations = {
     'settings.snip_key_taken': 'Un altro programma usa già questo tasto; scegline un altro',
     'settings.snip_key_off': 'Disattivato',
     'settings.tool_save': 'I risultati degli strumenti vanno in',
+    'files.pdf_thumb_making': 'Creazione anteprima, di solito da pochi secondi a un minuto',
+    'files.pdf_thumb_later': 'L’anteprima comparirà da sola (nuovo tentativo tra circa un minuto); i PDF con password o danneggiati non la mostrano',
   },
   'ar': {
     'nav.library': 'المكتبة',
@@ -24014,6 +24036,8 @@ const Map<String, Map<String, String>> translations = {
     'settings.snip_key_taken': 'يستخدم برنامج آخر هذا المفتاح؛ اختر غيره',
     'settings.snip_key_off': 'إيقاف',
     'settings.tool_save': 'تُحفظ نتائج الأدوات في',
+    'files.pdf_thumb_making': 'جارٍ إنشاء المعاينة، عادةً من بضع ثوانٍ إلى دقيقة',
+    'files.pdf_thumb_later': 'ستظهر المعاينة تلقائيًا (إعادة المحاولة بعد دقيقة تقريبًا)؛ ملفات PDF المحمية بكلمة مرور أو التالفة لا تظهر لها معاينة',
   },
   'hi': {
     'nav.library': 'लाइब्रेरी',
@@ -26015,6 +26039,8 @@ const Map<String, Map<String, String>> translations = {
     'settings.snip_key_taken': 'यह कुंजी कोई दूसरा प्रोग्राम उपयोग कर रहा है; कोई और चुनें',
     'settings.snip_key_off': 'बंद',
     'settings.tool_save': 'टूल के नतीजे यहाँ जाते हैं',
+    'files.pdf_thumb_making': 'पूर्वावलोकन बन रहा है, आमतौर पर कुछ सेकंड से एक मिनट',
+    'files.pdf_thumb_later': 'पूर्वावलोकन अपने आप दिखेगा (लगभग एक मिनट बाद फिर कोशिश); पासवर्ड वाली या ख़राब PDF का पूर्वावलोकन नहीं दिखता',
   },
   'id': {
     'nav.library': 'Pustaka',
@@ -28016,6 +28042,8 @@ const Map<String, Map<String, String>> translations = {
     'settings.snip_key_taken': 'Program lain sudah memakai tombol ini; pilih yang lain',
     'settings.snip_key_off': 'Mati',
     'settings.tool_save': 'Hasil alat disimpan ke',
+    'files.pdf_thumb_making': 'Membuat pratinjau, biasanya beberapa detik hingga satu menit',
+    'files.pdf_thumb_later': 'Pratinjau akan muncul sendiri (dicoba lagi sekitar satu menit lagi); PDF dengan kata sandi atau yang rusak tidak menampilkannya',
   },
   'vi': {
     'nav.library': 'Thư viện',
@@ -30017,6 +30045,8 @@ const Map<String, Map<String, String>> translations = {
     'settings.snip_key_taken': 'Chương trình khác đã dùng phím này; hãy chọn phím khác',
     'settings.snip_key_off': 'Tắt',
     'settings.tool_save': 'Kết quả công cụ lưu vào',
+    'files.pdf_thumb_making': 'Đang tạo bản xem trước, thường vài giây đến một phút',
+    'files.pdf_thumb_later': 'Bản xem trước sẽ tự hiện (thử lại sau khoảng một phút); PDF có mật khẩu hoặc bị hỏng sẽ không có',
   },
   'th': {
     'nav.library': 'คลังสื่อ',
@@ -32018,6 +32048,8 @@ const Map<String, Map<String, String>> translations = {
     'settings.snip_key_taken': 'โปรแกรมอื่นใช้ปุ่มลัดนี้อยู่ โปรดเลือกอันอื่น',
     'settings.snip_key_off': 'ปิด',
     'settings.tool_save': 'ผลจากเครื่องมือจะไปที่',
+    'files.pdf_thumb_making': 'กำลังสร้างตัวอย่าง ปกติไม่กี่วินาทีถึงหนึ่งนาที',
+    'files.pdf_thumb_later': 'ตัวอย่างจะแสดงเองภายหลัง (ลองใหม่ในราวหนึ่งนาที) PDF ที่มีรหัสผ่านหรือเสียจะไม่แสดงตัวอย่าง',
   },
   'tr': {
     'nav.library': 'Kitaplık',
@@ -34019,5 +34051,7 @@ const Map<String, Map<String, String>> translations = {
     'settings.snip_key_taken': 'Bu kısayolu başka bir program kullanıyor; başka birini seçin',
     'settings.snip_key_off': 'Kapalı',
     'settings.tool_save': 'Araç sonuçlarının gideceği yer',
+    'files.pdf_thumb_making': 'Önizleme hazırlanıyor, genelde birkaç saniye ile bir dakika',
+    'files.pdf_thumb_later': 'Önizleme kendiliğinden gelecek (yaklaşık bir dakika sonra yeniden denenir); parolalı ya da bozuk PDF’lerde görünmez',
   },
 };

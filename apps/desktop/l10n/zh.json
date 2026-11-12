@@ -1997,5 +1997,7 @@
   "settings.snip_key_hint": "在任何地方按下，框一块屏幕、读出文字（Keepnear 在后台也可以）",
   "settings.snip_key_taken": "这个快捷键已被别的程序占用，请换一个",
   "settings.snip_key_off": "不用快捷键",
-  "settings.tool_save": "工具结果保存到"
+  "settings.tool_save": "工具结果保存到",
+  "files.pdf_thumb_making": "正在生成预览，通常几秒到一分钟",
+  "files.pdf_thumb_later": "预览稍后自动生成（约 1 分钟后再试）；有密码或损坏的 PDF 不显示预览"
 }

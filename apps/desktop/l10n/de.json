@@ -1997,5 +1997,7 @@
   "settings.snip_key_hint": "Überall drücken, um einen Bildschirmbereich zu wählen und seinen Text zu lesen (auch mit Keepnear im Hintergrund)",
   "settings.snip_key_taken": "Ein anderes Programm nutzt diese Taste bereits; bitte eine andere wählen",
   "settings.snip_key_off": "Aus",
-  "settings.tool_save": "Werkzeug-Ergebnisse kommen nach"
+  "settings.tool_save": "Werkzeug-Ergebnisse kommen nach",
+  "files.pdf_thumb_making": "Vorschau wird erstellt, meist einige Sekunden bis eine Minute",
+  "files.pdf_thumb_later": "Die Vorschau erscheint von selbst (neuer Versuch in etwa einer Minute); passwortgeschützte oder beschädigte PDFs zeigen keine"
 }

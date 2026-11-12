@@ -1997,5 +1997,7 @@
   "settings.snip_key_hint": "Pressione em qualquer lugar para enquadrar parte da tela e ler o texto (funciona com o Keepnear em segundo plano)",
   "settings.snip_key_taken": "Outro programa já usa este atalho; escolha outro",
   "settings.snip_key_off": "Desativado",
-  "settings.tool_save": "Os resultados das ferramentas vão para"
+  "settings.tool_save": "Os resultados das ferramentas vão para",
+  "files.pdf_thumb_making": "Criando a prévia, geralmente de alguns segundos a um minuto",
+  "files.pdf_thumb_later": "A prévia aparece sozinha (nova tentativa em cerca de um minuto); PDFs com senha ou danificados não mostram"
 }

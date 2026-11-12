@@ -1997,5 +1997,7 @@
   "settings.snip_key_hint": "어디서든 누르면 화면 일부를 상자로 잡아 글자를 읽습니다(Keepnear가 백그라운드여도 됨)",
   "settings.snip_key_taken": "다른 프로그램이 이 키를 사용 중입니다. 다른 키를 고르세요",
   "settings.snip_key_off": "끄기",
-  "settings.tool_save": "도구 결과 저장 위치"
+  "settings.tool_save": "도구 결과 저장 위치",
+  "files.pdf_thumb_making": "미리보기 만드는 중(보통 몇 초~1분)",
+  "files.pdf_thumb_later": "미리보기는 잠시 후 자동으로 나타납니다(약 1분 뒤 다시 시도). 비밀번호가 있거나 손상된 PDF는 표시되지 않습니다"
 }

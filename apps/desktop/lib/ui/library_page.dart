@@ -540,18 +540,11 @@ class _LibraryPageState extends State<LibraryPage> {
         }
         final chosenMedia = _selected.isEmpty ? const <MediaItem>[] : [for (final i in items) if (_selected.contains(i.relPath)) i];
         _checkDisk(s.library.rootPath);
-        final bar = AppBar(
-            automaticallyImplyLeading: false,
-            primary: false,
-            toolbarHeight: 58,
-            backgroundColor: Colors.transparent,
-            surfaceTintColor: Colors.transparent,
-            elevation: 0,
-            scrolledUnderElevation: 0,
-            titleSpacing: 12,
-            title: _selecting
-                ? Text(tr('lib.selected_size', {'count': _selected.length + _copies.length, 'size': formatBytes(_selectedSize(chosenMedia))}))
-                : Row(children: [
+        // A narrow window: what to show (photos, videos, …) gets its own
+        // line under the tools, so none of it is hidden.
+        return LayoutBuilder(builder: (context, box) {
+        final wide = box.maxWidth >= 1750;
+        final filterRow = Row(children: [
                     _filters(all),
                     if (!_onlyRecent && _recent(all).isNotEmpty) ...[
                       const SizedBox(width: 8),
@@ -567,7 +560,19 @@ class _LibraryPageState extends State<LibraryPage> {
                         icon: const Icon(Icons.close_rounded),
                       ),
                     ],
-                  ]),
+                  ]);
+        final bar = AppBar(
+            automaticallyImplyLeading: false,
+            primary: false,
+            toolbarHeight: 58,
+            backgroundColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+            elevation: 0,
+            scrolledUnderElevation: 0,
+            titleSpacing: 12,
+            title: _selecting
+                ? Text(tr('lib.selected_size', {'count': _selected.length + _copies.length, 'size': formatBytes(_selectedSize(chosenMedia))}))
+                : (wide ? filterRow : null),
             leading: _selecting
                 ? IconButton(tooltip: tr('common.cancel'), icon: const Icon(Icons.close), onPressed: () => setState(_clearSelection))
                 : null,
@@ -750,10 +755,19 @@ class _LibraryPageState extends State<LibraryPage> {
                 decoration: LightLook.wash,
                 child: Column(
                   children: [
-                    if (!_selecting) _hero(context, all),
+                    // Stays while choosing, so the page doesn't jump.
+                    _hero(context, all, low: box.maxHeight < 760),
                     Padding(
-                      padding: EdgeInsets.fromLTRB(20, _selecting ? 16 : 0, 20, 0),
-                      child: Container(decoration: LightLook.card(), clipBehavior: Clip.antiAlias, child: bar),
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                      child: Container(
+                        decoration: LightLook.card(),
+                        clipBehavior: Clip.antiAlias,
+                        child: Column(mainAxisSize: MainAxisSize.min, children: [
+                          bar,
+                          if (!wide && !_selecting)
+                            Padding(padding: const EdgeInsets.fromLTRB(12, 0, 12, 10), child: filterRow),
+                        ]),
+                      ),
                     ),
                     ..._banners(context, items.length + _visibleFiles().length),
                     Expanded(
@@ -779,6 +793,7 @@ class _LibraryPageState extends State<LibraryPage> {
             ),
           ),
         );
+        });
       },
     );
   }
@@ -816,15 +831,16 @@ class _LibraryPageState extends State<LibraryPage> {
 
   /// The band at the top: the name (rest the mouse on it: how to use the
   /// library) and the disk it is on.
-  Widget _hero(BuildContext context, List<MediaItem> all) {
+  Widget _hero(BuildContext context, List<MediaItem> all, {bool low = false}) {
     final s = widget.services;
     final total = all.fold<int>(0, (n, i) => n + i.size);
     final d = _disk;
     final used = d == null || d.total == 0 ? null : 1 - d.free / d.total;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 14),
+      padding: EdgeInsets.fromLTRB(20, low ? 10 : 16, 20, low ? 10 : 14),
       child: SizedBox(
-        height: 124,
+        // A low window: a slimmer band, more room for the photos.
+        height: low ? 112 : 124,
         child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Expanded(
             child: ClipRRect(

@@ -1997,5 +1997,7 @@
   "settings.snip_key_hint": "在任何地方按下，框一塊螢幕、讀出文字（Keepnear 在背景也可以）",
   "settings.snip_key_taken": "這個快速鍵已被其他程式佔用，請換一個",
   "settings.snip_key_off": "不用快速鍵",
-  "settings.tool_save": "工具結果儲存到"
+  "settings.tool_save": "工具結果儲存到",
+  "files.pdf_thumb_making": "正在產生預覽，通常幾秒到一分鐘",
+  "files.pdf_thumb_later": "預覽稍後自動產生（約 1 分鐘後再試）；有密碼或損壞的 PDF 不顯示預覽"
 }

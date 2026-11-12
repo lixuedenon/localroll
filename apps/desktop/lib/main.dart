@@ -34,6 +34,7 @@ import 'ui/media_thumb.dart';
 import 'ui/send_paths.dart';
 import 'ui/theme.dart';
 import 'ui/title_bar.dart';
+import 'services/window_memory.dart';
 
 Future<void> main(List<String> args) async {
   // Build check (CI): the bundled face models load and answer here, the
@@ -82,6 +83,8 @@ Future<void> main(List<String> args) async {
       backgroundColor: LrColors.ink,
     ),
     () async {
+      // As it was left (the first time: maximized).
+      await WindowMemory.apply();
       await windowManager.show();
       // Started with Windows: stay out of the way, just receive.
       if (args.contains(AutoStart.minimizedFlag)) {

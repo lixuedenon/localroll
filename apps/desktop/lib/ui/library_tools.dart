@@ -88,15 +88,22 @@ class _CleanupState extends State<_Cleanup> {
     return Tooltip(
       message: '${i.name} · ${formatBytes(i.size)}',
       child: SizedBox(
-        width: 64,
-        height: 64,
+        width: 84,
+        height: 84,
         child: Stack(fit: StackFit.expand, children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
             child: GestureDetector(
               onTap: () => _preview(list, list.indexOf(i)),
-              child: Opacity(
-                opacity: on ? 1 : 0.45,
+              // Clear to see what it is; ticked to delete: dimmed and framed red.
+              child: Container(
+                foregroundDecoration: on
+                    ? BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.45),
+                        border: Border.all(color: LightLook.red, width: 2.5),
+                        borderRadius: BorderRadius.circular(6),
+                      )
+                    : null,
                 child: MediaThumb(key: ValueKey(i.relPath), item: i, library: widget.s.library, ffmpeg: widget.s.ffmpeg),
               ),
             ),
@@ -107,7 +114,7 @@ class _CleanupState extends State<_Cleanup> {
             child: GestureDetector(
               onTap: () => setState(() => on ? _picked.remove(i) : _picked.add(i)),
               child: Icon(on ? Icons.check_circle : Icons.radio_button_unchecked_rounded,
-                  size: 20, color: on ? LrColors.safelight : Colors.white, shadows: const [Shadow(color: Colors.black54, blurRadius: 4)]),
+                  size: 20, color: on ? LightLook.red : Colors.white, shadows: const [Shadow(color: Colors.black54, blurRadius: 4)]),
             ),
           ),
           if (i.kind == MediaKind.video)

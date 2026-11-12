@@ -1997,5 +1997,7 @@
   "settings.snip_key_hint": "Púlsalo en cualquier sitio para enmarcar una parte de la pantalla y leer su texto (funciona con Keepnear en segundo plano)",
   "settings.snip_key_taken": "Otro programa ya usa este atajo; elige otro",
   "settings.snip_key_off": "Desactivado",
-  "settings.tool_save": "Los resultados de herramientas van a"
+  "settings.tool_save": "Los resultados de herramientas van a",
+  "files.pdf_thumb_making": "Creando la vista previa, suele tardar de unos segundos a un minuto",
+  "files.pdf_thumb_later": "La vista previa aparecerá sola (se reintenta en un minuto aprox.); los PDF con contraseña o dañados no la muestran"
 }

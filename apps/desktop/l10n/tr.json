@@ -1997,5 +1997,7 @@
   "settings.snip_key_hint": "Ekranın bir bölümünü çerçeveleyip metnini okumak için her yerde basın (Keepnear arka plandayken de çalışır)",
   "settings.snip_key_taken": "Bu kısayolu başka bir program kullanıyor; başka birini seçin",
   "settings.snip_key_off": "Kapalı",
-  "settings.tool_save": "Araç sonuçlarının gideceği yer"
+  "settings.tool_save": "Araç sonuçlarının gideceği yer",
+  "files.pdf_thumb_making": "Önizleme hazırlanıyor, genelde birkaç saniye ile bir dakika",
+  "files.pdf_thumb_later": "Önizleme kendiliğinden gelecek (yaklaşık bir dakika sonra yeniden denenir); parolalı ya da bozuk PDF’lerde görünmez"
 }

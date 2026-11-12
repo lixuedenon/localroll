@@ -1,4 +1,5 @@
 // apps/desktop/lib/ui/files_view.dart
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -456,10 +457,19 @@ class FileThumb extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isDir) return icon;
-    return FutureBuilder<Object?>(
+    final pdf = isPdfPath(path);
+    // A PDF's first page can take a while (one PDF at a time, a file that
+    // just arrived may be busy): say so, and try again by itself.
+    return _Again(
+      builder: (later) => FutureBuilder<Object?>(
       future: _load(),
       builder: (context, s) {
         final d = s.data;
+        if (pdf && d == null) {
+          final done = s.connectionState == ConnectionState.done;
+          if (done) later(const Duration(seconds: 65));
+          return _Waiting(icon: icon, box: box, text: tr(done ? 'files.pdf_thumb_later' : 'files.pdf_thumb_making'));
+        }
         final Widget pic;
         if (d is File) {
           pic = Container(
@@ -489,6 +499,70 @@ class FileThumb extends StatelessWidget {
         );
         return box == null ? framed : SizedBox(width: box, height: box, child: framed);
       },
+    ),
     );
+  }
+}
+
+/// Builds again after the wait asked for (once at a time).
+class _Again extends StatefulWidget {
+  const _Again({required this.builder});
+
+  final Widget Function(void Function(Duration wait) later) builder;
+
+  @override
+  State<_Again> createState() => _AgainState();
+}
+
+class _AgainState extends State<_Again> {
+  Timer? _timer;
+
+  void _later(Duration wait) => _timer ??= Timer(wait, () {
+        _timer = null;
+        if (mounted) setState(() {});
+      });
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.builder(_later);
+}
+
+/// The file's icon while its picture is made, with a short word on it
+/// (rest the mouse on it: the whole sentence).
+class _Waiting extends StatelessWidget {
+  const _Waiting({required this.icon, required this.box, required this.text});
+
+  final Widget icon;
+  final double? box;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final big = box == null || box! >= 90;
+    final body = Tooltip(
+      message: text,
+      child: Stack(fit: StackFit.expand, children: [
+        icon,
+        if (big)
+          Positioned(
+            left: 4,
+            right: 4,
+            top: 6,
+            child: Text(
+              text,
+              maxLines: 2,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 10.5, height: 1.2, color: LrColors.muted),
+            ),
+          ),
+      ]),
+    );
+    return box == null ? body : SizedBox(width: box, height: box, child: body);
   }
 }
