@@ -1998,6 +1998,15 @@
   "settings.snip_key_taken": "Program lain sudah memakai tombol ini; pilih yang lain",
   "settings.snip_key_off": "Mati",
   "settings.tool_save": "Hasil alat disimpan ke",
-  "files.pdf_thumb_making": "Membuat pratinjau, biasanya beberapa detik hingga satu menit",
-  "files.pdf_thumb_later": "Pratinjau akan muncul sendiri (dicoba lagi sekitar satu menit lagi); PDF dengan kata sandi atau yang rusak tidak menampilkannya"
+  "files.pdf_thumb_making": "Membuat pratinjau, harap tunggu",
+  "files.pdf_thumb_later": "Pratinjau belum siap dan akan dicoba lagi otomatis; PDF dengan kata sandi atau yang rusak tidak menampilkannya",
+  "snip.bar_title": "Beralih ke jendela yang ingin dipotong, lalu tekan “Potong”",
+  "snip.bar_hint": "Klik jendela lain atau pakai Alt+Tab; tombol pintas juga bisa",
+  "snip.bar_now": "Jendela sekarang: {name}",
+  "snip.bar_go": "Potong",
+  "player.folder_sub": "Satu folder penuh, berurutan",
+  "player.show_more": "Lihat semua {count}",
+  "player.show_less": "Tampilkan lebih sedikit",
+  "player.found_notes": "Anotasi yang ditemukan",
+  "player.notes_empty": "Belum ada anotasi. Apa yang Anda gambar atau tulis di pemutar muncul di sini."
 }

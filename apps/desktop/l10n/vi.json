@@ -1998,6 +1998,15 @@
   "settings.snip_key_taken": "Chương trình khác đã dùng phím này; hãy chọn phím khác",
   "settings.snip_key_off": "Tắt",
   "settings.tool_save": "Kết quả công cụ lưu vào",
-  "files.pdf_thumb_making": "Đang tạo bản xem trước, thường vài giây đến một phút",
-  "files.pdf_thumb_later": "Bản xem trước sẽ tự hiện (thử lại sau khoảng một phút); PDF có mật khẩu hoặc bị hỏng sẽ không có"
+  "files.pdf_thumb_making": "Đang tạo bản xem trước, vui lòng chờ",
+  "files.pdf_thumb_later": "Bản xem trước chưa xong, sẽ tự thử lại; PDF có mật khẩu hoặc bị hỏng sẽ không có",
+  "snip.bar_title": "Chuyển tới cửa sổ cần chụp rồi bấm \"Chụp\"",
+  "snip.bar_hint": "Bấm vào cửa sổ khác hoặc dùng Alt+Tab; phím tắt cũng được",
+  "snip.bar_now": "Cửa sổ hiện tại: {name}",
+  "snip.bar_go": "Chụp",
+  "player.folder_sub": "Cả thư mục, xem liên tục",
+  "player.show_more": "Xem tất cả {count}",
+  "player.show_less": "Thu gọn",
+  "player.found_notes": "Chú thích tìm thấy",
+  "player.notes_empty": "Chưa có chú thích. Những gì bạn vẽ hoặc viết trong trình phát sẽ hiện ở đây."
 }

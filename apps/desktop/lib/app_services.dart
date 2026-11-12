@@ -293,6 +293,12 @@ class AppServices {
     // Tool results: the library's tools folder (its other files are listed
     // with the received files); conversions go there too.
     server.files.toolsDir = () => toolsFolderOf(s);
+    // A PDF that arrives gets its first-page picture at once (a moment
+    // later: a virus scanner may be reading it), not only when shown.
+    server.files.onArrived = (path) {
+      if (!path.toLowerCase().endsWith('.pdf')) return;
+      unawaited(Future<void>.delayed(const Duration(seconds: 3), () => PdfThumbs.of(path, library.cacheDir)));
+    };
     converter.outPathFor = (src, ext) => toolOutPath(s, src, '', ext);
     converter.onDone = (src, out) => unawaited(s.tools.saved([out], tool: 'convert', sources: {out: src}));
     unawaited(s.tools.showOldConversions());

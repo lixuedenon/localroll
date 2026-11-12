@@ -1998,6 +1998,15 @@
   "settings.snip_key_taken": "这个快捷键已被别的程序占用，请换一个",
   "settings.snip_key_off": "不用快捷键",
   "settings.tool_save": "工具结果保存到",
-  "files.pdf_thumb_making": "正在生成预览，通常几秒到一分钟",
-  "files.pdf_thumb_later": "预览稍后自动生成（约 1 分钟后再试）；有密码或损坏的 PDF 不显示预览"
+  "files.pdf_thumb_making": "正在生成预览，请稍候",
+  "files.pdf_thumb_later": "预览还没生成好，会自动再试，请稍候；有密码或损坏的 PDF 不显示预览",
+  "snip.bar_title": "切换到要截取的窗口，然后点「截图」",
+  "snip.bar_hint": "点一下别的窗口或按 Alt+Tab 切换；也可以按截图快捷键",
+  "snip.bar_now": "当前窗口：{name}",
+  "snip.bar_go": "截图",
+  "player.folder_sub": "整个文件夹连着看",
+  "player.show_more": "查看全部 {count} 个",
+  "player.show_less": "收起",
+  "player.found_notes": "找到的标注",
+  "player.notes_empty": "还没有标注。在播放器里用画笔画过、写过字的，会出现在这里。"
 }

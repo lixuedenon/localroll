@@ -1998,6 +1998,15 @@
   "settings.snip_key_taken": "這個快速鍵已被其他程式佔用，請換一個",
   "settings.snip_key_off": "不用快速鍵",
   "settings.tool_save": "工具結果儲存到",
-  "files.pdf_thumb_making": "正在產生預覽，通常幾秒到一分鐘",
-  "files.pdf_thumb_later": "預覽稍後自動產生（約 1 分鐘後再試）；有密碼或損壞的 PDF 不顯示預覽"
+  "files.pdf_thumb_making": "正在產生預覽，請稍候",
+  "files.pdf_thumb_later": "預覽還沒產生好，會自動再試，請稍候；有密碼或損壞的 PDF 不顯示預覽",
+  "snip.bar_title": "切換到要擷取的視窗，然後點「截圖」",
+  "snip.bar_hint": "點一下其他視窗或按 Alt+Tab 切換；也可以按截圖快速鍵",
+  "snip.bar_now": "目前視窗：{name}",
+  "snip.bar_go": "截圖",
+  "player.folder_sub": "整個資料夾連著看",
+  "player.show_more": "查看全部 {count} 個",
+  "player.show_less": "收起",
+  "player.found_notes": "找到的標註",
+  "player.notes_empty": "還沒有標註。在播放器裡用畫筆畫過、寫過字的，會出現在這裡。"
 }

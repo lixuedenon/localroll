@@ -112,9 +112,13 @@ class ReceivedFiles {
   }
 
   /// A file arrived from [owner] at [path].
+  /// A file has arrived (made ready ahead: a PDF's first-page picture).
+  void Function(String path)? onArrived;
+
   Future<void> received(String path, FileOwner owner) async {
     final rel = relOf(path);
     if (rel == null) return;
+    onArrived?.call(path);
     final m = await _loadOwners();
     var size = owner.size;
     if (size == 0) {

@@ -1998,6 +1998,15 @@
   "settings.snip_key_taken": "Another program already uses this key; pick another",
   "settings.snip_key_off": "Off",
   "settings.tool_save": "Tool results go to",
-  "files.pdf_thumb_making": "Making a preview, usually a few seconds to a minute",
-  "files.pdf_thumb_later": "The preview will appear by itself (tried again in about a minute); PDFs with a password or damaged ones show none"
+  "files.pdf_thumb_making": "Making a preview, please wait",
+  "files.pdf_thumb_later": "The preview isn’t ready yet and will be tried again by itself; PDFs with a password or damaged ones show none",
+  "snip.bar_title": "Switch to the window to snip, then press “Snip”",
+  "snip.bar_hint": "Click another window or use Alt+Tab; the snip key works too",
+  "snip.bar_now": "Window now: {name}",
+  "snip.bar_go": "Snip",
+  "player.folder_sub": "A whole folder, one after another",
+  "player.show_more": "See all {count}",
+  "player.show_less": "Show less",
+  "player.found_notes": "Notes found",
+  "player.notes_empty": "No notes yet. What you draw or write on in the player shows here."
 }

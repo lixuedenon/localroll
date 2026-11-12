@@ -12,6 +12,8 @@ import '../../services/player_memory.dart';
 import '../../services/win_dialogs.dart';
 import '../app_nav.dart';
 import '../files_view.dart';
+import '../format.dart';
+import '../light_look.dart';
 import '../media_thumb.dart';
 import '../theme.dart';
 import 'player_entry.dart';
@@ -23,6 +25,8 @@ class PlayerHome extends StatelessWidget {
   const PlayerHome({super.key, required this.services});
 
   final AppServices services;
+
+  String _title(String what) => '${tr('player.open_files')} · $what';
 
   Future<void> _openFiles(BuildContext context) async {
     final paths = await WinDialogs.pickFiles(
@@ -74,8 +78,139 @@ class PlayerHome extends StatelessWidget {
   }
 
   @override
+  Widget build(BuildContext context) => _PlayerHomeBody(home: this);
+}
+
+/// The light look (like the library): a header with the search and "Open
+/// files", cards for what to open, recent ones as a grid, my notes.
+class _PlayerHomeBody extends StatefulWidget {
+  const _PlayerHomeBody({required this.home});
+
+  final PlayerHome home;
+
+  @override
+  State<_PlayerHomeBody> createState() => _PlayerHomeBodyState();
+}
+
+class _PlayerHomeBodyState extends State<_PlayerHomeBody> {
+  final TextEditingController _q = TextEditingController();
+  bool _allRecent = false;
+
+  PlayerHome get h => widget.home;
+  AppServices get services => h.services;
+
+  @override
+  void dispose() {
+    _q.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pick(Set<String> exts, String label) async {
+    final paths = await WinDialogs.pickFiles(title: h._title(label), typeLabel: label, extensions: [...exts]);
+    if (paths.isEmpty || !mounted) return;
+    await openInPlayer(context, services, paths);
+  }
+
+  Widget _header() => Row(children: [
+        const _PlayBadge(size: 76),
+        const SizedBox(width: 20),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(tr('nav.player'),
+                style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w800, color: LightLook.text, letterSpacing: -0.5)),
+            const SizedBox(height: 4),
+            Text(tr('player.hint'), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 15, color: LightLook.muted)),
+          ]),
+        ),
+        const SizedBox(width: 16),
+        SizedBox(
+          width: 320,
+          height: 50,
+          child: TextField(
+            controller: _q,
+            onChanged: (_) => setState(() {}),
+            textAlignVertical: TextAlignVertical.center,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: EdgeInsets.zero,
+              prefixIcon: const Icon(Icons.search_rounded, color: LightLook.muted),
+              hintText: tr('ink.search_all'),
+              hintStyle: const TextStyle(color: LightLook.muted, fontSize: 14),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(25), borderSide: const BorderSide(color: Color(0xFFDCE3F0))),
+              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(25), borderSide: const BorderSide(color: Color(0xFFDCE3F0))),
+              suffixIcon: _q.text.isEmpty
+                  ? null
+                  : IconButton(onPressed: () => setState(_q.clear), icon: const Icon(Icons.close_rounded, size: 18)),
+            ),
+          ),
+        ),
+        const SizedBox(width: 14),
+        SizedBox(
+          height: 50,
+          child: FilledButton.icon(
+            style: FilledButton.styleFrom(
+              backgroundColor: LightLook.blue,
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              shape: const StadiumBorder(),
+              textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            onPressed: () => h._openFiles(context),
+            icon: const Icon(Icons.add_rounded),
+            label: Text(tr('player.open_files')),
+          ),
+        ),
+      ]);
+
+  Widget _kinds() {
+    final cards = [
+      _Kind(
+        icon: Icons.image_rounded,
+        colors: const [Color(0xFF4FC3F7), Color(0xFF1E88E5)],
+        title: tr('player.kind_photo'),
+        sub: 'JPG, PNG, HEIC…',
+        onTap: () => _pick(playerImageExtensions, tr('player.kind_photo')),
+      ),
+      _Kind(
+        icon: Icons.movie_rounded,
+        colors: const [Color(0xFFB388FF), Color(0xFF7C4DFF)],
+        title: tr('player.kind_video'),
+        sub: 'MP4, MOV, MKV…',
+        onTap: () => _pick(playerVideoExtensions, tr('player.kind_video')),
+      ),
+      _Kind(
+        icon: Icons.photo_library_rounded,
+        colors: const [Color(0xFF5B8CFF), Color(0xFF2F5BEA)],
+        title: tr('nav.library'),
+        sub: tr('player.file_types'),
+        onTap: () => AppNav.instance.selectTab(AppNav.library),
+      ),
+      _Kind(
+        icon: Icons.folder_rounded,
+        colors: const [Color(0xFFFFCA28), Color(0xFFFB8C00)],
+        title: tr('player.open_folder'),
+        sub: tr('player.folder_sub'),
+        onTap: () => h._openFolder(context),
+      ),
+    ];
+    return Row(children: [
+      for (var i = 0; i < cards.length; i++) ...[
+        if (i > 0) const SizedBox(width: 16),
+        Expanded(child: cards[i]),
+      ],
+    ]);
+  }
+
+  Widget _section(IconData icon, Color color, String title, {Widget? end}) => Row(children: [
+        Icon(icon, color: color, size: 26),
+        const SizedBox(width: 10),
+        Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LightLook.text)),
+        const Spacer(),
+        ?end,
+      ]);
+
+  @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final m = services.player;
     return ListenableBuilder(
       listenable: m,
@@ -83,68 +218,87 @@ class PlayerHome extends StatelessWidget {
         final last = m.last;
         final at = m.lastKey == null ? null : m.positionOf(m.lastKey!);
         final recent = m.recent;
-        return Scaffold(
-          body: ListView(
-            padding: const EdgeInsets.fromLTRB(28, 22, 28, 28),
-            children: [
-              Row(children: [
-                Text(tr('nav.player'), style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700)),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Text(tr('player.hint'), overflow: TextOverflow.ellipsis, style: const TextStyle(color: LrColors.muted, fontSize: 13)),
-                ),
-              ]),
-              const SizedBox(height: 18),
-              Wrap(spacing: 12, runSpacing: 12, children: [
-                FilledButton.icon(
-                  onPressed: () => _openFiles(context),
-                  icon: const Icon(Icons.file_open_rounded),
-                  label: Text(tr('player.open_files')),
-                ),
-                OutlinedButton.icon(
-                  onPressed: () => _openFolder(context),
-                  icon: const Icon(Icons.folder_open_rounded),
-                  label: Text(tr('player.open_folder')),
-                ),
-              ]),
-              const SizedBox(height: 10),
-              Text(tr('player.drop_hint'), style: const TextStyle(color: LrColors.muted, fontSize: 12.5)),
-              const SizedBox(height: 22),
-              _NoteSearch(services: services),
-              if (last != null && at != null) ...[
-                const SizedBox(height: 26),
-                Text(tr('player.resume'), style: theme.textTheme.titleMedium),
-                const SizedBox(height: 10),
-                _ResumeCard(
-                  services: services,
-                  recent: last,
-                  at: at,
-                  entry: _entryOf(last),
-                  onTap: () => _openRecent(context, last),
-                ),
-              ],
-              const SizedBox(height: 26),
-              Row(children: [
-                Text(tr('player.recent'), style: theme.textTheme.titleMedium),
-                const Spacer(),
-                if (recent.isNotEmpty) TextButton(onPressed: m.clearRecent, child: Text(tr('player.clear_recent'))),
-              ]),
-              const SizedBox(height: 10),
-              if (recent.isEmpty)
-                Text(tr('player.recent_empty'), style: const TextStyle(color: LrColors.muted))
-              else
-                Wrap(spacing: 10, runSpacing: 10, children: [
-                  for (final r in recent)
-                    _RecentTile(
-                      key: ValueKey(r.path),
-                      services: services,
-                      recent: r,
-                      entry: _entryOf(r),
-                      onTap: () => _openRecent(context, r),
-                      onForget: () => m.forget(r.path),
+        final searching = _q.text.trim().isNotEmpty;
+        return Theme(
+          data: LightLook.theme(Theme.of(context)),
+          child: Scaffold(
+            backgroundColor: LightLook.page,
+            body: DecoratedBox(
+              decoration: LightLook.wash,
+              child: LayoutBuilder(builder: (context, box) {
+                const gap = 16.0;
+                final inner = box.maxWidth - 64;
+                final cols = ((inner + gap) / (230 + gap)).floor().clamp(2, 8);
+                final tileW = (inner - gap * (cols - 1)) / cols;
+                final shown = _allRecent ? recent : recent.take(cols * 2).toList();
+                return ListView(
+                  padding: const EdgeInsets.fromLTRB(32, 28, 32, 32),
+                  children: [
+                    _header(),
+                    const SizedBox(height: 26),
+                    _kinds(),
+                    const SizedBox(height: 10),
+                    Text(tr('player.drop_hint'), style: const TextStyle(color: LightLook.muted, fontSize: 12.5)),
+                    if (!searching) ...[
+                      const SizedBox(height: 26),
+                      _section(
+                        Icons.schedule_rounded,
+                        LightLook.blue,
+                        tr('player.recent'),
+                        end: recent.isEmpty
+                            ? null
+                            : Row(mainAxisSize: MainAxisSize.min, children: [
+                                if (recent.length > shown.length || _allRecent)
+                                  TextButton(
+                                    onPressed: () => setState(() => _allRecent = !_allRecent),
+                                    child: Text(_allRecent ? tr('player.show_less') : tr('player.show_more', {'count': recent.length})),
+                                  ),
+                                TextButton(
+                                  style: TextButton.styleFrom(foregroundColor: LightLook.muted),
+                                  onPressed: m.clearRecent,
+                                  child: Text(tr('player.clear_recent')),
+                                ),
+                              ]),
+                      ),
+                      const SizedBox(height: 14),
+                      if (recent.isEmpty)
+                        Container(
+                          decoration: LightLook.card(),
+                          padding: const EdgeInsets.all(24),
+                          child: Text(tr('player.recent_empty'), style: const TextStyle(color: LightLook.muted)),
+                        )
+                      else
+                        Wrap(spacing: gap, runSpacing: gap, children: [
+                          for (final r in shown)
+                            _RecentTile(
+                              key: ValueKey(r.path),
+                              width: tileW,
+                              services: services,
+                              recent: r,
+                              entry: h._entryOf(r),
+                              // The one left part-way: where it stopped.
+                              resumeAt: last != null && at != null && r.path == last.path ? at : null,
+                              onTap: () => h._openRecent(context, r),
+                              onForget: () => m.forget(r.path),
+                            ),
+                        ]),
+                    ],
+                    const SizedBox(height: 28),
+                    _section(
+                      searching ? Icons.manage_search_rounded : Icons.draw_rounded,
+                      LightLook.amber,
+                      searching ? tr('player.found_notes') : tr('player.my_notes'),
                     ),
-                ]),
-            ],
+                    const SizedBox(height: 14),
+                    Container(
+                      decoration: LightLook.card(),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      child: _NoteSearch(services: services, query: _q.text),
+                    ),
+                  ],
+                );
+              }),
+            ),
           ),
         );
       },
@@ -152,9 +306,75 @@ class PlayerHome extends StatelessWidget {
   }
 }
 
+/// The big play sign at the top: a blue gradient tile with a triangle.
+class _PlayBadge extends StatelessWidget {
+  const _PlayBadge({required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(size * 0.26),
+          gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF6FB6FF), Color(0xFF1F63F0)]),
+          boxShadow: const [BoxShadow(color: Color(0x332F6BFF), blurRadius: 18, offset: Offset(0, 8))],
+        ),
+        child: Icon(Icons.play_arrow_rounded, color: Colors.white, size: size * 0.72),
+      );
+}
+
+/// One "what to open" card: a coloured icon, a name, what it takes.
+class _Kind extends StatefulWidget {
+  const _Kind({required this.icon, required this.colors, required this.title, required this.sub, required this.onTap});
+
+  final IconData icon;
+  final List<Color> colors;
+  final String title;
+  final String sub;
+  final VoidCallback onTap;
+
+  @override
+  State<_Kind> createState() => _KindState();
+}
+
+class _KindState extends State<_Kind> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) => MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 140),
+            height: 96,
+            padding: const EdgeInsets.symmetric(horizontal: 18),
+            decoration: LightLook.card(border: _hover ? LightLook.blue.withValues(alpha: 0.5) : null),
+            transform: Matrix4.translationValues(0, _hover ? -2 : 0, 0),
+            child: Row(children: [
+              LightBadge(icon: widget.icon, colors: widget.colors, size: 50),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(widget.title,
+                      maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: LightLook.text)),
+                  const SizedBox(height: 4),
+                  Text(widget.sub, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, color: LightLook.muted)),
+                ]),
+              ),
+            ]),
+          ),
+        ),
+      );
+}
+
 Widget _thumb(AppServices s, PlayerEntry? e, double box) {
   final icon = Container(
-    color: LrColors.raised,
+    color: const Color(0xFFEFF2F8),
     alignment: Alignment.center,
     child: Icon(e?.video ?? false ? Icons.movie_rounded : Icons.image_rounded, color: LrColors.muted),
   );
@@ -172,63 +392,23 @@ Widget _thumb(AppServices s, PlayerEntry? e, double box) {
   );
 }
 
-class _ResumeCard extends StatelessWidget {
-  const _ResumeCard({required this.services, required this.recent, required this.at, required this.entry, required this.onTap});
-
-  final AppServices services;
-  final RecentEntry recent;
-  final Duration at;
-  final PlayerEntry? entry;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => Align(
-        alignment: Alignment.centerLeft,
-        child: Material(
-          color: LrColors.surface,
-          borderRadius: BorderRadius.circular(12),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTap: onTap,
-            child: Container(
-              width: 460,
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: LrColors.line)),
-              child: Row(children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: SizedBox(width: 128, height: 72, child: _thumb(services, entry, 128)),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(recent.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 4),
-                    Text(tr('player.resume_at', {'time': playerTime(at)}), style: const TextStyle(color: LrColors.muted, fontSize: 12.5)),
-                  ]),
-                ),
-                const Icon(Icons.play_circle_fill_rounded, size: 36, color: LrColors.safelight),
-                const SizedBox(width: 6),
-              ]),
-            ),
-          ),
-        ),
-      );
-}
-
 class _RecentTile extends StatelessWidget {
   const _RecentTile({
     super.key,
+    required this.width,
     required this.services,
     required this.recent,
     required this.entry,
+    required this.resumeAt,
     required this.onTap,
     required this.onForget,
   });
 
+  final double width;
   final AppServices services;
   final RecentEntry recent;
   final PlayerEntry? entry;
+  final Duration? resumeAt;
   final VoidCallback onTap;
   final VoidCallback onForget;
 
@@ -248,41 +428,77 @@ class _RecentTile extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => Tooltip(
-        message: recent.path,
-        waitDuration: const Duration(milliseconds: 600),
-        child: GestureDetector(
-          onTap: onTap,
-          onSecondaryTapUp: (d) => _menu(context, d.globalPosition),
-          child: MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: SizedBox(
-              width: 168,
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: SizedBox(
-                    width: 168,
-                    height: 112,
-                    child: Stack(fit: StackFit.expand, children: [
-                      Opacity(opacity: entry == null ? 0.4 : 1, child: _thumb(services, entry, 168)),
-                      if (recent.video)
-                        const Positioned(
-                          right: 6,
-                          bottom: 6,
-                          child: Icon(Icons.play_circle_outline_rounded, color: Colors.white, size: 22),
+  Widget build(BuildContext context) {
+    final thumbH = width * 0.58;
+    final at = resumeAt;
+    return Tooltip(
+      message: recent.path,
+      waitDuration: const Duration(milliseconds: 600),
+      child: GestureDetector(
+        onTap: onTap,
+        onSecondaryTapUp: (d) => _menu(context, d.globalPosition),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: Container(
+            width: width,
+            decoration: LightLook.card(),
+            clipBehavior: Clip.antiAlias,
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              SizedBox(
+                width: width,
+                height: thumbH,
+                child: Stack(fit: StackFit.expand, children: [
+                  Opacity(opacity: entry == null ? 0.4 : 1, child: _thumb(services, entry, width)),
+                  if (recent.video)
+                    Center(
+                      child: Container(
+                        width: 46,
+                        height: 46,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.black.withValues(alpha: 0.35),
+                          border: Border.all(color: Colors.white, width: 2),
                         ),
-                    ]),
+                        child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 30),
+                      ),
+                    ),
+                  if (at != null)
+                    Positioned(
+                      right: 8,
+                      bottom: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.65), borderRadius: BorderRadius.circular(6)),
+                        child: Text(tr('player.resume_at', {'time': playerTime(at)}),
+                            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                      ),
+                    ),
+                ]),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(recent.name,
+                      maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: LightLook.text)),
+                  const SizedBox(height: 3),
+                  Text(
+                    entry == null
+                        ? tr('player.missing')
+                        : recent.openedMs > 0
+                            ? formatWhen(DateTime.fromMillisecondsSinceEpoch(recent.openedMs))
+                            : '',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 12, color: LightLook.muted),
                   ),
-                ),
-                const SizedBox(height: 6),
-                Text(recent.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12.5)),
-                if (entry == null) Text(tr('player.missing'), style: const TextStyle(color: LrColors.muted, fontSize: 11)),
-              ]),
-            ),
+                ]),
+              ),
+            ]),
           ),
         ),
-      );
+      ),
+    );
+  }
 }
 
 /// Files given on the command line / dropped on the window (paths that
@@ -362,22 +578,18 @@ class _PlayerDropTargetState extends State<PlayerDropTarget> {
 /// Search every annotation (library and other files on this PC): names,
 /// typed words, tool names. A result opens at its moment.
 class _NoteSearch extends StatefulWidget {
-  const _NoteSearch({required this.services});
+  const _NoteSearch({required this.services, required this.query});
 
   final AppServices services;
+
+  /// What is typed in the header's search.
+  final String query;
 
   @override
   State<_NoteSearch> createState() => _NoteSearchState();
 }
 
 class _NoteSearchState extends State<_NoteSearch> {
-  final TextEditingController _q = TextEditingController();
-
-  @override
-  void dispose() {
-    _q.dispose();
-    super.dispose();
-  }
 
   Future<void> _open(NoteHit h) async {
     final s = widget.services;
@@ -465,11 +677,11 @@ class _NoteSearchState extends State<_NoteSearch> {
   Widget build(BuildContext context) => ListenableBuilder(
         listenable: widget.services.notes,
         builder: (context, _) {
-          final searching = _q.text.trim().isNotEmpty;
+          final searching = widget.query.trim().isNotEmpty;
           // Nothing typed: the latest annotations ("My notes").
           // By video (the one drawn on last first); searching: the matches,
           // by video.
-          final hits = searching ? widget.services.notes.search(_q.text) : widget.services.notes.recent(100000);
+          final hits = searching ? widget.services.notes.search(widget.query) : widget.services.notes.recent(100000);
           final groups = <String, List<NoteHit>>{};
           for (final h in hits) {
             groups.putIfAbsent(h.set.key, () => []).add(h);
@@ -480,38 +692,20 @@ class _NoteSearchState extends State<_NoteSearch> {
           }
 
           return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            SizedBox(
-              width: 460,
-              child: TextField(
-                controller: _q,
-                onChanged: (_) => setState(() {}),
-                decoration: InputDecoration(
-                  isDense: true,
-                  prefixIcon: const Icon(Icons.search_rounded, size: 20),
-                  hintText: tr('ink.search_all'),
-                  border: const OutlineInputBorder(),
-                  suffixIcon: _q.text.isEmpty
-                      ? null
-                      : IconButton(
-                          onPressed: () => setState(_q.clear),
-                          icon: const Icon(Icons.close_rounded, size: 18),
-                        ),
-                ),
+            if (!searching && hits.isEmpty)
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Text(tr('player.notes_empty'), style: const TextStyle(color: LightLook.muted)),
               ),
-            ),
             if (searching || hits.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              if (!searching)
-                Padding(
-                  padding: const EdgeInsets.only(top: 10, bottom: 4),
-                  child: Text(tr('player.my_notes'), style: Theme.of(context).textTheme.titleMedium),
-                ),
               if (hits.isEmpty)
-                Text(tr('ink.no_hits'), style: const TextStyle(color: LrColors.muted))
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Text(tr('ink.no_hits'), style: const TextStyle(color: LightLook.muted)),
+                )
               else
                 for (final g in groups.values.take(30))
                   SizedBox(
-                    width: 520,
                     child: ExpansionTile(
                       key: PageStorageKey('notes-${g.first.set.key}-$searching'),
                       initiallyExpanded: searching,

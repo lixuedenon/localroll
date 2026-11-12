@@ -1998,6 +1998,15 @@
   "settings.snip_key_taken": "Un autre programme utilise déjà ce raccourci ; choisissez-en un autre",
   "settings.snip_key_off": "Désactivé",
   "settings.tool_save": "Les résultats des outils vont dans",
-  "files.pdf_thumb_making": "Aperçu en cours, en général de quelques secondes à une minute",
-  "files.pdf_thumb_later": "L’aperçu apparaîtra tout seul (nouvel essai dans une minute environ) ; les PDF protégés par mot de passe ou endommagés n’en ont pas"
+  "files.pdf_thumb_making": "Aperçu en cours, veuillez patienter",
+  "files.pdf_thumb_later": "L’aperçu n’est pas encore prêt, il sera réessayé tout seul ; les PDF protégés ou endommagés n’en ont pas",
+  "snip.bar_title": "Passez à la fenêtre à capturer, puis appuyez sur « Capturer »",
+  "snip.bar_hint": "Cliquez sur une autre fenêtre ou utilisez Alt+Tab ; le raccourci marche aussi",
+  "snip.bar_now": "Fenêtre actuelle : {name}",
+  "snip.bar_go": "Capturer",
+  "player.folder_sub": "Tout un dossier, à la suite",
+  "player.show_more": "Tout voir ({count})",
+  "player.show_less": "Afficher moins",
+  "player.found_notes": "Annotations trouvées",
+  "player.notes_empty": "Aucune annotation pour l’instant. Ce que vous dessinez ou écrivez dans le lecteur apparaît ici."
 }

@@ -1998,6 +1998,15 @@
   "settings.snip_key_taken": "Outro programa já usa este atalho; escolha outro",
   "settings.snip_key_off": "Desativado",
   "settings.tool_save": "Os resultados das ferramentas vão para",
-  "files.pdf_thumb_making": "Criando a prévia, geralmente de alguns segundos a um minuto",
-  "files.pdf_thumb_later": "A prévia aparece sozinha (nova tentativa em cerca de um minuto); PDFs com senha ou danificados não mostram"
+  "files.pdf_thumb_making": "Criando a prévia, aguarde",
+  "files.pdf_thumb_later": "A prévia ainda não está pronta e será tentada de novo sozinha; PDFs com senha ou danificados não mostram",
+  "snip.bar_title": "Mude para a janela que quer capturar e toque em “Capturar”",
+  "snip.bar_hint": "Clique em outra janela ou use Alt+Tab; o atalho também funciona",
+  "snip.bar_now": "Janela atual: {name}",
+  "snip.bar_go": "Capturar",
+  "player.folder_sub": "Uma pasta inteira, em sequência",
+  "player.show_more": "Ver todos ({count})",
+  "player.show_less": "Mostrar menos",
+  "player.found_notes": "Anotações encontradas",
+  "player.notes_empty": "Nenhuma anotação ainda. O que você desenhar ou escrever no player aparece aqui."
 }

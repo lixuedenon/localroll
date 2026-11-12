@@ -1998,6 +1998,15 @@
   "settings.snip_key_taken": "Ein anderes Programm nutzt diese Taste bereits; bitte eine andere wählen",
   "settings.snip_key_off": "Aus",
   "settings.tool_save": "Werkzeug-Ergebnisse kommen nach",
-  "files.pdf_thumb_making": "Vorschau wird erstellt, meist einige Sekunden bis eine Minute",
-  "files.pdf_thumb_later": "Die Vorschau erscheint von selbst (neuer Versuch in etwa einer Minute); passwortgeschützte oder beschädigte PDFs zeigen keine"
+  "files.pdf_thumb_making": "Vorschau wird erstellt, bitte warten",
+  "files.pdf_thumb_later": "Die Vorschau ist noch nicht fertig und wird von selbst erneut versucht; passwortgeschützte oder beschädigte PDFs zeigen keine",
+  "snip.bar_title": "Zum gewünschten Fenster wechseln, dann „Ausschneiden“ drücken",
+  "snip.bar_hint": "Ein anderes Fenster anklicken oder Alt+Tab; die Tastenkombination geht auch",
+  "snip.bar_now": "Aktuelles Fenster: {name}",
+  "snip.bar_go": "Ausschneiden",
+  "player.folder_sub": "Einen ganzen Ordner nacheinander",
+  "player.show_more": "Alle {count} zeigen",
+  "player.show_less": "Weniger zeigen",
+  "player.found_notes": "Gefundene Notizen",
+  "player.notes_empty": "Noch keine Notizen. Was Sie im Player zeichnen oder schreiben, erscheint hier."
 }

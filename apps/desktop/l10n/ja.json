@@ -1998,6 +1998,15 @@
   "settings.snip_key_taken": "このキーは別のプログラムが使っています。別のキーを選んでください",
   "settings.snip_key_off": "オフ",
   "settings.tool_save": "ツールの保存先",
-  "files.pdf_thumb_making": "プレビューを作成中（通常は数秒〜1 分）",
-  "files.pdf_thumb_later": "プレビューは後で自動的に表示されます（約 1 分後に再試行）。パスワード付きや破損した PDF には表示されません"
+  "files.pdf_thumb_making": "プレビューを作成中です。しばらくお待ちください",
+  "files.pdf_thumb_later": "プレビューはまだできていません。自動で再試行します。パスワード付きや破損した PDF には表示されません",
+  "snip.bar_title": "取り込みたいウィンドウに切り替えて「切り取る」を押します",
+  "snip.bar_hint": "別のウィンドウをクリックするか Alt+Tab で切り替え。ショートカットキーも使えます",
+  "snip.bar_now": "現在のウィンドウ：{name}",
+  "snip.bar_go": "切り取る",
+  "player.folder_sub": "フォルダーをまとめて続けて見る",
+  "player.show_more": "すべて表示（{count}）",
+  "player.show_less": "折りたたむ",
+  "player.found_notes": "見つかった注釈",
+  "player.notes_empty": "まだ注釈はありません。プレーヤーでペンで描いたり書いたりしたものがここに表示されます。"
 }

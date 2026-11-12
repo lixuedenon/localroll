@@ -18,6 +18,7 @@ class WindowMemory with WindowListener {
 
   final File _file;
   Timer? _save;
+  DateTime _quietUntil = DateTime(2000);
 
   static WindowMemory? _instance;
 
@@ -41,6 +42,9 @@ class WindowMemory with WindowListener {
         await windowManager.center();
       }
       windowManager.addListener(m);
+      // Back from recording / snipping: the window is put back where it
+      // was, which is not a new size to keep.
+      AppNav.instance.fullscreen.addListener(() => m._quietUntil = DateTime.now().add(const Duration(seconds: 3)));
     } catch (e) {
       DiagLog.log('ui', 'window size not restored: $e');
     }
@@ -54,7 +58,7 @@ class WindowMemory with WindowListener {
   Future<void> _write() async {
     try {
       // Recording / snipping spreads the window over a screen: not a size to keep.
-      if (AppNav.instance.fullscreen.value) return;
+      if (AppNav.instance.fullscreen.value || DateTime.now().isBefore(_quietUntil)) return;
       final max = await windowManager.isMaximized();
       if (await windowManager.isMinimized()) return;
       final size = await windowManager.getSize();

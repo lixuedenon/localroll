@@ -1998,6 +1998,15 @@
   "settings.snip_key_taken": "Un altro programma usa già questo tasto; scegline un altro",
   "settings.snip_key_off": "Disattivato",
   "settings.tool_save": "I risultati degli strumenti vanno in",
-  "files.pdf_thumb_making": "Creazione anteprima, di solito da pochi secondi a un minuto",
-  "files.pdf_thumb_later": "L’anteprima comparirà da sola (nuovo tentativo tra circa un minuto); i PDF con password o danneggiati non la mostrano"
+  "files.pdf_thumb_making": "Creazione anteprima, attendi",
+  "files.pdf_thumb_later": "L’anteprima non è ancora pronta e verrà ritentata da sola; i PDF con password o danneggiati non la mostrano",
+  "snip.bar_title": "Passa alla finestra da ritagliare, poi premi «Ritaglia»",
+  "snip.bar_hint": "Fai clic su un’altra finestra o usa Alt+Tab; funziona anche il tasto rapido",
+  "snip.bar_now": "Finestra attuale: {name}",
+  "snip.bar_go": "Ritaglia",
+  "player.folder_sub": "Un’intera cartella, uno dopo l’altro",
+  "player.show_more": "Vedi tutti ({count})",
+  "player.show_less": "Mostra meno",
+  "player.found_notes": "Annotazioni trovate",
+  "player.notes_empty": "Ancora nessuna annotazione. Ciò che disegni o scrivi nel lettore compare qui."
 }

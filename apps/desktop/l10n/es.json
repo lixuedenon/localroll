@@ -1998,6 +1998,15 @@
   "settings.snip_key_taken": "Otro programa ya usa este atajo; elige otro",
   "settings.snip_key_off": "Desactivado",
   "settings.tool_save": "Los resultados de herramientas van a",
-  "files.pdf_thumb_making": "Creando la vista previa, suele tardar de unos segundos a un minuto",
-  "files.pdf_thumb_later": "La vista previa aparecerá sola (se reintenta en un minuto aprox.); los PDF con contraseña o dañados no la muestran"
+  "files.pdf_thumb_making": "Creando la vista previa, espera un momento",
+  "files.pdf_thumb_later": "La vista previa aún no está lista y se reintentará sola; los PDF con contraseña o dañados no la muestran",
+  "snip.bar_title": "Cambia a la ventana que quieres capturar y pulsa «Capturar»",
+  "snip.bar_hint": "Haz clic en otra ventana o usa Alt+Tab; el atajo también funciona",
+  "snip.bar_now": "Ventana actual: {name}",
+  "snip.bar_go": "Capturar",
+  "player.folder_sub": "Una carpeta entera, seguida",
+  "player.show_more": "Ver los {count}",
+  "player.show_less": "Mostrar menos",
+  "player.found_notes": "Anotaciones encontradas",
+  "player.notes_empty": "Aún no hay anotaciones. Lo que dibujes o escribas en el reproductor aparecerá aquí."
 }

@@ -1782,15 +1782,34 @@ class _WindowPickerState extends State<_WindowPicker> {
 /// Drag a box on a still of the screen (LocalRoll covers that screen for it).
 /// "Snip": the screen under the mouse is frozen, a box is dragged over the
 /// part wanted, that part comes back as a PNG (Keepnear itself left out).
-Future<File?> snipScreen(BuildContext context, AppServices s) async {
+/// [live] (started inside Keepnear): Keepnear first shrinks to a small bar
+/// on top; switch to any window (Alt+Tab, a click), then "Snip" (or the
+/// snip key). Otherwise the screen as it is now.
+Future<File?> snipScreen(BuildContext context, AppServices s, {bool live = false}) async {
   final exe = s.ffmpeg.ffmpeg;
   final screens = WinScreen.screens();
   if (exe == null || screens.isEmpty) return null;
   final c = WinScreen.cursor();
-  final screen = screens.firstWhere((x) => x.rect.contains(c), orElse: () => screens.first);
+  var screen = screens.firstWhere((x) => x.rect.contains(c), orElse: () => screens.first);
   final saved = WinScreen.ownPlaceRect();
+  if (live) {
+    final target = await _snipBar(context, screen);
+    if (target == null || !context.mounted) {
+      await _snipBack(saved);
+      return null;
+    }
+    // The screen of the window chosen (else the one with the mouse).
+    final r = target == 0 ? null : WinScreen.windowRect(target);
+    final at = r?.center ?? WinScreen.cursor();
+    screen = screens.firstWhere((x) => x.rect.contains(at), orElse: () => screen);
+    await windowManager.hide();
+    await Future<void>.delayed(const Duration(milliseconds: 250));
+  }
   final shot = await _Gdi.still(exe, screen);
-  if (shot == null || !context.mounted) return null;
+  if (shot == null || !context.mounted) {
+    if (live) await _snipBack(saved);
+    return null;
+  }
   AppNav.instance.fullscreen.value = true;
   await windowManager.setMinimumSize(const Size(200, 40));
   // From the global key, Keepnear may be hidden or minimized.
@@ -1819,6 +1838,108 @@ Future<File?> snipScreen(BuildContext context, AppServices s) async {
     await shot.delete();
   } catch (_) {}
   return out.existsSync() ? out : null;
+}
+
+Future<void> _snipBack(Rect? saved) async {
+  AppNav.instance.fullscreen.value = false;
+  if (saved != null) WinScreen.place(saved, onTop: false);
+  await windowManager.setMinimumSize(const Size(960, 620));
+  if (!await windowManager.isVisible()) await windowManager.show();
+}
+
+/// Keepnear as a small bar at the top of [screen]; the window in use when
+/// "Snip" is pressed (0: none known), or null: cancelled.
+Future<int?> _snipBar(BuildContext context, ScreenInfo screen) async {
+  AppNav.instance.fullscreen.value = true;
+  await windowManager.setMinimumSize(const Size(200, 40));
+  final k = screen.scale;
+  final w = 640 * k, h = 64 * k;
+  WinScreen.place(Rect.fromLTWH(screen.rect.center.dx - w / 2, screen.rect.top + 10 * k, w, h), onTop: true, activate: false);
+  if (!context.mounted) return null;
+  return Navigator.of(context).push<int>(PageRouteBuilder(
+    opaque: true,
+    pageBuilder: (_, _, _) => const _SnipBar(),
+    transitionDuration: Duration.zero,
+  ));
+}
+
+/// The snip key while the bar is up: snip now. False: no bar.
+bool snipBarGo() {
+  final b = _SnipBarState._active;
+  if (b == null) return false;
+  b._go();
+  return true;
+}
+
+class _SnipBar extends StatefulWidget {
+  const _SnipBar();
+
+  @override
+  State<_SnipBar> createState() => _SnipBarState();
+}
+
+class _SnipBarState extends State<_SnipBar> {
+  static _SnipBarState? _active;
+  Timer? _watch;
+  int _last = 0;
+  final int _own = WinScreen.ownWindow();
+  String _name = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _active = this;
+    // The window in use, as the person switches (not Keepnear's own).
+    _watch = Timer.periodic(const Duration(milliseconds: 250), (_) {
+      final fg = WinScreen.foreground();
+      if (fg == 0 || fg == _own || fg == _last) return;
+      _last = fg;
+      final n = WinScreen.programName(fg);
+      if (mounted && n != _name) setState(() => _name = n);
+    });
+  }
+
+  @override
+  void dispose() {
+    _watch?.cancel();
+    if (_active == this) _active = null;
+    super.dispose();
+  }
+
+  void _go() {
+    if (!mounted) return;
+    _active = null;
+    Navigator.of(context).pop(_last);
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        backgroundColor: const Color(0xFF1C2433),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: Row(children: [
+            const Icon(Icons.crop_free_rounded, color: Colors.white, size: 26),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(tr('snip.bar_title'),
+                    maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
+                const SizedBox(height: 2),
+                Text(_name.isEmpty ? tr('snip.bar_hint') : tr('snip.bar_now', {'name': _name}),
+                    maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+              ]),
+            ),
+            const SizedBox(width: 10),
+            FilledButton.icon(onPressed: _go, icon: const Icon(Icons.content_cut_rounded, size: 18), label: Text(tr('snip.bar_go'))),
+            const SizedBox(width: 6),
+            TextButton(
+              style: TextButton.styleFrom(foregroundColor: Colors.white70),
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(tr('common.cancel')),
+            ),
+          ]),
+        ),
+      );
 }
 
 Future<Rect?> _pickArea(BuildContext context, AppServices s, ScreenInfo screen) async {

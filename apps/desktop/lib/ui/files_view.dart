@@ -425,7 +425,10 @@ class FileThumb extends StatelessWidget {
   /// remembered for good.
   static final SoftCache<Object> _cache = SoftCache(max: 600);
 
-  Future<Object?> _load() => _cache.get('$path|$size|${modified.millisecondsSinceEpoch}', () => retryWhileNull(_make));
+  Future<Object?> _load() => _cache.get('$path|$size|${modified.millisecondsSinceEpoch}', () => retryWhileNull(_make).then((v) {
+        if (v == null && isPdfPath(path)) DiagLog.log('ui', 'pdf thumbnail: none after retries (${size ~/ 1024} KB)');
+        return v;
+      }));
 
   Future<Object?> _make() async {
     final name = path.split(Platform.pathSeparator).last;

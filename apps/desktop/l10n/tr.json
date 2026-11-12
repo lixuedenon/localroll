@@ -1998,6 +1998,15 @@
   "settings.snip_key_taken": "Bu kısayolu başka bir program kullanıyor; başka birini seçin",
   "settings.snip_key_off": "Kapalı",
   "settings.tool_save": "Araç sonuçlarının gideceği yer",
-  "files.pdf_thumb_making": "Önizleme hazırlanıyor, genelde birkaç saniye ile bir dakika",
-  "files.pdf_thumb_later": "Önizleme kendiliğinden gelecek (yaklaşık bir dakika sonra yeniden denenir); parolalı ya da bozuk PDF’lerde görünmez"
+  "files.pdf_thumb_making": "Önizleme hazırlanıyor, lütfen bekleyin",
+  "files.pdf_thumb_later": "Önizleme henüz hazır değil, kendiliğinden yeniden denenecek; parolalı ya da bozuk PDF’lerde görünmez",
+  "snip.bar_title": "Kesmek istediğiniz pencereye geçin, sonra “Kes”e basın",
+  "snip.bar_hint": "Başka bir pencereye tıklayın ya da Alt+Tab kullanın; kısayol da çalışır",
+  "snip.bar_now": "Şu anki pencere: {name}",
+  "snip.bar_go": "Kes",
+  "player.folder_sub": "Bütün bir klasör, art arda",
+  "player.show_more": "Tümünü gör ({count})",
+  "player.show_less": "Daha az göster",
+  "player.found_notes": "Bulunan notlar",
+  "player.notes_empty": "Henüz not yok. Oynatıcıda çizdikleriniz ya da yazdıklarınız burada görünür."
 }

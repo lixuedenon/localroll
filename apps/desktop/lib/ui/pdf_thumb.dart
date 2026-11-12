@@ -38,7 +38,12 @@ class PdfThumbs {
     final FileStat st;
     try {
       st = await File(path).stat();
-    } catch (_) {
+    } catch (e) {
+      DiagLog.log('ui', 'pdf thumbnail: file not readable: $e');
+      return null;
+    }
+    if (st.type != FileSystemEntityType.file || st.size == 0) {
+      DiagLog.log('ui', 'pdf thumbnail: not there yet (${st.type}, ${st.size} bytes)');
       return null;
     }
     final out = File('$cacheDir${Platform.pathSeparator}${_key(path, st)}');
@@ -58,7 +63,11 @@ class PdfThumbs {
     try {
       // One PDF that never finishes must not hold up all the others.
       final f = await _render(path, out).timeout(const Duration(seconds: 15));
-      if (f == null) DiagLog.log('ui', 'pdf thumbnail: nothing drawn (${clock.elapsedMilliseconds} ms)');
+      if (f == null) {
+        DiagLog.log('ui', 'pdf thumbnail: nothing drawn (${clock.elapsedMilliseconds} ms)');
+      } else if (clock.elapsedMilliseconds > 3000) {
+        DiagLog.log('ui', 'pdf thumbnail: slow, ${clock.elapsedMilliseconds} ms (${_size(path)})');
+      }
       return f;
     } on TimeoutException {
       DiagLog.log('ui', 'pdf thumbnail: gave up after 15 s (${_size(path)})');

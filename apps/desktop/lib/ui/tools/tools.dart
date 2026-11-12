@@ -20,7 +20,7 @@ import '../format.dart';
 import '../library_picker.dart';
 import '../light_dialog.dart';
 import '../light_look.dart';
-import '../screen/screen_record.dart' show snipScreen;
+import '../screen/screen_record.dart' show snipBarGo, snipScreen;
 import '../send_paths.dart';
 import '../send_page.dart' show baseNameOf;
 import 'image_tool_page.dart';
@@ -218,7 +218,7 @@ Future<void> openTool(BuildContext context, AppServices s, Tool tool, {List<Stri
     case Tool.editImage:
       await Navigator.of(context).push(MaterialPageRoute(builder: (_) => ImageToolPage(services: s, path: files!.first)));
     case Tool.snipText:
-      final shot = await snipScreen(context, s);
+      final shot = await snipScreen(context, s, live: true);
       if (shot != null && context.mounted) await showSnipResult(context, s, shot);
     case Tool.qr:
       await showQrTool(context, s);
@@ -508,6 +508,8 @@ bool _snipping = false;
 /// read its words; then Keepnear goes back to how it was (hidden,
 /// minimized or open).
 Future<void> snipFromKey(AppServices s) async {
+  // The snip bar is up: the key means "snip now".
+  if (snipBarGo()) return;
   if (_snipping) return;
   _snipping = true;
   try {
