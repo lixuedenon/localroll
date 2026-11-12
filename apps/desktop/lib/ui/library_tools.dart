@@ -16,7 +16,6 @@ import 'format.dart';
 import 'light_dialog.dart';
 import 'light_look.dart';
 import 'media_thumb.dart';
-import 'theme.dart';
 import 'trash_actions.dart';
 
 // Library helpers that work on this PC only (no AI service, no cost):
