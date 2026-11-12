@@ -297,6 +297,7 @@ class AppServices {
     // later: a virus scanner may be reading it), not only when shown.
     server.files.onArrived = (path) {
       if (!path.toLowerCase().endsWith('.pdf')) return;
+      DiagLog.log('ui', 'pdf arrived: making its preview');
       unawaited(Future<void>.delayed(const Duration(seconds: 3), () => PdfThumbs.of(path, library.cacheDir)));
     };
     converter.outPathFor = (src, ext) => toolOutPath(s, src, '', ext);

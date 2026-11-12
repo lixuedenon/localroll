@@ -16,6 +16,11 @@
 //   lr_pdf.exe "<plan file>"
 // Prints: ok <pages>   or   error <why>
 //
+//   lr_pdf.exe --thumb "<pdf>" "<out.bmp>" <width>
+// The first page as a picture <width> pixels wide (white behind it), for
+// the library's previews; in its own process, so a PDF that hangs can't hold
+// up the app. Prints: ok   or   error <why>
+//
 // pdfium.dll (shipped for the PDF viewer) is loaded from the exe's folder;
 // the text of pages taken from PDFs stays text (a signature is laid on top).
 
@@ -76,6 +81,9 @@ struct Api {
   void (*CloseDocument)(DOC);
   BMP (*BitmapCreateEx)(int, int, int, void*, int);
   void (*BitmapDestroy)(BMP);
+  // For --thumb only.
+  void (*RenderPageBitmap)(BMP, PAGE, int, int, int, int, int, int);
+  int (*FillRect)(BMP, int, int, int, int, unsigned long);
 };
 
 Api api{};
@@ -149,6 +157,8 @@ bool load() {
             find(m, "FPDFPage_New", api.NewPage) && find(m, "FPDF_SaveAsCopy", api.SaveAsCopy) &&
             find(m, "FPDF_CloseDocument", api.CloseDocument) && find(m, "FPDFBitmap_CreateEx", api.BitmapCreateEx) &&
             find(m, "FPDFBitmap_Destroy", api.BitmapDestroy);
+  find(m, "FPDF_RenderPageBitmap", api.RenderPageBitmap);
+  find(m, "FPDFBitmap_FillRect", api.FillRect);
   // Optional (the page box's corner; 0,0 without them).
   find(m, "FPDFPage_GetCropBox", api.GetCropBox);
   find(m, "FPDFPage_GetMediaBox", api.GetMediaBox);
@@ -178,11 +188,109 @@ void toPage(int rot, double W, double H, double X, double Y, double& ux, double&
   }
 }
 
+std::string narrow(const wchar_t* w) {
+  int n = WideCharToMultiByte(CP_UTF8, 0, w, -1, nullptr, 0, nullptr, nullptr);
+  if (n <= 1) return "";
+  std::string s(n - 1, '\0');
+  WideCharToMultiByte(CP_UTF8, 0, w, -1, &s[0], n, nullptr, nullptr);
+  return s;
+}
+
+// --thumb: the first page, <width> wide, as a 24-bit BMP.
+int thumb(const std::string& pdf, const std::string& outPath, int width) {
+  if (!load() || !api.RenderPageBitmap || !api.FillRect) {
+    say("error pdfium.dll not usable");
+    return 3;
+  }
+  api.InitLibrary();
+  std::vector<unsigned char> bytes;
+  if (!readAll(pdf, bytes) || bytes.empty()) {
+    say("error cannot read");
+    return 1;
+  }
+  DOC doc = api.LoadMemDocument(bytes.data(), (int)bytes.size(), nullptr);
+  if (!doc) {
+    say("error cannot open (password or damaged)");
+    return 1;
+  }
+  PAGE page = api.GetPageCount(doc) > 0 ? api.LoadPage(doc, 0) : nullptr;
+  if (!page) {
+    api.CloseDocument(doc);
+    say("error no pages");
+    return 1;
+  }
+  double pw = api.GetPageWidth(page), ph = api.GetPageHeight(page);
+  if (width < 16) width = 240;
+  int height = pw > 0 ? (int)std::lround(width * ph / pw) : width;
+  if (height < 40) height = 40;
+  if (height > width * 2) height = width * 2;
+  std::vector<unsigned char> px((size_t)width * height * 4);
+  BMP bmp = api.BitmapCreateEx(width, height, 4 /* BGRA */, px.data(), width * 4);
+  if (!bmp) {
+    api.ClosePage(page);
+    api.CloseDocument(doc);
+    say("error no bitmap");
+    return 1;
+  }
+  api.FillRect(bmp, 0, 0, width, height, 0xFFFFFFFF);
+  api.RenderPageBitmap(bmp, page, 0, 0, width, height, 0, 0x01 /* FPDF_ANNOT */);
+  api.BitmapDestroy(bmp);
+  api.ClosePage(page);
+  api.CloseDocument(doc);
+  // 24-bit BMP, rows bottom up, each padded to 4 bytes.
+  int row = (width * 3 + 3) & ~3;
+  unsigned int dataSize = (unsigned int)row * height;
+  unsigned char head[54] = {0};
+  head[0] = 'B';
+  head[1] = 'M';
+  auto put32 = [&](int at, unsigned int v) {
+    head[at] = v & 255;
+    head[at + 1] = (v >> 8) & 255;
+    head[at + 2] = (v >> 16) & 255;
+    head[at + 3] = (v >> 24) & 255;
+  };
+  put32(2, 54 + dataSize);
+  put32(10, 54);
+  put32(14, 40);
+  put32(18, (unsigned int)width);
+  put32(22, (unsigned int)height);
+  head[26] = 1;
+  head[28] = 24;
+  put32(34, dataSize);
+  FILE* f = _wfopen(wide(outPath).c_str(), L"wb");
+  if (!f) {
+    say("error cannot write");
+    return 1;
+  }
+  fwrite(head, 1, 54, f);
+  std::vector<unsigned char> line((size_t)row, 0);
+  for (int y = height - 1; y >= 0; y--) {
+    const unsigned char* src = px.data() + (size_t)y * width * 4;
+    for (int x = 0; x < width; x++) {
+      line[x * 3] = src[x * 4];
+      line[x * 3 + 1] = src[x * 4 + 1];
+      line[x * 3 + 2] = src[x * 4 + 2];
+    }
+    fwrite(line.data(), 1, (size_t)row, f);
+  }
+  bool ok = ferror(f) == 0;
+  fclose(f);
+  if (!ok) {
+    say("error cannot write");
+    return 1;
+  }
+  say("ok");
+  return 0;
+}
+
 }  // namespace
 
 int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
   int argc = 0;
   LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+  if (argc >= 5 && wcscmp(argv[1], L"--thumb") == 0) {
+    return thumb(narrow(argv[2]), narrow(argv[3]), _wtoi(argv[4]));
+  }
   if (argc < 2) {
     say("error usage: lr_pdf.exe <plan>");
     return 2;

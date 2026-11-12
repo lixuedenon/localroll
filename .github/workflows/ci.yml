@@ -340,6 +340,16 @@ jobs:
             if (-not ($out -match '^ok 1')) { Write-Output "::error::lr_pdf ($plan): $out"; exit 1 }
             if ((Get-Item "$t\$plan.pdf").Length -lt 200) { Write-Output "::error::lr_pdf ($plan) wrote an empty PDF"; exit 1 }
           }
+          # The library's PDF preview: first page as a picture.
+          $psi = New-Object System.Diagnostics.ProcessStartInfo "$dir\lr_pdf.exe"
+          $psi.Arguments = "--thumb `"$t\b.pdf`" `"$t\b.bmp`" 240"
+          $psi.RedirectStandardOutput = $true
+          $psi.UseShellExecute = $false
+          $p = [System.Diagnostics.Process]::Start($psi)
+          $out = $p.StandardOutput.ReadToEnd()
+          if (-not $p.WaitForExit(30000)) { $p.Kill(); Write-Output "::error::lr_pdf --thumb did not finish"; exit 1 }
+          Write-Output "thumb: $out"
+          if (-not ($out -match '^ok') -or (Get-Item "$t\b.bmp").Length -lt 10000) { Write-Output "::error::lr_pdf --thumb: $out"; exit 1 }
       - uses: actions/upload-artifact@v4
         with:
           name: LocalRoll-Windows

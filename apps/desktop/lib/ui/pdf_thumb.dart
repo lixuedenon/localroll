@@ -31,8 +31,11 @@ class PdfThumbs {
       h ^= b;
       h *= 0x100000001b3; // wraps at 64 bits
     }
-    return 'pdf_${h.toRadixString(16).replaceAll('-', 'n')}.png';
+    return 'pdf_${h.toRadixString(16).replaceAll('-', 'n')}';
   }
+
+  /// lr_pdf.exe next to the app: draws the page in its own process.
+  static String get _exe => '${File(Platform.resolvedExecutable).parent.path}${Platform.pathSeparator}lr_pdf.exe';
 
   static Future<File?> of(String path, String cacheDir) async {
     final FileStat st;
@@ -46,7 +49,11 @@ class PdfThumbs {
       DiagLog.log('ui', 'pdf thumbnail: not there yet (${st.type}, ${st.size} bytes)');
       return null;
     }
-    final out = File('$cacheDir${Platform.pathSeparator}${_key(path, st)}');
+    final base = '$cacheDir${Platform.pathSeparator}${_key(path, st)}';
+    // Made before (older versions: PNG).
+    final png = File('$base.png');
+    if (await png.exists()) return png;
+    final out = File('$base.bmp');
     if (await out.exists()) return out;
     return _pending.putIfAbsent(out.path, () => _make(path, out).whenComplete(() => _pending.remove(out.path)));
   }
@@ -56,21 +63,21 @@ class PdfThumbs {
     if (_busy) {
       final c = Completer<void>();
       _waiting.add(c);
+      final waited = Stopwatch()..start();
       await c.future;
+      if (waited.elapsedMilliseconds > 10000) DiagLog.log('ui', 'pdf thumbnail: waited ${waited.elapsedMilliseconds} ms for others');
     }
     _busy = true;
     final clock = Stopwatch()..start();
     try {
       // One PDF that never finishes must not hold up all the others.
-      final f = await _render(path, out).timeout(const Duration(seconds: 15));
-      if (f == null) {
-        DiagLog.log('ui', 'pdf thumbnail: nothing drawn (${clock.elapsedMilliseconds} ms)');
-      } else if (clock.elapsedMilliseconds > 3000) {
-        DiagLog.log('ui', 'pdf thumbnail: slow, ${clock.elapsedMilliseconds} ms (${_size(path)})');
-      }
+      final f = await _draw(path, out).timeout(const Duration(seconds: 25));
+      DiagLog.log('ui', f == null
+          ? 'pdf thumbnail: nothing drawn (${clock.elapsedMilliseconds} ms, ${_size(path)})'
+          : 'pdf thumbnail: made in ${clock.elapsedMilliseconds} ms (${_size(path)})');
       return f;
     } on TimeoutException {
-      DiagLog.log('ui', 'pdf thumbnail: gave up after 15 s (${_size(path)})');
+      DiagLog.log('ui', 'pdf thumbnail: gave up after 25 s (${_size(path)})');
       return null;
     } catch (e) {
       DiagLog.log('ui', 'pdf thumbnail failed: $e');
@@ -87,6 +94,27 @@ class PdfThumbs {
     } catch (_) {
       return 'gone';
     }
+  }
+
+  /// lr_pdf.exe draws it (a separate process: nothing in the app can be
+  /// held up); without it, pdfrx here.
+  static Future<File?> _draw(String path, File out) async {
+    final exe = _exe;
+    if (!File(exe).existsSync()) return _render(path, File('${out.path.substring(0, out.path.length - 4)}.png'));
+    await out.parent.create(recursive: true);
+    final p = await Process.start(exe, ['--thumb', path, out.path, '$width']);
+    final said = p.stdout.transform(utf8.decoder).join();
+    unawaited(p.stderr.drain<void>());
+    final code = await p.exitCode.timeout(const Duration(seconds: 20), onTimeout: () {
+      p.kill();
+      return -1;
+    });
+    if (code == 0 && await out.exists() && await out.length() > 0) return out;
+    final why = code == -1 ? 'timed out' : (await said.timeout(const Duration(seconds: 1), onTimeout: () => '')).trim();
+    DiagLog.log('ui', 'pdf thumbnail (lr_pdf): $why');
+    // pdfium not usable there: try here.
+    if (why.contains('pdfium')) return _render(path, File('${out.path.substring(0, out.path.length - 4)}.png'));
+    return null;
   }
 
   static Future<File?> _render(String path, File out) async {
