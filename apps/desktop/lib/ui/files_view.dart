@@ -518,6 +518,14 @@ class _PdfTileState extends State<_PdfTile> {
   @override
   void initState() {
     super.initState();
+    PdfThumbs.made.addListener(_madeOne);
+    unawaited(_look());
+  }
+
+  /// A picture was just made (maybe this one): look now.
+  void _madeOne() {
+    if (_pic != null || !mounted) return;
+    _timer?.cancel();
     unawaited(_look());
   }
 
@@ -534,6 +542,7 @@ class _PdfTileState extends State<_PdfTile> {
 
   @override
   void dispose() {
+    PdfThumbs.made.removeListener(_madeOne);
     _timer?.cancel();
     super.dispose();
   }
@@ -543,8 +552,8 @@ class _PdfTileState extends State<_PdfTile> {
     _asking = true;
     File? f;
     try {
-      f = await PdfThumbs.of(widget.path, widget.cacheDir).timeout(const Duration(seconds: 30), onTimeout: () {
-        DiagLog.log('ui', 'pdf tile: no answer in 30 s, asking again');
+      f = await PdfThumbs.of(widget.path, widget.cacheDir).timeout(const Duration(seconds: 8), onTimeout: () {
+        if (_tries == 0) DiagLog.log('ui', 'pdf tile: no answer in 8 s, asking again');
         return null;
       });
     } catch (e) {
@@ -560,15 +569,15 @@ class _PdfTileState extends State<_PdfTile> {
     }
     _tries++;
     if (_tries == 1) setState(() {});
-    // Soon at first (a file just arriving), then once a minute.
-    _timer = Timer(_tries < 10 ? const Duration(seconds: 3) : const Duration(minutes: 1), () => unawaited(_look()));
+    // Every 2 s for about two minutes (a file just arriving), then every 30 s.
+    _timer = Timer(_tries < 60 ? const Duration(seconds: 2) : const Duration(seconds: 30), () => unawaited(_look()));
   }
 
   @override
   Widget build(BuildContext context) {
     final pic = _pic;
     if (pic == null) {
-      return _Waiting(icon: widget.icon, box: widget.box, text: tr(_tries >= 10 ? 'files.pdf_thumb_later' : 'files.pdf_thumb_making'));
+      return _Waiting(icon: widget.icon, box: widget.box, text: tr(_tries >= 60 ? 'files.pdf_thumb_later' : 'files.pdf_thumb_making'));
     }
     final framed = ClipRRect(
       borderRadius: BorderRadius.circular(4),

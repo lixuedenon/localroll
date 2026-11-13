@@ -19,6 +19,10 @@ class PdfThumbs {
   PdfThumbs._();
 
   static final Map<String, Future<File?>> _pending = {};
+
+  /// Ticks each time a picture is made: tiles showing "making…" look again
+  /// at once instead of waiting for their next turn.
+  static final ValueNotifier<int> made = ValueNotifier(0);
   static final Queue<Completer<void>> _waiting = Queue();
   static bool _busy = false;
 
@@ -28,7 +32,10 @@ class PdfThumbs {
   /// A name that changes when the file changes (path, size, time).
   static String _key(String path, FileStat st) {
     var h = 0xcbf29ce484222325;
-    for (final b in utf8.encode('$path|${st.size}|${st.modified.millisecondsSinceEpoch}')) {
+    // Path and size only: a file that has just arrived gets its date put
+    // back to the phone's a moment later, which must not mean "a new file"
+    // (that made a second picture and kept a tile waiting for it).
+    for (final b in utf8.encode('$path|${st.size}|v2')) {
       h ^= b;
       h *= 0x100000001b3; // wraps at 64 bits
     }
@@ -80,6 +87,7 @@ class PdfThumbs {
       DiagLog.log('ui', f == null
           ? 'pdf thumbnail: nothing drawn (${clock.elapsedMilliseconds} ms, ${_size(path)})'
           : 'pdf thumbnail: made in ${clock.elapsedMilliseconds} ms (${_size(path)})');
+      if (f != null) made.value++;
       return f;
     } on TimeoutException {
       DiagLog.log('ui', 'pdf thumbnail: gave up after 25 s (${_size(path)})');
