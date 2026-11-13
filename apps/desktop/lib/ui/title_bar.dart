@@ -79,7 +79,7 @@ class _LrTitleBarState extends State<LrTitleBar> with WindowListener {
           const _Mark(),
           const SizedBox(width: 10),
           Text(appName, style: Theme.of(context).textTheme.titleMedium?.copyWith(letterSpacing: 0.2)),
-          const Expanded(child: DragToMoveArea(child: SizedBox.expand())),
+          const Expanded(child: _DragArea()),
           TransfersButton(services: widget.services),
           const SizedBox(width: 6),
           _BarButton(tooltip: tr('app.minimize'), icon: Icons.remove_rounded, onPressed: windowManager.minimize),
@@ -110,6 +110,24 @@ class _LrTitleBarState extends State<LrTitleBar> with WindowListener {
       ),
     );
   }
+}
+
+/// The empty part of the bar: drag to move the window (a maximized one is
+/// put back to its normal size first, as Windows' own title bars do);
+/// double-click to maximize / restore.
+class _DragArea extends StatelessWidget {
+  const _DragArea();
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onPanStart: (_) async {
+          if (await windowManager.isMaximized()) await windowManager.unmaximize();
+          await windowManager.startDragging();
+        },
+        onDoubleTap: () async => await windowManager.isMaximized() ? windowManager.unmaximize() : windowManager.maximize(),
+        child: const SizedBox.expand(),
+      );
 }
 
 /// Aperture-like mark: an amber ring with a cyan core.

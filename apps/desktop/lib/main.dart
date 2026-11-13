@@ -84,8 +84,10 @@ Future<void> main(List<String> args) async {
     ),
     () async {
       // As it was left (the first time: maximized).
-      await WindowMemory.apply();
+      final max = await WindowMemory.apply();
       await windowManager.show();
+      if (max) await windowManager.maximize();
+      unawaited(Future<void>.delayed(const Duration(seconds: 1), WindowMemory.report));
       // Started with Windows: stay out of the way, just receive.
       if (args.contains(AutoStart.minimizedFlag)) {
         await windowManager.minimize();

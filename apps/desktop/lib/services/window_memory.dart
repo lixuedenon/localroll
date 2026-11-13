@@ -22,8 +22,11 @@ class WindowMemory with WindowListener {
 
   static WindowMemory? _instance;
 
-  /// Before the window is shown.
-  static Future<void> apply() async {
+  /// Before the window is shown: the size. True: maximize it — done by the
+  /// caller after showing (maximizing a hidden window can give it the wrong
+  /// size on some screens, its buttons beyond the edge).
+  static Future<bool> apply() async {
+    var max = false;
     try {
       final dir = await getApplicationSupportDirectory();
       final m = WindowMemory._(File('${dir.path}${Platform.pathSeparator}window.json'));
@@ -35,7 +38,9 @@ class WindowMemory with WindowListener {
         } catch (_) {}
       }
       if (j == null || j['max'] == true) {
-        await windowManager.maximize();
+        max = true;
+        await windowManager.setSize(const Size(1280, 760));
+        await windowManager.center();
       } else {
         final w = (j['w'] as num?)?.toDouble() ?? 1280, h = (j['h'] as num?)?.toDouble() ?? 760;
         await windowManager.setSize(Size(w < 960 ? 960 : w, h < 620 ? 620 : h));
@@ -48,6 +53,16 @@ class WindowMemory with WindowListener {
     } catch (e) {
       DiagLog.log('ui', 'window size not restored: $e');
     }
+    return max;
+  }
+
+  /// After showing: where the window ended up (for the log).
+  static Future<void> report() async {
+    try {
+      final b = await windowManager.getBounds();
+      DiagLog.log('ui', 'window: ${b.left.round()},${b.top.round()} ${b.width.round()}x${b.height.round()}'
+          '${await windowManager.isMaximized() ? ' maximized' : ''}');
+    } catch (_) {}
   }
 
   void _later() {
