@@ -6,6 +6,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:image/image.dart' as img;
 import 'package:localroll_core/localroll_core.dart';
 import 'package:pdfrx/pdfrx.dart';
 
@@ -113,7 +114,21 @@ class PdfThumbs {
       p.kill();
       return -1;
     });
-    if (code == 0 && await out.exists() && await out.length() > 0) return out;
+    if (code == 0 && await out.exists() && await out.length() > 0) {
+      // Kept as PNG (a fraction of the BMP's size; also what phones get).
+      final png = File('${out.path.substring(0, out.path.length - 4)}.png');
+      try {
+        final pic = img.decodeBmp(await out.readAsBytes());
+        if (pic != null) {
+          await png.writeAsBytes(img.encodePng(pic), flush: true);
+          await out.delete();
+          return png;
+        }
+      } catch (e) {
+        DiagLog.log('ui', 'pdf thumbnail: kept as BMP ($e)');
+      }
+      return out;
+    }
     final why = code == -1 ? 'timed out' : (await said.timeout(const Duration(seconds: 1), onTimeout: () => '')).trim();
     DiagLog.log('ui', 'pdf thumbnail (lr_pdf): $why');
     // pdfium not usable there: try here.
