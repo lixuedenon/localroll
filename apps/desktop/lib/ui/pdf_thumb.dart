@@ -64,7 +64,11 @@ class PdfThumbs {
       final c = Completer<void>();
       _waiting.add(c);
       final waited = Stopwatch()..start();
-      await c.future;
+      // Never wait for good on the others (one may be stuck).
+      await c.future.timeout(const Duration(seconds: 60), onTimeout: () {
+        DiagLog.log('ui', 'pdf thumbnail: the queue did not move for 60 s, going ahead');
+        _waiting.remove(c);
+      });
       if (waited.elapsedMilliseconds > 10000) DiagLog.log('ui', 'pdf thumbnail: waited ${waited.elapsedMilliseconds} ms for others');
     }
     _busy = true;

@@ -425,14 +425,10 @@ class FileThumb extends StatelessWidget {
   /// remembered for good.
   static final SoftCache<Object> _cache = SoftCache(max: 600);
 
-  Future<Object?> _load() => _cache.get('$path|$size|${modified.millisecondsSinceEpoch}', () => retryWhileNull(_make).then((v) {
-        if (v == null && isPdfPath(path)) DiagLog.log('ui', 'pdf thumbnail: none after retries (${size ~/ 1024} KB)');
-        return v;
-      }));
+  Future<Object?> _load() => _cache.get('$path|$size|${modified.millisecondsSinceEpoch}', () => retryWhileNull(_make));
 
   Future<Object?> _make() async {
     final name = path.split(Platform.pathSeparator).last;
-    if (isPdfPath(path)) return PdfThumbs.of(path, services.library.cacheDir);
     final kind = MediaKind.fromName(name);
     if (kind == MediaKind.image || kind == MediaKind.video) {
       final lib = services.library;
@@ -460,19 +456,11 @@ class FileThumb extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isDir) return icon;
-    final pdf = isPdfPath(path);
-    // A PDF's first page can take a while (one PDF at a time, a file that
-    // just arrived may be busy): say so, and try again by itself.
-    return _Again(
-      builder: (later) => FutureBuilder<Object?>(
+    if (isPdfPath(path)) return _PdfTile(path: path, cacheDir: services.library.cacheDir, icon: icon, box: box);
+    return FutureBuilder<Object?>(
       future: _load(),
       builder: (context, s) {
         final d = s.data;
-        if (pdf && d == null) {
-          final done = s.connectionState == ConnectionState.done;
-          if (done) later(const Duration(seconds: 65));
-          return _Waiting(icon: icon, box: box, text: tr(done ? 'files.pdf_thumb_later' : 'files.pdf_thumb_making'));
-        }
         final Widget pic;
         if (d is File) {
           pic = Container(
@@ -502,28 +490,47 @@ class FileThumb extends StatelessWidget {
         );
         return box == null ? framed : SizedBox(width: box, height: box, child: framed);
       },
-    ),
     );
   }
 }
 
-/// Builds again after the wait asked for (once at a time).
-class _Again extends StatefulWidget {
-  const _Again({required this.builder});
+/// A PDF's first page: asks for it, and keeps looking (every few seconds,
+/// then every minute) until the picture is there — nothing in between can
+/// leave it waiting for good.
+class _PdfTile extends StatefulWidget {
+  const _PdfTile({required this.path, required this.cacheDir, required this.icon, required this.box});
 
-  final Widget Function(void Function(Duration wait) later) builder;
+  final String path;
+  final String cacheDir;
+  final Widget icon;
+  final double? box;
 
   @override
-  State<_Again> createState() => _AgainState();
+  State<_PdfTile> createState() => _PdfTileState();
 }
 
-class _AgainState extends State<_Again> {
+class _PdfTileState extends State<_PdfTile> {
+  File? _pic;
   Timer? _timer;
+  int _tries = 0;
+  bool _asking = false;
 
-  void _later(Duration wait) => _timer ??= Timer(wait, () {
-        _timer = null;
-        if (mounted) setState(() {});
-      });
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_look());
+  }
+
+  @override
+  void didUpdateWidget(_PdfTile old) {
+    super.didUpdateWidget(old);
+    if (old.path != widget.path) {
+      _timer?.cancel();
+      _pic = null;
+      _tries = 0;
+      unawaited(_look());
+    }
+  }
 
   @override
   void dispose() {
@@ -531,8 +538,65 @@ class _AgainState extends State<_Again> {
     super.dispose();
   }
 
+  Future<void> _look() async {
+    if (_asking) return;
+    _asking = true;
+    File? f;
+    try {
+      f = await PdfThumbs.of(widget.path, widget.cacheDir).timeout(const Duration(seconds: 30), onTimeout: () {
+        DiagLog.log('ui', 'pdf tile: no answer in 30 s, asking again');
+        return null;
+      });
+    } catch (e) {
+      DiagLog.log('ui', 'pdf tile: $e');
+    } finally {
+      _asking = false;
+    }
+    if (!mounted) return;
+    if (f != null) {
+      if (_tries > 0) DiagLog.log('ui', 'pdf tile: picture shown after ${_tries + 1} tries');
+      setState(() => _pic = f);
+      return;
+    }
+    _tries++;
+    if (_tries == 1) setState(() {});
+    // Soon at first (a file just arriving), then once a minute.
+    _timer = Timer(_tries < 10 ? const Duration(seconds: 3) : const Duration(minutes: 1), () => unawaited(_look()));
+  }
+
   @override
-  Widget build(BuildContext context) => widget.builder(_later);
+  Widget build(BuildContext context) {
+    final pic = _pic;
+    if (pic == null) {
+      return _Waiting(icon: widget.icon, box: widget.box, text: tr(_tries >= 10 ? 'files.pdf_thumb_later' : 'files.pdf_thumb_making'));
+    }
+    final framed = ClipRRect(
+      borderRadius: BorderRadius.circular(4),
+      child: DecoratedBox(
+        position: DecorationPosition.foreground,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: LrColors.muted.withValues(alpha: 0.3)),
+        ),
+        child: Container(
+          color: Colors.white,
+          child: Image.file(
+            pic,
+            fit: BoxFit.cover,
+            alignment: Alignment.topCenter,
+            cacheWidth: widget.box == null ? 360 : (widget.box! * 2).round(),
+            gaplessPlayback: true,
+            errorBuilder: (_, e, _) {
+              DiagLog.log('ui', 'pdf tile: picture unreadable: $e');
+              return widget.icon;
+            },
+          ),
+        ),
+      ),
+    );
+    final b = widget.box;
+    return b == null ? framed : SizedBox(width: b, height: b, child: framed);
+  }
 }
 
 /// The file's icon while its picture is made, with a short word on it
