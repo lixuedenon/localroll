@@ -109,7 +109,7 @@ class FormatTable {
   static const _wmv = Fmt('wmv', 'WMV', {'wmv'});
   static const _webm = Fmt('webm', 'WebM', {'webm'});
   static const _flv = Fmt('flv', 'FLV', {'flv'});
-  static const _3gp = Fmt('3gp', '3GP', {'3gp'});
+  static const g3gp = Fmt('3gp', '3GP', {'3gp'});
   static const _mts = Fmt('mts', 'MTS', {'mts', 'm2ts', 'ts'});
 
   static const _mp3 = Fmt('mp3', 'MP3', {'mp3'});
@@ -130,7 +130,7 @@ class FormatTable {
   /// The wheels' items (the same on both sides).
   static List<Fmt> of(ConvCat c) => switch (c) {
         ConvCat.image => const [_heic, _jpg, _png, _webp, _bmp, _tiff, _gif, _avif, _pdf],
-        ConvCat.video => const [_mp4, _mov, _mkv, _avi, _wmv, _webm, _flv, _3gp, _mts, _gif, _mp3, _m4a, _wav],
+        ConvCat.video => const [_mp4, _mov, _mkv, _avi, _wmv, _webm, _flv, g3gp, _mts, _gif, _mp3, _m4a, _wav],
         ConvCat.audio => const [_mp3, _m4a, _wav, _flac, _ogg, _opus, _wma, _amr],
         ConvCat.doc => const [_pdf, _word, _excel, _csv, _ppt, _txt, _jpg, _png],
       };

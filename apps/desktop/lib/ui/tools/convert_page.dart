@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:localroll_core/localroll_core.dart' show DiagLog;
 
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
