@@ -264,7 +264,7 @@ class LocalRollApp extends StatelessWidget {
                     builder: (context, full, _) => full ? const SizedBox.shrink() : LrTitleBar(services: services),
                   ),
                   Expanded(
-                    child: Stack(children: [
+                    child: Stack(fit: StackFit.expand, children: [
                       Positioned.fill(child: PlayerDropTarget(services: services, child: child!)),
                       // Sending / receiving: how far, on top of any page.
                       TransferFloat(services: services),
