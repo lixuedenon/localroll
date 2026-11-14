@@ -2008,5 +2008,16 @@
   "player.show_more": "Alle {count} zeigen",
   "player.show_less": "Weniger zeigen",
   "player.found_notes": "Gefundene Notizen",
-  "player.notes_empty": "Noch keine Notizen. Was Sie im Player zeichnen oder schreiben, erscheint hier."
+  "player.notes_empty": "Noch keine Notizen. Was Sie im Player zeichnen oder schreiben, erscheint hier.",
+  "send.files_pc": "Dateien von diesem PC",
+  "send.files_library": "Aus der Mediathek",
+  "send.files_from": "Dateien woher wählen?",
+  "send.clipboard": "Zwischenablage",
+  "send.clipboard_empty": "Nichts zum Senden in der Zwischenablage (Dateien, Bild oder Text)",
+  "send.clipboard_files": "{count} Datei(en): {names}",
+  "send.clipboard_image": "Ein Bild (Bildschirmfoto oder kopiertes Bild)",
+  "send.clipboard_text": "Text: {text}",
+  "send.clipboard_title": "Zwischenablage an {name} senden?",
+  "send.clipboard_sent": "Text an {name} gesendet, dort einfügen",
+  "pick.files": "Dokumente & Dateien"
 }

@@ -2008,5 +2008,16 @@
   "player.show_more": "Vedi tutti ({count})",
   "player.show_less": "Mostra meno",
   "player.found_notes": "Annotazioni trovate",
-  "player.notes_empty": "Ancora nessuna annotazione. Ciò che disegni o scrivi nel lettore compare qui."
+  "player.notes_empty": "Ancora nessuna annotazione. Ciò che disegni o scrivi nel lettore compare qui.",
+  "send.files_pc": "File da questo PC",
+  "send.files_library": "Dalla libreria",
+  "send.files_from": "Da dove scegliere i file?",
+  "send.clipboard": "Appunti",
+  "send.clipboard_empty": "Niente da inviare negli appunti (file, immagine o testo)",
+  "send.clipboard_files": "{count} file: {names}",
+  "send.clipboard_image": "Un’immagine (screenshot o immagine copiata)",
+  "send.clipboard_text": "Testo: {text}",
+  "send.clipboard_title": "Inviare gli appunti a {name}?",
+  "send.clipboard_sent": "Testo inviato a {name}, pronto da incollare",
+  "pick.files": "Documenti e file"
 }

@@ -2008,5 +2008,16 @@
   "player.show_more": "查看全部 {count} 个",
   "player.show_less": "收起",
   "player.found_notes": "找到的标注",
-  "player.notes_empty": "还没有标注。在播放器里用画笔画过、写过字的，会出现在这里。"
+  "player.notes_empty": "还没有标注。在播放器里用画笔画过、写过字的，会出现在这里。",
+  "send.files_pc": "从电脑选文件",
+  "send.files_library": "从媒体库选",
+  "send.files_from": "从哪里选文件？",
+  "send.clipboard": "剪贴板",
+  "send.clipboard_empty": "剪贴板里没有可发送的内容（文件、图片或文字）",
+  "send.clipboard_files": "{count} 个文件：{names}",
+  "send.clipboard_image": "一张图片（截图或复制的图片）",
+  "send.clipboard_text": "一段文字：{text}",
+  "send.clipboard_title": "把剪贴板内容发给 {name}？",
+  "send.clipboard_sent": "文字已发到 {name}，那边可以直接粘贴",
+  "pick.files": "文档和文件"
 }

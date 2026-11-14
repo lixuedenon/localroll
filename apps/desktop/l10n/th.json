@@ -2008,5 +2008,16 @@
   "player.show_more": "ดูทั้งหมด {count}",
   "player.show_less": "แสดงน้อยลง",
   "player.found_notes": "คำอธิบายที่พบ",
-  "player.notes_empty": "ยังไม่มีคำอธิบาย สิ่งที่วาดหรือเขียนในเครื่องเล่นจะแสดงที่นี่"
+  "player.notes_empty": "ยังไม่มีคำอธิบาย สิ่งที่วาดหรือเขียนในเครื่องเล่นจะแสดงที่นี่",
+  "send.files_pc": "ไฟล์จาก PC นี้",
+  "send.files_library": "จากคลัง",
+  "send.files_from": "เลือกไฟล์จากที่ไหน?",
+  "send.clipboard": "คลิปบอร์ด",
+  "send.clipboard_empty": "ไม่มีอะไรในคลิปบอร์ดให้ส่ง (ไฟล์ รูป หรือข้อความ)",
+  "send.clipboard_files": "{count} ไฟล์: {names}",
+  "send.clipboard_image": "รูปภาพ (ภาพหน้าจอหรือรูปที่คัดลอก)",
+  "send.clipboard_text": "ข้อความ: {text}",
+  "send.clipboard_title": "ส่งคลิปบอร์ดไปยัง {name}?",
+  "send.clipboard_sent": "ส่งข้อความไป {name} แล้ว วางที่นั่นได้เลย",
+  "pick.files": "เอกสารและไฟล์"
 }

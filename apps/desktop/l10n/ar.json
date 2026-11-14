@@ -2008,5 +2008,16 @@
   "player.show_more": "عرض الكل ({count})",
   "player.show_less": "عرض أقل",
   "player.found_notes": "التعليقات التي وُجدت",
-  "player.notes_empty": "لا توجد تعليقات بعد. ما ترسمه أو تكتبه في المشغّل يظهر هنا."
+  "player.notes_empty": "لا توجد تعليقات بعد. ما ترسمه أو تكتبه في المشغّل يظهر هنا.",
+  "send.files_pc": "ملفات من هذا الكمبيوتر",
+  "send.files_library": "من المكتبة",
+  "send.files_from": "من أين تختار الملفات؟",
+  "send.clipboard": "الحافظة",
+  "send.clipboard_empty": "لا شيء لإرساله في الحافظة (ملفات أو صورة أو نص)",
+  "send.clipboard_files": "{count} ملفات: {names}",
+  "send.clipboard_image": "صورة (لقطة شاشة أو صورة منسوخة)",
+  "send.clipboard_text": "نص: {text}",
+  "send.clipboard_title": "إرسال الحافظة إلى {name}؟",
+  "send.clipboard_sent": "أُرسل النص إلى {name}، جاهز للصق هناك",
+  "pick.files": "المستندات والملفات"
 }

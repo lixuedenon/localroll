@@ -2008,5 +2008,16 @@
   "player.show_more": "सभी {count} देखें",
   "player.show_less": "कम दिखाएँ",
   "player.found_notes": "मिली टिप्पणियाँ",
-  "player.notes_empty": "अभी कोई टिप्पणी नहीं। प्लेयर में जो बनाएँगे या लिखेंगे, यहाँ दिखेगा।"
+  "player.notes_empty": "अभी कोई टिप्पणी नहीं। प्लेयर में जो बनाएँगे या लिखेंगे, यहाँ दिखेगा।",
+  "send.files_pc": "इस PC से फ़ाइलें",
+  "send.files_library": "लाइब्रेरी से",
+  "send.files_from": "फ़ाइलें कहाँ से चुनें?",
+  "send.clipboard": "क्लिपबोर्ड",
+  "send.clipboard_empty": "क्लिपबोर्ड पर भेजने को कुछ नहीं (फ़ाइलें, चित्र या टेक्स्ट)",
+  "send.clipboard_files": "{count} फ़ाइल(ें): {names}",
+  "send.clipboard_image": "एक चित्र (स्क्रीनशॉट या कॉपी किया चित्र)",
+  "send.clipboard_text": "टेक्स्ट: {text}",
+  "send.clipboard_title": "क्लिपबोर्ड {name} को भेजें?",
+  "send.clipboard_sent": "टेक्स्ट {name} को भेजा गया, वहाँ पेस्ट करें",
+  "pick.files": "दस्तावेज़ और फ़ाइलें"
 }

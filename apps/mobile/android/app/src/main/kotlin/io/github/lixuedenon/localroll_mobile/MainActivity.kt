@@ -38,6 +38,32 @@ class MainActivity : FlutterActivity() {
                         result.success(if (set.isNullOrBlank()) model else set)
                     }
                     "preview" -> result.success(false)
+                    "clipboardImage" -> {
+                        // A picture on the clipboard (copied image) as JPEG; null: none.
+                        val cm = getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                        val uri = cm.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.uri
+                        val type = uri?.let { try { contentResolver.getType(it) } catch (e: Exception) { null } }
+                        if (uri == null || type == null || !type.startsWith("image/")) {
+                            result.success(null)
+                        } else {
+                            Thread {
+                                try {
+                                    val bmp = contentResolver.openInputStream(uri)?.use { android.graphics.BitmapFactory.decodeStream(it) }
+                                    if (bmp == null) {
+                                        runOnUiThread { result.success(null) }
+                                    } else {
+                                        val out = ByteArrayOutputStream()
+                                        bmp.compress(Bitmap.CompressFormat.JPEG, 92, out)
+                                        bmp.recycle()
+                                        val bytes = out.toByteArray()
+                                        runOnUiThread { result.success(bytes) }
+                                    }
+                                } catch (e: Exception) {
+                                    runOnUiThread { result.success(null) }
+                                }
+                            }.start()
+                        }
+                    }
                     "toJpeg" -> {
                         // Any photo (HEIC too, Android 9+) as an upright JPEG.
                         val path = call.argument<String>("path") ?: ""

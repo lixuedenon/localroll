@@ -2008,5 +2008,16 @@
   "player.show_more": "查看全部 {count} 個",
   "player.show_less": "收起",
   "player.found_notes": "找到的標註",
-  "player.notes_empty": "還沒有標註。在播放器裡用畫筆畫過、寫過字的，會出現在這裡。"
+  "player.notes_empty": "還沒有標註。在播放器裡用畫筆畫過、寫過字的，會出現在這裡。",
+  "send.files_pc": "從電腦選檔案",
+  "send.files_library": "從媒體庫選",
+  "send.files_from": "從哪裡選檔案？",
+  "send.clipboard": "剪貼簿",
+  "send.clipboard_empty": "剪貼簿裡沒有可傳送的內容（檔案、圖片或文字）",
+  "send.clipboard_files": "{count} 個檔案：{names}",
+  "send.clipboard_image": "一張圖片（截圖或複製的圖片）",
+  "send.clipboard_text": "一段文字：{text}",
+  "send.clipboard_title": "把剪貼簿內容傳給 {name}？",
+  "send.clipboard_sent": "文字已傳到 {name}，那邊可以直接貼上",
+  "pick.files": "文件和檔案"
 }

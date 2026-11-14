@@ -2008,5 +2008,16 @@
   "player.show_more": "Tout voir ({count})",
   "player.show_less": "Afficher moins",
   "player.found_notes": "Annotations trouvées",
-  "player.notes_empty": "Aucune annotation pour l’instant. Ce que vous dessinez ou écrivez dans le lecteur apparaît ici."
+  "player.notes_empty": "Aucune annotation pour l’instant. Ce que vous dessinez ou écrivez dans le lecteur apparaît ici.",
+  "send.files_pc": "Fichiers de ce PC",
+  "send.files_library": "Depuis la photothèque",
+  "send.files_from": "Choisir les fichiers où ?",
+  "send.clipboard": "Presse-papiers",
+  "send.clipboard_empty": "Rien à envoyer dans le presse-papiers (fichiers, image ou texte)",
+  "send.clipboard_files": "{count} fichier(s) : {names}",
+  "send.clipboard_image": "Une image (capture ou image copiée)",
+  "send.clipboard_text": "Texte : {text}",
+  "send.clipboard_title": "Envoyer le presse-papiers à {name} ?",
+  "send.clipboard_sent": "Texte envoyé à {name}, prêt à coller",
+  "pick.files": "Documents et fichiers"
 }

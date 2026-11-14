@@ -2008,5 +2008,16 @@
   "player.show_more": "Lihat semua {count}",
   "player.show_less": "Tampilkan lebih sedikit",
   "player.found_notes": "Anotasi yang ditemukan",
-  "player.notes_empty": "Belum ada anotasi. Apa yang Anda gambar atau tulis di pemutar muncul di sini."
+  "player.notes_empty": "Belum ada anotasi. Apa yang Anda gambar atau tulis di pemutar muncul di sini.",
+  "send.files_pc": "File dari PC ini",
+  "send.files_library": "Dari pustaka",
+  "send.files_from": "Pilih file dari mana?",
+  "send.clipboard": "Papan klip",
+  "send.clipboard_empty": "Tidak ada yang bisa dikirim di papan klip (file, gambar, atau teks)",
+  "send.clipboard_files": "{count} file: {names}",
+  "send.clipboard_image": "Sebuah gambar (tangkapan layar atau gambar yang disalin)",
+  "send.clipboard_text": "Teks: {text}",
+  "send.clipboard_title": "Kirim papan klip ke {name}?",
+  "send.clipboard_sent": "Teks terkirim ke {name}, siap ditempel di sana",
+  "pick.files": "Dokumen & file"
 }

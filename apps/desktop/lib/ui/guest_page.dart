@@ -98,7 +98,7 @@ class _GuestDialogState extends State<_GuestDialog> {
   }
 
   Future<void> _shareLibrary() async {
-    final paths = await pickFromLibrary(context, widget.s);
+    final paths = await pickFromLibrary(context, widget.s, files: true);
     if (paths != null) g.share(paths);
   }
 

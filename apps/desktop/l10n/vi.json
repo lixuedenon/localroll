@@ -2008,5 +2008,16 @@
   "player.show_more": "Xem tất cả {count}",
   "player.show_less": "Thu gọn",
   "player.found_notes": "Chú thích tìm thấy",
-  "player.notes_empty": "Chưa có chú thích. Những gì bạn vẽ hoặc viết trong trình phát sẽ hiện ở đây."
+  "player.notes_empty": "Chưa có chú thích. Những gì bạn vẽ hoặc viết trong trình phát sẽ hiện ở đây.",
+  "send.files_pc": "Tệp từ PC này",
+  "send.files_library": "Từ thư viện",
+  "send.files_from": "Chọn tệp từ đâu?",
+  "send.clipboard": "Bộ nhớ tạm",
+  "send.clipboard_empty": "Bộ nhớ tạm không có gì để gửi (tệp, ảnh hoặc chữ)",
+  "send.clipboard_files": "{count} tệp: {names}",
+  "send.clipboard_image": "Một ảnh (ảnh chụp màn hình hoặc ảnh đã sao chép)",
+  "send.clipboard_text": "Chữ: {text}",
+  "send.clipboard_title": "Gửi bộ nhớ tạm tới {name}?",
+  "send.clipboard_sent": "Đã gửi chữ tới {name}, có thể dán ở đó",
+  "pick.files": "Tài liệu & tệp"
 }

@@ -1,5 +1,9 @@
 // apps/mobile/lib/services/clipboard_sync.dart
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:localroll_core/localroll_core.dart';
 
 import 'discovery.dart';
@@ -30,6 +34,21 @@ class ClipboardSync {
       return true;
     } finally {
       c.close();
+    }
+  }
+
+  /// A picture copied on this phone, as a JPEG file to send (null: none).
+  static Future<File?> image() async {
+    try {
+      final bytes = await const MethodChannel('localroll/files').invokeMethod<Uint8List>('clipboardImage');
+      if (bytes == null || bytes.isEmpty) return null;
+      final dir = await getTemporaryDirectory();
+      final f = File('${dir.path}${Platform.pathSeparator}clipboard_${DateTime.now().millisecondsSinceEpoch}.jpg');
+      await f.writeAsBytes(bytes, flush: true);
+      return f;
+    } catch (e) {
+      DiagLog.log('clipboard', 'picture not read: $e');
+      return null;
     }
   }
 

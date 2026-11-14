@@ -2008,5 +2008,16 @@
   "player.show_more": "すべて表示（{count}）",
   "player.show_less": "折りたたむ",
   "player.found_notes": "見つかった注釈",
-  "player.notes_empty": "まだ注釈はありません。プレーヤーでペンで描いたり書いたりしたものがここに表示されます。"
+  "player.notes_empty": "まだ注釈はありません。プレーヤーでペンで描いたり書いたりしたものがここに表示されます。",
+  "send.files_pc": "この PC からファイル",
+  "send.files_library": "ライブラリから",
+  "send.files_from": "どこからファイルを選びますか？",
+  "send.clipboard": "クリップボード",
+  "send.clipboard_empty": "クリップボードに送れるもの（ファイル、画像、テキスト）がありません",
+  "send.clipboard_files": "{count} 件のファイル：{names}",
+  "send.clipboard_image": "画像 1 枚（スクリーンショットかコピーした画像）",
+  "send.clipboard_text": "テキスト：{text}",
+  "send.clipboard_title": "クリップボードの内容を {name} に送りますか？",
+  "send.clipboard_sent": "テキストを {name} に送りました。そのまま貼り付けられます",
+  "pick.files": "書類とファイル"
 }

@@ -388,6 +388,13 @@ final class FilePreview: NSObject, QLPreviewControllerDataSource {
         result(UIDevice.current.name)
       case "preview":
         result(shared.show(path: args["path"] as? String ?? ""))
+      case "clipboardImage":
+        // A copied picture as JPEG (iOS may ask the person to allow pasting).
+        if UIPasteboard.general.hasImages, let img = UIPasteboard.general.image, let data = img.jpegData(compressionQuality: 0.92) {
+          result(FlutterStandardTypedData(bytes: data))
+        } else {
+          result(nil)
+        }
       case "toJpeg":
         // Any photo (HEIC too) as an upright JPEG, at most maxSide pixels.
         let path = args["path"] as? String ?? ""

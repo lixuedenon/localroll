@@ -2008,5 +2008,16 @@
   "player.show_more": "Ver los {count}",
   "player.show_less": "Mostrar menos",
   "player.found_notes": "Anotaciones encontradas",
-  "player.notes_empty": "Aún no hay anotaciones. Lo que dibujes o escribas en el reproductor aparecerá aquí."
+  "player.notes_empty": "Aún no hay anotaciones. Lo que dibujes o escribas en el reproductor aparecerá aquí.",
+  "send.files_pc": "Archivos de este PC",
+  "send.files_library": "Desde la biblioteca",
+  "send.files_from": "¿De dónde eliges los archivos?",
+  "send.clipboard": "Portapapeles",
+  "send.clipboard_empty": "No hay nada que enviar en el portapapeles (archivos, imagen o texto)",
+  "send.clipboard_files": "{count} archivo(s): {names}",
+  "send.clipboard_image": "Una imagen (captura o imagen copiada)",
+  "send.clipboard_text": "Texto: {text}",
+  "send.clipboard_title": "¿Enviar el portapapeles a {name}?",
+  "send.clipboard_sent": "Texto enviado a {name}, listo para pegar allí",
+  "pick.files": "Documentos y archivos"
 }

@@ -2008,5 +2008,16 @@
   "player.show_more": "Ver todos ({count})",
   "player.show_less": "Mostrar menos",
   "player.found_notes": "Anotações encontradas",
-  "player.notes_empty": "Nenhuma anotação ainda. O que você desenhar ou escrever no player aparece aqui."
+  "player.notes_empty": "Nenhuma anotação ainda. O que você desenhar ou escrever no player aparece aqui.",
+  "send.files_pc": "Arquivos deste PC",
+  "send.files_library": "Da biblioteca",
+  "send.files_from": "Escolher arquivos de onde?",
+  "send.clipboard": "Área de transferência",
+  "send.clipboard_empty": "Nada para enviar na área de transferência (arquivos, imagem ou texto)",
+  "send.clipboard_files": "{count} arquivo(s): {names}",
+  "send.clipboard_image": "Uma imagem (captura ou imagem copiada)",
+  "send.clipboard_text": "Texto: {text}",
+  "send.clipboard_title": "Enviar a área de transferência para {name}?",
+  "send.clipboard_sent": "Texto enviado para {name}, pronto para colar",
+  "pick.files": "Documentos e arquivos"
 }

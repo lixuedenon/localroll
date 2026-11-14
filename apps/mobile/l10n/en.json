@@ -560,7 +560,7 @@
   "home.me_shown": "This phone · how computers see it — tap to rename",
   "clip.take": "Get PC's",
   "clip.sent": "Sent to {pc} — ready to paste there",
-  "clip.empty": "Nothing copied on this phone",
+  "clip.empty": "Nothing copied on this phone (text or a picture)",
   "clip.pc_empty": "Nothing copied on {pc}",
   "clip.taken": "Copied — ready to paste",
   "home.pc_asked_backup": "The PC asked for a backup — starting…",

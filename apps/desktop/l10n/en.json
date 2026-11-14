@@ -2008,5 +2008,16 @@
   "player.show_more": "See all {count}",
   "player.show_less": "Show less",
   "player.found_notes": "Notes found",
-  "player.notes_empty": "No notes yet. What you draw or write on in the player shows here."
+  "player.notes_empty": "No notes yet. What you draw or write on in the player shows here.",
+  "send.files_pc": "Files from this PC",
+  "send.files_library": "From the library",
+  "send.files_from": "Pick files from where?",
+  "send.clipboard": "Clipboard",
+  "send.clipboard_empty": "Nothing to send on the clipboard (files, a picture or text)",
+  "send.clipboard_files": "{count} file(s): {names}",
+  "send.clipboard_image": "A picture (a screenshot or a copied image)",
+  "send.clipboard_text": "Text: {text}",
+  "send.clipboard_title": "Send the clipboard to {name}?",
+  "send.clipboard_sent": "Text sent to {name}, ready to paste there",
+  "pick.files": "Documents & files"
 }

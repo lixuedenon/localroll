@@ -2008,5 +2008,16 @@
   "player.show_more": "모두 보기({count})",
   "player.show_less": "접기",
   "player.found_notes": "찾은 주석",
-  "player.notes_empty": "아직 주석이 없습니다. 플레이어에서 펜으로 그리거나 쓴 것이 여기에 나타납니다."
+  "player.notes_empty": "아직 주석이 없습니다. 플레이어에서 펜으로 그리거나 쓴 것이 여기에 나타납니다.",
+  "send.files_pc": "이 PC에서 파일",
+  "send.files_library": "라이브러리에서",
+  "send.files_from": "어디에서 파일을 고를까요?",
+  "send.clipboard": "클립보드",
+  "send.clipboard_empty": "클립보드에 보낼 것(파일, 그림, 글자)이 없습니다",
+  "send.clipboard_files": "파일 {count}개: {names}",
+  "send.clipboard_image": "그림 1장(스크린샷이나 복사한 그림)",
+  "send.clipboard_text": "글자: {text}",
+  "send.clipboard_title": "클립보드 내용을 {name}에 보낼까요?",
+  "send.clipboard_sent": "글자를 {name}에 보냈습니다. 거기서 바로 붙여넣을 수 있습니다",
+  "pick.files": "문서와 파일"
 }

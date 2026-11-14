@@ -8,6 +8,7 @@ import 'package:localroll_core/localroll_core.dart';
 
 import '../app_services.dart';
 import '../l10n/l10n.dart';
+import '../services/clipboard_send.dart';
 import '../services/peers.dart';
 import '../services/received_files.dart' show ReceivedFile;
 import '../services/settings.dart';
@@ -21,6 +22,7 @@ import 'receive_page.dart' show NetworkCheck;
 import 'send_page.dart';
 import 'text_window.dart';
 import 'guest_page.dart';
+import 'library_picker.dart';
 import 'net_check.dart';
 import 'send_paths.dart';
 import 'transfer_records.dart';
@@ -408,9 +410,11 @@ class _DevicesPageState extends State<DevicesPage> {
   /// Several devices ticked: send to them together.
   Widget _multiBar(List<_Dev> all) {
     final names = [for (final d in all) if (_picked.contains(d.id)) d.name];
-    Future<void> go(bool folder) async {
+    Future<void> go(bool folder, {bool library = false}) async {
       final List<String> paths;
-      if (folder) {
+      if (library) {
+        paths = await pickFromLibrary(context, widget.services, files: true) ?? const [];
+      } else if (folder) {
         final dir = await WinDialogs.pickFolder(title: tr('send.folder'));
         paths = dir == null ? const [] : [dir];
       } else {
@@ -440,7 +444,9 @@ class _DevicesPageState extends State<DevicesPage> {
         Expanded(child: Text(names.join('、'), overflow: TextOverflow.ellipsis, style: const TextStyle(color: _Look.soft))),
         OutlinedButton(onPressed: () => go(true), child: Text(tr('send.folder'))),
         const SizedBox(width: 8),
-        FilledButton(onPressed: () => go(false), child: Text(tr('send.files'))),
+        OutlinedButton(onPressed: () => go(false, library: true), child: Text(tr('send.files_library'))),
+        const SizedBox(width: 8),
+        FilledButton(onPressed: () => go(false), child: Text(tr('send.files_pc'))),
       ]),
     );
   }
@@ -462,9 +468,11 @@ class _DevicesPageState extends State<DevicesPage> {
       tooltip: d.ready ? tr('dev.send') : tr('dev.send_later_tip'),
       onSelected: (v) => _send(d, v),
       itemBuilder: (_) => [
-        PopupMenuItem(value: 'files', child: Text(tr('send.files'))),
+        PopupMenuItem(value: 'files', child: Text(tr('send.files_pc'))),
+        PopupMenuItem(value: 'library', child: Text(tr('send.files_library'))),
         PopupMenuItem(value: 'folder', child: Text(tr('send.folder'))),
         if (d.isPc && d.ready) PopupMenuItem(value: 'text', child: Text(tr('send.text'))),
+        PopupMenuItem(value: 'clipboard', child: Text(tr('send.clipboard'))),
       ],
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
@@ -490,10 +498,90 @@ class _DevicesPageState extends State<DevicesPage> {
     switch (what) {
       case 'files':
         await _sendFiles(target, toPhone: !d.isPc);
+      case 'pick':
+        // "Files": from this PC's folders, or from the library.
+        final from = await showDialog<String>(
+          context: context,
+          builder: (ctx) => SimpleDialog(
+            title: Text(tr('send.files_from')),
+            children: [
+              SimpleDialogOption(
+                onPressed: () => Navigator.pop(ctx, 'files'),
+                child: ListTile(leading: const Icon(Icons.folder_open_rounded), title: Text(tr('send.files_pc'))),
+              ),
+              SimpleDialogOption(
+                onPressed: () => Navigator.pop(ctx, 'library'),
+                child: ListTile(leading: const Icon(Icons.photo_library_rounded), title: Text(tr('send.files_library'))),
+              ),
+            ],
+          ),
+        );
+        if (from != null && mounted) await _send(d, from);
+      case 'library':
+        final paths = await pickFromLibrary(context, widget.services, files: true);
+        if (paths != null && paths.isNotEmpty && mounted) await _sendPaths(target, paths, toPhone: !d.isPc);
       case 'folder':
         await _sendFolder(target, toPhone: !d.isPc);
       case 'text':
         await showTextComposer(context, widget.services, target);
+      case 'clipboard':
+        await _sendClipboard(target, toPhone: !d.isPc);
+    }
+  }
+
+  /// What is on this PC's clipboard (copied files, a picture, text): shown
+  /// first, then sent.
+  Future<void> _sendClipboard(PeerPc p, {bool toPhone = false}) async {
+    final m = ScaffoldMessenger.of(context);
+    final c = await ClipboardContent.read(Directory.systemTemp.path);
+    if (!mounted) return;
+    if (c.isEmpty) {
+      m.showSnackBar(SnackBar(content: Text(tr('send.clipboard_empty'))));
+      return;
+    }
+    final text = c.text ?? '';
+    final what = c.files.isNotEmpty
+        ? tr('send.clipboard_files', {'count': c.files.length, 'names': c.files.take(3).map(baseNameOf).join('、')})
+        : c.image != null
+            ? tr('send.clipboard_image')
+            : tr('send.clipboard_text', {'text': text.length > 80 ? '${text.substring(0, 80)}…' : text});
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr('send.clipboard_title', {'name': p.name})),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(what),
+            if (c.image != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: Image.file(File(c.image!), height: 160, fit: BoxFit.contain),
+                ),
+              ),
+          ]),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('common.cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('dev.send'))),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    if (c.files.isNotEmpty) {
+      await _sendPaths(p, c.files, toPhone: toPhone);
+    } else if (c.image != null) {
+      await _sendPaths(p, [c.image!], toPhone: toPhone);
+    } else if (!toPhone) {
+      final err = await widget.services.sender.sendText(p, text);
+      if (mounted) m.showSnackBar(SnackBar(content: Text(err ?? tr('send.clipboard_sent', {'name': p.name}))));
+    } else {
+      // Phones take files: the text as a .txt file.
+      final f = File('${Directory.systemTemp.path}${Platform.pathSeparator}clipboard_${DateTime.now().millisecondsSinceEpoch}.txt');
+      await f.writeAsString(text);
+      if (mounted) await _sendPaths(p, [f.path], toPhone: true);
     }
   }
 
@@ -753,7 +841,7 @@ class _DevicesPageState extends State<DevicesPage> {
         Row(children: [
           Expanded(
             child: FilledButton(
-              onPressed: d.target == null ? null : () => _send(d, 'files'),
+              onPressed: d.target == null ? null : () => _send(d, 'pick'),
               child: Text(tr('send.files')),
             ),
           ),
@@ -773,6 +861,13 @@ class _DevicesPageState extends State<DevicesPage> {
               ),
             ),
           ],
+          const SizedBox(width: 8),
+          Expanded(
+            child: OutlinedButton(
+              onPressed: d.target == null ? null : () => _send(d, 'clipboard'),
+              child: Text(tr('send.clipboard')),
+            ),
+          ),
         ]),
         if (d.target == null && !d.isPc)
           Padding(
@@ -843,11 +938,19 @@ class _DevicesPageState extends State<DevicesPage> {
   Future<void> _sendFiles(PeerPc p, {bool toPhone = false}) async {
     final picked = await WinDialogs.pickFiles(title: tr('send.files'));
     if (picked.isEmpty) return;
+    await _sendPaths(p, picked, toPhone: toPhone);
+  }
+
+  /// Files (and whole folders) to [p].
+  Future<void> _sendPaths(PeerPc p, List<String> picked, {bool toPhone = false}) async {
     final files = [
       // Photos and videos go into the other PC's library; other files into
       // its "Received files" folder.
       for (final path in picked)
-        ?SendFile.plain(File(path), baseNameOf(path), toLibrary: MediaKind.fromName(baseNameOf(path)) != MediaKind.other),
+        if (FileSystemEntity.isDirectorySync(path))
+          ...await filesInFolder(path)
+        else
+          ?SendFile.plain(File(path), baseNameOf(path), toLibrary: MediaKind.fromName(baseNameOf(path)) != MediaKind.other),
     ];
     if (files.isEmpty) return;
     final title = files.length == 1 ? files.first.name : tr('send.n_files', {'count': files.length});

@@ -1070,6 +1070,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       try {
         if (send) {
           final ok = await ClipboardSync.send(widget.settings, widget.discovery, d);
+          if (!ok) {
+            // No text: a copied picture goes as a file.
+            final pic = await ClipboardSync.image();
+            if (pic != null && context.mounted) {
+              final sender = FileSender(settings: widget.settings, discovery: widget.discovery, files: [pic], desktop: d);
+              await Navigator.of(context).push(MaterialPageRoute(builder: (_) => SendFilesPage(sender: sender)));
+              return;
+            }
+          }
           m?.showSnackBar(SnackBar(content: Text(tr(ok ? 'clip.sent' : 'clip.empty', {'pc': d.name}))));
         } else {
           final t = await ClipboardSync.take(widget.settings, widget.discovery, d);

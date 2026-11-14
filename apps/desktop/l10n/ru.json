@@ -2008,5 +2008,16 @@
   "player.show_more": "Показать все ({count})",
   "player.show_less": "Свернуть",
   "player.found_notes": "Найденные пометки",
-  "player.notes_empty": "Пометок пока нет. Всё, что вы нарисуете или напишете в проигрывателе, появится здесь."
+  "player.notes_empty": "Пометок пока нет. Всё, что вы нарисуете или напишете в проигрывателе, появится здесь.",
+  "send.files_pc": "Файлы с этого ПК",
+  "send.files_library": "Из медиатеки",
+  "send.files_from": "Откуда выбрать файлы?",
+  "send.clipboard": "Буфер обмена",
+  "send.clipboard_empty": "В буфере обмена нечего отправить (файлы, картинка или текст)",
+  "send.clipboard_files": "Файлов: {count} — {names}",
+  "send.clipboard_image": "Картинка (снимок экрана или скопированное изображение)",
+  "send.clipboard_text": "Текст: {text}",
+  "send.clipboard_title": "Отправить буфер обмена на {name}?",
+  "send.clipboard_sent": "Текст отправлен на {name} — можно вставить там",
+  "pick.files": "Документы и файлы"
 }

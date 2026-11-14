@@ -560,7 +560,7 @@
   "home.me_shown": "本機 · 電腦上顯示這個名字，點一下改名",
   "clip.take": "取電腦的",
   "clip.sent": "已傳到 {pc}，那邊可以直接貼上",
-  "clip.empty": "手機上沒有複製的文字",
+  "clip.empty": "手機上沒有複製的文字或圖片",
   "clip.pc_empty": "{pc} 上沒有複製的文字",
   "clip.taken": "已複製，可以貼上了",
   "home.pc_asked_backup": "電腦請你備份，正在開始…",

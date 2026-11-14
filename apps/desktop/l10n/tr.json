@@ -2008,5 +2008,16 @@
   "player.show_more": "Tümünü gör ({count})",
   "player.show_less": "Daha az göster",
   "player.found_notes": "Bulunan notlar",
-  "player.notes_empty": "Henüz not yok. Oynatıcıda çizdikleriniz ya da yazdıklarınız burada görünür."
+  "player.notes_empty": "Henüz not yok. Oynatıcıda çizdikleriniz ya da yazdıklarınız burada görünür.",
+  "send.files_pc": "Bu bilgisayardan dosyalar",
+  "send.files_library": "Kitaplıktan",
+  "send.files_from": "Dosyalar nereden seçilsin?",
+  "send.clipboard": "Pano",
+  "send.clipboard_empty": "Panoda gönderilecek bir şey yok (dosya, resim ya da metin)",
+  "send.clipboard_files": "{count} dosya: {names}",
+  "send.clipboard_image": "Bir resim (ekran görüntüsü ya da kopyalanan resim)",
+  "send.clipboard_text": "Metin: {text}",
+  "send.clipboard_title": "Pano {name} cihazına gönderilsin mi?",
+  "send.clipboard_sent": "Metin {name} cihazına gönderildi, orada yapıştırılabilir",
+  "pick.files": "Belgeler ve dosyalar"
 }
