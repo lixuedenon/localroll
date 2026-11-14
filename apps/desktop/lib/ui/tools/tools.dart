@@ -23,16 +23,19 @@ import '../light_look.dart';
 import '../screen/screen_record.dart' show snipBarGo, snipScreen;
 import '../send_paths.dart';
 import '../send_page.dart' show baseNameOf;
+import 'convert_page.dart';
 import 'image_tool_page.dart';
 import 'pdf_tool_page.dart';
 import 'qr_tool.dart';
 import 'video_tool_page.dart';
+import '../lr_dialog.dart';
 
 /// What a tool takes.
-enum ToolInput { photos, videos, pdfs, office, none }
+enum ToolInput { photos, videos, pdfs, office, any, none }
 
 /// The everyday tools (Home's grid, the Tools page, right-click menus).
 enum Tool {
+  convert(Icons.swap_horiz_rounded, Color(0xFFE6F0FF), Color(0xFF2F6BFF), ToolInput.any),
   heicJpg(Icons.image_rounded, Color(0xFFE6F0FF), Color(0xFF2F6BFF), ToolInput.photos),
   compressVideo(Icons.movie_filter_rounded, Color(0xFFFFEEDE), Color(0xFFE8740C), ToolInput.videos),
   photosPdf(Icons.picture_as_pdf_rounded, Color(0xFFE3F7EC), Color(0xFF16A36A), ToolInput.photos),
@@ -63,10 +66,14 @@ enum Tool {
         ToolInput.videos => const ['mp4', 'mov', 'm4v', 'mkv', 'avi', 'wmv', 'webm', '3gp', 'mts', 'm2ts', 'flv'],
         ToolInput.pdfs => const ['pdf'],
         ToolInput.office => [...OfficePdf.word, ...OfficePdf.excel, ...OfficePdf.powerpoint],
-        ToolInput.none => null,
+        ToolInput.any || ToolInput.none => null,
       };
 
+  /// Now part of "Format conversion" (kept for right-click menus).
+  bool get inConvert => this == heicJpg || this == videoToAudio || this == officePdf;
+
   bool takes(String path) {
+    if (input == ToolInput.any) return true;
     final e = extensionOf(path);
     final x = extensions;
     return x != null && x.contains(e);
@@ -95,7 +102,8 @@ class _ToolsGridState extends State<ToolsGrid> {
   Widget build(BuildContext context) => LayoutBuilder(builder: (context, c) {
         final cols = c.maxWidth > 1100 ? 6 : (c.maxWidth > 820 ? 4 : (c.maxWidth > 560 ? 3 : 2));
         final w = (c.maxWidth - (cols - 1) * 12) / cols;
-        final tools = widget.all ? Tool.values : Tool.values.take(11).toList();
+        final shown = [for (final t in Tool.values) if (!t.inConvert) t];
+        final tools = widget.all ? shown : shown.take(11).toList();
         return Wrap(spacing: 12, runSpacing: 12, children: [
           for (final t in tools) SizedBox(width: w, child: _tile(t)),
           if (!widget.all)
@@ -179,6 +187,10 @@ class _ToolsGridState extends State<ToolsGrid> {
 Future<void> openTool(BuildContext context, AppServices s, Tool tool, {List<String>? paths}) async {
   s.tools.current = tool.name;
   var files = paths;
+  if (tool == Tool.convert) {
+    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => ConvertPage(services: s, files: paths ?? const [])));
+    return;
+  }
   if (tool.input != ToolInput.none) {
     files ??= await _pickInputs(context, s, tool);
     if (files == null || files.isEmpty || !context.mounted) return;
@@ -199,7 +211,7 @@ Future<void> openTool(BuildContext context, AppServices s, Tool tool, {List<Stri
     case Tool.compressVideo:
       _queue(context, s, files!, preset: ConvertPreset.share);
     case Tool.videoToAudio:
-      final f = await showDialog<ConvertFormat>(
+      final f = await showLrDialog<ConvertFormat>(
         context: context,
         builder: (c) => SimpleDialog(title: Text(tool.title), children: [
           SimpleDialogOption(onPressed: () => Navigator.pop(c, ConvertFormat.mp3), child: Text(tr('tool.as_mp3'))),
@@ -222,6 +234,8 @@ Future<void> openTool(BuildContext context, AppServices s, Tool tool, {List<Stri
       if (shot != null && context.mounted) await showSnipResult(context, s, shot);
     case Tool.qr:
       await showQrTool(context, s);
+    case Tool.convert:
+      break;
   }
 }
 
@@ -230,7 +244,7 @@ Future<List<String>?> _pickInputs(BuildContext context, AppServices s, Tool tool
   final media = tool.input == ToolInput.photos || tool.input == ToolInput.videos;
   var where = 'folder';
   if (media) {
-    final w = await showDialog<String>(
+    final w = await showLrDialog<String>(
       context: context,
       builder: (c) => SimpleDialog(title: Text(tool.title), children: [
         SimpleDialogOption(
@@ -264,7 +278,7 @@ void _queue(BuildContext context, AppServices s, List<String> files, {ConvertFor
 /// Something that takes a moment, with a turning circle; then the result.
 Future<T?> runBusy<T>(BuildContext context, String what, Future<T> Function() job) async {
   final nav = Navigator.of(context);
-  unawaited(showDialog<void>(
+  unawaited(showLrDialog<void>(
     context: context,
     barrierDismissible: false,
     builder: (_) => PopScope(
@@ -299,7 +313,7 @@ Future<void> _photosPdf(BuildContext context, AppServices s, List<String> photos
 Future<void> _officePdf(BuildContext context, AppServices s, List<String> docs) async {
   if (!await OfficePdf.available()) {
     if (!context.mounted) return;
-    await showDialog<void>(
+    await showLrDialog<void>(
       context: context,
       builder: (c) => AlertDialog(
         icon: const Icon(Icons.info_outline_rounded, size: 30),
@@ -339,7 +353,7 @@ Future<void> showToolResult(BuildContext context, AppServices s, List<String> ou
   await s.tools.saved(outs);
   if (!context.mounted) return;
   final where = savedWhere(s, outs.first);
-  return showDialog<void>(
+  return showLrDialog<void>(
       context: context,
       builder: (c) => LightDialog(
         icon: Icons.check_circle_rounded,
@@ -449,7 +463,7 @@ Future<void> showSnipResult(BuildContext context, AppServices s, File shot) asyn
   final text = await runBusy(context, tr('tool.reading'), () async => s.textIndexer.ocr.read(shot.path));
   if (!context.mounted) return;
   final ctl = TextEditingController(text: text ?? '');
-  await showDialog<void>(
+  await showLrDialog<void>(
     context: context,
     builder: (c) => LightDialog(
       icon: Icons.document_scanner_rounded,

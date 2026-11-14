@@ -7,10 +7,11 @@ import '../app_services.dart';
 import '../l10n/l10n.dart';
 import 'receive_page.dart' show PairingPanel;
 import 'theme.dart';
+import 'lr_dialog.dart';
 
 /// "Add a device": a phone (tap this PC in LocalRoll on the phone; the QR
 /// code / PIN when it can't find it), or another PC (search nearby).
-Future<void> showAddDevice(BuildContext context, AppServices s) => showDialog<void>(
+Future<void> showAddDevice(BuildContext context, AppServices s) => showLrDialog<void>(
       context: context,
       builder: (ctx) => Dialog(
         child: ConstrainedBox(

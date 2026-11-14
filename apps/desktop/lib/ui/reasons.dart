@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/l10n.dart';
+import 'lr_dialog.dart';
 
 /// Ready-made reasons for declining (keys in the language files).
 const List<String> declineReasonKeys = [
@@ -19,7 +20,7 @@ const int maxReasonLength = 100;
 /// Returns the text, or null when cancelled.
 Future<String?> askDeclineReason(BuildContext context) {
   final ctrl = TextEditingController();
-  return showDialog<String>(
+  return showLrDialog<String>(
     context: context,
     builder: (c) => AlertDialog(
       title: Text(tr('reason.title')),

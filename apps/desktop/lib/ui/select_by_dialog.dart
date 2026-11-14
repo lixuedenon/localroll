@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../l10n/l10n.dart';
 import 'format.dart';
 import 'theme.dart';
+import 'lr_dialog.dart';
 
 /// What "Select by…" can pick.
 enum PickType { photo, video, doc, other, copy }
@@ -34,7 +35,7 @@ class PickCandidate {
 /// how big — and how many that is, before anything is selected. Returns the
 /// chosen candidates (null: cancelled).
 Future<List<PickCandidate>?> showSelectByDialog(BuildContext context, List<PickCandidate> all) =>
-    showDialog<List<PickCandidate>>(context: context, builder: (_) => _SelectByDialog(all: all));
+    showLrDialog<List<PickCandidate>>(context: context, builder: (_) => _SelectByDialog(all: all));
 
 /// How a sender is shown: items copied in on this PC have none ("?").
 String senderLabel(String m) => m == '?' ? tr('lib.from_this_pc') : m;

@@ -14,6 +14,7 @@ import '../theme.dart';
 import 'pen_bar.dart';
 import 'recordings_view.dart';
 import 'screen_record.dart';
+import '../lr_dialog.dart';
 
 /// "Record screen" on the left: what to record (the whole screen, a
 /// window, an area, or explaining a video in the player at its own
@@ -55,7 +56,7 @@ class _ScreenPageState extends State<ScreenPage> {
   /// Explain a video / photo: choose it, the player opens and records.
   Future<void> _explain() async {
     final recent = [for (final r in s.player.recent) if (File(r.path).existsSync()) r].take(8).toList();
-    final path = await showDialog<Object>(
+    final path = await showLrDialog<Object>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(tr('screen.explain_pick')),

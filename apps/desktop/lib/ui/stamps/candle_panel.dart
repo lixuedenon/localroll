@@ -7,6 +7,7 @@ import '../../services/stamp_library.dart';
 import '../player/ink_editor.dart';
 import '../theme.dart';
 import 'stamp_picker.dart';
+import '../lr_dialog.dart';
 
 /// What was chosen in the candle panel: a kind to draw by hand, or a
 /// ready-made candle / pattern to place.
@@ -30,7 +31,7 @@ Future<void> pickCandleInto(BuildContext context, InkEditor editor) async {
 
 /// Candles (K lines): how to draw them by hand, single candles rising and
 /// falling, patterns, and the rising / falling colours.
-Future<CandlePick?> showCandlePanel(BuildContext context) => showDialog<CandlePick>(context: context, builder: (_) => const _CandlePanel());
+Future<CandlePick?> showCandlePanel(BuildContext context) => showLrDialog<CandlePick>(context: context, builder: (_) => const _CandlePanel());
 
 class _CandlePanel extends StatefulWidget {
   const _CandlePanel();

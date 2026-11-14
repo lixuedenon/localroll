@@ -1,6 +1,8 @@
 // apps/desktop/lib/ui/theme.dart
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
+
 /// "Darkroom": ink-teal surfaces lit by an amber safelight. Amber marks the
 /// one thing that is active right now; cyan marks what is verified and safe.
 class LrColors {
@@ -17,7 +19,20 @@ class LrColors {
   static const danger = Color(0xFFFF6B5E);
 }
 
-ThemeData buildLrTheme() {
+/// The fonts after Segoe UI (which has no Chinese, Japanese or Korean): the
+/// language's own first, so its characters all come from one font.
+List<String> lrFontFallback(String lang) {
+  const sc = 'Microsoft YaHei UI', tc = 'Microsoft JhengHei UI', ja = 'Yu Gothic UI', ko = 'Malgun Gothic';
+  final cjk = switch (lang) {
+    'zh_Hant' => [tc, sc, ja, ko],
+    'ja' => [ja, sc, tc, ko],
+    'ko' => [ko, sc, tc, ja],
+    _ => [sc, tc, ja, ko],
+  };
+  return ['Segoe UI', ...cjk, 'Microsoft YaHei', 'Segoe UI Symbol', 'sans-serif'];
+}
+
+ThemeData buildLrTheme({String? lang}) {
   const scheme = ColorScheme(
     brightness: Brightness.dark,
     primary: LrColors.safelight,
@@ -50,7 +65,7 @@ ThemeData buildLrTheme() {
   );
 
   const family = 'Segoe UI Variable Text';
-  const fallback = ['Segoe UI', 'Microsoft YaHei UI', 'Yu Gothic UI', 'Malgun Gothic', 'sans-serif'];
+  final fallback = lrFontFallback(lang ?? translator.language);
 
   final base = ThemeData(colorScheme: scheme, useMaterial3: true, fontFamily: family, fontFamilyFallback: fallback);
   final text = base.textTheme.copyWith(
@@ -59,7 +74,10 @@ ThemeData buildLrTheme() {
     titleMedium: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
     bodyMedium: const TextStyle(fontSize: 14, height: 1.45),
     bodySmall: const TextStyle(fontSize: 13, height: 1.4, color: LrColors.muted),
-  ).apply(bodyColor: LrColors.text, displayColor: LrColors.text);
+  ).apply(bodyColor: LrColors.text, displayColor: LrColors.text, fontFamily: family, fontFamilyFallback: fallback);
+  // (The styles above are new ones: without this they had no font of their
+  // own, and Windows picked one per character — some Chinese characters
+  // came out of a Japanese font, smaller and odd.)
 
   return base.copyWith(
     scaffoldBackgroundColor: LrColors.ink,

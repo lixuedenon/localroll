@@ -9,6 +9,7 @@ import '../l10n/l10n.dart';
 import '../services/library_index.dart';
 import '../services/library_trash.dart';
 import 'format.dart';
+import 'lr_dialog.dart';
 
 /// Deleting from the library, the same way everywhere: a question with how
 /// many and how big, into "Recently deleted" (30 days), then 10 seconds to
@@ -35,7 +36,7 @@ Future<int> deleteToTrash(
   }
   final messenger = ScaffoldMessenger.of(context);
   final nav = Navigator.of(context);
-  final ok = await showDialog<bool>(
+  final ok = await showLrDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
       icon: const Icon(Icons.delete_outline_rounded, size: 32),
@@ -57,7 +58,7 @@ Future<int> deleteToTrash(
   final progress = ValueNotifier<(int, int)>((0, total));
   final showProgress = total >= 50;
   if (showProgress) {
-    unawaited(showDialog<void>(
+    unawaited(showLrDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (_) => PopScope(

@@ -21,6 +21,7 @@ import 'ink_paint.dart';
 import 'narration.dart';
 import 'narration_dialogs.dart';
 import 'player_page.dart' show playerTime;
+import '../lr_dialog.dart';
 
 /// Edits a recorded explanation: plays it back, marks deleted (their
 /// annotation too), stretches made silent, cut out or spoken again.
@@ -323,7 +324,7 @@ class _EditorState extends State<_Editor> {
   // ------------------------------------------------------------- editing
 
   Future<void> _deleteInk(NarrationInk i) async {
-    final ok = await showDialog<bool>(
+    final ok = await showLrDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(tr('nedit.delete_mark')),
@@ -342,7 +343,7 @@ class _EditorState extends State<_Editor> {
     if (sel == null) return;
     if (_clashes(sel.$1, sel.$2)) return _snack(tr('nedit.overlap'));
     final drawn = [for (final i in n.inks) if (i.startT >= sel.$1 && i.startT < sel.$2 && !_deleted.contains(i.ink.id)) i].length;
-    final ok = await showDialog<bool>(
+    final ok = await showLrDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(tr('nedit.cut_title', {'len': playerTime(Duration(milliseconds: sel.$2 - sel.$1))})),

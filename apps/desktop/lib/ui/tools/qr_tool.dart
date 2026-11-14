@@ -18,10 +18,11 @@ import '../../services/file_tools.dart';
 import '../../services/win_dialogs.dart';
 import '../light_dialog.dart';
 import '../light_look.dart';
+import '../lr_dialog.dart';
 
 /// QR codes: make one (a link, text, a Wi-Fi network) and save / copy it;
 /// read one from a picture.
-Future<void> showQrTool(BuildContext context, AppServices s) => showDialog<void>(context: context, builder: (_) => _QrTool(s: s));
+Future<void> showQrTool(BuildContext context, AppServices s) => showLrDialog<void>(context: context, builder: (_) => _QrTool(s: s));
 
 class _QrTool extends StatefulWidget {
   const _QrTool({required this.s});

@@ -10,6 +10,7 @@ import '../services/library_trash.dart';
 import 'files_view.dart';
 import 'format.dart';
 import 'theme.dart';
+import 'lr_dialog.dart';
 
 /// LocalRoll's "Recently deleted": what was deleted in the last 30 days,
 /// newest first. Select (click, Ctrl+A), then restore or delete for good.
@@ -58,7 +59,7 @@ class _TrashPageState extends State<TrashPage> {
   Future<void> _forever(List<TrashEntry> list) async {
     if (list.isEmpty) return;
     final size = list.fold(0, (a, e) => a + _trash.sizeOf(e));
-    final ok = await showDialog<bool>(
+    final ok = await showLrDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
         icon: const Icon(Icons.delete_forever_rounded, size: 32),

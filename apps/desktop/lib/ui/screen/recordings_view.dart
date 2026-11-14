@@ -22,6 +22,7 @@ import '../send_page.dart';
 import '../theme.dart';
 import '../trash_actions.dart';
 import 'screen_record.dart' show ScreenSession, afterScreenSession, screenSessionFolder;
+import '../lr_dialog.dart';
 
 String _len(int ms) {
   final d = Duration(milliseconds: ms);
@@ -82,7 +83,7 @@ Future<void> recordingAction(
       await sendRecordings(context, s, [r]);
     case 'rename':
       final c = TextEditingController(text: stemOf(r.name));
-      final name = await showDialog<String>(
+      final name = await showLrDialog<String>(
         context: context,
         builder: (ctx) => AlertDialog(
           title: Text(tr('recs.rename')),
@@ -175,7 +176,7 @@ Future<void> deleteRecordings(BuildContext context, AppServices s, List<Recordin
             : NarrationSession.folderOf(s.settings.dataDir, r.narrationId!),
   ];
   if (raw.isEmpty) return;
-  final also = await showDialog<bool>(
+  final also = await showLrDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
       title: Text(tr('recs.raw_title')),
@@ -204,7 +205,7 @@ Future<void> deleteRecordings(BuildContext context, AppServices s, List<Recordin
 Future<void> pickSeenBy(BuildContext context, AppServices s) async {
   final phones = [for (final t in s.settings.trusted.values) if (!isDesktopPlatform(t.platform)) t];
   final chosen = Set<String>.of(s.recordings.seenBy);
-  final ok = await showDialog<bool>(
+  final ok = await showLrDialog<bool>(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, set) => AlertDialog(

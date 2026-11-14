@@ -21,6 +21,7 @@ import '../player/narration_dialogs.dart' show pickMicrophone;
 import '../player/player_page.dart' show playerTime;
 import '../theme.dart';
 import 'screen_record.dart' show ScreenSession;
+import '../lr_dialog.dart';
 
 /// Edits a screen recording from its kept material, the way an explanation
 /// is edited: plays it back, marks deleted, stretches made silent, cut out
@@ -369,7 +370,7 @@ class _EditorState extends State<_Editor> {
   // ------------------------------------------------------------- editing
 
   Future<void> _deleteInk(NarrationInk i) async {
-    final ok = await showDialog<bool>(
+    final ok = await showLrDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(tr('nedit.delete_mark')),
@@ -392,7 +393,7 @@ class _EditorState extends State<_Editor> {
     if (sel == null) return;
     if (_clashes(sel.$1, sel.$2)) return _snack(tr('nedit.overlap'));
     final drawn = [for (final i in inks) if (i.startT >= sel.$1 && i.startT < sel.$2 && !_deleted.contains(i.ink.id)) i].length;
-    final ok = await showDialog<bool>(
+    final ok = await showLrDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(tr('nedit.cut_title', {'len': playerTime(Duration(milliseconds: sel.$2 - sel.$1))})),

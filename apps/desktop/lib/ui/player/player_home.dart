@@ -18,6 +18,7 @@ import '../media_thumb.dart';
 import '../theme.dart';
 import 'player_entry.dart';
 import 'player_page.dart';
+import '../lr_dialog.dart';
 
 /// "Player" on the left: continue where you left off, open photos and
 /// videos from anywhere on this PC (or drop them on the window), recent.
@@ -617,7 +618,7 @@ class _NoteSearchState extends State<_NoteSearch> {
 
   Future<void> _rename(NoteHit h) async {
     final c = TextEditingController(text: h.note.name);
-    final name = await showDialog<String>(
+    final name = await showLrDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(tr('recs.rename')),
@@ -637,7 +638,7 @@ class _NoteSearchState extends State<_NoteSearch> {
   /// Deleted (the original is not touched); 10 seconds to undo.
   Future<void> _delete(NoteSet set, List<Note> notes) async {
     if (notes.length > 1) {
-      final ok = await showDialog<bool>(
+      final ok = await showLrDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
           title: Text(tr('ink.delete_all_title', {'n': notes.length, 'name': set.name})),

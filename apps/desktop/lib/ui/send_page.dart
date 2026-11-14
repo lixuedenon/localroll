@@ -14,6 +14,7 @@ import 'device_badge.dart';
 import 'format.dart';
 import 'theme.dart';
 import 'transfers_panel.dart';
+import 'lr_dialog.dart';
 
 /// Error code from sending / pairing, in the user's language.
 String peerErrorText(String? code) {
@@ -124,7 +125,7 @@ Future<bool> sendToPc(BuildContext context, AppServices s, List<SendFile> files,
     ));
     return false;
   }
-  final picked = await showDialog<(String, bool)>(
+  final picked = await showLrDialog<(String, bool)>(
     context: context,
     builder: (ctx) => ListenableBuilder(
       listenable: Listenable.merge([s.server, s.peers, s.settings]),
@@ -213,7 +214,7 @@ Future<bool> queueForPhone(BuildContext context, AppServices s, PeerPc phone, Li
   if (!context.mounted) return false;
   var convert = false;
   if (plan.anyConversion) {
-    final choice = await showDialog<String>(
+    final choice = await showLrDialog<String>(
       context: context,
       builder: (c) => AlertDialog(
         icon: const Icon(Icons.auto_fix_high_rounded, size: 32),

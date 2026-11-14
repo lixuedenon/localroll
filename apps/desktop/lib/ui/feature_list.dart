@@ -5,6 +5,7 @@ import '../app_services.dart';
 import '../l10n/l10n.dart';
 import 'app_nav.dart';
 import 'theme.dart';
+import 'lr_dialog.dart';
 
 /// One thing LocalRoll does, and where it is.
 typedef _Feature = ({IconData icon, String key, int tab});
@@ -84,7 +85,7 @@ class FeatureCard extends StatelessWidget {
 }
 
 /// Settings › "What I can do" (any time).
-Future<void> showFeatures(BuildContext context) => showDialog<void>(
+Future<void> showFeatures(BuildContext context) => showLrDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(tr('features.title')),

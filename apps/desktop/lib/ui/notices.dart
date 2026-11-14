@@ -18,6 +18,7 @@ import 'presence_toasts.dart';
 import 'reasons.dart';
 import 'send_page.dart' show peerErrorText;
 import 'theme.dart';
+import 'lr_dialog.dart';
 
 /// The dialogs that tell the user something finished or needs an answer:
 ///  * "X wants to send files" (auto-receive off) — Accept / Decline;
@@ -102,7 +103,7 @@ class Notices {
     AppNav.instance.needAttention(true);
     final AskAnswer? answer;
     try {
-      answer = await showDialog<AskAnswer>(
+      answer = await showLrDialog<AskAnswer>(
       context: ctx,
       barrierDismissible: false,
       builder: (c) => StatefulBuilder(
@@ -172,7 +173,7 @@ class Notices {
       final c = _ctx;
       if (open && c != null && c.mounted) Navigator.of(c).pop();
     }));
-    final yes = await showDialog<bool>(
+    final yes = await showLrDialog<bool>(
       context: ctx,
       barrierDismissible: false,
       builder: (c) => AlertDialog(
@@ -336,7 +337,7 @@ class Notices {
 
     final ctx = _ctx;
     if (ctx == null || !ctx.mounted) return;
-    await showDialog<void>(
+    await showLrDialog<void>(
       context: ctx,
       builder: (c) => AlertDialog(
         icon: Icon(failed == 0 ? Icons.check_circle_rounded : Icons.error_outline_rounded,
@@ -383,7 +384,7 @@ class Notices {
     final ctx = _ctx;
     if (ctx == null || !ctx.mounted) return;
     final ok = j.state == SendJobState.done;
-    await showDialog<void>(
+    await showLrDialog<void>(
       context: ctx,
       builder: (c) => AlertDialog(
         icon: Icon(ok ? Icons.check_circle_rounded : Icons.error_outline_rounded,

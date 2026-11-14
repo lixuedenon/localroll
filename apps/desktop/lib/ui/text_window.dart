@@ -15,16 +15,17 @@ import '../services/settings.dart';
 import '../services/win_dialogs.dart';
 import 'send_page.dart' show peerErrorText;
 import 'theme.dart';
+import 'lr_dialog.dart';
 
 /// A small text editor: paste or type, then send to [peer]. The other PC
 /// shows it in the same kind of window.
-Future<void> showTextComposer(BuildContext context, AppServices s, PeerPc peer) => showDialog<void>(
+Future<void> showTextComposer(BuildContext context, AppServices s, PeerPc peer) => showLrDialog<void>(
       context: context,
       builder: (_) => _TextWindow(services: s, peer: peer),
     );
 
 /// Text that arrived from another device: read, edit, copy or keep as a file.
-Future<void> showReceivedText(BuildContext context, AppServices s, ReceivedText t) => showDialog<void>(
+Future<void> showReceivedText(BuildContext context, AppServices s, ReceivedText t) => showLrDialog<void>(
       context: context,
       builder: (_) => _TextWindow(services: s, received: t),
     );
@@ -47,7 +48,7 @@ Future<void> showTextFile(BuildContext context, AppServices s, String path) asyn
     return;
   }
   if (!context.mounted) return;
-  await showDialog<void>(
+  await showLrDialog<void>(
     context: context,
     builder: (_) => _TextWindow(services: s, file: path, fileText: text),
   );

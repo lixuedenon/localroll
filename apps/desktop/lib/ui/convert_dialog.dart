@@ -7,6 +7,7 @@ import '../services/converter.dart';
 import '../services/library_index.dart';
 import 'app_nav.dart';
 import 'theme.dart';
+import 'lr_dialog.dart';
 
 /// What to convert to: one of the two ready choices, or a file type.
 typedef ConvertChoice = ({ConvertPreset? preset, ConvertFormat? format});
@@ -36,7 +37,7 @@ Future<ConvertChoice?> showConvertDialog(BuildContext context, AppServices s, {r
     );
   }
 
-  return showDialog<ConvertChoice>(
+  return showLrDialog<ConvertChoice>(
     context: context,
     builder: (ctx) => AlertDialog(
       title: Text(tr('convert.title')),

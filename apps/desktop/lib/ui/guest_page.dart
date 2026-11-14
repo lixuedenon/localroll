@@ -14,6 +14,7 @@ import 'app_nav.dart';
 import 'format.dart';
 import 'library_picker.dart';
 import 'theme.dart';
+import 'lr_dialog.dart';
 
 /// Guests without LocalRoll: a QR code / short address + code for their
 /// browser; what they send (accepted here first), what is shared with them.
@@ -29,7 +30,7 @@ Future<void> showGuestTransfer(BuildContext context, AppServices s) async {
   // The firewall may block the page's port: allowed once (asks for admin).
   unawaited(allowGuestPort(g.port));
   if (!context.mounted) return;
-  await showDialog<void>(context: context, builder: (_) => _GuestDialog(s: s));
+  await showLrDialog<void>(context: context, builder: (_) => _GuestDialog(s: s));
   await g.stop();
 }
 
@@ -37,7 +38,7 @@ Future<bool> _askGuest(GuestOffer offer) async {
   final ctx = AppNav.instance.navigatorKey.currentContext;
   if (ctx == null) return false;
   final total = offer.files.fold<int>(0, (n, f) => n + f.size);
-  final r = await showDialog<bool>(
+  final r = await showLrDialog<bool>(
     context: ctx,
     builder: (c) => AlertDialog(
       title: Text(tr('guest.ask_title', {'name': offer.guest})),

@@ -45,6 +45,7 @@ enum ConvertFormat {
   mp3('mp3', 'MP3', FormatKind.audio, 'libmp3lame'),
   m4a('m4a', 'M4A (AAC)', FormatKind.audio, 'aac'),
   wav('wav', 'WAV', FormatKind.audio, 'pcm_s16le'),
+  flac('flac', 'FLAC', FormatKind.audio, 'flac'),
   jpg('jpg', 'JPEG', FormatKind.image, 'mjpeg'),
   png('png', 'PNG', FormatKind.image, 'png'),
   webp('webp', 'WebP', FormatKind.image, 'libwebp'),
@@ -344,6 +345,7 @@ class ConverterService extends ChangeNotifier {
       final a = switch (f) {
         ConvertFormat.mp3 => ['-c:a', 'libmp3lame', '-q:a', '2'],
         ConvertFormat.m4a => ['-c:a', 'aac', '-b:a', '192k'],
+        ConvertFormat.flac => ['-c:a', 'flac'],
         _ => ['-c:a', 'pcm_s16le'],
       };
       return ['-i', src, '-vn', '-map', '0:a:0', ...a, '-map_metadata', '0', out];

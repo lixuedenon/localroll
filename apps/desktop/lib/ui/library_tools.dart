@@ -17,6 +17,7 @@ import 'light_dialog.dart';
 import 'light_look.dart';
 import 'media_thumb.dart';
 import 'trash_actions.dart';
+import 'lr_dialog.dart';
 
 // Library helpers that work on this PC only (no AI service, no cost):
 // cleaning suggestions, a package for AI assistants, a backup check-up.
@@ -64,7 +65,7 @@ Future<void> showCleanup(BuildContext context, AppServices s) async {
   final videos = [for (final i in items) if (i.kind == MediaKind.video) i]..sort((a, b) => b.size.compareTo(a.size));
   final big = videos.take(20).where((v) => v.size > 200 * 1024 * 1024).toList();
   if (!context.mounted) return;
-  await showDialog<void>(context: context, builder: (_) => _Cleanup(s: s, groups: [('clean.dupes', dupes), ('clean.bursts', burst), ('clean.shots', shots), ('clean.big', big)]));
+  await showLrDialog<void>(context: context, builder: (_) => _Cleanup(s: s, groups: [('clean.dupes', dupes), ('clean.bursts', burst), ('clean.shots', shots), ('clean.big', big)]));
 }
 
 class _Cleanup extends StatefulWidget {
@@ -124,7 +125,7 @@ class _CleanupState extends State<_Cleanup> {
   }
 
   /// Bigger, with ← / → through this group, and its tick.
-  void _preview(List<MediaItem> list, int at) => showDialog<void>(
+  void _preview(List<MediaItem> list, int at) => showLrDialog<void>(
         context: context,
         builder: (c) => _Preview(
           s: widget.s,
@@ -258,7 +259,7 @@ Future<void> packForAi(BuildContext context, AppServices s, List<MediaItem> medi
 /// last sent any, how many it still has (as it reported); "Back up now".
 Future<void> showBackupReport(BuildContext context, AppServices s) async {
   if (!context.mounted) return;
-  await showDialog<void>(context: context, builder: (c) => _BackupReport(s: s));
+  await showLrDialog<void>(context: context, builder: (c) => _BackupReport(s: s));
 }
 
 class _BackupReport extends StatefulWidget {

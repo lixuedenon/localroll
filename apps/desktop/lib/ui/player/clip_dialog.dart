@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/l10n.dart';
 import '../theme.dart';
+import '../lr_dialog.dart';
 
 /// What was chosen for a clip.
 typedef ClipChoice = ({int startMs, int endMs, bool withInk, bool send});
@@ -26,7 +27,7 @@ Future<ClipChoice?> showClipDialog(
   bool hasInk = true,
   bool send = false,
 }) =>
-    showDialog<ClipChoice>(
+    showLrDialog<ClipChoice>(
       context: context,
       builder: (_) => _ClipDialog(startMs: startMs, endMs: endMs, durationMs: durationMs, hasInk: hasInk, send: send),
     );
@@ -120,7 +121,7 @@ class _ClipDialogState extends State<_ClipDialog> {
 }
 
 /// The seconds before / after an annotation that its clip takes (0–60).
-Future<(int, int)?> showClipAroundDialog(BuildContext context, int before, int after) => showDialog<(int, int)>(
+Future<(int, int)?> showClipAroundDialog(BuildContext context, int before, int after) => showLrDialog<(int, int)>(
       context: context,
       builder: (ctx) {
         var b = before.toDouble(), a = after.toDouble();

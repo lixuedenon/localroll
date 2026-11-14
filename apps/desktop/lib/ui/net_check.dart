@@ -11,11 +11,12 @@ import '../l10n/l10n.dart';
 import '../services/network.dart';
 import 'light_dialog.dart';
 import 'light_look.dart';
+import 'lr_dialog.dart';
 
 /// "Why can't they find me / why is it slow": each thing checked, what to do,
 /// a button where it can be fixed from here.
 Future<void> showNetCheck(BuildContext context, AppServices s) =>
-    showDialog<void>(context: context, builder: (_) => _NetCheck(s: s));
+    showLrDialog<void>(context: context, builder: (_) => _NetCheck(s: s));
 
 enum _Level { ok, warn, bad }
 

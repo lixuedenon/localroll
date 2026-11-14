@@ -10,6 +10,7 @@ import '../server/transfer_server.dart';
 import 'app_nav.dart';
 import 'device_badge.dart';
 import 'theme.dart';
+import 'lr_dialog.dart';
 
 /// Shows an Allow / Deny dialog for each phone that taps this PC.
 class PairPrompter {
@@ -41,7 +42,7 @@ class PairPrompter {
     final ctx = AppNav.instance.navigatorKey.currentContext;
     if (ctx == null) return;
     // 'family' / 'guest' / null (deny).
-    final choice = await showDialog<String>(
+    final choice = await showLrDialog<String>(
       context: ctx,
       barrierDismissible: false,
       builder: (_) => _PairDialog(request: p),

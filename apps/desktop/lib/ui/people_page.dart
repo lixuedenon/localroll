@@ -10,6 +10,7 @@ import '../services/people.dart';
 import '../services/text_index.dart';
 import '../services/text_indexer.dart';
 import 'theme.dart';
+import 'lr_dialog.dart';
 
 /// How far finding faces is (Settings and the People page).
 String peopleState(IndexProgress p) => switch (p.state) {
@@ -22,7 +23,7 @@ String peopleState(IndexProgress p) => switch (p.state) {
 
 /// Takes every face and name off this library, and switches People off.
 Future<void> clearPeople(BuildContext context, AppServices s) async {
-  final ok = await showDialog<bool>(
+  final ok = await showLrDialog<bool>(
     context: context,
     builder: (c) => AlertDialog(
       title: Text(tr('people.clear')),
@@ -51,7 +52,7 @@ Future<void> namePerson(BuildContext context, AppServices s, int id) async {
   final p = s.server.people.person(id);
   if (p == null) return;
   final ctrl = TextEditingController(text: p.name ?? '');
-  final name = await showDialog<String>(
+  final name = await showLrDialog<String>(
     context: context,
     builder: (c) => AlertDialog(
       title: Text(tr('people.name_title')),
@@ -371,7 +372,7 @@ class _PeoplePageState extends State<PeoplePage> {
   /// "Same person as…": pick who [v] is.
   Future<void> _merge(PersonView v) async {
     final others = [for (final o in _people.people()) if (o.person.id != v.person.id) o];
-    final into = await showDialog<int>(
+    final into = await showLrDialog<int>(
       context: context,
       builder: (c) => AlertDialog(
         title: Text(tr('people.merge_title')),

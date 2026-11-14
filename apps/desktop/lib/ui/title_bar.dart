@@ -12,6 +12,7 @@ import '../services/run_flag.dart';
 import 'app_nav.dart';
 import 'theme.dart';
 import 'transfers_panel.dart';
+import 'lr_dialog.dart';
 
 /// Our own title bar (the native one is hidden): Back, app name, drag area,
 /// minimise / maximise / close. Close asks first, so a stray click on the
@@ -239,7 +240,7 @@ Future<void> confirmExit(AppServices services) async {
   final busy = services.hub.transfers
       .where((t) => t.state == TransferState.receiving || t.state == TransferState.verifying)
       .length;
-  final ok = await showDialog<bool>(
+  final ok = await showLrDialog<bool>(
     context: ctx,
     builder: (context) => AlertDialog(
       icon: Icon(busy > 0 ? Icons.sync_problem_rounded : Icons.power_settings_new_rounded,

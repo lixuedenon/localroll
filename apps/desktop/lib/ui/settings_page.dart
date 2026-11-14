@@ -17,6 +17,7 @@ import 'search_settings.dart';
 import 'theme.dart';
 import '../services/global_keys.dart';
 import 'tools/tools.dart' show ToolSaveChip;
+import 'lr_dialog.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key, required this.services});
@@ -383,7 +384,7 @@ class _AutoStartSwitchState extends State<_AutoStartSwitch> {
 }
 
 /// What LocalRoll does and doesn't do with your data.
-Future<void> showPrivacy(BuildContext context) => showDialog<void>(
+Future<void> showPrivacy(BuildContext context) => showLrDialog<void>(
       context: context,
       builder: (c) => AlertDialog(
         icon: const Icon(Icons.privacy_tip_outlined, size: 32),
@@ -402,7 +403,7 @@ Future<void> showPrivacy(BuildContext context) => showDialog<void>(
     );
 
 /// The parts made by others that ship with the app, and their licenses.
-Future<void> showOpenLicenses(BuildContext context) => showDialog<void>(
+Future<void> showOpenLicenses(BuildContext context) => showLrDialog<void>(
       context: context,
       builder: (c) => AlertDialog(
         icon: const Icon(Icons.gavel_rounded, size: 32),

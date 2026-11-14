@@ -27,6 +27,7 @@ import 'net_check.dart';
 import 'send_paths.dart';
 import 'transfer_records.dart';
 import 'theme.dart';
+import 'lr_dialog.dart';
 
 /// One paired device as the Devices page shows it (a phone or a PC; a PC
 /// can be both trusted here and a send target there).
@@ -500,7 +501,7 @@ class _DevicesPageState extends State<DevicesPage> {
         await _sendFiles(target, toPhone: !d.isPc);
       case 'pick':
         // "Files": from this PC's folders, or from the library.
-        final from = await showDialog<String>(
+        final from = await showLrDialog<String>(
           context: context,
           builder: (ctx) => SimpleDialog(
             title: Text(tr('send.files_from')),
@@ -545,7 +546,7 @@ class _DevicesPageState extends State<DevicesPage> {
         : c.image != null
             ? tr('send.clipboard_image')
             : tr('send.clipboard_text', {'text': text.length > 80 ? '${text.substring(0, 80)}…' : text});
-    final ok = await showDialog<bool>(
+    final ok = await showLrDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(tr('send.clipboard_title', {'name': p.name})),
@@ -900,7 +901,7 @@ class _DevicesPageState extends State<DevicesPage> {
   // ------------------------------------------------------------- actions
 
   Future<void> _unpairPhone(TrustedDevice t) async {
-    final ok = await showDialog<bool>(
+    final ok = await showLrDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(tr('dev.unpair_title', {'name': t.name})),
@@ -982,7 +983,7 @@ class _DevicesPageState extends State<DevicesPage> {
   /// Disconnect: both PCs stop sending to each other; each still sees the
   /// other under "Nearby". Forget: also stop listing it.
   Future<void> _unpair(PeerPc p, {required bool forget}) async {
-    final ok = await showDialog<bool>(
+    final ok = await showLrDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(tr(forget ? 'send.forget_title' : 'send.disconnect_title', {'name': p.name})),
@@ -1008,7 +1009,7 @@ class _DevicesPageState extends State<DevicesPage> {
     if (!mounted) return;
     final emoji = ValueNotifier<List<String>?>(null);
     var cancelled = false;
-    final dialog = showDialog<void>(
+    final dialog = showLrDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
@@ -1066,7 +1067,7 @@ class _DevicesPageState extends State<DevicesPage> {
   /// Asks for a family member's name; existing members are one tap away.
   Future<String?> _askMember(String current, List<String> members) async {
     final ctrl = TextEditingController(text: current);
-    final name = await showDialog<String>(
+    final name = await showLrDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(tr('family.member_name')),

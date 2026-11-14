@@ -19,6 +19,7 @@ import '../screen/pen_bar.dart' show PenSession;
 import '../send_page.dart';
 import '../theme.dart';
 import 'candle_panel.dart';
+import '../lr_dialog.dart';
 
 /// A stamp chosen: its picture (rising / falling colours set) and name.
 typedef PickedStamp = ({String id, StampShape shape, String name});
@@ -37,7 +38,7 @@ Future<void> pickStampInto(BuildContext context, InkEditor editor) async {
 /// The stamp panel: packs, recent, favourites, the user's own; search by
 /// name. [drawn]: marks that can be kept as a stamp of one's own.
 Future<PickedStamp?> showStampPicker(BuildContext context, {List<InkMark> drawn = const [], double aspect = 16 / 9}) =>
-    showDialog<PickedStamp>(context: context, builder: (_) => _StampPicker(drawn: drawn, aspect: aspect));
+    showLrDialog<PickedStamp>(context: context, builder: (_) => _StampPicker(drawn: drawn, aspect: aspect));
 
 String stampName(String id) {
   for (final (end, word) in const [('_up', 'stamp.rising'), ('_down', 'stamp.falling')]) {
@@ -135,7 +136,7 @@ class _StampPickerState extends State<_StampPicker> {
   /// The words of [shape] (filled in with its own); null: cancelled.
   Future<List<String>?> _askWords(StampShape shape) async {
     final ctls = [for (final p in shape.parts) if (p.text != null) TextEditingController(text: p.text)];
-    final r = await showDialog<List<String>>(
+    final r = await showLrDialog<List<String>>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(tr('stamp.words_title')),
@@ -168,7 +169,7 @@ class _StampPickerState extends State<_StampPicker> {
 
   /// Turn packs on / off (off: not shown here).
   Future<void> _managePacks() async {
-    await showDialog<void>(
+    await showLrDialog<void>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, set) => AlertDialog(
@@ -268,7 +269,7 @@ class _StampPickerState extends State<_StampPicker> {
 
   Future<String?> _askName(String initial) async {
     final c = TextEditingController(text: initial);
-    final r = await showDialog<String>(
+    final r = await showLrDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(tr('stamp.name_title')),
@@ -296,7 +297,7 @@ class _StampPickerState extends State<_StampPicker> {
   Future<void> _fromPicture() async {
     final files = await WinDialogs.pickFiles(multiple: false, typeLabel: tr('stamp.pictures'), extensions: const ['png', 'jpg', 'jpeg']);
     if (files.isEmpty || !mounted) return;
-    final white = await showDialog<bool>(
+    final white = await showLrDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(tr('stamp.white_title')),

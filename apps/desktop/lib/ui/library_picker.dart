@@ -12,6 +12,7 @@ import '../services/text_index.dart';
 import 'files_view.dart';
 import 'media_thumb.dart';
 import 'theme.dart';
+import 'lr_dialog.dart';
 
 /// Pick photos / videos from the library (newest first; all, videos or
 /// photos; by name) — with [files], also its documents and other files.
@@ -21,7 +22,7 @@ Future<List<String>?> pickFromLibrary(BuildContext context, AppServices s, {bool
     ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('pick.no_library'))));
     return Future.value(null);
   }
-  return showDialog<List<String>>(context: context, builder: (_) => _LibraryPicker(services: s, multiple: multiple, files: files));
+  return showLrDialog<List<String>>(context: context, builder: (_) => _LibraryPicker(services: s, multiple: multiple, files: files));
 }
 
 /// One thing to pick: a library photo / video, or a received file.

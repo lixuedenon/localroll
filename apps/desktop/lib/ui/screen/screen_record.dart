@@ -37,6 +37,7 @@ import 'float_panel.dart';
 import 'pen_bar.dart';
 import 'recordings_view.dart';
 import 'screen_editor.dart';
+import '../lr_dialog.dart';
 
 /// What is recorded.
 enum ScreenMode { screen, window, area }
@@ -1488,7 +1489,7 @@ Future<ScreenSetup?> showScreenSetup(BuildContext context, AppServices s, {Scree
   var micName = m.mic;
   // While choosing, LocalRoll stays over the window brought forward.
   await windowManager.setAlwaysOnTop(true);
-  final choice = await showDialog<bool>(
+  final choice = await showLrDialog<bool>(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, set) => AlertDialog(
@@ -2204,7 +2205,7 @@ class _Bar extends StatelessWidget {
 
 /// "Making the video…" with its progress, until [done].
 void _showMaking(BuildContext context, Future<Object?> done, ValueNotifier<double> progress, VoidCallback cancel) {
-  unawaited(showDialog<void>(
+  unawaited(showLrDialog<void>(
     context: context,
     barrierDismissible: false,
     builder: (ctx) {

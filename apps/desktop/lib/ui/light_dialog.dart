@@ -29,6 +29,7 @@ class LightDialog extends StatelessWidget {
           brightness: Brightness.light,
           colorSchemeSeed: LightLook.blue,
           fontFamily: Theme.of(context).textTheme.bodyMedium?.fontFamily,
+          fontFamilyFallback: Theme.of(context).textTheme.bodyMedium?.fontFamilyFallback,
         ),
         child: Dialog(
           backgroundColor: Colors.white,

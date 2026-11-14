@@ -20,6 +20,7 @@ import 'player/player_entry.dart';
 import 'player/player_page.dart';
 import 'text_window.dart';
 import 'trash_actions.dart';
+import 'lr_dialog.dart';
 
 /// Library tabs "Documents" / "Other": the files other PCs sent that are not
 /// photos or videos, straight from their folders (newest first).
@@ -154,7 +155,7 @@ class _FilesViewState extends State<FilesView> {
       if (n > 0) await _load();
       return;
     }
-    final ok = await showDialog<bool>(
+    final ok = await showLrDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
         title: Text(tr('files.delete_title', {'name': e.name})),
@@ -276,7 +277,7 @@ Future<String?> renameReceivedFile(BuildContext context, AppServices services, S
     ..selection = TextSelection(baseOffset: 0, extentOffset: dot > 0 ? dot : old.length);
   String? error;
   final messenger = ScaffoldMessenger.of(context);
-  final name = await showDialog<String>(
+  final name = await showLrDialog<String>(
     context: context,
     builder: (c) => StatefulBuilder(
       builder: (c, set) => AlertDialog(
@@ -369,7 +370,7 @@ Future<void> _openGoogle(BuildContext context, String path, int size) async {
   } catch (_) {}
   if (!context.mounted) return;
   final link = url;
-  await showDialog<void>(
+  await showLrDialog<void>(
     context: context,
     builder: (c) => AlertDialog(
       icon: const Icon(Icons.cloud_outlined, size: 36, color: LrColors.safelight),

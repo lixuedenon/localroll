@@ -12,6 +12,7 @@ import '../services/settings.dart';
 import 'app_nav.dart';
 import 'send_page.dart';
 import 'theme.dart';
+import 'lr_dialog.dart';
 
 /// Where to send to device [id]: a PC, a phone with Keepnear open, or — a
 /// phone not open now — its pairing (the send waits until it is online).
@@ -95,7 +96,7 @@ Future<List<String>?> pickDevices(BuildContext context, AppServices s, {required
       return on != 0 ? on : s.deviceName(a).toLowerCase().compareTo(s.deviceName(b).toLowerCase());
     });
   final picked = <String>{};
-  return showDialog<List<String>>(
+  return showLrDialog<List<String>>(
     context: context,
     builder: (c) => StatefulBuilder(
       builder: (c, set) => AlertDialog(

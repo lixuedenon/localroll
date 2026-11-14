@@ -34,6 +34,7 @@ import 'ui/media_thumb.dart';
 import 'ui/send_paths.dart';
 import 'ui/theme.dart';
 import 'ui/title_bar.dart';
+import 'ui/transfer_float.dart';
 import 'services/window_memory.dart';
 
 Future<void> main(List<String> args) async {
@@ -262,7 +263,13 @@ class LocalRollApp extends StatelessWidget {
                     valueListenable: AppNav.instance.fullscreen,
                     builder: (context, full, _) => full ? const SizedBox.shrink() : LrTitleBar(services: services),
                   ),
-                  Expanded(child: PlayerDropTarget(services: services, child: child!)),
+                  Expanded(
+                    child: Stack(children: [
+                      Positioned.fill(child: PlayerDropTarget(services: services, child: child!)),
+                      // Sending / receiving: how far, on top of any page.
+                      TransferFloat(services: services),
+                    ]),
+                  ),
                 ],
               ),
             );

@@ -9,6 +9,7 @@ import '../../services/mic.dart';
 import '../../services/recordings.dart';
 import '../theme.dart';
 import 'narration.dart';
+import '../lr_dialog.dart';
 
 String _len(int ms) {
   final d = Duration(milliseconds: ms);
@@ -21,7 +22,7 @@ Future<String?> pickMicrophone(BuildContext context, MicRecorder mic, {String? c
   final names = await mic.devices();
   if (!context.mounted) return null;
   if (names.isEmpty) {
-    await showDialog<void>(
+    await showLrDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(tr('rec.no_mic')),
@@ -32,7 +33,7 @@ Future<String?> pickMicrophone(BuildContext context, MicRecorder mic, {String? c
     return null;
   }
   var chosen = names.contains(current) ? current! : names.first;
-  return showDialog<String>(
+  return showLrDialog<String>(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, set) => AlertDialog(
@@ -88,7 +89,7 @@ Future<RecordedAnswer?> recordedDialog(
   bool editable = false,
   bool replaceable = false,
 }) =>
-    showDialog<RecordedAnswer>(
+    showLrDialog<RecordedAnswer>(
       context: context,
       barrierDismissible: false,
       builder: (ctx) {
@@ -194,7 +195,7 @@ String recordingName(String base, String what, DateTime at) => recName(base, wha
 
 /// "Throw this explanation away?" — really (and the drawings too?).
 /// Null: back.
-Future<bool?> confirmDiscard(BuildContext context, {required bool drew}) => showDialog<bool>(
+Future<bool?> confirmDiscard(BuildContext context, {required bool drew}) => showLrDialog<bool>(
       context: context,
       builder: (ctx) {
         var ink = false;

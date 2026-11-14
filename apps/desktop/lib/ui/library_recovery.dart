@@ -8,6 +8,7 @@ import '../l10n/l10n.dart';
 import '../services/library_index.dart';
 import '../services/win_dialogs.dart';
 import 'theme.dart';
+import 'lr_dialog.dart';
 
 /// The library folder can't be reached. Two cases:
 ///  * its drive is unplugged → wait (it resumes by itself), or point to
@@ -51,7 +52,7 @@ class _LibraryRecoveryState extends State<LibraryRecovery> {
     if (dir == null || !mounted) return;
     if (!await LibraryIndex.isLibraryFolder(dir)) {
       if (!mounted) return;
-      final ok = await showDialog<bool>(
+      final ok = await showLrDialog<bool>(
         context: context,
         builder: (c) => AlertDialog(
           title: Text(tr('recover.not_library_title')),
@@ -70,7 +71,7 @@ class _LibraryRecoveryState extends State<LibraryRecovery> {
 
   /// Start again here, empty.
   Future<void> _recreate() async {
-    final ok = await showDialog<bool>(
+    final ok = await showLrDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
         icon: const Icon(Icons.create_new_folder_outlined, size: 32),

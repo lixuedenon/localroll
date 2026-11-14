@@ -17,6 +17,7 @@ import '../../services/win_dialogs.dart';
 import '../light_look.dart';
 import '../send_page.dart' show baseNameOf;
 import 'tools.dart';
+import '../lr_dialog.dart';
 
 class _Doc {
   _Doc(this.path, this.doc);
@@ -152,7 +153,7 @@ class _PdfToolPageState extends State<PdfToolPage> {
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('tool.failed', {'why': why}))));
 
   Future<void> _split() async {
-    final how = await showDialog<String>(
+    final how = await showLrDialog<String>(
       context: context,
       builder: (c) => SimpleDialog(title: Text(tr('pdf.split')), children: [
         SimpleDialogOption(onPressed: () => Navigator.pop(c, 'picked'), child: Text(tr('pdf.split_picked', {'count': _chosen.length}))),
@@ -240,7 +241,7 @@ class _PdfToolPageState extends State<PdfToolPage> {
   /// Smaller: every page made a JPEG picture at 150 dpi (the text can no
   /// longer be selected — said before).
   Future<void> _compress() async {
-    final go = await showDialog<bool>(
+    final go = await showLrDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
         title: Text(tr('pdf.compress')),
@@ -317,7 +318,7 @@ class _PdfToolPageState extends State<PdfToolPage> {
     });
     if (!mounted) return;
     final ctl = TextEditingController(text: buf.toString().trim());
-    await showDialog<void>(
+    await showLrDialog<void>(
       context: context,
       builder: (c) => AlertDialog(
         title: Text(tr('pdf.text')),
@@ -353,7 +354,7 @@ class _PdfToolPageState extends State<PdfToolPage> {
     var sig = _lastSig;
     final shown = sig;
     if (shown != null) {
-      final again = await showDialog<bool>(
+      final again = await showLrDialog<bool>(
         context: context,
         builder: (c) => AlertDialog(
           title: Text(tr('pdf.sign')),
@@ -373,7 +374,7 @@ class _PdfToolPageState extends State<PdfToolPage> {
     sig ??= await showSignaturePad(context, (k) => tr('sig.$k'));
     if (sig == null || !mounted) return;
     _lastSig = sig;
-    final placed = await showDialog<Rect>(context: context, builder: (_) => _PlaceSign(page: target, sig: sig!));
+    final placed = await showLrDialog<Rect>(context: context, builder: (_) => _PlaceSign(page: target, sig: sig!));
     if (placed == null) return;
     setState(() => target.signs.add(_Sign(sig!, placed)));
   }

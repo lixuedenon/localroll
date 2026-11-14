@@ -11,6 +11,7 @@ import 'package:localroll_core/localroll_core.dart';
 import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/file_actions.dart';
+import '../services/format_convert.dart';
 import '../services/library_index.dart';
 import '../services/network.dart';
 import '../services/peers.dart';
@@ -1383,8 +1384,7 @@ class _LibraryPageState extends State<LibraryPage> {
       case 'delete':
         await _delete(targets);
       case 'convert':
-        final ok = await convertWithDialog(this.context, s, items: targets, video: targets.every((i) => i.kind == MediaKind.video));
-        if (ok && mounted) setState(_clearSelection);
+        await openTool(this.context, s, Tool.convert, paths: [for (final i in targets) s.library.absPath(i)]);
     }
   }
 
@@ -2127,7 +2127,7 @@ class _LibraryPageState extends State<LibraryPage> {
           child: _menuRow(Icons.check_circle_outline_rounded, _selected.contains(key) ? tr('lib.unselect') : tr('lib.select')),
         ),
         if (Tool.pdfTools.takes(f.path)) PopupMenuItem(value: 'tool:pdfTools', child: _menuRow(Tool.pdfTools.icon, Tool.pdfTools.title)),
-        if (Tool.officePdf.takes(f.path)) PopupMenuItem(value: 'tool:officePdf', child: _menuRow(Tool.officePdf.icon, Tool.officePdf.title)),
+        if (FormatTable.find(f.path, ConvCat.doc) != null) PopupMenuItem(value: 'tool:convert', child: _menuRow(Tool.convert.icon, Tool.convert.title)),
         PopupMenuItem(value: 'export', child: _menuRow(Icons.drive_file_move_rounded, tr('lib.export'))),
         PopupMenuItem(value: 'send', child: _menuRow(Icons.send_rounded, tr('send.to_pc'))),
         PopupMenuItem(value: 'rename', child: _menuRow(Icons.drive_file_rename_outline_rounded, tr('files.rename'))),

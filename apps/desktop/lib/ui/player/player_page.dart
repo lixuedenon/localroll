@@ -48,6 +48,7 @@ import 'narration_editor.dart';
 import 'notes_panel.dart';
 import 'player_entry.dart';
 import 'snapshot.dart';
+import '../lr_dialog.dart';
 
 part 'player_side.dart';
 part 'player_video.dart';
@@ -827,7 +828,7 @@ class _PlayerPageState extends State<PlayerPage> {
     final ed = _editor;
     if (ed == null) return;
     if (ed.inks.isNotEmpty && ed.original == null) {
-      final ok = await showDialog<bool>(
+      final ok = await showLrDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
           content: Text(tr('ink.discard')),
@@ -938,7 +939,7 @@ class _PlayerPageState extends State<PlayerPage> {
       picture: pic,
       onProgress: (p) => progress.value = p,
     );
-    unawaited(showDialog<void>(
+    unawaited(showLrDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (ctx) {
@@ -988,7 +989,7 @@ class _PlayerPageState extends State<PlayerPage> {
     final set = _sets[e];
     if (set == null) return;
     final ctrl = TextEditingController(text: n.name);
-    final name = await showDialog<String>(
+    final name = await showLrDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(tr('ink.rename')),
@@ -1103,7 +1104,7 @@ class _PlayerPageState extends State<PlayerPage> {
   Future<void> _addDuringRecording() async {
     final s = widget.services;
     final recent = [for (final r in s.player.recent) if (File(r.path).existsSync()) r].take(10).toList();
-    final picked = await showDialog<List<String>>(
+    final picked = await showLrDialog<List<String>>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(tr('rec.add_title')),
@@ -1228,7 +1229,7 @@ class _PlayerPageState extends State<PlayerPage> {
         await dir.delete(recursive: true);
       } catch (_) {}
       if (!mounted) return;
-      await showDialog<void>(
+      await showLrDialog<void>(
         context: context,
         builder: (ctx) => AlertDialog(
           title: Text(tr('rec.mic_failed')),
@@ -1496,7 +1497,7 @@ class _PlayerPageState extends State<PlayerPage> {
     final progress = ValueNotifier<double>(0);
     final done = maker.make(n,
         voice: voice, sound: sound, notes: sets, onProgress: (p) => progress.value = p, beforeMs: beforeMs, afterMs: afterMs, name: name);
-    unawaited(showDialog<void>(
+    unawaited(showLrDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (ctx) {
@@ -1555,7 +1556,7 @@ class _PlayerPageState extends State<PlayerPage> {
     } else if (action == 'edit') {
       await _editNarration(n);
     } else if (action == 'delete') {
-      final ok = await showDialog<bool>(
+      final ok = await showLrDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
           title: Text(tr('rec.delete_record')),
@@ -1574,7 +1575,7 @@ class _PlayerPageState extends State<PlayerPage> {
     }
   }
 
-  Future<void> _shortcuts() => showDialog<void>(
+  Future<void> _shortcuts() => showLrDialog<void>(
         context: context,
         builder: (ctx) {
           Widget row(String keys, String what) => Padding(
@@ -1930,7 +1931,7 @@ class _PlayerPageState extends State<PlayerPage> {
                 selected: AppNav.player,
                 onSelect: (t) async {
                   if (_rec != null) {
-                    final stop = await showDialog<bool>(
+                    final stop = await showLrDialog<bool>(
                       context: context,
                       builder: (ctx) => AlertDialog(
                         title: Text(tr('rec.leave_title')),
