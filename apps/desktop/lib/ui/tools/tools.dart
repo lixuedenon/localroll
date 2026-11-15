@@ -15,6 +15,7 @@ import '../../services/file_tools.dart';
 import '../../services/tool_outputs.dart';
 import '../../services/network.dart' show revealInExplorer;
 import '../../services/win_dialogs.dart';
+import '../../services/bg_tasks.dart';
 import '../app_nav.dart';
 import '../format.dart';
 import '../library_picker.dart';
@@ -275,31 +276,19 @@ void _queue(BuildContext context, AppServices s, List<String> files, {ConvertFor
   ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('tool.queued', {'count': files.length}))));
 }
 
-/// Something that takes a moment, with a turning circle; then the result.
-Future<T?> runBusy<T>(BuildContext context, String what, Future<T> Function() job) async {
-  // Closes this dialog itself when done (not whatever opened over it).
-  final finished = Completer<void>();
-  unawaited(showLrDialog<void>(
-    context: context,
-    barrierDismissible: false,
-    closeWhen: finished.future,
-    builder: (_) => PopScope(
-      canPop: false,
-      child: AlertDialog(
-        content: Row(children: [
-          const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 3)),
-          const SizedBox(width: 18),
-          Flexible(child: Text(what)),
-        ]),
-      ),
-    ),
-  ));
-  try {
-    return await job();
-  } finally {
-    finished.complete();
-  }
-}
+/// Something that takes a moment: a background task (its card in the
+/// middle; a click elsewhere puts it aside, the app stays usable); then the
+/// result. [heavy]: video work, one at a time. [open]: where its result is
+/// seen when it finished aside (default: the Tools page, its records).
+Future<T?> runBusy<T>(BuildContext context, String what, Future<T> Function() job, {bool heavy = false, VoidCallback? open}) =>
+    BgTasks.instance.run<T>(
+      title: what,
+      heavy: heavy,
+      open: open ?? () => AppNav.instance.selectTab(AppNav.convert),
+      job: (_) => job(),
+      // A job answering false did not work.
+      ok: (r) => r is! bool || r,
+    );
 
 Future<void> _photosPdf(BuildContext context, AppServices s, List<String> photos) async {
   final out = toolOutPath(s, photos.first, photos.length > 1 ? '-${photos.length}' : '', 'pdf');

@@ -14,6 +14,7 @@ import 'package:window_manager/window_manager.dart';
 
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
+import '../../services/bg_tasks.dart';
 import '../../services/annotations.dart';
 import '../../services/camera_bubble.dart';
 import '../../services/ffmpeg.dart';
@@ -929,41 +930,24 @@ class _PlayerPageState extends State<PlayerPage> {
     if (v.playing) v.seekTo(v.nowMs);
     final pic = v.pictureSize ?? const Size(1920, 1080);
     final exporter = ClipExporter(widget.services);
-    final progress = ValueNotifier<double>(0);
-    final done = exporter.run(
-      e,
-      startMs: choice.startMs,
-      endMs: choice.endMs,
-      withInk: choice.withInk,
-      notes: _showInk ? notes : const [],
-      picture: pic,
-      onProgress: (p) => progress.value = p,
-    );
-    unawaited(showLrDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      // Closes this dialog only (a dialog opened meanwhile, e.g. "send to", stays).
-      closeWhen: done,
-      builder: (ctx) {
-        return AlertDialog(
-          title: Text(tr(choice.withInk ? 'clip.making_ink' : 'clip.making')),
-          content: SizedBox(
-            width: 360,
-            child: ValueListenableBuilder<double>(
-              valueListenable: progress,
-              builder: (_, p, _) => Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                LinearProgressIndicator(value: p <= 0 ? null : p),
-                const SizedBox(height: 8),
-                Text('${(p * 100).round()}%', style: const TextStyle(color: LrColors.muted)),
-              ]),
-            ),
-          ),
-          actions: [TextButton(onPressed: exporter.cancel, child: Text(tr('common.cancel')))],
+    // In the background: the player (and the app) stay usable.
+    final f = await BgTasks.instance.run<File?>(
+      title: tr(choice.withInk ? 'clip.making_ink' : 'clip.making'),
+      heavy: true,
+      ok: (r) => r != null,
+      job: (t) {
+        t.onCancel = exporter.cancel;
+        return exporter.run(
+          e,
+          startMs: choice.startMs,
+          endMs: choice.endMs,
+          withInk: choice.withInk,
+          notes: _showInk ? notes : const [],
+          picture: pic,
+          onProgress: t.setProgress,
         );
       },
-    ));
-    final f = await done;
-    progress.dispose();
+    );
     if (!mounted) return;
     final messenger = ScaffoldMessenger.of(context);
     if (f == null) {
@@ -1491,37 +1475,20 @@ class _PlayerPageState extends State<PlayerPage> {
     }
     if (!mounted) return;
     final maker = NarrationComposer(s);
-    final progress = ValueNotifier<double>(0);
-    final done = maker.make(n,
-        voice: voice, sound: sound, notes: sets, onProgress: (p) => progress.value = p, beforeMs: beforeMs, afterMs: afterMs, name: name);
-    unawaited(showLrDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      // Closes this dialog only (a dialog opened meanwhile, e.g. "send to", stays).
-      closeWhen: done,
-      builder: (ctx) {
-        return AlertDialog(
-          title: Text(tr('rec.making')),
-          content: SizedBox(
-            width: 360,
-            child: ValueListenableBuilder<double>(
-              valueListenable: progress,
-              builder: (_, p, _) => Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                LinearProgressIndicator(value: p <= 0 ? null : p),
-                const SizedBox(height: 8),
-                Text('${(p * 100).round()}%', style: const TextStyle(color: LrColors.muted)),
-              ]),
-            ),
-          ),
-          actions: [TextButton(onPressed: maker.cancel, child: Text(tr('common.cancel')))],
-        );
+    // In the background: the player (and the app) stay usable.
+    var f = await BgTasks.instance.run<File?>(
+      title: tr('rec.making'),
+      heavy: true,
+      ok: (r) => r != null,
+      open: () => AppNav.instance.selectTab(AppNav.screen),
+      job: (t) {
+        t.onCancel = maker.cancel;
+        return maker.make(n,
+            voice: voice, sound: sound, notes: sets, onProgress: t.setProgress, beforeMs: beforeMs, afterMs: afterMs, name: name);
       },
-    ));
-    var f = await done;
-    progress.dispose();
-    if (!mounted) return;
+    );
     if (f == null) {
-      _snack(tr('rec.failed'));
+      if (mounted) _snack(tr('rec.failed'));
       return;
     }
     // In place of the one made before: that one goes, this takes its name.
@@ -1537,6 +1504,8 @@ class _PlayerPageState extends State<PlayerPage> {
       final now = recs.byPath(f.path);
       if (now != null && await recs.rename(now, oldName)) f = File(now.path);
     }
+    // The player was closed meanwhile: it is saved (the corner card says so).
+    if (!mounted) return;
     if (send) {
       await _sendFile(f);
       return;

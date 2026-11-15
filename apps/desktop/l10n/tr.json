@@ -2063,5 +2063,13 @@
   "float.pause": "Duraklat",
   "float.secs": "{n} sn",
   "float.mins": "{n} dk",
-  "float.hours": "{n} sa"
+  "float.hours": "{n} sa",
+  "task.queued": "Sırada: önceki video bitince başlar",
+  "task.working": "İşleniyor…",
+  "task.hint": "Başka bir şey yapmak için başka yere tıklayın — sağ alt köşede devam eder",
+  "task.done": "✓ Tamamlandı",
+  "task.failed": "✗ Başarısız",
+  "task.cancelled": "İptal edildi",
+  "task.show": "Göster",
+  "task.exit_busy": "Hâlâ {count} görev sürüyor (video oluşturma, dönüştürme…). Çıkarsanız durur."
 }

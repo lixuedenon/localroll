@@ -2052,9 +2052,9 @@
   "conv.no_office": "这台电脑没有 Microsoft Office",
   "float.to": "发给 {name} · {what}",
   "float.from": "来自 {name} · {count} 个文件",
-  "float.done": "✓ 传输完成",
-  "float.n_going": "{count} 个传输进行中",
-  "float.title": "传输中（{count}）",
+  "float.done": "✓ 全部完成",
+  "float.n_going": "{count} 个任务进行中",
+  "float.title": "进行中（{count}）",
   "float.collapse": "收起",
   "float.all": "全部",
   "float.more": "还有 {count} 个…",
@@ -2063,5 +2063,13 @@
   "float.pause": "暂停",
   "float.secs": "{n} 秒",
   "float.mins": "{n} 分钟",
-  "float.hours": "{n} 小时"
+  "float.hours": "{n} 小时",
+  "task.queued": "排队中，前一个视频做完就开始",
+  "task.working": "正在处理…",
+  "task.hint": "点别处可以继续做别的，它会在右下角接着做",
+  "task.done": "✓ 已完成",
+  "task.failed": "✗ 没有成功",
+  "task.cancelled": "已取消",
+  "task.show": "查看",
+  "task.exit_busy": "还有 {count} 个任务没做完（合成、转换等），退出就会停下。"
 }

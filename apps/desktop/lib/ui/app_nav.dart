@@ -79,6 +79,15 @@ class AppNav extends ChangeNotifier {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   late final NavigatorObserver observer = _Observer(this);
 
+  /// When the user last went somewhere else (another section, a page or a
+  /// dialog opening). Told after the frame, with the moment it happened.
+  final ValueNotifier<DateTime?> wentElsewhere = ValueNotifier(null);
+
+  void _wentElsewhere() {
+    final at = DateTime.now();
+    WidgetsBinding.instance.addPostFrameCallback((_) => wentElsewhere.value = at);
+  }
+
   int _routes = 0;
   final List<int> _tabs = [];
   int tab = 0;
@@ -98,6 +107,7 @@ class AppNav extends ChangeNotifier {
     if (_tabs.length > 30) _tabs.removeAt(0);
     tab = i;
     notifyListeners();
+    _wentElsewhere();
   }
 
   /// Start-up section, without history.
@@ -134,6 +144,7 @@ class _Observer extends NavigatorObserver {
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     DiagLog.log('ui', 'open ${_what(route)}');
     if (route is PageRoute) nav._routeCount(1);
+    nav._wentElsewhere();
   }
 
   @override

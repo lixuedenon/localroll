@@ -2052,9 +2052,9 @@
   "conv.no_office": "Microsoft Office isn’t on this PC",
   "float.to": "To {name} · {what}",
   "float.from": "From {name} · {count} file(s)",
-  "float.done": "✓ Transfers done",
-  "float.n_going": "{count} transfers going",
-  "float.title": "Transferring ({count})",
+  "float.done": "✓ All done",
+  "float.n_going": "{count} tasks in progress",
+  "float.title": "In progress ({count})",
   "float.collapse": "Hide",
   "float.all": "All",
   "float.more": "{count} more…",
@@ -2063,5 +2063,13 @@
   "float.pause": "Pause",
   "float.secs": "{n} s",
   "float.mins": "{n} min",
-  "float.hours": "{n} h"
+  "float.hours": "{n} h",
+  "task.queued": "Queued: starts when the video before it is done",
+  "task.working": "Working…",
+  "task.hint": "Click anywhere else to carry on — it keeps going in the corner",
+  "task.done": "✓ Done",
+  "task.failed": "✗ Did not work",
+  "task.cancelled": "Cancelled",
+  "task.show": "Show",
+  "task.exit_busy": "{count} task(s) still running (making a video, converting…). Quitting stops them."
 }

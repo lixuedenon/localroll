@@ -2052,9 +2052,9 @@
   "conv.no_office": "這台電腦沒有 Microsoft Office",
   "float.to": "傳給 {name} · {what}",
   "float.from": "來自 {name} · {count} 個檔案",
-  "float.done": "✓ 傳輸完成",
-  "float.n_going": "{count} 個傳輸進行中",
-  "float.title": "傳輸中（{count}）",
+  "float.done": "✓ 全部完成",
+  "float.n_going": "{count} 個任務進行中",
+  "float.title": "進行中（{count}）",
   "float.collapse": "收起",
   "float.all": "全部",
   "float.more": "還有 {count} 個…",
@@ -2063,5 +2063,13 @@
   "float.pause": "暫停",
   "float.secs": "{n} 秒",
   "float.mins": "{n} 分鐘",
-  "float.hours": "{n} 小時"
+  "float.hours": "{n} 小時",
+  "task.queued": "排隊中，前一個影片做完就開始",
+  "task.working": "正在處理…",
+  "task.hint": "點別處可以繼續做別的，它會在右下角接著做",
+  "task.done": "✓ 已完成",
+  "task.failed": "✗ 沒有成功",
+  "task.cancelled": "已取消",
+  "task.show": "查看",
+  "task.exit_busy": "還有 {count} 個任務沒做完（合成、轉換等），退出就會停下。"
 }

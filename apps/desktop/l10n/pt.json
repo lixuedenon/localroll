@@ -2063,5 +2063,13 @@
   "float.pause": "Pausar",
   "float.secs": "{n} s",
   "float.mins": "{n} min",
-  "float.hours": "{n} h"
+  "float.hours": "{n} h",
+  "task.queued": "Na fila: começa quando o vídeo anterior terminar",
+  "task.working": "Processando…",
+  "task.hint": "Clique em outro lugar para continuar — segue no canto inferior direito",
+  "task.done": "✓ Concluído",
+  "task.failed": "✗ Não deu certo",
+  "task.cancelled": "Cancelado",
+  "task.show": "Ver",
+  "task.exit_busy": "Ainda há {count} tarefa(s) em andamento (criar vídeo, converter…). Sair as interrompe."
 }

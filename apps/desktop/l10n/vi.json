@@ -2063,5 +2063,13 @@
   "float.pause": "Tạm dừng",
   "float.secs": "{n} giây",
   "float.mins": "{n} phút",
-  "float.hours": "{n} giờ"
+  "float.hours": "{n} giờ",
+  "task.queued": "Đang chờ: bắt đầu khi video trước xong",
+  "task.working": "Đang xử lý…",
+  "task.hint": "Bấm chỗ khác để làm việc khác — tác vụ tiếp tục ở góc dưới bên phải",
+  "task.done": "✓ Xong",
+  "task.failed": "✗ Không thành công",
+  "task.cancelled": "Đã hủy",
+  "task.show": "Xem",
+  "task.exit_busy": "Còn {count} tác vụ đang chạy (tạo video, chuyển đổi…). Thoát sẽ dừng chúng."
 }

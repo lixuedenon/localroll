@@ -9,6 +9,7 @@ import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/receive_hub.dart';
 import '../services/run_flag.dart';
+import '../services/bg_tasks.dart';
 import 'app_nav.dart';
 import 'theme.dart';
 import 'transfers_panel.dart';
@@ -240,22 +241,29 @@ Future<void> confirmExit(AppServices services) async {
   final busy = services.hub.transfers
       .where((t) => t.state == TransferState.receiving || t.state == TransferState.verifying)
       .length;
+  // Still making something (a recording, a clip, a PDF…).
+  final making = BgTasks.instance.busy;
+  final warn = busy > 0 || making > 0;
   final ok = await showLrDialog<bool>(
     context: ctx,
     builder: (context) => AlertDialog(
-      icon: Icon(busy > 0 ? Icons.sync_problem_rounded : Icons.power_settings_new_rounded,
-          color: busy > 0 ? LrColors.safelight : LrColors.muted, size: 32),
+      icon: Icon(warn ? Icons.sync_problem_rounded : Icons.power_settings_new_rounded,
+          color: warn ? LrColors.safelight : LrColors.muted, size: 32),
       title: Text(tr('exit.title')),
       content: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 380),
-        child: Text(busy > 0 ? tr('exit.body_busy', {'count': busy}) : tr('exit.body')),
+        child: Text([
+          if (busy > 0) tr('exit.body_busy', {'count': busy}),
+          if (making > 0) tr('task.exit_busy', {'count': making}),
+          if (!warn) tr('exit.body'),
+        ].join('\n\n')),
       ),
       actions: [
         OutlinedButton(onPressed: () => Navigator.of(context).pop(false), child: Text(tr('exit.stay'))),
         FilledButton(
           style: FilledButton.styleFrom(
-            backgroundColor: busy > 0 ? LrColors.danger : LrColors.safelight,
-            foregroundColor: busy > 0 ? Colors.white : const Color(0xFF2B1A00),
+            backgroundColor: warn ? LrColors.danger : LrColors.safelight,
+            foregroundColor: warn ? Colors.white : const Color(0xFF2B1A00),
           ),
           onPressed: () => Navigator.of(context).pop(true),
           child: Text(tr('exit.quit')),

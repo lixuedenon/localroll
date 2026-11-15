@@ -2063,5 +2063,13 @@
   "float.pause": "Jeda",
   "float.secs": "{n} dtk",
   "float.mins": "{n} mnt",
-  "float.hours": "{n} jam"
+  "float.hours": "{n} jam",
+  "task.queued": "Antre: mulai setelah video sebelumnya selesai",
+  "task.working": "Sedang diproses…",
+  "task.hint": "Klik di tempat lain untuk lanjut — tugas tetap berjalan di pojok kanan bawah",
+  "task.done": "✓ Selesai",
+  "task.failed": "✗ Gagal",
+  "task.cancelled": "Dibatalkan",
+  "task.show": "Lihat",
+  "task.exit_busy": "Masih ada {count} tugas berjalan (membuat video, mengonversi…). Keluar akan menghentikannya."
 }

@@ -13,6 +13,7 @@ import 'package:window_manager/window_manager.dart';
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/annotations.dart';
+import '../../services/bg_tasks.dart';
 import '../../services/camera_bubble.dart';
 import '../../services/library_index.dart';
 import '../../services/loopback.dart';
@@ -1127,35 +1128,47 @@ class ScreenRecorder extends ChangeNotifier {
       {File? system, required bool send, required String name, String source = ''}) async {
     final s = _s!;
     final maker = _ScreenComposer(s);
-    final progress = ValueNotifier<double>(0);
+    // Taken now: a new recording may start while this one waits its turn.
+    final su = setup!;
+    final parts = [..._parts], clicks = [..._clicks], inks = _inks.values.toList();
+    final boards = _apart ? [..._boards] : const <(int, int, Rect)>[];
+    final windowAt = su.mode == ScreenMode.window ? [..._windowAt] : const <(int, Rect)>[];
+    final fades = Map.of(_fades), pageOf = Map.of(_inkPage), front = [..._front], firstPage = _firstPage, at = area;
     final sessionId = DateTime.now().millisecondsSinceEpoch.toRadixString(36);
-    final done = maker.make(
-      boards: _apart ? _boards : const [],
+    // In the background: the app stays usable meanwhile.
+    final f = await BgTasks.instance.run<File?>(
+      title: '${tr('screen.making')} · $name',
+      heavy: true,
+      ok: (r) => r != null,
+      open: () => AppNav.instance.selectTab(AppNav.screen),
+      job: (t) {
+        t.onCancel = maker.cancel;
+        return maker.make(
+      boards: boards,
       sessionId: sessionId,
-      parts: _parts,
+      parts: parts,
       length: length,
-      area: area,
-      screen: setup!.screen,
-      windowAt: setup!.mode == ScreenMode.window ? _windowAt : const [],
-      clicks: _clicks,
-      inks: _inks.values.toList(),
-      fades: _fades,
-      pageOf: _inkPage,
-      front: _front,
-      firstPage: _firstPage,
+      area: at,
+      screen: su.screen,
+      windowAt: windowAt,
+      clicks: clicks,
+      inks: inks,
+      fades: fades,
+      pageOf: pageOf,
+      front: front,
+      firstPage: firstPage,
       voice: voice,
       system: system,
-      micVol: setup!.micVol,
-      sysVol: setup!.sysVol,
-      duck: setup!.duck,
+      micVol: su.micVol,
+      sysVol: su.sysVol,
+      duck: su.duck,
       name: name,
       source: source,
-      fps: setup!.fps,
-      onProgress: (p) => progress.value = p,
+      fps: su.fps,
+      onProgress: t.setProgress,
     );
-    _showMaking(context, done, progress, maker.cancel);
-    final f = await done;
-    progress.dispose();
+      },
+    );
     if (f != null) {
       await _keepSession(sessionId, length, name, voice: voice, system: system);
     } else {
@@ -2223,36 +2236,6 @@ class _Bar extends StatelessWidget {
   }
 }
 
-/// "Making the video…" with its progress, until [done].
-void _showMaking(BuildContext context, Future<Object?> done, ValueNotifier<double> progress, VoidCallback cancel) {
-  var finished = false;
-  unawaited(done.then((_) {}, onError: (Object _) {}).whenComplete(() => finished = true));
-  unawaited(showLrDialog<void>(
-    context: context,
-    barrierDismissible: false,
-    // Closes this one when made, even with the transfers panel over it.
-    closeWhen: done,
-    builder: (ctx) {
-      return AlertDialog(
-        title: Text(tr('screen.making')),
-        content: SizedBox(
-          width: 360,
-          child: ValueListenableBuilder<double>(
-            valueListenable: progress,
-            builder: (_, p, _) => Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-              LinearProgressIndicator(value: p <= 0 ? null : p),
-              const SizedBox(height: 8),
-              Text('${(p * 100).round()}%', style: const TextStyle(color: LrColors.muted)),
-            ]),
-          ),
-        ),
-        // Already made (and somehow still shown): the button just closes it.
-        actions: [TextButton(onPressed: () => finished ? Navigator.pop(ctx) : cancel(), child: Text(tr('common.cancel')))],
-      );
-    },
-  ));
-}
-
 /// A screen recording's kept material, read back (see `_keepSession`).
 class ScreenSession {
   ScreenSession._(this.id, this.dir, this.json);
@@ -2377,12 +2360,14 @@ Future<void> afterScreenSession(BuildContext context, AppServices s, String id,
       if (c2.mounted) ScaffoldMessenger.of(c2).showSnackBar(SnackBar(content: Text(tr('rec.discarded'))));
       return;
     }
-    final progress = ValueNotifier<double>(0);
-    VoidCallback cancel = () {};
-    final done = session.make(s, name: r.name, onProgress: (p) => progress.value = p, onCancel: (x) => cancel = x);
-    _showMaking(c2, done, progress, () => cancel());
-    var f = await done;
-    progress.dispose();
+    // In the background: the app stays usable meanwhile.
+    var f = await BgTasks.instance.run<File?>(
+      title: '${tr('screen.making')} · ${r.name}',
+      heavy: true,
+      ok: (x) => x != null,
+      open: () => AppNav.instance.selectTab(AppNav.screen),
+      job: (t) => session.make(s, name: r.name, onProgress: t.setProgress, onCancel: (x) => t.onCancel = x),
+    );
     final c3 = AppNav.instance.navigatorKey.currentContext;
     if (c3 == null || !c3.mounted) return;
     final messenger = ScaffoldMessenger.of(c3);

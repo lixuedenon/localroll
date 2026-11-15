@@ -34,6 +34,7 @@ import 'ui/media_thumb.dart';
 import 'ui/send_paths.dart';
 import 'ui/theme.dart';
 import 'ui/title_bar.dart';
+import 'ui/task_float.dart';
 import 'ui/transfer_float.dart';
 import 'services/window_memory.dart';
 
@@ -268,6 +269,9 @@ class LocalRollApp extends StatelessWidget {
                       Positioned.fill(child: PlayerDropTarget(services: services, child: child!)),
                       // Sending / receiving: how far, on top of any page.
                       TransferFloat(services: services),
+                      // A long job just started (making a video, a PDF…): its card,
+                      // not blocking; a click elsewhere puts it in the corner.
+                      const TaskFloat(),
                     ]),
                   ),
                 ],

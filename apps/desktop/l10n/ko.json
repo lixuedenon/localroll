@@ -2063,5 +2063,13 @@
   "float.pause": "일시 정지",
   "float.secs": "{n}초",
   "float.mins": "{n}분",
-  "float.hours": "{n}시간"
+  "float.hours": "{n}시간",
+  "task.queued": "대기 중: 앞의 동영상이 끝나면 시작합니다",
+  "task.working": "처리 중…",
+  "task.hint": "다른 곳을 클릭하면 다른 작업을 할 수 있어요. 오른쪽 아래에서 계속 진행됩니다",
+  "task.done": "✓ 완료",
+  "task.failed": "✗ 실패했습니다",
+  "task.cancelled": "취소됨",
+  "task.show": "보기",
+  "task.exit_busy": "아직 {count}개 작업(동영상 만들기, 변환 등)이 남아 있어요. 종료하면 중단됩니다."
 }

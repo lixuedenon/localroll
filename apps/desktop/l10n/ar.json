@@ -2063,5 +2063,13 @@
   "float.pause": "إيقاف مؤقت",
   "float.secs": "{n} ث",
   "float.mins": "{n} د",
-  "float.hours": "{n} س"
+  "float.hours": "{n} س",
+  "task.queued": "في الانتظار: يبدأ عند انتهاء الفيديو السابق",
+  "task.working": "جارٍ المعالجة…",
+  "task.hint": "انقر في أي مكان آخر للمتابعة — تستمر المهمة في الزاوية السفلية",
+  "task.done": "✓ تم",
+  "task.failed": "✗ لم ينجح",
+  "task.cancelled": "أُلغي",
+  "task.show": "عرض",
+  "task.exit_busy": "لا تزال {count} مهمة قيد التنفيذ (إنشاء فيديو، تحويل…). الخروج يوقفها."
 }

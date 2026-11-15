@@ -2063,5 +2063,13 @@
   "float.pause": "一時停止",
   "float.secs": "{n} 秒",
   "float.mins": "{n} 分",
-  "float.hours": "{n} 時間"
+  "float.hours": "{n} 時間",
+  "task.queued": "順番待ち：前の動画が終わると始まります",
+  "task.working": "処理中…",
+  "task.hint": "ほかの場所をクリックすれば作業を続けられます。右下で処理が続きます",
+  "task.done": "✓ 完了",
+  "task.failed": "✗ 失敗しました",
+  "task.cancelled": "キャンセルしました",
+  "task.show": "表示",
+  "task.exit_busy": "まだ {count} 件の処理（動画の作成・変換など）が残っています。終了すると止まります。"
 }

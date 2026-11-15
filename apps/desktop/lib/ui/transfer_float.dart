@@ -6,6 +6,7 @@ import 'package:window_manager/window_manager.dart';
 
 import '../app_services.dart';
 import '../l10n/l10n.dart';
+import '../services/bg_tasks.dart';
 import '../services/peers.dart';
 import '../services/receive_hub.dart';
 import 'app_nav.dart';
@@ -28,7 +29,7 @@ class TransferFloat extends StatefulWidget {
 
 /// One line of the card: a send job, or what one device is sending here.
 class _Row {
-  _Row({required this.title, required this.done, required this.total, required this.fraction, this.job, this.speed = 0, this.outgoing = true});
+  _Row({required this.title, required this.done, required this.total, required this.fraction, this.job, this.speed = 0, this.outgoing = true, this.task});
 
   final String title;
   final int done;
@@ -37,6 +38,9 @@ class _Row {
   final SendJob? job;
   final double speed;
   final bool outgoing;
+
+  /// A background job (making a recording, a PDF…) instead of a transfer.
+  final BgTask? task;
 }
 
 class _TransferFloatState extends State<TransferFloat> {
@@ -84,6 +88,10 @@ class _TransferFloatState extends State<TransferFloat> {
         (byDevice[t.deviceName] ??= []).add(t);
       }
     }
+    // Jobs put aside (making a recording, a PDF…), done ones too until closed.
+    for (final t in BgTasks.instance.listed) {
+      rows.add(_Row(title: t.title, done: 0, total: 0, fraction: t.over ? 1 : (t.progress > 0 ? t.progress : 0), task: t));
+    }
     byDevice.forEach((name, list) {
       final total = list.fold<int>(0, (a, t) => a + t.total);
       final got = list.fold<int>(0, (a, t) => a + t.received);
@@ -100,7 +108,7 @@ class _TransferFloatState extends State<TransferFloat> {
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-        listenable: Listenable.merge([s.hub, s.sender, AppNav.instance.fullscreen]),
+        listenable: Listenable.merge([s.hub, s.sender, BgTasks.instance, AppNav.instance.fullscreen]),
         builder: (context, _) {
           final rows = _rows();
           final active = rows.isNotEmpty;
@@ -206,7 +214,63 @@ class _TransferFloatState extends State<TransferFloat> {
         ]),
       );
 
+  Widget _taskLine(BgTask t) {
+    final status = switch (t.state) {
+      BgState.queued => tr('task.queued'),
+      BgState.running => t.progress > 0 ? '${(t.progress * 100).round()}%' : tr('task.working'),
+      BgState.done => tr('task.done'),
+      BgState.failed => tr('task.failed'),
+      BgState.cancelled => tr('task.cancelled'),
+    };
+    final color = t.state == BgState.done ? const Color(0xFF16A34A) : (t.state == BgState.failed ? const Color(0xFFDC2626) : LightLook.muted);
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Row(children: [
+          Icon(t.over ? (t.state == BgState.done ? Icons.check_circle_rounded : Icons.error_outline_rounded) : Icons.auto_awesome_motion_rounded,
+              size: 15, color: color),
+          const SizedBox(width: 6),
+          Expanded(child: Text(t.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, color: LightLook.text))),
+          if (t.state == BgState.done && t.open != null)
+            InkWell(
+              onTap: () {
+                BgTasks.instance.dismiss(t);
+                t.open!();
+              },
+              child: Padding(padding: const EdgeInsets.all(3), child: Text(tr('task.show'), style: const TextStyle(fontSize: 12, color: LightLook.blue))),
+            ),
+          if (!t.over && (t.onCancel != null || t.state == BgState.queued))
+            InkWell(
+              onTap: t.cancel,
+              child: Padding(padding: const EdgeInsets.all(3), child: Text(tr('common.cancel'), style: const TextStyle(fontSize: 12, color: LightLook.muted))),
+            ),
+          if (t.over)
+            InkWell(
+              onTap: () => BgTasks.instance.dismiss(t),
+              child: const Padding(padding: EdgeInsets.all(3), child: Icon(Icons.close_rounded, size: 15, color: LightLook.muted)),
+            ),
+        ]),
+        if (!t.over) ...[
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(5),
+            child: LinearProgressIndicator(
+              value: t.state == BgState.queued || t.progress <= 0 ? null : t.progress,
+              minHeight: 7,
+              backgroundColor: const Color(0xFFE8EEF8),
+              color: LightLook.blue,
+            ),
+          ),
+        ],
+        const SizedBox(height: 4),
+        Text(status, style: TextStyle(fontSize: 11.5, color: color)),
+      ]),
+    );
+  }
+
   Widget _line(_Row r) {
+    final t = r.task;
+    if (t != null) return _taskLine(t);
     final j = r.job;
     final left = r.outgoing
         ? '${r.done} / ${r.total} · ${formatBytes(j?.sentBytes ?? 0)} / ${formatBytes(j?.totalBytes ?? 0)}'

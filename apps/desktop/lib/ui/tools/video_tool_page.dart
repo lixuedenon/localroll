@@ -100,6 +100,7 @@ class _VideoToolPageState extends State<VideoToolPage> {
       context,
       tr('video.working'),
       () => VideoTools.cut(s, src, out, _how, fromMs: _keep.start.round(), toMs: whole ? null : _keep.end.round()),
+      heavy: true,
     );
     if (!mounted) return;
     if (ok != true) {
@@ -113,7 +114,7 @@ class _VideoToolPageState extends State<VideoToolPage> {
     final out = toolOutPath(s, _files.first, tr('video.suffix_joined'), 'mp4');
     await _player.pause();
     if (!mounted) return;
-    final ok = await runBusy(context, tr('video.joining', {'count': _files.length}), () => VideoTools.join(s, _files, out));
+    final ok = await runBusy(context, tr('video.joining', {'count': _files.length}), () => VideoTools.join(s, _files, out), heavy: true);
     if (!mounted) return;
     if (ok != true) {
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('video.join_failed'))));
