@@ -942,12 +942,9 @@ class _PlayerPageState extends State<PlayerPage> {
     unawaited(showLrDialog<void>(
       context: context,
       barrierDismissible: false,
+      // Closes this dialog only (a dialog opened meanwhile, e.g. "send to", stays).
+      closeWhen: done,
       builder: (ctx) {
-        // Closes this dialog only (a dialog opened meanwhile, e.g. "send to", stays).
-        final own = ModalRoute.of(ctx);
-        unawaited(done.whenComplete(() {
-          if (ctx.mounted && own != null && own.isActive) Navigator.of(ctx).removeRoute(own);
-        }));
         return AlertDialog(
           title: Text(tr(choice.withInk ? 'clip.making_ink' : 'clip.making')),
           content: SizedBox(
@@ -1500,12 +1497,9 @@ class _PlayerPageState extends State<PlayerPage> {
     unawaited(showLrDialog<void>(
       context: context,
       barrierDismissible: false,
+      // Closes this dialog only (a dialog opened meanwhile, e.g. "send to", stays).
+      closeWhen: done,
       builder: (ctx) {
-        // Closes this dialog only (a dialog opened meanwhile, e.g. "send to", stays).
-        final own = ModalRoute.of(ctx);
-        unawaited(done.whenComplete(() {
-          if (ctx.mounted && own != null && own.isActive) Navigator.of(ctx).removeRoute(own);
-        }));
         return AlertDialog(
           title: Text(tr('rec.making')),
           content: SizedBox(

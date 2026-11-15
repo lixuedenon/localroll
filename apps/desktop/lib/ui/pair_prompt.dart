@@ -69,7 +69,8 @@ class _PairDialogState extends State<_PairDialog> {
     // Nobody answered in time: close as "deny" (the phone sees "expired").
     final left = LrProtocol.pairApprovalTimeout - DateTime.now().difference(widget.request.created);
     _timeout = Timer(left.isNegative ? Duration.zero : left, () {
-      if (mounted) Navigator.of(context).pop();
+      // This dialog only (not whatever opened over it).
+      if (mounted) closeDialogRoute(ModalRoute.of(context));
     });
   }
 

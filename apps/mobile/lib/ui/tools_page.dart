@@ -234,11 +234,31 @@ Future<File> _toMyFiles(MobileSettings settings, File f) async {
 
 /// A moment's work with a turning circle (the screen can't be used meanwhile).
 Future<T?> _busy<T>(BuildContext context, Future<T> Function() job) async {
-  final nav = Navigator.of(context);
+  // This dialog's own route: closed by itself when done, not whatever
+  // opened over it meanwhile (e.g. "receive these files?").
+  Route<dynamic>? own;
+  var done = false;
+  void close() {
+    final r = own;
+    if (r == null || !r.isActive) return;
+    final nav = r.navigator;
+    if (nav == null) return;
+    if (r.isCurrent) {
+      nav.pop();
+    } else {
+      nav.removeRoute(r);
+    }
+  }
+
   unawaited(showDialog<void>(
     context: context,
     barrierDismissible: false,
-    builder: (_) => PopScope(
+    builder: (c) {
+      if (own == null) {
+        own = ModalRoute.of(c);
+        if (done) WidgetsBinding.instance.addPostFrameCallback((_) => close());
+      }
+      return PopScope(
       canPop: false,
       child: AlertDialog(
         content: Row(children: [
@@ -247,12 +267,14 @@ Future<T?> _busy<T>(BuildContext context, Future<T> Function() job) async {
           Flexible(child: Text(tr('ptool.working'))),
         ]),
       ),
-    ),
+    );
+    },
   ));
   try {
     return await job();
   } finally {
-    nav.pop();
+    done = true;
+    close();
   }
 }
 

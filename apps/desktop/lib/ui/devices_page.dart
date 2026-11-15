@@ -1009,9 +1009,12 @@ class _DevicesPageState extends State<DevicesPage> {
     if (!mounted) return;
     final emoji = ValueNotifier<List<String>?>(null);
     var cancelled = false;
+    // Closes this dialog itself when pairing ends (not whatever opened over it).
+    final finished = Completer<void>();
     final dialog = showLrDialog<void>(
       context: context,
       barrierDismissible: false,
+      closeWhen: finished.future,
       builder: (ctx) => AlertDialog(
         content: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 380),
@@ -1050,16 +1053,17 @@ class _DevicesPageState extends State<DevicesPage> {
     );
     try {
       final p = await widget.services.peers.pair(f, onWaiting: (e) => emoji.value = e, cancelled: () => cancelled);
+      finished.complete();
       if (!mounted || cancelled) return;
-      Navigator.of(context).pop();
       if (p != null) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('send.paired_ok', {'name': p.name}))));
       }
     } on PeerError catch (e) {
+      if (!finished.isCompleted) finished.complete();
       if (!mounted) return;
-      if (!cancelled) Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(peerErrorText(e.code))));
     } finally {
+      if (!finished.isCompleted) finished.complete();
       unawaited(dialog.whenComplete(emoji.dispose));
     }
   }

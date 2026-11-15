@@ -277,10 +277,12 @@ void _queue(BuildContext context, AppServices s, List<String> files, {ConvertFor
 
 /// Something that takes a moment, with a turning circle; then the result.
 Future<T?> runBusy<T>(BuildContext context, String what, Future<T> Function() job) async {
-  final nav = Navigator.of(context);
+  // Closes this dialog itself when done (not whatever opened over it).
+  final finished = Completer<void>();
   unawaited(showLrDialog<void>(
     context: context,
     barrierDismissible: false,
+    closeWhen: finished.future,
     builder: (_) => PopScope(
       canPop: false,
       child: AlertDialog(
@@ -295,7 +297,7 @@ Future<T?> runBusy<T>(BuildContext context, String what, Future<T> Function() jo
   try {
     return await job();
   } finally {
-    nav.pop();
+    finished.complete();
   }
 }
 

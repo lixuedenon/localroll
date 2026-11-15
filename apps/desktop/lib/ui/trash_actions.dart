@@ -35,7 +35,6 @@ Future<int> deleteToTrash(
     } catch (_) {}
   }
   final messenger = ScaffoldMessenger.of(context);
-  final nav = Navigator.of(context);
   final ok = await showLrDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
@@ -57,10 +56,13 @@ Future<int> deleteToTrash(
   final total = lib.withLive(media).length + files.length;
   final progress = ValueNotifier<(int, int)>((0, total));
   final showProgress = total >= 50;
+  // Closes this dialog itself when done (not whatever opened over it).
+  final finished = Completer<void>();
   if (showProgress) {
     unawaited(showLrDialog<void>(
       context: context,
       barrierDismissible: false,
+      closeWhen: finished.future,
       builder: (_) => PopScope(
         canPop: false,
         child: AlertDialog(
@@ -83,7 +85,7 @@ Future<int> deleteToTrash(
     made.addAll(await trash.putMedia(media, onProgress: (d, _) => progress.value = (d, total)));
     made.addAll(await trash.putFiles(files, onProgress: (d, _) => progress.value = (mediaTotal + d, total)));
   } finally {
-    if (showProgress) nav.pop();
+    finished.complete();
     progress.dispose();
   }
   final missed = count - made.length;
