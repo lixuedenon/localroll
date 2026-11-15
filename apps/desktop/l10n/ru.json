@@ -829,6 +829,7 @@
   "screen.drag_area": "Обведите рамкой, что записывать · Esc — отмена",
   "screen.pick_area": "Выбрать область",
   "screen.start": "Начать запись",
+  "screen.prepare": "Подготовить запись",
   "screen.with_mic": "С микрофоном",
   "screen.mic_choose": "Микрофон не выбран",
   "screen.mic_change": "Изменить",

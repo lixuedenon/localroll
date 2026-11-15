@@ -277,6 +277,10 @@ class PenOverlay extends ChangeNotifier implements PenControls {
   /// Start on this window's page.
   void page(int hwnd) => _send('page $hwnd');
 
+  /// Recording one window: its marks stay its own, whichever window is in
+  /// front (LocalRoll's bar, the panel). 0: free again.
+  void lockPage(int hwnd) => _send('lock $hwnd');
+
   /// Words for the text tool's click ([textAt]); empty: none.
   void putText(String words) {
     final at = textAt;

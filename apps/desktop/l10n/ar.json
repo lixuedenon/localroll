@@ -829,6 +829,7 @@
   "screen.drag_area": "اسحب مربعًا حول ما تريد تسجيله · Esc للإلغاء",
   "screen.pick_area": "اختيار المنطقة",
   "screen.start": "بدء التسجيل",
+  "screen.prepare": "التحضير للتسجيل",
   "screen.with_mic": "تسجيل صوتي من الميكروفون",
   "screen.mic_choose": "لم يُختر ميكروفون بعد",
   "screen.mic_change": "تغيير",

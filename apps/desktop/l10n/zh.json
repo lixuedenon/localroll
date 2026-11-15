@@ -829,6 +829,7 @@
   "screen.drag_area": "拖出一个框，框住要录的部分 · Esc 取消",
   "screen.pick_area": "框选区域",
   "screen.start": "开始录制",
+  "screen.prepare": "准备录制",
   "screen.with_mic": "同时录麦克风",
   "screen.mic_choose": "还没选麦克风",
   "screen.mic_change": "更换",

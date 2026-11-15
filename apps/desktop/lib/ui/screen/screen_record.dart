@@ -501,7 +501,10 @@ class ScreenRecorder extends ChangeNotifier {
     if (su.mode == ScreenMode.window && su.window != null) {
       WinScreen.bringToFront(su.window!.handle);
       _page = su.window!.handle;
-      if (usesOverlay) o.page(su.window!.handle);
+      if (usesOverlay) {
+        o.page(su.window!.handle);
+        o.lockPage(su.window!.handle);
+      }
     }
     _firstPage = _page;
     // The camera bubble (when switched on): bottom right of what is filmed.
@@ -648,7 +651,8 @@ class ScreenRecorder extends ChangeNotifier {
       // The window in use (LocalRoll's own bar / pen screen does not count).
       final fg = WinScreen.foreground();
       final own = _floating ? FloatPanel.instance.hwnd : _own;
-      if (fg != 0 && fg != own && !pen && fg != _page) {
+      // Recording one window: its marks only (as the pen helper does).
+      if (fg != 0 && fg != own && !pen && fg != _page && su.mode != ScreenMode.window) {
         _page = fg;
         _front.add((t, fg));
       }
@@ -928,6 +932,7 @@ class ScreenRecorder extends ChangeNotifier {
       o.report(false);
       o.onReport = null;
       o.removeListener(_onOverlay);
+      o.lockPage(0);
       o.border(null);
       await o.stop();
     }
@@ -946,6 +951,7 @@ class ScreenRecorder extends ChangeNotifier {
     if (usesOverlay) {
       final o = PenOverlay.instance;
       o.removeListener(_onOverlay);
+      o.lockPage(0);
       o.border(null);
       await o.stop();
     }
@@ -1489,6 +1495,21 @@ Future<ScreenSetup?> showScreenSetup(BuildContext context, AppServices s, {Scree
   var micName = m.mic;
   // While choosing, LocalRoll stays over the window brought forward.
   await windowManager.setAlwaysOnTop(true);
+  // Another window chosen: LocalRoll steps back for a moment so that one
+  // shows in front with an orange frame, then LocalRoll comes back.
+  var shown = 0;
+  var open = true;
+  Future<void> showChosen(WindowInfo x) async {
+    final n = ++shown;
+    await windowManager.setAlwaysOnTop(false);
+    WinScreen.bringToFront(x.handle);
+    final r = WinScreen.windowRect(x.handle);
+    if (r != null) ScreenPick.flash(r);
+    await Future<void>.delayed(const Duration(milliseconds: 1500));
+    if (!open || n != shown) return;
+    await windowManager.setAlwaysOnTop(true);
+    await windowManager.focus();
+  }
   final choice = await showLrDialog<bool>(
     context: context,
     builder: (ctx) => StatefulBuilder(
@@ -1555,9 +1576,7 @@ Future<ScreenSetup?> showScreenSetup(BuildContext context, AppServices s, {Scree
                         // ignore: deprecated_member_use
                         onChanged: (_) {
                           set(() => window = x);
-                          // To the front, so it is clear which one it is
-                          // (LocalRoll stays on top meanwhile).
-                          WinScreen.bringToFront(x.handle);
+                          unawaited(showChosen(x));
                         },
                         title: Text(x.title, maxLines: 1, overflow: TextOverflow.ellipsis),
                         subtitle: Text('${x.rect.width.round()}×${x.rect.height.round()}'),
@@ -1627,12 +1646,13 @@ Future<ScreenSetup?> showScreenSetup(BuildContext context, AppServices s, {Scree
           FilledButton.icon(
             onPressed: () => Navigator.pop(ctx, true),
             icon: const Icon(Icons.fiber_manual_record_rounded, size: 18),
-            label: Text(tr(mode == ScreenMode.area ? 'screen.pick_area' : 'screen.start')),
+            label: Text(tr(mode == ScreenMode.area ? 'screen.pick_area' : 'screen.prepare')),
           ),
         ],
       ),
     ),
   );
+  open = false;
   await windowManager.setAlwaysOnTop(false);
   if (choice != true || !context.mounted) return null;
   if (withMic && micName == null) {

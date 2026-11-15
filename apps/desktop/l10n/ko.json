@@ -829,6 +829,7 @@
   "screen.drag_area": "녹화할 부분을 상자로 둘러싸세요 · Esc로 취소",
   "screen.pick_area": "영역 선택",
   "screen.start": "녹화 시작",
+  "screen.prepare": "녹화 준비",
   "screen.with_mic": "마이크 녹음",
   "screen.mic_choose": "아직 마이크를 고르지 않음",
   "screen.mic_change": "변경",

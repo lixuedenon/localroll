@@ -11,6 +11,10 @@
 //          rect <x> <y> <w> <h>   (screen pixels) when one was clicked
 //          back                   Esc
 //          cancel                 right click / stdin closed
+//
+//   lr_pick.exe --flash <x> <y> <w> <h> <ms>
+// Only shows an orange frame around that rectangle (screen pixels) for
+// <ms> milliseconds, then quits: "this is the window you chose".
 
 #ifndef UNICODE
 #define UNICODE
@@ -26,6 +30,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <cstdlib>
 #include <cstdio>
 #include <iostream>
 #include <string>
@@ -135,6 +140,39 @@ void outline(const RECT& r) {
   }
   put(g_frame, x, y, w, h, px);
   ShowWindow(g_frame, SW_SHOWNOACTIVATE);
+}
+
+// "This one": a thick orange frame, nothing inside, for a moment.
+int flash(HINSTANCE inst, int x, int y, int w, int h, int ms) {
+  WNDCLASSW wc{};
+  wc.lpfnWndProc = DefWindowProcW;
+  wc.hInstance = inst;
+  wc.lpszClassName = L"LocalRollFlash";
+  RegisterClassW(&wc);
+  const DWORD ex = WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE;
+  HWND f = CreateWindowExW(ex, wc.lpszClassName, L"", WS_POPUP, 0, 0, 1, 1, nullptr, nullptr, inst, nullptr);
+  if (!f) return 1;
+  const int e = 6;
+  const int fx = x - e, fy = y - e, fw = w + 2 * e, fh = h + 2 * e;
+  if (fw <= 2 * e || fh <= 2 * e || fw > 20000 || fh > 20000) return 1;
+  std::vector<uint32_t> px((size_t)fw * fh, 0);
+  const uint32_t edge = pre(255, 255, 159, 28);
+  for (int j = 0; j < fh; j++) {
+    for (int i = 0; i < fw; i++) {
+      if (i < e || j < e || i >= fw - e || j >= fh - e) px[(size_t)j * fw + i] = edge;
+    }
+  }
+  put(f, fx, fy, fw, fh, px);
+  ShowWindow(f, SW_SHOWNOACTIVATE);
+  SetWindowPos(f, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+  SetTimer(nullptr, 0, static_cast<UINT>(ms < 100 ? 100 : (ms > 10000 ? 10000 : ms)), nullptr);
+  MSG msg;
+  while (GetMessageW(&msg, nullptr, 0, 0) > 0) {
+    if (msg.message == WM_TIMER) break;
+    DispatchMessageW(&msg);
+  }
+  DestroyWindow(f);
+  return 0;
 }
 
 void tip() {
@@ -344,6 +382,11 @@ int WINAPI wWinMain(HINSTANCE inst, HINSTANCE, PWSTR, int) {
   g_self = GetCurrentProcessId();
   int argc = 0;
   wchar_t** argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+  if (argv && argc >= 7 && std::wstring(argv[1]) == L"--flash") {
+    const int x = _wtoi(argv[2]), y = _wtoi(argv[3]), w = _wtoi(argv[4]), h = _wtoi(argv[5]), ms = _wtoi(argv[6]);
+    LocalFree(argv);
+    ExitProcess(static_cast<UINT>(flash(inst, x, y, w, h, ms)));
+  }
   if (argv && argc > 1) g_tipText = argv[1];
   if (argv) LocalFree(argv);
   if (FAILED(CoCreateInstance(__uuidof(CUIAutomation), nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&g_uia))) || !g_uia ||

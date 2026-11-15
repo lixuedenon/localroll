@@ -829,6 +829,7 @@
   "screen.drag_area": "Kaydedilecek yerin çevresine bir kutu çizin · Esc iptal",
   "screen.pick_area": "Alanı seç",
   "screen.start": "Kaydı başlat",
+  "screen.prepare": "Kayda hazırlan",
   "screen.with_mic": "Mikrofonla",
   "screen.mic_choose": "Henüz mikrofon seçilmedi",
   "screen.mic_change": "Değiştir",

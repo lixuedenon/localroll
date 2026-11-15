@@ -207,6 +207,16 @@ void emit(const std::string& line) {
   std::fflush(stdout);
 }
 
+// A line for LocalRoll's diagnostics log (stderr goes there as "[pen]").
+void logLine(const std::string& line) {
+  std::fputs(line.c_str(), stderr);
+  std::fputc('\n', stderr);
+  std::fflush(stderr);
+}
+
+// "page 0x1234 (title)" for the log.
+std::string pageName(HWND w);
+
 // ---------------------------------------------------------------- reports
 // While a recording keeps the marks apart from the picture ("report 1"),
 // every change of what is shown is written out: "mark <json>" when a mark
@@ -858,6 +868,7 @@ void deleteSelected() {
   remember();
   auto& ms = sheet().marks;
   ms.erase(std::remove_if(ms.begin(), ms.end(), [](const Mark& m) { return m.id == g_selected; }), ms.end());
+  logLine("mark deleted");
   g_selected = 0;
   render();
   emitState();
@@ -922,6 +933,7 @@ void endDrawing() {
     remember();
     m.doneAt = GetTickCount64();
     sheet().marks.push_back(m);
+    logLine("mark " + std::to_string(m.tool) + " on " + pageName(g_page));
   } else {
     g_made = 0;
   }
@@ -978,7 +990,24 @@ void onDown(D2D1_POINT_2F p) {
     return;
   }
   if ((twice || heldBack) && g_tool != kText) {
-    if (made) dropMade(made);
+    if (made) {
+      // The first click made a mark. Another mark under it: the double-click
+      // selects that one (the new mark is taken back). None: the new mark
+      // stays and the second click adds nothing (it used to go and come
+      // back, a flicker).
+      bool other = false;
+      for (const auto& m : sheet().marks) {
+        if (m.id != made && hits(m, p, 8)) other = true;
+      }
+      if (!other) {
+        logLine("double click: the new mark stays");
+        g_lastDown = 0;
+        g_drag = kNone;
+        return;
+      }
+      dropMade(made);
+      logLine("double click: selects the mark under it");
+    }
     if (Mark* hit = topAt(p)) {
       if (hit->id == g_selected) {
         deleteSelected();
@@ -1052,6 +1081,7 @@ void onDown(D2D1_POINT_2F p) {
       if (g_tool == kNumber) m.number = nextNumber();
       m.doneAt = now;
       sheet().marks.push_back(m);
+      logLine("mark " + std::to_string(m.tool) + " on " + pageName(g_page));
       g_made = m.id;
       RECT a = areaOf(m);
       render(&a);
@@ -1348,6 +1378,19 @@ bool isShell(HWND w) {
 
 bool g_perWindow = false;
 
+// Recording one window: the marks belong to it only, whichever window is
+// in front (clicking LocalRoll's bar or panel used to move them there).
+HWND g_lock = nullptr;
+
+std::string pageName(HWND w) {
+  if (!w) return "screen";
+  wchar_t t[80] = {};
+  GetWindowTextW(w, t, 80);
+  char b[32];
+  std::snprintf(b, sizeof b, "0x%llx", static_cast<unsigned long long>(reinterpret_cast<UINT_PTR>(w)));
+  return std::string(b) + " (" + utf8(t) + ")";
+}
+
 DWORD pidOf(HWND w) {
   DWORD pid = 0;
   GetWindowThreadProcessId(w, &pid);
@@ -1368,6 +1411,7 @@ HWND pageKeyFor(HWND w) {
 void switchPage(HWND w) {
   if (w == g_page) return;
   if (g_drag != kNone) onUp();
+  logLine("page " + pageName(g_page) + " -> " + pageName(w));
   g_page = w;
   g_selected = 0;
   render();
@@ -1382,6 +1426,7 @@ void CALLBACK onForeground(HWINEVENTHOOK, DWORD, HWND w, LONG, LONG, DWORD, DWOR
   GetWindowThreadProcessId(w, &pid);
   if (pid == GetCurrentProcessId()) return;
   if (!g_perWindow) return;  // one layer for the whole screen
+  if (g_lock) return;        // recording one window: its marks only
   switchPage(pageKeyFor(w));
 }
 
@@ -1503,9 +1548,15 @@ void command(const std::string& line) {
   } else if (cmd == "own") {
     g_own = reinterpret_cast<HWND>(static_cast<INT_PTR>(std::strtoll(arg.c_str(), nullptr, 10)));
     HWND fg = GetForegroundWindow();
-    if (fg && fg != g_own && !isShell(fg)) g_page = GetAncestor(fg, GA_ROOT);
+    if (!g_lock && fg && fg != g_own && !isShell(fg)) g_page = GetAncestor(fg, GA_ROOT);
     render();
     emitState();
+  } else if (cmd == "lock") {
+    // lock <hwnd>: the marks stay on this window's page; lock 0: free again.
+    HWND h = reinterpret_cast<HWND>(static_cast<INT_PTR>(std::strtoll(arg.c_str(), nullptr, 10)));
+    g_lock = (h && IsWindow(h)) ? h : nullptr;
+    logLine("lock " + pageName(g_lock));
+    if (g_lock && g_perWindow) switchPage(g_lock);
   } else if (cmd == "page") {
     if (g_perWindow) switchPage(pageKeyFor(reinterpret_cast<HWND>(static_cast<INT_PTR>(std::strtoll(arg.c_str(), nullptr, 10)))));
   } else if (cmd == "pages") {
@@ -1516,6 +1567,8 @@ void command(const std::string& line) {
       if (!per && g_page != nullptr) {
         g_pages[nullptr] = g_pages[g_page];
         switchPage(nullptr);
+      } else if (per && g_lock) {
+        switchPage(g_lock);
       } else if (per) {
         HWND fg = GetForegroundWindow();
         fg = fg ? GetAncestor(fg, GA_ROOT) : nullptr;

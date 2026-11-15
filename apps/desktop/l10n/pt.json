@@ -829,6 +829,7 @@
   "screen.drag_area": "Arraste um retângulo em volta do que gravar · Esc cancela",
   "screen.pick_area": "Escolher a área",
   "screen.start": "Começar a gravar",
+  "screen.prepare": "Preparar gravação",
   "screen.with_mic": "Com o microfone",
   "screen.mic_choose": "Nenhum microfone escolhido",
   "screen.mic_change": "Trocar",

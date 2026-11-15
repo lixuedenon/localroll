@@ -829,6 +829,7 @@
   "screen.drag_area": "ลากกรอบรอบสิ่งที่จะบันทึก · Esc ยกเลิก",
   "screen.pick_area": "เลือกพื้นที่",
   "screen.start": "เริ่มบันทึก",
+  "screen.prepare": "เตรียมบันทึก",
   "screen.with_mic": "บันทึกเสียงไมโครโฟน",
   "screen.mic_choose": "ยังไม่ได้เลือกไมโครโฟน",
   "screen.mic_change": "เปลี่ยน",

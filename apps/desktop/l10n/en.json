@@ -829,6 +829,7 @@
   "screen.drag_area": "Drag a box around what to record · Esc cancels",
   "screen.pick_area": "Choose the area",
   "screen.start": "Start recording",
+  "screen.prepare": "Get ready",
   "screen.with_mic": "With the microphone",
   "screen.mic_choose": "No microphone chosen yet",
   "screen.mic_change": "Change",

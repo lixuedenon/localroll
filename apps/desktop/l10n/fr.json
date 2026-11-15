@@ -829,6 +829,7 @@
   "screen.drag_area": "Tracez un cadre autour de ce qu’il faut enregistrer · Échap annule",
   "screen.pick_area": "Choisir la zone",
   "screen.start": "Démarrer",
+  "screen.prepare": "Préparer l'enregistrement",
   "screen.with_mic": "Avec le micro",
   "screen.mic_choose": "Aucun micro choisi",
   "screen.mic_change": "Changer",

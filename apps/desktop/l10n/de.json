@@ -829,6 +829,7 @@
   "screen.drag_area": "Rahmen um den Aufnahmebereich ziehen · Esc bricht ab",
   "screen.pick_area": "Bereich wählen",
   "screen.start": "Aufnahme starten",
+  "screen.prepare": "Aufnahme vorbereiten",
   "screen.with_mic": "Mit Mikrofon",
   "screen.mic_choose": "Noch kein Mikrofon gewählt",
   "screen.mic_change": "Ändern",

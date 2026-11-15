@@ -829,6 +829,7 @@
   "screen.drag_area": "録画する範囲を枠で囲んでください · Esc で取り消し",
   "screen.pick_area": "範囲を選ぶ",
   "screen.start": "録画を開始",
+  "screen.prepare": "録画の準備",
   "screen.with_mic": "マイクも録音",
   "screen.mic_choose": "マイク未選択",
   "screen.mic_change": "変更",

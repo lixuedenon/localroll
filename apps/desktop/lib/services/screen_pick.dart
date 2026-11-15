@@ -14,6 +14,25 @@ class ScreenPick {
 
   static bool get available => Platform.isWindows && File(exe).existsSync();
 
+  /// An orange frame around [r] (screen pixels) for a moment: "this
+  /// window". Does not wait.
+  static void flash(Rect r, {int ms = 1500}) {
+    if (!available) return;
+    unawaited(Process.start(exe, [
+      '--flash',
+      '${r.left.round()}',
+      '${r.top.round()}',
+      '${r.width.round()}',
+      '${r.height.round()}',
+      '$ms',
+    ]).then((p) {
+      p.stdout.drain<void>().ignore();
+      p.stderr.drain<void>().ignore();
+    }).catchError((Object e) {
+      DiagLog.log('screen', 'frame not shown: $e');
+    }));
+  }
+
   /// The part clicked (screen pixels); null rect: given up, or Esc ([back]).
   static Future<({Rect? rect, bool back})> run(String tip) async {
     if (!available) return (rect: null, back: true);
