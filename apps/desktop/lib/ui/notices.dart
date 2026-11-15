@@ -93,11 +93,6 @@ class Notices {
     await _toFront();
     final ctx = _ctx;
     if (ctx == null || !ctx.mounted) return;
-    // Closes by itself when the request times out on the server.
-    unawaited(a.answer.future.then((_) {
-      final c = _ctx;
-      if (c != null && c.mounted && _openAsk == a) Navigator.of(c).pop();
-    }));
     _openAsk = a;
     var quiet = false;
     AppNav.instance.needAttention(true);
@@ -106,6 +101,9 @@ class Notices {
       answer = await showLrDialog<AskAnswer>(
       context: ctx,
       barrierDismissible: false,
+      // Closes by itself when the request times out on the server (this
+      // dialog only, not whatever is open over it).
+      closeWhen: a.answer.future,
       builder: (c) => StatefulBuilder(
         builder: (c, setLocal) => AlertDialog(
           title: Row(children: [
@@ -168,14 +166,10 @@ class Notices {
     await _toFront();
     final ctx = _ctx;
     if (ctx == null || !ctx.mounted) return;
-    var open = true;
-    unawaited(a.answer.future.then((_) {
-      final c = _ctx;
-      if (open && c != null && c.mounted) Navigator.of(c).pop();
-    }));
     final yes = await showLrDialog<bool>(
       context: ctx,
       barrierDismissible: false,
+      closeWhen: a.answer.future,
       builder: (c) => AlertDialog(
         title: Text(tr('family.join_title', {'name': a.device.name})),
         content: Text(tr('family.join_body')),
@@ -185,7 +179,6 @@ class Notices {
         ],
       ),
     );
-    open = false;
     s.server.answerMembership(a, allow: yes == true);
   }
 

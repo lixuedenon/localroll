@@ -1,4 +1,6 @@
 // apps/desktop/lib/ui/lr_dialog.dart
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'light_look.dart';
@@ -13,16 +15,48 @@ Future<T?> showLrDialog<T>({
   String? barrierLabel,
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
-}) =>
-    showDialog<T>(
-      context: context,
-      barrierDismissible: barrierDismissible,
-      barrierColor: barrierColor ?? const Color(0x661B2433),
-      barrierLabel: barrierLabel,
-      useRootNavigator: useRootNavigator,
-      routeSettings: routeSettings,
-      builder: (c) => Theme(data: lightDialogTheme(Theme.of(c)), child: Builder(builder: builder)),
-    );
+  Future<Object?>? closeWhen,
+}) {
+  // [closeWhen]: closes THIS dialog when it completes — even with another
+  // dialog or panel opened over it (Navigator.pop would close that one).
+  Route<dynamic>? route;
+  var due = false;
+  final when = closeWhen;
+  if (when != null) {
+    unawaited(when.then((_) {}, onError: (Object _) {}).whenComplete(() {
+      due = true;
+      closeDialogRoute(route);
+    }));
+  }
+  return showDialog<T>(
+    context: context,
+    barrierDismissible: barrierDismissible,
+    barrierColor: barrierColor ?? const Color(0x661B2433),
+    barrierLabel: barrierLabel,
+    useRootNavigator: useRootNavigator,
+    routeSettings: routeSettings,
+    builder: (c) {
+      if (route == null) {
+        route = ModalRoute.of(c);
+        // Done before the dialog was even built: close it right away.
+        if (due) WidgetsBinding.instance.addPostFrameCallback((_) => closeDialogRoute(route));
+      }
+      return Theme(data: lightDialogTheme(Theme.of(c)), child: Builder(builder: builder));
+    },
+  );
+}
+
+/// Closes [route] itself, wherever it is in the stack (not just the top one).
+void closeDialogRoute(Route<dynamic>? route) {
+  if (route == null || !route.isActive) return;
+  final nav = route.navigator;
+  if (nav == null) return;
+  if (route.isCurrent) {
+    nav.pop();
+  } else {
+    nav.removeRoute(route);
+  }
+}
 
 /// The light theme for dialogs (fonts kept from [base]).
 ThemeData lightDialogTheme(ThemeData base) {

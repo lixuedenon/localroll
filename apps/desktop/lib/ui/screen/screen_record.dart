@@ -2225,13 +2225,14 @@ class _Bar extends StatelessWidget {
 
 /// "Making the video…" with its progress, until [done].
 void _showMaking(BuildContext context, Future<Object?> done, ValueNotifier<double> progress, VoidCallback cancel) {
+  var finished = false;
+  unawaited(done.then((_) {}, onError: (Object _) {}).whenComplete(() => finished = true));
   unawaited(showLrDialog<void>(
     context: context,
     barrierDismissible: false,
+    // Closes this one when made, even with the transfers panel over it.
+    closeWhen: done,
     builder: (ctx) {
-      unawaited(done.whenComplete(() {
-        if (ctx.mounted) Navigator.of(ctx).pop();
-      }));
       return AlertDialog(
         title: Text(tr('screen.making')),
         content: SizedBox(
@@ -2245,7 +2246,8 @@ void _showMaking(BuildContext context, Future<Object?> done, ValueNotifier<doubl
             ]),
           ),
         ),
-        actions: [TextButton(onPressed: cancel, child: Text(tr('common.cancel')))],
+        // Already made (and somehow still shown): the button just closes it.
+        actions: [TextButton(onPressed: () => finished ? Navigator.pop(ctx) : cancel(), child: Text(tr('common.cancel')))],
       );
     },
   ));

@@ -729,7 +729,9 @@ class SendJob {
 /// file continues from what the other PC already has.
 class PeerSender extends ChangeNotifier {
   PeerSender({required this.settings, required this.peers}) {
-    _check = Timer.periodic(const Duration(minutes: 1), (_) => _checkHeld());
+    // Often: a phone tells where it receives a moment after it is online,
+    // and this is only a look at what is in memory (no network).
+    _check = Timer.periodic(const Duration(seconds: 5), (_) => _checkHeld());
   }
 
   /// How long a transfer waits for its device to come online.
@@ -793,6 +795,9 @@ class PeerSender extends ChangeNotifier {
     for (final j in jobs) {
       if (j.state != SendJobState.held || j.peer.id != id) continue;
       final fresh = j.toPhone ? phoneTarget?.call(id) : settings.peers[id];
+      // A phone that has not said yet where it receives: a few seconds
+      // more ([_checkHeld] looks again).
+      if (j.toPhone && fresh == null) continue;
       if (fresh != null) j.peer = fresh;
       j.state = SendJobState.waiting;
       any = true;
@@ -806,7 +811,7 @@ class PeerSender extends ChangeNotifier {
 
   String deviceName(String id) => settings.peers[id]?.name ?? settings.trusted[id]?.name ?? id;
 
-  /// Every minute: online again (missed the moment)? Waited too long?
+  /// Every few seconds: online again (missed the moment)? Waited too long?
   void _checkHeld() {
     final now = DateTime.now();
     var changed = false;
