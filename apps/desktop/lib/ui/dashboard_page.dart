@@ -7,12 +7,14 @@ import 'package:localroll_core/localroll_core.dart';
 
 import '../app_services.dart';
 import '../l10n/l10n.dart';
+import '../services/elevation.dart';
 import '../services/file_actions.dart';
 import '../services/library_index.dart';
 import '../services/network.dart';
 import '../services/peers.dart';
 import '../services/received_files.dart';
 import 'add_device_dialog.dart';
+import 'title_bar.dart' show reopenAsUser;
 import 'app_nav.dart';
 import 'feature_list.dart';
 import 'breathing.dart';
@@ -597,6 +599,8 @@ class _DashboardPageState extends State<DashboardPage> {
     final s = widget.services;
     final net = _net;
     return <(IconData, String, VoidCallback?)>[
+      // Started as administrator: Windows blocks dragging files in.
+      if (Elevation.isAdmin) (Icons.admin_panel_settings_rounded, tr('home.issue_admin'), () => reopenAsUser(context, s)),
       if (s.library.offline)
         (
           s.library.loss == LibraryLoss.gone ? Icons.folder_off_rounded : Icons.usb_off_rounded,

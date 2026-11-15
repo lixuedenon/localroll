@@ -10,6 +10,7 @@ import '../l10n/l10n.dart';
 import '../services/receive_hub.dart';
 import '../services/run_flag.dart';
 import '../services/bg_tasks.dart';
+import '../services/elevation.dart';
 import 'app_nav.dart';
 import 'theme.dart';
 import 'transfers_panel.dart';
@@ -272,16 +273,37 @@ Future<void> confirmExit(AppServices services) async {
     ),
   );
   _asking = false;
-  if (ok == true) {
-    // Disappear at once; tidy up behind the scenes, then end the process.
-    try {
-      await windowManager.hide();
-    } catch (_) {}
-    await services.shutdown();
-    RunFlag.clear();
-    try {
-      await windowManager.destroy().timeout(const Duration(seconds: 2));
-    } catch (_) {}
-    exit(0);
-  }
+  if (ok == true) await _quit(services);
+}
+
+Future<void> _quit(AppServices services) async {
+  // Disappear at once; tidy up behind the scenes, then end the process.
+  try {
+    await windowManager.hide();
+  } catch (_) {}
+  await services.shutdown();
+  RunFlag.clear();
+  try {
+    await windowManager.destroy().timeout(const Duration(seconds: 2));
+  } catch (_) {}
+  exit(0);
+}
+
+/// Running as administrator (files can't be dragged in): open again as a
+/// normal user, after asking.
+Future<void> reopenAsUser(BuildContext context, AppServices services) async {
+  final ok = await showLrDialog<bool>(
+    context: context,
+    builder: (c) => AlertDialog(
+      icon: const Icon(Icons.admin_panel_settings_rounded, color: LrColors.safelight, size: 32),
+      title: Text(tr('admin.title')),
+      content: SizedBox(width: 440, child: Text(tr('admin.body'))),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('common.cancel'))),
+        FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(tr('admin.reopen'))),
+      ],
+    ),
+  );
+  if (ok != true) return;
+  if (await Elevation.startAgainAsUser()) await _quit(services);
 }

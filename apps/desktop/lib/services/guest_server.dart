@@ -471,7 +471,8 @@ Future<bool> allowGuestPort(int port) async {
     if (has.exitCode == 0 && '${has.stdout}'.contains('$port')) return true;
     // Every network type: Windows often marks a home Wi-Fi "Public". Safe
     // enough: the page answers only while it is open, and only to the code.
-    final cmd = 'netsh advfirewall firewall delete rule name=\\"LocalRoll Guest $port\\" & '
+    final cmd = 'netsh advfirewall firewall delete rule name=\\"Keepnear Guest $port\\" & '
+        'netsh advfirewall firewall delete rule name=\\"LocalRoll Guest $port\\" & '
         'netsh advfirewall firewall add rule name=\\"Keepnear Guest $port\\" dir=in action=allow protocol=TCP localport=$port profile=any';
     final r = await Process.run('powershell', [
       '-NoProfile',

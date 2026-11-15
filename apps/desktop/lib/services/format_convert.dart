@@ -197,6 +197,39 @@ class FormatTable {
     }
   }
 
+  /// The usual best target for each format (shown first, "recommended"):
+  /// what opens most easily almost anywhere.
+  static const _best = {
+    'heic': 'jpg', 'webp': 'jpg', 'bmp': 'jpg', 'tiff': 'jpg', 'avif': 'jpg', 'png': 'jpg', 'gif': 'png', 'jpg': 'pdf',
+    'mov': 'mp4', 'mkv': 'mp4', 'avi': 'mp4', 'wmv': 'mp4', 'webm': 'mp4', 'flv': 'mp4', '3gp': 'mp4', 'mts': 'mp4', 'mp4': 'mp3',
+    'm4a': 'mp3', 'wav': 'mp3', 'flac': 'mp3', 'ogg': 'mp3', 'opus': 'mp3', 'wma': 'mp3', 'amr': 'mp3',
+    'pdf': 'word', 'word': 'pdf', 'excel': 'pdf', 'ppt': 'pdf', 'csv': 'excel', 'txt': 'pdf',
+  };
+
+  /// Everything [path] can become, over all kinds (a JPG: other pictures
+  /// and a PDF; an MP4: other videos, its sound, a GIF). Recommended first.
+  static List<ConvChoice> choicesFor(String path, ConvCat first) {
+    final out = <ConvChoice>[];
+    final seen = <String>{};
+    for (final c in [first, ...ConvCat.values.where((x) => x != first)]) {
+      final list = of(c);
+      Fmt? from;
+      for (final f in list) {
+        if (f.takes(path)) {
+          from = f;
+          break;
+        }
+      }
+      if (from == null) continue;
+      for (final to in list) {
+        final o = op(c, from, to);
+        if (o == null || !seen.add(to.id)) continue;
+        out.add(ConvChoice(c, from, to, o, recommended: _best[from.id] == to.id));
+      }
+    }
+    return [...out.where((x) => x.recommended), ...out.where((x) => !x.recommended)];
+  }
+
   /// The kind and format a file is (the current kind first).
   static (ConvCat, Fmt)? find(String path, ConvCat first) {
     for (final c in [first, ...ConvCat.values.where((x) => x != first)]) {
@@ -205,6 +238,24 @@ class FormatTable {
       }
     }
     return null;
+  }
+}
+
+/// One thing a file can become, with what it is usually for.
+class ConvChoice {
+  const ConvChoice(this.cat, this.from, this.to, this.op, {this.recommended = false});
+
+  final ConvCat cat;
+  final Fmt from;
+  final Fmt to;
+  final ConvOp op;
+  final bool recommended;
+
+  /// The text key saying where this format is used.
+  String get useKey {
+    if ((from.id == 'pdf' || from.id == 'ppt') && (to.id == 'jpg' || to.id == 'png')) return 'conv.use.pages';
+    if (to.id == 'gif' && cat == ConvCat.video) return 'conv.use.gif_video';
+    return 'conv.use.${to.id}';
   }
 }
 

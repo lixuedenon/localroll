@@ -9,6 +9,7 @@ import 'package:localroll_core/localroll_core.dart' show DiagLog;
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/converter.dart';
+import '../../services/elevation.dart';
 import '../../services/file_tools.dart';
 import '../../services/format_convert.dart';
 import '../../services/win_dialogs.dart';
@@ -83,14 +84,23 @@ class _ConvertPageState extends State<ConvertPage> {
   /// left out (and said).
   void _add(List<String> paths) {
     if (paths.isEmpty) return;
-    final first = paths.firstWhere((p) => !_left.takes(p), orElse: () => '');
-    if (_files.isEmpty && first.isNotEmpty && !paths.any(_left.takes)) {
-      final found = FormatTable.find(first, _cat);
-      if (found != null) {
-        final (c, f) = found;
-        _cat = c;
-        _from = FormatTable.of(c).indexWhere((x) => x.id == f.id);
-        _fixRight();
+    if (_files.isEmpty) {
+      // The wheels follow the format most of the files are (ties: the kind
+      // shown now).
+      final counts = <String, (int, ConvCat, Fmt)>{};
+      for (final p in paths) {
+        final found = FormatTable.find(p, _cat);
+        if (found == null) continue;
+        final k = '${found.$1.name}/${found.$2.id}';
+        counts[k] = ((counts[k]?.$1 ?? 0) + 1, found.$1, found.$2);
+      }
+      if (counts.isNotEmpty) {
+        final best = counts.values.reduce((a, b) => b.$1 > a.$1 ? b : a);
+        if (best.$2 != _cat || best.$3.id != _left.id) {
+          _cat = best.$2;
+          _from = FormatTable.of(best.$2).indexWhere((x) => x.id == best.$3.id);
+          _fixRight();
+        }
       }
     }
     final ok = [for (final p in paths) if (_left.takes(p) && !_files.contains(p)) p];
@@ -232,6 +242,11 @@ class _ConvertPageState extends State<ConvertPage> {
                 ]),
               );
             }),
+            // Files in: what they can become, and what each is for.
+            if (_files.isNotEmpty) ...[
+              const SizedBox(height: 18),
+              _suggestCard(),
+            ],
             const SizedBox(height: 18),
             _overview(),
           ]),
@@ -259,6 +274,61 @@ class _ConvertPageState extends State<ConvertPage> {
             Text(_catLabel(c), style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w700, color: on ? Colors.white : LightLook.text)),
             const SizedBox(width: 8),
             Text('${_catSub(c)}…', style: TextStyle(fontSize: 12, color: on ? const Color(0xFFDCE6FF) : LightLook.muted)),
+          ]),
+        ),
+      ),
+    );
+  }
+
+  /// "Can become": every format the files can be turned into, with where
+  /// it is used; a click sets the wheels.
+  Widget _suggestCard() {
+    final found = FormatTable.find(_files.first, _cat);
+    final choices = FormatTable.choicesFor(_files.first, found?.$1 ?? _cat);
+    if (choices.isEmpty) return const SizedBox.shrink();
+    return _card(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Text(tr('conv.suggest', {'what': choices.first.from.label}),
+          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: LightLook.text)),
+      const SizedBox(height: 4),
+      Text(tr('conv.suggest_hint'), style: const TextStyle(color: LightLook.muted, fontSize: 12.5)),
+      const SizedBox(height: 10),
+      for (final c in choices) _choice(c),
+    ]));
+  }
+
+  Widget _choice(ConvChoice c) {
+    final on = c.cat == _cat && c.from.id == _left.id && c.to.id == _right.id;
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => setState(() {
+          final list = FormatTable.of(c.cat);
+          _cat = c.cat;
+          _from = list.indexWhere((x) => x.id == c.from.id);
+          _to = list.indexWhere((x) => x.id == c.to.id);
+        }),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: on ? const Color(0xFFE8EFFF) : const Color(0xFFF8FAFF),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: on ? LightLook.blue : const Color(0xFFE3E8F2), width: on ? 2 : 1),
+          ),
+          child: Row(children: [
+            SizedBox(
+              width: 120,
+              child: Text(c.to.label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: LightLook.text)),
+            ),
+            if (c.recommended) ...[
+              _tag(tr('conv.recommended'), const Color(0xFFE3F5E9), const Color(0xFF15803D)),
+              const SizedBox(width: 10),
+            ],
+            Expanded(child: Text(tr(c.useKey), style: const TextStyle(fontSize: 13.5, color: Color(0xFF38445A)))),
+            if (c.op.office) ...[
+              const SizedBox(width: 8),
+              _tag(tr('conv.needs_office'), const Color(0xFFFFF0E3), const Color(0xFFC0560A)),
+            ],
           ]),
         ),
       ),
@@ -326,7 +396,8 @@ class _ConvertPageState extends State<ConvertPage> {
               border: Border.all(color: _over ? LightLook.blue : const Color(0xFFB9C8EA), width: _over ? 2 : 1.5),
             ),
             child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Text(tr('conv.drop', {'what': _left.label}),
+              Text(Elevation.isAdmin ? tr('conv.drop_admin') : tr('conv.drop', {'what': _left.label}),
+                  textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 16.5, fontWeight: FontWeight.w600, color: LightLook.text)),
               const SizedBox(height: 10),
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -464,8 +535,14 @@ class _Wheel extends StatelessWidget {
         Text(caption, style: const TextStyle(color: LightLook.muted, fontSize: 13)),
         const SizedBox(height: 8),
         Listener(
+          // The wheel's own: the page around does not scroll with it (it
+          // used to, going down, so the wheel slid away under the mouse).
           onPointerSignal: (e) {
-            if (e is PointerScrollEvent && e.scrollDelta.dy != 0) _step(e.scrollDelta.dy > 0 ? 1 : -1);
+            if (e is PointerScrollEvent && e.scrollDelta.dy != 0) {
+              GestureBinding.instance.pointerSignalResolver.register(e, (ev) {
+                if (ev is PointerScrollEvent) _step(ev.scrollDelta.dy > 0 ? 1 : -1);
+              });
+            }
           },
           child: Container(
             height: 300,

@@ -15,6 +15,7 @@ import 'package:window_manager/window_manager.dart';
 
 import 'app_services.dart';
 import 'l10n/l10n.dart';
+import 'services/elevation.dart';
 import 'services/autostart.dart';
 import 'services/boot.dart';
 import 'services/face_engine.dart';
@@ -74,6 +75,8 @@ Future<void> main(List<String> args) async {
   await RunFlag.start();
   Boot.logReady();
   Boot.mark('log');
+  // Elevated (started from an administrator shell): no drag and drop.
+  if (Elevation.isAdmin) DiagLog.log('start', 'running as administrator: Windows blocks dragging files in');
   MediaKit.ensureInitialized();
   // Our own title bar replaces the native one; closing asks first.
   await windowManager.ensureInitialized();
