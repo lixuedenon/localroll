@@ -2144,5 +2144,9 @@
   "fw.later": "Nanti",
   "fw.allow": "Izinkan",
   "fw.fixed": "Selesai: perangkat lain sekarang bisa mengirim file ke PC ini",
-  "fw.not_fixed": "Tidak berubah (mengklik Tidak?). Bisa dicoba lagi dari beranda kapan saja."
+  "fw.not_fixed": "Tidak berubah (mengklik Tidak?). Bisa dicoba lagi dari beranda kapan saja.",
+  "pdfedit.font_same": "Font: yang asli ({name}) — tampak persis sama",
+  "pdfedit.font_near": "Font: {name} (font asli tidak memuat beberapa huruf ini; dipakai yang paling mirip)",
+  "pdfedit.brush": "Salin format",
+  "pdfedit.brush_hint": "Klik teks mana pun di halaman untuk memakai font, ukuran, tebal, miring, dan warnanya"
 }

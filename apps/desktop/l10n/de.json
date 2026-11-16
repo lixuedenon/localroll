@@ -2144,5 +2144,9 @@
   "fw.later": "Später",
   "fw.allow": "Zulassen",
   "fw.fixed": "Fertig: Andere Geräte können jetzt Dateien an diesen PC senden",
-  "fw.not_fixed": "Nicht geändert („Nein“ geklickt?). Auf der Startseite jederzeit erneut versuchen."
+  "fw.not_fixed": "Nicht geändert („Nein“ geklickt?). Auf der Startseite jederzeit erneut versuchen.",
+  "pdfedit.font_same": "Schrift: die ursprüngliche ({name}) – sieht genau gleich aus",
+  "pdfedit.font_near": "Schrift: {name} (der ursprünglichen fehlen einige dieser Zeichen; die ähnlichste wird verwendet)",
+  "pdfedit.brush": "Format übernehmen",
+  "pdfedit.brush_hint": "Klick auf einen Text der Seite, um seine Schrift, Größe, Fett, Kursiv und Farbe zu übernehmen"
 }

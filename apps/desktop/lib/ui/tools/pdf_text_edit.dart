@@ -12,6 +12,7 @@ import 'package:pdfrx/pdfrx.dart';
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/file_tools.dart';
+import '../../services/pdf_fonts.dart';
 import '../../services/tool_outputs.dart';
 import '../light_look.dart';
 import '../lr_dialog.dart';
@@ -31,17 +32,25 @@ class _Line {
   /// Estimated font size (points) and baseline.
   final double size;
   final double base;
+
+  /// How the PDF draws it (its font, size, bold, italic, colour), when the
+  /// PDF helper could tell.
+  PdfTextStyle? style;
 }
 
 /// A line changed.
 class _Edit {
-  _Edit(this.line, this.text, this.size, this.bold, this.serif);
+  _Edit(this.line, this.text, this.size, this.bold, this.italic, this.color, this.from);
 
   final _Line line;
   String text;
   double size;
   bool bold;
-  bool serif;
+  bool italic;
+  Color? color;
+
+  /// Whose look it has: the line itself, or one picked with the brush.
+  _Line from;
 }
 
 /// Changing words in a PDF in place: click a line, type, done. Only the
@@ -76,7 +85,18 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
   final _ctl = TextEditingController();
   final _focus = FocusNode();
   double _size = 12;
-  bool _bold = false, _serif = false;
+  bool _bold = false, _italic = false;
+  Color? _color;
+
+  /// Whose look the line being changed takes (itself unless brushed).
+  _Line? _from;
+
+  /// The brush is on: the next line clicked gives its look.
+  bool _brush = false;
+
+  /// Per page: which letters each of its fonts holds (a font is reused only
+  /// when it holds every new letter).
+  final Map<int, Map<int, Set<int>>> _fontChars = {};
 
   @override
   void initState() {
@@ -122,6 +142,22 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
     pic?.dispose();
     final px = await im?.toByteData(format: ui.ImageByteFormat.rawRgba);
     final lines = await _readLines(page, i);
+    // How each line is drawn (font, size, bold, italic, colour).
+    final styles = await PdfBuilder.styles(widget.path, i);
+    final chars = <int, Set<int>>{};
+    for (final st in styles) {
+      (chars[st.font] ??= <int>{}).addAll(st.text.runes);
+    }
+    for (final l in lines) {
+      PdfTextStyle? best;
+      for (final st in styles) {
+        final cx = (st.l + st.r) / 2, cy = (st.b + st.t) / 2;
+        final tol = (l.box.top - l.box.bottom) * 0.3 + 1;
+        if (cx < l.box.left - tol || cx > l.box.right + tol || cy < l.box.bottom - tol || cy > l.box.top + tol) continue;
+        if (best == null || st.text.trim().length > best.text.trim().length) best = st;
+      }
+      l.style = best;
+    }
     if (!mounted) {
       im?.dispose();
       return;
@@ -130,6 +166,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
       if (im != null) _pics[i] = im;
       if (px != null) _px[i] = px;
       _lines[i] = lines;
+      _fontChars[i] = chars;
     });
   }
 
@@ -263,30 +300,70 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
 
   _Edit? _editOf(_Line l) => _edits.where((e) => identical(e.line, l)).firstOrNull;
 
+  static Color? _rgbColor(String? hex) {
+    final v = int.tryParse(hex ?? '', radix: 16);
+    return v == null ? null : Color(0xFF000000 | v);
+  }
+
+  /// The look [l] is drawn with: size, bold, italic, colour.
+  (double, bool, bool, Color?) _lookOf(_Line l) {
+    final st = l.style;
+    final size = st != null && st.size > 0 ? st.size : l.size;
+    final color = _rgbColor(st?.rgb);
+    // The PDF's colour unless it says plain black while the page shows
+    // another (some PDFs colour text in ways the helper can't read).
+    final seen = _colorOf(l);
+    final c = color == null || (color.toARGB32() == 0xFF000000 && seen != null && _far(seen, color)) ? seen : color;
+    return (double.parse(size.toStringAsFixed(1)), st?.bold ?? false, st?.slanted ?? false, c);
+  }
+
+  static bool _far(Color a, Color b) =>
+      ((a.r - b.r).abs() + (a.g - b.g).abs() + (a.b - b.b).abs()) * 255 > 120;
+
   void _start(_Line l) {
     final e = _editOf(l);
+    final (size, bold, italic, color) = _lookOf(l);
     setState(() {
+      _brush = false;
       _editing = l;
       _ctl.text = e?.text ?? l.text;
       _ctl.selection = TextSelection(baseOffset: 0, extentOffset: _ctl.text.length);
-      _size = e?.size ?? double.parse(l.size.toStringAsFixed(1));
-      _bold = e?.bold ?? false;
-      _serif = e?.serif ?? false;
+      _size = e?.size ?? size;
+      _bold = e?.bold ?? bold;
+      _italic = e?.italic ?? italic;
+      _color = e?.color ?? color;
+      _from = e?.from ?? l;
+    });
+    _focus.requestFocus();
+  }
+
+  /// The brush: [src]'s look for the line being changed.
+  void _copyLook(_Line src) {
+    final (size, bold, italic, color) = _lookOf(src);
+    setState(() {
+      _brush = false;
+      _size = size;
+      _bold = bold;
+      _italic = italic;
+      _color = color;
+      _from = src;
     });
     _focus.requestFocus();
   }
 
   void _cancel() {
-    if (_editing != null) setState(() => _editing = null);
+    if (_editing != null) setState(() => _editing = _from = null);
   }
 
   void _done() {
     final l = _editing;
     if (l == null) return;
     final text = _ctl.text.replaceAll('\n', ' ').trimRight();
+    final (size, bold, italic, _) = _lookOf(l);
     setState(() {
       final e = _editOf(l);
-      if (text == l.text && (e == null || (e.size == _size && !_bold))) {
+      final same = text == l.text && _size == size && _bold == bold && _italic == italic && identical(_from ?? l, l);
+      if (same) {
         // Back as it was.
         if (e != null) _edits.remove(e);
       } else if (e != null) {
@@ -294,65 +371,89 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
           ..text = text
           ..size = _size
           ..bold = _bold
-          ..serif = _serif;
+          ..italic = _italic
+          ..color = _color
+          ..from = _from ?? l;
       } else {
-        _edits.add(_Edit(l, text, _size, _bold, _serif));
+        _edits.add(_Edit(l, text, _size, _bold, _italic, _color, _from ?? l));
       }
       _editing = null;
+      _from = null;
+      _brush = false;
     });
   }
 
-  /// The font file for [text]: Korean, Chinese / Japanese, or Latin (serif
-  /// or not); the PDF's own font often holds only the letters it used.
-  static String? fontFor(String text, {required bool bold, required bool serif}) {
-    final dir = '${Platform.environment['WINDIR'] ?? r'C:\Windows'}\\Fonts';
-    final codes = text.runes;
-    final hangul = codes.any((c) => c >= 0xAC00 && c <= 0xD7AF);
-    final cjk = codes.any(_cjk);
-    final names = hangul
-        ? (bold ? ['malgunbd.ttf', 'malgun.ttf'] : ['malgun.ttf'])
-        : cjk
-            ? (bold ? ['Dengb.ttf', 'simhei.ttf', 'Deng.ttf'] : ['Deng.ttf', 'simhei.ttf'])
-            : serif
-                ? (bold ? ['timesbd.ttf', 'times.ttf'] : ['times.ttf'])
-                : (bold ? ['arialbd.ttf', 'arial.ttf'] : ['arial.ttf']);
-    for (final n in [...names, 'arial.ttf']) {
-      final f = File('$dir\\$n');
-      if (f.existsSync()) return f.path;
+  /// The PDF's own font can write [text] for [target], looking like [from]:
+  /// same page, same bold / italic, and it holds every new letter (a PDF
+  /// usually carries only the letters it used).
+  bool _canReuse(String text, _Line from, _Line target, bool bold, bool italic) {
+    final st = from.style;
+    if (st == null || from.page != target.page || bold != st.bold || italic != st.slanted) return false;
+    final chars = _fontChars[from.page]?[st.font] ?? const <int>{};
+    for (final r in text.runes) {
+      if (r == 32 || chars.contains(r)) continue;
+      if (!st.embedded && r < 128) continue;
+      return false;
     }
-    return null;
+    return true;
   }
 
-  static String _family(String text, bool serif) {
-    final cjk = text.runes.any(_cjk);
-    if (cjk) return 'DengXian';
-    return serif ? 'Times New Roman' : 'Arial';
+  /// "Font: …" for the line being changed.
+  String _fontNote(String text, _Line from, _Line target, bool bold, bool italic) {
+    final st = from.style;
+    if (_canReuse(text, from, target, bold, italic)) {
+      return tr('pdfedit.font_same', {'name': PdfFonts.familyOf(st?.name) ?? _plainName(st?.name ?? '')});
+    }
+    final fam = PdfFonts.familyOf(st?.name);
+    final cjk = text.runes.any(PdfFonts.isCjk);
+    final near = fam != null && (!cjk || PdfFonts.familyOf(st?.name) != 'Times New Roman') ? fam : (cjk ? 'Microsoft YaHei' : 'Arial');
+    return tr('pdfedit.font_near', {'name': near});
+  }
+
+  static String _plainName(String n) => n.contains('+') && n.indexOf('+') == 6 ? n.substring(7) : n;
+
+  /// The family to show [e]'s words in on screen.
+  String _screenFamily(String text, _Line from) {
+    final fam = PdfFonts.familyOf(from.style?.name);
+    if (fam != null) return fam;
+    return text.runes.any(PdfFonts.isCjk) ? 'Microsoft YaHei' : 'Arial';
   }
 
   Future<void> _save({required bool replace}) async {
     final d = _doc;
     if (d == null || _edits.isEmpty) return;
     _done();
-    final plan = <PdfPlanPage>[];
-    for (var i = 0; i < d.pages.length; i++) {
-      plan.add(PdfFromDoc(widget.path, i, edits: [
-        for (final e in _edits)
-          if (e.line.page == i)
-            PdfTextEdit(
-              l: e.line.box.left,
-              b: e.line.box.bottom,
-              r: e.line.box.right,
-              t: e.line.box.top,
-              x: e.line.box.left,
-              base: e.line.base,
-              size: e.size,
-              font: fontFor(e.text, bold: e.bold, serif: e.serif) ?? '',
-              text: e.text,
-              // The colour the old words had (red stays red).
-              rgb: _colorOf(e.line) == null ? 'auto' : _hex(_colorOf(e.line)!),
-            ),
-      ]));
+    // Each change: the PDF's own font when it holds all the new letters,
+    // else the closest Windows font (bold / italic drawn if it has none).
+    final made = <int, List<PdfTextEdit>>{};
+    for (final e in _edits) {
+      String font;
+      var fake = 0;
+      if (_canReuse(e.text, e.from, e.line, e.bold, e.italic)) {
+        final st = e.from.style!;
+        font = identical(e.from, e.line) ? 'obj' : 'objat:${(st.l + st.r) / 2},${(st.b + st.t) / 2}';
+      } else {
+        final c = await PdfFonts.pick(e.text, like: e.from.style?.name, bold: e.bold, italic: e.italic);
+        font = c?.path ?? '';
+        if (e.bold && !(c?.hasBold ?? false)) fake |= 1;
+        if (e.italic && !(c?.hasItalic ?? false)) fake |= 2;
+      }
+      (made[e.line.page] ??= []).add(PdfTextEdit(
+        l: e.line.box.left,
+        b: e.line.box.bottom,
+        r: e.line.box.right,
+        t: e.line.box.top,
+        x: e.line.box.left,
+        base: e.from.style != null && identical(e.from, e.line) ? e.line.base : e.line.base,
+        size: e.size,
+        font: font,
+        text: e.text,
+        // The colour the old words had (red stays red), or the brushed one.
+        rgb: e.color == null ? 'auto' : _hex(e.color!),
+        fake: fake,
+      ));
     }
+    final plan = <PdfPlanPage>[for (var i = 0; i < d.pages.length; i++) PdfFromDoc(widget.path, i, edits: made[i] ?? const [])];
     final out = replace ? '${widget.path}.lr-edit.pdf' : toolOutPath(s, widget.path, tr('pdfedit.suffix'), 'pdf');
     final n = _edits.length;
     String? err;
@@ -456,14 +557,14 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
                         Positioned.fromRect(
                           rect: at(l.box).inflate(2),
                           child: MouseRegion(
-                            cursor: SystemMouseCursors.text,
+                            cursor: _brush ? SystemMouseCursors.precise : SystemMouseCursors.text,
                             onEnter: (_) => setState(() => _hover = l),
                             onExit: (_) {
                               if (identical(_hover, l)) setState(() => _hover = null);
                             },
                             child: GestureDetector(
                               behavior: HitTestBehavior.opaque,
-                              onTap: () => _start(l),
+                              onTap: () => _brush && _editing != null ? _copyLook(l) : _start(l),
                               child: Container(
                                 decoration: identical(_hover, l)
                                     ? BoxDecoration(
@@ -498,8 +599,9 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
               fontSize: e.size * scale,
               height: 1.0,
               fontWeight: e.bold ? FontWeight.w700 : FontWeight.w400,
-              fontFamily: _family(e.text, e.serif),
-              color: _colorOf(e.line) ?? const Color(0xFF1A1A1A),
+              fontStyle: e.italic ? FontStyle.italic : FontStyle.normal,
+              fontFamily: _screenFamily(e.text, e.from),
+              color: e.color ?? const Color(0xFF1A1A1A),
               decoration: TextDecoration.underline,
               decorationColor: const Color(0x8012A35F),
               decorationThickness: 2,
@@ -540,11 +642,14 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
                   fontSize: _size * scale,
                   height: 1.15,
                   fontWeight: _bold ? FontWeight.w700 : FontWeight.w400,
-                  fontFamily: _family(_ctl.text, _serif),
-                  color: _colorOf(l) ?? const Color(0xFF1A1A1A),
+                  fontStyle: _italic ? FontStyle.italic : FontStyle.normal,
+                  fontFamily: _screenFamily(_ctl.text, _from ?? l),
+                  color: _color ?? const Color(0xFF1A1A1A),
                 ),
                 decoration: const InputDecoration(isDense: true, border: InputBorder.none, contentPadding: EdgeInsets.zero),
                 onSubmitted: (_) => _done(),
+                // The font note follows what is typed.
+                onChanged: (_) => setState(() {}),
               ),
             ),
           ),
@@ -559,7 +664,8 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
           borderRadius: BorderRadius.circular(12),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(mainAxisSize: MainAxisSize.min, children: [
               Text(tr('pdfedit.size'), style: const TextStyle(fontSize: 12.5)),
               IconButton(
                 visualDensity: VisualDensity.compact,
@@ -581,15 +687,45 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
               ),
               const SizedBox(width: 6),
               FilterChip(
-                label: Text(tr('pdfedit.serif')),
-                selected: _serif,
-                onSelected: (v) => setState(() => _serif = v),
+                label: const Text('I', style: TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.w700)),
+                selected: _italic,
+                onSelected: (v) => setState(() => _italic = v),
+                visualDensity: VisualDensity.compact,
+              ),
+              const SizedBox(width: 8),
+              // The colour (the original's, or the brushed text's).
+              Container(
+                width: 18,
+                height: 18,
+                decoration: BoxDecoration(
+                  color: _color ?? const Color(0xFF1A1A1A),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                  boxShadow: const [BoxShadow(color: Color(0x40000000), blurRadius: 2)],
+                ),
+              ),
+              const SizedBox(width: 6),
+              // The brush: take the look of another line.
+              FilterChip(
+                avatar: const Icon(Icons.format_paint_rounded, size: 16),
+                label: Text(tr('pdfedit.brush')),
+                selected: _brush,
+                onSelected: (v) => setState(() => _brush = v),
                 visualDensity: VisualDensity.compact,
               ),
               const SizedBox(width: 10),
               TextButton(onPressed: _cancel, child: Text(tr('common.cancel'))),
               const SizedBox(width: 4),
               FilledButton(onPressed: _done, child: Text(tr('pdfedit.done'))),
+              ]),
+              // Which font the new words get; what the brush does.
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4, 0, 4, 4),
+                child: Text(
+                  _brush ? tr('pdfedit.brush_hint') : _fontNote(_ctl.text, _from ?? l, l, _bold, _italic),
+                  style: TextStyle(fontSize: 12, color: _brush ? LightLook.blue : LightLook.muted),
+                ),
+              ),
             ]),
           ),
         ),

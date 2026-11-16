@@ -2144,5 +2144,9 @@
   "fw.later": "Plus tard",
   "fw.allow": "Autoriser",
   "fw.fixed": "C’est fait : les autres appareils peuvent envoyer des fichiers à ce PC",
-  "fw.not_fixed": "Rien n'a changé (Non cliqué ?). Vous pouvez réessayer depuis l'accueil à tout moment."
+  "fw.not_fixed": "Rien n'a changé (Non cliqué ?). Vous pouvez réessayer depuis l'accueil à tout moment.",
+  "pdfedit.font_same": "Police : l'originale ({name}) — rendu identique",
+  "pdfedit.font_near": "Police : {name} (l'originale n'a pas certains de ces caractères ; la plus proche est utilisée)",
+  "pdfedit.brush": "Copier le style",
+  "pdfedit.brush_hint": "Cliquez sur un texte de la page pour reprendre sa police, sa taille, le gras, l’italique et la couleur"
 }

@@ -2144,5 +2144,9 @@
   "fw.later": "Più tardi",
   "fw.allow": "Consenti",
   "fw.fixed": "Fatto: ora gli altri dispositivi possono inviare file a questo PC",
-  "fw.not_fixed": "Non modificato (premuto No?). Puoi riprovare dalla Home quando vuoi."
+  "fw.not_fixed": "Non modificato (premuto No?). Puoi riprovare dalla Home quando vuoi.",
+  "pdfedit.font_same": "Carattere: quello originale ({name}) — identico",
+  "pdfedit.font_near": "Carattere: {name} (all’originale mancano alcune di queste lettere; si usa il più simile)",
+  "pdfedit.brush": "Copia formato",
+  "pdfedit.brush_hint": "Clicca un testo della pagina per usarne carattere, dimensione, grassetto, corsivo e colore"
 }

@@ -54,10 +54,58 @@ class PdfTextEdit {
     required this.font,
     required this.text,
     this.rgb = 'auto',
+    this.fake = 0,
   });
 
   final double l, b, r, t, x, base, size;
-  final String font, text, rgb;
+
+  /// A .ttf file, "obj" (the old text's own font) or "objat:x,y" (the
+  /// font of the text at that point of the page).
+  final String font;
+  final String text, rgb;
+
+  /// Drawn bold (1) / slanted (2) because the font file has no such face.
+  final int fake;
+}
+
+/// One text object of a page and how it looks (lr_pdf.exe --styles).
+class PdfTextStyle {
+  PdfTextStyle({
+    required this.l,
+    required this.b,
+    required this.r,
+    required this.t,
+    required this.size,
+    required this.weight,
+    required this.italic,
+    required this.rgb,
+    required this.font,
+    required this.embedded,
+    required this.name,
+    required this.text,
+  });
+
+  final double l, b, r, t, size;
+  final int weight;
+  final bool italic;
+
+  /// "rrggbb".
+  final String rgb;
+
+  /// Which font of the page (same number: same font).
+  final int font;
+  final bool embedded;
+
+  /// The font's name, e.g. "ABCDEF+SimSun" or "TimesNewRomanPS-BoldMT".
+  final String name;
+  final String text;
+
+  bool get bold {
+    final n = name.toLowerCase();
+    return weight >= 600 || n.contains('bold') || n.contains('heavy') || n.contains('black') || n.contains(',bold');
+  }
+
+  bool get slanted => italic || name.toLowerCase().contains('italic') || name.toLowerCase().contains('oblique');
 }
 
 /// A picture laid on a page: raw BGRA pixels; where, 0–1 of the page as
@@ -92,6 +140,49 @@ class PdfBuilder {
   /// Text edits the last [build] had to leave alone.
   static int lastSkipped = 0;
 
+  /// The text objects of page [index] (0-based) of [pdf], with their looks.
+  static Future<List<PdfTextStyle>> styles(String pdf, int index) async {
+    if (!available) return const [];
+    final tmp = await Directory.systemTemp.createTemp('lr_sty');
+    final out = '${tmp.path}${Platform.pathSeparator}s.txt';
+    final list = <PdfTextStyle>[];
+    try {
+      final r = await Process.run(exe, ['--styles', pdf, '$index', out]).timeout(const Duration(seconds: 30));
+      if ('${r.stdout}'.trim() == 'ok') {
+        for (final line in await File(out).readAsLines()) {
+          final p = line.split('|');
+          if (p.length < 12) continue;
+          String text;
+          try {
+            text = utf8.decode(base64.decode(p[11]));
+          } catch (_) {
+            text = '';
+          }
+          list.add(PdfTextStyle(
+            l: double.tryParse(p[0]) ?? 0,
+            b: double.tryParse(p[1]) ?? 0,
+            r: double.tryParse(p[2]) ?? 0,
+            t: double.tryParse(p[3]) ?? 0,
+            size: double.tryParse(p[4]) ?? 0,
+            weight: int.tryParse(p[5]) ?? -1,
+            italic: p[6] == '1',
+            rgb: p[7],
+            font: int.tryParse(p[8]) ?? -1,
+            embedded: p[9] != '0',
+            name: p[10],
+            text: text,
+          ));
+        }
+      }
+    } catch (e) {
+      DiagLog.log('tools', 'pdf styles: $e');
+    }
+    try {
+      await tmp.delete(recursive: true);
+    } catch (_) {}
+    return list;
+  }
+
   /// Writes [pages] to [out]; null when done, else why not.
   static Future<String?> build(String out, List<PdfPlanPage> pages) async {
     if (!available) return 'lr_pdf.exe missing';
@@ -116,7 +207,7 @@ class PdfBuilder {
             for (final e in p.edits) {
               final f = File('${tmp.path}${Platform.pathSeparator}t${n++}.txt');
               await f.writeAsString(e.text, encoding: utf8);
-              plan.writeln('EDIT ${e.l}|${e.b}|${e.r}|${e.t}|${e.x}|${e.base}|${e.size}|${e.rgb}|${e.font}|${f.path}');
+              plan.writeln('EDIT ${e.l}|${e.b}|${e.r}|${e.t}|${e.x}|${e.base}|${e.size}|${e.rgb}|${e.font}|${f.path}|${e.fake}');
             }
             for (final st in p.stamps) {
               final f = File('${tmp.path}${Platform.pathSeparator}s${n++}.bgra');

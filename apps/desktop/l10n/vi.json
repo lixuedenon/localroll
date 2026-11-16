@@ -2144,5 +2144,9 @@
   "fw.later": "Để sau",
   "fw.allow": "Cho phép",
   "fw.fixed": "Xong: giờ thiết bị khác có thể gửi tệp tới máy này",
-  "fw.not_fixed": "Chưa đổi được (bấm «Không»?). Có thể thử lại từ trang chủ bất cứ lúc nào."
+  "fw.not_fixed": "Chưa đổi được (bấm «Không»?). Có thể thử lại từ trang chủ bất cứ lúc nào.",
+  "pdfedit.font_same": "Phông: phông gốc ({name}) — giống hệt bản gốc",
+  "pdfedit.font_near": "Phông: {name} (phông gốc thiếu vài chữ này; dùng phông giống nhất)",
+  "pdfedit.brush": "Sao chép định dạng",
+  "pdfedit.brush_hint": "Bấm vào chữ bất kỳ trên trang để dùng phông, cỡ, đậm, nghiêng và màu của nó"
 }

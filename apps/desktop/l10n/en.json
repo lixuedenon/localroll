@@ -2124,7 +2124,7 @@
   "pdfedit.page": "Page {n} / {count}",
   "pdfedit.cannot_open": "This PDF can't be opened (password or damaged)",
   "pdfedit.no_text": "No text to change on this page — probably a scan (the page is a picture). Use Sign / Stamp to write on it.",
-  "pdfedit.hint": "Click any line to change it in place; Enter when done. Only the changed words are touched — tables, stamps and the other text stay as they are.\n\nNew words use a font on this PC (Chinese: DengXian or SimHei), so they may look a little different from the rest; a PDF with changed Chinese text grows by a few MB.",
+  "pdfedit.hint": "Click any line to change it in place; Enter when done. Font, size, bold, italic and colour stay as they were; only the changed words are touched — tables, stamps and the rest stay.\n\nIf the original font holds all the new letters it is used, so the change can't be seen; otherwise the closest font on this PC. “Copy look” writes like another piece of text.",
   "pdfedit.changed": "{count} change(s)",
   "pdfedit.page_short": "p. {n}",
   "pdfedit.undo": "Undo this one",
@@ -2144,5 +2144,9 @@
   "fw.later": "Later",
   "fw.allow": "Allow",
   "fw.fixed": "Done: other devices can send files to this PC now",
-  "fw.not_fixed": "Not changed (No was clicked?). You can try again from the home page any time."
+  "fw.not_fixed": "Not changed (No was clicked?). You can try again from the home page any time.",
+  "pdfedit.font_same": "Font: the original ({name}) — looks exactly the same",
+  "pdfedit.font_near": "Font: {name} (the original lacks some of these letters; the closest font is used)",
+  "pdfedit.brush": "Copy look",
+  "pdfedit.brush_hint": "Click any text on the page to use its font, size, bold, italic and colour"
 }

@@ -2144,5 +2144,9 @@
   "fw.later": "Más tarde",
   "fw.allow": "Permitir",
   "fw.fixed": "Listo: otros dispositivos ya pueden enviar archivos a este PC",
-  "fw.not_fixed": "No se cambió (¿se pulsó No?). Puedes reintentarlo desde el inicio cuando quieras."
+  "fw.not_fixed": "No se cambió (¿se pulsó No?). Puedes reintentarlo desde el inicio cuando quieras.",
+  "pdfedit.font_same": "Fuente: la original ({name}); se ve exactamente igual",
+  "pdfedit.font_near": "Fuente: {name} (a la original le faltan algunas de estas letras; se usa la más parecida)",
+  "pdfedit.brush": "Copiar formato",
+  "pdfedit.brush_hint": "Haz clic en cualquier texto de la página para usar su fuente, tamaño, negrita, cursiva y color"
 }

@@ -2144,5 +2144,9 @@
   "fw.later": "Sonra",
   "fw.allow": "İzin ver",
   "fw.fixed": "Tamam: diğer cihazlar artık bu bilgisayara dosya gönderebilir",
-  "fw.not_fixed": "Değişmedi (Hayır mı tıklandı?). Ana sayfadan istediğiniz zaman yeniden deneyebilirsiniz."
+  "fw.not_fixed": "Değişmedi (Hayır mı tıklandı?). Ana sayfadan istediğiniz zaman yeniden deneyebilirsiniz.",
+  "pdfedit.font_same": "Yazı tipi: özgün olan ({name}) — tıpatıp aynı",
+  "pdfedit.font_near": "Yazı tipi: {name} (özgün yazı tipinde bu harflerin bazıları yok; en yakını kullanıldı)",
+  "pdfedit.brush": "Biçimi kopyala",
+  "pdfedit.brush_hint": "Sayfadaki herhangi bir metne tıklayın; yazı tipi, boyut, kalınlık, eğiklik ve rengi alınır"
 }

@@ -29,6 +29,9 @@
 // Prints: ok <pages> [skipped <n>]   or   error <why>
 //
 //   lr_pdf.exe --thumb "<pdf>" "<out.bmp>" <width>
+//   lr_pdf.exe --styles "<pdf>" <page> "<out.txt>"   (the page's text objects,
+//              one per line: l|b|r|t|size|weight|italic|rgb|font#|embedded|name|text
+//              — size in points as drawn, text as base64 UTF-8)
 // The first page as a picture <width> pixels wide (white behind it), for
 // the library's previews; in its own process, so a PDF that hangs can't hold
 // up the app. Prints: ok   or   error <why>
@@ -54,6 +57,10 @@ typedef void* PAGE;
 typedef void* OBJ;
 typedef void* BMP;
 typedef void* FONT;
+typedef void* TEXTPAGE;
+struct Matrix {
+  float a, b, c, d, e, f;
+};
 
 struct FileAccess {
   unsigned long len;
@@ -109,6 +116,21 @@ struct Api {
   int (*ObjSetFillColor)(OBJ, unsigned int, unsigned int, unsigned int, unsigned int);
   void (*ObjTransform)(OBJ, double, double, double, double, double, double);
   void (*FontClose)(FONT);
+  // Reading a text's style (--styles), and keeping it (EDIT).
+  FONT (*TextObjGetFont)(OBJ);
+  int (*TextObjGetFontSize)(OBJ, float*);
+  int (*ObjGetMatrix)(OBJ, Matrix*);
+  unsigned long (*FontGetBaseName)(FONT, char*, unsigned long);
+  unsigned long (*FontGetFamilyName)(FONT, char*, unsigned long);
+  int (*FontGetWeight)(FONT);
+  int (*FontGetItalicAngle)(FONT, int*);
+  int (*FontGetIsEmbedded)(FONT);
+  TEXTPAGE (*TextLoadPage)(PAGE);
+  void (*TextClosePage)(TEXTPAGE);
+  unsigned long (*TextObjGetText)(OBJ, TEXTPAGE, unsigned short*, unsigned long);
+  int (*TextObjSetRenderMode)(OBJ, int);
+  int (*ObjSetStrokeColor)(OBJ, unsigned int, unsigned int, unsigned int, unsigned int);
+  int (*ObjSetStrokeWidth)(OBJ, float);
   // For --thumb only.
   void (*RenderPageBitmap)(BMP, PAGE, int, int, int, int, int, int);
   int (*FillRect)(BMP, int, int, int, int, unsigned long);
@@ -201,6 +223,20 @@ bool load() {
   find(m, "FPDFPageObj_SetFillColor", api.ObjSetFillColor);
   find(m, "FPDFPageObj_Transform", api.ObjTransform);
   find(m, "FPDFFont_Close", api.FontClose);
+  find(m, "FPDFTextObj_GetFont", api.TextObjGetFont);
+  find(m, "FPDFTextObj_GetFontSize", api.TextObjGetFontSize);
+  find(m, "FPDFPageObj_GetMatrix", api.ObjGetMatrix);
+  if (!find(m, "FPDFFont_GetBaseFontName", api.FontGetBaseName)) find(m, "FPDFFont_GetFontName", api.FontGetBaseName);
+  find(m, "FPDFFont_GetFamilyName", api.FontGetFamilyName);
+  find(m, "FPDFFont_GetWeight", api.FontGetWeight);
+  find(m, "FPDFFont_GetItalicAngle", api.FontGetItalicAngle);
+  find(m, "FPDFFont_GetIsEmbedded", api.FontGetIsEmbedded);
+  find(m, "FPDFText_LoadPage", api.TextLoadPage);
+  find(m, "FPDFText_ClosePage", api.TextClosePage);
+  find(m, "FPDFTextObj_GetText", api.TextObjGetText);
+  find(m, "FPDFTextObj_SetTextRenderMode", api.TextObjSetRenderMode);
+  find(m, "FPDFPageObj_SetStrokeColor", api.ObjSetStrokeColor);
+  find(m, "FPDFPageObj_SetStrokeWidth", api.ObjSetStrokeWidth);
   // Optional (the page box's corner; 0,0 without them).
   find(m, "FPDFPage_GetCropBox", api.GetCropBox);
   find(m, "FPDFPage_GetMediaBox", api.GetMediaBox);
@@ -325,11 +361,151 @@ int thumb(const std::string& pdf, const std::string& outPath, int width) {
   return 0;
 }
 
+std::string b64(const std::string& in) {
+  static const char* t = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  std::string out;
+  size_t i = 0;
+  for (; i + 2 < in.size(); i += 3) {
+    unsigned v = ((unsigned char)in[i] << 16) | ((unsigned char)in[i + 1] << 8) | (unsigned char)in[i + 2];
+    out += t[v >> 18];
+    out += t[(v >> 12) & 63];
+    out += t[(v >> 6) & 63];
+    out += t[v & 63];
+  }
+  if (i + 1 == in.size()) {
+    unsigned v = (unsigned char)in[i] << 16;
+    out += t[v >> 18];
+    out += t[(v >> 12) & 63];
+    out += "==";
+  } else if (i + 2 == in.size()) {
+    unsigned v = ((unsigned char)in[i] << 16) | ((unsigned char)in[i + 1] << 8);
+    out += t[v >> 18];
+    out += t[(v >> 12) & 63];
+    out += t[(v >> 6) & 63];
+    out += '=';
+  }
+  return out;
+}
+
+// The size a text object is drawn at: its font size times the matrix's
+// vertical scale.
+double drawnSize(OBJ o) {
+  float fs = 0;
+  if (!api.TextObjGetFontSize || !api.TextObjGetFontSize(o, &fs)) return 0;
+  Matrix m{1, 0, 0, 1, 0, 0};
+  if (api.ObjGetMatrix) api.ObjGetMatrix(o, &m);
+  double sy = sqrt((double)m.c * m.c + (double)m.d * m.d);
+  return fs * (sy > 0 ? sy : 1);
+}
+
+// --styles: each text object of one page, with how it looks.
+int styles(const std::string& pdf, int index, const std::wstring& outPath) {
+  if (!load() || !api.CountObjects || !api.GetObject || !api.ObjGetType || !api.ObjGetBounds || !api.TextObjGetFont) {
+    say("error pdfium.dll not usable");
+    return 3;
+  }
+  api.InitLibrary();
+  std::vector<unsigned char> bytes;
+  if (!readAll(pdf, bytes) || bytes.empty()) {
+    say("error cannot read");
+    return 1;
+  }
+  DOC doc = api.LoadMemDocument(bytes.data(), (int)bytes.size(), nullptr);
+  if (!doc) {
+    say("error cannot open (password or damaged)");
+    return 1;
+  }
+  PAGE page = index >= 0 && index < api.GetPageCount(doc) ? api.LoadPage(doc, index) : nullptr;
+  if (!page) {
+    api.CloseDocument(doc);
+    say("error no page");
+    return 1;
+  }
+  TEXTPAGE tp = api.TextLoadPage ? api.TextLoadPage(page) : nullptr;
+  std::vector<FONT> fonts;
+  std::string out;
+  int n = api.CountObjects(page);
+  for (int i = 0; i < n; i++) {
+    OBJ o = api.GetObject(page, i);
+    if (!o || api.ObjGetType(o) != 1) continue;
+    float l = 0, b = 0, r = 0, t = 0;
+    if (!api.ObjGetBounds(o, &l, &b, &r, &t)) continue;
+    FONT f = api.TextObjGetFont(o);
+    int fi = -1;
+    for (size_t k = 0; k < fonts.size(); k++) {
+      if (fonts[k] == f) fi = (int)k;
+    }
+    if (fi < 0) {
+      fonts.push_back(f);
+      fi = (int)fonts.size() - 1;
+    }
+    std::string name;
+    if (f && api.FontGetBaseName) {
+      char buf[256] = {0};
+      unsigned long len = api.FontGetBaseName(f, buf, sizeof buf);
+      if (len > 0 && len <= sizeof buf) name = buf;
+    }
+    if (name.empty() && f && api.FontGetFamilyName) {
+      char buf[256] = {0};
+      unsigned long len = api.FontGetFamilyName(f, buf, sizeof buf);
+      if (len > 0 && len <= sizeof buf) name = buf;
+    }
+    for (char& c : name) {
+      if (c == '|' || c == '\n' || c == '\r') c = ' ';
+    }
+    int weight = f && api.FontGetWeight ? api.FontGetWeight(f) : -1;
+    int angle = 0;
+    if (f && api.FontGetItalicAngle) api.FontGetItalicAngle(f, &angle);
+    Matrix m{1, 0, 0, 1, 0, 0};
+    if (api.ObjGetMatrix) api.ObjGetMatrix(o, &m);
+    bool italic = angle != 0 || (m.d != 0 && fabs(m.c / m.d) > 0.12);
+    int embedded = f && api.FontGetIsEmbedded ? api.FontGetIsEmbedded(f) : 1;
+    unsigned int cr = 0, cg = 0, cb = 0, ca = 255;
+    if (api.ObjGetFillColor) api.ObjGetFillColor(o, &cr, &cg, &cb, &ca);
+    std::string text;
+    if (tp && api.TextObjGetText) {
+      unsigned long len = api.TextObjGetText(o, tp, nullptr, 0);
+      if (len > 2 && len < 100000) {
+        std::vector<unsigned short> w(len / 2 + 1, 0);
+        api.TextObjGetText(o, tp, w.data(), len);
+        std::wstring ws(w.begin(), w.end());
+        ws = ws.c_str();
+        int need = WideCharToMultiByte(CP_UTF8, 0, ws.c_str(), -1, nullptr, 0, nullptr, nullptr);
+        if (need > 1) {
+          std::string u(need - 1, '\0');
+          WideCharToMultiByte(CP_UTF8, 0, ws.c_str(), -1, &u[0], need, nullptr, nullptr);
+          text = u;
+        }
+      }
+    }
+    char line[512];
+    snprintf(line, sizeof line, "%.2f|%.2f|%.2f|%.2f|%.2f|%d|%d|%02x%02x%02x|%d|%d|", l, b, r, t, drawnSize(o), weight, italic ? 1 : 0, cr, cg, cb, fi,
+             embedded);
+    out += line;
+    out += name + "|" + b64(text) + "\n";
+  }
+  if (tp) api.TextClosePage(tp);
+  api.ClosePage(page);
+  api.CloseDocument(doc);
+  FILE* f = _wfopen(outPath.c_str(), L"wb");
+  if (!f) {
+    say("error cannot write");
+    return 1;
+  }
+  fwrite(out.data(), 1, out.size(), f);
+  fclose(f);
+  say("ok");
+  return 0;
+}
+
 }  // namespace
 
 int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
   int argc = 0;
   LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+  if (argc >= 5 && wcscmp(argv[1], L"--styles") == 0) {
+    return styles(narrow(argv[2]), _wtoi(argv[3]), argv[4]);
+  }
   if (argc >= 5 && wcscmp(argv[1], L"--thumb") == 0) {
     return thumb(narrow(argv[2]), narrow(argv[3]), _wtoi(argv[4]));
   }
@@ -497,10 +673,29 @@ int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
         skipped++;
         continue;
       }
-      // The new font (loaded once per file).
+      // fake: 1 = bold, 2 = italic (the font file has no such face).
+      int fake = p.size() > 10 ? atoi(p[10].c_str()) : 0;
+      // "obj": the very font the old text used (all the new letters are in
+      // it); "objat:x,y": the font of the text at that point of this page.
       FONT font = nullptr;
+      OBJ like = nullptr;
+      if (p[8] == "obj") {
+        like = old[0];
+      } else if (p[8].rfind("objat:", 0) == 0) {
+        double px = atof(p[8].c_str() + 6);
+        const char* comma = strchr(p[8].c_str() + 6, ',');
+        double py = comma ? atof(comma + 1) : 0;
+        int cnt = api.CountObjects(last);
+        for (int i = 0; i < cnt && !like; i++) {
+          OBJ o = api.GetObject(last, i);
+          if (!o || api.ObjGetType(o) != 1) continue;
+          float l = 0, b = 0, r = 0, t = 0;
+          if (api.ObjGetBounds(o, &l, &b, &r, &t) && px >= l && px <= r && py >= b && py <= t) like = o;
+        }
+      }
+      if (like && api.TextObjGetFont) font = api.TextObjGetFont(like);
       for (auto& f : fonts) {
-        if (f.first == p[8]) font = f.second;
+        if (!font && f.first == p[8]) font = f.second;
       }
       if (!font) {
         auto* fb = new std::vector<unsigned char>();
@@ -522,22 +717,49 @@ int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
         cg = (v >> 8) & 255;
         cb = v & 255;
       }
-      for (OBJ o : old) {
-        if (api.RemoveObject(last, o)) api.ObjDestroy(o);
-      }
       std::string text(textBytes.begin(), textBytes.end());
       std::wstring w = wide(text);
+      // Made before the old text goes (the reused font stays alive).
+      OBJ to = nullptr;
       if (!w.empty()) {
-        OBJ to = api.CreateTextObj(out, font, (float)size);
+        float rawSize = (float)size;
+        double ma = 1, mb = 0, mc = 0, md = 1;
+        if (like && api.TextObjGetFontSize && api.ObjGetMatrix) {
+          // Drawn exactly like the text it copies: its size and matrix
+          // (so a slanted or squeezed text stays so).
+          float fs = 0;
+          Matrix m{1, 0, 0, 1, 0, 0};
+          if (api.TextObjGetFontSize(like, &fs) && api.ObjGetMatrix(like, &m) && fs > 0) {
+            double sy = sqrt((double)m.c * m.c + (double)m.d * m.d);
+            double k = sy > 0 ? size / (fs * sy) : 1;
+            rawSize = fs;
+            ma = m.a * k;
+            mb = m.b * k;
+            mc = m.c * k;
+            md = m.d * k;
+          }
+        } else if (fake & 2) {
+          mc = 0.21;  // about 12 degrees, like an italic
+        }
+        to = api.CreateTextObj(out, font, rawSize);
         if (to) {
           std::vector<unsigned short> u(w.begin(), w.end());
           u.push_back(0);
           api.TextSetText(to, u.data());
           api.ObjSetFillColor(to, cr, cg, cb, 255);
-          api.ObjTransform(to, 1, 0, 0, 1, X, base);
-          api.InsertObject(last, to);
+          if ((fake & 1) && api.TextObjSetRenderMode && api.ObjSetStrokeColor && api.ObjSetStrokeWidth) {
+            // Bold drawn by outlining the letters too (fill + stroke).
+            api.TextObjSetRenderMode(to, 2);
+            api.ObjSetStrokeColor(to, cr, cg, cb, 255);
+            api.ObjSetStrokeWidth(to, (float)(rawSize * 0.035));
+          }
+          api.ObjTransform(to, ma, mb, mc, md, X, base);
         }
       }
+      for (OBJ o : old) {
+        if (api.RemoveObject(last, o)) api.ObjDestroy(o);
+      }
+      if (to) api.InsertObject(last, to);
     } else if (cmd == "IMAGE") {
       closeLast();
       auto p = split(arg, '|');
