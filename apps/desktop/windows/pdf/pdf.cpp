@@ -12,9 +12,21 @@
 //   IMAGE <jpg>|<pw>|<ph>|<x>|<y>|<w>|<h>        a new page <pw>×<ph> points with
 //                                                the photo at x y w h (points,
 //                                                from the bottom left)
+//   EDIT <l>|<b>|<r>|<t>|<x>|<base>|<size>|<rgb>|<font>|<text>
+//                                                on the last PAGE: the text in the
+//                                                box l b r t (PDF points, the page's
+//                                                own space) is taken out and <text>
+//                                                (a UTF-8 file) written at x, <base>
+//                                                (baseline), <size> points, colour
+//                                                <rgb> (hex, or "auto": the old
+//                                                text's), font file <font> (.ttf,
+//                                                embedded). A box whose text runs on
+//                                                outside it is left alone (counted
+//                                                as skipped: changing it would move
+//                                                the text beside it).
 //
 //   lr_pdf.exe "<plan file>"
-// Prints: ok <pages>   or   error <why>
+// Prints: ok <pages> [skipped <n>]   or   error <why>
 //
 //   lr_pdf.exe --thumb "<pdf>" "<out.bmp>" <width>
 // The first page as a picture <width> pixels wide (white behind it), for
@@ -32,6 +44,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -40,6 +53,7 @@ typedef void* DOC;
 typedef void* PAGE;
 typedef void* OBJ;
 typedef void* BMP;
+typedef void* FONT;
 
 struct FileAccess {
   unsigned long len;
@@ -81,6 +95,20 @@ struct Api {
   void (*CloseDocument)(DOC);
   BMP (*BitmapCreateEx)(int, int, int, void*, int);
   void (*BitmapDestroy)(BMP);
+  // For EDIT (optional: without them EDIT is skipped).
+  int (*CountObjects)(PAGE);
+  OBJ (*GetObject)(PAGE, int);
+  int (*ObjGetType)(OBJ);
+  int (*ObjGetBounds)(OBJ, float*, float*, float*, float*);
+  int (*RemoveObject)(PAGE, OBJ);
+  void (*ObjDestroy)(OBJ);
+  int (*ObjGetFillColor)(OBJ, unsigned int*, unsigned int*, unsigned int*, unsigned int*);
+  FONT (*LoadFont)(DOC, const unsigned char*, unsigned int, int, int);
+  OBJ (*CreateTextObj)(DOC, FONT, float);
+  int (*TextSetText)(OBJ, const unsigned short*);
+  int (*ObjSetFillColor)(OBJ, unsigned int, unsigned int, unsigned int, unsigned int);
+  void (*ObjTransform)(OBJ, double, double, double, double, double, double);
+  void (*FontClose)(FONT);
   // For --thumb only.
   void (*RenderPageBitmap)(BMP, PAGE, int, int, int, int, int, int);
   int (*FillRect)(BMP, int, int, int, int, unsigned long);
@@ -159,6 +187,20 @@ bool load() {
             find(m, "FPDFBitmap_Destroy", api.BitmapDestroy);
   find(m, "FPDF_RenderPageBitmap", api.RenderPageBitmap);
   find(m, "FPDFBitmap_FillRect", api.FillRect);
+  // Optional: changing text (EDIT).
+  find(m, "FPDFPage_CountObjects", api.CountObjects);
+  find(m, "FPDFPage_GetObject", api.GetObject);
+  find(m, "FPDFPageObj_GetType", api.ObjGetType);
+  find(m, "FPDFPageObj_GetBounds", api.ObjGetBounds);
+  find(m, "FPDFPage_RemoveObject", api.RemoveObject);
+  find(m, "FPDFPageObj_Destroy", api.ObjDestroy);
+  find(m, "FPDFPageObj_GetFillColor", api.ObjGetFillColor);
+  find(m, "FPDFText_LoadFont", api.LoadFont);
+  find(m, "FPDFPageObj_CreateTextObj", api.CreateTextObj);
+  find(m, "FPDFText_SetText", api.TextSetText);
+  find(m, "FPDFPageObj_SetFillColor", api.ObjSetFillColor);
+  find(m, "FPDFPageObj_Transform", api.ObjTransform);
+  find(m, "FPDFFont_Close", api.FontClose);
   // Optional (the page box's corner; 0,0 without them).
   find(m, "FPDFPage_GetCropBox", api.GetCropBox);
   find(m, "FPDFPage_GetMediaBox", api.GetMediaBox);
@@ -319,6 +361,9 @@ int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
   std::vector<DOC> docs;
   std::vector<std::vector<unsigned char>*> keep;
   int pages = 0;
+  int skipped = 0;
+  // Fonts loaded for EDIT (their bytes must stay until saved).
+  std::vector<std::pair<std::string, FONT>> fonts;
   PAGE last = nullptr;
   int lastRot = 0;
   double lastW = 0, lastH = 0, lastX0 = 0, lastY0 = 0;
@@ -414,6 +459,85 @@ int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
         api.InsertObject(last, img);
       }
       api.BitmapDestroy(bmp);
+    } else if (cmd == "EDIT") {
+      auto p = split(arg, '|');
+      bool can = api.CountObjects && api.GetObject && api.ObjGetType && api.ObjGetBounds && api.RemoveObject && api.ObjDestroy &&
+                 api.LoadFont && api.CreateTextObj && api.TextSetText && api.ObjSetFillColor && api.ObjTransform;
+      if (!last || p.size() < 10 || !can) {
+        skipped++;
+        continue;
+      }
+      double L = atof(p[0].c_str()), B = atof(p[1].c_str()), R = atof(p[2].c_str()), T = atof(p[3].c_str());
+      double X = atof(p[4].c_str()), base = atof(p[5].c_str()), size = atof(p[6].c_str());
+      // The old text: objects whose middle is in the box. One that runs on
+      // well outside it holds other text too: then leave the line alone.
+      double tol = (T - B) * 0.35 + 1.5;
+      std::vector<OBJ> old;
+      bool mixed = false;
+      int n = api.CountObjects(last);
+      for (int i = 0; i < n; i++) {
+        OBJ o = api.GetObject(last, i);
+        if (!o || api.ObjGetType(o) != 1 /* text */) continue;
+        float l = 0, b = 0, r = 0, t = 0;
+        if (!api.ObjGetBounds(o, &l, &b, &r, &t)) continue;
+        double cx = (l + r) / 2, cy = (b + t) / 2;
+        if (cx < L - tol || cx > R + tol || cy < B - tol || cy > T + tol) continue;
+        if (l < L - tol * 2 || r > R + tol * 2 || b < B - tol * 2 || t > T + tol * 2) {
+          mixed = true;
+          break;
+        }
+        old.push_back(o);
+      }
+      if (mixed || old.empty()) {
+        skipped++;
+        continue;
+      }
+      std::vector<unsigned char> textBytes;
+      if (!readAll(p[9], textBytes)) {
+        skipped++;
+        continue;
+      }
+      // The new font (loaded once per file).
+      FONT font = nullptr;
+      for (auto& f : fonts) {
+        if (f.first == p[8]) font = f.second;
+      }
+      if (!font) {
+        auto* fb = new std::vector<unsigned char>();
+        if (readAll(p[8], *fb)) font = api.LoadFont(out, fb->data(), (unsigned int)fb->size(), 2 /* TrueType */, 1 /* CID */);
+        if (!font) {
+          delete fb;
+          skipped++;
+          continue;
+        }
+        keep.push_back(fb);
+        fonts.push_back({p[8], font});
+      }
+      unsigned int cr = 0, cg = 0, cb = 0, ca = 255;
+      if (p[7] == "auto") {
+        if (!api.ObjGetFillColor || !api.ObjGetFillColor(old[0], &cr, &cg, &cb, &ca)) cr = cg = cb = 0;
+      } else {
+        unsigned long v = strtoul(p[7].c_str(), nullptr, 16);
+        cr = (v >> 16) & 255;
+        cg = (v >> 8) & 255;
+        cb = v & 255;
+      }
+      for (OBJ o : old) {
+        if (api.RemoveObject(last, o)) api.ObjDestroy(o);
+      }
+      std::string text(textBytes.begin(), textBytes.end());
+      std::wstring w = wide(text);
+      if (!w.empty()) {
+        OBJ to = api.CreateTextObj(out, font, (float)size);
+        if (to) {
+          std::vector<unsigned short> u(w.begin(), w.end());
+          u.push_back(0);
+          api.TextSetText(to, u.data());
+          api.ObjSetFillColor(to, cr, cg, cb, 255);
+          api.ObjTransform(to, 1, 0, 0, 1, X, base);
+          api.InsertObject(last, to);
+        }
+      }
     } else if (cmd == "IMAGE") {
       closeLast();
       auto p = split(arg, '|');
@@ -461,6 +585,10 @@ int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
       if (!ok) err = "save failed";
     }
   }
+  // The fonts belong to the new document: closed before it.
+  if (api.FontClose) {
+    for (auto& f : fonts) api.FontClose(f.second);
+  }
   api.CloseDocument(out);
   for (DOC d : docs) api.CloseDocument(d);
   for (auto* b : blobs) delete b;
@@ -469,6 +597,6 @@ int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
     say("error " + err);
     return 1;
   }
-  say("ok " + std::to_string(pages));
+  say("ok " + std::to_string(pages) + (skipped ? " skipped " + std::to_string(skipped) : ""));
   return 0;
 }

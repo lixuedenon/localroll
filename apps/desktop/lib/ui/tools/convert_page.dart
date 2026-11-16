@@ -250,7 +250,11 @@ class _ConvertPageState extends State<ConvertPage> {
         await _convert(g.op!, g.files, outs, failed);
       }
     });
-    if (!mounted) return;
+    if (!mounted) {
+      // Left meanwhile: the results still go into the library / records.
+      await s.tools.saved(outs);
+      return;
+    }
     if (outs.isEmpty) {
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('conv.failed', {'names': failed.join('、')}))));
       return;

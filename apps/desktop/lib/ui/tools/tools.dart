@@ -329,7 +329,11 @@ Future<void> _officePdf(BuildContext context, AppServices s, List<String> docs) 
       }
     }
   });
-  if (!context.mounted) return;
+  if (!context.mounted) {
+    // Left meanwhile: the results still go into the library / records.
+    await s.tools.saved(outs);
+    return;
+  }
   if (failed.isNotEmpty) {
     ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('tool.office_failed', {'names': failed.join('、')}))));
   }

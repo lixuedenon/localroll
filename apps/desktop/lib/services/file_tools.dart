@@ -23,7 +23,7 @@ sealed class PdfPlanPage {
 }
 
 class PdfFromDoc extends PdfPlanPage {
-  const PdfFromDoc(this.path, this.page, {this.turns = 0, this.stamps = const []});
+  const PdfFromDoc(this.path, this.page, {this.turns = 0, this.stamps = const [], this.edits = const []});
 
   final String path;
 
@@ -33,6 +33,31 @@ class PdfFromDoc extends PdfPlanPage {
   /// Quarter turns clockwise.
   final int turns;
   final List<PdfStamp> stamps;
+
+  /// Lines of text changed in place.
+  final List<PdfTextEdit> edits;
+}
+
+/// One line of text changed on a page: the old text in [l] [b] [r] [t]
+/// (PDF points, the page's own space) goes; [text] is written at [x],
+/// baseline [base], [size] points, in the font file [font]; [rgb] "auto"
+/// keeps the old colour.
+class PdfTextEdit {
+  const PdfTextEdit({
+    required this.l,
+    required this.b,
+    required this.r,
+    required this.t,
+    required this.x,
+    required this.base,
+    required this.size,
+    required this.font,
+    required this.text,
+    this.rgb = 'auto',
+  });
+
+  final double l, b, r, t, x, base, size;
+  final String font, text, rgb;
 }
 
 /// A picture laid on a page: raw BGRA pixels; where, 0–1 of the page as
@@ -64,9 +89,13 @@ class PdfBuilder {
 
   static bool get available => Platform.isWindows && File(exe).existsSync();
 
+  /// Text edits the last [build] had to leave alone.
+  static int lastSkipped = 0;
+
   /// Writes [pages] to [out]; null when done, else why not.
   static Future<String?> build(String out, List<PdfPlanPage> pages) async {
     if (!available) return 'lr_pdf.exe missing';
+    lastSkipped = 0;
     final tmp = await Directory.systemTemp.createTemp('lr_pdf');
     try {
       final docs = <String>[];
@@ -84,6 +113,11 @@ class PdfBuilder {
               plan.writeln('DOC ${p.path}');
             }
             plan.writeln('PAGE $di|${p.page}|${p.turns % 4}');
+            for (final e in p.edits) {
+              final f = File('${tmp.path}${Platform.pathSeparator}t${n++}.txt');
+              await f.writeAsString(e.text, encoding: utf8);
+              plan.writeln('EDIT ${e.l}|${e.b}|${e.r}|${e.t}|${e.x}|${e.base}|${e.size}|${e.rgb}|${e.font}|${f.path}');
+            }
             for (final st in p.stamps) {
               final f = File('${tmp.path}${Platform.pathSeparator}s${n++}.bgra');
               await f.writeAsBytes(st.bgra);
@@ -106,6 +140,7 @@ class PdfBuilder {
         } catch (_) {}
         return said.isEmpty ? 'no answer' : said;
       }
+      lastSkipped = int.tryParse(RegExp(r'skipped (\d+)').firstMatch(said)?.group(1) ?? '') ?? 0;
       if (await File(out).exists()) await File(out).delete();
       await File(part).rename(out);
       return null;

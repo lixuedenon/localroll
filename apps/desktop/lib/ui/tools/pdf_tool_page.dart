@@ -17,6 +17,7 @@ import '../../services/file_tools.dart';
 import '../../services/win_dialogs.dart';
 import '../light_look.dart';
 import '../send_page.dart' show baseNameOf;
+import 'pdf_text_edit.dart';
 import 'tools.dart';
 import '../lr_dialog.dart';
 
@@ -144,7 +145,11 @@ class _PdfToolPageState extends State<PdfToolPage> {
     final plan = await _plan(_pages);
     if (!mounted) return;
     final err = await runBusy(context, tr('pdf.saving'), () => PdfBuilder.build(out, plan));
-    if (!mounted) return;
+    if (!mounted) {
+      // Left meanwhile: the results still go into the library / records.
+      if (err == null) await s.tools.saved([out]);
+      return;
+    }
     if (err != null) return _failed(err);
     await showToolResult(context, s, [out]);
   }
@@ -183,7 +188,11 @@ class _PdfToolPageState extends State<PdfToolPage> {
         }
       }
     });
-    if (!mounted) return;
+    if (!mounted) {
+      // Left meanwhile: the results still go into the library / records.
+      await s.tools.saved(outs);
+      return;
+    }
     if (err != null) return _failed(err!);
     await showToolResult(context, s, outs);
   }
@@ -239,7 +248,11 @@ class _PdfToolPageState extends State<PdfToolPage> {
         outs.add(out);
       }
     });
-    if (!mounted) return;
+    if (!mounted) {
+      // Left meanwhile: the results still go into the library / records.
+      await s.tools.saved(outs);
+      return;
+    }
     if (err != null) return _failed(err!);
     await showToolResult(context, s, outs);
   }
@@ -287,7 +300,11 @@ class _PdfToolPageState extends State<PdfToolPage> {
     try {
       await tmp.delete(recursive: true);
     } catch (_) {}
-    if (!mounted) return;
+    if (!mounted) {
+      // Left meanwhile: the results still go into the library / records.
+      if (err == null) await s.tools.saved([out]);
+      return;
+    }
     if (err != null) return _failed(err!);
     final before = _docs.fold<int>(0, (n, d) => n + File(d.path).lengthSync());
     final after = File(out).lengthSync();
@@ -459,6 +476,12 @@ class _PdfToolPageState extends State<PdfToolPage> {
                         _pages.removeWhere(_picked.contains);
                         _picked.clear();
                       })),
+              // Change words in place (one PDF at a time).
+              act(Icons.edit_note_rounded, tr('pdfedit.title'), busy || _docs.length != 1
+                  ? null
+                  : () => Navigator.of(context).push(MaterialPageRoute<void>(
+                        builder: (_) => PdfTextEditPage(services: s, path: _docs.first.path),
+                      )), color: LightLook.blue),
               act(Icons.draw_rounded, tr('pdf.sign'), busy ? null : _sign, color: const Color(0xFF7B4DEB)),
               act(Icons.call_split_rounded, tr('pdf.split'), busy ? null : _split),
               act(Icons.compress_rounded, tr('pdf.compress'), busy ? null : _compress),

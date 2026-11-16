@@ -102,7 +102,11 @@ class _VideoToolPageState extends State<VideoToolPage> {
       () => VideoTools.cut(s, src, out, _how, fromMs: _keep.start.round(), toMs: whole ? null : _keep.end.round()),
       heavy: true,
     );
-    if (!mounted) return;
+    if (!mounted) {
+      // Left meanwhile: the results still go into the library / records.
+      if (ok == true) await s.tools.saved([out]);
+      return;
+    }
     if (ok != true) {
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('tool.failed', {'why': 'ffmpeg'}))));
       return;
@@ -115,7 +119,11 @@ class _VideoToolPageState extends State<VideoToolPage> {
     await _player.pause();
     if (!mounted) return;
     final ok = await runBusy(context, tr('video.joining', {'count': _files.length}), () => VideoTools.join(s, _files, out), heavy: true);
-    if (!mounted) return;
+    if (!mounted) {
+      // Left meanwhile: the results still go into the library / records.
+      if (ok == true) await s.tools.saved([out]);
+      return;
+    }
     if (ok != true) {
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('video.join_failed'))));
       return;
