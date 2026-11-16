@@ -217,6 +217,10 @@ class AppSettings extends ChangeNotifier {
   /// Where the tools' results go: library / beside / both (ToolSaveTo).
   String toolSaveTo = 'library';
 
+  /// Which office program does the Office conversions first: auto / office
+  /// / wps / libre (OfficeEngines).
+  String officeEngine = 'auto';
+
   /// Conversions made before beta.115 (_converted) were added to the library.
   bool convertedShown = false;
 
@@ -299,6 +303,7 @@ class AppSettings extends ChangeNotifier {
     s.otherFolder = j['otherFolder'] as String?;
     s.toolsFolder = j['toolsFolder'] as String?;
     s.toolSaveTo = j['toolSaveTo'] as String? ?? 'library';
+    s.officeEngine = j['officeEngine'] as String? ?? 'auto';
     s.convertedShown = j['convertedShown'] == true;
     s.snipKey = j['snipKey'] as String? ?? 'ctrlAltX';
     s.recentSeenMs = (j['recentSeenMs'] as num?)?.toInt() ?? 0;
@@ -359,6 +364,7 @@ class AppSettings extends ChangeNotifier {
       if (otherFolder != null) 'otherFolder': otherFolder,
       if (toolsFolder != null) 'toolsFolder': toolsFolder,
       'toolSaveTo': toolSaveTo,
+      'officeEngine': officeEngine,
       if (convertedShown) 'convertedShown': true,
       'snipKey': snipKey,
       'hiddenPeers': hiddenPeers.toList(),

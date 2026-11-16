@@ -12,6 +12,7 @@ import 'package:pdfrx/pdfrx.dart';
 import '../app_services.dart';
 import 'converter.dart';
 import 'file_tools.dart';
+import 'office_engines.dart';
 
 // "Format conversion": what can be turned into what, by kind of file, and
 // doing it (ffmpeg's queue for pictures, video and sound; PDF and Office
@@ -285,36 +286,22 @@ class FormatConverter {
 
   static String _q(String v) => v.replaceAll("'", "''");
 
-  /// Office: [src] into [out].
-  static Future<String?> office(String kind, String src, String out) async {
-    if (kind == 'pdf') return OfficePdf.convert(src, out);
-    final s = _q(src), o = _q(out);
-    final script = switch (kind) {
-      // Word: a PDF opened in Word is turned into an editable document
-      // (Word's own "PDF Reflow"; its question switched off first).
-      'wordDocx' => "\$a=New-Object -ComObject Word.Application;\$a.Visible=\$false;\$a.DisplayAlerts=0;"
-          "try{\$k='HKCU:\\Software\\Microsoft\\Office\\'+\$a.Version+'\\Word\\Options';if(!(Test-Path \$k)){New-Item \$k|Out-Null};"
-          "Set-ItemProperty \$k DisableConvertPdfWarning 1 -Type DWord;"
-          "\$d=\$a.Documents.Open('$s',\$false,\$true,\$false,'','',\$false,'','',${src.toLowerCase().endsWith('.txt') || src.toLowerCase().endsWith('.md') || src.toLowerCase().endsWith('.log') ? 5 : 0},65001);"
-          "\$d.SaveAs2('$o',16);\$d.Close(\$false)}finally{\$a.Quit()}",
-      'wordTxt' => "\$a=New-Object -ComObject Word.Application;\$a.Visible=\$false;\$a.DisplayAlerts=0;"
-          "try{\$d=\$a.Documents.Open('$s',\$false,\$true);\$d.SaveAs2('$o',7,\$false,'',\$false,'',\$false,\$false,\$false,\$false,\$false,65001);\$d.Close(\$false)}finally{\$a.Quit()}",
-      'excelCsv' => "\$a=New-Object -ComObject Excel.Application;\$a.Visible=\$false;\$a.DisplayAlerts=\$false;"
-          "try{\$d=\$a.Workbooks.Open('$s',0,\$true);try{\$d.SaveAs('$o',62)}catch{\$d.SaveAs('$o',6)};\$d.Close(\$false)}finally{\$a.Quit()}",
-      'excelXlsx' => "\$a=New-Object -ComObject Excel.Application;\$a.Visible=\$false;\$a.DisplayAlerts=\$false;"
-          "try{\$a.Workbooks.OpenText('$s',65001,1,1,1,\$false,\$false,\$false,\$true);\$d=\$a.ActiveWorkbook;\$d.SaveAs('$o',51);\$d.Close(\$false)}finally{\$a.Quit()}",
-      _ => '',
-    };
-    if (script.isEmpty) return 'unknown';
-    final err = await _ps(script);
-    if (await File(out).exists() && await File(out).length() > 0) return null;
-    DiagLog.log('tools', 'office $kind failed: $err');
-    return err ?? 'no file';
-  }
+  /// Office work: [src] into [out], by Office, WPS or LibreOffice.
+  static Future<String?> office(String kind, String src, String out) => OfficeEngines.run(kind, src, out);
 
   /// PowerPoint's slides as pictures (made in a temporary folder, then named
   /// like the other results).
   static Future<List<String>> pptImages(AppServices s, String src, String ext) async {
+    // Not Microsoft Office: slides → PDF (WPS / LibreOffice), then pages.
+    if (OfficeEngines.pickFrom(await OfficeEngines.installed(), 'pdf', src) != OfficeApp.office) {
+      final tmp = await Directory.systemTemp.createTemp('lr_ppt');
+      final pdf = '${tmp.path}${Platform.pathSeparator}slides.pdf';
+      final outs = await OfficeEngines.run('pdf', src, pdf) == null ? await pdfImages(s, pdf, ext, nameFrom: src) : <String>[];
+      try {
+        await tmp.delete(recursive: true);
+      } catch (_) {}
+      return outs;
+    }
     final tmp = await Directory.systemTemp.createTemp('lr_ppt');
     final filter = ext == 'png' ? 'PNG' : 'JPG';
     final s0 = _q(src), d0 = _q(tmp.path);
@@ -346,7 +333,7 @@ class FormatConverter {
   }
 
   /// A PDF's pages as JPG / PNG at 150 dpi.
-  static Future<List<String>> pdfImages(AppServices s, String src, String ext) async {
+  static Future<List<String>> pdfImages(AppServices s, String src, String ext, {String? nameFrom}) async {
     final outs = <String>[];
     final doc = await PdfDocument.openFile(src);
     try {
@@ -356,7 +343,7 @@ class FormatConverter {
         if (pic == null) continue;
         final im = await pic.createImage();
         pic.dispose();
-        final out = toolOutPath(s, src, '-p${page.pageNumber}', ext);
+        final out = toolOutPath(s, nameFrom ?? src, '-p${page.pageNumber}', ext);
         await _write(im, out, ext);
         im.dispose();
         outs.add(out);

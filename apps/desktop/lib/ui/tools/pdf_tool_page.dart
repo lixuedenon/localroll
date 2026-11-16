@@ -12,6 +12,7 @@ import 'package:pdfrx/pdfrx.dart';
 
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
+import '../../services/office_engines.dart';
 import '../../services/file_tools.dart';
 import '../../services/win_dialogs.dart';
 import '../light_look.dart';
@@ -61,6 +62,8 @@ class PdfToolPage extends StatefulWidget {
 }
 
 class _PdfToolPageState extends State<PdfToolPage> {
+  /// Office programs here, for "Open with".
+  Set<OfficeApp> _apps = const {};
   final List<_Doc> _docs = [];
   final List<_Page> _pages = [];
   final Set<_Page> _picked = {};
@@ -72,6 +75,9 @@ class _PdfToolPageState extends State<PdfToolPage> {
   @override
   void initState() {
     super.initState();
+    unawaited(OfficeEngines.installed().then((a) {
+      if (mounted) setState(() => _apps = a);
+    }));
     unawaited(_add(widget.files));
   }
 
@@ -402,6 +408,25 @@ class _PdfToolPageState extends State<PdfToolPage> {
           title: Text(_title, overflow: TextOverflow.ellipsis),
           backgroundColor: Colors.white,
           actions: [
+            // The PDF in Word / LibreOffice / any program ("Open with").
+            if (_docs.length == 1)
+              PopupMenuButton<String>(
+                tooltip: '',
+                onSelected: (v) => unawaited(OfficeEngines.openWith(_docs.first.path, OfficeApp.values.where((a) => a.name == v).firstOrNull)),
+                itemBuilder: (_) => [
+                  for (final a in _apps)
+                    if (a != OfficeApp.wps) PopupMenuItem(value: a.name, child: Text(tr('pdf.open_in', {'app': a == OfficeApp.office ? 'Word' : a.label}))),
+                  PopupMenuItem(value: 'other', child: Text(tr('pdf.open_other'))),
+                ],
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Row(children: [
+                    const Icon(Icons.open_in_new_rounded, size: 18),
+                    const SizedBox(width: 4),
+                    Text(tr('pdf.open_with')),
+                  ]),
+                ),
+              ),
             ToolSaveChip(services: s),
             TextButton(onPressed: busy ? null : () => _saveOne(ask: true), child: Text(tr('tool.save_as'))),
             const SizedBox(width: 6),

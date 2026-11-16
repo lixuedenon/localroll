@@ -1,5 +1,4 @@
 // apps/desktop/lib/services/file_tools.dart
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
@@ -8,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:localroll_core/localroll_core.dart';
 
 import '../app_services.dart';
+import 'office_engines.dart';
 import 'video_encoders.dart';
 
 export 'tool_outputs.dart' show toolOutPath;
@@ -172,54 +172,12 @@ class OfficePdf {
     return word.contains(e) || excel.contains(e) || powerpoint.contains(e);
   }
 
-  static bool? _have;
-
-  /// Office is installed (its programs answer to other programs).
-  static Future<bool> available() async {
-    if (_have != null) return _have!;
-    if (!Platform.isWindows) return _have = false;
-    try {
-      final r = await Process.run('reg', ['query', r'HKCR\Word.Application\CLSID']);
-      final r2 = await Process.run('reg', ['query', r'HKCR\PowerPoint.Application\CLSID']);
-      final r3 = await Process.run('reg', ['query', r'HKCR\Excel.Application\CLSID']);
-      return _have = r.exitCode == 0 || r2.exitCode == 0 || r3.exitCode == 0;
-    } catch (_) {
-      return _have = false;
-    }
-  }
+  /// An office program that can do it is here: Microsoft Office, WPS or
+  /// LibreOffice (see [OfficeEngines]).
+  static Future<bool> available() async => (await OfficeEngines.installed()).isNotEmpty;
 
   /// Null when done, else why not.
-  static Future<String?> convert(String src, String out) async {
-    final e = extensionOf(src);
-    String q(String v) => v.replaceAll("'", "''");
-    final script = word.contains(e)
-        ? "\$a=New-Object -ComObject Word.Application;\$a.Visible=\$false;\$a.DisplayAlerts=0;"
-            "try{\$d=\$a.Documents.Open('${q(src)}',\$false,\$true);\$d.ExportAsFixedFormat('${q(out)}',17);\$d.Close(\$false)}finally{\$a.Quit()}"
-        : excel.contains(e)
-            ? "\$a=New-Object -ComObject Excel.Application;\$a.Visible=\$false;\$a.DisplayAlerts=\$false;"
-                "try{\$d=\$a.Workbooks.Open('${q(src)}',0,\$true);\$d.ExportAsFixedFormat(0,'${q(out)}');\$d.Close(\$false)}finally{\$a.Quit()}"
-            : "\$a=New-Object -ComObject PowerPoint.Application;"
-                "try{\$d=\$a.Presentations.Open('${q(src)}',\$true,\$false,\$false);\$d.SaveAs('${q(out)}',32);\$d.Close()}finally{\$a.Quit()}";
-    // Sent encoded: paths with any characters survive.
-    final units = <int>[];
-    for (final u in script.codeUnits) {
-      units
-        ..add(u & 0xFF)
-        ..add(u >> 8);
-    }
-    try {
-      final r = await Process.run('powershell', ['-NoProfile', '-NonInteractive', '-EncodedCommand', base64.encode(units)])
-          .timeout(const Duration(minutes: 3));
-      if (await File(out).exists() && await File(out).length() > 0) return null;
-      final err = '${r.stderr}'.trim();
-      DiagLog.log('tools', 'office → pdf failed: ${err.length > 300 ? err.substring(0, 300) : err}');
-      return err.isEmpty ? 'no file' : err;
-    } on TimeoutException {
-      return 'timeout';
-    } catch (e) {
-      return '$e';
-    }
-  }
+  static Future<String?> convert(String src, String out) => OfficeEngines.run('pdf', src, out);
 }
 
 // ------------------------------------------------------------- video

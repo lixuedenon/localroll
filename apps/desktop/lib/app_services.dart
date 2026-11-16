@@ -10,6 +10,7 @@ import 'server/transfer_server.dart';
 import 'services/annotations.dart';
 import 'services/boot.dart';
 import 'services/converter.dart';
+import 'services/office_engines.dart';
 import 'services/tool_outputs.dart';
 import 'services/global_keys.dart';
 import 'ui/tools/tools.dart' show Tool, snipFromKey;
@@ -219,6 +220,7 @@ class AppServices {
   static Future<AppServices> create() async {
     Boot.step.value = 'settings';
     final settings = await AppSettings.load();
+    OfficeEngines.preferred = settings.officeEngine;
     Boot.mark('settings', next: 'library');
     final library = LibraryIndex(settings.libraryPath, stateFile: settings.libraryStateFile);
     // Documents / other files from PCs live beside the photos, not in the library view.

@@ -1,5 +1,6 @@
 // apps/desktop/lib/ui/tools/convert_page.dart
 import 'dart:async';
+import 'dart:io';
 
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/gestures.dart';
@@ -10,6 +11,7 @@ import '../../app_services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/converter.dart';
 import '../../services/elevation.dart';
+import '../../services/office_engines.dart';
 import '../../services/file_tools.dart';
 import '../../services/format_convert.dart';
 import '../../services/win_dialogs.dart';
@@ -32,24 +34,48 @@ class ConvertPage extends StatefulWidget {
   State<ConvertPage> createState() => _ConvertPageState();
 }
 
+/// Files of one format, and what they become.
+class _Group {
+  _Group(this.cat, this.from, this.to);
+
+  ConvCat cat;
+  Fmt from;
+  Fmt to;
+  final List<String> files = [];
+
+  ConvOp? get op => FormatTable.op(cat, from, to);
+}
+
 class _ConvertPageState extends State<ConvertPage> {
   ConvCat _cat = ConvCat.image;
   int _from = 0, _to = 1;
-  final List<String> _files = [];
+
+  /// Files in, by format; each group has its own target.
+  final List<_Group> _groups = [];
+
+  /// The group the wheels show (null: the wheels are free).
+  _Group? _sel;
   bool _small = false;
   bool _over = false;
+
+  /// Office programs here (Office / WPS / LibreOffice), looked up once.
+  Set<OfficeApp> _apps = const {};
 
   AppServices get s => widget.services;
   List<Fmt> get _fmts => FormatTable.of(_cat);
   Fmt get _left => _fmts[_from];
   Fmt get _right => _fmts[_to];
   ConvOp? get _op => FormatTable.op(_cat, _left, _right);
+  int get _count => _groups.fold(0, (n, g) => n + g.files.length);
 
   @override
   void initState() {
     super.initState();
     _fixRight();
     if (widget.files.isNotEmpty) _add(widget.files);
+    unawaited(OfficeEngines.installed().then((a) {
+      if (mounted) setState(() => _apps = a);
+    }));
   }
 
   bool _can(int i) => FormatTable.op(_cat, _left, _fmts[i]) != null;
@@ -57,7 +83,6 @@ class _ConvertPageState extends State<ConvertPage> {
   /// The right wheel on something that can be done.
   void _fixRight() {
     if (_to < _fmts.length && _can(_to)) return;
-    // The usual first choice: JPG / MP4 / MP3 / PDF, else the first possible.
     for (var i = 0; i < _fmts.length; i++) {
       if (_can(i)) {
         _to = i;
@@ -67,52 +92,83 @@ class _ConvertPageState extends State<ConvertPage> {
     _to = 0;
   }
 
+  /// The wheels show [g] (and turning "to" changes its target).
+  void _show(_Group g) {
+    final list = FormatTable.of(g.cat);
+    _sel = g;
+    _cat = g.cat;
+    _from = list.indexWhere((x) => x.id == g.from.id);
+    _to = list.indexWhere((x) => x.id == g.to.id);
+  }
+
   void _setCat(ConvCat c) => setState(() {
+        _sel = null;
         _cat = c;
         _from = 0;
-        _files.clear();
         _fixRight();
       });
 
   void _setFrom(int i) => setState(() {
-        if (i != _from) _files.removeWhere((f) => !_fmts[i].takes(f));
+        _sel = null;
         _from = i;
         _fixRight();
       });
 
-  /// Files in: the wheels follow the first one; others of another type are
-  /// left out (and said).
+  void _setTo(int i) => setState(() {
+        _to = i;
+        final g = _sel;
+        if (g != null) g.to = _fmts[i];
+      });
+
+  /// Files in, any formats: each goes to the group of its format (a new
+  /// group starts on its recommended target, or what the wheels show).
   void _add(List<String> paths) {
     if (paths.isEmpty) return;
-    if (_files.isEmpty) {
-      // The wheels follow the format most of the files are (ties: the kind
-      // shown now).
-      final counts = <String, (int, ConvCat, Fmt)>{};
-      for (final p in paths) {
-        final found = FormatTable.find(p, _cat);
-        if (found == null) continue;
-        final k = '${found.$1.name}/${found.$2.id}';
-        counts[k] = ((counts[k]?.$1 ?? 0) + 1, found.$1, found.$2);
+    final have = {for (final g in _groups) ...g.files};
+    _Group? first;
+    var skipped = 0;
+    for (final p in paths) {
+      if (have.contains(p)) continue;
+      final found = FormatTable.find(p, _cat);
+      if (found == null) {
+        skipped++;
+        continue;
       }
-      if (counts.isNotEmpty) {
-        final best = counts.values.reduce((a, b) => b.$1 > a.$1 ? b : a);
-        if (best.$2 != _cat || best.$3.id != _left.id) {
-          _cat = best.$2;
-          _from = FormatTable.of(best.$2).indexWhere((x) => x.id == best.$3.id);
-          _fixRight();
+      final (c, f) = found;
+      var g = _groups.where((x) => x.from.id == f.id).firstOrNull;
+      if (g == null) {
+        final choices = FormatTable.choicesFor(p, c);
+        if (choices.isEmpty) {
+          skipped++;
+          continue;
         }
+        final op = _op;
+        g = (_sel == null && _cat == c && _left.id == f.id && op != null)
+            ? _Group(c, f, _right)
+            : _Group(choices.first.cat, choices.first.from, choices.first.to);
+        _groups.add(g);
       }
+      g.files.add(p);
+      have.add(p);
+      first ??= g;
     }
-    final ok = [for (final p in paths) if (_left.takes(p) && !_files.contains(p)) p];
-    final left = paths.length - ok.length;
-    setState(() => _files.addAll(ok));
-    if (left > 0) {
-      ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('conv.skipped', {'count': left, 'what': _left.label}))));
+    final show = first;
+    setState(() {
+      if (show != null) _show(show);
+    });
+    if (skipped > 0) {
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('conv.skipped_any', {'count': skipped}))));
     }
   }
 
+  /// Every format the page can take (pick several kinds at once).
+  List<String> get _allExts => {
+        for (final c in ConvCat.values)
+          for (final f in FormatTable.of(c)) ...f.exts,
+      }.toList();
+
   Future<void> _pickPc() async {
-    final p = await WinDialogs.pickFiles(title: tr('conv.pick_title', {'what': _left.label}), extensions: _left.exts.toList());
+    final p = await WinDialogs.pickFiles(title: tr('conv.pick_any'), extensions: _allExts);
     if (mounted) _add(p);
   }
 
@@ -121,82 +177,125 @@ class _ConvertPageState extends State<ConvertPage> {
     if (p != null && mounted) _add(p);
   }
 
+  /// Which office program would do [op] for [src] (null: none here).
+  OfficeApp? _engine(ConvOp op, String src) {
+    if (!op.office) return null;
+    final kind = op is OfficeOp ? (op.kind == 'pptImages' ? 'pdf' : op.kind) : 'pdf';
+    return OfficeEngines.pickFrom(_apps, kind, src);
+  }
+
+  /// The tag after an Office pair: "with WPS" / "needs Office…".
+  Widget? _engineTag(ConvOp? op, String src) {
+    if (op == null || !op.office) return null;
+    final a = _engine(op, src);
+    return a == null
+        ? _tag(tr('conv.engine_none'), const Color(0xFFFDECEC), const Color(0xFFB42318))
+        : _tag(tr('conv.engine_use', {'app': a.label}), const Color(0xFFFFF0E3), const Color(0xFFC0560A));
+  }
+
   Future<void> _start() async {
-    final op = _op;
-    if (op == null || _files.isEmpty) return;
+    if (_groups.isEmpty) return;
     s.tools.current = 'convert';
-    if (op.office && !await OfficePdf.available()) {
-      if (!mounted) return;
-      await showLrDialog<void>(
+    var groups = [for (final g in _groups) if (g.op != null) g];
+    // Office pairs with no program here: say which, go on with the rest.
+    final blocked = [for (final g in groups) if (g.op!.office && _engine(g.op!, g.files.first) == null) g];
+    if (blocked.isNotEmpty) {
+      final go = await showLrDialog<bool>(
         context: context,
         builder: (c) => AlertDialog(
-          title: Text(tr('conv.no_office')),
-          content: SizedBox(width: 440, child: Text(tr('conv.office_needed'))),
-          actions: [FilledButton(onPressed: () => Navigator.pop(c), child: Text(tr('common.ok')))],
+          title: Text(tr('conv.no_engine_title')),
+          content: SizedBox(
+            width: 460,
+            child: Text(tr('conv.no_engine_body', {'what': blocked.map((g) => '${g.from.label} → ${g.to.label}').join('、')})),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => unawaited(Process.start('cmd', ['/c', 'start', '', 'https://www.libreoffice.org/download/download/'])),
+              child: Text(tr('conv.get_libre')),
+            ),
+            TextButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('common.cancel'))),
+            if (blocked.length < groups.length) FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(tr('conv.go_on'))),
+          ],
         ),
       );
-      return;
+      if (go != true) return;
+      groups = [for (final g in groups) if (!blocked.contains(g)) g];
     }
-    if (!mounted) return;
-    final files = List.of(_files);
-    switch (op) {
-      case MediaOp(:final format):
-        for (final f in files) {
-          s.converter.enqueueFile(f, format, preset: _small ? ConvertPreset.share : ConvertPreset.compatible);
+    if (!mounted || groups.isEmpty) return;
+    // Pictures, video, sound: the conversion queue.
+    var queued = 0;
+    for (final g in groups) {
+      final op = g.op;
+      if (op is MediaOp) {
+        for (final f in g.files) {
+          s.converter.enqueueFile(f, op.format, preset: _small ? ConvertPreset.share : ConvertPreset.compatible);
+          queued++;
         }
-        setState(_files.clear);
-        ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('conv.queued', {'count': files.length}))));
-        return;
-      default:
-        break;
+      }
     }
+    final rest = [for (final g in groups) if (g.op is! MediaOp) g];
+    final count = rest.fold(0, (n, g) => n + g.files.length);
+    setState(() {
+      _groups.clear();
+      _sel = null;
+    });
+    if (queued > 0) {
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('conv.queued', {'count': queued}))));
+    }
+    if (rest.isEmpty) return;
     final outs = <String>[];
     final failed = <String>[];
-    await runBusy(context, tr('conv.working', {'count': files.length}), () async {
-      if (op is ImagesToPdf) {
-        final out = toolOutPath(s, files.first, files.length > 1 ? '-${files.length}' : '', 'pdf');
-        final err = await photosToPdf(s, files, out);
-        err == null ? outs.add(out) : failed.add(baseNameOf(files.first));
-        return;
-      }
-      for (final f in files) {
-        try {
-          switch (op) {
-            case PdfToImages(:final ext):
-              outs.addAll(await FormatConverter.pdfImages(s, f, ext));
-            case PdfToText():
-              final out = toolOutPath(s, f, '', 'txt');
-              await FormatConverter.pdfText(s, f, out);
-              outs.add(out);
-            case TextToPdf():
-              final out = toolOutPath(s, f, '', 'pdf');
-              final err = await FormatConverter.textPdf(f, out, lrFontFallback(translator.language));
-              err == null ? outs.add(out) : failed.add(baseNameOf(f));
-            case OfficeOp(:final kind, :final ext):
-              if (kind == 'pptImages') {
-                final made = await FormatConverter.pptImages(s, f, ext);
-                made.isEmpty ? failed.add(baseNameOf(f)) : outs.addAll(made);
-              } else {
-                final out = toolOutPath(s, f, '', ext);
-                final err = await FormatConverter.office(kind, f, out);
-                err == null ? outs.add(out) : failed.add(baseNameOf(f));
-              }
-            default:
-              break;
-          }
-        } catch (e) {
-          DiagLog.log('tools', 'convert ${_left.id} → ${_right.id}: $e');
-          failed.add(baseNameOf(f));
-        }
+    await runBusy(context, tr('conv.working', {'count': count}), () async {
+      for (final g in rest) {
+        await _convert(g.op!, g.files, outs, failed);
       }
     });
     if (!mounted) return;
-    setState(_files.clear);
     if (outs.isEmpty) {
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('conv.failed', {'names': failed.join('、')}))));
       return;
     }
     await showToolResult(context, s, outs, note: failed.isEmpty ? null : tr('conv.some_failed', {'names': failed.join('、')}));
+  }
+
+  /// One group's documents (PDF, text, Office work).
+  Future<void> _convert(ConvOp op, List<String> files, List<String> outs, List<String> failed) async {
+    if (op is ImagesToPdf) {
+      final out = toolOutPath(s, files.first, files.length > 1 ? '-${files.length}' : '', 'pdf');
+      final err = await photosToPdf(s, files, out);
+      err == null ? outs.add(out) : failed.add(baseNameOf(files.first));
+      return;
+    }
+    for (final f in files) {
+      try {
+        switch (op) {
+          case PdfToImages(:final ext):
+            outs.addAll(await FormatConverter.pdfImages(s, f, ext));
+          case PdfToText():
+            final out = toolOutPath(s, f, '', 'txt');
+            await FormatConverter.pdfText(s, f, out);
+            outs.add(out);
+          case TextToPdf():
+            final out = toolOutPath(s, f, '', 'pdf');
+            final err = await FormatConverter.textPdf(f, out, lrFontFallback(translator.language));
+            err == null ? outs.add(out) : failed.add(baseNameOf(f));
+          case OfficeOp(:final kind, :final ext):
+            if (kind == 'pptImages') {
+              final made = await FormatConverter.pptImages(s, f, ext);
+              made.isEmpty ? failed.add(baseNameOf(f)) : outs.addAll(made);
+            } else {
+              final out = toolOutPath(s, f, '', ext);
+              final err = await FormatConverter.office(kind, f, out);
+              err == null ? outs.add(out) : failed.add(baseNameOf(f));
+            }
+          default:
+            break;
+        }
+      } catch (e) {
+        DiagLog.log('tools', 'convert $f: $e');
+        failed.add(baseNameOf(f));
+      }
+    }
   }
 
   String _catLabel(ConvCat c) => tr('conv.cat_${c.name}');
@@ -221,7 +320,13 @@ class _ConvertPageState extends State<ConvertPage> {
           backgroundColor: Colors.transparent,
           foregroundColor: LightLook.text,
           title: Text(tr('tool.convert')),
-          actions: [ToolSaveChip(services: s), const SizedBox(width: 12)],
+          actions: [
+            // Several office programs here: which does the Office work.
+            if (_apps.length > 1) _engineMenu(),
+            const SizedBox(width: 8),
+            ToolSaveChip(services: s),
+            const SizedBox(width: 12),
+          ],
         ),
         body: DecoratedBox(
           decoration: LightLook.wash,
@@ -242,11 +347,6 @@ class _ConvertPageState extends State<ConvertPage> {
                 ]),
               );
             }),
-            // Files in: what they can become, and what each is for.
-            if (_files.isNotEmpty) ...[
-              const SizedBox(height: 18),
-              _suggestCard(),
-            ],
             const SizedBox(height: 18),
             _overview(),
           ]),
@@ -280,60 +380,26 @@ class _ConvertPageState extends State<ConvertPage> {
     );
   }
 
-  /// "Can become": every format the files can be turned into, with where
-  /// it is used; a click sets the wheels.
-  Widget _suggestCard() {
-    final found = FormatTable.find(_files.first, _cat);
-    final choices = FormatTable.choicesFor(_files.first, found?.$1 ?? _cat);
-    if (choices.isEmpty) return const SizedBox.shrink();
-    return _card(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      Text(tr('conv.suggest', {'what': choices.first.from.label}),
-          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: LightLook.text)),
-      const SizedBox(height: 4),
-      Text(tr('conv.suggest_hint'), style: const TextStyle(color: LightLook.muted, fontSize: 12.5)),
-      const SizedBox(height: 10),
-      for (final c in choices) _choice(c),
-    ]));
-  }
-
-  Widget _choice(ConvChoice c) {
-    final on = c.cat == _cat && c.from.id == _left.id && c.to.id == _right.id;
-    return Padding(
-      padding: const EdgeInsets.only(top: 6),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () => setState(() {
-          final list = FormatTable.of(c.cat);
-          _cat = c.cat;
-          _from = list.indexWhere((x) => x.id == c.from.id);
-          _to = list.indexWhere((x) => x.id == c.to.id);
-        }),
+  Widget _engineMenu() => PopupMenuButton<String>(
+        tooltip: '',
+        onSelected: (v) {
+          setState(() => s.settings.officeEngine = OfficeEngines.preferred = v);
+          unawaited(s.settings.save());
+        },
+        itemBuilder: (_) => [
+          PopupMenuItem(value: 'auto', child: Text(tr('conv.engine_auto'))),
+          for (final a in OfficeApp.values)
+            if (_apps.contains(a)) PopupMenuItem(value: a.name, child: Text(a.label)),
+        ],
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: on ? const Color(0xFFE8EFFF) : const Color(0xFFF8FAFF),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: on ? LightLook.blue : const Color(0xFFE3E8F2), width: on ? 2 : 1),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: const Color(0xFFB9C8EA))),
+          child: Text(
+            '${tr('conv.engine_pick')}：${OfficeApp.values.where((a) => a.name == OfficeEngines.preferred).firstOrNull?.label ?? tr('conv.engine_auto')} ▾',
+            style: const TextStyle(fontSize: 13, color: LightLook.text),
           ),
-          child: Row(children: [
-            SizedBox(
-              width: 120,
-              child: Text(c.to.label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: LightLook.text)),
-            ),
-            if (c.recommended) ...[
-              _tag(tr('conv.recommended'), const Color(0xFFE3F5E9), const Color(0xFF15803D)),
-              const SizedBox(width: 10),
-            ],
-            Expanded(child: Text(tr(c.useKey), style: const TextStyle(fontSize: 13.5, color: Color(0xFF38445A)))),
-            if (c.op.office) ...[
-              const SizedBox(width: 8),
-              _tag(tr('conv.needs_office'), const Color(0xFFFFF0E3), const Color(0xFFC0560A)),
-            ],
-          ]),
         ),
-      ),
-    );
-  }
+      );
 
   Widget _card(Widget child) => Container(
         padding: const EdgeInsets.all(20),
@@ -356,7 +422,7 @@ class _ConvertPageState extends State<ConvertPage> {
                 if (op?.office ?? false)
                   Padding(
                     padding: const EdgeInsets.only(top: 6),
-                    child: _tag(tr('conv.needs_office'), const Color(0xFFFFF0E3), const Color(0xFFC0560A)),
+                    child: _engineTag(op, _sel?.files.first ?? 'x.${_left.exts.first}')!,
                   ),
               ]),
             ),
@@ -367,7 +433,7 @@ class _ConvertPageState extends State<ConvertPage> {
               items: _fmts,
               at: _to,
               enabled: _can,
-              onChanged: (i) => setState(() => _to = i),
+              onChanged: _setTo,
             ),
           ),
         ]),
@@ -380,80 +446,161 @@ class _ConvertPageState extends State<ConvertPage> {
           ),
       ]));
 
-  Widget _filesCard(ConvOp? op) => _card(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        DropTarget(
-          onDragEntered: (_) => setState(() => _over = true),
-          onDragExited: (_) => setState(() => _over = false),
-          onDragDone: (d) {
-            setState(() => _over = false);
-            _add([for (final f in d.files) f.path]);
-          },
-          child: Container(
-            height: 140,
-            decoration: BoxDecoration(
-              color: _over ? const Color(0xFFE8EFFF) : const Color(0xFFF8FAFF),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: _over ? LightLook.blue : const Color(0xFFB9C8EA), width: _over ? 2 : 1.5),
-            ),
-            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Text(Elevation.isAdmin ? tr('conv.drop_admin') : tr('conv.drop', {'what': _left.label}),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 16.5, fontWeight: FontWeight.w600, color: LightLook.text)),
-              const SizedBox(height: 10),
-              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                OutlinedButton(onPressed: _pickPc, child: Text(tr('send.files_pc'))),
-                const SizedBox(width: 10),
-                OutlinedButton(onPressed: _pickLibrary, child: Text(tr('send.files_library'))),
-              ]),
-            ]),
+  Widget _filesCard(ConvOp? op) {
+    final video = _groups.any((g) {
+      final o = g.op;
+      return o is MediaOp && o.format.kind != FormatKind.audio;
+    });
+    return _card(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      DropTarget(
+        onDragEntered: (_) => setState(() => _over = true),
+        onDragExited: (_) => setState(() => _over = false),
+        onDragDone: (d) {
+          setState(() => _over = false);
+          _add([for (final f in d.files) f.path]);
+        },
+        child: Container(
+          height: 110,
+          decoration: BoxDecoration(
+            color: _over ? const Color(0xFFE8EFFF) : const Color(0xFFF8FAFF),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _over ? LightLook.blue : const Color(0xFFB9C8EA), width: _over ? 2 : 1.5),
           ),
-        ),
-        const SizedBox(height: 8),
-        if (_files.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            child: Text(tr('conv.no_files'), textAlign: TextAlign.center, style: const TextStyle(color: LightLook.muted)),
-          )
-        else
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 220),
-            child: ListView(shrinkWrap: true, children: [
-              for (final f in _files)
-                ListTile(
-                  dense: true,
-                  leading: const Icon(Icons.insert_drive_file_outlined, color: LightLook.muted),
-                  title: Text(baseNameOf(f), maxLines: 1, overflow: TextOverflow.ellipsis),
-                  trailing: IconButton(
-                    tooltip: tr('conv.remove'),
-                    icon: const Icon(Icons.close_rounded, size: 18),
-                    onPressed: () => setState(() => _files.remove(f)),
-                  ),
-                ),
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Text(Elevation.isAdmin ? tr('conv.drop_admin') : tr('conv.drop_any'),
+                textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: LightLook.text)),
+            const SizedBox(height: 10),
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              OutlinedButton(onPressed: _pickPc, child: Text(tr('send.files_pc'))),
+              const SizedBox(width: 10),
+              OutlinedButton(onPressed: _pickLibrary, child: Text(tr('send.files_library'))),
             ]),
-          ),
-        if (op is MediaOp && op.format.kind != FormatKind.audio) ...[
-          const SizedBox(height: 8),
-          Row(children: [
-            Text(tr('conv.quality'), style: const TextStyle(color: LightLook.text)),
-            const SizedBox(width: 12),
-            ChoiceChip(label: Text(tr('conv.q_high')), selected: !_small, onSelected: (_) => setState(() => _small = false)),
-            const SizedBox(width: 8),
-            ChoiceChip(label: Text(tr('conv.q_small')), selected: _small, onSelected: (_) => setState(() => _small = true)),
           ]),
-        ],
-        const SizedBox(height: 14),
+        ),
+      ),
+      const SizedBox(height: 12),
+      if (_groups.isEmpty)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          child: Text(tr('conv.no_files'), textAlign: TextAlign.center, style: const TextStyle(color: LightLook.muted)),
+        )
+      else ...[
         Row(children: [
           Expanded(
-            child: Text(op is MediaOp ? tr('conv.queue_note') : '', style: const TextStyle(color: LightLook.muted, fontSize: 12.5)),
+            child: Text(tr('conv.groups', {'groups': _groups.length, 'count': _count}),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: LightLook.text)),
           ),
-          FilledButton.icon(
-            style: FilledButton.styleFrom(backgroundColor: LightLook.blue, shape: const StadiumBorder()),
-            onPressed: op == null || _files.isEmpty ? null : _start,
-            icon: const Icon(Icons.play_arrow_rounded),
-            label: Text(tr('conv.start', {'count': _files.length})),
-          ),
+          Text(tr('conv.groups_hint'), style: const TextStyle(color: LightLook.muted, fontSize: 12)),
         ]),
-      ]));
+        const SizedBox(height: 4),
+        for (final g in _groups) _groupRow(g),
+      ],
+      if (video) ...[
+        const SizedBox(height: 10),
+        Row(children: [
+          Text(tr('conv.quality'), style: const TextStyle(color: LightLook.text)),
+          const SizedBox(width: 12),
+          ChoiceChip(label: Text(tr('conv.q_high')), selected: !_small, onSelected: (_) => setState(() => _small = false)),
+          const SizedBox(width: 8),
+          ChoiceChip(label: Text(tr('conv.q_small')), selected: _small, onSelected: (_) => setState(() => _small = true)),
+        ]),
+      ],
+      const SizedBox(height: 14),
+      Row(children: [
+        Expanded(child: Text(_groups.isEmpty ? '' : tr('conv.groups_note'), style: const TextStyle(color: LightLook.muted, fontSize: 12.5))),
+        FilledButton.icon(
+          style: FilledButton.styleFrom(backgroundColor: LightLook.blue, shape: const StadiumBorder()),
+          onPressed: _groups.isEmpty ? null : _start,
+          icon: const Icon(Icons.play_arrow_rounded),
+          label: Text(tr('conv.start', {'count': _count})),
+        ),
+      ]),
+    ]));
+  }
+
+  /// One format's files: how many, → its target (a list of everything it
+  /// can become, with what each is for), ×.
+  Widget _groupRow(_Group g) {
+    final on = identical(g, _sel);
+    final choices = FormatTable.choicesFor(g.files.first, g.cat);
+    final now = choices.where((c) => c.to.id == g.to.id).firstOrNull;
+    final names = g.files.take(2).map(baseNameOf).join('、') + (g.files.length > 2 ? ' …' : '');
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: () => setState(() => _show(g)),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: on ? const Color(0xFFE8EFFF) : const Color(0xFFF8FAFF),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: on ? LightLook.blue : const Color(0xFFE3E8F2), width: on ? 2 : 1),
+          ),
+          child: Row(children: [
+            SizedBox(
+              width: 150,
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('${g.from.label}  ×${g.files.length}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: LightLook.text)),
+                Text(names, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11.5, color: LightLook.muted)),
+              ]),
+            ),
+            const Icon(Icons.arrow_forward_rounded, color: LightLook.blue),
+            const SizedBox(width: 10),
+            PopupMenuButton<ConvChoice>(
+              tooltip: '',
+              onSelected: (c) => setState(() {
+                g
+                  ..cat = c.cat
+                  ..from = c.from
+                  ..to = c.to;
+                _show(g);
+              }),
+              itemBuilder: (_) => [
+                for (final c in choices)
+                  PopupMenuItem(
+                    value: c,
+                    child: SizedBox(
+                      width: 460,
+                      child: Row(children: [
+                        SizedBox(width: 64, child: Text(c.to.label, style: const TextStyle(fontWeight: FontWeight.w800))),
+                        if (c.recommended) ...[_tag(tr('conv.recommended'), const Color(0xFFE3F5E9), const Color(0xFF15803D)), const SizedBox(width: 8)],
+                        Expanded(child: Text(tr(c.useKey), style: const TextStyle(fontSize: 12.5))),
+                        if (_engineTag(c.op, g.files.first) case final t?) ...[const SizedBox(width: 6), t],
+                      ]),
+                    ),
+                  ),
+              ],
+              child: Container(
+                width: 110,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10), border: Border.all(color: const Color(0xFFB9C8EA))),
+                child: Row(children: [
+                  Expanded(child: Text(g.to.label, style: const TextStyle(fontWeight: FontWeight.w800, color: LightLook.text))),
+                  const Icon(Icons.arrow_drop_down_rounded, color: LightLook.muted),
+                ]),
+              ),
+            ),
+            const SizedBox(width: 10),
+            if (now?.recommended ?? false) ...[_tag(tr('conv.recommended'), const Color(0xFFE3F5E9), const Color(0xFF15803D)), const SizedBox(width: 8)],
+            if (_engineTag(g.op, g.files.first) case final t?) ...[t, const SizedBox(width: 8)],
+            Expanded(
+              child: Text(now == null ? '' : tr(now.useKey),
+                  maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12.5, color: Color(0xFF38445A))),
+            ),
+            IconButton(
+              tooltip: tr('conv.remove'),
+              icon: const Icon(Icons.close_rounded, size: 18),
+              onPressed: () => setState(() {
+                _groups.remove(g);
+                if (identical(_sel, g)) _sel = null;
+              }),
+            ),
+          ]),
+        ),
+      ),
+    );
+  }
 
   Widget _tag(String t, Color bg, Color fg) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
