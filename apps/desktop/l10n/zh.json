@@ -165,7 +165,7 @@
   "home.issue_offline": "媒体库文件夹不可用（硬盘拔掉了？）。",
   "home.issue_missing": "文件夹中有 {count} 个文件不见了，请确认或撤销。",
   "home.issue_server": "接收服务未运行，手机无法发送。",
-  "home.issue_firewall": "Windows 防火墙可能会拦截手机，请在“接收”页允许。",
+  "home.issue_firewall": "其他设备发不进来：Windows 防火墙挡着 Keepnear，点这里允许",
   "home.issue_ffmpeg": "缺少视频组件，无法转换视频。",
   "home.issue_disk": "媒体库所在磁盘剩余不足 5 GB。",
   "nav.send": "发送",
@@ -2137,5 +2137,12 @@
   "pdfedit.done": "✓ 完成",
   "pdfedit.suffix": "-已改",
   "pdfedit.skipped": "{all} 处里有 {count} 处没改：那几行的文字和旁边的连在一起，单独改会弄乱排版。",
-  "pdfedit.replaced": "已覆盖原文件"
+  "pdfedit.replaced": "已覆盖原文件",
+  "send.held_blocked": "连不上 {name}。请确认它开着 Keepnear；如果它的屏幕上提示「允许」，请点一下",
+  "fw.title": "让其他设备能把文件发到这台电脑",
+  "fw.body": "Windows 防火墙现在挡着 Keepnear，手机和其他电脑发不进来。\n\n点「允许」后，Windows 会问一次「是否允许此应用更改你的设备」，点「是」就好，以后不会再问。",
+  "fw.later": "以后再说",
+  "fw.allow": "允许",
+  "fw.fixed": "好了，其他设备现在可以发文件到这台电脑了",
+  "fw.not_fixed": "没有改成（可能点了「否」）。首页可以随时再试。"
 }

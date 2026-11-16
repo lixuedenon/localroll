@@ -165,7 +165,7 @@
   "home.issue_offline": "媒體庫資料夾無法使用（硬碟拔掉了？）。",
   "home.issue_missing": "資料夾中有 {count} 個檔案不見了，請確認或復原。",
   "home.issue_server": "接收服務未執行，手機無法傳送。",
-  "home.issue_firewall": "Windows 防火牆可能會攔截手機，請在「接收」頁允許。",
+  "home.issue_firewall": "其他裝置傳不進來：Windows 防火牆擋著 Keepnear，點這裡允許",
   "home.issue_ffmpeg": "缺少影片元件，無法轉換影片。",
   "home.issue_disk": "媒體庫所在磁碟剩餘不足 5 GB。",
   "nav.send": "傳送",
@@ -2137,5 +2137,12 @@
   "pdfedit.done": "✓ 完成",
   "pdfedit.suffix": "-已改",
   "pdfedit.skipped": "{all} 處裡有 {count} 處沒改：那幾行的文字和旁邊的連在一起，單獨改會弄亂排版。",
-  "pdfedit.replaced": "已覆蓋原檔案"
+  "pdfedit.replaced": "已覆蓋原檔案",
+  "send.held_blocked": "連不上 {name}。請確認它開著 Keepnear；如果它的螢幕上提示「允許」，請點一下",
+  "fw.title": "讓其他裝置能把檔案傳到這台電腦",
+  "fw.body": "Windows 防火牆現在擋著 Keepnear，手機和其他電腦傳不進來。\n\n點「允許」後，Windows 會問一次「是否允許此應用程式變更您的裝置」，點「是」就好，以後不會再問。",
+  "fw.later": "以後再說",
+  "fw.allow": "允許",
+  "fw.fixed": "好了，其他裝置現在可以傳檔案到這台電腦了",
+  "fw.not_fixed": "沒有改成（可能點了「否」）。首頁可以隨時再試。"
 }

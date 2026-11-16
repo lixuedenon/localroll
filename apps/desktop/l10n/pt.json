@@ -165,7 +165,7 @@
   "home.issue_offline": "A pasta da biblioteca não está disponível (disco desconectado?).",
   "home.issue_missing": "{count} arquivos sumiram da pasta. Confirme ou desfaça.",
   "home.issue_server": "O recebimento está desligado. Os celulares não podem enviar.",
-  "home.issue_firewall": "O Firewall do Windows pode bloquear os celulares. Permita em Receber.",
+  "home.issue_firewall": "Outros dispositivos não conseguem enviar: o Firewall do Windows bloqueia o Keepnear — clique para permitir",
   "home.issue_ffmpeg": "Faltam as ferramentas de vídeo: não é possível converter vídeos.",
   "home.issue_disk": "Menos de 5 GB livres no disco da biblioteca.",
   "nav.send": "Enviar",
@@ -2137,5 +2137,12 @@
   "pdfedit.done": "✓ Pronto",
   "pdfedit.suffix": "-editado",
   "pdfedit.skipped": "{count} de {all} alteração(ões) não foram feitas: esse texto está ligado ao texto ao lado e mudá-lo sozinho estragaria o layout.",
-  "pdfedit.replaced": "O original foi substituído"
+  "pdfedit.replaced": "O original foi substituído",
+  "send.held_blocked": "Não dá para alcançar {name}. Confira se o Keepnear está aberto lá; se aparecer “Permitir”, clique lá",
+  "fw.title": "Deixar outros dispositivos enviarem arquivos a este PC",
+  "fw.body": "O Firewall do Windows está bloqueando o Keepnear, então celulares e outros PCs não conseguem enviar para cá.\n\nClique em Permitir: o Windows pergunta uma vez “Permitir que este app faça alterações?” — clique em Sim e ele não pergunta mais.",
+  "fw.later": "Depois",
+  "fw.allow": "Permitir",
+  "fw.fixed": "Pronto: outros dispositivos já podem enviar arquivos a este PC",
+  "fw.not_fixed": "Nada mudou (clicou em Não?). Dá para tentar de novo pela tela inicial quando quiser."
 }

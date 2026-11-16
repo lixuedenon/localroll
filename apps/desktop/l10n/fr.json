@@ -165,7 +165,7 @@
   "home.issue_offline": "Le dossier de la bibliothèque est indisponible (disque débranché ?).",
   "home.issue_missing": "{count} fichiers ont disparu du dossier. Confirmez ou annulez.",
   "home.issue_server": "La réception est arrêtée. Les téléphones ne peuvent pas envoyer.",
-  "home.issue_firewall": "Le pare-feu Windows peut bloquer les téléphones. Autorisez-le dans Recevoir.",
+  "home.issue_firewall": "Les autres appareils ne peuvent rien envoyer : le pare-feu Windows bloque Keepnear — cliquez pour autoriser",
   "home.issue_ffmpeg": "Outils vidéo manquants : impossible de convertir les vidéos.",
   "home.issue_disk": "Moins de 5 Go libres sur le disque de la bibliothèque.",
   "nav.send": "Envoyer",
@@ -2137,5 +2137,12 @@
   "pdfedit.done": "✓ Terminé",
   "pdfedit.suffix": "-modifié",
   "pdfedit.skipped": "{count} modification(s) sur {all} non faites : ce texte est lié au texte voisin, le changer seul casserait la mise en page.",
-  "pdfedit.replaced": "L'original a été remplacé"
+  "pdfedit.replaced": "L'original a été remplacé",
+  "send.held_blocked": "{name} est injoignable. Vérifiez que Keepnear y est ouvert ; s'il affiche « Autoriser », cliquez-y là-bas",
+  "fw.title": "Permettre aux autres appareils d'envoyer des fichiers à ce PC",
+  "fw.body": "Le pare-feu Windows bloque Keepnear : téléphones et autres PC ne peuvent rien envoyer ici.\n\nCliquez sur Autoriser : Windows demande une fois « Autoriser cette application à apporter des modifications ? » — cliquez sur Oui, il ne redemandera plus.",
+  "fw.later": "Plus tard",
+  "fw.allow": "Autoriser",
+  "fw.fixed": "C’est fait : les autres appareils peuvent envoyer des fichiers à ce PC",
+  "fw.not_fixed": "Rien n'a changé (Non cliqué ?). Vous pouvez réessayer depuis l'accueil à tout moment."
 }

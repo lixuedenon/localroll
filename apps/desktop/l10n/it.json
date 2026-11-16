@@ -165,7 +165,7 @@
   "home.issue_offline": "La cartella della libreria non è disponibile (disco scollegato?).",
   "home.issue_missing": "Mancano {count} file nella cartella. Conferma o annulla.",
   "home.issue_server": "La ricezione è spenta. I telefoni non possono inviare.",
-  "home.issue_firewall": "Il firewall di Windows può bloccare i telefoni. Consentilo in Ricevi.",
+  "home.issue_firewall": "Gli altri dispositivi non possono inviare: il Firewall di Windows blocca Keepnear — clicca per consentire",
   "home.issue_ffmpeg": "Mancano gli strumenti video: impossibile convertire i video.",
   "home.issue_disk": "Meno di 5 GB liberi sul disco della libreria.",
   "nav.send": "Invia",
@@ -2137,5 +2137,12 @@
   "pdfedit.done": "✓ Fatto",
   "pdfedit.suffix": "-modificato",
   "pdfedit.skipped": "{count} di {all} modifiche non sono state fatte: quel testo è unito a quello accanto e cambiarlo da solo romperebbe l’impaginazione.",
-  "pdfedit.replaced": "L’originale è stato sostituito"
+  "pdfedit.replaced": "L’originale è stato sostituito",
+  "send.held_blocked": "{name} non è raggiungibile. Controlla che abbia Keepnear aperto; se lì compare «Consenti», fai clic lì",
+  "fw.title": "Consenti agli altri dispositivi di inviare file a questo PC",
+  "fw.body": "Il Firewall di Windows blocca Keepnear, quindi telefoni e altri PC non possono inviare qui.\n\nFai clic su Consenti: Windows chiede una volta «Consentire a questa app di apportare modifiche?» — fai clic su Sì e non lo chiederà più.",
+  "fw.later": "Più tardi",
+  "fw.allow": "Consenti",
+  "fw.fixed": "Fatto: ora gli altri dispositivi possono inviare file a questo PC",
+  "fw.not_fixed": "Non modificato (premuto No?). Puoi riprovare dalla Home quando vuoi."
 }

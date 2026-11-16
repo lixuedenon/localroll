@@ -8,6 +8,7 @@ import 'package:localroll_core/localroll_core.dart';
 import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/elevation.dart';
+import '../services/firewall_guard.dart';
 import '../services/file_actions.dart';
 import '../services/library_index.dart';
 import '../services/network.dart';
@@ -17,6 +18,7 @@ import 'add_device_dialog.dart';
 import 'title_bar.dart' show reopenAsUser;
 import 'app_nav.dart';
 import 'feature_list.dart';
+import 'firewall_prompt.dart';
 import 'breathing.dart';
 import 'device_badge.dart';
 import 'files_view.dart';
@@ -89,7 +91,7 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     final s = widget.services;
     return ListenableBuilder(
-      listenable: Listenable.merge([s.library, s.settings, s.server, s.converter, s.hub, s.peers]),
+      listenable: Listenable.merge([s.library, s.settings, s.server, s.converter, s.hub, s.peers, FirewallGuard.instance]),
       builder: (context, _) {
         final items = s.library.items;
         final total = items.fold<int>(0, (sum, i) => sum + i.size);
@@ -601,6 +603,8 @@ class _DashboardPageState extends State<DashboardPage> {
     return <(IconData, String, VoidCallback?)>[
       // Started as administrator: Windows blocks dragging files in.
       if (Elevation.isAdmin) (Icons.admin_panel_settings_rounded, tr('home.issue_admin'), () => reopenAsUser(context, s)),
+      // Others can't send here: Windows' firewall doesn't let Keepnear in.
+      if (FirewallGuard.instance.blocked) (Icons.shield_rounded, tr('home.issue_firewall'), () => fixFirewall()),
       if (s.library.offline)
         (
           s.library.loss == LibraryLoss.gone ? Icons.folder_off_rounded : Icons.usb_off_rounded,

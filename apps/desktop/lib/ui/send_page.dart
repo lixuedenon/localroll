@@ -26,7 +26,7 @@ String peerErrorText(String? code) {
 /// What a transfer is doing now, and its colour.
 (String, Color) jobStatus(SendJob j) => switch (j.state) {
       SendJobState.waiting => (tr('send.waiting'), LrColors.muted),
-      SendJobState.held => (tr('send.held', {'name': j.peer.name}), LrColors.muted),
+      SendJobState.held => (tr(j.blocked ? 'send.held_blocked' : 'send.held', {'name': j.peer.name}), LrColors.muted),
       SendJobState.converting => (
           [
             tr(j.convertHw ? 'send.converting_hw' : 'send.converting',

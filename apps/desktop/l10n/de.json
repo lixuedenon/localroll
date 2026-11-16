@@ -165,7 +165,7 @@
   "home.issue_offline": "Mediathek-Ordner nicht verfügbar (Laufwerk getrennt?).",
   "home.issue_missing": "{count} Dateien fehlen im Ordner. Bestätigen oder rückgängig machen.",
   "home.issue_server": "Empfang ist aus. Handys können nicht senden.",
-  "home.issue_firewall": "Die Windows-Firewall kann Handys blockieren. Unter Empfangen erlauben.",
+  "home.issue_firewall": "Andere Geräte können nichts senden: Die Windows-Firewall sperrt Keepnear – zum Zulassen klicken",
   "home.issue_ffmpeg": "Videowerkzeuge fehlen: Videos können nicht umgewandelt werden.",
   "home.issue_disk": "Weniger als 5 GB frei auf dem Mediathek-Laufwerk.",
   "nav.send": "Senden",
@@ -2137,5 +2137,12 @@
   "pdfedit.done": "✓ Fertig",
   "pdfedit.suffix": "-geändert",
   "pdfedit.skipped": "{count} von {all} Änderung(en) wurden nicht gemacht: Dieser Text hängt mit dem Text daneben zusammen, eine Einzeländerung würde das Layout zerstören.",
-  "pdfedit.replaced": "Das Original wurde ersetzt"
+  "pdfedit.replaced": "Das Original wurde ersetzt",
+  "send.held_blocked": "{name} ist nicht erreichbar. Prüfe, ob Keepnear dort offen ist; steht dort „Zulassen“, bitte dort klicken",
+  "fw.title": "Andere Geräte Dateien an diesen PC senden lassen",
+  "fw.body": "Die Windows-Firewall sperrt Keepnear aus, daher können Handys und andere PCs nichts hierher senden.\n\nKlick auf „Zulassen“: Windows fragt einmal „Darf diese App Änderungen vornehmen?“ – „Ja“, und es wird nicht wieder gefragt.",
+  "fw.later": "Später",
+  "fw.allow": "Zulassen",
+  "fw.fixed": "Fertig: Andere Geräte können jetzt Dateien an diesen PC senden",
+  "fw.not_fixed": "Nicht geändert („Nein“ geklickt?). Auf der Startseite jederzeit erneut versuchen."
 }

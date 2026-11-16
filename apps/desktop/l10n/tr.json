@@ -165,7 +165,7 @@
   "home.issue_offline": "Kitaplık klasörü kullanılamıyor (sürücü çıkarıldı mı?).",
   "home.issue_missing": "Klasörden {count} dosya kayboldu. Onaylayın veya geri alın.",
   "home.issue_server": "Alım kapalı. Telefonlar gönderemez.",
-  "home.issue_firewall": "Windows Güvenlik Duvarı telefonları engelleyebilir. Al sayfasından izin verin.",
+  "home.issue_firewall": "Diğer cihazlar gönderemiyor: Windows Güvenlik Duvarı Keepnear'ı engelliyor — izin vermek için tıklayın",
   "home.issue_ffmpeg": "Video araçları eksik: videolar dönüştürülemez.",
   "home.issue_disk": "Kitaplık sürücüsünde 5 GB’tan az boş alan var.",
   "nav.send": "Gönder",
@@ -2137,5 +2137,12 @@
   "pdfedit.done": "✓ Tamam",
   "pdfedit.suffix": "-düzenlendi",
   "pdfedit.skipped": "{all} değişiklikten {count} tanesi yapılmadı: o metin yanındaki metne bağlı, tek başına değiştirmek düzeni bozar.",
-  "pdfedit.replaced": "Orijinalin üzerine yazıldı"
+  "pdfedit.replaced": "Orijinalin üzerine yazıldı",
+  "send.held_blocked": "{name} cihazına ulaşılamıyor. Orada Keepnear'ın açık olduğunu kontrol edin; orada “İzin ver” görünüyorsa oradan tıklayın",
+  "fw.title": "Diğer cihazların bu bilgisayara dosya göndermesine izin ver",
+  "fw.body": "Windows Güvenlik Duvarı Keepnear'ı engelliyor, bu yüzden telefonlar ve diğer bilgisayarlar buraya gönderemiyor.\n\nİzin ver'e tıklayın: Windows bir kez “Bu uygulamanın değişiklik yapmasına izin verilsin mi?” diye sorar — Evet'e tıklayın, bir daha sormaz.",
+  "fw.later": "Sonra",
+  "fw.allow": "İzin ver",
+  "fw.fixed": "Tamam: diğer cihazlar artık bu bilgisayara dosya gönderebilir",
+  "fw.not_fixed": "Değişmedi (Hayır mı tıklandı?). Ana sayfadan istediğiniz zaman yeniden deneyebilirsiniz."
 }

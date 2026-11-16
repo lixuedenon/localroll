@@ -680,6 +680,10 @@ class SendJob {
   /// Since when it waits for the other device to come online.
   DateTime? heldSince;
 
+  /// Waiting although the device is seen online: it can't be reached
+  /// (most often its firewall).
+  bool blocked = false;
+
   /// Files deleted or changed while it waited: left out.
   int goneFiles = 0;
 
@@ -772,10 +776,11 @@ class PeerSender extends ChangeNotifier {
     return j;
   }
 
-  void _hold(SendJob j) {
+  void _hold(SendJob j, {bool tried = false}) {
     j
       ..state = SendJobState.held
       ..heldSince ??= DateTime.now()
+      ..blocked = tried && (isOnline?.call(j.peer.id) ?? false)
       ..error = null;
   }
 
@@ -1001,10 +1006,20 @@ class PeerSender extends ChangeNotifier {
         return c;
       } on PeerError {
         rethrow; // certificate changed: don't try elsewhere
-      } catch (_) {}
+      } catch (e) {
+        // Why it can't be reached (said once per reason, not every retry).
+        final why = '$host:$port ${'$e'.split('\n').first}';
+        final short = why.length > 160 ? why.substring(0, 160) : why;
+        if (_unreachable[p.id] != short) {
+          _unreachable[p.id] = short;
+          DiagLog.log('send', 'cannot reach ${p.name}: $short');
+        }
+      }
     }
     return null;
   }
+
+  final Map<String, String> _unreachable = {};
 
   Future<void> _run(SendJob j) async {
     j
@@ -1104,7 +1119,7 @@ class PeerSender extends ChangeNotifier {
         j.state = SendJobState.cancelled;
       } else if (e.code == 'peer_offline' || e.code == 'phone_closed') {
         // Gone offline: waits for it (what arrived is skipped next time).
-        _hold(j);
+        _hold(j, tried: true);
       } else {
         j
           ..state = SendJobState.failed
@@ -1116,7 +1131,7 @@ class PeerSender extends ChangeNotifier {
         ..error = e.code
         ..reason = (e.body['reason'] as String?)?.trim();
     } catch (e) {
-      _hold(j);
+      _hold(j, tried: true);
       debugPrint('send failed: $e');
     } finally {
       c?.close();

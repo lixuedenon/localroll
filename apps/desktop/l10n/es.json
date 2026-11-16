@@ -165,7 +165,7 @@
   "home.issue_offline": "La carpeta de la biblioteca no está disponible (¿disco desconectado?).",
   "home.issue_missing": "Faltan {count} archivos en la carpeta. Confirma o deshaz.",
   "home.issue_server": "La recepción está apagada. Los teléfonos no pueden enviar.",
-  "home.issue_firewall": "El Firewall de Windows puede bloquear los teléfonos. Permítelo en Recibir.",
+  "home.issue_firewall": "Otros dispositivos no pueden enviar aquí: el Firewall de Windows bloquea Keepnear — haz clic para permitir",
   "home.issue_ffmpeg": "Faltan las herramientas de vídeo: no se pueden convertir vídeos.",
   "home.issue_disk": "Quedan menos de 5 GB en el disco de la biblioteca.",
   "nav.send": "Enviar",
@@ -2137,5 +2137,12 @@
   "pdfedit.done": "✓ Hecho",
   "pdfedit.suffix": "-editado",
   "pdfedit.skipped": "{count} de {all} cambio(s) no se hicieron: ese texto está unido al de al lado y cambiarlo solo rompería el diseño.",
-  "pdfedit.replaced": "Se reemplazó el original"
+  "pdfedit.replaced": "Se reemplazó el original",
+  "send.held_blocked": "No se puede llegar a {name}. Comprueba que tenga Keepnear abierto; si allí aparece «Permitir», haz clic en ese equipo",
+  "fw.title": "Permitir que otros dispositivos envíen archivos a este PC",
+  "fw.body": "El Firewall de Windows está bloqueando Keepnear, así que móviles y otros PC no pueden enviar aquí.\n\nHaz clic en Permitir: Windows pregunta una vez «¿Permitir que esta aplicación haga cambios?» — haz clic en Sí y no volverá a preguntar.",
+  "fw.later": "Más tarde",
+  "fw.allow": "Permitir",
+  "fw.fixed": "Listo: otros dispositivos ya pueden enviar archivos a este PC",
+  "fw.not_fixed": "No se cambió (¿se pulsó No?). Puedes reintentarlo desde el inicio cuando quieras."
 }

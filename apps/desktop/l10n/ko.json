@@ -165,7 +165,7 @@
   "home.issue_offline": "라이브러리 폴더를 사용할 수 없습니다(드라이브 분리?).",
   "home.issue_missing": "폴더에서 파일 {count}개가 사라졌습니다. 확인하거나 되돌리세요.",
   "home.issue_server": "수신이 꺼져 있어 휴대폰에서 보낼 수 없습니다.",
-  "home.issue_firewall": "Windows 방화벽이 휴대폰을 차단할 수 있습니다. 수신 화면에서 허용하세요.",
+  "home.issue_firewall": "다른 기기가 보낼 수 없어요: Windows 방화벽이 Keepnear를 막고 있어요 — 눌러서 허용",
   "home.issue_ffmpeg": "동영상 도구가 없어 동영상을 변환할 수 없습니다.",
   "home.issue_disk": "라이브러리 드라이브의 남은 공간이 5GB 미만입니다.",
   "nav.send": "보내기",
@@ -2137,5 +2137,12 @@
   "pdfedit.done": "✓ 완료",
   "pdfedit.suffix": "-수정됨",
   "pdfedit.skipped": "{all}곳 중 {count}곳은 고치지 않았어요. 그 글자가 옆 글자와 이어져 있어서 따로 고치면 레이아웃이 깨져요.",
-  "pdfedit.replaced": "원본을 덮어썼어요"
+  "pdfedit.replaced": "원본을 덮어썼어요",
+  "send.held_blocked": "{name}에 연결할 수 없어요. Keepnear가 열려 있는지 확인하고, 그쪽 화면에 「허용」이 보이면 눌러 주세요",
+  "fw.title": "다른 기기가 이 PC로 파일을 보낼 수 있게 하기",
+  "fw.body": "Windows 방화벽이 Keepnear를 막고 있어서 휴대폰과 다른 PC가 보낼 수 없어요.\n\n「허용」을 누르면 Windows가 「이 앱이 디바이스를 변경하도록 허용하시겠어요?」라고 한 번 물어요. 「예」를 누르면 다시 묻지 않아요.",
+  "fw.later": "나중에",
+  "fw.allow": "허용",
+  "fw.fixed": "완료: 이제 다른 기기가 이 PC로 파일을 보낼 수 있어요",
+  "fw.not_fixed": "바뀌지 않았어요(「아니요」를 눌렀나요?). 홈에서 언제든 다시 할 수 있어요."
 }

@@ -165,7 +165,7 @@
   "home.issue_offline": "ライブラリのフォルダーが見つかりません（ドライブが外れていませんか？）。",
   "home.issue_missing": "フォルダーから {count} 件が消えました。確認または元に戻してください。",
   "home.issue_server": "受信が停止中のため、スマホから送れません。",
-  "home.issue_firewall": "Windows ファイアウォールがスマホを遮断する可能性があります。「受信」画面で許可してください。",
+  "home.issue_firewall": "ほかの機器から送れません：Windows ファイアウォールが Keepnear をブロック中。ここを押して許可",
   "home.issue_ffmpeg": "動画ツールがないため、動画を変換できません。",
   "home.issue_disk": "ライブラリのドライブの空きが 5 GB 未満です。",
   "nav.send": "送信",
@@ -2137,5 +2137,12 @@
   "pdfedit.done": "✓ 完了",
   "pdfedit.suffix": "-修正済み",
   "pdfedit.skipped": "{all} か所のうち {count} か所は修正していません。その文字は隣の文字とつながっていて、単独で変えるとレイアウトが崩れます。",
-  "pdfedit.replaced": "元のファイルを上書きしました"
+  "pdfedit.replaced": "元のファイルを上書きしました",
+  "send.held_blocked": "{name} に接続できません。Keepnear が開いているか確認し、相手の画面に「許可」が出ていればクリックしてもらってください",
+  "fw.title": "ほかの機器からこの PC にファイルを送れるようにする",
+  "fw.body": "Windows ファイアウォールが Keepnear をブロックしているため、スマホやほかの PC から送れません。\n\n「許可」を押すと Windows が一度だけ「このアプリがデバイスに変更を加えることを許可しますか？」と聞くので「はい」を押してください。以後は聞きません。",
+  "fw.later": "あとで",
+  "fw.allow": "許可",
+  "fw.fixed": "完了：ほかの機器からこの PC に送れるようになりました",
+  "fw.not_fixed": "変更されませんでした（「いいえ」を押した？）。ホームからいつでも再試行できます。"
 }

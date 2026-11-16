@@ -277,7 +277,7 @@ class _TransferRecordsState extends State<TransferRecords> {
       middle: paused
           ? Text(tr('xfer.paused', {'pct': (j.fraction * 100).round()}), style: const TextStyle(color: _soft, fontSize: 13))
           : waiting
-              ? Text(tr('send.held', {'name': j.peer.name}), style: const TextStyle(color: _soft, fontSize: 13))
+              ? Text(tr(j.blocked ? 'send.held_blocked' : 'send.held', {'name': j.peer.name}), style: const TextStyle(color: _soft, fontSize: 13))
               : Row(children: [
                   _bar(j.fraction),
                   const SizedBox(width: 10),

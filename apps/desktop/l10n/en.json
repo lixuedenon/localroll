@@ -165,7 +165,7 @@
   "home.issue_offline": "The library folder is not available (drive unplugged?).",
   "home.issue_missing": "{count} files are gone from the folder. Confirm or undo.",
   "home.issue_server": "Receiving is off. Phones cannot send.",
-  "home.issue_firewall": "Windows Firewall may block phones. Allow it on the Receive page.",
+  "home.issue_firewall": "Other devices can't send here: Windows Firewall keeps Keepnear out — click to allow",
   "home.issue_ffmpeg": "Video tools are missing: videos cannot be converted.",
   "home.issue_disk": "Less than 5 GB free on the library drive.",
   "nav.send": "Send",
@@ -2137,5 +2137,12 @@
   "pdfedit.done": "✓ Done",
   "pdfedit.suffix": "-edited",
   "pdfedit.skipped": "{count} of {all} change(s) were not made: that text is joined to the text beside it, and changing it alone would break the layout.",
-  "pdfedit.replaced": "The original was replaced"
+  "pdfedit.replaced": "The original was replaced",
+  "send.held_blocked": "Can't reach {name}. Check it has Keepnear open; if it shows “Allow”, click it there",
+  "fw.title": "Let other devices send files to this PC",
+  "fw.body": "Windows Firewall is keeping Keepnear out, so phones and other PCs can't send here.\n\nClick Allow: Windows asks once “Allow this app to make changes?” — click Yes, and it won't ask again.",
+  "fw.later": "Later",
+  "fw.allow": "Allow",
+  "fw.fixed": "Done: other devices can send files to this PC now",
+  "fw.not_fixed": "Not changed (No was clicked?). You can try again from the home page any time."
 }

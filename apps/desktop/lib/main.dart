@@ -15,6 +15,7 @@ import 'package:window_manager/window_manager.dart';
 
 import 'app_services.dart';
 import 'l10n/l10n.dart';
+import 'services/firewall_guard.dart';
 import 'services/elevation.dart';
 import 'services/autostart.dart';
 import 'services/boot.dart';
@@ -23,6 +24,7 @@ import 'services/open_with.dart';
 import 'services/settings.dart';
 import 'services/single_instance.dart';
 import 'services/watchdog.dart';
+import 'ui/firewall_prompt.dart';
 import 'ui/app_nav.dart';
 import 'ui/boot_screen.dart';
 import 'ui/home_shell.dart';
@@ -124,6 +126,10 @@ Future<void> main(List<String> args) async {
   }
   runApp(LocalRollApp(services: services));
   WidgetsBinding.instance.addPostFrameCallback((_) => Boot.mark('first screen'));
+  // Others must be able to send here: Windows' firewall has to let Keepnear
+  // in. Looked at now and whenever its rules change; asked once if not.
+  FirewallGuard.instance.ask = askFirewall;
+  Timer(const Duration(seconds: 3), FirewallGuard.instance.start);
   // Ctrl+Shift+R / P / D for recording the screen, from anywhere.
   ScreenRecorder.instance.watchKeys(services);
   if (files.isNotEmpty && !sending) PlayerLauncher.request(services, files);

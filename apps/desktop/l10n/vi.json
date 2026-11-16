@@ -165,7 +165,7 @@
   "home.issue_offline": "Không truy cập được thư mục thư viện (ổ đĩa bị rút?).",
   "home.issue_missing": "{count} tệp đã biến mất khỏi thư mục. Xác nhận hoặc hoàn tác.",
   "home.issue_server": "Đang tắt nhận. Điện thoại không gửi được.",
-  "home.issue_firewall": "Tường lửa Windows có thể chặn điện thoại. Cho phép ở trang Nhận.",
+  "home.issue_firewall": "Thiết bị khác không gửi vào được: tường lửa Windows đang chặn Keepnear — bấm để cho phép",
   "home.issue_ffmpeg": "Thiếu công cụ video: không chuyển đổi được video.",
   "home.issue_disk": "Ổ thư viện còn trống dưới 5 GB.",
   "nav.send": "Gửi",
@@ -2137,5 +2137,12 @@
   "pdfedit.done": "✓ Xong",
   "pdfedit.suffix": "-đã sửa",
   "pdfedit.skipped": "{count}/{all} chỗ chưa sửa: chữ đó dính liền với chữ bên cạnh, sửa riêng sẽ làm hỏng bố cục.",
-  "pdfedit.replaced": "Đã ghi đè tệp gốc"
+  "pdfedit.replaced": "Đã ghi đè tệp gốc",
+  "send.held_blocked": "Không kết nối được {name}. Kiểm tra máy đó đang mở Keepnear; nếu bên đó hiện «Cho phép», hãy bấm ở máy đó",
+  "fw.title": "Cho thiết bị khác gửi tệp tới máy này",
+  "fw.body": "Tường lửa Windows đang chặn Keepnear nên điện thoại và máy tính khác không gửi vào được.\n\nBấm «Cho phép»: Windows sẽ hỏi một lần «Cho phép ứng dụng này thay đổi thiết bị?» — bấm «Có», sau này không hỏi nữa.",
+  "fw.later": "Để sau",
+  "fw.allow": "Cho phép",
+  "fw.fixed": "Xong: giờ thiết bị khác có thể gửi tệp tới máy này",
+  "fw.not_fixed": "Chưa đổi được (bấm «Không»?). Có thể thử lại từ trang chủ bất cứ lúc nào."
 }
