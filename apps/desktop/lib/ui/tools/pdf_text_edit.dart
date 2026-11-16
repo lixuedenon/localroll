@@ -94,6 +94,12 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
   /// The brush is on: the next line clicked gives its look.
   bool _brush = false;
 
+  /// The size / bold / colour bar under the line being changed. It sits in
+  /// the overlay: drawn past the page's edge it would show but not take
+  /// clicks (a Stack only hit-tests inside itself).
+  final _bar = OverlayPortalController();
+  final _barLink = LayerLink();
+
   /// Per page: which letters each of its fonts holds (a font is reused only
   /// when it holds every new letter).
   final Map<int, Map<int, Set<int>>> _fontChars = {};
@@ -320,6 +326,22 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
   static bool _far(Color a, Color b) =>
       ((a.r - b.r).abs() + (a.g - b.g).abs() + (a.b - b.b).abs()) * 255 > 120;
 
+  /// The line being changed differs from how it was when opened.
+  bool get _typing {
+    final l = _editing;
+    if (l == null) return false;
+    final text = _ctl.text.replaceAll('\n', ' ').trimRight();
+    final e = _editOf(l);
+    if (e != null) {
+      return text != e.text || _size != e.size || _bold != e.bold || _italic != e.italic || !identical(_from ?? l, e.from);
+    }
+    final (size, bold, italic, _) = _lookOf(l);
+    return text != l.text || _size != size || _bold != bold || _italic != italic || !identical(_from ?? l, l);
+  }
+
+  /// Something not saved yet (done, or still being typed).
+  bool get _unsaved => _edits.isNotEmpty || _typing;
+
   void _start(_Line l) {
     final e = _editOf(l);
     final (size, bold, italic, color) = _lookOf(l);
@@ -334,6 +356,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
       _color = e?.color ?? color;
       _from = e?.from ?? l;
     });
+    _bar.show();
     _focus.requestFocus();
   }
 
@@ -353,6 +376,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
 
   void _cancel() {
     if (_editing != null) setState(() => _editing = _from = null);
+    _bar.hide();
   }
 
   void _done() {
@@ -381,6 +405,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
       _from = null;
       _brush = false;
     });
+    _bar.hide();
   }
 
   /// The PDF's own font can write [text] for [target], looking like [from]:
@@ -419,10 +444,25 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
     return text.runes.any(PdfFonts.isCjk) ? 'Microsoft YaHei' : 'Arial';
   }
 
-  Future<void> _save({required bool replace}) async {
-    final d = _doc;
-    if (d == null || _edits.isEmpty) return;
+  /// Saves; true when it worked.
+  Future<bool> _save({required bool replace}) async {
+    // What is still being typed counts too.
     _done();
+    final d = _doc;
+    if (d == null || _edits.isEmpty) return false;
+    DiagLog.log('tools', 'pdf edit save: ${_edits.length} change(s), ${replace ? 'replace' : 'new file'}');
+    try {
+      return await _saving(d, replace: replace);
+    } catch (e, st) {
+      DiagLog.log('tools', 'pdf edit save failed: $e\n$st');
+      if (mounted) {
+        ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('tool.failed', {'why': '$e'}))));
+      }
+      return false;
+    }
+  }
+
+  Future<bool> _saving(PdfDocument d, {required bool replace}) async {
     // Each change: the PDF's own font when it holds all the new letters,
     // else the closest Windows font (bold / italic drawn if it has none).
     final made = <int, List<PdfTextEdit>>{};
@@ -453,6 +493,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
         fake: fake,
       ));
     }
+    DiagLog.log('tools', 'pdf edit fonts: ${[for (final p in made.values) for (final e in p) e.font.isEmpty ? '?' : e.font.split(r'\\').last].join(', ')}');
     final plan = <PdfPlanPage>[for (var i = 0; i < d.pages.length; i++) PdfFromDoc(widget.path, i, edits: made[i] ?? const [])];
     final out = replace ? '${widget.path}.lr-edit.pdf' : toolOutPath(s, widget.path, tr('pdfedit.suffix'), 'pdf');
     final n = _edits.length;
@@ -469,13 +510,14 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
         await File(out).delete();
       }
     });
+    DiagLog.log('tools', 'pdf edit saved: ${err ?? 'ok'}, skipped $skipped');
     if (!mounted) {
       if (err == null && !replace) await s.tools.saved([out]);
-      return;
+      return err == null;
     }
     if (err != null) {
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('tool.failed', {'why': err!}))));
-      return;
+      return false;
     }
     final note = skipped > 0 ? tr('pdfedit.skipped', {'count': skipped, 'all': n}) : null;
     if (replace) {
@@ -492,15 +534,24 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
       });
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(note ?? tr('pdfedit.replaced'))));
       await _open();
-      return;
+      return true;
     }
+    // Saved as a new file: the changes are in it, nothing left to keep.
+    setState(_edits.clear);
     await showToolResult(context, s, [out], note: note);
+    return true;
   }
 
   @override
   Widget build(BuildContext context) {
     final d = _doc;
-    return Theme(
+    return PopScope(
+      // Changes not saved: leaving asks first.
+      canPop: !_unsaved,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) unawaited(_leave());
+      },
+      child: Theme(
       data: LightLook.theme(Theme.of(context)),
       child: Scaffold(
         backgroundColor: LightLook.page,
@@ -525,7 +576,36 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
                     SizedBox(width: 320, child: _side(d)),
                   ]),
       ),
+      ),
     );
+  }
+
+  /// Leaving with changes not saved: save, drop them, or stay.
+  Future<void> _leave() async {
+    _done();
+    final n = _edits.length;
+    if (n == 0) {
+      if (mounted) Navigator.of(context).pop();
+      return;
+    }
+    final pick = await showLrDialog<String>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text(tr('pdfedit.leave_title')),
+        content: SizedBox(width: 420, child: Text(tr('pdfedit.leave_body', {'count': n}))),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, 'stay'), child: Text(tr('common.cancel'))),
+          TextButton(onPressed: () => Navigator.pop(c, 'drop'), child: Text(tr('pdfedit.leave_drop'))),
+          FilledButton(onPressed: () => Navigator.pop(c, 'save'), child: Text(tr('pdfedit.save_new'))),
+        ],
+      ),
+    );
+    if (!mounted || pick == null || pick == 'stay') return;
+    DiagLog.log('tools', 'pdf edit leave: $pick');
+    if (pick == 'save' && !await _save(replace: false)) return;
+    if (!mounted) return;
+    setState(_edits.clear);
+    Navigator.of(context).pop();
   }
 
   Widget _pageView(PdfDocument d) {
@@ -616,12 +696,18 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
     if (width < 220) width = 220;
     final room = page.width - r.left + 40;
     if (width > room && room >= 220) width = room;
+    // The bar goes under the line, or over it near the page's foot; lined
+    // up on the right for a line on the right half (so it stays in view).
+    final up = page.height - r.bottom < 120;
+    final right = r.left > page.width / 2;
     return [
       Positioned(
         left: r.left - 4,
         top: r.top - 5,
         width: width,
-        child: Material(
+        child: CompositedTransformTarget(
+          link: _barLink,
+          child: Material(
           color: Colors.white,
           child: Container(
             decoration: BoxDecoration(
@@ -654,11 +740,33 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
             ),
           ),
         ),
+        ),
       ),
       Positioned(
-        left: r.left - 4,
-        top: r.bottom + 10,
-        child: Material(
+        left: 0,
+        top: 0,
+        width: 0,
+        height: 0,
+        child: OverlayPortal(
+          controller: _bar,
+          overlayChildBuilder: (_) => Align(
+            alignment: Alignment.topLeft,
+            child: CompositedTransformFollower(
+              link: _barLink,
+              showWhenUnlinked: false,
+              targetAnchor: up ? (right ? Alignment.topRight : Alignment.topLeft) : (right ? Alignment.bottomRight : Alignment.bottomLeft),
+              followerAnchor: up ? (right ? Alignment.bottomRight : Alignment.bottomLeft) : (right ? Alignment.topRight : Alignment.topLeft),
+              offset: Offset(0, up ? -10 : 10),
+              child: _toolbar(l),
+            ),
+          ),
+        ),
+      ),
+    ];
+  }
+
+  /// Size, bold, italic, colour, brush, cancel / done.
+  Widget _toolbar(_Line l) => Material(
           color: Colors.white,
           elevation: 6,
           borderRadius: BorderRadius.circular(12),
@@ -728,10 +836,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
               ),
             ]),
           ),
-        ),
-      ),
-    ];
-  }
+      );
 
   Widget _side(PdfDocument d) => ListView(padding: const EdgeInsets.fromLTRB(0, 24, 20, 24), children: [
         _box(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -778,15 +883,16 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
               ),
             ),
           const SizedBox(height: 10),
-          FilledButton(onPressed: _edits.isEmpty ? null : () => _save(replace: false), child: Text(tr('pdfedit.save_new'))),
+          FilledButton(onPressed: _unsaved ? () => _save(replace: false) : null, child: Text(tr('pdfedit.save_new'))),
           const SizedBox(height: 8),
-          OutlinedButton(onPressed: _edits.isEmpty ? null : _confirmReplace, child: Text(tr('pdfedit.save_over'))),
+          OutlinedButton(onPressed: _unsaved ? _confirmReplace : null, child: Text(tr('pdfedit.save_over'))),
           const SizedBox(height: 8),
           Text(tr('pdfedit.save_note'), style: const TextStyle(color: LightLook.muted, fontSize: 12, height: 1.5)),
         ])),
       ]);
 
   Future<void> _confirmReplace() async {
+    _done();
     final ok = await showLrDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
