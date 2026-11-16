@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:localroll_core/localroll_core.dart';
 import 'package:localroll_ink/localroll_ink.dart';
@@ -63,6 +64,10 @@ class PdfToolPage extends StatefulWidget {
 }
 
 class _PdfToolPageState extends State<PdfToolPage> {
+  /// How big the pages are shown (a slider and Ctrl + wheel change it;
+  /// kept while Keepnear runs).
+  static double _thumbW = 170;
+
   /// Office programs here, for "Open with".
   Set<OfficeApp> _apps = const {};
   final List<_Doc> _docs = [];
@@ -308,6 +313,7 @@ class _PdfToolPageState extends State<PdfToolPage> {
     if (err != null) return _failed(err!);
     final before = _docs.fold<int>(0, (n, d) => n + File(d.path).lengthSync());
     final after = File(out).lengthSync();
+    DiagLog.log('tools', 'pdf compressed: ${before ~/ 1024} KB → ${after ~/ 1024} KB');
     await showToolResult(context, s, [out], note: tr('pdf.compressed', {'before': _mb(before), 'after': _mb(after)}));
   }
 
@@ -491,19 +497,47 @@ class _PdfToolPageState extends State<PdfToolPage> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 18),
-            child: Text(
-              _picked.isEmpty ? tr('pdf.hint', {'count': _pages.length}) : tr('pdf.picked', {'count': _picked.length}) + (one ? ' · ${tr('pdf.sign_hint')}' : ''),
-              style: const TextStyle(color: LightLook.muted, fontSize: 13),
-            ),
+            child: Row(children: [
+              Expanded(
+                child: Text(
+                  _picked.isEmpty ? tr('pdf.hint', {'count': _pages.length}) : tr('pdf.picked', {'count': _picked.length}) + (one ? ' · ${tr('pdf.sign_hint')}' : ''),
+                  style: const TextStyle(color: LightLook.muted, fontSize: 13),
+                ),
+              ),
+              // Page size: smaller / bigger.
+              const Icon(Icons.photo_size_select_small_rounded, size: 18, color: LightLook.muted),
+              SizedBox(
+                width: 160,
+                child: Slider(
+                  value: _thumbW,
+                  min: 100,
+                  max: 480,
+                  onChanged: (v) => setState(() => _thumbW = v),
+                ),
+              ),
+              const Icon(Icons.photo_size_select_large_rounded, size: 20, color: LightLook.muted),
+            ]),
           ),
           Expanded(
             child: _loading && _pages.isEmpty
                 ? const Center(child: CircularProgressIndicator())
-                : SingleChildScrollView(
-                    padding: const EdgeInsets.all(18),
-                    child: Wrap(spacing: 18, runSpacing: 22, children: [
-                      for (var i = 0; i < _pages.length; i++) _tile(i),
-                    ]),
+                : Listener(
+                    // Ctrl + wheel: pages bigger / smaller.
+                    onPointerSignal: (e) {
+                      if (e is PointerScrollEvent && HardwareKeyboard.instance.isControlPressed) {
+                        GestureBinding.instance.pointerSignalResolver.register(e, (ev) {
+                          if (ev is PointerScrollEvent) {
+                            setState(() => _thumbW = (_thumbW - ev.scrollDelta.dy / 4).clamp(100.0, 480.0));
+                          }
+                        });
+                      }
+                    },
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(18),
+                      child: Wrap(spacing: 18, runSpacing: 22, children: [
+                        for (var i = 0; i < _pages.length; i++) _tile(i),
+                      ]),
+                    ),
                   ),
           ),
         ]),
@@ -514,7 +548,7 @@ class _PdfToolPageState extends State<PdfToolPage> {
   Widget _tile(int i) {
     final p = _pages[i];
     final on = _picked.contains(p);
-    final thumb = _Thumb(page: p, width: 132, picked: on);
+    final thumb = _Thumb(page: p, width: _thumbW, picked: on);
     return DragTarget<int>(
       onWillAcceptWithDetails: (d) => d.data != i,
       onAcceptWithDetails: (d) => setState(() {
@@ -523,7 +557,7 @@ class _PdfToolPageState extends State<PdfToolPage> {
       }),
       builder: (context, cand, _) => Draggable<int>(
         data: i,
-        feedback: Opacity(opacity: 0.85, child: Material(color: Colors.transparent, child: _Thumb(page: p, width: 132, picked: true))),
+        feedback: Opacity(opacity: 0.85, child: Material(color: Colors.transparent, child: _Thumb(page: p, width: _thumbW, picked: true))),
         childWhenDragging: Opacity(opacity: 0.3, child: thumb),
         child: GestureDetector(
           onTap: () => setState(() => on ? _picked.remove(p) : _picked.add(p)),
@@ -561,7 +595,8 @@ class _Thumb extends StatelessWidget {
       width: width,
       height: h,
       child: Stack(children: [
-        Positioned.fill(child: PdfPageView(document: page.doc.doc, pageNumber: page.number, maximumDpi: 72)),
+        // Sharper when shown bigger.
+        Positioned.fill(child: PdfPageView(document: page.doc.doc, pageNumber: page.number, maximumDpi: width > 220 ? 150 : 96)),
         for (final sg in page.signs)
           Positioned(
             left: sg.rect.left * width,

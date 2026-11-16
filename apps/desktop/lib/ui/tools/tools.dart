@@ -20,6 +20,7 @@ import '../app_nav.dart';
 import '../format.dart';
 import '../library_picker.dart';
 import '../light_dialog.dart';
+import '../files_view.dart' show openReceivedFile;
 import '../light_look.dart';
 import '../screen/screen_record.dart' show snipBarGo, snipScreen;
 import '../send_paths.dart';
@@ -385,7 +386,7 @@ Future<void> showToolResult(BuildContext context, AppServices s, List<String> ou
               trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                 IconButton(
                   tooltip: tr('common.open'),
-                  onPressed: () => unawaited(Process.run('rundll32', ['url.dll,FileProtocolHandler', o])),
+                  onPressed: () => unawaited(openReceivedFile(context, s, o)),
                   icon: const Icon(Icons.open_in_new_rounded, size: 20),
                 ),
                 IconButton(

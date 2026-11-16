@@ -8,6 +8,7 @@ import '../../app_services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/network.dart' show revealInExplorer;
 import '../../services/tool_outputs.dart';
+import '../files_view.dart' show openReceivedFile;
 import '../light_look.dart';
 import '../send_paths.dart';
 import '../send_page.dart' show baseNameOf;
@@ -141,7 +142,8 @@ class _ToolRecordsViewState extends State<ToolRecordsView> {
         IconButton(
           tooltip: tr('common.open'),
           visualDensity: VisualDensity.compact,
-          onPressed: () => have ? unawaited(Process.run('rundll32', ['url.dll,FileProtocolHandler', r.out])) : _gone(),
+          // In Keepnear's own viewer / player when it can show it, else the PC's program.
+          onPressed: () => have ? unawaited(openReceivedFile(context, s, r.out)) : _gone(),
           icon: const Icon(Icons.open_in_new_rounded, size: 18),
         ),
         IconButton(

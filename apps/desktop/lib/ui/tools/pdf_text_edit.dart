@@ -1,6 +1,7 @@
 // apps/desktop/lib/ui/tools/pdf_text_edit.dart
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -63,6 +64,10 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
   String? _error;
   int _page = 0;
   final Map<int, ui.Image> _pics = {};
+
+  /// Each page's picture as pixels (to read the text's colour).
+  final Map<int, ByteData> _px = {};
+  final Map<_Line, Color?> _colors = {};
   final Map<int, List<_Line>> _lines = {};
   final List<_Edit> _edits = [];
 
@@ -84,6 +89,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
     for (final p in _pics.values) {
       p.dispose();
     }
+    _px.clear();
     unawaited(_doc?.dispose());
     _ctl.dispose();
     _focus.dispose();
@@ -114,6 +120,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
     final pic = await page.render(width: w, height: h, fullWidth: w.toDouble(), fullHeight: h.toDouble(), backgroundColor: Colors.white);
     final im = await pic?.createImage();
     pic?.dispose();
+    final px = await im?.toByteData(format: ui.ImageByteFormat.rawRgba);
     final lines = await _readLines(page, i);
     if (!mounted) {
       im?.dispose();
@@ -121,6 +128,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
     }
     setState(() {
       if (im != null) _pics[i] = im;
+      if (px != null) _px[i] = px;
       _lines[i] = lines;
     });
   }
@@ -197,6 +205,61 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
     setState(() => _page = i);
     await _load(i);
   }
+
+  /// The colour the line's text is drawn in, read from the page's picture:
+  /// the pixels inside its box that differ most from the background around
+  /// it (null: can't tell — the old text's colour is kept).
+  Color? _colorOf(_Line l) {
+    if (_colors.containsKey(l)) return _colors[l];
+    final im = _pics[l.page], px = _px[l.page], d = _doc;
+    if (im == null || px == null || d == null) return null;
+    final w = im.width, h = im.height;
+    final r = l.box.toRect(page: d.pages[l.page], scaledPageSize: Size(w.toDouble(), h.toDouble()));
+    int cl(int v, int hi) => v < 0 ? 0 : (v > hi ? hi : v);
+    final x0 = cl(r.left.floor(), w - 1), x1 = cl(r.right.ceil(), w - 1);
+    final y0 = cl(r.top.floor(), h - 1), y1 = cl(r.bottom.ceil(), h - 1);
+    int at(int x, int y) => (y * w + x) * 4;
+    // Background: the pixels just around the box.
+    final edge = <int>[];
+    for (var x = x0; x <= x1; x += 2) {
+      for (final y in [cl(y0 - 3, h - 1), cl(y1 + 3, h - 1)]) {
+        edge.add(at(x, y));
+      }
+    }
+    if (edge.isEmpty) return null;
+    int med(int o) {
+      final v = [for (final e in edge) px.getUint8(e + o)]..sort();
+      return v[v.length ~/ 2];
+    }
+
+    final br = med(0), bg = med(1), bb = med(2);
+    // Ink: the pixels farthest from it; the darkest third of those.
+    final ink = <(int, int, int, int)>[];
+    for (var y = y0; y <= y1; y++) {
+      for (var x = x0; x <= x1; x++) {
+        final o = at(x, y);
+        final cr = px.getUint8(o), cg = px.getUint8(o + 1), cb = px.getUint8(o + 2);
+        final dist = (cr - br).abs() + (cg - bg).abs() + (cb - bb).abs();
+        if (dist > 120) ink.add((dist, cr, cg, cb));
+      }
+    }
+    Color? c;
+    if (ink.length >= 6) {
+      ink.sort((a, b) => b.$1.compareTo(a.$1));
+      final top = ink.take((ink.length / 3).ceil()).toList();
+      var sr = 0, sg = 0, sb = 0;
+      for (final p in top) {
+        sr += p.$2;
+        sg += p.$3;
+        sb += p.$4;
+      }
+      c = Color.fromARGB(255, sr ~/ top.length, sg ~/ top.length, sb ~/ top.length);
+    }
+    return _colors[l] = c;
+  }
+
+  static String _hex(Color c) =>
+      [(c.r * 255).round(), (c.g * 255).round(), (c.b * 255).round()].map((v) => v.toRadixString(16).padLeft(2, '0')).join();
 
   _Edit? _editOf(_Line l) => _edits.where((e) => identical(e.line, l)).firstOrNull;
 
@@ -285,6 +348,8 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
               size: e.size,
               font: fontFor(e.text, bold: e.bold, serif: e.serif) ?? '',
               text: e.text,
+              // The colour the old words had (red stays red).
+              rgb: _colorOf(e.line) == null ? 'auto' : _hex(_colorOf(e.line)!),
             ),
       ]));
     }
@@ -319,6 +384,8 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
       }
       setState(() {
         _pics.clear();
+        _px.clear();
+        _colors.clear();
         _lines.clear();
         _edits.clear();
       });
@@ -432,7 +499,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
               height: 1.0,
               fontWeight: e.bold ? FontWeight.w700 : FontWeight.w400,
               fontFamily: _family(e.text, e.serif),
-              color: const Color(0xFF1A1A1A),
+              color: _colorOf(e.line) ?? const Color(0xFF1A1A1A),
               decoration: TextDecoration.underline,
               decorationColor: const Color(0x8012A35F),
               decorationThickness: 2,
@@ -474,7 +541,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
                   height: 1.15,
                   fontWeight: _bold ? FontWeight.w700 : FontWeight.w400,
                   fontFamily: _family(_ctl.text, _serif),
-                  color: const Color(0xFF1A1A1A),
+                  color: _colorOf(l) ?? const Color(0xFF1A1A1A),
                 ),
                 decoration: const InputDecoration(isDense: true, border: InputBorder.none, contentPadding: EdgeInsets.zero),
                 onSubmitted: (_) => _done(),

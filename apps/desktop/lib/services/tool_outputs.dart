@@ -235,7 +235,7 @@ class ToolRecords extends ChangeNotifier {
     } else {
       await s.server.files.received(path, FileOwner(toolsDeviceId, tr('tool.owner')));
       s.server.files.changed();
-      DiagLog.log('tools', 'into the files list: $rel');
+      DiagLog.log('tools', 'into the files list: $rel (${(await File(path).length()) ~/ 1024} KB)');
     }
   }
 
