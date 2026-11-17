@@ -25,16 +25,73 @@ class PhotoEdit {
 
   int quality = 88;
 
+  /// Exactly this many pixels (an ID photo); 0: as cropped.
+  int outW = 0, outH = 0;
+
   bool get changed =>
-      turns % 4 != 0 || crop != const Rect.fromLTWH(0, 0, 1, 1) || brightness != 0 || contrast != 0 || saturation != 0 || mosaic.isNotEmpty || maxSide > 0;
+      turns % 4 != 0 ||
+      crop != const Rect.fromLTWH(0, 0, 1, 1) ||
+      brightness != 0 ||
+      contrast != 0 ||
+      saturation != 0 ||
+      mosaic.isNotEmpty ||
+      maxSide > 0 ||
+      outW > 0;
+}
+
+/// An ID photo's shape: its size on paper, the pixels saved, and how much
+/// of its height the head (top of the head to the chin) should fill.
+class IdPhoto {
+  const IdPhoto(this.key, this.w, this.h, this.headFrom, this.headTo);
+
+  /// Its name in the texts ("id_us"…).
+  final String key;
+
+  /// Pixels saved.
+  final int w, h;
+
+  /// Head height, part of the photo's height.
+  final double headFrom, headTo;
+
+  double get ratio => w / h;
+
+  /// US passport / visa / green card: 2×2 in, head 1–1⅜ in. Schengen, UK,
+  /// most of Europe: 35×45 mm, head 32–36 mm. China passport / visa:
+  /// 33×48 mm, head 28–33 mm. Pixels at 300 dpi (the US: 1200, the most
+  /// its online forms take).
+  static const all = [
+    IdPhoto('id_us', 1200, 1200, 0.50, 0.69),
+    IdPhoto('id_eu', 413, 531, 0.71, 0.80),
+    IdPhoto('id_cn', 390, 567, 0.58, 0.69),
+  ];
 }
 
 /// The photo with [edit] done, as a JPEG (in the background: big photos take
 /// a moment).
-Future<Uint8List?> renderPhotoEdit(Uint8List source, PhotoEdit edit) => compute(_render, (source, edit.turns, edit.crop, edit.brightness, edit.contrast, edit.saturation, List<Rect>.of(edit.mosaic), edit.maxSide, edit.quality));
+Future<Uint8List?> renderPhotoEdit(Uint8List source, PhotoEdit edit) => compute(
+    _render, (source, edit.turns, edit.crop, edit.brightness, edit.contrast, edit.saturation, List<Rect>.of(edit.mosaic), edit.maxSide, edit.quality, edit.outW, edit.outH));
 
-Uint8List? _render((Uint8List, int, Rect, double, double, double, List<Rect>, int, int) a) {
-  final (bytes, turns, crop, br, co, sa, mosaic, maxSide, quality) = a;
+/// The colour change, the same sums as the screen's [photoEditFilter], each
+/// value kept within 0–255 (bright parts stay white instead of wrapping
+/// round to black).
+img.Image _colour(img.Image src, double br, double co, double sa) {
+  final m = _colourMatrix(br, co, sa);
+  final im = src.format == img.Format.uint8 && src.numChannels >= 3 ? src : src.convert(format: img.Format.uint8, numChannels: 3);
+  final d = im.data!.toUint8List();
+  final n = im.numChannels;
+  int c(double v) => v < 0 ? 0 : (v > 255 ? 255 : v.round());
+  for (var i = 0; i + 2 < d.length; i += n) {
+    final r = d[i].toDouble(), g = d[i + 1].toDouble(), b = d[i + 2].toDouble();
+    d[i] = c(m[0] * r + m[1] * g + m[2] * b + m[4]);
+    d[i + 1] = c(m[5] * r + m[6] * g + m[7] * b + m[9]);
+    d[i + 2] = c(m[10] * r + m[11] * g + m[12] * b + m[14]);
+  }
+  return img.Image.fromBytes(
+      width: im.width, height: im.height, bytes: d.buffer, bytesOffset: d.offsetInBytes, numChannels: n, rowStride: im.width * n);
+}
+
+Uint8List? _render((Uint8List, int, Rect, double, double, double, List<Rect>, int, int, int, int) a) {
+  final (bytes, turns, crop, br, co, sa, mosaic, maxSide, quality, outW, outH) = a;
   var im = img.decodeImage(bytes);
   if (im == null) return null;
   im = img.bakeOrientation(im);
@@ -51,9 +108,11 @@ Uint8List? _render((Uint8List, int, Rect, double, double, double, List<Rect>, in
     im = img.copyCrop(im, x: x, y: y, width: (crop.width * w).round().clamp(1, w - x), height: (crop.height * h).round().clamp(1, h - y));
   }
   if (br != 0 || co != 0 || sa != 0) {
-    im = img.adjustColor(im, brightness: 1 + br, contrast: 1 + co, saturation: 1 + sa);
+    im = _colour(im, br, co, sa);
   }
-  if (maxSide > 0 && math.max(im.width, im.height) > maxSide) {
+  if (outW > 0 && outH > 0) {
+    im = img.copyResize(im, width: outW, height: outH, interpolation: img.Interpolation.cubic);
+  } else if (maxSide > 0 && math.max(im.width, im.height) > maxSide) {
     im = im.width >= im.height
         ? img.copyResize(im, width: maxSide, interpolation: img.Interpolation.average)
         : img.copyResize(im, height: maxSide, interpolation: img.Interpolation.average);
@@ -62,19 +121,21 @@ Uint8List? _render((Uint8List, int, Rect, double, double, double, List<Rect>, in
 }
 
 /// The colour change as the screen shows it meanwhile (close to the saved one).
-ColorFilter photoEditFilter(PhotoEdit e) {
-  final b = e.brightness * 255 * 0.6;
-  final c = 1 + e.contrast;
-  final s = 1 + e.saturation;
+ColorFilter photoEditFilter(PhotoEdit e) => ColorFilter.matrix(_colourMatrix(e.brightness, e.contrast, e.saturation));
+
+List<double> _colourMatrix(double brightness, double contrast, double saturation) {
+  final b = brightness * 255 * 0.6;
+  final c = 1 + contrast;
+  final s = 1 + saturation;
   const lr = 0.2126, lg = 0.7152, lb = 0.0722;
   final sr = (1 - s) * lr, sg = (1 - s) * lg, sb = (1 - s) * lb;
   final t = (1 - c) * 128 + b;
-  return ColorFilter.matrix([
+  return [
     c * (sr + s), c * sg, c * sb, 0, t, //
     c * sr, c * (sg + s), c * sb, 0, t,
     c * sr, c * sg, c * (sb + s), 0, t,
     0, 0, 0, 1, 0,
-  ]);
+  ];
 }
 
 enum _Mode { crop, adjust, mosaic, size }
@@ -83,7 +144,8 @@ enum _Mode { crop, adjust, mosaic, size }
 /// what should not be seen, smaller. Saving is the app's ([onSave] gets the
 /// JPEG). [texts] keys: crop, turn, adjust, mosaic, size, brightness,
 /// contrast, saturation, free, square, original, undo, reset, save, saving,
-/// mosaic_hint, size_hint, cancel.
+/// mosaic_hint, size_hint, cancel, crop_hint, id_photos, id_us, id_eu,
+/// id_cn, id_hint, out_size.
 class PhotoEditor extends StatefulWidget {
   const PhotoEditor({super.key, required this.bytes, required this.texts, required this.onSave, this.dark = true, this.extraActions = const []});
 
@@ -103,6 +165,12 @@ class _PhotoEditorState extends State<PhotoEditor> {
   final PhotoEdit _e = PhotoEdit();
   _Mode _mode = _Mode.crop;
   double? _ratio; // crop shape (w / h), null: free
+  IdPhoto? _id; // an ID photo's shape and size, if chosen
+
+  /// Changing the crop box: 'move', 'new', or the edges held ('l', 't',
+  /// 'r', 'b' — a corner is two).
+  String? _grab;
+  Rect _grabFrom = Rect.zero;
   Size? _natural;
   bool _busy = false;
   Offset? _dragStart;
@@ -124,9 +192,13 @@ class _PhotoEditorState extends State<PhotoEditor> {
     return _e.turns.isOdd ? Size(n.height, n.width) : n;
   }
 
-  void _setRatio(double? r) {
+  void _setRatio(double? r, {IdPhoto? id}) {
     setState(() {
       _ratio = r;
+      _id = id;
+      _e
+        ..outW = id?.w ?? 0
+        ..outH = id?.h ?? 0;
       if (r == null) return;
       final s = _turned;
       // The biggest box of that shape in the middle.
@@ -177,6 +249,10 @@ class _PhotoEditorState extends State<PhotoEditor> {
                 _e.crop = const Rect.fromLTWH(0, 0, 1, 1);
                 _e.mosaic.clear();
                 _ratio = null;
+                _id = null;
+                _e
+                  ..outW = 0
+                  ..outH = 0;
               }),
               icon: Icon(Icons.rotate_right_rounded, color: fg),
             ),
@@ -189,9 +265,12 @@ class _PhotoEditorState extends State<PhotoEditor> {
                   ..brightness = 0
                   ..contrast = 0
                   ..saturation = 0
-                  ..maxSide = 0;
+                  ..maxSide = 0
+                  ..outW = 0
+                  ..outH = 0;
                 _e.mosaic.clear();
                 _ratio = null;
+                _id = null;
               }),
               icon: Icon(Icons.restart_alt_rounded, color: fg),
             ),
@@ -261,8 +340,11 @@ class _PhotoEditorState extends State<PhotoEditor> {
     switch (_mode) {
       case _Mode.crop:
         final s = _turned;
+        final id = _id;
         return ListView(children: [
           Text(t('crop'), style: const TextStyle(fontWeight: FontWeight.w700)),
+          const SizedBox(height: 4),
+          Text(t('crop_hint'), style: TextStyle(color: fg.withValues(alpha: 0.7), fontSize: 12, height: 1.45)),
           const SizedBox(height: 8),
           Wrap(spacing: 6, runSpacing: 6, children: [
             for (final (label, r) in [
@@ -274,10 +356,20 @@ class _PhotoEditorState extends State<PhotoEditor> {
               ('16:9', 16 / 9),
               ('9:16', 9 / 16),
             ])
-              ChoiceChip(selected: _ratio == r, onSelected: (_) => _setRatio(r), label: Text(label)),
+              ChoiceChip(selected: _id == null && _ratio == r, onSelected: (_) => _setRatio(r), label: Text(label)),
           ]),
+          const SizedBox(height: 14),
+          Text(t('id_photos'), style: const TextStyle(fontWeight: FontWeight.w700)),
+          const SizedBox(height: 6),
+          for (final p in IdPhoto.all)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: ChoiceChip(selected: _id == p, onSelected: (_) => _setRatio(p.ratio, id: p), label: Text(t(p.key))),
+            ),
+          if (id != null) Text(t('id_hint'), style: TextStyle(color: fg.withValues(alpha: 0.7), fontSize: 12, height: 1.45)),
           const SizedBox(height: 12),
           Text('${(_e.crop.width * s.width).round()} × ${(_e.crop.height * s.height).round()}', style: TextStyle(color: fg.withValues(alpha: 0.7))),
+          if (id != null) Text(t('out_size').replaceAll('{w}', '${id.w}').replaceAll('{h}', '${id.h}'), style: TextStyle(color: fg.withValues(alpha: 0.7))),
         ]);
       case _Mode.adjust:
         return ListView(children: [
@@ -314,6 +406,58 @@ class _PhotoEditorState extends State<PhotoEditor> {
     }
   }
 
+  String? _hoverGrab;
+
+  static MouseCursor _cursorFor(String? g) => switch (g) {
+        'move' => SystemMouseCursors.move,
+        'lt' || 'rb' => SystemMouseCursors.resizeUpLeftDownRight,
+        'rt' || 'lb' => SystemMouseCursors.resizeUpRightDownLeft,
+        'l' || 'r' => SystemMouseCursors.resizeLeftRight,
+        't' || 'b' => SystemMouseCursors.resizeUpDown,
+        _ => SystemMouseCursors.precise,
+      };
+
+  /// What a press at [p] takes hold of: a corner, an edge (free shape
+  /// only), the inside (move), or nothing (draw a new box).
+  String _grabAt(Rect box, Offset p) {
+    const near = 14.0;
+    final l = (p.dx - box.left).abs() < near, r = (p.dx - box.right).abs() < near;
+    final t = (p.dy - box.top).abs() < near, b = (p.dy - box.bottom).abs() < near;
+    final inX = p.dx > box.left - near && p.dx < box.right + near, inY = p.dy > box.top - near && p.dy < box.bottom + near;
+    if (inX && inY) {
+      if ((l || r) && (t || b)) return '${l ? 'l' : 'r'}${t ? 't' : 'b'}';
+      if (_ratio == null) {
+        if (l || r) return l ? 'l' : 'r';
+        if (t || b) return t ? 't' : 'b';
+      }
+      if (box.contains(p)) return 'move';
+    }
+    return 'new';
+  }
+
+  /// [from] with the [edges] moved by [d] (0–1 units), kept on the picture;
+  /// a set shape keeps its shape (the corner opposite stays put).
+  Rect _resized(Rect from, String edges, Offset d, Size s) {
+    var l = from.left, t = from.top, r = from.right, b = from.bottom;
+    if (edges.contains('l')) l = (l + d.dx).clamp(0.0, r - 0.02);
+    if (edges.contains('r')) r = (r + d.dx).clamp(l + 0.02, 1.0);
+    if (edges.contains('t')) t = (t + d.dy).clamp(0.0, b - 0.02);
+    if (edges.contains('b')) b = (b + d.dy).clamp(t + 0.02, 1.0);
+    final rt = _ratio;
+    if (rt == null) return Rect.fromLTRB(l, t, r, b);
+    // Width decides; the height follows; both shrink if it would not fit.
+    final want = rt * s.height / s.width; // width / height in 0–1 units
+    var w = r - l, h = w / want;
+    final room = edges.contains('t') ? from.bottom : 1 - from.top;
+    if (h > room) {
+      h = room;
+      w = h * want;
+    }
+    final left = edges.contains('l') ? from.right - w : from.left;
+    final top = edges.contains('t') ? from.bottom - h : from.top;
+    return Rect.fromLTWH(left, top, w, h);
+  }
+
   Widget _canvas() => LayoutBuilder(builder: (context, c) {
         final s = _turned;
         final k = math.min((c.maxWidth - 32) / s.width, (c.maxHeight - 32) / s.height);
@@ -331,16 +475,24 @@ class _PhotoEditorState extends State<PhotoEditor> {
             child: GestureDetector(
               onPanStart: (d) {
                 if (_mode == _Mode.mosaic) setState(() => _dragStart = norm(d.localPosition));
-                if (_mode == _Mode.crop) _dragStart = norm(d.localPosition);
+                if (_mode == _Mode.crop) {
+                  _dragStart = norm(d.localPosition);
+                  _grab = _grabAt(toPx(_e.crop), d.localPosition);
+                  _grabFrom = _e.crop;
+                }
               },
               onPanUpdate: (d) {
                 final p = norm(d.localPosition), a = _dragStart;
                 if (a == null) return;
                 if (_mode == _Mode.mosaic) setState(() => _drawing = Rect.fromPoints(a, p));
+                if (_mode == _Mode.crop && _grab != 'move' && _grab != 'new' && _grab != null) {
+                  setState(() => _e.crop = _resized(_grabFrom, _grab!, p - a, s));
+                  return;
+                }
                 if (_mode == _Mode.crop) {
                   // Move the box when dragging inside it, else draw a new one.
                   final r = _e.crop;
-                  if (r.contains(a) && _drawing == null) {
+                  if (_grab == 'move' && _drawing == null) {
                     final delta = p - a;
                     _dragStart = p;
                     setState(() => _e.crop = r.shift(delta).translate(
@@ -367,13 +519,25 @@ class _PhotoEditorState extends State<PhotoEditor> {
                   if (_mode == _Mode.crop && (_e.crop.width < 0.02 || _e.crop.height < 0.02)) _e.crop = const Rect.fromLTWH(0, 0, 1, 1);
                   _drawing = null;
                   _dragStart = null;
+                  _grab = null;
                 });
               },
               child: Stack(children: [
                 Positioned.fill(child: pic),
                 for (final m in [..._e.mosaic, if (_mode == _Mode.mosaic && _drawing != null) _drawing!])
                   Positioned.fromRect(rect: toPx(m), child: const _Squares()),
-                if (_mode == _Mode.crop) Positioned.fill(child: CustomPaint(painter: _CropShade(toPx(_e.crop)))),
+                if (_mode == _Mode.crop) Positioned.fill(child: CustomPaint(painter: _CropShade(toPx(_e.crop), id: _id))),
+                // Where the pointer can grab the box.
+                if (_mode == _Mode.crop)
+                  Positioned.fill(
+                    child: MouseRegion(
+                      cursor: _cursorFor(_hoverGrab),
+                      onHover: (h) {
+                        final g = _grabAt(toPx(_e.crop), h.localPosition);
+                        if (g != _hoverGrab) setState(() => _hoverGrab = g);
+                      },
+                    ),
+                  ),
               ]),
             ),
           ),
@@ -406,9 +570,12 @@ class _SquaresPaint extends CustomPainter {
 }
 
 class _CropShade extends CustomPainter {
-  _CropShade(this.box);
+  _CropShade(this.box, {this.id});
 
   final Rect box;
+
+  /// An ID photo: where the head goes (an oval, top of head to chin).
+  final IdPhoto? id;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -430,8 +597,55 @@ class _CropShade extends CustomPainter {
       canvas.drawLine(Offset(box.left + box.width * i / 3, box.top), Offset(box.left + box.width * i / 3, box.bottom), thirds);
       canvas.drawLine(Offset(box.left, box.top + box.height * i / 3), Offset(box.right, box.top + box.height * i / 3), thirds);
     }
+    // Handles: the corners (and the middle of each side).
+    final grip = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 4
+      ..strokeCap = StrokeCap.round;
+    const k = 16.0;
+    for (final (x, y, dx, dy) in [
+      (box.left, box.top, 1.0, 1.0),
+      (box.right, box.top, -1.0, 1.0),
+      (box.left, box.bottom, 1.0, -1.0),
+      (box.right, box.bottom, -1.0, -1.0),
+    ]) {
+      canvas.drawLine(Offset(x, y), Offset(x + dx * k, y), grip);
+      canvas.drawLine(Offset(x, y), Offset(x, y + dy * k), grip);
+    }
+    if (id == null) {
+      for (final (a, b) in [
+        (Offset(box.center.dx - 10, box.top), Offset(box.center.dx + 10, box.top)),
+        (Offset(box.center.dx - 10, box.bottom), Offset(box.center.dx + 10, box.bottom)),
+        (Offset(box.left, box.center.dy - 10), Offset(box.left, box.center.dy + 10)),
+        (Offset(box.right, box.center.dy - 10), Offset(box.right, box.center.dy + 10)),
+      ]) {
+        canvas.drawLine(a, b, grip);
+      }
+    }
+    final p = id;
+    if (p != null) {
+      // The head: as tall as the middle of what is allowed, a little above
+      // the middle; the band where the chin may be.
+      final hh = box.height * (p.headFrom + p.headTo) / 2;
+      final top = box.top + box.height * 0.1;
+      final oval = Rect.fromCenter(center: Offset(box.center.dx, top + hh / 2), width: hh * 0.74, height: hh);
+      canvas.drawOval(
+          oval,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2
+            ..color = const Color(0xCC4ADE80));
+      final band = Paint()..color = const Color(0x334ADE80);
+      canvas.drawRect(Rect.fromLTRB(box.left, top + box.height * p.headFrom, box.right, top + box.height * p.headTo), band);
+      canvas.drawLine(
+          Offset(box.left, top),
+          Offset(box.right, top),
+          Paint()
+            ..color = const Color(0xCC4ADE80)
+            ..strokeWidth = 1);
+    }
   }
 
   @override
-  bool shouldRepaint(_CropShade old) => old.box != box;
+  bool shouldRepaint(_CropShade old) => old.box != box || old.id != id;
 }

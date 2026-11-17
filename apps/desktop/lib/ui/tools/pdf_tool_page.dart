@@ -466,7 +466,7 @@ class _PdfToolPageState extends State<PdfToolPage> {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
             child: Wrap(children: [
               act(Icons.add_rounded, tr('pdf.add'), () async {
-                final f = await WinDialogs.pickFiles(title: tr('pdf.add'), extensions: const ['pdf']);
+                final f = await pickPdfs(context, s);
                 if (f.isNotEmpty) await _add(f);
               }),
               act(Icons.rotate_right_rounded, tr('pdf.turn'), busy

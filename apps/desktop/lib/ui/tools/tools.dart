@@ -241,9 +241,14 @@ Future<void> openTool(BuildContext context, AppServices s, Tool tool, {List<Stri
   }
 }
 
+/// More PDFs: from the library (only its PDFs) or a folder on this PC.
+Future<List<String>> pickPdfs(BuildContext context, AppServices s) async =>
+    await _pickInputs(context, s, Tool.pdfTools) ?? const [];
+
 /// Where the files are: the library, or a folder on this PC.
 Future<List<String>?> _pickInputs(BuildContext context, AppServices s, Tool tool) async {
-  final media = tool.input == ToolInput.photos || tool.input == ToolInput.videos;
+  final pdfs = tool.input == ToolInput.pdfs;
+  final media = tool.input == ToolInput.photos || tool.input == ToolInput.videos || pdfs;
   var where = 'folder';
   if (media) {
     final w = await showLrDialog<String>(
@@ -264,7 +269,7 @@ Future<List<String>?> _pickInputs(BuildContext context, AppServices s, Tool tool
   }
   if (where == 'library') {
     if (!context.mounted) return null;
-    return pickFromLibrary(context, s, multiple: tool.many);
+    return pickFromLibrary(context, s, multiple: tool.many, exts: pdfs ? const {'pdf'} : null);
   }
   return WinDialogs.pickFiles(title: tool.title, multiple: tool.many, extensions: tool.extensions);
 }

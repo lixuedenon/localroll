@@ -16,13 +16,14 @@ import 'lr_dialog.dart';
 
 /// Pick photos / videos from the library (newest first; all, videos or
 /// photos; by name) — with [files], also its documents and other files.
-/// Returns their paths on this PC, or null.
-Future<List<String>?> pickFromLibrary(BuildContext context, AppServices s, {bool multiple = true, bool files = false}) {
+/// Returns their paths on this PC, or null. [exts] (e.g. {'pdf'}): only
+/// files of those kinds, wherever in the library they are.
+Future<List<String>?> pickFromLibrary(BuildContext context, AppServices s, {bool multiple = true, bool files = false, Set<String>? exts}) {
   if (s.library.rootPath.isEmpty || s.library.offline) {
     ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('pick.no_library'))));
     return Future.value(null);
   }
-  return showLrDialog<List<String>>(context: context, builder: (_) => _LibraryPicker(services: s, multiple: multiple, files: files));
+  return showLrDialog<List<String>>(context: context, builder: (_) => _LibraryPicker(services: s, multiple: multiple, files: files || exts != null, exts: exts));
 }
 
 /// One thing to pick: a library photo / video, or a received file.
@@ -44,11 +45,12 @@ class _Pick {
 }
 
 class _LibraryPicker extends StatefulWidget {
-  const _LibraryPicker({required this.services, required this.multiple, required this.files});
+  const _LibraryPicker({required this.services, required this.multiple, required this.files, this.exts});
 
   final AppServices services;
   final bool multiple;
   final bool files;
+  final Set<String>? exts;
 
   @override
   State<_LibraryPicker> createState() => _LibraryPickerState();
@@ -115,9 +117,31 @@ class _LibraryPickerState extends State<_LibraryPicker> {
     setState(() {});
   }
 
+  static String _ext(String name) {
+    final d = name.lastIndexOf('.');
+    return d < 0 ? '' : name.substring(d + 1).toLowerCase();
+  }
+
   List<_Pick> _shown() {
     final s = widget.services;
     final idx = s.server.textIndex;
+    final exts = widget.exts;
+    if (exts != null) {
+      // Only these kinds of file: from the library and from what came in,
+      // each once.
+      final seen = <String>{};
+      final only = <_Pick>[
+        for (final i in s.library.items)
+          if (exts.contains(_ext(i.name)) && (_search.isEmpty || idx.matches(TextIndex.mediaKey(i), i.name, _search)))
+            _Pick.media(i, s.library.absPath(i)),
+        for (final f in _files)
+          if (exts.contains(_ext(f.name)) &&
+              (_search.isEmpty || idx.matches(TextIndex.fileKey(s.server.files.relOf(f.path) ?? f.path, f.size), f.name, _search)))
+            _Pick.file(f),
+      ].where((p) => seen.add(p.path.toLowerCase())).toList()
+        ..sort((a, b) => b.ms.compareTo(a.ms));
+      return only;
+    }
     final all = [
       if (_kind != MediaKind.other)
         for (final i in s.library.items)
@@ -171,6 +195,7 @@ class _LibraryPickerState extends State<_LibraryPicker> {
                 ),
               ),
             ),
+            if (widget.exts == null) ...[
             const SizedBox(width: 10),
             SegmentedButton<MediaKind?>(
               showSelectedIcon: false,
@@ -183,6 +208,7 @@ class _LibraryPickerState extends State<_LibraryPicker> {
               selected: {_kind},
               onSelectionChanged: (v) => setState(() => _kind = v.first),
             ),
+            ],
           ]),
           const SizedBox(height: 10),
           Expanded(
@@ -222,7 +248,7 @@ class _LibraryPickerState extends State<_LibraryPicker> {
                                       ),
                                     ),
                             ),
-                            if (file != null)
+                            if (file != null || item?.kind == MediaKind.other)
                               Positioned(
                                 left: 0,
                                 right: 0,
@@ -230,7 +256,7 @@ class _LibraryPickerState extends State<_LibraryPicker> {
                                 child: Container(
                                   color: const Color(0xAA000000),
                                   padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                  child: Text(file.name,
+                                  child: Text(i.name,
                                       maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: Colors.white)),
                                 ),
                               ),
