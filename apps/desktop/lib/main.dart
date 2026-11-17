@@ -78,7 +78,7 @@ Future<void> main(List<String> args) async {
   Boot.logReady();
   Boot.mark('log');
   // Elevated (started from an administrator shell): no drag and drop.
-  if (Elevation.isAdmin) DiagLog.log('start', 'running as administrator: Windows blocks dragging files in');
+  if (Elevation.isAdmin) DiagLog.log('start', 'running as administrator (files dropped in come by WM_DROPFILES)');
   MediaKit.ensureInitialized();
   // Our own title bar replaces the native one; closing asks first.
   await windowManager.ensureInitialized();

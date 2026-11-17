@@ -430,7 +430,10 @@ class _PhotoEditorState extends State<PhotoEditor> {
         if (l || r) return l ? 'l' : 'r';
         if (t || b) return t ? 't' : 'b';
       }
-      if (box.contains(p)) return 'move';
+      // The box is the whole picture (nothing chosen yet): a press inside
+      // draws a new box; moving it could not go anywhere.
+      final whole = _e.crop.width > 0.98 && _e.crop.height > 0.98;
+      if (box.contains(p) && !whole) return 'move';
     }
     return 'new';
   }
@@ -504,8 +507,20 @@ class _PhotoEditorState extends State<PhotoEditor> {
                     final rt = _ratio;
                     if (rt != null) {
                       final want = rt * s.height / s.width;
-                      final w = box.width, h = w / want;
-                      box = Rect.fromLTWH(box.left, box.top, w, math.min(h, 1 - box.top));
+                      // From where the drag began, toward the pointer; the
+                      // shape kept, shrunk to stay on the picture.
+                      var w = box.width, h = w / want;
+                      final down = p.dy >= a.dy, right = p.dx >= a.dx;
+                      final roomH = down ? 1 - a.dy : a.dy, roomW = right ? 1 - a.dx : a.dx;
+                      if (h > roomH) {
+                        h = roomH;
+                        w = h * want;
+                      }
+                      if (w > roomW) {
+                        w = roomW;
+                        h = w / want;
+                      }
+                      box = Rect.fromLTWH(right ? a.dx : a.dx - w, down ? a.dy : a.dy - h, w, h);
                     }
                     _drawing = box;
                     setState(() => _e.crop = box);

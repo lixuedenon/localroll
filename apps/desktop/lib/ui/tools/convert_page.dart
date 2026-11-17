@@ -10,7 +10,6 @@ import 'package:localroll_core/localroll_core.dart' show DiagLog;
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/converter.dart';
-import '../../services/elevation.dart';
 import '../../services/office_engines.dart';
 import '../../services/file_tools.dart';
 import '../../services/format_convert.dart';
@@ -471,7 +470,7 @@ class _ConvertPageState extends State<ConvertPage> {
             border: Border.all(color: _over ? LightLook.blue : const Color(0xFFB9C8EA), width: _over ? 2 : 1.5),
           ),
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Text(Elevation.isAdmin ? tr('conv.drop_admin') : tr('conv.drop_any'),
+            Text(tr('conv.drop_any'),
                 textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: LightLook.text)),
             const SizedBox(height: 10),
             Row(mainAxisAlignment: MainAxisAlignment.center, children: [

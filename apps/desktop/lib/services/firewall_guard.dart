@@ -9,6 +9,8 @@ import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:localroll_core/localroll_core.dart' show DiagLog;
 
+import 'elevation.dart';
+
 /// Keeps other devices able to send to this PC: Windows' firewall must let
 /// Keepnear in. Looked at (no administrator needed) when Keepnear starts,
 /// the moment Windows' firewall rules change (it is told by Windows), and
@@ -65,6 +67,11 @@ class FirewallGuard extends ChangeNotifier {
       }
       if (blocked && !_putOff) {
         _putOff = true; // asked once per time it happens
+        if (Elevation.isAdmin) {
+          // Run as administrator: Windows asks nothing, so neither do we.
+          DiagLog.log('firewall', 'administrator: letting Keepnear in without asking');
+          if (await fix()) return;
+        }
         await ask?.call();
       }
     } finally {

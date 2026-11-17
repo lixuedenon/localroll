@@ -144,6 +144,21 @@ class WinScreen {
     }
   }
 
+  /// Windows 11: round corners for [hwnd] (a small bar window looks like a
+  /// card). Older Windows: nothing.
+  static void roundCorners(int hwnd) {
+    if (hwnd == 0) return;
+    try {
+      final set = _dwm!.lookupFunction<Int32 Function(IntPtr, Uint32, Pointer<Void>, Uint32), int Function(int, int, Pointer<Void>, int)>('DwmSetWindowAttribute');
+      final v = calloc<Int32>()..value = 2; // DWMWCP_ROUND
+      try {
+        set(hwnd, 33, v.cast(), sizeOf<Int32>()); // DWMWA_WINDOW_CORNER_PREFERENCE
+      } finally {
+        calloc.free(v);
+      }
+    } catch (_) {}
+  }
+
   /// Where [hwnd] is (its visible frame), or null when it is gone or minimised.
   static Rect? windowRect(int hwnd) {
     final u = _user32;

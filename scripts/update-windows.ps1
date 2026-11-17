@@ -85,11 +85,7 @@ foreach ($d in ($others | Select-Object -Unique)) {
   Write-Host "NOTE: an old copy was running from $d" -ForegroundColor Yellow
   Write-Host '      It is not updated by this script. You can delete that folder.' -ForegroundColor Yellow
 }
-# Always as a normal user, even from an administrator shell: elevated,
-# Windows blocks dragging files in from Explorer (and Keepnear never needs it).
-$admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-if ($admin) {
-  Start-Process explorer.exe -ArgumentList "`"$exe`""
-} else {
-  Start-Process $exe
-}
+# Started the way this shell runs: from an administrator shell, Keepnear
+# runs as administrator too (no Windows prompts later; files can still be
+# dragged in).
+Start-Process $exe

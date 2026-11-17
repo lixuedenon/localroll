@@ -571,6 +571,12 @@ class _PlayerPageState extends State<PlayerPage> {
         return KeyEventResult.handled;
       }
     }
+    // Delete: the file shown goes to "Recently deleted" (not while drawing
+    // or recording).
+    if (down && ed == null && !_armed && _rec == null && k == LogicalKeyboardKey.delete && _entries.isNotEmpty) {
+      unawaited(_delete(_entries[_index]));
+      return KeyEventResult.handled;
+    }
     if (down && _armed && k == LogicalKeyboardKey.escape) {
       _disarm();
       return KeyEventResult.handled;
@@ -640,8 +646,10 @@ class _PlayerPageState extends State<PlayerPage> {
 
   Future<void> _delete(PlayerEntry e) async {
     final item = e.item;
-    if (item == null) return;
-    final n = await deleteToTrash(context, widget.services, media: [item]);
+    // A library photo / video, or any other file opened here.
+    final n = item != null
+        ? await deleteToTrash(context, widget.services, media: [item])
+        : (await deleteOneFile(context, widget.services, e.path) ? 1 : 0);
     if (n <= 0 || !mounted) return;
     if (_entries.length == 1) {
       Navigator.of(context).maybePop();
@@ -1667,6 +1675,7 @@ class _PlayerPageState extends State<PlayerPage> {
         ),
         _btn(Icons.view_sidebar_rounded, tr('player.side'), _toggleSide, on: _fullscreen ? _peek : _side),
         _btn(Icons.send_rounded, tr('player.send'), () => _send(e)),
+        _btn(Icons.delete_outline_rounded, tr('lib.delete'), () => unawaited(_delete(e))),
         PopupMenuButton<String>(
           tooltip: tr('ink.more'),
           icon: const Icon(Icons.more_vert_rounded, color: Colors.white, size: 22),
@@ -1680,10 +1689,8 @@ class _PlayerPageState extends State<PlayerPage> {
             PopupMenuItem(value: 'convert', child: Text(tr('convert.menu'))),
             PopupMenuItem(value: 'reveal', child: Text(tr('common.show_in_folder'))),
             PopupMenuItem(value: 'keys', child: Text(tr('player.shortcuts'))),
-            if (item != null) ...[
-              const PopupMenuDivider(),
-              PopupMenuItem(value: 'delete', child: Text(tr('lib.delete'), style: const TextStyle(color: LrColors.danger))),
-            ],
+            const PopupMenuDivider(),
+            PopupMenuItem(value: 'delete', child: Text(tr('lib.delete'), style: const TextStyle(color: LrColors.danger))),
           ],
         ),
         _btn(_fullscreen ? Icons.fullscreen_exit_rounded : Icons.fullscreen_rounded,

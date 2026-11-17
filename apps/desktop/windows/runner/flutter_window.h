@@ -8,6 +8,9 @@
 
 #include <memory>
 
+#include <windows.h>
+#include <shellapi.h>
+
 #include "win32_window.h"
 
 // A window that does nothing but host a Flutter view.
@@ -34,6 +37,16 @@ class FlutterWindow : public Win32Window {
   // Keepnear's global keys (RegisterHotKey on this window; WM_HOTKEY is
   // passed to Dart as "pressed" with the key's id).
   std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> hotkeys_;
+
+  // Run as administrator: Windows blocks Explorer's drag and drop (OLE)
+  // into an elevated window, but lets the older WM_DROPFILES through when
+  // allowed. The dropped files then go to Dart on desktop_drop's own
+  // channel, as if desktop_drop had seen them.
+  std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> admin_drop_;
+  void AllowDropWhenElevated();
+
+ public:
+  void OnFilesDropped(HDROP drop);
 };
 
 #endif  // RUNNER_FLUTTER_WINDOW_H_

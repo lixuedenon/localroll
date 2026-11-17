@@ -15,6 +15,7 @@ import '../services/settings.dart';
 import '../services/win_dialogs.dart';
 import 'send_page.dart' show peerErrorText;
 import 'theme.dart';
+import 'trash_actions.dart';
 import 'lr_dialog.dart';
 
 /// A small text editor: paste or type, then send to [peer]. The other PC
@@ -240,6 +241,15 @@ class _TextWindowState extends State<_TextWindow> {
                 onPressed: () => revealInExplorer(widget.file!),
                 icon: const Icon(Icons.folder_open_rounded),
                 label: Text(tr('common.show_in_folder')),
+              ),
+            if (_viewing)
+              TextButton.icon(
+                style: TextButton.styleFrom(foregroundColor: LrColors.danger),
+                onPressed: () async {
+                  if (await deleteOneFile(context, widget.services, widget.file!) && mounted) Navigator.of(context).pop();
+                },
+                icon: const Icon(Icons.delete_outline_rounded),
+                label: Text(tr('lib.delete')),
               ),
             if (_sending)
               TextButton.icon(

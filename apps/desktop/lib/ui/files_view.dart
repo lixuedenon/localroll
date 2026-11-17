@@ -234,7 +234,7 @@ class _FilesViewState extends State<FilesView> {
                             IconButton(
                               tooltip: tr('office.preview'),
                               icon: const Icon(Icons.visibility_outlined),
-                              onPressed: () => previewOffice(context, e.entity.path),
+                              onPressed: () => previewOffice(context, e.entity.path, services: widget.services),
                             ),
                           if (!e.isDir)
                             IconButton(
@@ -328,14 +328,14 @@ Future<void> openReceivedFile(BuildContext context, AppServices services, String
   if (PlayerEntry.playable(name)) {
     await openInPlayer(context, services, [path]);
   } else if (isPdfPath(path)) {
-    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => PdfViewerPage(path: path)));
+    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => PdfViewerPage(path: path, services: services)));
   } else if (googleShortcutKinds.containsKey(extensionOf(name))) {
     await _openGoogle(context, path, size);
   } else if (OfficeViewPage.canShow(name)) {
     if (await hasProgramFor(extensionOf(name))) {
       await Process.run('explorer.exe', [path]);
     } else if (context.mounted) {
-      previewOffice(context, path);
+      previewOffice(context, path, services: services);
     }
   } else if (isPlainTextPath(path) && size <= 4 * 1024 * 1024) {
     await showTextFile(context, services, path);
@@ -345,9 +345,9 @@ Future<void> openReceivedFile(BuildContext context, AppServices services, String
 }
 
 /// LocalRoll's simple look inside a Word / Excel / PowerPoint file.
-void previewOffice(BuildContext context, String path) {
+void previewOffice(BuildContext context, String path, {AppServices? services}) {
   Navigator.of(context).push(MaterialPageRoute(
-    builder: (_) => OfficeViewPage(
+    builder: (pageCtx) => OfficeViewPage(
       path: path,
       name: path.split(Platform.pathSeparator).last,
       actions: [
@@ -356,6 +356,14 @@ void previewOffice(BuildContext context, String path) {
           icon: const Icon(Icons.open_in_new_rounded, size: 18),
           label: Text(tr('office.open_with')),
         ),
+        if (services != null)
+          IconButton(
+            tooltip: tr('lib.delete'),
+            onPressed: () async {
+              if (await deleteOneFile(pageCtx, services, path) && pageCtx.mounted) Navigator.of(pageCtx).maybePop();
+            },
+            icon: const Icon(Icons.delete_outline_rounded, color: LrColors.danger),
+          ),
         const SizedBox(width: 8),
       ],
     ),

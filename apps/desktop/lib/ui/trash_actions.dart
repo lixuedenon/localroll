@@ -11,6 +11,19 @@ import '../services/library_trash.dart';
 import 'format.dart';
 import 'lr_dialog.dart';
 
+/// One open file (a PDF, a document, a text…): as a library item when it
+/// is one, else as a file. True when it went to "Recently deleted".
+Future<bool> deleteOneFile(BuildContext context, AppServices s, String path) async {
+  final lib = s.library;
+  MediaItem? item;
+  final root = lib.rootPath;
+  if (root.isNotEmpty && path.toLowerCase().startsWith('${root.toLowerCase()}${Platform.pathSeparator}')) {
+    item = lib.findByRel(path.substring(root.length + 1).replaceAll(Platform.pathSeparator, '/'));
+  }
+  final n = await deleteToTrash(context, s, media: [?item], files: item == null ? [path] : const []);
+  return n > 0;
+}
+
 /// Deleting from the library, the same way everywhere: a question with how
 /// many and how big, into "Recently deleted" (30 days), then 10 seconds to
 /// undo. [media]: photos / videos (their Live Photo videos go along);

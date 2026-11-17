@@ -1,4 +1,5 @@
 // apps/desktop/lib/ui/pdf_viewer_page.dart
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -6,23 +7,32 @@ import 'package:flutter/services.dart';
 import 'package:localroll_core/localroll_core.dart';
 import 'package:pdfrx/pdfrx.dart';
 
+import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/network.dart';
 import 'theme.dart';
+import 'trash_actions.dart';
 
 /// Reads a PDF inside LocalRoll (scans and documents that arrived): scroll
 /// through the pages, zoom with the buttons, Ctrl + wheel or a pinch, jump
 /// to a page. "Open with…" hands it to the PC's usual PDF program.
 class PdfViewerPage extends StatefulWidget {
-  const PdfViewerPage({super.key, required this.path});
+  const PdfViewerPage({super.key, required this.path, this.services});
 
   final String path;
+
+  /// Given: a "Delete" button (into "Recently deleted").
+  final AppServices? services;
 
   @override
   State<PdfViewerPage> createState() => _PdfViewerPageState();
 }
 
 class _PdfViewerPageState extends State<PdfViewerPage> {
+  Future<void> _delete(AppServices s) async {
+    if (await deleteOneFile(context, s, widget.path) && mounted) Navigator.of(context).maybePop();
+  }
+
   final PdfViewerController _c = PdfViewerController();
   final FocusNode _focus = FocusNode();
   int _page = 1;
@@ -94,6 +104,12 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
               onPressed: () => Process.run('explorer.exe', [widget.path]),
               icon: const Icon(Icons.open_in_new_rounded),
             ),
+            if (widget.services case final s?)
+              IconButton(
+                tooltip: tr('lib.delete'),
+                onPressed: () => unawaited(_delete(s)),
+                icon: const Icon(Icons.delete_outline_rounded, color: LrColors.danger),
+              ),
             const SizedBox(width: 8),
           ],
         ),

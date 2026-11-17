@@ -410,10 +410,15 @@ class _RecordingBarState extends State<RecordingBar> {
         ),
         const SizedBox(width: 4),
         FilledButton.icon(
-          style: FilledButton.styleFrom(backgroundColor: LrColors.danger, foregroundColor: Colors.white, visualDensity: VisualDensity.compact),
+          style: FilledButton.styleFrom(
+            backgroundColor: LrColors.danger,
+            foregroundColor: Colors.white,
+            minimumSize: const Size(0, 40),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+          ),
           onPressed: widget.onStop,
-          icon: const Icon(Icons.stop_rounded, size: 18),
-          label: Text(tr('rec.stop')),
+          icon: const Icon(Icons.stop_rounded, size: 20),
+          label: Text(tr('rec.stop'), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
         ),
       ]),
     );

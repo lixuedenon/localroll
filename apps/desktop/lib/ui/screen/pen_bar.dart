@@ -26,7 +26,7 @@ import 'screen_record.dart';
 /// the mouse button lets the mouse through to the apps; any drawing tool
 /// draws. Undo / redo, pages, board, light around the mouse, options.
 class PenToolbar extends StatefulWidget {
-  const PenToolbar({super.key, this.extra = const [], this.controls, this.vertical = false});
+  const PenToolbar({super.key, this.extra = const [], this.controls, this.vertical = false, this.flat = false});
 
   /// More buttons at the end (end the pen…).
   final List<Widget> extra;
@@ -37,6 +37,9 @@ class PenToolbar extends StatefulWidget {
 
   /// Buttons in columns (the panel standing upright).
   final bool vertical;
+
+  /// Inside a bar of its own (the floating panel): no card, no grip.
+  final bool flat;
 
   @override
   State<PenToolbar> createState() => _PenToolbarState();
@@ -74,36 +77,6 @@ class _PenToolbarState extends State<PenToolbar> {
     await o.setStamp(r.shape);
   }
 
-  /// The toolbar's own stamps (up to three, one click each), and a fold.
-  List<Widget> _quick() {
-    final lib = StampLibrary.instance;
-    return [
-      if (lib.quickShown)
-        for (final id in lib.quick)
-          GestureDetector(
-            onSecondaryTapUp: (d) => unawaited(quickMenu(context, id, d.globalPosition, () => _big(() => showStampPicker(context)))),
-            child: IconButton(
-              tooltip: stampName(id),
-              onPressed: () {
-                final q = quickStamp(id);
-                if (q == null) {
-                  unawaited(_pickCandle());
-                } else {
-                  unawaited(o.setStamp(q.shape));
-                }
-              },
-              icon: StampThumb(id: id, size: 22),
-            ),
-          ),
-      IconButton(
-        tooltip: tr(lib.quickShown ? 'stamp.quick_fold' : 'stamp.quick_unfold'),
-        visualDensity: VisualDensity.compact,
-        onPressed: () => lib.setQuickShown(!lib.quickShown),
-        icon: Icon(lib.quickShown ? Icons.chevron_left_rounded : Icons.chevron_right_rounded, size: 18, color: Colors.white54),
-      ),
-    ];
-  }
-
   Future<void> _pickCandle() async {
     final r = await _big(() => showCandlePanel(context));
     if (r == null) return;
@@ -115,12 +88,164 @@ class _PenToolbarState extends State<PenToolbar> {
     }
   }
 
-  Widget _btn(IconData icon, String tip, VoidCallback? onTap, {bool on = false}) => IconButton(
-        tooltip: tip,
-        onPressed: onTap,
-        style: IconButton.styleFrom(backgroundColor: on ? LrColors.safelight.withValues(alpha: 0.25) : null),
-        icon: Icon(icon, size: 20, color: onTap == null ? Colors.white38 : (on ? LrColors.safelight : Colors.white)),
+  // The light look: white, round, the tool in use blue.
+  static const _ink = Color(0xFF33415C);
+  static const _blue = Color(0xFF2F6BFF);
+
+  Widget _btn(IconData icon, String tip, VoidCallback? onTap, {bool on = false, Widget? child}) => Tooltip(
+        message: tip,
+        child: Material(
+          color: on ? _blue : Colors.transparent,
+          borderRadius: BorderRadius.circular(11),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(11),
+            onTap: onTap,
+            child: SizedBox(
+              width: 36,
+              height: 36,
+              child: Center(child: child ?? Icon(icon, size: 19, color: onTap == null ? const Color(0x5533415C) : (on ? Colors.white : _ink))),
+            ),
+          ),
+        ),
       );
+
+  /// A button with more inside (shapes, marks, stamps, colour): a small
+  /// arrow under it; the window grows a moment while the list is open.
+  Widget _group(IconData icon, String tip, bool on, Future<void> Function(Rect at) open, {Widget? child}) => Builder(
+        builder: (ctx) => Stack(clipBehavior: Clip.none, children: [
+          _btn(icon, tip, () {
+            final box = ctx.findRenderObject() as RenderBox?;
+            if (box == null) return;
+            unawaited(open(box.localToGlobal(Offset.zero) & box.size));
+          }, on: on, child: child),
+          Positioned(
+            right: 1,
+            bottom: 1,
+            child: IgnorePointer(child: Icon(Icons.arrow_drop_down_rounded, size: 13, color: on ? Colors.white70 : const Color(0xFF8A97B0))),
+          ),
+        ]),
+      );
+
+  /// A list under [at] (above it when there is no room below).
+  Future<T?> _menu<T>(Rect at, List<PopupMenuEntry<T>> items) => _big(() {
+        final size = MediaQuery.sizeOf(context);
+        final down = at.bottom + 260 < size.height || at.top < 260;
+        return showMenu<T>(
+          context: context,
+          color: Colors.white,
+          surfaceTintColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          position: down
+              ? RelativeRect.fromLTRB(at.left, at.bottom + 6, size.width - at.right, 0)
+              : RelativeRect.fromLTRB(at.left, 0, size.width - at.right, size.height - at.top + 6),
+          items: items,
+        );
+      });
+
+  /// A row of tools in one list entry (tapped: chosen, the list closes).
+  PopupMenuEntry<T> _tiles<T>(List<(Widget, String, VoidCallback, bool)> tiles) => _Tiles<T>(tiles: tiles);
+
+  static const _shapes = [EditTool.line, EditTool.arrow, EditTool.rect, EditTool.ellipse];
+  static const _marks = [EditTool.check, EditTool.cross, EditTool.number];
+
+  /// The tool shown for a group: the one in use if it is in it, else the
+  /// group's first.
+  EditTool _shown(List<EditTool> g) => g.firstWhere((t) => o.tool == t.name, orElse: () => g.first);
+
+  Future<void> _pickFrom(Rect at, List<EditTool> g) => _menu<void>(at, [
+        _tiles([
+          for (final t in g)
+            (Icon(InkToolbar.icon(t), size: 20, color: o.tool == t.name ? Colors.white : _ink), InkToolbar.label(t), () => o.setTool(t.name), o.draw && o.tool == t.name),
+        ]),
+      ]);
+
+  Future<void> _stamps(Rect at) async {
+    final lib = StampLibrary.instance;
+    String? pick;
+    await _menu<void>(at, [
+      if (lib.quick.isNotEmpty)
+        _tiles([
+          for (final id in lib.quick) (StampThumb(id: id, size: 22), stampName(id), () => pick = id, false),
+        ]),
+      PopupMenuItem<void>(
+        onTap: () => pick = '',
+        child: Row(children: [
+          const Icon(Icons.apps_rounded, size: 18, color: _ink),
+          const SizedBox(width: 10),
+          Text(tr('ink.tool_stamp'), style: const TextStyle(color: _ink)),
+        ]),
+      ),
+    ]);
+    final id = pick;
+    if (id == null) return;
+    if (id.isEmpty) return _pickStamp();
+    final q = quickStamp(id);
+    if (q == null) return _pickCandle();
+    await o.setStamp(q.shape);
+  }
+
+  Future<void> _colour(Rect at) => _menu<void>(at, [
+        _tiles([
+          for (final c in inkColors)
+            (
+              Container(width: 22, height: 22, decoration: BoxDecoration(color: c, shape: BoxShape.circle, border: Border.all(color: const Color(0xFFD7DDEA), width: 2))),
+              '',
+              () => o.setColor(c),
+              c == o.color,
+            ),
+        ]),
+        _tiles([
+          for (var l = 0; l < 3; l++)
+            (
+              Container(width: 6.0 + l * 5, height: 6.0 + l * 5, decoration: BoxDecoration(color: o.level == l ? Colors.white : _ink, shape: BoxShape.circle)),
+              tr('ink.size_${['small', 'medium', 'large'][l]}'),
+              () => o.setLevel(l),
+              o.level == l,
+            ),
+        ]),
+      ]);
+
+  /// Everything used less often, in one list.
+  Future<void> _more(Rect at) {
+    PopupMenuItem<void> item(IconData icon, String label, VoidCallback? onTap, {bool on = false}) => PopupMenuItem<void>(
+          enabled: onTap != null,
+          onTap: onTap,
+          height: 40,
+          child: Row(children: [
+            Icon(icon, size: 18, color: on ? _blue : _ink),
+            const SizedBox(width: 10),
+            Expanded(child: Text(label, style: TextStyle(color: on ? _blue : _ink, fontWeight: on ? FontWeight.w700 : FontWeight.w400))),
+            if (on) const Icon(Icons.check_rounded, size: 16, color: _blue),
+          ]),
+        );
+    return _menu<void>(at, [
+      item(Icons.redo_rounded, tr('ink.redo'), o.canRedo ? o.redo : null),
+      if (o.selected) item(Icons.delete_outline_rounded, tr('ink.delete'), o.deleteSelected),
+      if (o.hasNumbers) item(Icons.format_list_numbered_rounded, tr('ink.renumber'), o.renumber),
+      item(Icons.delete_sweep_rounded, tr('pen.clear_page'), o.clearPage),
+      item(Icons.note_add_outlined, tr('pen.new_page'), o.newPage),
+      if (o.sheets > 1) ...[
+        item(Icons.chevron_left_rounded, '${tr('pen.prev_sheet')}  (${o.sheet}/${o.sheets})', o.sheet > 1 ? o.prevPage : null),
+        item(Icons.chevron_right_rounded, tr('pen.next_sheet'), o.sheet < o.sheets ? o.nextPage : null),
+      ],
+      const PopupMenuDivider(),
+      for (var b = 0; b < 3; b++)
+        item(b == 0 ? Icons.layers_clear_outlined : Icons.dashboard_outlined, tr(['pen.board_none', 'pen.board_white', 'pen.board_black'][b]), () => o.setBoard(b),
+            on: o.board == b),
+      item(Icons.highlight_rounded, tr('pen.highlight'), () => o.setHighlight(!o.highlight), on: o.highlight),
+      const PopupMenuDivider(),
+      item(Icons.blur_on_rounded, tr('screen.fade'), () => o.setFade(!o.fade), on: o.fade),
+      item(Icons.u_turn_left_rounded, tr('pen.auto_return'), () => o.setAutoReturn(!o.autoReturn), on: o.autoReturn),
+      item(Icons.draw_rounded, tr('pen.stylus'), () => o.setPenDraws(!o.penDraws), on: o.penDraws),
+      item(Icons.web_asset_rounded, tr('pen.per_window'), () => o.setPerWindow(!o.perWindow), on: o.perWindow),
+      PopupMenuItem<void>(enabled: false, height: 28, child: Text(tr('pen.key_title'), style: const TextStyle(fontSize: 12, color: LrColors.muted))),
+      for (final vk in const [0x75, 0x76, 0x77, 0x78, 0x79, 0])
+        item(Icons.keyboard_rounded, _keyName(vk), () {
+          o.setToggleKey(vk);
+          PenSession.instance.services?.player.setPenKey(vk);
+        }, on: o.toggleKey == vk),
+    ]);
+  }
 
   Widget _typing() {
     if (!_wordsFocus.hasFocus) {
@@ -129,15 +254,15 @@ class _PenToolbarState extends State<PenToolbar> {
       });
     }
     return Row(mainAxisSize: MainAxisSize.min, children: [
-      const Icon(Icons.text_fields_rounded, color: Colors.white, size: 20),
+      const Icon(Icons.text_fields_rounded, color: _ink, size: 20),
       const SizedBox(width: 8),
       SizedBox(
         width: 360,
         child: TextField(
           controller: _words,
           focusNode: _wordsFocus,
-          style: const TextStyle(color: Colors.white),
-          decoration: InputDecoration(isDense: true, hintText: tr('ink.type_here'), hintStyle: const TextStyle(color: Colors.white54)),
+          style: const TextStyle(color: _ink),
+          decoration: InputDecoration(isDense: true, hintText: tr('ink.type_here'), hintStyle: const TextStyle(color: Color(0xFF8A97B0))),
           onSubmitted: (v) {
             o.putText(v);
             _words.clear();
@@ -162,133 +287,156 @@ class _PenToolbarState extends State<PenToolbar> {
     ]);
   }
 
+  /// Operate the computer, or draw: two halves of one switch.
+  Widget _mode() {
+    Widget half(bool draw, IconData icon, String label) {
+      final on = o.draw == draw;
+      return Material(
+        color: on ? Colors.white : Colors.transparent,
+        elevation: on ? 1 : 0,
+        borderRadius: BorderRadius.circular(9),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(9),
+          onTap: () => o.setDraw(draw),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              Icon(icon, size: 16, color: on ? _blue : const Color(0xFF6B7A99)),
+              const SizedBox(width: 4),
+              Text(label, style: TextStyle(fontSize: 13, color: on ? _blue : const Color(0xFF4B5872), fontWeight: on ? FontWeight.w700 : FontWeight.w400)),
+            ]),
+          ),
+        ),
+      );
+    }
+
+    return Tooltip(
+      message: tr(o.draw ? 'pen.operate_tip' : 'pen.back_tip', {'key': _keyName(o.toggleKey)}),
+      child: Container(
+        padding: const EdgeInsets.all(3),
+        decoration: BoxDecoration(color: const Color(0xFFEEF2F9), borderRadius: BorderRadius.circular(12)),
+        child: Flex(
+          direction: widget.vertical ? Axis.vertical : Axis.horizontal,
+          mainAxisSize: MainAxisSize.min,
+          children: [half(false, Icons.mouse_rounded, tr('pen.mode_operate')), half(true, Icons.edit_rounded, tr('pen.mode_draw'))],
+        ),
+      ),
+    );
+  }
+
+  Widget _sep() => widget.vertical
+      ? Container(width: 26, height: 1, margin: const EdgeInsets.symmetric(vertical: 4), color: const Color(0xFFE3E8F2))
+      : Container(width: 1, height: 26, margin: const EdgeInsets.symmetric(horizontal: 4), color: const Color(0xFFE3E8F2));
+
   @override
   Widget build(BuildContext context) => ListenableBuilder(
         listenable: Listenable.merge([o, StampLibrary.instance]),
-        builder: (context, _) => Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          decoration: BoxDecoration(
-            color: const Color(0xF0202020),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(0x33FFFFFF)),
-          ),
-          child: o.textAt != null
-              ? _typing()
-              : Wrap(
-                  direction: widget.vertical ? Axis.vertical : Axis.horizontal,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  alignment: WrapAlignment.center,
-                  children: [
-                  const BarGrip(),
-                  // On / off: operate the computer, or back to the pen in use.
-                  Tooltip(
-                    message: tr(o.draw ? 'pen.operate_tip' : 'pen.back_tip', {'key': _keyName(o.toggleKey)}),
-                    child: TextButton.icon(
-                      style: TextButton.styleFrom(
-                        foregroundColor: o.draw ? Colors.white : LrColors.safelight,
-                        backgroundColor: o.draw ? null : LrColors.safelight.withValues(alpha: 0.25),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                      onPressed: () => o.setDraw(!o.draw),
-                      icon: Icon(o.draw ? Icons.mouse_rounded : Icons.edit_rounded, size: 18),
-                      label: Text(tr(o.draw ? 'pen.to_operate' : 'pen.back_draw')),
-                    ),
+        builder: (context, _) {
+          bool on(EditTool t) => o.draw && o.tool == t.name;
+          final shape = _shown(_shapes), mark = _shown(_marks);
+          final tools = <Widget>[
+            _btn(InkToolbar.icon(EditTool.pen), InkToolbar.label(EditTool.pen), () => o.setTool(EditTool.pen.name), on: on(EditTool.pen)),
+            _btn(InkToolbar.icon(EditTool.marker), InkToolbar.label(EditTool.marker), () => o.setTool(EditTool.marker.name), on: on(EditTool.marker)),
+            _group(InkToolbar.icon(shape), tr('pen.shapes'), _shapes.any(on), (r) => _pickFrom(r, _shapes)),
+            _btn(InkToolbar.icon(EditTool.text), InkToolbar.label(EditTool.text), () => o.setTool(EditTool.text.name), on: on(EditTool.text)),
+            _group(InkToolbar.icon(mark), tr('pen.marks'), _marks.any(on), (r) => _pickFrom(r, _marks)),
+            _group(InkToolbar.icon(EditTool.stamp), InkToolbar.label(EditTool.stamp), on(EditTool.stamp) || on(EditTool.candle), _stamps),
+            _btn(InkToolbar.icon(EditTool.select), InkToolbar.label(EditTool.select), () => o.setTool(EditTool.select.name), on: on(EditTool.select)),
+            _btn(InkToolbar.icon(EditTool.eraser), InkToolbar.label(EditTool.eraser), () => o.setTool(EditTool.eraser.name), on: on(EditTool.eraser)),
+            _sep(),
+            _group(
+              Icons.circle,
+              tr('ink.color'),
+              false,
+              _colour,
+              child: Container(
+                width: 20,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: o.color,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 3),
+                  boxShadow: const [BoxShadow(color: Color(0x33000000), blurRadius: 2)],
+                ),
+              ),
+            ),
+            _btn(Icons.undo_rounded, tr('ink.undo'), o.canUndo ? o.undo : null),
+            _group(Icons.more_horiz_rounded, tr('ink.more'), o.highlight || o.board != 0, _more),
+          ];
+          return Container(
+            padding: widget.flat ? EdgeInsets.zero : const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
+            decoration: widget.flat
+                ? null
+                : BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFFE3E8F2)),
+                    boxShadow: const [BoxShadow(color: Color(0x2A0A1432), blurRadius: 14, offset: Offset(0, 4))],
                   ),
-                  const SizedBox(width: 4),
-                  for (final t in EditTool.values)
-                    if (t != EditTool.candle) ...[
-                      _btn(InkToolbar.icon(t), InkToolbar.label(t), () {
-                        if (t == EditTool.stamp) return unawaited(_pickStamp());
-                        o.setTool(t.name);
-                      }, on: o.draw && o.tool == t.name),
-                      if (t == EditTool.stamp) ..._quick(),
-                    ],
-                  PopupMenuButton<Color>(
-                    tooltip: tr('ink.color'),
-                    onSelected: o.setColor,
-                    itemBuilder: (_) => [
-                      for (final c in inkColors)
-                        PopupMenuItem<Color>(
-                          value: c,
-                          height: 36,
-                          child: Row(children: [
-                            Container(width: 22, height: 22, decoration: BoxDecoration(color: c, shape: BoxShape.circle, border: Border.all(color: Colors.white54))),
-                            if (c == o.color) ...[const SizedBox(width: 10), const Icon(Icons.check_rounded, size: 18)],
-                          ]),
-                        ),
-                    ],
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Container(
-                        width: 22,
-                        height: 22,
-                        decoration: BoxDecoration(color: o.color, shape: BoxShape.circle, border: Border.all(color: Colors.white70, width: 2)),
+            child: o.textAt != null
+                ? _typing()
+                : Flex(
+                    direction: widget.vertical ? Axis.vertical : Axis.horizontal,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (!widget.flat) const BarGrip(),
+                      if (widget.flat) _sep(),
+                      _mode(),
+                      _sep(),
+                      // Operating the computer: the drawing tools stay, greyed a little.
+                      Opacity(
+                        opacity: o.draw ? 1 : 0.55,
+                        child: Flex(direction: widget.vertical ? Axis.vertical : Axis.horizontal, mainAxisSize: MainAxisSize.min, children: tools),
                       ),
-                    ),
-                  ),
-                  for (var l = 0; l < 3; l++)
-                    IconButton(
-                      tooltip: tr('ink.size_${['small', 'medium', 'large'][l]}'),
-                      onPressed: () => o.setLevel(l),
-                      icon: Container(
-                        width: 6.0 + l * 5,
-                        height: 6.0 + l * 5,
-                        decoration: BoxDecoration(color: o.level == l ? LrColors.safelight : Colors.white70, shape: BoxShape.circle),
-                      ),
-                    ),
-                  const SizedBox(width: 4),
-                  _btn(Icons.undo_rounded, tr('ink.undo'), o.canUndo ? o.undo : null),
-                  _btn(Icons.redo_rounded, tr('ink.redo'), o.canRedo ? o.redo : null),
-                  if (o.selected) _btn(Icons.delete_outline_rounded, tr('ink.delete'), o.deleteSelected),
-                  if (o.hasNumbers) _btn(Icons.format_list_numbered_rounded, tr('ink.renumber'), o.renumber),
-                  _btn(Icons.delete_sweep_rounded, tr('pen.clear_page'), o.clearPage),
-                  _btn(Icons.note_add_outlined, tr('pen.new_page'), o.newPage),
-                  if (o.sheets > 1) ...[
-                    _btn(Icons.chevron_left_rounded, tr('pen.prev_sheet'), o.sheet > 1 ? o.prevPage : null),
-                    Text('${o.sheet}/${o.sheets}', style: const TextStyle(color: Colors.white70, fontSize: 12)),
-                    _btn(Icons.chevron_right_rounded, tr('pen.next_sheet'), o.sheet < o.sheets ? o.nextPage : null),
-                  ],
-                  const SizedBox(width: 4),
-                  PopupMenuButton<int>(
-                    tooltip: tr('pen.board'),
-                    onSelected: o.setBoard,
-                    itemBuilder: (_) => [
-                      for (var b = 0; b < 3; b++)
-                        CheckedPopupMenuItem(value: b, checked: o.board == b, child: Text(tr(['pen.board_none', 'pen.board_white', 'pen.board_black'][b]))),
+                      ...widget.extra,
                     ],
-                    icon: Icon(Icons.dashboard_outlined, size: 20, color: o.board == 0 ? Colors.white : LrColors.safelight),
                   ),
-                  _btn(Icons.highlight_rounded, tr('pen.highlight'), () => o.setHighlight(!o.highlight), on: o.highlight),
-                  PopupMenuButton<String>(
-                    tooltip: tr('ink.more'),
-                    icon: const Icon(Icons.tune_rounded, size: 20, color: Colors.white),
-                    onSelected: (v) {
-                      if (v == 'fade') o.setFade(!o.fade);
-                      if (v == 'return') o.setAutoReturn(!o.autoReturn);
-                      if (v == 'stylus') o.setPenDraws(!o.penDraws);
-                      if (v == 'perwindow') o.setPerWindow(!o.perWindow);
-                      if (v.startsWith('key')) {
-                        final vk = int.parse(v.substring(3));
-                        o.setToggleKey(vk);
-                        PenSession.instance.services?.player.setPenKey(vk);
-                      }
+          );
+        },
+      );
+}
+
+/// Tools side by side in one list entry; a tap chooses and closes the list.
+class _Tiles<T> extends PopupMenuEntry<T> {
+  const _Tiles({required this.tiles});
+
+  final List<(Widget, String, VoidCallback, bool)> tiles;
+
+  @override
+  double get height => 52;
+
+  @override
+  bool represents(T? value) => false;
+
+  @override
+  State<_Tiles<T>> createState() => _TilesState<T>();
+}
+
+class _TilesState<T> extends State<_Tiles<T>> {
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          for (final (icon, label, onTap, on) in widget.tiles)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2),
+              child: Tooltip(
+                message: label,
+                child: Material(
+                  color: on ? const Color(0xFF2F6BFF) : const Color(0xFFF5F7FC),
+                  borderRadius: BorderRadius.circular(10),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(10),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      onTap();
                     },
-                    itemBuilder: (_) => [
-                      CheckedPopupMenuItem(value: 'fade', checked: o.fade, child: Text(tr('screen.fade'))),
-                      CheckedPopupMenuItem(value: 'return', checked: o.autoReturn, child: Text(tr('pen.auto_return'))),
-                      CheckedPopupMenuItem(value: 'stylus', checked: o.penDraws, child: Text(tr('pen.stylus'))),
-                      CheckedPopupMenuItem(value: 'perwindow', checked: o.perWindow, child: Text(tr('pen.per_window'))),
-                      const PopupMenuDivider(),
-                      PopupMenuItem(enabled: false, child: Text(tr('pen.key_title'), style: const TextStyle(fontSize: 12, color: LrColors.muted))),
-                      for (final vk in const [0x75, 0x76, 0x77, 0x78, 0x79, 0])
-                        CheckedPopupMenuItem(value: 'key$vk', checked: o.toggleKey == vk, child: Text(_keyName(vk))),
-                      const PopupMenuDivider(),
-                      PopupMenuItem(enabled: false, child: Text(tr('pen.tips_v2'), style: const TextStyle(fontSize: 12, color: LrColors.muted))),
-                    ],
+                    child: SizedBox(width: 40, height: 40, child: Center(child: icon)),
                   ),
-                  ...widget.extra,
-                ]),
-        ),
+                ),
+              ),
+            ),
+        ]),
       );
 }
 
@@ -421,7 +569,7 @@ class _PenBarPage extends StatelessWidget {
   Widget build(BuildContext context) => PopScope(
         canPop: false,
         child: Scaffold(
-          backgroundColor: LrColors.ink,
+          backgroundColor: const Color(0xFFF3F6FC),
           body: Center(
             child: Material(
               color: Colors.transparent,
@@ -440,7 +588,7 @@ class _PenBarPage extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: FilledButton.icon(
-                      style: FilledButton.styleFrom(visualDensity: VisualDensity.compact),
+                      style: FilledButton.styleFrom(backgroundColor: LrColors.danger, minimumSize: const Size(0, 40)),
                       onPressed: () => unawaited(PenSession.instance.stop()),
                       icon: const Icon(Icons.close_rounded, size: 18),
                       label: Text(tr('pen.end')),
@@ -488,9 +636,9 @@ class _ShotButtonState extends State<_ShotButton> {
           onPressed: _busy ? null : () => unawaited(_take()),
           icon: _busy
               ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-              : const Icon(Icons.add_a_photo_outlined, size: 20, color: Colors.white),
+              : const Icon(Icons.add_a_photo_outlined, size: 20, color: Color(0xFF33415C)),
         ),
-        if (_done != null) Text(_done!, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+        if (_done != null) Text(_done!, style: const TextStyle(color: Color(0xFF6B7A99), fontSize: 12)),
       ]);
 }
 
@@ -575,7 +723,7 @@ class _BarGripState extends State<BarGrip> with WindowListener {
             },
             child: const Padding(
               padding: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-              child: Icon(Icons.drag_indicator_rounded, color: Colors.white54, size: 20),
+              child: Icon(Icons.drag_indicator_rounded, color: Color(0xFFA9B4C8), size: 20),
             ),
           ),
         ),
@@ -626,15 +774,23 @@ class _BarTipsState extends State<BarTips> {
         onExit: (_) {
           if (_tip != null) setState(() => _tip = null);
         },
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          TooltipVisibility(visible: false, child: KeyedSubtree(key: _key, child: widget.child)),
-          SizedBox(
+        // The line under the bar is as wide as the bar (a long tip is cut,
+        // it never makes the bar wider).
+        child: Stack(children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: BarTips.line),
+            child: TooltipVisibility(visible: false, child: KeyedSubtree(key: _key, child: widget.child)),
+          ),
+          Positioned(
+            left: 4,
+            right: 4,
+            bottom: 0,
             height: BarTips.line,
             child: Text(
               _tip ?? '',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: Colors.white70, fontSize: 12, height: 1.3),
+              style: const TextStyle(color: Color(0xFF6B7A99), fontSize: 12, height: 1.3),
             ),
           ),
         ]),

@@ -333,7 +333,7 @@ Future<void> runPenPanel(List<String> args) async {
       titleBarStyle: TitleBarStyle.hidden,
       skipTaskbar: true,
       alwaysOnTop: true,
-      backgroundColor: LrColors.ink,
+      backgroundColor: const Color(0xFFF3F6FC),
       size: const Size(640, 120),
     ),
     () async {
@@ -341,6 +341,7 @@ Future<void> runPenPanel(List<String> args) async {
       // Its size and place first (no flash of a big window), then shown.
       panel.place();
       await windowManager.show();
+      WinScreen.roundCorners(WinScreen.ownWindow());
     },
   );
   WinScreen.excludeFromCapture(true);
@@ -357,6 +358,9 @@ class _PanelPlace {
   bool vertical;
   bool small = false;
 
+  /// What the bar measures (logical pixels): the window fits it.
+  Size? content;
+
   void place() {
     final screens = WinScreen.screens();
     if (screens.isEmpty) return;
@@ -364,8 +368,11 @@ class _PanelPlace {
     final scr = screens.firstWhere((s) => s.rect.contains(c), orElse: () => screens.first);
     final k = scr.scale;
     final Size size;
+    final c0 = content;
     if (small) {
       size = Size(64 * k, 64 * k);
+    } else if (c0 != null) {
+      size = Size(math.min((c0.width + 12) * k, scr.rect.width - 20 * k), math.min((c0.height + 10) * k, scr.rect.height - 20 * k));
     } else if (vertical) {
       size = Size(150 * k, math.min(900 * k, scr.rect.height - 60 * k));
     } else {
@@ -620,11 +627,26 @@ class _PanelPageState extends State<_PanelPage> with WindowListener {
     widget.place.report(r, save: false);
   }
 
-  Widget _tool(IconData icon, String tip, VoidCallback onTap, {Color color = Colors.white}) => IconButton(
+  static const _ink = Color(0xFF33415C);
+
+  Widget _tool(IconData icon, String tip, VoidCallback onTap, {Color color = _ink}) => IconButton(
         tooltip: tip,
         onPressed: onTap,
         icon: Icon(icon, size: 20, color: color),
       );
+
+  /// The bar's size, measured after each frame: the window follows it.
+  final GlobalKey _body = GlobalKey();
+
+  void _fit() {
+    final sz = _body.currentContext?.size;
+    if (sz == null || widget.place.small) return;
+    final had = widget.place.content;
+    if (had != null && (had.width - sz.width).abs() < 1 && (had.height - sz.height).abs() < 1) return;
+    widget.place.content = sz;
+    widget.place.place();
+    widget.place.report(r, save: false);
+  }
 
   /// Upright / flat, small, close: the panel's own buttons.
   List<Widget> _own() => [
@@ -641,42 +663,103 @@ class _PanelPageState extends State<_PanelPage> with WindowListener {
     return s >= 3600 ? '${s ~/ 3600}:${two(s ~/ 60 % 60)}:${two(s % 60)}' : '${two(s ~/ 60)}:${two(s % 60)}';
   }
 
-  /// A recording's controls (ready / counting down / recording).
+  /// A recording's controls (ready / counting down / recording): a red
+  /// part at the start, the stop button big and named.
   List<Widget> _record() {
+    Widget redBox(List<Widget> children) => Container(
+          padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
+          decoration: BoxDecoration(color: const Color(0xFFFFF0F1), borderRadius: BorderRadius.circular(16)),
+          child: Row(mainAxisSize: MainAxisSize.min, children: children),
+        );
     if (r.countdown > 0) {
-      return [Text(tr('screen.starting_in', {'n': r.countdown}), style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600))];
+      return [
+        redBox([
+          Text(tr('screen.starting_in', {'n': r.countdown}),
+              style: const TextStyle(color: Color(0xFFB4232A), fontSize: 16, fontWeight: FontWeight.w700)),
+          const SizedBox(width: 8),
+        ]),
+      ];
     }
     if (r.armed) {
       return [
-        if (r.what.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(r.what, style: const TextStyle(color: Colors.white70, fontSize: 13)),
+        redBox([
+          if (r.what.isNotEmpty) ...[
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 200),
+              child: Text(r.what, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Color(0xFF7A2E45), fontSize: 13)),
+            ),
+            const SizedBox(width: 8),
+          ],
+          FilledButton.icon(
+            style: FilledButton.styleFrom(backgroundColor: LrColors.danger, foregroundColor: Colors.white, minimumSize: const Size(0, 40)),
+            onPressed: () => r.send({'a': 'go'}),
+            icon: const Icon(Icons.fiber_manual_record_rounded, size: 18),
+            label: Text(tr('panel.start'), style: const TextStyle(fontWeight: FontWeight.w800)),
           ),
-        FilledButton.icon(
-          style: FilledButton.styleFrom(backgroundColor: LrColors.danger, visualDensity: VisualDensity.compact),
-          onPressed: () => r.send({'a': 'go'}),
-          icon: const Icon(Icons.fiber_manual_record_rounded, size: 18),
-          label: Text(tr('panel.start')),
-        ),
-        const SizedBox(width: 6),
-        TextButton(onPressed: () => r.send({'a': 'cancel'}), child: Text(tr('common.cancel'))),
+          const SizedBox(width: 4),
+          TextButton(onPressed: () => r.send({'a': 'cancel'}), child: Text(tr('common.cancel'))),
+        ]),
       ];
     }
     if (!r.recording) return const [];
     return [
-      Icon(Icons.fiber_manual_record_rounded, size: 14, color: r.paused ? Colors.white54 : LrColors.danger),
-      const SizedBox(width: 4),
-      Text(_time(r.elapsedNow), style: const TextStyle(color: Colors.white, fontSize: 14, fontFeatures: [FontFeature.tabularFigures()])),
-      _tool(r.paused ? Icons.play_arrow_rounded : Icons.pause_rounded, tr(r.paused ? 'panel.resume' : 'panel.pause'), () => r.send({'a': 'pause'})),
-      _tool(Icons.stop_rounded, tr('panel.stop'), () => r.send({'a': 'stop'}), color: LrColors.danger),
-      _tool(Icons.brush_rounded, tr(r.pen ? 'screen.pen_off' : 'screen.pen_on'), () => r.send({'a': 'pen'}), color: r.pen ? LrColors.safelight : Colors.white),
+      redBox([
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: r.paused ? const Color(0xFF9AA5BA) : LrColors.danger,
+            boxShadow: [if (!r.paused) BoxShadow(color: LrColors.danger.withValues(alpha: 0.3), spreadRadius: 3)],
+          ),
+        ),
+        const SizedBox(width: 8),
+        SizedBox(
+          width: 62,
+          child: Text(_time(r.elapsedNow),
+              style: const TextStyle(color: Color(0xFFB4232A), fontSize: 17, fontWeight: FontWeight.w800, fontFeatures: [FontFeature.tabularFigures()])),
+        ),
+        Tooltip(
+          message: tr(r.paused ? 'panel.resume' : 'panel.pause'),
+          child: OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFFB4232A),
+              side: const BorderSide(color: Color(0xFFF3C7CA)),
+              backgroundColor: Colors.white,
+              minimumSize: const Size(40, 40),
+              padding: EdgeInsets.zero,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => r.send({'a': 'pause'}),
+            child: Icon(r.paused ? Icons.play_arrow_rounded : Icons.pause_rounded, size: 20),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Tooltip(
+          message: '${tr('panel.stop')}  (Ctrl+Shift+R)',
+          child: FilledButton.icon(
+            style: FilledButton.styleFrom(
+              backgroundColor: LrColors.danger,
+              foregroundColor: Colors.white,
+              minimumSize: const Size(0, 40),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
+            ),
+            onPressed: () => r.send({'a': 'stop'}),
+            icon: const Icon(Icons.stop_rounded, size: 20),
+            label: Text(tr('panel.stop'), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+          ),
+        ),
+      ]),
+      const SizedBox(width: 6),
+      _tool(Icons.brush_rounded, tr(r.pen ? 'screen.pen_off' : 'screen.pen_on'), () => r.send({'a': 'pen'}),
+          color: r.pen ? const Color(0xFF2F6BFF) : _ink),
     ];
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        backgroundColor: LrColors.ink,
+        backgroundColor: const Color(0xFFF3F6FC),
         body: Focus(
           autofocus: true,
           onKeyEvent: (_, e) {
@@ -704,9 +787,9 @@ class _PanelPageState extends State<_PanelPage> with WindowListener {
               // Recording: the pen's tools only while the pen is on.
               final tools = !rec || r.pen;
               final vertical = widget.place.vertical;
-              final top = Wrap(
+              final top = Flex(
                 direction: vertical ? Axis.vertical : Axis.horizontal,
-                crossAxisAlignment: WrapCrossAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   const BarGrip(),
                   ...strip,
@@ -715,12 +798,12 @@ class _PanelPageState extends State<_PanelPage> with WindowListener {
                     _tool(Icons.add_a_photo_outlined, tr('recs.pen_shot'), () => r.send({'a': 'shot'})),
                     ValueListenableBuilder<String?>(
                       valueListenable: r.toast,
-                      builder: (_, t, _) => t == null ? const SizedBox.shrink() : Text(t, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                      builder: (_, t, _) => t == null ? const SizedBox.shrink() : Text(t, style: const TextStyle(color: Color(0xFF6B7A99), fontSize: 12)),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(4),
                       child: FilledButton.icon(
-                        style: FilledButton.styleFrom(visualDensity: VisualDensity.compact),
+                        style: FilledButton.styleFrom(backgroundColor: LrColors.danger, minimumSize: const Size(0, 40)),
                         onPressed: () => r.send({'a': 'end'}),
                         icon: const Icon(Icons.close_rounded, size: 18),
                         label: Text(tr('pen.end')),
@@ -729,21 +812,39 @@ class _PanelPageState extends State<_PanelPage> with WindowListener {
                   ],
                 ],
               );
-              final body = Flex(
-                direction: vertical ? Axis.horizontal : Axis.vertical,
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  top,
-                  if (tools) PenToolbar(controls: r, vertical: vertical),
-                ],
+              // One bar: the recording part, then the pen's tools.
+              final body = Container(
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFFE3E8F2)),
+                ),
+                child: Flex(
+                  direction: vertical ? Axis.vertical : Axis.horizontal,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    top,
+                    if (tools) PenToolbar(controls: r, vertical: vertical, flat: true),
+                  ],
+                ),
               );
-              return LayoutBuilder(
-                builder: (context, c) => BarTips(
-                  child: Material(
-                    color: Colors.transparent,
-                    // Upright: the columns need a height to fill.
-                    child: vertical ? SizedBox(height: math.max(0, c.maxHeight - BarTips.line), child: body) : body,
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) _fit();
+              });
+              // Laid out at its own size whatever the window is; the window
+              // then takes that size.
+              return OverflowBox(
+                alignment: Alignment.topLeft,
+                minWidth: 0,
+                minHeight: 0,
+                maxWidth: double.infinity,
+                maxHeight: double.infinity,
+                child: Padding(
+                  padding: const EdgeInsets.all(5),
+                  child: KeyedSubtree(
+                    key: _body,
+                    child: BarTips(child: Material(color: Colors.transparent, child: body)),
                   ),
                 ),
               );
