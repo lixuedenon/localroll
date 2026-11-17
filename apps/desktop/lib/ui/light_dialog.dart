@@ -39,7 +39,8 @@ class LightDialog extends StatelessWidget {
             width: width,
             child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
               Container(
-                height: 112,
+                // At least this high; taller when the words need it.
+                constraints: const BoxConstraints(minHeight: 112),
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF2F7CF6), Color(0xFF1559D6)]),
                 ),
@@ -57,7 +58,7 @@ class LightDialog extends StatelessWidget {
                       ]),
                       if (subtitle != null) ...[
                         const SizedBox(height: 6),
-                        Text(subtitle!, maxLines: 2, style: TextStyle(color: Colors.white.withValues(alpha: 0.88), fontSize: 13.5)),
+                        Text(subtitle!, maxLines: 4, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.white.withValues(alpha: 0.88), fontSize: 13.5)),
                       ],
                     ]),
                   ),

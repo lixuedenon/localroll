@@ -15,6 +15,7 @@ import '../app_nav.dart';
 import '../convert_dialog.dart';
 import '../files_view.dart';
 import '../format.dart';
+import '../light_look.dart';
 import '../player/narration.dart';
 import '../player/player_entry.dart';
 import '../player/player_page.dart';
@@ -295,6 +296,7 @@ class RecordingsView extends StatefulWidget {
     this.onOpen,
     this.onRemake,
     this.footer,
+    this.light = false,
   });
 
   final AppServices services;
@@ -311,6 +313,9 @@ class RecordingsView extends StatefulWidget {
   /// More at the end (explanations not made into a video yet).
   final Widget? footer;
 
+  /// On a light page (Record screen): white cards, two to a row.
+  final bool light;
+
   @override
   State<RecordingsView> createState() => _RecordingsViewState();
 }
@@ -321,6 +326,24 @@ class _RecordingsViewState extends State<RecordingsView> {
   final Set<String> _picked = {};
 
   AppServices get s => widget.services;
+
+  // Colours for the dark (player) or light (Record screen) page.
+  bool get _l => widget.light;
+  Color get _text => _l ? LightLook.text : LrColors.text;
+  Color get _muted => _l ? LightLook.muted : LrColors.muted;
+  Color get _danger => _l ? LightLook.red : LrColors.danger;
+  Color get _accent => _l ? LightLook.blue : LrColors.safelight;
+  Color get _warn => _l ? LightLook.amberText : LrColors.safelight;
+  Color get _ok => _l ? LightLook.green : LrColors.verified;
+  Color get _raised => _l ? const Color(0xFFEFF3FA) : LrColors.raised;
+
+  /// The kind's tag colours (light page): text, background.
+  static (Color, Color) _kindColors(RecKind k) => switch (k) {
+        RecKind.screen => (const Color(0xFF2F6BFF), const Color(0xFFE6F0FF)),
+        RecKind.narration => (const Color(0xFF12A35F), const Color(0xFFE3F7EC)),
+        RecKind.clip => (const Color(0xFFC46A00), const Color(0xFFFFF2DC)),
+        RecKind.shot => (const Color(0xFF6A47E6), const Color(0xFFEEE9FF)),
+      };
 
   @override
   void didUpdateWidget(RecordingsView old) {
@@ -375,13 +398,16 @@ class _RecordingsViewState extends State<RecordingsView> {
       }
     })();
     final meta = [
-      tr('recs.kind_${r.kind.name}'),
+      if (!_l) tr('recs.kind_${r.kind.name}'),
       if (r.lengthMs > 0) _len(r.lengthMs),
       _when(r.createdMs),
       if (!widget.compact && st != null) formatBytes(st.size),
     ].join(' · ');
-    return Material(
-      color: on ? LrColors.safelight.withValues(alpha: 0.16) : (picked ? LrColors.raised : Colors.transparent),
+    final (kindFg, kindBg) = _kindColors(r.kind);
+    final row = Material(
+      color: on ? _accent.withValues(alpha: 0.16) : (picked ? _raised : Colors.transparent),
+      borderRadius: _l ? BorderRadius.circular(14) : null,
+      clipBehavior: _l ? Clip.antiAlias : Clip.none,
       child: InkWell(
         onTap: () {
           if (_picked.isNotEmpty) {
@@ -392,12 +418,12 @@ class _RecordingsViewState extends State<RecordingsView> {
         },
         onLongPress: widget.compact ? null : () => setState(() => _picked.add(r.id)),
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: widget.compact ? 10 : 6, vertical: 5),
+          padding: EdgeInsets.symmetric(horizontal: widget.compact ? 10 : 6, vertical: _l ? 8 : 5),
           child: Row(children: [
             if (!widget.compact)
               Checkbox(value: picked, onChanged: (v) => setState(() => v == true ? _picked.add(r.id) : _picked.remove(r.id))),
             ClipRRect(
-              borderRadius: BorderRadius.circular(5),
+              borderRadius: BorderRadius.circular(_l ? 10 : 5),
               child: SizedBox(
                 width: w,
                 height: w * 9 / 16,
@@ -409,7 +435,7 @@ class _RecordingsViewState extends State<RecordingsView> {
                     modified: st?.modified ?? DateTime.fromMillisecondsSinceEpoch(r.createdMs),
                     services: s,
                     box: w,
-                    icon: Container(color: LrColors.raised, alignment: Alignment.center, child: Icon(kindIcon(r.kind), color: LrColors.muted, size: 18)),
+                    icon: Container(color: _raised, alignment: Alignment.center, child: Icon(kindIcon(r.kind), color: _muted, size: 18)),
                   ),
                   Positioned(right: 3, bottom: 3, child: Icon(kindIcon(r.kind), size: 14, color: Colors.white70)),
                 ]),
@@ -421,14 +447,26 @@ class _RecordingsViewState extends State<RecordingsView> {
                 Text(r.name,
                     maxLines: widget.compact ? 2 : 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 13, color: on ? LrColors.safelight : LrColors.text, fontWeight: on ? FontWeight.w600 : FontWeight.w400)),
-                const SizedBox(height: 2),
-                Text(meta, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11.5, color: LrColors.muted)),
+                    style: TextStyle(
+                        fontSize: _l ? 14 : 13,
+                        color: on ? _accent : _text,
+                        fontWeight: on || _l ? FontWeight.w600 : FontWeight.w400)),
+                SizedBox(height: _l ? 4 : 2),
+                Row(children: [
+                  if (_l)
+                    Container(
+                      margin: const EdgeInsets.only(right: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1),
+                      decoration: BoxDecoration(color: kindBg, borderRadius: BorderRadius.circular(8)),
+                      child: Text(tr('recs.kind_${r.kind.name}'), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: kindFg)),
+                    ),
+                  Expanded(child: Text(meta, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: _l ? 12 : 11.5, color: _muted))),
+                ]),
                 if (r.sentTo.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 2),
                     child: Text(tr('recs.sent_to', {'names': r.sentTo.join(', ')}),
-                        maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11.5, color: LrColors.verified)),
+                        maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.5, color: _ok)),
                   ),
               ]),
             ),
@@ -453,7 +491,7 @@ class _RecordingsViewState extends State<RecordingsView> {
                   PopupMenuItem(value: 'edit', child: Text(tr('sedit.menu'))),
                 ],
                 if (r.kind == RecKind.narration && r.narrationId != null) PopupMenuItem(value: 'edit', child: Text(tr('nedit.menu'))),
-                PopupMenuItem(value: 'delete', child: Text(tr('lib.delete'), style: const TextStyle(color: LrColors.danger))),
+                PopupMenuItem(value: 'delete', child: Text(tr('lib.delete'), style: TextStyle(color: _danger))),
                 const PopupMenuDivider(),
                 PopupMenuItem(value: 'reveal', child: Text(tr('common.show_in_folder'))),
               ],
@@ -461,6 +499,16 @@ class _RecordingsViewState extends State<RecordingsView> {
           ]),
         ),
       ),
+    );
+    if (!_l) return row;
+    // A small card.
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFFFBFCFF),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: on ? _accent : const Color(0xFFEEF2F9)),
+      ),
+      child: row,
     );
   }
 
@@ -478,16 +526,35 @@ class _RecordingsViewState extends State<RecordingsView> {
           final rows = <Widget>[];
           for (final g in groups.entries) {
             rows.add(Padding(
-              padding: EdgeInsets.fromLTRB(widget.compact ? 12 : 8, 12, 12, 4),
+              padding: EdgeInsets.fromLTRB(widget.compact ? 12 : (_l ? 2 : 8), _l ? 16 : 12, 12, _l ? 8 : 4),
               child: Row(children: [
-                Expanded(
-                  child: Text(g.key, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                Flexible(
+                  child: Text(g.key,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: _l ? LightLook.muted : null)),
                 ),
-                Text(tr('recs.n', {'n': g.value.length}), style: const TextStyle(color: LrColors.muted, fontSize: 12)),
+                const SizedBox(width: 8),
+                Text(tr('recs.n', {'n': g.value.length}), style: TextStyle(color: _muted, fontSize: 12)),
+                if (_l) ...[
+                  const SizedBox(width: 10),
+                  const Expanded(child: Divider(height: 1, color: Color(0xFFEEF2F9))),
+                ] else
+                  const Spacer(),
               ]),
             ));
-            for (final r in g.value) {
-              rows.add(_row(shown, r));
+            if (_l && !widget.compact) {
+              // Two to a row.
+              rows.add(LayoutBuilder(builder: (context, box) {
+                final w = box.maxWidth >= 760 ? (box.maxWidth - 10) / 2 : box.maxWidth;
+                return Wrap(spacing: 10, runSpacing: 10, children: [
+                  for (final r in g.value) SizedBox(width: w, child: _row(shown, r)),
+                ]);
+              }));
+            } else {
+              for (final r in g.value) {
+                rows.add(_row(shown, r));
+              }
             }
           }
           final pad = EdgeInsets.symmetric(horizontal: widget.compact ? 10 : 0);
@@ -550,7 +617,7 @@ class _RecordingsViewState extends State<RecordingsView> {
                 padding: const EdgeInsets.only(top: 8),
                 child: Row(children: [
                   Expanded(
-                    child: Text(tr('recs.outside', {'n': s.recordings.outside.length}), style: const TextStyle(color: LrColors.safelight, fontSize: 12.5)),
+                    child: Text(tr('recs.outside', {'n': s.recordings.outside.length}), style: TextStyle(color: _warn, fontSize: 12.5)),
                   ),
                   OutlinedButton(onPressed: () => unawaited(s.recordings.moveIntoLibrary()), child: Text(tr('recs.move_in'))),
                 ]),
@@ -558,12 +625,12 @@ class _RecordingsViewState extends State<RecordingsView> {
             if (!s.recordings.inLibrary)
               Padding(
                 padding: EdgeInsets.fromLTRB(widget.compact ? 12 : 0, 8, 12, 0),
-                child: Text(tr('recs.offline', {'folder': s.recordings.root}), style: const TextStyle(color: LrColors.safelight, fontSize: 12)),
+                child: Text(tr('recs.offline', {'folder': s.recordings.root}), style: TextStyle(color: _warn, fontSize: 12)),
               ),
           ];
           final empty = Padding(
             padding: const EdgeInsets.all(16),
-            child: Text(tr(s.recordings.items.isEmpty ? 'recs.empty' : 'ink.no_hits'), style: const TextStyle(color: LrColors.muted, height: 1.5)),
+            child: Text(tr(s.recordings.items.isEmpty ? 'recs.empty' : 'ink.no_hits'), style: TextStyle(color: _muted, height: 1.5)),
           );
           if (widget.compact) {
             return Material(

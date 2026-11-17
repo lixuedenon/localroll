@@ -765,8 +765,18 @@ class _LibraryPageState extends State<LibraryPage> {
                         clipBehavior: Clip.antiAlias,
                         child: Column(mainAxisSize: MainAxisSize.min, children: [
                           bar,
-                          if (!wide && !_selecting)
-                            Padding(padding: const EdgeInsets.fromLTRB(12, 0, 12, 10), child: filterRow),
+                          // Choosing: the row's room kept (empty), so the photos don't jump.
+                          if (!wide)
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+                              child: Visibility(
+                                visible: !_selecting,
+                                maintainSize: true,
+                                maintainAnimation: true,
+                                maintainState: true,
+                                child: filterRow,
+                              ),
+                            ),
                         ]),
                       ),
                     ),
