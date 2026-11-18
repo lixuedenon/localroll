@@ -7,7 +7,9 @@ import 'package:localroll_core/localroll_core.dart';
 
 import '../app_services.dart';
 import '../l10n/l10n.dart';
+import '../services/admin_start.dart';
 import '../services/autostart.dart';
+import '../services/elevation.dart';
 import '../services/network.dart';
 import 'app_nav.dart';
 import 'feature_list.dart';
@@ -83,6 +85,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     const Divider(height: 1),
                     const _AutoStartSwitch(),
+                    const Divider(height: 1),
+                    const _AdminStartSwitch(),
                     const Divider(height: 1),
                     _row(
                       Icons.lightbulb_outline_rounded,
@@ -343,6 +347,54 @@ class _SettingsPageState extends State<SettingsPage> {
         title: Text(title),
         subtitle: sub == null ? null : Text(sub),
         trailing: trailing,
+      );
+}
+
+/// "Always open as administrator" (a scheduled task; Windows asks once).
+class _AdminStartSwitch extends StatefulWidget {
+  const _AdminStartSwitch();
+
+  @override
+  State<_AdminStartSwitch> createState() => _AdminStartSwitchState();
+}
+
+class _AdminStartSwitchState extends State<_AdminStartSwitch> {
+  bool? _on;
+  bool _busy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    AdminStart.isOn().then((v) {
+      if (mounted) setState(() => _on = v);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => SwitchListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+        secondary: _busy
+            ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2))
+            : const Icon(Icons.admin_panel_settings_rounded),
+        value: _on ?? false,
+        onChanged: _on == null || _busy
+            ? null
+            : (v) async {
+                setState(() => _busy = true);
+                final ok = await AdminStart.set(v);
+                if (!mounted) return;
+                setState(() {
+                  _busy = false;
+                  if (ok) _on = v;
+                });
+                if (!ok) {
+                  ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('settings.admin_failed'))));
+                } else if (v != Elevation.isAdmin) {
+                  ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('settings.admin_next'))));
+                }
+              },
+        title: Text(tr('settings.admin_start')),
+        subtitle: Text(tr('settings.admin_start_hint')),
       );
 }
 

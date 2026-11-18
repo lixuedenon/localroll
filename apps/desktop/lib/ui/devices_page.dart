@@ -23,6 +23,8 @@ import 'send_page.dart';
 import 'text_window.dart';
 import 'guest_page.dart';
 import 'library_picker.dart';
+import '../services/hotspot.dart';
+import 'hotspot_card.dart';
 import 'net_check.dart';
 import 'send_paths.dart';
 import 'transfer_records.dart';
@@ -203,6 +205,16 @@ class _DevicesPageState extends State<DevicesPage> {
                     _glassButton(Icons.health_and_safety_outlined, tr('net.title'), () => unawaited(showNetCheck(context, s))),
                     const SizedBox(width: 10),
                     _glassButton(Icons.qr_code_2_rounded, tr('guest.button'), () => unawaited(showGuestTransfer(context, s))),
+                    const SizedBox(width: 10),
+                    // This PC's hotspot (for a Wi-Fi that keeps devices apart).
+                    ListenableBuilder(
+                      listenable: Hotspot.instance,
+                      builder: (context, _) => _glassButton(
+                        Icons.wifi_tethering_rounded,
+                        Hotspot.instance.on ? tr('hot.button_on', {'n': Hotspot.instance.clients}) : tr('hot.button'),
+                        () => unawaited(showHotspot(context)),
+                      ),
+                    ),
                     const SizedBox(width: 12),
                     _addButton(() => showAddDevice(context, s)),
                   ]),

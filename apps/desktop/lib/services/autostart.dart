@@ -25,10 +25,15 @@ class AutoStart {
   static Future<bool> setEnabled(bool on) async {
     if (!Platform.isWindows) return false;
     try {
+      // Always as administrator: through its scheduled task (no prompt).
+      final viaTask = (await Process.run('schtasks', ['/query', '/tn', 'Keepnear (startup)'])).exitCode == 0;
+      final run = viaTask
+          ? '"${Platform.environment['SystemRoot'] ?? r'C:\Windows'}\\System32\\schtasks.exe" /run /tn "Keepnear (startup)"'
+          : '"${Platform.resolvedExecutable}" $minimizedFlag';
       final r = on
           ? await Process.run('reg', [
               'add', _key, '/v', _name, '/t', 'REG_SZ',
-              '/d', '"${Platform.resolvedExecutable}" $minimizedFlag', '/f',
+              '/d', run, '/f',
             ])
           : await Process.run('reg', ['delete', _key, '/v', _name, '/f']);
       return r.exitCode == 0;

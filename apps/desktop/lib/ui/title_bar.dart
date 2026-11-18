@@ -7,6 +7,7 @@ import 'package:window_manager/window_manager.dart';
 
 import '../app_services.dart';
 import '../l10n/l10n.dart';
+import '../services/hotspot.dart';
 import '../services/receive_hub.dart';
 import '../services/run_flag.dart';
 import '../services/bg_tasks.dart';
@@ -281,6 +282,8 @@ Future<void> _quit(AppServices services) async {
   try {
     await windowManager.hide();
   } catch (_) {}
+  // The hotspot was Keepnear's doing: off with it.
+  if (Hotspot.instance.on) await Hotspot.instance.stop().timeout(const Duration(seconds: 5), onTimeout: () => false);
   await services.shutdown();
   RunFlag.clear();
   try {

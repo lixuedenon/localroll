@@ -9,6 +9,8 @@ import 'package:flutter/services.dart';
 import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/network.dart';
+import '../services/hotspot.dart';
+import 'hotspot_card.dart';
 import 'light_dialog.dart';
 import 'light_look.dart';
 import 'lr_dialog.dart';
@@ -82,6 +84,7 @@ class _NetCheckState extends State<_NetCheck> {
           }, fixLabel: tr('net.fix')));
     // 4. Every paired device: reachable? same network? how fast to answer?
     final ids = {...s.settings.peers.keys, ...s.settings.trusted.keys};
+    var upSame = 0, downSame = 0;
     for (final id in ids) {
       final name = s.deviceName(id);
       String? host;
@@ -101,6 +104,7 @@ class _NetCheckState extends State<_NetCheck> {
       }
       final same = mine.any((m) => _subnet(m) == _subnet(host!));
       final ms = await _ping(host, port);
+      if (same) ms == null ? downSame++ : upSame++;
       if (ms == null) {
         items.add(_Item(_Level.bad, tr('net.dev_down', {'name': name}),
             same ? tr('net.dev_down_sub', {'ip': host}) : tr('net.other_subnet', {'ip': host})));
@@ -108,6 +112,15 @@ class _NetCheckState extends State<_NetCheck> {
         items.add(_Item(same ? _Level.ok : _Level.warn, tr('net.dev_ok', {'name': name}),
             [host, tr('net.ms', {'ms': ms}), if (!same) tr('net.routed')].join(' · ')));
       }
+    }
+    // 4b. On Wi-Fi, devices on the same network all unreachable, the router
+    // answering: likely a Wi-Fi that keeps devices apart. This PC's hotspot
+    // gets round it.
+    final h = Hotspot.instance;
+    if (h.on) {
+      items.add(_Item(_Level.ok, tr('hot.on_title'), tr('hot.on_sub', {'n': h.clients}), fix: () => showHotspot(context), fixLabel: tr('hot.show')));
+    } else if (wifi != null && downSame > 0 && upSame == 0 && await _routerAnswers()) {
+      items.add(_Item(_Level.bad, tr('net.isolated'), tr('net.isolated_sub'), fix: () => showHotspot(context), fixLabel: tr('hot.open')));
     }
     // 5. The guest page's port (short address).
     if (s.guest.running) {
@@ -134,6 +147,22 @@ class _NetCheckState extends State<_NetCheck> {
       return w.elapsedMilliseconds;
     } catch (_) {
       return null;
+    }
+  }
+
+  /// The default gateway answers a ping (the network itself works).
+  static Future<bool> _routerAnswers() async {
+    if (!Platform.isWindows) return false;
+    try {
+      final r = await Process.run('powershell', [
+        '-NoProfile',
+        '-NonInteractive',
+        '-Command',
+        r"$g = (Get-NetRoute -DestinationPrefix '0.0.0.0/0' -ErrorAction SilentlyContinue | Sort-Object RouteMetric | Select-Object -First 1).NextHop; if ($g) { Test-Connection -Count 1 -Quiet $g }",
+      ]);
+      return '${r.stdout}'.trim().toLowerCase() == 'true';
+    } catch (_) {
+      return false;
     }
   }
 

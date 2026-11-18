@@ -72,9 +72,21 @@ Move-Item $tmp $InstallDir
 # at a copy somewhere else).
 $exe = Join-Path $InstallDir 'LocalRoll.exe'
 $lnk = Join-Path ([Environment]::GetFolderPath('Desktop')) 'LocalRoll.lnk'
+# "Always open as administrator" switched on in Keepnear: the shortcut runs
+# its scheduled task (administrator, no Windows prompt).
+$task = $null
+try { $task = Get-ScheduledTask -TaskName 'Keepnear' -ErrorAction Stop } catch {}
 $s = (New-Object -ComObject WScript.Shell).CreateShortcut($lnk)
-$s.TargetPath = $exe
+if ($task) {
+  $s.TargetPath = Join-Path $env:SystemRoot 'System32\schtasks.exe'
+  $s.Arguments = '/run /tn "Keepnear"'
+  $s.WindowStyle = 7
+} else {
+  $s.TargetPath = $exe
+  $s.Arguments = ''
+}
 $s.WorkingDirectory = $InstallDir
+$s.IconLocation = "$exe,0"
 $s.Save()
 
 Write-Host ''
@@ -85,7 +97,10 @@ foreach ($d in ($others | Select-Object -Unique)) {
   Write-Host "NOTE: an old copy was running from $d" -ForegroundColor Yellow
   Write-Host '      It is not updated by this script. You can delete that folder.' -ForegroundColor Yellow
 }
-# Started the way this shell runs: from an administrator shell, Keepnear
-# runs as administrator too (no Windows prompts later; files can still be
-# dragged in).
-Start-Process $exe
+# Through the task when there is one (administrator, from any shell);
+# otherwise the way this shell runs.
+if ($task) {
+  schtasks /run /tn 'Keepnear' | Out-Null
+} else {
+  Start-Process $exe
+}

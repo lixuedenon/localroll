@@ -165,6 +165,12 @@ class _EditorState extends State<_Editor> {
   }
 
   Set<String> get _deleted => {for (final e in _edits) if (e is _DeleteInk) ...e.ids};
+
+  /// The marks begun inside [sel] and not yet deleted.
+  Set<String> _inksIn((int, int) sel) => {
+        for (final i in inks)
+          if (i.startT >= sel.$1 && i.startT < sel.$2 && !_deleted.contains(i.ink.id)) i.ink.id,
+      };
   List<(int, int)> get _mutes => [for (final e in _edits) if (e is _Mute) (e.a, e.b)];
   List<(int, int)> get _cuts => [for (final e in _edits) if (e is _Cut) (e.a, e.b)];
   List<_Redub> get _redubs => [for (final e in _edits) if (e is _Redub) e];
@@ -733,6 +739,18 @@ class _EditorState extends State<_Editor> {
                 const SizedBox(width: 8),
                 OutlinedButton.icon(onPressed: _cutSelection, icon: const Icon(Icons.content_cut_rounded, size: 18), label: Text(tr('nedit.cut'))),
                 const SizedBox(width: 8),
+                // The marks drawn in this stretch go (picture and voice stay).
+                if (_inksIn(sel).isNotEmpty) ...[
+                  OutlinedButton.icon(
+                    onPressed: () => setState(() {
+                      _edits.add(_DeleteInk(_inksIn(sel)));
+                      _sel = null;
+                    }),
+                    icon: const Icon(Icons.layers_clear_rounded, size: 18),
+                    label: Text(tr('nedit.clear_marks', {'n': _inksIn(sel).length})),
+                  ),
+                  const SizedBox(width: 8),
+                ],
                 FilledButton.icon(onPressed: _redub, icon: const Icon(Icons.mic_rounded, size: 18), label: Text(tr('nedit.redub'))),
                 const SizedBox(width: 8),
                 TextButton(onPressed: () => setState(() => _sel = null), child: Text(tr('common.cancel'))),
