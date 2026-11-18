@@ -1545,6 +1545,10 @@ void command(const std::string& line) {
   const std::string arg = sp == std::string::npos ? "" : line.substr(sp + 1);
   if (cmd == "quit") {
     PostQuitMessage(0);
+  } else if (cmd == "ping") {
+    // Keepnear checks this helper still answers (else it closes it, so the
+    // mouse is never left caught by a screen-wide window).
+    emit("pong");
   } else if (cmd == "own") {
     g_own = reinterpret_cast<HWND>(static_cast<INT_PTR>(std::strtoll(arg.c_str(), nullptr, 10)));
     HWND fg = GetForegroundWindow();

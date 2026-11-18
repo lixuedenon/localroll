@@ -314,7 +314,7 @@ class FfmpegService extends ChangeNotifier {
     final outPath = _fileCache(path, size, modifiedMs, '_at$ms');
     await Directory(fileCacheDir).create(recursive: true);
     return _cachedAt(outPath, path, true,
-        (src, out) => ['-ss', (ms / 1000).toStringAsFixed(3), '-i', src, '-frames:v', '1', '-vf', 'scale=320:-2', '-q:v', '4', out]);
+        (src, out) => ['-ss', (ms / 1000).toStringAsFixed(3), '-i', src, '-frames:v', '1', '-vf', 'scale=320:-2,format=yuvj420p', '-q:v', '4', out]);
   }
 
   /// Runs ffmpeg with [args] (at most two at once); true when it worked.

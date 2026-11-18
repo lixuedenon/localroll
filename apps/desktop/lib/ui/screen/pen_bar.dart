@@ -500,6 +500,9 @@ class PenSession {
     panel.onGone = () {
       if (active && floating) unawaited(stop());
     };
+    o.onEnded = () {
+      if (active && floating) unawaited(stop());
+    };
     if (!await panel.start('pen')) {
       await o.stop();
       return false;
@@ -514,6 +517,7 @@ class PenSession {
   Future<void> stop() async {
     if (!active) return;
     active = false;
+    DiagLog.log('pen', 'drawing ended');
     if (floating) {
       floating = false;
       await FloatPanel.instance.stop();

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -82,6 +83,19 @@ class FloatPanel {
               return;
             }
             _sock = sock;
+            _beat = DateTime.now();
+            // The panel says it is alive every second; silent for a while
+            // (stuck): closed, and the mouse given back to the computer.
+            _watch?.cancel();
+            _watch = Timer.periodic(const Duration(seconds: 2), (_) {
+              final quiet = DateTime.now().difference(_beat);
+              if (_p != null && quiet > const Duration(seconds: 8)) {
+                DiagLog.log('pen', 'panel not answering for ${quiet.inSeconds} s: closed');
+                PenOverlay.instance.setDraw(false);
+                _p?.kill();
+                _gone();
+              }
+            });
             _push();
             return;
           }
@@ -117,7 +131,12 @@ class FloatPanel {
     }
   }
 
+  Timer? _watch;
+  DateTime _beat = DateTime.now();
+
   Future<void> stop() async {
+    _watch?.cancel();
+    _watch = null;
     PenOverlay.instance.removeListener(_push);
     ScreenRecorder.instance.removeListener(_push);
     final p = _p, sock = _sock;
@@ -207,7 +226,12 @@ class FloatPanel {
     final r = ScreenRecorder.instance;
     final s = PenSession.instance.services;
     final v = m['v'];
+    _beat = DateTime.now();
     switch (m['a']) {
+      case 'beat':
+        break;
+      case 'log':
+        DiagLog.log('pen', 'panel: $v');
       case 'hwnd':
         hwnd = (v as num?)?.toInt() ?? 0;
         if (hwnd != 0) o.own(hwnd);
@@ -319,6 +343,16 @@ Future<void> runPenPanel(List<String> args) async {
   }
   sock.writeln('hello $key');
   final remote = RemotePen(sock);
+  // Alive, every second (Keepnear closes a panel that goes quiet); errors
+  // go to Keepnear's log.
+  Timer.periodic(const Duration(seconds: 1), (_) => remote.send({'a': 'beat'}));
+  FlutterError.onError = (d) {
+    remote.send({'a': 'log', 'v': '${d.exceptionAsString()} | ${d.stack.toString().split('\n').take(6).join(' | ')}'});
+  };
+  PlatformDispatcher.instance.onError = (e, st) {
+    remote.send({'a': 'log', 'v': '$e | ${st.toString().split('\n').take(6).join(' | ')}'});
+    return true;
+  };
   Offset? at;
   final a = arg('at')?.split(',');
   if (a != null && a.length == 2) {

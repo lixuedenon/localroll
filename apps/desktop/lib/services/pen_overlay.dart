@@ -65,8 +65,11 @@ class PenOverlay extends ChangeNotifier implements PenControls {
     try {
       final p = _p = await Process.start(exe, const []);
       final ready = _ready = Completer<bool>();
+      _pong = DateTime.now();
       p.stdout.transform(const Utf8Decoder(allowMalformed: true)).transform(const LineSplitter()).listen(_line);
-      p.stderr.transform(const Utf8Decoder(allowMalformed: true)).listen((e) => DiagLog.log('pen', e.trim()));
+      p.stderr.transform(const Utf8Decoder(allowMalformed: true)).transform(const LineSplitter()).listen((e) {
+        if (e.trim().isNotEmpty) DiagLog.log('pen', e.trim());
+      });
       unawaited(p.exitCode.then((code) {
         if (identical(_p, p)) {
           _p = null;
@@ -74,7 +77,10 @@ class PenOverlay extends ChangeNotifier implements PenControls {
           textAt = null;
           if (!ready.isCompleted) ready.complete(false);
           if (code != 0) DiagLog.log('pen', 'helper ended ($code)');
+          _alive?.cancel();
+          _alive = null;
           notifyListeners();
+          onEnded?.call();
         }
       }));
       final ok = await ready.future.timeout(const Duration(seconds: 6), onTimeout: () => false);
@@ -92,6 +98,20 @@ class PenOverlay extends ChangeNotifier implements PenControls {
       _send('pendraw ${penDraws ? 1 : 0}');
       _send('togglekey $toggleKey');
       _send('pages ${perWindow ? 'window' : 'screen'}');
+      // Still answering? A helper that stops would keep the mouse caught
+      // under its screen-wide window: closed after a few seconds of silence.
+      _alive?.cancel();
+      _alive = Timer.periodic(const Duration(seconds: 2), (_) {
+        final q = _p;
+        if (q == null) return;
+        final quiet = DateTime.now().difference(_pong);
+        if (quiet > const Duration(seconds: 8)) {
+          DiagLog.log('pen', 'helper not answering for ${quiet.inSeconds} s: closed');
+          q.kill();
+          return;
+        }
+        _send('ping');
+      });
       board = 0;
       highlight = false;
       stampsSent.clear();
@@ -104,6 +124,8 @@ class PenOverlay extends ChangeNotifier implements PenControls {
   }
 
   Future<void> stop() async {
+    _alive?.cancel();
+    _alive = null;
     final p = _p;
     _p = null;
     draw = false;
@@ -122,8 +144,15 @@ class PenOverlay extends ChangeNotifier implements PenControls {
     notifyListeners();
   }
 
+  Timer? _alive;
+  DateTime _pong = DateTime.now();
+
+  /// The helper went away (quit, crashed, or closed for not answering).
+  void Function()? onEnded;
+
   void _line(String line) {
     final parts = line.trim().split(' ');
+    _pong = DateTime.now();
     switch (parts.first) {
       case 'ready':
         DiagLog.log('pen', line.trim());
