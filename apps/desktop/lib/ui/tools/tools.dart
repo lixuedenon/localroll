@@ -26,6 +26,8 @@ import '../screen/screen_record.dart' show snipBarGo, snipScreen;
 import '../send_paths.dart';
 import '../send_page.dart' show baseNameOf;
 import 'convert_page.dart';
+import 'doc_pages.dart';
+import 'print_page.dart';
 import 'image_tool_page.dart';
 import 'pdf_tool_page.dart';
 import 'qr_tool.dart';
@@ -354,6 +356,7 @@ Future<void> showToolResult(BuildContext context, AppServices s, List<String> ou
   await s.tools.saved(outs);
   if (!context.mounted) return;
   final where = savedWhere(s, outs.first);
+  final printable = [for (final o in outs) if (DocPages.handles(o)) o];
   return showLrDialog<void>(
       context: context,
       builder: (c) => LightDialog(
@@ -370,6 +373,16 @@ Future<void> showToolResult(BuildContext context, AppServices s, List<String> ou
             icon: const Icon(Icons.qr_code_2_rounded, size: 18),
             label: Text(tr('tool.to_guest')),
           ),
+          // Print preview of what was made (PDF, photos, Office files).
+          if (printable.isNotEmpty)
+            OutlinedButton.icon(
+              onPressed: () {
+                Navigator.pop(c);
+                unawaited(openPrint(context, s, printable));
+              },
+              icon: const Icon(Icons.print_rounded, size: 18),
+              label: Text(tr('print.menu')),
+            ),
           FilledButton.icon(
             onPressed: () async {
               Navigator.pop(c);

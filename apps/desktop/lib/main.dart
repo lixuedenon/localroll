@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter/foundation.dart' show LicenseEntryWithLineBreaks, LicenseRegistry;
+import 'package:flutter/gestures.dart' show kBackMouseButton;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:localroll_core/localroll_core.dart';
@@ -276,7 +277,16 @@ class LocalRollApp extends StatelessWidget {
                   ),
                   Expanded(
                     child: Stack(fit: StackFit.expand, children: [
-                      Positioned.fill(child: PlayerDropTarget(services: services, child: child!)),
+                      // The mouse's back button: the same as Back.
+                      Positioned.fill(
+                        child: Listener(
+                          behavior: HitTestBehavior.translucent,
+                          onPointerDown: (e) {
+                            if (e.buttons & kBackMouseButton != 0) AppNav.instance.back();
+                          },
+                          child: PlayerDropTarget(services: services, child: child!),
+                        ),
+                      ),
                       // Sending / receiving: how far, on top of any page.
                       TransferFloat(services: services),
                       // A long job just started (making a video, a PDF…): its card,

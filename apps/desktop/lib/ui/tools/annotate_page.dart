@@ -21,10 +21,16 @@ import 'tools.dart';
 /// tools; a number can say something (shown on the pointer, and as a PDF
 /// note in the PDF saved). Saved as a new file next to the others.
 class AnnotatePage extends StatefulWidget {
-  const AnnotatePage({super.key, required this.services, required this.path});
+  const AnnotatePage({super.key, required this.services, required this.path, this.page = 0, this.onSaved});
 
   final AppServices services;
   final String path;
+
+  /// The page shown first (0-based).
+  final int page;
+
+  /// Told the new file once saved (the PDF tool then uses it).
+  final ValueChanged<String>? onSaved;
 
   @override
   State<AnnotatePage> createState() => _AnnotatePageState();
@@ -44,7 +50,12 @@ class _AnnotatePageState extends State<AnnotatePage> {
     super.initState();
     DiagLog.log('tools', 'annotate open');
     unawaited(DocPages.open(s, widget.path, why: (w) => _why = w).then((d) {
-      if (mounted) setState(() => _doc = d);
+      if (mounted) {
+        setState(() {
+          _doc = d;
+          if (d != null) _at = widget.page.clamp(0, d.count - 1);
+        });
+      }
       if (d == null && mounted) setState(() => _why ??= 'kind');
     }));
   }
@@ -141,6 +152,7 @@ class _AnnotatePageState extends State<AnnotatePage> {
       for (final e in _eds.values) {
         e.clear();
       }
+      widget.onSaved?.call(out);
       await showToolResult(context, s, [out]);
     } catch (e) {
       DiagLog.log('tools', 'annotate save failed: $e');
@@ -244,5 +256,5 @@ class _AnnotatePageState extends State<AnnotatePage> {
 }
 
 /// Opens the marking page for [path].
-Future<void> openAnnotate(BuildContext context, AppServices s, String path) =>
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => AnnotatePage(services: s, path: path)));
+Future<void> openAnnotate(BuildContext context, AppServices s, String path, {int page = 0, ValueChanged<String>? onSaved}) =>
+    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => AnnotatePage(services: s, path: path, page: page, onSaved: onSaved)));

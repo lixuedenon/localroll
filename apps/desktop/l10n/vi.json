@@ -2209,9 +2209,7 @@
   "pen.hung_reopen": "Mở lại thanh công cụ",
   "pen.hung_end": "Tắt bút",
   "sig.mine": "Chữ ký của tôi",
-  "sig.mine_sub": "Bấm để dùng, viết mới hoặc lấy từ ảnh",
   "sig.add_draw": "Viết mới",
-  "sig.add_photo": "Từ ảnh",
   "sig.none": "Chưa có chữ ký nào được lưu.",
   "sig.cut_sub": "Kéo các góc bên trái để cắt; bên phải là kết quả (ô caro = trong suốt)",
   "sig.save": "Lưu vào chữ ký của tôi",
@@ -2268,5 +2266,13 @@
   "print.save_pdf": "Lưu thành PDF",
   "print.sent": "Đã gửi tới máy in ({n} trang)",
   "print.bad_range": "Số trang không đúng, vd. 1-3, 5",
-  "print.suffix": "in"
+  "print.suffix": "in",
+  "pdf.which_file": "Làm trong tệp nào?",
+  "pdf.n_pages": "{count} trang",
+  "pdf.text_all": "Chữ của cả trang",
+  "app.to_main": "Màn hình chính",
+  "sig.add_file": "Từ tệp",
+  "sig.pick_page": "Chọn trang có chữ ký",
+  "sig.pick_page_sub": "Bấm trang có chữ ký; sau đó khoanh chữ ký và bỏ nền.",
+  "sig.mine_sub": "Bấm để dùng, viết chữ ký mới, hoặc lấy từ tệp (ảnh hoặc PDF)"
 }

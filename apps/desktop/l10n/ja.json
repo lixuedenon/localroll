@@ -2209,9 +2209,7 @@
   "pen.hung_reopen": "ツールバーを開き直す",
   "pen.hung_end": "ペンを終了",
   "sig.mine": "マイ署名",
-  "sig.mine_sub": "クリックで使用。新しく書くか、写真から取り込むこともできます",
   "sig.add_draw": "手書きで追加",
-  "sig.add_photo": "写真から",
   "sig.none": "保存した署名はまだありません。",
   "sig.cut_sub": "左で四隅をドラッグして切り抜き。右が結果（市松模様は透明）",
   "sig.save": "マイ署名に保存",
@@ -2268,5 +2266,13 @@
   "print.save_pdf": "PDF で保存",
   "print.sent": "プリンターに送りました（{n} ページ）",
   "print.bad_range": "ページ指定が正しくありません（例 1-3, 5）",
-  "print.suffix": "印刷"
+  "print.suffix": "印刷",
+  "pdf.which_file": "どのファイルで行いますか？",
+  "pdf.n_pages": "{count} ページ",
+  "pdf.text_all": "ページ全体の文字",
+  "app.to_main": "メイン画面",
+  "sig.add_file": "ファイルから",
+  "sig.pick_page": "署名のあるページを選択",
+  "sig.pick_page_sub": "署名のあるページをクリック。次に署名を囲み、背景を消します。",
+  "sig.mine_sub": "クリックで使用。新しく書くか、ファイル（写真または PDF）から取り込めます"
 }

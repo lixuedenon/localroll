@@ -2209,9 +2209,7 @@
   "pen.hung_reopen": "Araç çubuğunu yeniden aç",
   "pen.hung_end": "Kalemi kapat",
   "sig.mine": "İmzalarım",
-  "sig.mine_sub": "Kullanmak için tıklayın, yeni yazın ya da fotoğraftan alın",
   "sig.add_draw": "Yeni yaz",
-  "sig.add_photo": "Fotoğraftan",
   "sig.none": "Henüz kayıtlı imza yok.",
   "sig.cut_sub": "Kırpmak için soldaki köşeleri sürükleyin; sağda sonuç (dama = saydam)",
   "sig.save": "İmzalarıma kaydet",
@@ -2268,5 +2266,13 @@
   "print.save_pdf": "PDF olarak kaydet",
   "print.sent": "Yazıcıya gönderildi ({n} sayfa)",
   "print.bad_range": "Sayfa geçersiz, ör. 1-3, 5",
-  "print.suffix": "baskı"
+  "print.suffix": "baskı",
+  "pdf.which_file": "Hangi dosyada?",
+  "pdf.n_pages": "{count} sayfa",
+  "pdf.text_all": "Tüm sayfaların metni",
+  "app.to_main": "Ana ekran",
+  "sig.add_file": "Dosyadan",
+  "sig.pick_page": "İmzanın olduğu sayfayı seçin",
+  "sig.pick_page_sub": "İmzanın olduğu sayfaya tıklayın; sonra çerçeveleyip arka planı kaldırın.",
+  "sig.mine_sub": "Kullanmak için tıklayın, yenisini yazın ya da dosyadan (fotoğraf veya PDF) alın"
 }

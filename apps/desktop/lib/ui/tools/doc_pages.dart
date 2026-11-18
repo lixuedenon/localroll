@@ -91,6 +91,9 @@ class DocPages {
     return const {'jpg', 'jpeg', 'png', 'heic', 'heif', 'webp', 'bmp', 'gif', 'tif', 'tiff', 'dng'}.contains(e);
   }
 
+  /// PDF, photo or Office document: shown (and printed) as pages.
+  static bool handles(String path) => path.toLowerCase().endsWith('.pdf') || isPicture(path) || OfficePdf.handles(path);
+
   /// Opens [path]; null when it can't be shown as pages ([why] says).
   static Future<DocPages?> open(AppServices s, String path, {void Function(String why)? why}) async {
     try {

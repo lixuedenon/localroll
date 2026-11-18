@@ -6,8 +6,9 @@ import 'package:localroll_core/localroll_core.dart';
 
 import '../services/win_screen.dart';
 
-/// App-wide navigation state for the title bar's Back button: pops a pushed
-/// page (viewer…) first, otherwise returns to the previously visited section.
+/// App-wide navigation state for the title bar's Back button. The sections
+/// are always one click away in the left rail, so Back only closes pages
+/// opened on top (viewer, tool…): one at a time; "Main screen" closes all.
 class AppNav extends ChangeNotifier {
   AppNav._();
 
@@ -89,42 +90,50 @@ class AppNav extends ChangeNotifier {
   }
 
   int _routes = 0;
-  final List<int> _tabs = [];
   int tab = 0;
 
-  bool get canGoBack => _routes > 1 || _tabs.isNotEmpty;
+  /// A page is open (the main screen with the rail has no Back).
+  bool get canGoBack => _routes > 1;
 
   /// A page (viewer…) is open on top of the main screen.
   bool get hasPage => _routes > 1;
 
-  /// Switch section and remember where we came from.
+  /// Two or more pages are open (PDF tool → change words): "Main screen"
+  /// closes them all at once.
+  bool get deep => _routes > 2;
+
+  /// Switch section.
   static const List<String> _names = ['home', 'devices', 'library', 'player', 'screen', 'convert', 'settings'];
 
   void selectTab(int i) {
     if (i == tab) return;
     DiagLog.log('ui', 'section: ${i >= 0 && i < _names.length ? _names[i] : i}');
-    _tabs.add(tab);
-    if (_tabs.length > 30) _tabs.removeAt(0);
     tab = i;
     notifyListeners();
     _wentElsewhere();
   }
 
-  /// Start-up section, without history.
+  /// Start-up section.
   void initialTab(int i) {
     tab = i;
-    _tabs.clear();
   }
 
+  /// Closes the page on top (a page with unsaved work asks first).
   void back() {
     final nav = navigatorKey.currentState;
-    if (_routes > 1 && nav != null) {
-      nav.maybePop();
-      return;
-    }
-    if (_tabs.isNotEmpty) {
-      tab = _tabs.removeLast();
-      notifyListeners();
+    if (_routes > 1 && nav != null) nav.maybePop();
+  }
+
+  /// Closes every page, top first, back to the main screen. A page with
+  /// unsaved work asks first, and the closing stops there.
+  Future<void> toMain() async {
+    final nav = navigatorKey.currentState;
+    if (nav == null) return;
+    DiagLog.log('ui', 'to main screen');
+    while (_routes > 1) {
+      final before = _routes;
+      await nav.maybePop();
+      if (_routes >= before) return;
     }
   }
 

@@ -2209,9 +2209,7 @@
   "pen.hung_reopen": "Buka bilah lagi",
   "pen.hung_end": "Akhiri pena",
   "sig.mine": "Tanda tangan saya",
-  "sig.mine_sub": "Klik untuk memakai, tulis baru, atau ambil dari foto",
   "sig.add_draw": "Tulis baru",
-  "sig.add_photo": "Dari foto",
   "sig.none": "Belum ada tanda tangan tersimpan.",
   "sig.cut_sub": "Seret sudut di kiri untuk memotong; kanan hasilnya (kotak-kotak = transparan)",
   "sig.save": "Simpan ke tanda tangan saya",
@@ -2268,5 +2266,13 @@
   "print.save_pdf": "Simpan sebagai PDF",
   "print.sent": "Dikirim ke printer ({n} halaman)",
   "print.bad_range": "Halaman tidak valid, mis. 1-3, 5",
-  "print.suffix": "cetak"
+  "print.suffix": "cetak",
+  "pdf.which_file": "Di file mana?",
+  "pdf.n_pages": "{count} halaman",
+  "pdf.text_all": "Teks seluruh halaman",
+  "app.to_main": "Layar utama",
+  "sig.add_file": "Dari file",
+  "sig.pick_page": "Pilih halaman tanda tangan",
+  "sig.pick_page_sub": "Klik halaman tempat tanda tangan; lalu kotaki dan hapus latarnya.",
+  "sig.mine_sub": "Klik untuk memakai, tulis yang baru, atau ambil dari file (foto atau PDF)"
 }

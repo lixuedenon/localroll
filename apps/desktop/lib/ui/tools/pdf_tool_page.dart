@@ -18,6 +18,8 @@ import '../../services/file_tools.dart';
 import '../../services/win_dialogs.dart';
 import '../light_look.dart';
 import '../send_page.dart' show baseNameOf;
+import 'annotate_page.dart';
+import 'ocr_box_page.dart';
 import 'pdf_text_edit.dart';
 import 'sig_library.dart';
 import 'tools.dart';
@@ -404,6 +406,87 @@ class _PdfToolPageState extends State<PdfToolPage> {
     });
   }
 
+  /// The file (and its page) a one-file action works on: the page picked
+  /// first; else the only file; else the user says which file.
+  Future<(_Doc, int)?> _target() async {
+    for (final p in _pages) {
+      if (_picked.contains(p)) return (p.doc, p.number - 1);
+    }
+    if (_docs.isEmpty) return null;
+    if (_docs.length == 1) return (_docs.first, 0);
+    final d = await showLrDialog<_Doc>(
+      context: context,
+      builder: (c) => SimpleDialog(title: Text(tr('pdf.which_file')), children: [
+        for (final d in _docs)
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(c, d),
+            child: Row(children: [
+              const Icon(Icons.picture_as_pdf_outlined, size: 18, color: Color(0xFFE5484D)),
+              const SizedBox(width: 10),
+              Expanded(child: Text(baseNameOf(d.path), overflow: TextOverflow.ellipsis)),
+              Text(tr('pdf.n_pages', {'count': d.doc.pages.length}), style: const TextStyle(color: LightLook.muted, fontSize: 12)),
+            ]),
+          ),
+      ]),
+    );
+    return d == null ? null : (d, 0);
+  }
+
+  /// [old]'s pages now come from [path] (changed words, marks): same
+  /// places, turning, signatures and picking.
+  Future<void> _swap(_Doc old, String path) async {
+    PdfDocument d;
+    try {
+      d = await PdfDocument.openFile(path);
+    } catch (e) {
+      DiagLog.log('tools', 'pdf swap not opened: $e');
+      return;
+    }
+    if (!mounted || !_docs.contains(old)) {
+      await d.dispose();
+      return;
+    }
+    final doc = _Doc(path, d);
+    setState(() {
+      _docs[_docs.indexOf(old)] = doc;
+      for (var i = 0; i < _pages.length; i++) {
+        final p = _pages[i];
+        if (p.doc != old || p.number > d.pages.length) continue;
+        final n = _Page(doc, p.number)..turns = p.turns;
+        n.signs.addAll(p.signs);
+        if (_picked.remove(p)) _picked.add(n);
+        _pages[i] = n;
+      }
+      _pages.removeWhere((p) => p.doc == old);
+    });
+    DiagLog.log('tools', 'pdf tool now uses ${baseNameOf(path)}');
+    await old.doc.dispose();
+  }
+
+  Future<void> _editText() async {
+    final t = await _target();
+    if (t == null || !mounted) return;
+    final (doc, at) = t;
+    await Navigator.of(context).push(MaterialPageRoute<void>(
+      builder: (_) => PdfTextEditPage(services: s, path: doc.path, page: at, onSaved: (f) => unawaited(_swap(doc, f))),
+    ));
+  }
+
+  Future<void> _annotate() async {
+    final t = await _target();
+    if (t == null || !mounted) return;
+    final (doc, at) = t;
+    await openAnnotate(context, s, doc.path, page: at, onSaved: (f) => unawaited(_swap(doc, f)));
+  }
+
+  /// 取字: a box on the page picked (or the first page); the whole page,
+  /// or several pages at once, is one button away there / in the menu.
+  Future<void> _boxText() async {
+    final t = await _target();
+    if (t == null || !mounted) return;
+    await openOcrBox(context, s, t.$1.path, page: t.$2);
+  }
+
   // ------------------------------------------------------------- page
 
   @override
@@ -478,18 +561,16 @@ class _PdfToolPageState extends State<PdfToolPage> {
                         _pages.removeWhere(_picked.contains);
                         _picked.clear();
                       })),
-              // Change words in place (one PDF at a time).
-              act(Icons.edit_note_rounded, tr('pdfedit.title'), busy || _docs.length != 1
-                  ? null
-                  : () => Navigator.of(context).push(MaterialPageRoute<void>(
-                        builder: (_) => PdfTextEditPage(services: s, path: _docs.first.path),
-                      )), color: LightLook.blue),
+              // Change words in place: in the file of the page picked.
+              act(Icons.edit_note_rounded, tr('pdfedit.title'), busy ? null : _editText, color: LightLook.blue),
+              act(Icons.gesture_rounded, tr('ann.title'), busy ? null : _annotate, color: const Color(0xFFE5484D)),
               act(Icons.draw_rounded, tr('pdf.sign'), busy ? null : _sign, color: const Color(0xFF7B4DEB)),
               act(Icons.add_photo_alternate_outlined, tr('pdf.add_picture'), busy ? null : _addPicture),
               act(Icons.call_split_rounded, tr('pdf.split'), busy ? null : _split),
               act(Icons.compress_rounded, tr('pdf.compress'), busy ? null : _compress),
               act(Icons.image_outlined, tr('pdf.images'), busy ? null : _toImages),
-              act(Icons.text_snippet_outlined, tr('pdf.text'), busy ? null : _text),
+              act(Icons.crop_free_rounded, tr('pdf.text'), busy ? null : _boxText),
+              act(Icons.text_snippet_outlined, tr('pdf.text_all'), busy ? null : _text),
             ]),
           ),
           Padding(

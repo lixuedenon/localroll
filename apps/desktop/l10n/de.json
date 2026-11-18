@@ -2209,9 +2209,7 @@
   "pen.hung_reopen": "Leiste neu öffnen",
   "pen.hung_end": "Stift beenden",
   "sig.mine": "Meine Unterschriften",
-  "sig.mine_sub": "Zum Verwenden anklicken, neu schreiben oder aus einem Foto holen",
   "sig.add_draw": "Neu schreiben",
-  "sig.add_photo": "Aus einem Foto",
   "sig.none": "Noch keine gespeicherten Unterschriften.",
   "sig.cut_sub": "Links an den Ecken zuschneiden; rechts das Ergebnis (Karos = durchsichtig)",
   "sig.save": "In meine Unterschriften",
@@ -2268,5 +2266,13 @@
   "print.save_pdf": "Als PDF speichern",
   "print.sent": "An den Drucker gesendet ({n} Seiten)",
   "print.bad_range": "Seitenangabe ungültig, z. B. 1-3, 5",
-  "print.suffix": "Druck"
+  "print.suffix": "Druck",
+  "pdf.which_file": "In welcher Datei?",
+  "pdf.n_pages": "{count} Seiten",
+  "pdf.text_all": "Text ganzer Seiten",
+  "app.to_main": "Hauptansicht",
+  "sig.add_file": "Aus einer Datei",
+  "sig.pick_page": "Seite mit der Unterschrift wählen",
+  "sig.pick_page_sub": "Seite mit der Unterschrift anklicken; danach einrahmen und Hintergrund entfernen.",
+  "sig.mine_sub": "Zum Verwenden anklicken, neu schreiben oder aus einer Datei holen (Foto oder PDF)"
 }

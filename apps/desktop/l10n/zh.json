@@ -2209,9 +2209,7 @@
   "pen.hung_reopen": "重新打开工具条",
   "pen.hung_end": "结束画笔",
   "sig.mine": "我的签名",
-  "sig.mine_sub": "点一个就用；也可以新写一个，或从照片导入",
   "sig.add_draw": "手写一个",
-  "sig.add_photo": "从照片导入",
   "sig.none": "还没有保存的签名。",
   "sig.cut_sub": "左边拖四个角裁剪；右边是结果（格子表示透明）",
   "sig.save": "存到我的签名",
@@ -2268,5 +2266,13 @@
   "print.save_pdf": "存成 PDF",
   "print.sent": "已发送到打印机（{n} 页）",
   "print.bad_range": "页数写法不对，例如 1-3, 5",
-  "print.suffix": "打印"
+  "print.suffix": "打印",
+  "pdf.which_file": "在哪个文件里做？",
+  "pdf.n_pages": "{count} 页",
+  "pdf.text_all": "整页取字",
+  "app.to_main": "主界面",
+  "sig.add_file": "从文件导入",
+  "sig.pick_page": "选签名所在的页",
+  "sig.pick_page_sub": "点签名所在的那一页，下一步框出签名、去掉背景。",
+  "sig.mine_sub": "点一个就用；也可以新写一个，或从文件导入（照片或 PDF）"
 }

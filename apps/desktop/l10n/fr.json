@@ -2209,9 +2209,7 @@
   "pen.hung_reopen": "Rouvrir la barre",
   "pen.hung_end": "Arrêter le stylet",
   "sig.mine": "Mes signatures",
-  "sig.mine_sub": "Cliquez pour l'utiliser, écrivez-en une ou importez-la d'une photo",
   "sig.add_draw": "En écrire une",
-  "sig.add_photo": "Depuis une photo",
   "sig.none": "Aucune signature enregistrée.",
   "sig.cut_sub": "Tirez les coins à gauche pour recadrer ; à droite le résultat (damier = transparent)",
   "sig.save": "Enregistrer dans mes signatures",
@@ -2268,5 +2266,13 @@
   "print.save_pdf": "Enregistrer en PDF",
   "print.sent": "Envoyé à l'imprimante ({n} pages)",
   "print.bad_range": "Pages illisibles ; ex. 1-3, 5",
-  "print.suffix": "impression"
+  "print.suffix": "impression",
+  "pdf.which_file": "Dans quel fichier ?",
+  "pdf.n_pages": "{count} pages",
+  "pdf.text_all": "Texte des pages entières",
+  "app.to_main": "Écran principal",
+  "sig.add_file": "Depuis un fichier",
+  "sig.pick_page": "Choisir la page avec la signature",
+  "sig.pick_page_sub": "Cliquez la page de la signature ; ensuite encadrez-la et retirez le fond.",
+  "sig.mine_sub": "Cliquez pour l'utiliser, écrivez-en une ou importez-la d'un fichier (photo ou PDF)"
 }

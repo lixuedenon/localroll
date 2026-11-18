@@ -2209,9 +2209,7 @@
   "pen.hung_reopen": "Volver a abrir la barra",
   "pen.hung_end": "Terminar lápiz",
   "sig.mine": "Mis firmas",
-  "sig.mine_sub": "Haz clic para usarla, escribe una nueva o tráela de una foto",
   "sig.add_draw": "Escribir una",
-  "sig.add_photo": "Desde una foto",
   "sig.none": "Aún no hay firmas guardadas.",
   "sig.cut_sub": "Arrastra las esquinas a la izquierda para recortar; a la derecha el resultado (cuadros = transparente)",
   "sig.save": "Guardar en mis firmas",
@@ -2268,5 +2266,13 @@
   "print.save_pdf": "Guardar como PDF",
   "print.sent": "Enviado a la impresora ({n} páginas)",
   "print.bad_range": "Páginas no válidas; p. ej. 1-3, 5",
-  "print.suffix": "impresión"
+  "print.suffix": "impresión",
+  "pdf.which_file": "¿En qué archivo?",
+  "pdf.n_pages": "{count} páginas",
+  "pdf.text_all": "Texto de páginas enteras",
+  "app.to_main": "Pantalla principal",
+  "sig.add_file": "Desde un archivo",
+  "sig.pick_page": "Elige la página con la firma",
+  "sig.pick_page_sub": "Haz clic en la página de la firma; luego enmárcala y quita el fondo.",
+  "sig.mine_sub": "Haz clic para usarla, escribe una nueva o tráela de un archivo (foto o PDF)"
 }

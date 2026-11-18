@@ -2209,9 +2209,7 @@
   "pen.hung_reopen": "도구 막대 다시 열기",
   "pen.hung_end": "펜 끝내기",
   "sig.mine": "내 서명",
-  "sig.mine_sub": "클릭해서 사용; 새로 쓰거나 사진에서 가져올 수도 있습니다",
   "sig.add_draw": "직접 쓰기",
-  "sig.add_photo": "사진에서",
   "sig.none": "저장된 서명이 없습니다.",
   "sig.cut_sub": "왼쪽에서 모서리를 끌어 자르기; 오른쪽은 결과(체크무늬는 투명)",
   "sig.save": "내 서명에 저장",
@@ -2268,5 +2266,13 @@
   "print.save_pdf": "PDF로 저장",
   "print.sent": "프린터로 보냈습니다({n}쪽)",
   "print.bad_range": "페이지 지정이 올바르지 않습니다(예: 1-3, 5)",
-  "print.suffix": "인쇄"
+  "print.suffix": "인쇄",
+  "pdf.which_file": "어느 파일에서 할까요?",
+  "pdf.n_pages": "{count}쪽",
+  "pdf.text_all": "페이지 전체 글자",
+  "app.to_main": "메인 화면",
+  "sig.add_file": "파일에서",
+  "sig.pick_page": "서명이 있는 페이지 선택",
+  "sig.pick_page_sub": "서명이 있는 페이지를 클릭하세요. 다음에 서명을 상자로 고르고 배경을 지웁니다.",
+  "sig.mine_sub": "클릭해서 사용하거나 새로 쓰거나 파일(사진 또는 PDF)에서 가져오세요"
 }

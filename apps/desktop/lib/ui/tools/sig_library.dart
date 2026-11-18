@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:localroll_core/localroll_core.dart' show DiagLog;
 import 'package:localroll_ink/localroll_ink.dart' show Signature, showSignaturePad;
+import 'package:pdfrx/pdfrx.dart';
 
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
@@ -51,8 +52,9 @@ Future<Signature> signatureFromPng(Uint8List png) async {
   return Signature(f.image, png);
 }
 
-/// Picks a signature: a saved one, a new one drawn, or one from a photo of
-/// a signature on paper (its background taken away). New ones are saved.
+/// Picks a signature: a saved one, a new one drawn, or one from a file (a
+/// photo or a PDF of a signature on paper, its background taken away). New
+/// ones are saved.
 Future<Signature?> pickSignature(BuildContext context, AppServices s) async {
   final store = SigStore(s);
   var files = await store.list();
@@ -66,7 +68,7 @@ Future<Signature?> pickSignature(BuildContext context, AppServices s) async {
         subtitle: tr('sig.mine_sub'),
         actions: [
           OutlinedButton.icon(onPressed: () => Navigator.pop(c, 'draw'), icon: const Icon(Icons.gesture_rounded, size: 18), label: Text(tr('sig.add_draw'))),
-          OutlinedButton.icon(onPressed: () => Navigator.pop(c, 'photo'), icon: const Icon(Icons.photo_camera_outlined, size: 18), label: Text(tr('sig.add_photo'))),
+          OutlinedButton.icon(onPressed: () => Navigator.pop(c, 'photo'), icon: const Icon(Icons.upload_file_rounded, size: 18), label: Text(tr('sig.add_file'))),
           TextButton(onPressed: () => Navigator.pop(c), child: Text(tr('common.cancel'))),
         ],
         child: files.isEmpty
@@ -124,27 +126,33 @@ Future<Signature?> pickSignature(BuildContext context, AppServices s) async {
   return sig;
 }
 
-/// A picture to put on a page: from the library or a folder, cropped, its
-/// plain background (paper, white) made see-through if asked. [signature]:
-/// set for a signature (background off by default for other pictures).
+/// Photos and PDFs a picture / signature can come from.
+const _pictureExts = {'jpg', 'jpeg', 'png', 'heic', 'heif', 'webp', 'bmp', 'gif', 'tif', 'tiff', 'pdf'};
+
+/// A picture to put on a page: a photo or a PDF page (from the library or
+/// this PC), cropped, its plain background (paper, white) made see-through
+/// if asked. [signature]: set for a signature (background off by default for
+/// other pictures).
 Future<Signature?> pictureCutout(BuildContext context, AppServices s, {bool signature = false}) async {
   final where = await showLrDialog<String>(
     context: context,
-    builder: (c) => SimpleDialog(title: Text(tr(signature ? 'sig.add_photo' : 'pdf.add_picture')), children: [
+    builder: (c) => SimpleDialog(title: Text(tr(signature ? 'sig.add_file' : 'pdf.add_picture')), children: [
       SimpleDialogOption(onPressed: () => Navigator.pop(c, 'lib'), child: Text(tr('tool.from_library'))),
       SimpleDialogOption(onPressed: () => Navigator.pop(c, 'pc'), child: Text(tr('tool.from_folder'))),
     ]),
   );
   if (where == null || !context.mounted) return null;
   final List<String> paths = where == 'lib'
-      ? (await pickFromLibrary(context, s, multiple: false) ?? const [])
-      : await WinDialogs.pickFiles(title: tr('pdf.add_picture'), extensions: const ['jpg', 'jpeg', 'png', 'heic', 'heif', 'webp', 'bmp', 'gif', 'tif', 'tiff']);
+      ? (await pickFromLibrary(context, s, multiple: false, exts: _pictureExts) ?? const [])
+      : await WinDialogs.pickFiles(title: tr(signature ? 'sig.add_file' : 'pdf.add_picture'), extensions: _pictureExts.toList());
   if (paths.isEmpty || !context.mounted) return null;
   Uint8List? bytes;
   final p = paths.first;
   final ext = p.toLowerCase().split('.').last;
   try {
-    if (ext == 'png' || ext == 'jpg' || ext == 'jpeg') {
+    if (ext == 'pdf') {
+      bytes = await _pdfPagePicture(context, p);
+    } else if (ext == 'png' || ext == 'jpg' || ext == 'jpeg') {
       bytes = await File(p).readAsBytes();
     } else {
       final j = await uprightJpeg(s, p, max: 2400);
@@ -154,7 +162,72 @@ Future<Signature?> pictureCutout(BuildContext context, AppServices s, {bool sign
     DiagLog.log('tools', 'picture for pdf: $e');
   }
   if (bytes == null || !context.mounted) return null;
-  return showLrDialog<Signature>(context: context, builder: (_) => _Cutout(src: bytes!, signature: signature));
+  return showLrDialog<Signature>(
+    context: context,
+    builder: (_) => _Cutout(src: bytes!, signature: signature, maxSide: ext == 'pdf' ? 3600 : 2400),
+  );
+}
+
+/// A page of the PDF [path] as a sharp picture (300 dpi): the page is
+/// picked first when there are several.
+Future<Uint8List?> _pdfPagePicture(BuildContext context, String path) async {
+  final doc = await PdfDocument.openFile(path);
+  try {
+    var at = 0;
+    if (doc.pages.length > 1) {
+      if (!context.mounted) return null;
+      final pick = await showLrDialog<int>(
+        context: context,
+        builder: (c) => LightDialog(
+          icon: Icons.picture_as_pdf_outlined,
+          title: tr('sig.pick_page'),
+          subtitle: tr('sig.pick_page_sub'),
+          actions: [TextButton(onPressed: () => Navigator.pop(c), child: Text(tr('common.cancel')))],
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 440),
+            child: SingleChildScrollView(
+              child: Wrap(spacing: 12, runSpacing: 12, children: [
+                for (var i = 0; i < doc.pages.length; i++)
+                  InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () => Navigator.pop(c, i),
+                    child: Column(mainAxisSize: MainAxisSize.min, children: [
+                      Container(
+                        width: 120,
+                        height: 120 * doc.pages[i].height / doc.pages[i].width,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(color: const Color(0xFFDDE3EC)),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: PdfPageView(document: doc, pageNumber: i + 1, maximumDpi: 72),
+                      ),
+                      const SizedBox(height: 4),
+                      Text('${i + 1}', style: const TextStyle(color: LightLook.muted, fontSize: 12)),
+                    ]),
+                  ),
+              ]),
+            ),
+          ),
+        ),
+      );
+      if (pick == null) return null;
+      at = pick;
+    }
+    final page = doc.pages[at];
+    final k = math.min(300 / 72, 3600 / math.max(page.width, page.height));
+    final w = (page.width * k).round(), h = (page.height * k).round();
+    final pic = await page.render(width: w, height: h, fullWidth: w.toDouble(), fullHeight: h.toDouble(), backgroundColor: Colors.white);
+    if (pic == null) return null;
+    final im = await pic.createImage();
+    pic.dispose();
+    final png = await im.toByteData(format: ui.ImageByteFormat.png);
+    im.dispose();
+    DiagLog.log('tools', 'picture from pdf page ${at + 1}: ${w}x$h');
+    return png?.buffer.asUint8List();
+  } finally {
+    await doc.dispose();
+  }
 }
 
 /// The picture's pixels, its size, and how to treat them.
@@ -274,10 +347,13 @@ Future<ui.Image> _toImage(Uint8List rgba, int w, int h) {
 }
 
 class _Cutout extends StatefulWidget {
-  const _Cutout({required this.src, required this.signature});
+  const _Cutout({required this.src, required this.signature, this.maxSide = 2400});
 
   final Uint8List src;
   final bool signature;
+
+  /// The longest side kept (a PDF page is cut from a larger picture).
+  final int maxSide;
 
   @override
   State<_Cutout> createState() => _CutoutState();
@@ -308,7 +384,7 @@ class _CutoutState extends State<_Cutout> {
     final codec = await ui.instantiateImageCodec(widget.src);
     final f = await codec.getNextFrame();
     var im = f.image;
-    final k = math.min(1.0, 2400 / math.max(im.width, im.height));
+    final k = math.min(1.0, widget.maxSide / math.max(im.width, im.height));
     if (k < 1) {
       final rec = ui.PictureRecorder();
       Canvas(rec).drawImageRect(im, Rect.fromLTWH(0, 0, im.width.toDouble(), im.height.toDouble()),
@@ -373,7 +449,7 @@ class _CutoutState extends State<_Cutout> {
     final orig = _orig;
     return LightDialog(
       icon: widget.signature ? Icons.draw_rounded : Icons.image_outlined,
-      title: tr(widget.signature ? 'sig.add_photo' : 'pdf.add_picture'),
+      title: tr(widget.signature ? 'sig.add_file' : 'pdf.add_picture'),
       subtitle: tr('sig.cut_sub'),
       actions: [
         TextButton(onPressed: () => Navigator.pop(context), child: Text(tr('common.cancel'))),

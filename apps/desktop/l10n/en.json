@@ -2209,9 +2209,7 @@
   "pen.hung_reopen": "Reopen toolbar",
   "pen.hung_end": "End pen",
   "sig.mine": "My signatures",
-  "sig.mine_sub": "Click one to use it, write a new one, or bring one in from a photo",
   "sig.add_draw": "Write one",
-  "sig.add_photo": "From a photo",
   "sig.none": "No saved signatures yet.",
   "sig.cut_sub": "Drag the corners on the left to crop; the right shows the result (checks are see-through)",
   "sig.save": "Save to my signatures",
@@ -2268,5 +2266,13 @@
   "print.save_pdf": "Save as PDF",
   "print.sent": "Sent to the printer ({n} pages)",
   "print.bad_range": "Pages don't read; e.g. 1-3, 5",
-  "print.suffix": "print"
+  "print.suffix": "print",
+  "pdf.which_file": "Which file?",
+  "pdf.n_pages": "{count} pages",
+  "pdf.text_all": "Text of whole pages",
+  "app.to_main": "Main screen",
+  "sig.add_file": "From a file",
+  "sig.pick_page": "Choose the page with the signature",
+  "sig.pick_page_sub": "Click the page the signature is on; next, box it and take the background away.",
+  "sig.mine_sub": "Click one to use it, write a new one, or bring one in from a file (photo or PDF)"
 }

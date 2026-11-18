@@ -57,10 +57,17 @@ class _Edit {
 /// changed lines are touched — tables, stamps, pictures and the rest of the
 /// text stay as they are.
 class PdfTextEditPage extends StatefulWidget {
-  const PdfTextEditPage({super.key, required this.services, required this.path});
+  const PdfTextEditPage({super.key, required this.services, required this.path, this.page = 0, this.onSaved});
 
   final AppServices services;
   final String path;
+
+  /// The page shown first (0-based).
+  final int page;
+
+  /// Told the file once the changes are saved (the new file, or [path]
+  /// when replaced); the PDF tool then uses it.
+  final ValueChanged<String>? onSaved;
 
   @override
   State<PdfTextEditPage> createState() => _PdfTextEditPageState();
@@ -129,8 +136,12 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
         await d.dispose();
         return;
       }
-      setState(() => _doc = d);
-      await _load(0);
+      final at = _page == 0 ? widget.page.clamp(0, d.pages.length - 1) : _page.clamp(0, d.pages.length - 1);
+      setState(() {
+        _doc = d;
+        _page = at;
+      });
+      await _load(at);
     } catch (e) {
       DiagLog.log('tools', 'pdf edit open: $e');
       if (mounted) setState(() => _error = '$e');
@@ -533,11 +544,13 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
         _edits.clear();
       });
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(note ?? tr('pdfedit.replaced'))));
+      widget.onSaved?.call(widget.path);
       await _open();
       return true;
     }
     // Saved as a new file: the changes are in it, nothing left to keep.
     setState(_edits.clear);
+    widget.onSaved?.call(out);
     await showToolResult(context, s, [out], note: note);
     return true;
   }

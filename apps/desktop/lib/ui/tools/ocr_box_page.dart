@@ -19,10 +19,13 @@ import 'tools.dart';
 /// pictures) — or the whole page — with Windows' own text recognition, on
 /// this PC.
 class OcrBoxPage extends StatefulWidget {
-  const OcrBoxPage({super.key, required this.services, required this.path});
+  const OcrBoxPage({super.key, required this.services, required this.path, this.page = 0});
 
   final AppServices services;
   final String path;
+
+  /// The page shown first (0-based).
+  final int page;
 
   @override
   State<OcrBoxPage> createState() => _OcrBoxPageState();
@@ -48,6 +51,7 @@ class _OcrBoxPageState extends State<OcrBoxPage> {
       setState(() {
         _doc = d;
         if (d == null) _why ??= 'kind';
+        if (d != null) _at = widget.page.clamp(0, d.count - 1);
       });
     }));
   }
@@ -228,5 +232,5 @@ class _OcrBoxPageState extends State<OcrBoxPage> {
   }
 }
 
-Future<void> openOcrBox(BuildContext context, AppServices s, String path) =>
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => OcrBoxPage(services: s, path: path)));
+Future<void> openOcrBox(BuildContext context, AppServices s, String path, {int page = 0}) =>
+    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => OcrBoxPage(services: s, path: path, page: page)));

@@ -71,16 +71,31 @@ class _LrTitleBarState extends State<LrTitleBar> with WindowListener {
       child: Row(
         children: [
           const SizedBox(width: 6),
+          // Back only while a page is open (the main screen has the rail);
+          // two or more pages: "Main screen" too.
           ListenableBuilder(
             listenable: AppNav.instance,
-            builder: (context, _) => _BarButton(
-              tooltip: tr('app.back'),
-              icon: Icons.arrow_back_rounded,
-              label: tr('app.back'),
-              onPressed: AppNav.instance.canGoBack ? AppNav.instance.back : null,
-            ),
+            builder: (context, _) => !AppNav.instance.canGoBack
+                ? const SizedBox.shrink()
+                : Row(mainAxisSize: MainAxisSize.min, children: [
+                    _BarButton(
+                      tooltip: tr('app.back'),
+                      icon: Icons.arrow_back_rounded,
+                      label: tr('app.back'),
+                      onPressed: AppNav.instance.back,
+                    ),
+                    if (AppNav.instance.deep) ...[
+                      const SizedBox(width: 4),
+                      _BarButton(
+                        tooltip: tr('app.to_main'),
+                        icon: Icons.home_rounded,
+                        label: tr('app.to_main'),
+                        onPressed: () => unawaited(AppNav.instance.toMain()),
+                      ),
+                    ],
+                    const SizedBox(width: 8),
+                  ]),
           ),
-          const SizedBox(width: 8),
           const _Mark(),
           const SizedBox(width: 10),
           Text(appName, style: Theme.of(context).textTheme.titleMedium?.copyWith(letterSpacing: 0.2)),

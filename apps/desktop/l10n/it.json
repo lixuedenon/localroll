@@ -2209,9 +2209,7 @@
   "pen.hung_reopen": "Riapri la barra",
   "pen.hung_end": "Termina penna",
   "sig.mine": "Le mie firme",
-  "sig.mine_sub": "Clicca per usarla, scrivine una nuova o prendila da una foto",
   "sig.add_draw": "Scrivine una",
-  "sig.add_photo": "Da una foto",
   "sig.none": "Nessuna firma salvata.",
   "sig.cut_sub": "Trascina gli angoli a sinistra per ritagliare; a destra il risultato (scacchi = trasparente)",
   "sig.save": "Salva nelle mie firme",
@@ -2268,5 +2266,13 @@
   "print.save_pdf": "Salva come PDF",
   "print.sent": "Inviato alla stampante ({n} pagine)",
   "print.bad_range": "Pagine non valide, es. 1-3, 5",
-  "print.suffix": "stampa"
+  "print.suffix": "stampa",
+  "pdf.which_file": "In quale file?",
+  "pdf.n_pages": "{count} pagine",
+  "pdf.text_all": "Testo di pagine intere",
+  "app.to_main": "Schermata principale",
+  "sig.add_file": "Da un file",
+  "sig.pick_page": "Scegli la pagina con la firma",
+  "sig.pick_page_sub": "Fai clic sulla pagina della firma; poi riquadrala e togli lo sfondo.",
+  "sig.mine_sub": "Fai clic per usarla, scrivine una nuova o importala da un file (foto o PDF)"
 }
