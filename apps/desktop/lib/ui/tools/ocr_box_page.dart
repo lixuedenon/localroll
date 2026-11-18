@@ -91,6 +91,11 @@ class _OcrBoxPageState extends State<OcrBoxPage> {
     }
   }
 
+  void _page(int i) => setState(() {
+        _at = i;
+        _box = null;
+      });
+
   Future<void> _saveText() async {
     final t = _text.text;
     if (t.trim().isEmpty) return;
@@ -115,10 +120,10 @@ class _OcrBoxPageState extends State<OcrBoxPage> {
                 child: Column(children: [
                   if (d.count > 1)
                     Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                      IconButton(onPressed: _at > 0 ? () => setState(() => (_at, _box) = (_at - 1, null)) : null, icon: const Icon(Icons.chevron_left_rounded)),
+                      IconButton(onPressed: _at > 0 ? () => _page(_at - 1) : null, icon: const Icon(Icons.chevron_left_rounded)),
                       Text('${_at + 1} / ${d.count}', style: const TextStyle(color: LrColors.muted)),
                       IconButton(
-                          onPressed: _at < d.count - 1 ? () => setState(() => (_at, _box) = (_at + 1, null)) : null,
+                          onPressed: _at < d.count - 1 ? () => _page(_at + 1) : null,
                           icon: const Icon(Icons.chevron_right_rounded)),
                     ]),
                   Expanded(
