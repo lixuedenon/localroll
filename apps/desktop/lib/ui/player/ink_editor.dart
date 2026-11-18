@@ -198,6 +198,15 @@ class InkEditor extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// What a number says.
+  void setNote(String id, String text) {
+    final m = inks.where((i) => i.id == id).firstOrNull;
+    if (m == null) return;
+    remember();
+    m.note = text.isEmpty ? null : text;
+    notifyListeners();
+  }
+
   void deleteSelected() {
     final id = selectedId;
     if (id == null) return;
@@ -843,6 +852,102 @@ class _InkLayerState extends State<InkLayer> {
   }
 }
 
+/// Writes what the chosen number says.
+Future<void> editNumberNote(BuildContext context, InkEditor ed) async {
+  final m = ed.selected;
+  if (m == null || m.tool != InkTool.number) return;
+  final ctl = TextEditingController(text: m.note ?? '');
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (c) => AlertDialog(
+      title: Text(tr('ink.note_title', {'n': m.number ?? ''})),
+      content: SizedBox(
+        width: 420,
+        child: TextField(controller: ctl, autofocus: true, maxLines: 6, minLines: 3, decoration: InputDecoration(hintText: tr('ink.note_hint'))),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('common.cancel'))),
+        FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(tr('common.ok'))),
+      ],
+    ),
+  );
+  if (ok == true) ed.setNote(m.id, ctl.text.trim());
+  ctl.dispose();
+}
+
+/// What numbers say: a small card by a number when the pointer is on it
+/// (or near). [marks]: read each time.
+class NumberNotes extends StatefulWidget {
+  const NumberNotes({super.key, required this.marks, this.repaint});
+
+  final List<InkMark> Function() marks;
+  final Listenable? repaint;
+
+  @override
+  State<NumberNotes> createState() => _NumberNotesState();
+}
+
+class _NumberNotesState extends State<NumberNotes> {
+  InkMark? _on;
+
+  static Offset _at(InkMark m) => m.points.isEmpty ? Offset.zero : m.points.first + Offset(m.dx, m.dy);
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(builder: (context, c) {
+        final size = Size(c.maxWidth, c.maxHeight);
+        final on = _on;
+        return MouseRegion(
+          opaque: false,
+          hitTestBehavior: HitTestBehavior.translucent,
+          onExit: (_) {
+            if (_on != null) setState(() => _on = null);
+          },
+          onHover: (e) {
+            InkMark? best;
+            var bestD = 22.0;
+            for (final m in widget.marks()) {
+              if (m.tool != InkTool.number || (m.note ?? '').isEmpty) continue;
+              final p = _at(m);
+              final d = (Offset(p.dx * size.width, p.dy * size.height) - e.localPosition).distance;
+              if (d < bestD) {
+                bestD = d;
+                best = m;
+              }
+            }
+            if (!identical(best, _on)) setState(() => _on = best);
+          },
+          child: Stack(clipBehavior: Clip.none, children: [
+            if (on != null)
+              Builder(builder: (_) {
+                final p = _at(on);
+                final x = p.dx * size.width, y = p.dy * size.height;
+                const w = 260.0;
+                return Positioned(
+                  left: (x + 16).clamp(0.0, math.max(0.0, size.width - w)),
+                  top: (y + 16).clamp(0.0, math.max(0.0, size.height - 60)),
+                  width: w,
+                  child: IgnorePointer(
+                    child: Material(
+                      elevation: 6,
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      child: Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+                          Text('${on.number ?? ''}', style: TextStyle(color: Color(on.color), fontWeight: FontWeight.w800)),
+                          const SizedBox(height: 2),
+                          Text(on.note ?? '', style: const TextStyle(color: Color(0xFF16213E), fontSize: 13, height: 1.5)),
+                        ]),
+                      ),
+                    ),
+                  ),
+                );
+              }),
+          ]),
+        );
+      });
+}
+
 /// The tools above the picture while drawing.
 class InkToolbar extends StatelessWidget {
   const InkToolbar({super.key, required this.editor, required this.onDone, this.onCancel, this.doneLabel, this.extra = const []});
@@ -993,6 +1098,13 @@ class InkToolbar extends StatelessWidget {
               icon: const Icon(Icons.redo_rounded, size: 20),
               color: Colors.white,
             ),
+            // A number chosen: what it says (shown when the pointer is on it).
+            if (editor.selected?.tool == InkTool.number)
+              TextButton.icon(
+                onPressed: () => unawaited(editNumberNote(context, editor)),
+                icon: const Icon(Icons.sticky_note_2_outlined, size: 18),
+                label: Text(tr('ink.note')),
+              ),
             if (editor.hasNumbers)
               IconButton(
                 tooltip: tr('ink.renumber'),

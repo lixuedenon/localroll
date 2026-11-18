@@ -11,6 +11,7 @@ import 'package:localroll_core/localroll_core.dart';
 import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/file_actions.dart';
+import '../services/file_tools.dart' show OfficePdf;
 import '../services/format_convert.dart';
 import '../services/library_index.dart';
 import '../services/network.dart';
@@ -34,6 +35,10 @@ import 'people_page.dart';
 import 'select_by_dialog.dart';
 import 'send_page.dart';
 import 'trash_actions.dart';
+import 'tools/annotate_page.dart';
+import 'tools/doc_pages.dart';
+import 'tools/ocr_box_page.dart';
+import 'tools/print_page.dart';
 import 'tools/tools.dart';
 import 'trash_page.dart';
 import 'player/player_page.dart';
@@ -1348,6 +1353,12 @@ class _LibraryPageState extends State<LibraryPage> {
         ),
         const PopupMenuDivider(),
         for (final t in _toolsFor(targets)) PopupMenuItem(value: 'tool:${t.name}', child: _menuRow(t.icon, t.title)),
+        if (targets.length == 1 && item.kind != MediaKind.video)
+          PopupMenuItem(value: 'annotate', child: _menuRow(Icons.draw_rounded, tr('ann.title'))),
+        if (targets.length == 1 && item.kind != MediaKind.video)
+          PopupMenuItem(value: 'ocr', child: _menuRow(Icons.document_scanner_outlined, tr('ocrbox.title'))),
+        if (targets.every((i) => i.kind != MediaKind.video))
+          PopupMenuItem(value: 'print', child: _menuRow(Icons.print_rounded, tr('print.menu'))),
         PopupMenuItem(value: 'convert', child: _menuRow(Icons.auto_fix_high_rounded, tr('convert.menu'))),
         PopupMenuItem(value: 'export', child: _menuRow(Icons.drive_file_move_rounded, tr('lib.export'))),
         PopupMenuItem(value: 'send', child: _menuRow(Icons.send_rounded, tr('send.to_pc'))),
@@ -1393,6 +1404,12 @@ class _LibraryPageState extends State<LibraryPage> {
         }
       case 'delete':
         await _delete(targets);
+      case 'annotate':
+        await openAnnotate(this.context, s, s.library.absPath(item));
+      case 'ocr':
+        await openOcrBox(this.context, s, s.library.absPath(item));
+      case 'print':
+        await openPrint(this.context, s, [for (final i in targets) s.library.absPath(i)]);
       case 'convert':
         await openTool(this.context, s, Tool.convert, paths: [for (final i in targets) s.library.absPath(i)]);
     }
@@ -2122,6 +2139,9 @@ class _LibraryPageState extends State<LibraryPage> {
     return Icons.insert_drive_file_rounded;
   }
 
+  /// A file that can be shown as pages (PDF, photo, Office document).
+  static bool _pagesKind(String path) => path.toLowerCase().endsWith('.pdf') || DocPages.isPicture(path) || OfficePdf.handles(path);
+
   /// Right-click on a received file: open, select, show in its folder,
   /// delete.
   Future<void> _fileMenu(BuildContext context, ReceivedFile f, Offset at) async {
@@ -2137,6 +2157,11 @@ class _LibraryPageState extends State<LibraryPage> {
           child: _menuRow(Icons.check_circle_outline_rounded, _selected.contains(key) ? tr('lib.unselect') : tr('lib.select')),
         ),
         if (Tool.pdfTools.takes(f.path)) PopupMenuItem(value: 'tool:pdfTools', child: _menuRow(Tool.pdfTools.icon, Tool.pdfTools.title)),
+        if (_pagesKind(f.path)) PopupMenuItem(value: 'annotate', child: _menuRow(Icons.draw_rounded, tr('ann.title'))),
+        if (_pagesKind(f.path) && !OfficePdf.handles(f.path))
+          PopupMenuItem(value: 'ocr', child: _menuRow(Icons.document_scanner_outlined, tr('ocrbox.title'))),
+        if (MediaKind.fromName(f.name) != MediaKind.video)
+          PopupMenuItem(value: 'print', child: _menuRow(Icons.print_rounded, tr('print.menu'))),
         if (FormatTable.find(f.path, ConvCat.doc) != null) PopupMenuItem(value: 'tool:convert', child: _menuRow(Tool.convert.icon, Tool.convert.title)),
         PopupMenuItem(value: 'export', child: _menuRow(Icons.drive_file_move_rounded, tr('lib.export'))),
         PopupMenuItem(value: 'send', child: _menuRow(Icons.send_rounded, tr('send.to_pc'))),
@@ -2155,6 +2180,12 @@ class _LibraryPageState extends State<LibraryPage> {
     switch (choice) {
       case 'open':
         await openReceivedFile(this.context, widget.services, f.path);
+      case 'annotate':
+        await openAnnotate(this.context, widget.services, f.path);
+      case 'ocr':
+        await openOcrBox(this.context, widget.services, f.path);
+      case 'print':
+        await openPrint(this.context, widget.services, _selected.contains(key) ? _chosenFiles() : [f.path]);
       case 'export':
         await _export(const [], _selected.contains(key) ? _chosenFiles() : [f.path]);
       case 'send':

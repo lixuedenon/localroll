@@ -30,7 +30,11 @@ class InkMark {
     this.wallMs,
     this.shape,
     this.color2,
+    this.note,
   }) : times = times ?? [];
+
+  /// A number's content: shown when the pointer is on it.
+  String? note;
 
   /// A stamp: its whole picture (kept with the mark, so it shows anywhere,
   /// pack or no pack). [points]: two corners of its box; [text]: its name.
@@ -97,6 +101,7 @@ class InkMark {
         'wall': ?wallMs,
         if (shape != null) 'sh': shape!.toJson(),
         'c2': ?color2,
+        if (note != null && note!.isNotEmpty) 'note': note,
       };
 
   static double _r(double v) => (v * 100000).roundToDouble() / 100000;
@@ -122,6 +127,7 @@ class InkMark {
       wallMs: (j['wall'] as num?)?.toInt(),
       shape: j['sh'] is Map ? StampShape.fromJson((j['sh'] as Map).cast<String, dynamic>()) : null,
       color2: (j['c2'] as num?)?.toInt(),
+      note: j['note'] as String?,
     );
   }
 

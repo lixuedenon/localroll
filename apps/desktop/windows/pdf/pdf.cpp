@@ -25,7 +25,14 @@
 //                                                as skipped: changing it would move
 //                                                the text beside it).
 //
+//   NOTE <x>|<y>|<text>|<rgb>                    on the last PAGE: a note (a PDF text
+//                                                annotation: its icon at x y, 0–1 of
+//                                                the page as shown; <text> a UTF-8
+//                                                file; readers show it on a click)
+//
 //   lr_pdf.exe "<plan file>"
+//   lr_pdf.exe --print "<pdf>" "<printer>" <copies> <pages> <landscape> <fit> <gray> <duplex>
+//              <pages>: 0-based, comma separated; the rest 0 / 1. Prints: ok <n>
 // Prints: ok <pages> [skipped <n>]   or   error <why>
 //
 //   lr_pdf.exe --thumb "<pdf>" "<out.bmp>" <width>
@@ -41,6 +48,7 @@
 
 #include <windows.h>
 #include <shellapi.h>
+#include <winspool.h>
 
 #include <cmath>
 #include <cstdio>
@@ -131,6 +139,14 @@ struct Api {
   int (*TextObjSetRenderMode)(OBJ, int);
   int (*ObjSetStrokeColor)(OBJ, unsigned int, unsigned int, unsigned int, unsigned int);
   int (*ObjSetStrokeWidth)(OBJ, float);
+  // Notes (NOTE).
+  void* (*CreateAnnot)(PAGE, int);
+  int (*AnnotSetRect)(void*, const float*);
+  int (*AnnotSetString)(void*, const char*, const unsigned short*);
+  int (*AnnotSetColor)(void*, int, unsigned int, unsigned int, unsigned int, unsigned int);
+  void (*CloseAnnot)(void*);
+  // Printing (--print): straight to the printer, or through a picture.
+  void (*RenderPage)(HDC, PAGE, int, int, int, int, int, int);
   // For --thumb only.
   void (*RenderPageBitmap)(BMP, PAGE, int, int, int, int, int, int);
   int (*FillRect)(BMP, int, int, int, int, unsigned long);
@@ -208,6 +224,12 @@ bool load() {
             find(m, "FPDF_CloseDocument", api.CloseDocument) && find(m, "FPDFBitmap_CreateEx", api.BitmapCreateEx) &&
             find(m, "FPDFBitmap_Destroy", api.BitmapDestroy);
   find(m, "FPDF_RenderPageBitmap", api.RenderPageBitmap);
+  find(m, "FPDFPage_CreateAnnot", api.CreateAnnot);
+  find(m, "FPDFAnnot_SetRect", api.AnnotSetRect);
+  find(m, "FPDFAnnot_SetStringValue", api.AnnotSetString);
+  find(m, "FPDFAnnot_SetColor", api.AnnotSetColor);
+  find(m, "FPDFPage_CloseAnnot", api.CloseAnnot);
+  find(m, "FPDF_RenderPage", api.RenderPage);
   find(m, "FPDFBitmap_FillRect", api.FillRect);
   // Optional: changing text (EDIT).
   find(m, "FPDFPage_CountObjects", api.CountObjects);
@@ -498,6 +520,112 @@ int styles(const std::string& pdf, int index, const std::wstring& outPath) {
   return 0;
 }
 
+// --print: each page asked for, fitted to the paper (or at its own size),
+// centred. Settings go to the printer's own; Windows' print queue does the
+// rest.
+int printPdf(const std::string& path, const std::wstring& printer, int copies, const std::string& pagesCsv, bool landscape, bool fit,
+             bool gray, bool duplex) {
+  if (!load()) {
+    say("error pdfium.dll not usable");
+    return 3;
+  }
+  api.InitLibrary();
+  std::vector<unsigned char> bytes;
+  if (!readAll(path, bytes)) {
+    say("error cannot read");
+    return 2;
+  }
+  DOC doc = api.LoadMemDocument(bytes.data(), (int)bytes.size(), nullptr);
+  if (!doc) {
+    say("error cannot open");
+    return 2;
+  }
+  HANDLE hp = nullptr;
+  std::wstring name = printer;
+  if (!OpenPrinterW(&name[0], &hp, nullptr)) {
+    say("error no printer");
+    return 4;
+  }
+  LONG need = DocumentPropertiesW(nullptr, hp, &name[0], nullptr, nullptr, 0);
+  std::vector<BYTE> dmBuf(need > (LONG)sizeof(DEVMODEW) ? (size_t)need : sizeof(DEVMODEW));
+  auto* dm = reinterpret_cast<DEVMODEW*>(dmBuf.data());
+  DocumentPropertiesW(nullptr, hp, &name[0], dm, nullptr, DM_OUT_BUFFER);
+  dm->dmFields |= DM_ORIENTATION | DM_COPIES | DM_COLOR;
+  dm->dmOrientation = landscape ? DMORIENT_LANDSCAPE : DMORIENT_PORTRAIT;
+  dm->dmCopies = (short)(copies < 1 ? 1 : copies);
+  dm->dmColor = gray ? DMCOLOR_MONOCHROME : DMCOLOR_COLOR;
+  if (duplex) {
+    dm->dmFields |= DM_DUPLEX;
+    dm->dmDuplex = landscape ? DMDUP_HORIZONTAL : DMDUP_VERTICAL;
+  }
+  DocumentPropertiesW(nullptr, hp, &name[0], dm, dm, DM_IN_BUFFER | DM_OUT_BUFFER);
+  ClosePrinter(hp);
+  HDC dc = CreateDCW(L"WINSPOOL", printer.c_str(), nullptr, dm);
+  if (!dc) {
+    say("error printer not ready");
+    return 4;
+  }
+  DOCINFOW di{};
+  di.cbSize = sizeof di;
+  di.lpszDocName = L"Keepnear";
+  if (StartDocW(dc, &di) <= 0) {
+    DeleteDC(dc);
+    say("error printer refused");
+    return 4;
+  }
+  const int pw = GetDeviceCaps(dc, HORZRES), ph = GetDeviceCaps(dc, VERTRES);
+  const int dpx = GetDeviceCaps(dc, LOGPIXELSX), dpy = GetDeviceCaps(dc, LOGPIXELSY);
+  int printed = 0;
+  for (auto& one : split(pagesCsv, ',')) {
+    if (one.empty()) continue;
+    const int idx = atoi(one.c_str());
+    if (idx < 0 || idx >= api.GetPageCount(doc)) continue;
+    PAGE p = api.LoadPage(doc, idx);
+    if (!p) continue;
+    const double w = api.GetPageWidth(p), h = api.GetPageHeight(p);
+    int rw, rh;
+    if (fit) {
+      const double k = std::fmin(pw / w, ph / h);
+      rw = (int)(w * k);
+      rh = (int)(h * k);
+    } else {
+      rw = (int)(w * dpx / 72.0);
+      rh = (int)(h * dpy / 72.0);
+    }
+    const int x = (pw - rw) / 2, y = (ph - rh) / 2;
+    StartPage(dc);
+    if (api.RenderPage) {
+      api.RenderPage(dc, p, x, y, rw, rh, 0, 0x01 /* annotations */ | 0x800 /* printing */ | (gray ? 0x08 : 0));
+    } else if (api.RenderPageBitmap && api.FillRect) {
+      // Through a picture, at most 300 dpi.
+      const double k = std::fmin(1.0, 300.0 / (dpx > 0 ? dpx : 300));
+      const int bw = (int)(rw * k), bh = (int)(rh * k);
+      std::vector<unsigned char> px((size_t)bw * bh * 4);
+      BMP bmp = api.BitmapCreateEx(bw, bh, 4, px.data(), bw * 4);
+      if (bmp) {
+        api.FillRect(bmp, 0, 0, bw, bh, 0xFFFFFFFF);
+        api.RenderPageBitmap(bmp, p, 0, 0, bw, bh, 0, 0x01 | 0x800);
+        BITMAPINFO bi{};
+        bi.bmiHeader.biSize = sizeof bi.bmiHeader;
+        bi.bmiHeader.biWidth = bw;
+        bi.bmiHeader.biHeight = -bh;
+        bi.bmiHeader.biPlanes = 1;
+        bi.bmiHeader.biBitCount = 32;
+        StretchDIBits(dc, x, y, rw, rh, 0, 0, bw, bh, px.data(), &bi, DIB_RGB_COLORS, SRCCOPY);
+        api.BitmapDestroy(bmp);
+      }
+    }
+    EndPage(dc);
+    api.ClosePage(p);
+    printed++;
+  }
+  EndDoc(dc);
+  DeleteDC(dc);
+  api.CloseDocument(doc);
+  say("ok " + std::to_string(printed));
+  return 0;
+}
+
 }  // namespace
 
 int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
@@ -505,6 +633,10 @@ int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
   LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
   if (argc >= 5 && wcscmp(argv[1], L"--styles") == 0) {
     return styles(narrow(argv[2]), _wtoi(argv[3]), argv[4]);
+  }
+  if (argc >= 10 && wcscmp(argv[1], L"--print") == 0) {
+    return printPdf(narrow(argv[2]), argv[3], _wtoi(argv[4]), narrow(argv[5]), _wtoi(argv[6]) != 0, _wtoi(argv[7]) != 0,
+                    _wtoi(argv[8]) != 0, _wtoi(argv[9]) != 0);
   }
   if (argc >= 5 && wcscmp(argv[1], L"--thumb") == 0) {
     return thumb(narrow(argv[2]), narrow(argv[3]), _wtoi(argv[4]));
@@ -635,6 +767,33 @@ int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
         api.InsertObject(last, img);
       }
       api.BitmapDestroy(bmp);
+    } else if (cmd == "NOTE") {
+      auto p = split(arg, '|');
+      if (!last || p.size() < 3 || !api.CreateAnnot || !api.AnnotSetRect || !api.AnnotSetString || !api.CloseAnnot) continue;
+      std::vector<unsigned char> t;
+      if (!readAll(p[2], t)) continue;
+      std::wstring text = wide(std::string(t.begin(), t.end()));
+      std::vector<unsigned short> u16(text.begin(), text.end());
+      u16.push_back(0);
+      double dW = (lastRot & 1) ? lastH : lastW, dH = (lastRot & 1) ? lastW : lastH;
+      double ox, oy;
+      toPage(lastRot, lastW, lastH, atof(p[0].c_str()) * dW, atof(p[1].c_str()) * dH, ox, oy);
+      ox += lastX0;
+      oy += lastY0;
+      void* a = api.CreateAnnot(last, 1 /* FPDF_ANNOT_TEXT */);
+      if (!a) continue;
+      const float r[4] = {(float)ox - 10, (float)oy + 10, (float)ox + 10, (float)oy - 10};  // left top right bottom
+      api.AnnotSetRect(a, r);
+      api.AnnotSetString(a, "Contents", u16.data());
+      std::wstring who = L"Keepnear";
+      std::vector<unsigned short> w16(who.begin(), who.end());
+      w16.push_back(0);
+      api.AnnotSetString(a, "T", w16.data());
+      if (api.AnnotSetColor && p.size() > 3) {
+        unsigned int rgb = (unsigned int)strtoul(p[3].c_str(), nullptr, 16);
+        api.AnnotSetColor(a, 0, (rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF, 255);
+      }
+      api.CloseAnnot(a);
     } else if (cmd == "EDIT") {
       auto p = split(arg, '|');
       bool can = api.CountObjects && api.GetObject && api.ObjGetType && api.ObjGetBounds && api.RemoveObject && api.ObjDestroy &&

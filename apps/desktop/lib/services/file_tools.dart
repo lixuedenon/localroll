@@ -23,7 +23,7 @@ sealed class PdfPlanPage {
 }
 
 class PdfFromDoc extends PdfPlanPage {
-  const PdfFromDoc(this.path, this.page, {this.turns = 0, this.stamps = const [], this.edits = const []});
+  const PdfFromDoc(this.path, this.page, {this.turns = 0, this.stamps = const [], this.edits = const [], this.notes = const []});
 
   final String path;
 
@@ -36,6 +36,18 @@ class PdfFromDoc extends PdfPlanPage {
 
   /// Lines of text changed in place.
   final List<PdfTextEdit> edits;
+
+  /// Notes (PDF text annotations) on the page.
+  final List<PdfNote> notes;
+}
+
+/// A note on a page: its icon at [x] [y] (0–1 of the page as shown), its
+/// [text] shown by PDF readers on a click; [rgb] its colour (hex).
+class PdfNote {
+  const PdfNote(this.x, this.y, this.text, {this.rgb = 'E5484D'});
+  final double x, y;
+  final String text;
+  final String rgb;
 }
 
 /// One line of text changed on a page: the old text in [l] [b] [r] [t]
@@ -184,6 +196,23 @@ class PdfBuilder {
   }
 
   /// Writes [pages] to [out]; null when done, else why not.
+  /// Prints [pdf] ([pages] 0-based) on [printer]; null when sent, else why not.
+  static Future<String?> print(String pdf, String printer, List<int> pages,
+      {int copies = 1, bool landscape = false, bool fit = true, bool gray = false, bool duplex = false}) async {
+    if (!available) return 'lr_pdf.exe missing';
+    try {
+      final r = await Process.run(exe, [
+        '--print', pdf, printer, '$copies', pages.join(','),
+        landscape ? '1' : '0', fit ? '1' : '0', gray ? '1' : '0', duplex ? '1' : '0',
+      ], stdoutEncoding: utf8).timeout(const Duration(minutes: 10));
+      final said = '${r.stdout}'.trim();
+      DiagLog.log('tools', 'print: $said');
+      return said.startsWith('ok') ? null : (said.isEmpty ? 'no answer' : said);
+    } catch (e) {
+      return '$e';
+    }
+  }
+
   static Future<String?> build(String out, List<PdfPlanPage> pages) async {
     if (!available) return 'lr_pdf.exe missing';
     lastSkipped = 0;
@@ -214,6 +243,11 @@ class PdfBuilder {
               await f.writeAsBytes(st.bgra);
               final r = st.rect;
               plan.writeln('STAMP ${f.path}|${st.width}|${st.height}|${r.left}|${r.top}|${r.width}|${r.height}');
+            }
+            for (final nt in p.notes) {
+              final f = File('${tmp.path}${Platform.pathSeparator}n${n++}.txt');
+              await f.writeAsString(nt.text, encoding: utf8);
+              plan.writeln('NOTE ${nt.x}|${nt.y}|${f.path}|${nt.rgb}');
             }
           case PdfFromJpeg():
             final r = p.rect;

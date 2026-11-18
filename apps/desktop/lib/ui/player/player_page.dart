@@ -2311,6 +2311,8 @@ class _ImageViewState extends State<_ImageView> implements _ViewHandle {
       child: Stack(fit: StackFit.expand, children: [
         _still(),
         InkLayer(notes: widget.notes, video: false, editor: widget.editor),
+        // What numbers say, on the pointer.
+        NumberNotes(marks: () => [for (final n in widget.notes) ...n.inks, ...?widget.editor?.inks]),
       ]),
     );
   }

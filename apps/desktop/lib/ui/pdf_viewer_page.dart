@@ -11,6 +11,9 @@ import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/network.dart';
 import 'theme.dart';
+import 'tools/annotate_page.dart';
+import 'tools/ocr_box_page.dart';
+import 'tools/print_page.dart';
 import 'trash_actions.dart';
 
 /// Reads a PDF inside LocalRoll (scans and documents that arrived): scroll
@@ -104,6 +107,23 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
               onPressed: () => Process.run('explorer.exe', [widget.path]),
               icon: const Icon(Icons.open_in_new_rounded),
             ),
+            if (widget.services case final s?) ...[
+              IconButton(
+                tooltip: tr('ocrbox.title'),
+                onPressed: () => unawaited(openOcrBox(context, s, widget.path)),
+                icon: const Icon(Icons.document_scanner_outlined),
+              ),
+              IconButton(
+                tooltip: tr('ann.title'),
+                onPressed: () => unawaited(openAnnotate(context, s, widget.path)),
+                icon: const Icon(Icons.draw_rounded),
+              ),
+              IconButton(
+                tooltip: tr('print.menu'),
+                onPressed: () => unawaited(openPrint(context, s, [widget.path])),
+                icon: const Icon(Icons.print_rounded),
+              ),
+            ],
             if (widget.services case final s?)
               IconButton(
                 tooltip: tr('lib.delete'),
