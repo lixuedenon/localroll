@@ -390,7 +390,7 @@ class _PdfToolPageState extends State<PdfToolPage> {
 
   /// A picture (cropped, its background taken away if asked) on the page
   /// chosen, or on every page (a logo).
-  Future<void> _picture() async {
+  Future<void> _addPicture() async {
     final target = _picked.length == 1 ? _picked.first : (_pages.isNotEmpty ? _pages.first : null);
     if (target == null) return;
     final pic = await pictureCutout(context, s);
@@ -485,7 +485,7 @@ class _PdfToolPageState extends State<PdfToolPage> {
                         builder: (_) => PdfTextEditPage(services: s, path: _docs.first.path),
                       )), color: LightLook.blue),
               act(Icons.draw_rounded, tr('pdf.sign'), busy ? null : _sign, color: const Color(0xFF7B4DEB)),
-              act(Icons.add_photo_alternate_outlined, tr('pdf.add_picture'), busy ? null : _picture),
+              act(Icons.add_photo_alternate_outlined, tr('pdf.add_picture'), busy ? null : _addPicture),
               act(Icons.call_split_rounded, tr('pdf.split'), busy ? null : _split),
               act(Icons.compress_rounded, tr('pdf.compress'), busy ? null : _compress),
               act(Icons.image_outlined, tr('pdf.images'), busy ? null : _toImages),
