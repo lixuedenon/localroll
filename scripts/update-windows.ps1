@@ -45,11 +45,29 @@ foreach ($p in $running) {
     if ($dir -and ($dir.TrimEnd('\') -ne $full)) { $others += $dir }
   } catch {}
 }
-$running | Stop-Process -Force -ErrorAction SilentlyContinue
+# Asked first (a Keepnear running as administrator can't be closed from a
+# normal shell; it sees this file and quits by itself), then made to.
+$quitFile = Join-Path $env:TEMP 'keepnear-quit.request'
+if ($running) {
+  Set-Content -LiteralPath $quitFile -Value 'update' -ErrorAction SilentlyContinue
+  for ($i = 0; $i -lt 20; $i++) {
+    if (-not (Get-Process -Name LocalRoll, localroll_desktop -ErrorAction SilentlyContinue)) { break }
+    Start-Sleep -Milliseconds 500
+  }
+}
+Get-Process -Name LocalRoll, localroll_desktop -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+# Its helpers too (screen pen, PDF, picker), if any are left.
+Get-Process -Name lr_overlay, lr_pdf, lr_pick -ErrorAction SilentlyContinue | Where-Object {
+  try { (Split-Path $_.Path -Parent).TrimEnd('\') -eq $full } catch { $false }
+} | Stop-Process -Force -ErrorAction SilentlyContinue
 # Wait until they are really gone (files stay locked until then).
 for ($i = 0; $i -lt 20; $i++) {
   if (-not (Get-Process -Name LocalRoll, localroll_desktop -ErrorAction SilentlyContinue)) { break }
   Start-Sleep -Milliseconds 500
+}
+Remove-Item -LiteralPath $quitFile -ErrorAction SilentlyContinue
+if (Get-Process -Name LocalRoll, localroll_desktop -ErrorAction SilentlyContinue) {
+  throw 'Keepnear is still running (as administrator?). Quit it from its title bar, then run the update again.'
 }
 
 $tmp = Join-Path $env:TEMP "localroll-update-$runId"

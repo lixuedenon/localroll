@@ -130,6 +130,7 @@ Future<void> main(List<String> args) async {
   // in. Looked at now and whenever its rules change; asked once if not.
   FirewallGuard.instance.ask = askFirewall;
   Timer(const Duration(seconds: 3), FirewallGuard.instance.start);
+  watchQuitRequest(services);
   // Ctrl+Shift+R / P / D for recording the screen, from anywhere.
   ScreenRecorder.instance.watchKeys(services);
   if (files.isNotEmpty && !sending) PlayerLauncher.request(services, files);

@@ -1,8 +1,9 @@
 // apps/desktop/lib/ui/title_bar.dart
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:localroll_core/localroll_core.dart' show appName;
+import 'package:localroll_core/localroll_core.dart' show DiagLog, appName;
 import 'package:window_manager/window_manager.dart';
 
 import '../app_services.dart';
@@ -275,6 +276,28 @@ Future<void> confirmExit(AppServices services) async {
   );
   _asking = false;
   if (ok == true) await _quit(services);
+}
+
+/// Quits at once (the update script asks for it; see [watchQuitRequest]).
+Future<void> quitNow(AppServices services) => _quit(services);
+
+/// The update script can't close a Keepnear running as administrator from
+/// a normal shell; it leaves a file in the user's temp folder instead, and
+/// Keepnear quits by itself when it sees it.
+void watchQuitRequest(AppServices services) {
+  final f = File('${Directory.systemTemp.path}${Platform.pathSeparator}keepnear-quit.request');
+  try {
+    if (f.existsSync()) f.deleteSync(); // an old one: not for us
+  } catch (_) {}
+  Timer.periodic(const Duration(seconds: 1), (t) async {
+    if (!f.existsSync()) return;
+    t.cancel();
+    try {
+      f.deleteSync();
+    } catch (_) {}
+    DiagLog.log('start', 'asked to quit (update)');
+    await _quit(services);
+  });
 }
 
 Future<void> _quit(AppServices services) async {
