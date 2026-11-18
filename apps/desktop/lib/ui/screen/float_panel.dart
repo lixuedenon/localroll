@@ -134,6 +134,16 @@ class FloatPanel {
   Timer? _watch;
   DateTime _beat = DateTime.now();
 
+  /// Closes the panel and opens it again (same mode); the session goes on.
+  Future<void> restart() async {
+    final m = mode, gone = onGone;
+    onGone = null;
+    await stop();
+    onGone = gone;
+    DiagLog.log('pen', 'panel opened again');
+    await start(m);
+  }
+
   Future<void> stop() async {
     _watch?.cancel();
     _watch = null;
@@ -234,7 +244,11 @@ class FloatPanel {
         DiagLog.log('pen', 'panel: $v');
       case 'hwnd':
         hwnd = (v as num?)?.toInt() ?? 0;
-        if (hwnd != 0) o.own(hwnd);
+        if (hwnd != 0) {
+          o.own(hwnd);
+          // The helper checks the panel (quick) and Keepnear (slower).
+          o.watch([(hwnd, 1500), (WinScreen.ownWindow(), 5000)]);
+        }
       case 'at':
         final l = (m['l'] as num?)?.toDouble(), t = (m['t'] as num?)?.toDouble();
         final w = (m['w'] as num?)?.toDouble(), h = (m['h'] as num?)?.toDouble();
@@ -346,6 +360,8 @@ Future<void> runPenPanel(List<String> args) async {
   // Alive, every second (Keepnear closes a panel that goes quiet); errors
   // go to Keepnear's log.
   Timer.periodic(const Duration(seconds: 1), (_) => remote.send({'a': 'beat'}));
+  // …and on its own window, for the pen helper (checked every second).
+  Timer.periodic(const Duration(milliseconds: 500), (_) => WinScreen.beat(WinScreen.ownWindow()));
   FlutterError.onError = (d) {
     remote.send({'a': 'log', 'v': '${d.exceptionAsString()} | ${d.stack.toString().split('\n').take(6).join(' | ')}'});
   };

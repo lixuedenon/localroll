@@ -459,8 +459,34 @@ class PenSession {
 
   Future<void> toggle() => active ? stop() : start();
 
+  /// The helper's own words when Keepnear stops answering, and what its
+  /// buttons (or Esc twice) do.
+  static void prepareHelper({required bool recording}) {
+    final o = PenOverlay.instance;
+    o.noteText = (tr('pen.hung_text'), tr('pen.hung_reopen'), tr('pen.hung_end'));
+    o.onHung = (what) {
+      if (recording) {
+        final r = ScreenRecorder.instance;
+        if (what == 'end') {
+          if (r.pen) unawaited(r.togglePen());
+        } else if (FloatPanel.instance.running || FloatPanel.wanted) {
+          unawaited(FloatPanel.instance.restart());
+        }
+        return;
+      }
+      final p = PenSession.instance;
+      if (!p.active) return;
+      if (what == 'end') {
+        unawaited(p.stop());
+      } else if (p.floating) {
+        unawaited(FloatPanel.instance.restart());
+      }
+    };
+  }
+
   Future<bool> start() async {
     if (active) return true;
+    prepareHelper(recording: false);
     final ctx = AppNav.instance.navigatorKey.currentContext;
     if (!PenOverlay.available) {
       if (ctx != null) ScaffoldMessenger.maybeOf(ctx)?.showSnackBar(SnackBar(content: Text(tr('pen.missing'))));

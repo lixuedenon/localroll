@@ -144,6 +144,24 @@ class WinScreen {
     }
   }
 
+  /// "Still alive": the tick count now, kept on [hwnd] (the pen helper
+  /// reads it; a Dart side that stops never updates it, even while Windows
+  /// still sees the window answering).
+  static void beat(int hwnd) {
+    final u = _user32;
+    if (u == null || hwnd == 0) return;
+    try {
+      _setProp ??= u.lookupFunction<Int32 Function(IntPtr, Pointer<Utf16>, IntPtr), int Function(int, Pointer<Utf16>, int)>('SetPropW');
+      _tick ??= DynamicLibrary.open('kernel32.dll').lookupFunction<Uint32 Function(), int Function()>('GetTickCount');
+      _beatName ??= 'KeepnearBeat'.toNativeUtf16();
+      _setProp!(hwnd, _beatName!, _tick!() | 1);
+    } catch (_) {}
+  }
+
+  static int Function(int, Pointer<Utf16>, int)? _setProp;
+  static int Function()? _tick;
+  static Pointer<Utf16>? _beatName;
+
   /// Windows 11: round corners for [hwnd] (a small bar window looks like a
   /// card). Older Windows: nothing.
   static void roundCorners(int hwnd) {

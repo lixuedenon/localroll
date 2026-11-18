@@ -98,6 +98,13 @@ class PenOverlay extends ChangeNotifier implements PenControls {
       _send('pendraw ${penDraws ? 1 : 0}');
       _send('togglekey $toggleKey');
       _send('pages ${perWindow ? 'window' : 'screen'}');
+      // The helper checks Keepnear answers (else it lets go of the mouse).
+      watch([(WinScreen.ownWindow(), 5000)]);
+      _beat?.cancel();
+      _beat = Timer.periodic(const Duration(milliseconds: 500), (_) => WinScreen.beat(WinScreen.ownWindow()));
+      WinScreen.beat(WinScreen.ownWindow());
+      final nt = noteText;
+      if (nt != null) _send('notetext ${nt.$1}\t${nt.$2}\t${nt.$3}');
       // Still answering? A helper that stops would keep the mouse caught
       // under its screen-wide window: closed after a few seconds of silence.
       _alive?.cancel();
@@ -126,6 +133,8 @@ class PenOverlay extends ChangeNotifier implements PenControls {
   Future<void> stop() async {
     _alive?.cancel();
     _alive = null;
+    _beat?.cancel();
+    _beat = null;
     final p = _p;
     _p = null;
     draw = false;
@@ -144,11 +153,24 @@ class PenOverlay extends ChangeNotifier implements PenControls {
     notifyListeners();
   }
 
-  Timer? _alive;
+  Timer? _alive, _beat;
   DateTime _pong = DateTime.now();
 
   /// The helper went away (quit, crashed, or closed for not answering).
   void Function()? onEnded;
+
+  /// From the helper: "reopen" (the toolbar, after it stopped answering) or
+  /// "end" (end the pen: its button, or Esc twice).
+  void Function(String what)? onHung;
+
+  /// What the helper says when Keepnear stops answering: the line, and its
+  /// two buttons (set before [start]).
+  (String, String, String)? noteText;
+
+  /// Keepnear's windows the helper checks, each with how long it may take
+  /// to answer (ms).
+  void watch(List<(int, int)> windows) =>
+      _send('watch ${[for (final (h, ms) in windows) if (h != 0) '$h $ms'].join(' ')}');
 
   void _line(String line) {
     final parts = line.trim().split(' ');
@@ -175,6 +197,11 @@ class PenOverlay extends ChangeNotifier implements PenControls {
         }
       case 'error':
         DiagLog.log('pen', line.trim());
+      case 'hung':
+        if (parts.length > 1) {
+          DiagLog.log('pen', 'helper: ${parts[1]}');
+          onHung?.call(parts[1]);
+        }
       case 'mark':
       case 'gone':
       case 'board':

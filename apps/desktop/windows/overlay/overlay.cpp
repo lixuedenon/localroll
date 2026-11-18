@@ -54,6 +54,7 @@
 #include <map>
 #include <set>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <thread>
 #include <vector>
@@ -94,6 +95,8 @@ struct Com {
 
 constexpr UINT kCmd = WM_APP + 1;
 constexpr UINT kQuit = WM_APP + 2;
+constexpr UINT kHung = WM_APP + 3;   // lParam: the window not answering
+constexpr UINT kAlive = WM_APP + 4;  // it answers again
 constexpr UINT_PTR kTimerTick = 1;
 constexpr UINT_PTR kTimerCursor = 2;
 constexpr float kPi = 3.14159265358979f;
@@ -194,6 +197,7 @@ UINT32* g_bits = nullptr;
 HGDIOBJ g_oldBmp = nullptr;
 HHOOK g_hook = nullptr, g_keys = nullptr;
 int g_toggleKey = VK_F8;
+ULONGLONG g_lastEsc = 0;  // Esc twice quickly: end the pen
 bool g_keyHeld = false;
 ULONGLONG g_lastWheel = 0;
 HWINEVENTHOOK g_fgHook = nullptr;
@@ -1276,6 +1280,23 @@ LRESULT CALLBACK keyHook(int code, WPARAM wp, LPARAM lp) {
       }
       return 1;
     }
+    // Esc: back to operating the computer (the mouse goes back); twice
+    // quickly: end the pen. Only while drawing (or just after), so Esc in
+    // apps is never taken otherwise.
+    if (down && vk == VK_ESCAPE && g_selected == 0) {
+      const ULONGLONG now = GetTickCount64();
+      const bool second = g_lastEsc != 0 && now - g_lastEsc < 700;
+      if ((g_draw && !g_pass) || second) {
+        if (second) {
+          g_lastEsc = 0;
+          emit("hung end");
+        } else {
+          g_lastEsc = now;
+        }
+        setMode(false);
+        return 1;
+      }
+    }
     if (down && g_draw && !g_pass && g_selected != 0) {
       if (vk == VK_DELETE || vk == VK_BACK) {
         deleteSelected();
@@ -1539,12 +1560,132 @@ std::wstring wide(const std::string& s) {
   return w;
 }
 
+// ------------------------------------------------- not answering
+// Keepnear's windows (its toolbar, itself) are checked from a thread of
+// their own every second. One not answering in time: the pen lets go of
+// the mouse at once (operate) and says so in a small window of its own,
+// so the computer is never left caught under the screen-wide layer.
+struct Watch {
+  HWND h;
+  DWORD ms;
+};
+std::vector<Watch> g_watch;
+std::mutex g_watchLock;
+HWND g_note = nullptr;
+std::wstring g_noteText = L"Keepnear's toolbar is not answering. The pen is paused: the computer works as usual.";
+std::wstring g_noteReopen = L"Reopen toolbar";
+std::wstring g_noteEnd = L"End pen";
+
+void watchLoop() {
+  std::set<HWND> hung;
+  for (;;) {
+    Sleep(1000);
+    std::vector<Watch> ws;
+    {
+      std::lock_guard<std::mutex> lock(g_watchLock);
+      ws = g_watch;
+    }
+    for (const auto& w : ws) {
+      if (!IsWindow(w.h)) continue;
+      DWORD_PTR r = 0;
+      bool ok = SendMessageTimeoutW(w.h, WM_NULL, 0, 0, SMTO_ABORTIFHUNG | SMTO_BLOCK, w.ms, &r) != 0;
+      // Its program's own "still alive" (the window can answer while the
+      // program behind it is stuck).
+      if (ok) {
+        const auto beat = static_cast<DWORD>(reinterpret_cast<UINT_PTR>(GetPropW(w.h, L"KeepnearBeat")));
+        if (beat != 0 && GetTickCount() - beat > w.ms) ok = false;
+      }
+      if (!ok && hung.insert(w.h).second) PostMessageW(g_msg, kHung, 0, reinterpret_cast<LPARAM>(w.h));
+      // The toolbar (checked quickly) stays above the drawing layer, so it
+      // can always be clicked.
+      if (ok && w.ms <= 2000) {
+        SetWindowPos(w.h, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_ASYNCWINDOWPOS);
+      }
+      if (ok && hung.erase(w.h) > 0) PostMessageW(g_msg, kAlive, 0, reinterpret_cast<LPARAM>(w.h));
+    }
+  }
+}
+
+LRESULT CALLBACK noteProc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
+  if (msg == WM_COMMAND) {
+    const int id = LOWORD(wp);
+    if (id == 1) emit("hung reopen");
+    if (id == 2) emit("hung end");
+    DestroyWindow(h);
+    return 0;
+  }
+  if (msg == WM_CTLCOLORSTATIC) {
+    SetBkMode(reinterpret_cast<HDC>(wp), TRANSPARENT);
+    return reinterpret_cast<LRESULT>(GetSysColorBrush(COLOR_WINDOW));
+  }
+  if (msg == WM_DESTROY && h == g_note) g_note = nullptr;
+  return DefWindowProcW(h, msg, wp, lp);
+}
+
+void showNote() {
+  if (g_note) return;
+  static bool registered = false;
+  HINSTANCE inst = GetModuleHandleW(nullptr);
+  if (!registered) {
+    WNDCLASSW wc{};
+    wc.lpfnWndProc = noteProc;
+    wc.hInstance = inst;
+    wc.lpszClassName = L"KeepnearPenNote";
+    wc.hbrBackground = GetSysColorBrush(COLOR_WINDOW);
+    wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    RegisterClassW(&wc);
+    registered = true;
+  }
+  const double k = GetDpiForSystem() / 96.0;
+  auto px = [k](int v) { return static_cast<int>(v * k); };
+  MONITORINFO mi{sizeof mi};
+  GetMonitorInfoW(MonitorFromPoint(POINT{0, 0}, MONITOR_DEFAULTTOPRIMARY), &mi);
+  const int W = px(560), H = px(118);
+  const int x = (mi.rcWork.left + mi.rcWork.right - W) / 2, y = mi.rcWork.top + px(40);
+  g_note = CreateWindowExW(WS_EX_TOPMOST | WS_EX_TOOLWINDOW, L"KeepnearPenNote", L"Keepnear", WS_POPUP | WS_BORDER, x, y, W, H, nullptr,
+                           nullptr, inst, nullptr);
+  if (!g_note) return;
+  HFONT font = CreateFontW(-px(15), 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, 0, 0, CLEARTYPE_QUALITY, 0, L"Microsoft YaHei UI");
+  HWND t = CreateWindowExW(0, L"STATIC", (L"\u26A0  " + g_noteText).c_str(), WS_CHILD | WS_VISIBLE, px(16), px(14), W - px(32), px(44),
+                           g_note, nullptr, inst, nullptr);
+  HWND b1 = CreateWindowExW(0, L"BUTTON", g_noteReopen.c_str(), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, W - px(16 + 130 + 10 + 170),
+                            H - px(48), px(170), px(34), g_note, reinterpret_cast<HMENU>(1), inst, nullptr);
+  HWND b2 = CreateWindowExW(0, L"BUTTON", g_noteEnd.c_str(), WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON, W - px(16 + 130), H - px(48),
+                            px(130), px(34), g_note, reinterpret_cast<HMENU>(2), inst, nullptr);
+  for (HWND c : {t, b1, b2}) SendMessageW(c, WM_SETFONT, reinterpret_cast<WPARAM>(font), TRUE);
+  ShowWindow(g_note, SW_SHOWNOACTIVATE);
+}
+
 void command(const std::string& line) {
   const auto sp = line.find(' ');
   const std::string cmd = line.substr(0, sp);
   const std::string arg = sp == std::string::npos ? "" : line.substr(sp + 1);
   if (cmd == "quit") {
     PostQuitMessage(0);
+  } else if (cmd == "watch") {
+    // watch <hwnd> <ms> [<hwnd> <ms> …]: Keepnear's windows to check.
+    std::vector<Watch> ws;
+    const char* p = arg.c_str();
+    char* end = nullptr;
+    for (;;) {
+      const long long h = std::strtoll(p, &end, 10);
+      if (end == p) break;
+      p = end;
+      const long ms = std::strtol(p, &end, 10);
+      if (end == p) break;
+      p = end;
+      if (h != 0) ws.push_back({reinterpret_cast<HWND>(static_cast<INT_PTR>(h)), static_cast<DWORD>(ms < 300 ? 300 : ms)});
+    }
+    std::lock_guard<std::mutex> lock(g_watchLock);
+    g_watch = ws;
+  } else if (cmd == "notetext") {
+    // notetext <text>\t<reopen>\t<end> (UTF-8)
+    const auto a = arg.find('\t'), b = a == std::string::npos ? a : arg.find('\t', a + 1);
+    if (b != std::string::npos) {
+      g_noteText = wide(arg.substr(0, a));
+      g_noteReopen = wide(arg.substr(a + 1, b - a - 1));
+      g_noteEnd = wide(arg.substr(b + 1));
+    }
   } else if (cmd == "ping") {
     // Keepnear checks this helper still answers (else it closes it, so the
     // mouse is never left caught by a screen-wide window).
@@ -1754,6 +1895,18 @@ LRESULT CALLBACK msgProc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
     PostQuitMessage(0);
     return 0;
   }
+  if (msg == kHung) {
+    // Let go of the mouse first, then say so.
+    logLine("keepnear window not answering: pen let go");
+    setMode(false);
+    showNote();
+    return 0;
+  }
+  if (msg == kAlive) {
+    logLine("keepnear window answers again");
+    if (g_note) DestroyWindow(g_note);
+    return 0;
+  }
   if (msg == WM_TIMER && wp == kTimerCursor) {
     moveSpot();
     return 0;
@@ -1912,6 +2065,7 @@ int WINAPI wWinMain(HINSTANCE inst, HINSTANCE, PWSTR, int) {
                              WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS);
   SetTimer(g_msg, kTimerTick, 40, nullptr);
   SetTimer(g_msg, kTimerCursor, 15, nullptr);
+  std::thread(watchLoop).detach();
 
   char b[96];
   std::snprintf(b, sizeof b, "ready %ld %ld %d %d", g_virt.left, g_virt.top, w, h);

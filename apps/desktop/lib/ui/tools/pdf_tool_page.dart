@@ -19,6 +19,7 @@ import '../../services/win_dialogs.dart';
 import '../light_look.dart';
 import '../send_page.dart' show baseNameOf;
 import 'pdf_text_edit.dart';
+import 'sig_library.dart';
 import 'tools.dart';
 import '../lr_dialog.dart';
 
@@ -74,7 +75,6 @@ class _PdfToolPageState extends State<PdfToolPage> {
   final List<_Page> _pages = [];
   final Set<_Page> _picked = {};
   bool _loading = true;
-  Signature? _lastSig;
 
   AppServices get s => widget.services;
 
@@ -377,35 +377,31 @@ class _PdfToolPageState extends State<PdfToolPage> {
     );
   }
 
+  /// A signature (saved, drawn, or from a photo) on the page chosen.
   Future<void> _sign() async {
     final target = _picked.length == 1 ? _picked.first : (_pages.isNotEmpty ? _pages.first : null);
     if (target == null) return;
-    var sig = _lastSig;
-    final shown = sig;
-    if (shown != null) {
-      final again = await showLrDialog<bool>(
-        context: context,
-        builder: (c) => AlertDialog(
-          title: Text(tr('pdf.sign')),
-          content: Column(mainAxisSize: MainAxisSize.min, children: [
-            Container(color: Colors.white, padding: const EdgeInsets.all(8), height: 90, child: Image.memory(shown.png)),
-          ]),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('pdf.sign_new'))),
-            FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(tr('pdf.sign_same'))),
-          ],
-        ),
-      );
-      if (again == null) return;
-      if (!again) sig = null;
-    }
-    if (!mounted) return;
-    sig ??= await showSignaturePad(context, (k) => tr('sig.$k'));
+    final sig = await pickSignature(context, s);
     if (sig == null || !mounted) return;
-    _lastSig = sig;
-    final placed = await showLrDialog<Rect>(context: context, builder: (_) => _PlaceSign(page: target, sig: sig!));
+    final placed = await showLrDialog<(Rect, bool)>(context: context, builder: (_) => _PlaceSign(page: target, sig: sig));
     if (placed == null) return;
-    setState(() => target.signs.add(_Sign(sig!, placed)));
+    setState(() => target.signs.add(_Sign(sig, placed.$1)));
+  }
+
+  /// A picture (cropped, its background taken away if asked) on the page
+  /// chosen, or on every page (a logo).
+  Future<void> _picture() async {
+    final target = _picked.length == 1 ? _picked.first : (_pages.isNotEmpty ? _pages.first : null);
+    if (target == null) return;
+    final pic = await pictureCutout(context, s);
+    if (pic == null || !mounted) return;
+    final placed = await showLrDialog<(Rect, bool)>(context: context, builder: (_) => _PlaceSign(page: target, sig: pic, everyPage: true));
+    if (placed == null) return;
+    setState(() {
+      for (final p in placed.$2 ? _pages : [target]) {
+        p.signs.add(_Sign(pic, placed.$1));
+      }
+    });
   }
 
   // ------------------------------------------------------------- page
@@ -489,6 +485,7 @@ class _PdfToolPageState extends State<PdfToolPage> {
                         builder: (_) => PdfTextEditPage(services: s, path: _docs.first.path),
                       )), color: LightLook.blue),
               act(Icons.draw_rounded, tr('pdf.sign'), busy ? null : _sign, color: const Color(0xFF7B4DEB)),
+              act(Icons.add_photo_alternate_outlined, tr('pdf.add_picture'), busy ? null : _picture),
               act(Icons.call_split_rounded, tr('pdf.split'), busy ? null : _split),
               act(Icons.compress_rounded, tr('pdf.compress'), busy ? null : _compress),
               act(Icons.image_outlined, tr('pdf.images'), busy ? null : _toImages),
@@ -621,10 +618,13 @@ class _Thumb extends StatelessWidget {
 
 /// Where the signature goes: drag it on the page, make it bigger / smaller.
 class _PlaceSign extends StatefulWidget {
-  const _PlaceSign({required this.page, required this.sig});
+  const _PlaceSign({required this.page, required this.sig, this.everyPage = false});
 
   final _Page page;
   final Signature sig;
+
+  /// Offer "on every page" (a picture such as a logo).
+  final bool everyPage;
 
   @override
   State<_PlaceSign> createState() => _PlaceSignState();
@@ -633,6 +633,7 @@ class _PlaceSign extends StatefulWidget {
 class _PlaceSignState extends State<_PlaceSign> {
   Offset _at = const Offset(0.55, 0.8);
   double _w = 0.3;
+  bool _all = false;
 
   @override
   Widget build(BuildContext context) {
@@ -668,13 +669,21 @@ class _PlaceSignState extends State<_PlaceSign> {
         ),
         Row(children: [
           Text(tr('pdf.sign_size')),
-          Expanded(child: Slider(value: _w, min: 0.08, max: 0.8, onChanged: (v) => setState(() => _w = v))),
+          Expanded(child: Slider(value: _w, min: 0.05, max: 1, onChanged: (v) => setState(() => _w = v))),
         ]),
+        if (widget.everyPage)
+          CheckboxListTile(
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            value: _all,
+            onChanged: (v) => setState(() => _all = v ?? false),
+            title: Text(tr('pdf.every_page')),
+          ),
       ]),
       actions: [
         TextButton(onPressed: () => Navigator.pop(context), child: Text(tr('common.cancel'))),
         FilledButton(
-          onPressed: () => Navigator.pop(context, Rect.fromLTWH(rect.left / w, rect.top / h, rect.width / w, rect.height / h)),
+          onPressed: () => Navigator.pop(context, (Rect.fromLTWH(rect.left / w, rect.top / h, rect.width / w, rect.height / h), _all)),
           child: Text(tr('pdf.place_ok')),
         ),
       ],

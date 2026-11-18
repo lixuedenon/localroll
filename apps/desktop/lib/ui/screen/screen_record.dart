@@ -458,6 +458,7 @@ class ScreenRecorder extends ChangeNotifier {
       _savedWindow = WinScreen.ownPlaceRect();
     }
     final o = PenOverlay.instance;
+    PenSession.prepareHelper(recording: true);
     usesOverlay = PenOverlay.available && (o.running || await o.start());
     // The floating panel: LocalRoll's window stays as it is — it can be
     // recorded, shown and drawn on like any other.
