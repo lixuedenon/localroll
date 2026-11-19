@@ -666,14 +666,11 @@ class _PdfToolPageState extends State<PdfToolPage> {
 
 /// One page, small: its picture turned as asked, its signatures on it.
 class _Thumb extends StatelessWidget {
-  const _Thumb({required this.page, required this.width, required this.picked, this.onSign});
+  const _Thumb({required this.page, required this.width, required this.picked});
 
   final _Page page;
   final double width;
   final bool picked;
-
-  /// A signature / picture on the page clicked (to change it).
-  final ValueChanged<_Sign>? onSign;
 
   @override
   Widget build(BuildContext context) {
@@ -693,18 +690,7 @@ class _Thumb extends StatelessWidget {
             height: sg.rect.height * h,
             child: Transform.rotate(
               angle: sg.angle,
-              child: onSign == null
-                  ? Image.memory(sg.sig.png, fit: BoxFit.fill)
-                  : Tooltip(
-                      message: tr('pdf.sign_edit'),
-                      child: MouseRegion(
-                        cursor: SystemMouseCursors.click,
-                        child: GestureDetector(
-                          onTap: () => onSign!(sg),
-                          child: Image.memory(sg.sig.png, fit: BoxFit.fill),
-                        ),
-                      ),
-                    ),
+              child: Image.memory(sg.sig.png, fit: BoxFit.fill),
             ),
           ),
       ]),
