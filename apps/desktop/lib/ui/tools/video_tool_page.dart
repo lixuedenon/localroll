@@ -362,7 +362,7 @@ class _VideoToolPageState extends State<VideoToolPage> {
     final keepMs = (_keep.end - _keep.start).round();
     return Scaffold(
       backgroundColor: const Color(0xFF141B26),
-      appBar: AppBar(
+      appBar: AppBar(automaticallyImplyLeading: false,
         backgroundColor: const Color(0xFF1D2633),
         title: Text(baseNameOf(_files[_at]), overflow: TextOverflow.ellipsis),
         actions: [

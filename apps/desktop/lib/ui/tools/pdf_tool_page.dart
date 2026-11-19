@@ -18,10 +18,8 @@ import '../../services/file_tools.dart';
 import '../../services/win_dialogs.dart';
 import '../light_look.dart';
 import '../send_page.dart' show baseNameOf;
-import 'annotate_page.dart';
 import 'ocr_box_page.dart';
 import 'pdf_text_edit.dart';
-import 'sig_library.dart';
 import 'tools.dart';
 import '../lr_dialog.dart';
 
@@ -52,17 +50,6 @@ class _Was {
   final _Page page;
   final int turns;
   final List<_Sign> signs;
-}
-
-/// Where a signature / picture ends up: its box, its turn, on every page;
-/// or taken away.
-class _Placed {
-  const _Placed(this.rect, this.angle, {this.all = false, this.remove = false});
-
-  final Rect rect;
-  final double angle;
-  final bool all;
-  final bool remove;
 }
 
 class _Page {
@@ -390,110 +377,6 @@ class _PdfToolPageState extends State<PdfToolPage> {
 
   static String _mb(int b) => b < 1024 * 1024 ? '${(b / 1024).round()} KB' : '${(b / 1024 / 1024).toStringAsFixed(1)} MB';
 
-  /// The words on the pages: the PDF's own text, or read from the picture
-  /// (scans) by Windows.
-  Future<void> _text() async {
-    final buf = StringBuffer();
-    await runBusy(context, tr('tool.reading'), () async {
-      final tmp = await Directory.systemTemp.createTemp('lr_pdft');
-      try {
-        for (final p in _chosen) {
-          var t = '';
-          try {
-            t = (await p.page.loadText()).fullText.trim();
-          } catch (_) {}
-          if (t.isEmpty) {
-            final png = '${tmp.path}${Platform.pathSeparator}${p.number}.png';
-            if (await _png(p, 200, png) == null) t = (await s.textIndexer.ocr.read(png))?.trim() ?? '';
-          }
-          if (_chosen.length > 1) buf.writeln('— ${tr('pdf.page_n', {'n': p.number})} —');
-          buf.writeln(t);
-          buf.writeln();
-        }
-      } finally {
-        try {
-          await tmp.delete(recursive: true);
-        } catch (_) {}
-      }
-    });
-    if (!mounted) return;
-    final ctl = TextEditingController(text: buf.toString().trim());
-    await showLrDialog<void>(
-      context: context,
-      builder: (c) => AlertDialog(
-        title: Text(tr('pdf.text')),
-        content: SizedBox(
-          width: 680,
-          child: TextField(controller: ctl, maxLines: 20, minLines: 12, decoration: const InputDecoration(border: OutlineInputBorder())),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              final out = toolOutPath(s, _docs.first.path, '', 'txt');
-              await File(out).writeAsString(ctl.text);
-              if (c.mounted) Navigator.pop(c);
-              if (mounted) await showToolResult(context, s, [out]);
-            },
-            child: Text(tr('pdf.save_txt')),
-          ),
-          FilledButton(
-            onPressed: () {
-              unawaited(Clipboard.setData(ClipboardData(text: ctl.text)));
-              Navigator.pop(c);
-            },
-            child: Text(tr('tool.copy_text')),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// A signature (saved, drawn, or from a photo) on the page chosen.
-  Future<void> _sign() async {
-    final target = _picked.length == 1 ? _picked.first : (_pages.isNotEmpty ? _pages.first : null);
-    if (target == null) return;
-    final sig = await pickSignature(context, s);
-    if (sig == null || !mounted) return;
-    final placed = await showLrDialog<_Placed>(context: context, builder: (_) => _PlaceSign(page: target, sig: sig));
-    if (placed == null || placed.remove) return;
-    _change(() => target.signs.add(_Sign(sig, placed.rect, angle: placed.angle)));
-  }
-
-  /// A signature / picture already on [p]: moved, resized, turned, or
-  /// taken away.
-  Future<void> _editSign(_Page p, _Sign sg) async {
-    final placed = await showLrDialog<_Placed>(
-      context: context,
-      builder: (_) => _PlaceSign(page: p, sig: sg.sig, start: sg),
-    );
-    if (placed == null || !mounted || !p.signs.contains(sg)) return;
-    _change(() {
-      if (placed.remove) {
-        p.signs.remove(sg);
-      } else {
-        sg
-          ..rect = placed.rect
-          ..angle = placed.angle;
-      }
-    });
-  }
-
-  /// A picture (cropped, its background taken away if asked) on the page
-  /// chosen, or on every page (a logo).
-  Future<void> _addPicture() async {
-    final target = _picked.length == 1 ? _picked.first : (_pages.isNotEmpty ? _pages.first : null);
-    if (target == null) return;
-    final pic = await pictureCutout(context, s);
-    if (pic == null || !mounted) return;
-    final placed = await showLrDialog<_Placed>(context: context, builder: (_) => _PlaceSign(page: target, sig: pic, everyPage: true));
-    if (placed == null || placed.remove) return;
-    _change(() {
-      for (final p in placed.all ? _pages : [target]) {
-        p.signs.add(_Sign(pic, placed.rect, angle: placed.angle));
-      }
-    });
-  }
-
   /// The file (and its page) a one-file action works on: the page picked
   /// first; else the only file; else the user says which file.
   Future<(_Doc, int)?> _target() async {
@@ -569,20 +452,13 @@ class _PdfToolPageState extends State<PdfToolPage> {
     await old.doc.dispose();
   }
 
-  Future<void> _editText() async {
+  /// 编辑: words, marks, signatures, pictures — in the file of the page
+  /// picked; the tool then uses the new version.
+  Future<void> _edit() async {
     final t = await _target();
     if (t == null || !mounted) return;
     final (doc, at) = t;
-    await Navigator.of(context).push(MaterialPageRoute<void>(
-      builder: (_) => PdfTextEditPage(services: s, path: doc.path, page: at, onSaved: (f) => unawaited(_swap(doc, f))),
-    ));
-  }
-
-  Future<void> _annotate() async {
-    final t = await _target();
-    if (t == null || !mounted) return;
-    final (doc, at) = t;
-    await openAnnotate(context, s, doc.path, page: at, onSaved: (f) => unawaited(_swap(doc, f)));
+    await openEditor(context, s, doc.path, page: at, onSaved: (f) => unawaited(_swap(doc, f)));
   }
 
   /// 取字: a box on the page picked (or the first page); the whole page,
@@ -590,14 +466,14 @@ class _PdfToolPageState extends State<PdfToolPage> {
   Future<void> _boxText() async {
     final t = await _target();
     if (t == null || !mounted) return;
-    await openOcrBox(context, s, t.$1.path, page: t.$2);
+    final picked = [for (final p in _pages) if (_picked.contains(p) && p.doc == t.$1) p.number - 1];
+    await openOcrBox(context, s, t.$1.path, page: t.$2, pages: picked.length > 1 ? picked : null);
   }
 
   // ------------------------------------------------------------- page
 
   @override
   Widget build(BuildContext context) {
-    final one = _picked.length == 1;
     Widget act(IconData icon, String label, VoidCallback? on, {Color? color}) => Padding(
           padding: const EdgeInsets.only(right: 8, bottom: 8),
           child: FilledButton.tonalIcon(
@@ -620,7 +496,7 @@ class _PdfToolPageState extends State<PdfToolPage> {
       data: LightLook.theme(Theme.of(context)),
       child: Scaffold(
         backgroundColor: LightLook.page,
-        appBar: AppBar(
+        appBar: AppBar(automaticallyImplyLeading: false,
           title: Text(_title, overflow: TextOverflow.ellipsis),
           backgroundColor: Colors.white,
           actions: [
@@ -693,16 +569,13 @@ class _PdfToolPageState extends State<PdfToolPage> {
                         _pages.removeWhere(_picked.contains);
                         _picked.clear();
                       })),
-              // Change words in place: in the file of the page picked.
-              act(Icons.edit_note_rounded, tr('pdfedit.title'), busy ? null : _editText, color: LightLook.blue),
-              act(Icons.gesture_rounded, tr('ann.title'), busy ? null : _annotate, color: const Color(0xFFE5484D)),
-              act(Icons.draw_rounded, tr('pdf.sign'), busy ? null : _sign, color: const Color(0xFF7B4DEB)),
-              act(Icons.add_photo_alternate_outlined, tr('pdf.add_picture'), busy ? null : _addPicture),
+              // 编辑: change words, mark, sign, pictures — in the file of
+              // the page picked.
+              act(Icons.edit_document, tr('edit.title'), busy ? null : _edit, color: LightLook.blue),
               act(Icons.call_split_rounded, tr('pdf.split'), busy ? null : _split),
               act(Icons.compress_rounded, tr('pdf.compress'), busy ? null : _compress),
               act(Icons.image_outlined, tr('pdf.images'), busy ? null : _toImages),
               act(Icons.crop_free_rounded, tr('pdf.text'), busy ? null : _boxText),
-              act(Icons.text_snippet_outlined, tr('pdf.text_all'), busy ? null : _text),
             ]),
           ),
           Padding(
@@ -710,7 +583,7 @@ class _PdfToolPageState extends State<PdfToolPage> {
             child: Row(children: [
               Expanded(
                 child: Text(
-                  _picked.isEmpty ? tr('pdf.hint', {'count': _pages.length}) : tr('pdf.picked', {'count': _picked.length}) + (one ? ' · ${tr('pdf.sign_hint')}' : ''),
+                  _picked.isEmpty ? tr('pdf.hint', {'count': _pages.length}) : tr('pdf.picked', {'count': _picked.length}),
                   style: const TextStyle(color: LightLook.muted, fontSize: 13),
                 ),
               ),
@@ -760,7 +633,7 @@ class _PdfToolPageState extends State<PdfToolPage> {
   Widget _tile(int i) {
     final p = _pages[i];
     final on = _picked.contains(p);
-    final thumb = _Thumb(page: p, width: _thumbW, picked: on, onSign: (sg) => unawaited(_editSign(p, sg)));
+    final thumb = _Thumb(page: p, width: _thumbW, picked: on);
     return DragTarget<int>(
       onWillAcceptWithDetails: (d) => d.data != i,
       onAcceptWithDetails: (d) => _change(() {
@@ -846,200 +719,4 @@ class _Thumb extends StatelessWidget {
       child: RotatedBox(quarterTurns: page.turns, child: content),
     );
   }
-}
-
-/// Where the signature / picture goes: drag it on the page; a corner makes
-/// it bigger / smaller (same shape), the round knob above it turns it.
-/// [start]: one already on the page (it can be taken away too).
-class _PlaceSign extends StatefulWidget {
-  const _PlaceSign({required this.page, required this.sig, this.everyPage = false, this.start});
-
-  final _Page page;
-  final Signature sig;
-
-  /// Offer "on every page" (a picture such as a logo).
-  final bool everyPage;
-  final _Sign? start;
-
-  @override
-  State<_PlaceSign> createState() => _PlaceSignState();
-}
-
-class _PlaceSignState extends State<_PlaceSign> {
-  /// Its middle and width, 0–1 of the page; its turn (radians, clockwise).
-  late Offset _at = widget.start?.rect.center ?? const Offset(0.55, 0.8);
-  late double _w = widget.start?.rect.width ?? 0.3;
-  late double _angle = widget.start?.angle ?? 0;
-  bool _all = false;
-
-  // What the mouse holds, and how things were when it took hold.
-  String? _grab;
-  Offset _from = Offset.zero;
-  double _w0 = 0;
-
-  static const _knob = 26.0;
-
-  /// The box's corners and the knob, in shown pixels.
-  (List<Offset>, Offset) _handles(Offset c, double bw, double bh) {
-    final cs = math.cos(_angle), sn = math.sin(_angle);
-    Offset turn(double x, double y) => c + Offset(x * cs - y * sn, x * sn + y * cs);
-    return (
-      [turn(-bw / 2, -bh / 2), turn(bw / 2, -bh / 2), turn(bw / 2, bh / 2), turn(-bw / 2, bh / 2)],
-      turn(0, -bh / 2 - _knob),
-    );
-  }
-
-  /// Whether [p] is on the (turned) box.
-  bool _inside(Offset p, Offset c, double bw, double bh) {
-    final d = p - c;
-    final cs = math.cos(-_angle), sn = math.sin(-_angle);
-    final x = d.dx * cs - d.dy * sn, y = d.dx * sn + d.dy * cs;
-    return x.abs() <= bw / 2 + 4 && y.abs() <= bh / 2 + 4;
-  }
-
-  /// Near 0°, 90°, 180°, 270°: exactly that.
-  static double _snap(double a) {
-    final q = (a / (math.pi / 2)).roundToDouble() * (math.pi / 2);
-    return (a - q).abs() < 3 * math.pi / 180 ? q : a;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final pg = widget.page.page;
-    const maxH = 640.0, maxW = 620.0;
-    final k = math.min(maxW / pg.width, maxH / pg.height);
-    final w = pg.width * k, h = pg.height * k;
-    final bw = _w * w, bh = bw * widget.sig.height / widget.sig.width;
-    final c = Offset(_at.dx * w, _at.dy * h);
-    final (corners, knob) = _handles(c, bw, bh);
-    final deg = ((_angle * 180 / math.pi) % 360 + 360) % 360;
-    return AlertDialog(
-      title: Text(tr(widget.start != null ? 'pdf.sign_edit' : 'pdf.place_sign')),
-      content: Column(mainAxisSize: MainAxisSize.min, children: [
-        Text(tr('pdf.place_hint'), style: const TextStyle(color: LightLook.muted, fontSize: 13)),
-        const SizedBox(height: 8),
-        Container(
-          width: w,
-          height: h,
-          color: Colors.white,
-          child: GestureDetector(
-            onPanStart: (d) {
-              final p = d.localPosition;
-              _from = p;
-              _w0 = _w;
-              if ((p - knob).distance < 14) {
-                _grab = 'turn';
-              } else if (corners.any((q) => (p - q).distance < 14)) {
-                _grab = 'size';
-              } else {
-                _grab = 'move';
-                if (!_inside(p, c, bw, bh)) setState(() => _at = Offset(p.dx / w, p.dy / h));
-              }
-            },
-            onPanUpdate: (d) {
-              final p = d.localPosition;
-              setState(() {
-                switch (_grab) {
-                  case 'turn':
-                    final v = p - c;
-                    _angle = _snap(math.atan2(v.dy, v.dx) + math.pi / 2);
-                  case 'size':
-                    final r0 = (_from - c).distance;
-                    if (r0 > 1) _w = (_w0 * (p - c).distance / r0).clamp(0.03, 1.5);
-                  case 'move':
-                    _at = Offset(((_at.dx * w + d.delta.dx) / w).clamp(0.0, 1.0), ((_at.dy * h + d.delta.dy) / h).clamp(0.0, 1.0));
-                }
-              });
-            },
-            onPanEnd: (_) => _grab = null,
-            onTapDown: (d) {
-              if (!_inside(d.localPosition, c, bw, bh)) setState(() => _at = Offset(d.localPosition.dx / w, d.localPosition.dy / h));
-            },
-            child: Stack(clipBehavior: Clip.none, children: [
-              Positioned.fill(child: PdfPageView(document: widget.page.doc.doc, pageNumber: widget.page.number)),
-              Positioned(
-                left: c.dx - bw / 2,
-                top: c.dy - bh / 2,
-                width: bw,
-                height: bh,
-                child: Transform.rotate(angle: _angle, child: Image.memory(widget.sig.png, fit: BoxFit.fill)),
-              ),
-              Positioned.fill(child: IgnorePointer(child: CustomPaint(painter: _Handles(corners, knob, (corners[0] + corners[1]) / 2)))),
-            ]),
-          ),
-        ),
-        const SizedBox(height: 6),
-        Row(children: [
-          Text(tr('pdf.sign_size')),
-          Expanded(child: Slider(value: _w.clamp(0.03, 1.5), min: 0.03, max: 1.5, onChanged: (v) => setState(() => _w = v))),
-          Text('${deg.round()}°', style: const TextStyle(color: LightLook.muted, fontSize: 13)),
-          IconButton(
-            tooltip: tr('pdf.turn'),
-            onPressed: () => setState(() => _angle = _snap(_angle + math.pi / 2)),
-            icon: const Icon(Icons.rotate_right_rounded),
-          ),
-          IconButton(
-            tooltip: tr('pdf.turn_reset'),
-            onPressed: _angle == 0 ? null : () => setState(() => _angle = 0),
-            icon: const Icon(Icons.screen_rotation_alt_rounded),
-          ),
-        ]),
-        if (widget.everyPage)
-          CheckboxListTile(
-            dense: true,
-            contentPadding: EdgeInsets.zero,
-            value: _all,
-            onChanged: (v) => setState(() => _all = v ?? false),
-            title: Text(tr('pdf.every_page')),
-          ),
-      ]),
-      actions: [
-        if (widget.start != null)
-          TextButton.icon(
-            style: TextButton.styleFrom(foregroundColor: const Color(0xFFE5484D)),
-            onPressed: () => Navigator.pop(context, const _Placed(Rect.zero, 0, remove: true)),
-            icon: const Icon(Icons.delete_outline_rounded, size: 18),
-            label: Text(tr('pdf.sign_remove')),
-          ),
-        TextButton(onPressed: () => Navigator.pop(context), child: Text(tr('common.cancel'))),
-        FilledButton(
-          onPressed: () => Navigator.pop(
-            context,
-            _Placed(Rect.fromCenter(center: _at, width: bw / w, height: bh / h), _angle, all: _all),
-          ),
-          child: Text(tr('pdf.place_ok')),
-        ),
-      ],
-    );
-  }
-}
-
-/// The box (turned), its four corners and the knob that turns it.
-class _Handles extends CustomPainter {
-  _Handles(this.corners, this.knob, this.top);
-
-  final List<Offset> corners;
-  final Offset knob, top;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const blue = Color(0xFF2F6BFF);
-    final line = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5
-      ..color = blue;
-    canvas.drawPath(Path()..addPolygon(corners, true), line);
-    canvas.drawLine(top, knob, line);
-    final fill = Paint()..color = Colors.white;
-    for (final q in corners) {
-      final r = Rect.fromCenter(center: q, width: 12, height: 12);
-      canvas.drawRect(r, fill);
-      canvas.drawRect(r, line..strokeWidth = 2);
-    }
-    canvas.drawCircle(knob, 7, fill);
-    canvas.drawCircle(knob, 7, line..strokeWidth = 2);
-  }
-
-  @override
-  bool shouldRepaint(_Handles old) => true;
 }

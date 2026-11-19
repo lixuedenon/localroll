@@ -64,7 +64,7 @@ class _OfficeViewPageState extends State<OfficeViewPage> {
     final d = _doc;
     final sheets = d?.kind == OfficeKind.excel ? d!.sheets : const <OfficeSheet>[];
     final page = Scaffold(
-      appBar: AppBar(
+      appBar: AppBar(automaticallyImplyLeading: false,
         title: Text(widget.name, overflow: TextOverflow.ellipsis),
         actions: widget.actions,
         bottom: sheets.length > 1

@@ -195,7 +195,7 @@ class _AnnotatePageState extends State<AnnotatePage> {
       },
       child: Scaffold(
         backgroundColor: LrColors.ink,
-        appBar: AppBar(title: Text('${tr('ann.title')} · $name', overflow: TextOverflow.ellipsis)),
+        appBar: AppBar(automaticallyImplyLeading: false, title: Text('${tr('ann.title')} · $name', overflow: TextOverflow.ellipsis)),
         body: d == null
             ? Center(
                 child: _why == null

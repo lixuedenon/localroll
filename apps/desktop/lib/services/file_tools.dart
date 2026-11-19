@@ -269,6 +269,7 @@ class PdfBuilder {
         return said.isEmpty ? 'no answer' : said;
       }
       lastSkipped = int.tryParse(RegExp(r'skipped (\d+)').firstMatch(said)?.group(1) ?? '') ?? 0;
+      if (said.contains('fonts')) DiagLog.log('tools', 'pdf made: $said');
       if (await File(out).exists()) await File(out).delete();
       await File(part).rename(out);
       return null;

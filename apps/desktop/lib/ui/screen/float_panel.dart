@@ -208,6 +208,7 @@ class FloatPanel {
       'toggleKey': o.toggleKey,
       'perWindow': o.perWindow,
       if (o.textAt != null) 'textAt': [o.textAt!.x, o.textAt!.y],
+      if (o.textAt != null) 'textWords': o.textWords,
       if (mode == 'record') ...{
         'armed': r.armed,
         'countdown': r.countdown,
@@ -510,6 +511,8 @@ class RemotePen extends ChangeNotifier implements PenControls {
   bool perWindow = false;
   @override
   ({int x, int y})? textAt;
+  @override
+  String textWords = '';
 
   void _onLine(String line) {
     Map<String, dynamic> m;
@@ -542,6 +545,7 @@ class RemotePen extends ChangeNotifier implements PenControls {
     perWindow = b('perWindow');
     final t = m['textAt'];
     textAt = t is List && t.length == 2 ? (x: (t[0] as num).toInt(), y: (t[1] as num).toInt()) : null;
+    textWords = m['textWords'] as String? ?? '';
     armed = b('armed');
     countdown = i('countdown', 0);
     recording = b('recording');

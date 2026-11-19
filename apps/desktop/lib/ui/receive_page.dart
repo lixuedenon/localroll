@@ -24,7 +24,7 @@ class ReceivePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = services;
     return Scaffold(
-      appBar: AppBar(title: Text(tr('receive.title'))),
+      appBar: AppBar(automaticallyImplyLeading: false, title: Text(tr('receive.title'))),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [

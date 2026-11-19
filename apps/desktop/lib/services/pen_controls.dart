@@ -27,6 +27,9 @@ abstract class PenControls implements Listenable {
   bool get perWindow;
   ({int x, int y})? get textAt;
 
+  /// The words already there when a text is being changed ('' for new).
+  String get textWords;
+
   void setDraw(bool on);
   void setTool(String t);
   Future<void> setStamp(StampShape shape);

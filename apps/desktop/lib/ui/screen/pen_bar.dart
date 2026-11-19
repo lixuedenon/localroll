@@ -47,6 +47,10 @@ class PenToolbar extends StatefulWidget {
 
 class _PenToolbarState extends State<PenToolbar> {
   final TextEditingController _words = TextEditingController();
+
+  /// The typing asked for that [_words] was filled for (a text being
+  /// changed starts with its words).
+  ({int x, int y})? _typingFor;
   final FocusNode _wordsFocus = FocusNode();
 
   PenControls get o => widget.controls ?? PenOverlay.instance;
@@ -248,6 +252,11 @@ class _PenToolbarState extends State<PenToolbar> {
   }
 
   Widget _typing() {
+    if (o.textAt != _typingFor) {
+      _typingFor = o.textAt;
+      _words.text = o.textWords;
+      _words.selection = TextSelection(baseOffset: 0, extentOffset: _words.text.length);
+    }
     if (!_wordsFocus.hasFocus) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _wordsFocus.requestFocus();
@@ -266,6 +275,7 @@ class _PenToolbarState extends State<PenToolbar> {
           onSubmitted: (v) {
             o.putText(v);
             _words.clear();
+            _typingFor = null;
           },
         ),
       ),
@@ -274,6 +284,7 @@ class _PenToolbarState extends State<PenToolbar> {
         onPressed: () {
           o.putText(_words.text);
           _words.clear();
+          _typingFor = null;
         },
         child: Text(tr('common.ok')),
       ),
@@ -281,6 +292,7 @@ class _PenToolbarState extends State<PenToolbar> {
         onPressed: () {
           o.putText('');
           _words.clear();
+          _typingFor = null;
         },
         child: Text(tr('common.cancel')),
       ),

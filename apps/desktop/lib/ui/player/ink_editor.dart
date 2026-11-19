@@ -131,13 +131,29 @@ class InkEditor extends ChangeNotifier {
   final List<List<InkMark>> _redoInks = [];
 
   /// Before a change: remember how it was.
+  /// A page keeping one undo for everything (the PDF editor): told before
+  /// each change, and does undo / redo itself.
+  VoidCallback? beforeChange, undoAll, redoAll;
+
+  /// The marks put back as they were (the page's own undo).
+  void restore(List<InkMark> marks) {
+    inks
+      ..clear()
+      ..addAll([for (final m in marks) m.copy()]);
+    selectedId = null;
+    typingId = null;
+    notifyListeners();
+  }
+
   void remember() {
+    beforeChange?.call();
     _undoInks.add([for (final i in inks) i.copy()]);
     if (_undoInks.length > 100) _undoInks.removeAt(0);
     _redoInks.clear();
   }
 
   void undo() {
+    if (undoAll != null) return undoAll!();
     if (_undoInks.isEmpty) return;
     _redoInks.add([for (final i in inks) i.copy()]);
     inks
@@ -148,6 +164,7 @@ class InkEditor extends ChangeNotifier {
   }
 
   void redo() {
+    if (redoAll != null) return redoAll!();
     if (_redoInks.isEmpty) return;
     _undoInks.add([for (final i in inks) i.copy()]);
     inks
@@ -435,7 +452,12 @@ class InkEditor extends ChangeNotifier {
     i.text = text;
     if (done) {
       typingId = null;
-      if (text.trim().isEmpty) inks.remove(i);
+      if (text.trim().isEmpty) {
+        inks.remove(i);
+      } else {
+        // Typed: chosen, like any other mark (move, corners, turn knob).
+        selectedId = i.id;
+      }
     }
     notifyListeners();
   }
@@ -526,6 +548,14 @@ class _InkLayerState extends State<InkLayer> {
   Offset? _heldAt;
   Offset _from = Offset.zero;
   InkMark? _start;
+
+  /// Text: the one just chosen by this click (a double-click on it then
+  /// keeps it, a later double-click deletes it); a click (no drag) on the
+  /// chosen one changes its words — after a moment, in case of a second
+  /// click.
+  String? _justPicked;
+  String? _maybeEdit;
+  Timer? _editSoon;
   final TextEditingController _text = TextEditingController();
   final FocusNode _textFocus = FocusNode();
   String? _textFor;
@@ -541,6 +571,7 @@ class _InkLayerState extends State<InkLayer> {
   @override
   void dispose() {
     _held?.cancel();
+    _editSoon?.cancel();
     _endTyping();
     _text.dispose();
     _textFocus.dispose();
@@ -559,6 +590,9 @@ class _InkLayerState extends State<InkLayer> {
   void _down(PointerDownEvent e, Size s) {
     final ed = widget.editor;
     if (ed == null || e.buttons != kPrimaryButton) return;
+    _editSoon?.cancel();
+    _editSoon = null;
+    _maybeEdit = null;
     if (_textFor != null) {
       _textFocus.unfocus();
       _endTyping();
@@ -595,10 +629,17 @@ class _InkLayerState extends State<InkLayer> {
         }
       }
     }
-    if ((twice || heldBack) && ed.tool != EditTool.text) {
+    final picked = _justPicked;
+    _justPicked = null;
+    if (twice || heldBack) {
       if (made != null) ed.dropMade(made);
       final hit = ed.topAt(p, s);
       if (hit != null) {
+        if (ed.selectedId == hit.id && picked == hit.id) {
+          // The first click of this double-click chose it: keep it chosen.
+          _drag = _Drag.none;
+          return;
+        }
         if (ed.selectedId == hit.id) {
           ed.deleteSelected();
           _lastDown = DateTime(0);
@@ -621,6 +662,7 @@ class _InkLayerState extends State<InkLayer> {
         _drag = _Drag.scale;
       } else if (InkGeometry.hits(sel, s, p, slop: 8)) {
         _drag = _Drag.move;
+        if (sel.tool == InkTool.text && ed.tool == EditTool.text && !twice) _maybeEdit = sel.id;
       } else {
         ed.select(null);
         return;
@@ -660,13 +702,19 @@ class _InkLayerState extends State<InkLayer> {
           _start = hit.copy();
         }
       case EditTool.text:
-        // A word already there: change it.
+        // A word already there: choose it (like any mark: move, corners,
+        // turn; a click on it then changes its words).
         final hit = ed.inks.reversed.where((i) => i.tool == InkTool.text && InkGeometry.hits(i, s, p)).firstOrNull;
         if (hit != null) {
-          ed.editText(hit);
-        } else {
-          ed.begin(_n(p, s));
+          ed.select(hit.id);
+          _justPicked = hit.id;
+          ed.remember();
+          _drag = _Drag.move;
+          _from = p;
+          _start = hit.copy();
+          return;
         }
+        ed.begin(_n(p, s));
         _startTyping();
       default:
         const oneClick = {EditTool.stamp, EditTool.check, EditTool.cross, EditTool.number};
@@ -721,6 +769,7 @@ class _InkLayerState extends State<InkLayer> {
       case _Drag.move:
         final sel = ed.selected, st = _start;
         if (sel == null || st == null) return;
+        if ((p - _from).distance > 3) _maybeEdit = null;
         sel
           ..dx = st.dx + (p.dx - _from.dx) / s.width
           ..dy = st.dy + (p.dy - _from.dy) / s.height;
@@ -758,6 +807,17 @@ class _InkLayerState extends State<InkLayer> {
   int _handle = 0;
 
   void _up() {
+    final edit = _maybeEdit;
+    _maybeEdit = null;
+    if (edit != null) {
+      _editSoon = Timer(const Duration(milliseconds: 400), () {
+        final ed = widget.editor;
+        final i = ed?.inks.where((x) => x.id == edit).firstOrNull;
+        if (!mounted || ed == null || i == null || ed.selectedId != edit) return;
+        ed.editText(i);
+        _startTyping();
+      });
+    }
     if (_drag == _Drag.draw) widget.editor?.end();
     if (_drag == _Drag.candle) {
       final sel = widget.editor?.selected;

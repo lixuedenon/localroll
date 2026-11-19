@@ -118,7 +118,7 @@ class _TrashPageState extends State<TrashPage> {
           autofocus: true,
           onKeyEvent: _onKey,
           child: Scaffold(
-            appBar: AppBar(
+            appBar: AppBar(automaticallyImplyLeading: false,
               title: Text(_selected.isEmpty
                   ? tr('trash.title')
                   : tr('lib.selected_size', {

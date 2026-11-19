@@ -35,7 +35,7 @@ import 'people_page.dart';
 import 'select_by_dialog.dart';
 import 'send_page.dart';
 import 'trash_actions.dart';
-import 'tools/annotate_page.dart';
+import 'tools/pdf_text_edit.dart';
 import 'tools/doc_pages.dart';
 import 'tools/ocr_box_page.dart';
 import 'tools/print_page.dart';
@@ -1354,7 +1354,7 @@ class _LibraryPageState extends State<LibraryPage> {
         const PopupMenuDivider(),
         for (final t in _toolsFor(targets)) PopupMenuItem(value: 'tool:${t.name}', child: _menuRow(t.icon, t.title)),
         if (targets.length == 1 && item.kind != MediaKind.video)
-          PopupMenuItem(value: 'annotate', child: _menuRow(Icons.draw_rounded, tr('ann.title'))),
+          PopupMenuItem(value: 'annotate', child: _menuRow(Icons.edit_document, tr('edit.title'))),
         if (targets.length == 1 && item.kind != MediaKind.video)
           PopupMenuItem(value: 'ocr', child: _menuRow(Icons.document_scanner_outlined, tr('ocrbox.title'))),
         if (targets.every((i) => i.kind != MediaKind.video))
@@ -1405,7 +1405,7 @@ class _LibraryPageState extends State<LibraryPage> {
       case 'delete':
         await _delete(targets);
       case 'annotate':
-        await openAnnotate(this.context, s, s.library.absPath(item));
+        await openEditor(this.context, s, s.library.absPath(item));
       case 'ocr':
         await openOcrBox(this.context, s, s.library.absPath(item));
       case 'print':
@@ -2157,7 +2157,7 @@ class _LibraryPageState extends State<LibraryPage> {
           child: _menuRow(Icons.check_circle_outline_rounded, _selected.contains(key) ? tr('lib.unselect') : tr('lib.select')),
         ),
         if (Tool.pdfTools.takes(f.path)) PopupMenuItem(value: 'tool:pdfTools', child: _menuRow(Tool.pdfTools.icon, Tool.pdfTools.title)),
-        if (_pagesKind(f.path)) PopupMenuItem(value: 'annotate', child: _menuRow(Icons.draw_rounded, tr('ann.title'))),
+        if (_pagesKind(f.path)) PopupMenuItem(value: 'annotate', child: _menuRow(Icons.edit_document, tr('edit.title'))),
         if (_pagesKind(f.path) && !OfficePdf.handles(f.path))
           PopupMenuItem(value: 'ocr', child: _menuRow(Icons.document_scanner_outlined, tr('ocrbox.title'))),
         if (MediaKind.fromName(f.name) != MediaKind.video)
@@ -2181,7 +2181,7 @@ class _LibraryPageState extends State<LibraryPage> {
       case 'open':
         await openReceivedFile(this.context, widget.services, f.path);
       case 'annotate':
-        await openAnnotate(this.context, widget.services, f.path);
+        await openEditor(this.context, widget.services, f.path);
       case 'ocr':
         await openOcrBox(this.context, widget.services, f.path);
       case 'print':

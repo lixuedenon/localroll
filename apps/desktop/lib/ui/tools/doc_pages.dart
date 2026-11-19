@@ -81,6 +81,45 @@ class DocPages {
     return rec.endRecording().toImage(width, h);
   }
 
+  /// The words of page [i] stored in the PDF itself (not read from the
+  /// picture: exact), in [part] (0–1) or all; '' when it has none (a scan).
+  Future<String> textIn(int i, Rect? part) async {
+    final d = pdf;
+    if (d == null) return '';
+    try {
+      final pg = d.pages[i];
+      final t = await pg.loadText();
+      if (part == null) return t.fullText.trim();
+      final keep = <int>[];
+      for (final f in t.fragments) {
+        for (var k = 0; k < f.charRects.length && k < f.length; k++) {
+          final r = f.charRects[k].toRect(page: pg);
+          if (part.contains(Offset(r.center.dx / pg.width, r.center.dy / pg.height))) keep.add(f.index + k);
+        }
+      }
+      keep.sort();
+      final b = StringBuffer();
+      var last = -1;
+      for (final k in keep) {
+        if (k >= t.fullText.length) continue;
+        if (last >= 0 && k > last + 1) {
+          final gap = t.fullText.substring(last + 1, k);
+          if (gap.contains('\n')) {
+            b.write('\n');
+          } else if (gap.contains(' ')) {
+            b.write(' ');
+          }
+        }
+        b.write(t.fullText[k]);
+        last = k;
+      }
+      return b.toString().trim();
+    } catch (e) {
+      DiagLog.log('tools', 'text of page ${i + 1}: $e');
+      return '';
+    }
+  }
+
   Future<void> dispose() async {
     await pdf?.dispose();
     image?.dispose();

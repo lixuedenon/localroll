@@ -66,7 +66,7 @@ class _ImageToolPageState extends State<ImageToolPage> {
     final b = _bytes;
     return Scaffold(
       backgroundColor: const Color(0xFF141B26),
-      appBar: AppBar(
+      appBar: AppBar(automaticallyImplyLeading: false,
         backgroundColor: const Color(0xFF1D2633),
         title: Text(baseNameOf(widget.path), overflow: TextOverflow.ellipsis),
         actions: [ToolSaveChip(services: s, dark: true), const SizedBox(width: 12)],

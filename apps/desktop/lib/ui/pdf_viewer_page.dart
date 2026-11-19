@@ -11,7 +11,7 @@ import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../services/network.dart';
 import 'theme.dart';
-import 'tools/annotate_page.dart';
+import 'tools/pdf_text_edit.dart';
 import 'tools/ocr_box_page.dart';
 import 'tools/print_page.dart';
 import 'trash_actions.dart';
@@ -79,7 +79,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
         if (k == LogicalKeyboardKey.minus || k == LogicalKeyboardKey.numpadSubtract) _c.zoomDown();
       },
       child: Scaffold(
-        appBar: AppBar(
+        appBar: AppBar(automaticallyImplyLeading: false,
           title: Text(_name, overflow: TextOverflow.ellipsis),
           actions: [
             IconButton(tooltip: tr('pdf.zoom_out'), onPressed: () => _c.zoomDown(), icon: const Icon(Icons.zoom_out_rounded)),
@@ -114,9 +114,9 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
                 icon: const Icon(Icons.document_scanner_outlined),
               ),
               IconButton(
-                tooltip: tr('ann.title'),
-                onPressed: () => unawaited(openAnnotate(context, s, widget.path)),
-                icon: const Icon(Icons.draw_rounded),
+                tooltip: tr('edit.title'),
+                onPressed: () => unawaited(openEditor(context, s, widget.path)),
+                icon: const Icon(Icons.edit_document),
               ),
               IconButton(
                 tooltip: tr('print.menu'),

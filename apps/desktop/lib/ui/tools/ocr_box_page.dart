@@ -15,17 +15,20 @@ import '../theme.dart';
 import 'doc_pages.dart';
 import 'tools.dart';
 
-/// Reads the words in a box drawn on a page (a scan, a photo, a PDF made of
-/// pictures) — or the whole page — with Windows' own text recognition, on
-/// this PC.
+/// 取字: the words in a box drawn on a page, the whole page, or all pages.
+/// A PDF's own words are taken as they are (exact); a scan, a photo, a PDF
+/// made of pictures is read with Windows' own text recognition, on this PC.
 class OcrBoxPage extends StatefulWidget {
-  const OcrBoxPage({super.key, required this.services, required this.path, this.page = 0});
+  const OcrBoxPage({super.key, required this.services, required this.path, this.page = 0, this.pages});
 
   final AppServices services;
   final String path;
 
   /// The page shown first (0-based).
   final int page;
+
+  /// Pages picked in the PDF tool (0-based): "the picked pages" reads them.
+  final List<int>? pages;
 
   @override
   State<OcrBoxPage> createState() => _OcrBoxPageState();
@@ -67,21 +70,18 @@ class _OcrBoxPageState extends State<OcrBoxPage> {
   Future<void> _read(Rect? part) async {
     final d = _doc;
     if (d == null) return;
-    setState(() => _reading = true);
+    setState(() {
+      _reading = true;
+      _of = 0;
+    });
     try {
-      final r = part ?? const Rect.fromLTWH(0, 0, 1, 1);
-      // Small boxes are made larger: the reader wants letters 20+ px high.
-      final pts = d.points(_at);
-      final w = (r.width * pts.width * 4).clamp(400, 4000).round();
-      final pic = await d.render(_at, r, w);
-      if (pic == null) throw 'no picture';
-      final png = await pic.toByteData(format: ui.ImageByteFormat.png);
-      pic.dispose();
-      final f = File('${Directory.systemTemp.path}${Platform.pathSeparator}keepnear_ocr_${DateTime.now().millisecondsSinceEpoch}.png');
-      await f.writeAsBytes(png!.buffer.asUint8List(), flush: true);
-      final text = await _ocr.read(f.path);
-      unawaited(f.delete().then((_) {}, onError: (_) {}));
-      DiagLog.log('tools', 'ocr box: ${text == null ? 'nothing' : '${text.length} chars'}');
+      final own = await d.textIn(_at, part);
+      if (own.isNotEmpty) {
+        DiagLog.log('tools', 'text from the pdf: ${own.length} chars');
+        if (mounted) setState(() => _text.text = own);
+        return;
+      }
+      final text = await _ocrPart(d, _at, part);
       if (!mounted) return;
       setState(() => _text.text = (text ?? '').trim().isEmpty ? '' : text!.trim());
       if ((text ?? '').trim().isEmpty) {
@@ -92,6 +92,58 @@ class _OcrBoxPageState extends State<OcrBoxPage> {
       if (mounted) ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('tool.failed', {'why': '$e'}))));
     } finally {
       if (mounted) setState(() => _reading = false);
+    }
+  }
+
+  /// Several pages one after the other (each: its own words, else read).
+  Future<void> _readPages(List<int> pages) async {
+    final d = _doc;
+    if (d == null) return;
+    setState(() {
+      _reading = true;
+      _done = 0;
+      _of = pages.length;
+    });
+    final b = StringBuffer();
+    try {
+      for (final i in pages) {
+        var t = await d.textIn(i, null);
+        if (t.isEmpty) t = (await _ocrPart(d, i, null))?.trim() ?? '';
+        if (pages.length > 1) b.writeln('— ${tr('pdf.page_n', {'n': i + 1})} —');
+        b.writeln(t);
+        b.writeln();
+        if (!mounted) return;
+        setState(() => _done++);
+      }
+      DiagLog.log('tools', 'text of ${pages.length} pages');
+      if (mounted) setState(() => _text.text = b.toString().trim());
+    } catch (e) {
+      DiagLog.log('tools', 'text of pages failed: $e');
+      if (mounted) ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('tool.failed', {'why': '$e'}))));
+    } finally {
+      if (mounted) setState(() => _reading = false);
+    }
+  }
+
+  int _done = 0, _of = 0;
+
+  /// [part] (null: all) of page [i] read by text recognition.
+  Future<String?> _ocrPart(DocPages d, int i, Rect? part) async {
+    {
+      final r = part ?? const Rect.fromLTWH(0, 0, 1, 1);
+      // Small boxes are made larger: the reader wants letters 20+ px high.
+      final pts = d.points(i);
+      final w = (r.width * pts.width * 4).clamp(400, 4000).round();
+      final pic = await d.render(i, r, w);
+      if (pic == null) throw 'no picture';
+      final png = await pic.toByteData(format: ui.ImageByteFormat.png);
+      pic.dispose();
+      final f = File('${Directory.systemTemp.path}${Platform.pathSeparator}keepnear_ocr_${DateTime.now().millisecondsSinceEpoch}.png');
+      await f.writeAsBytes(png!.buffer.asUint8List(), flush: true);
+      final text = await _ocr.read(f.path);
+      unawaited(f.delete().then((_) {}, onError: (_) {}));
+      DiagLog.log('tools', 'ocr: ${text == null ? 'nothing' : '${text.length} chars'}');
+      return text;
     }
   }
 
@@ -114,7 +166,7 @@ class _OcrBoxPageState extends State<OcrBoxPage> {
     final name = widget.path.split(Platform.pathSeparator).last;
     return Scaffold(
       backgroundColor: LrColors.ink,
-      appBar: AppBar(title: Text('${tr('ocrbox.title')} · $name', overflow: TextOverflow.ellipsis)),
+      appBar: AppBar(automaticallyImplyLeading: false, title: Text('${tr('ocrbox.title')} · $name', overflow: TextOverflow.ellipsis)),
       body: d == null
           ? Center(
               child: _why == null ? const CircularProgressIndicator() : Text(tr('ann.cannot'), style: const TextStyle(color: LrColors.muted)),
@@ -192,8 +244,23 @@ class _OcrBoxPageState extends State<OcrBoxPage> {
                     icon: const Icon(Icons.crop_free_rounded, size: 18),
                     label: Text(tr('ocrbox.whole')),
                   ),
+                  // Several pages at once: the pages picked, or all of them.
+                  if ((widget.pages?.length ?? 0) > 1 || d.count > 1) ...[
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      onPressed: _reading
+                          ? null
+                          : () => unawaited(_readPages((widget.pages?.length ?? 0) > 1
+                              ? [for (final i in widget.pages!) if (i < d.count) i]
+                              : [for (var i = 0; i < d.count; i++) i])),
+                      icon: const Icon(Icons.library_books_outlined, size: 18),
+                      label: Text((widget.pages?.length ?? 0) > 1
+                          ? tr('ocrbox.picked', {'count': widget.pages!.length})
+                          : tr('ocrbox.all', {'count': d.count})),
+                    ),
+                  ],
                   const SizedBox(height: 12),
-                  if (_reading) const LinearProgressIndicator(),
+                  if (_reading) LinearProgressIndicator(value: _of > 1 ? _done / _of : null),
                   const SizedBox(height: 6),
                   Expanded(
                     child: TextField(
@@ -232,5 +299,5 @@ class _OcrBoxPageState extends State<OcrBoxPage> {
   }
 }
 
-Future<void> openOcrBox(BuildContext context, AppServices s, String path, {int page = 0}) =>
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => OcrBoxPage(services: s, path: path, page: page)));
+Future<void> openOcrBox(BuildContext context, AppServices s, String path, {int page = 0, List<int>? pages}) =>
+    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => OcrBoxPage(services: s, path: path, page: page, pages: pages)));

@@ -319,7 +319,7 @@ class _ConvertPageState extends State<ConvertPage> {
       data: LightLook.theme(Theme.of(context)),
       child: Scaffold(
         backgroundColor: LightLook.page,
-        appBar: AppBar(
+        appBar: AppBar(automaticallyImplyLeading: false,
           backgroundColor: Colors.transparent,
           foregroundColor: LightLook.text,
           title: Text(tr('tool.convert')),

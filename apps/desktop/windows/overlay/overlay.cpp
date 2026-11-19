@@ -22,6 +22,7 @@
 //   togglekey <vk>        this key switches draw / operate (0: none);
 //                         the key is not passed on to the app in front
 //   text <x> <y> <words>  put words at x, y (screen pixels)
+//   retext <id> <words>   new words for text mark <id>
 //   border <x> <y> <w> <h> | border off   red frame around an area
 //   visible 0|1           quit
 //   probe <x> <y>         answers "pixel AARRGGBB" (a self-check)
@@ -29,6 +30,7 @@
 //   ready <x> <y> <w> <h>                   the screens it covers
 //   state <mode> <undo> <redo> <selected> <sheet> <sheets>
 //   text <x> <y>                            the text tool was clicked there
+//   textedit <id> <x> <y> <words>           change the words of this text
 // Closing stdin ends it too.
 
 #ifndef UNICODE
@@ -951,6 +953,24 @@ void endDrawing() {
 // selects): it no longer flashes up and away.
 bool g_heldOn = false, g_firing = false;
 ULONGLONG g_heldUntil = 0;
+
+// Text, like any other mark: a click chooses it (g_justPicked: a double-
+// click then keeps it chosen, a later double-click deletes it); a click
+// without dragging on the chosen one asks for new words, after a moment
+// (in case a second click comes).
+int g_justPicked = 0, g_maybeEdit = 0, g_editId = 0;
+ULONGLONG g_editAt = 0;
+POINT g_editPt{};
+
+void askEdit() {
+  const int id = g_editId;
+  g_editId = 0;
+  Mark* m = findMark(id);
+  if (!m || m->tool != kText || id != g_selected) return;
+  char b[64];
+  std::snprintf(b, sizeof b, "textedit %d %ld %ld ", id, g_editPt.x, g_editPt.y);
+  emit(std::string(b) + utf8(m->text));
+}
 D2D1_POINT_2F g_heldAt{};
 
 void onDown(D2D1_POINT_2F p);
@@ -986,6 +1006,10 @@ void onDown(D2D1_POINT_2F p) {
   g_lastAt = pt;
   const int made = g_made;
   g_made = 0;
+  g_editId = 0;
+  g_maybeEdit = 0;
+  const int picked = g_justPicked;
+  g_justPicked = 0;
   const bool oneClick = g_tool == kCheck || g_tool == kCross || g_tool == kNumber || (g_tool == kStamp && g_stamp);
   if (!g_firing && !twice && oneClick && !findMark(g_selected) && topAt(p)) {
     g_heldOn = true;
@@ -993,7 +1017,7 @@ void onDown(D2D1_POINT_2F p) {
     g_heldUntil = now + 380;
     return;
   }
-  if ((twice || heldBack) && g_tool != kText) {
+  if (twice || heldBack) {
     if (made) {
       // The first click made a mark. Another mark under it: the double-click
       // selects that one (the new mark is taken back). None: the new mark
@@ -1013,6 +1037,11 @@ void onDown(D2D1_POINT_2F p) {
       logLine("double click: selects the mark under it");
     }
     if (Mark* hit = topAt(p)) {
+      if (hit->id == g_selected && picked == hit->id) {
+        // The first click of this double-click chose it: keep it chosen.
+        g_drag = kNone;
+        return;
+      }
       if (hit->id == g_selected) {
         deleteSelected();
         g_lastDown = 0;
@@ -1042,6 +1071,10 @@ void onDown(D2D1_POINT_2F p) {
       g_drag = d;
       g_from = p;
       g_start = *s;
+      if (d == kMoving && s->tool == kText && g_tool == kText && !twice) {
+        g_maybeEdit = s->id;
+        g_editPt = pt;
+      }
       return;
     }
     if (g_tool != kSelect) {
@@ -1072,6 +1105,19 @@ void onDown(D2D1_POINT_2F p) {
       }
       return;
     case kText: {
+      // Words already there: choose them (move, corners, turn knob).
+      for (auto it = sheet().marks.rbegin(); it != sheet().marks.rend(); ++it) {
+        if (it->tool == kText && (insideBox(*it, p) || hits(*it, p, 8))) {
+          select(it->id);
+          g_justPicked = it->id;
+          remember();
+          g_drag = kMoving;
+          g_from = p;
+          g_start = *it;
+          render();
+          return;
+        }
+      }
       char b[64];
       std::snprintf(b, sizeof b, "text %ld %ld", pt.x, pt.y);
       emit(b);
@@ -1194,6 +1240,7 @@ void onMove(D2D1_POINT_2F p) {
       RECT before = areaOf(*s);
       const auto c = centerOf(g_start);
       if (g_drag == kMoving) {
+        if (dist(p, g_from) > 3) g_maybeEdit = 0;
         s->dx = g_start.dx + (p.x - g_from.x);
         s->dy = g_start.dy + (p.y - g_from.y);
       } else if (g_drag == kScaling) {
@@ -1216,6 +1263,11 @@ void onMove(D2D1_POINT_2F p) {
 }
 
 void onUp() {
+  if (g_maybeEdit) {
+    g_editId = g_maybeEdit;
+    g_editAt = GetTickCount64() + 400;
+    g_maybeEdit = 0;
+  }
   if (g_drag == kDrawing) {
     g_drag = kNone;
     endDrawing();
@@ -1856,7 +1908,25 @@ void command(const std::string& line) {
       m.text = words;
       m.doneAt = GetTickCount64();
       sheet().marks.push_back(m);
+      // Typed: chosen, like any other mark.
+      select(m.id);
       render();
+      emitState();
+    }
+  } else if (cmd == "retext") {
+    // retext <id> <words>
+    char* end = nullptr;
+    const int id = static_cast<int>(std::strtol(arg.c_str(), &end, 10));
+    while (end && *end == ' ') ++end;
+    const std::wstring words = wide(end ? std::string(end) : std::string());
+    Mark* m = findMark(id);
+    if (m && m->tool == kText && !words.empty() && words != m->text) {
+      remember();
+      RECT before = areaOf(*m);
+      m->text = words;
+      RECT after = areaOf(*m);
+      UnionRect(&before, &before, &after);
+      render(&before);
       emitState();
     }
   } else if (cmd == "border") {
@@ -1948,6 +2018,7 @@ LRESULT CALLBACK msgProc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
     }
   }
   if (msg == WM_TIMER && wp == kTimerTick && g_heldOn && GetTickCount64() >= g_heldUntil) fireHeld();
+  if (msg == WM_TIMER && wp == kTimerTick && g_editId && GetTickCount64() >= g_editAt) askEdit();
   if (msg == WM_TIMER && wp == kTimerTick) {
     // Hold Ctrl while drawing: the mouse goes through for that moment.
     if (g_draw && g_drag == kNone) {

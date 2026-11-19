@@ -57,6 +57,12 @@ class PenOverlay extends ChangeNotifier implements PenControls {
   /// The text tool was clicked here (screen pixels): words are asked for.
   ({int x, int y})? textAt;
 
+  @override
+  String textWords = '';
+
+  /// The text mark whose words are being changed (null: a new one).
+  int? _textEdit;
+
   Completer<bool>? _ready;
 
   Future<bool> start() async {
@@ -193,6 +199,17 @@ class PenOverlay extends ChangeNotifier implements PenControls {
       case 'text':
         if (parts.length >= 3) {
           textAt = (x: int.tryParse(parts[1]) ?? 0, y: int.tryParse(parts[2]) ?? 0);
+          textWords = '';
+          _textEdit = null;
+          notifyListeners();
+        }
+      case 'textedit':
+        // textedit <id> <x> <y> <words>: a click on a chosen text.
+        final m = RegExp(r'^textedit (\d+) (-?\d+) (-?\d+) ?(.*)$').firstMatch(line.trim());
+        if (m != null) {
+          _textEdit = int.parse(m.group(1)!);
+          textAt = (x: int.parse(m.group(2)!), y: int.parse(m.group(3)!));
+          textWords = m.group(4) ?? '';
           notifyListeners();
         }
       case 'error':
@@ -340,9 +357,12 @@ class PenOverlay extends ChangeNotifier implements PenControls {
   /// Words for the text tool's click ([textAt]); empty: none.
   void putText(String words) {
     final at = textAt;
+    final edit = _textEdit;
     textAt = null;
+    _textEdit = null;
+    textWords = '';
     final w = words.replaceAll('\n', ' ').trim();
-    if (at != null && w.isNotEmpty) _send('text ${at.x} ${at.y} $w');
+    if (at != null && w.isNotEmpty) _send(edit != null ? 'retext $edit $w' : 'text ${at.x} ${at.y} $w');
     notifyListeners();
   }
 

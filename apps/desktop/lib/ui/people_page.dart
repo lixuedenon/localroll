@@ -189,7 +189,7 @@ class _PeoplePageState extends State<PeoplePage> {
       builder: (context, _) {
         final on = s.settings.faces;
         return Scaffold(
-          appBar: AppBar(
+          appBar: AppBar(automaticallyImplyLeading: false,
             title: Row(children: [
               Text(tr('people.title')),
               if (on) ...[

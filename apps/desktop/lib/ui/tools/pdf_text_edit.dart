@@ -1,9 +1,11 @@
 // apps/desktop/lib/ui/tools/pdf_text_edit.dart
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:localroll_core/localroll_core.dart' show DiagLog;
@@ -11,11 +13,15 @@ import 'package:pdfrx/pdfrx.dart';
 
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
+import '../../services/annotations.dart';
 import '../../services/file_tools.dart';
 import '../../services/pdf_fonts.dart';
 import '../../services/tool_outputs.dart';
 import '../light_look.dart';
 import '../lr_dialog.dart';
+import '../player/ink_editor.dart';
+import 'annotate_page.dart';
+import 'sig_library.dart';
 import 'tools.dart';
 
 /// One line (or one cell's text) on a page, as the PDF has it.
@@ -51,16 +57,59 @@ class _Edit {
 
   /// Whose look it has: the line itself, or one picked with the brush.
   _Line from;
+
+  _Edit copy() => _Edit(line, text, size, bold, italic, color, from);
 }
 
-/// Changing words in a PDF in place: click a line, type, done. Only the
-/// changed lines are touched — tables, stamps, pictures and the rest of the
-/// text stay as they are.
+/// A signature or picture laid on a page: its box 0–1 of the page as
+/// shown, turned about its middle ([angle], clockwise, radians).
+class _Put {
+  _Put(this.page, this.sig, this.rect, {this.angle = 0});
+
+  final int page;
+  final Signature sig;
+  Rect rect;
+  double angle;
+
+  _Put copy() => _Put(page, sig, rect, angle: angle);
+}
+
+/// Everything as it was (one undo for all kinds of change).
+class _Snap {
+  _Snap(this.edits, this.puts, this.inks);
+
+  final List<_Edit> edits;
+  final List<_Put> puts;
+  final Map<int, List<InkMark>> inks;
+}
+
+/// What a click on the page does.
+enum _Mode { text, mark, sign, picture }
+
+/// 编辑: one page for changing words in place, marks, signatures and
+/// pictures — mixed in any order, one undo, saved together once. Changing
+/// words touches only the changed lines (tables, stamps, pictures and the
+/// rest of the text stay as they are).
 class PdfTextEditPage extends StatefulWidget {
-  const PdfTextEditPage({super.key, required this.services, required this.path, this.page = 0, this.onSaved});
+  const PdfTextEditPage({
+    super.key,
+    required this.services,
+    required this.path,
+    this.page = 0,
+    this.onSaved,
+    this.original,
+    this.mark = false,
+  });
 
   final AppServices services;
   final String path;
+
+  /// An Office document made into [path] for this: words can't be changed,
+  /// the result is a new PDF named after it.
+  final String? original;
+
+  /// Start with marking.
+  final bool mark;
 
   /// The page shown first (0-based).
   final int page;
@@ -75,6 +124,27 @@ class PdfTextEditPage extends StatefulWidget {
 
 class _PdfTextEditPageState extends State<PdfTextEditPage> {
   AppServices get s => widget.services;
+
+  bool get _office => widget.original != null;
+  String get _named => widget.original ?? widget.path;
+
+  late _Mode _mode = _office || widget.mark ? _Mode.mark : _Mode.text;
+
+  /// Page size: 1 = as wide as the room (up to 900); Ctrl + wheel, −/+.
+  double _zoom = 1;
+
+  /// Marks per page (the screen pen's tools).
+  final Map<int, InkEditor> _eds = {};
+
+  /// Signatures and pictures, and the one chosen.
+  final List<_Put> _puts = [];
+  _Put? _sel;
+  String? _grab;
+  Offset _grabFrom = Offset.zero;
+  _Put? _grabStart;
+
+  /// One undo / redo for words, marks, signatures and pictures.
+  final List<_Snap> _undo = [], _redo = [];
 
   PdfDocument? _doc;
   String? _error;
@@ -119,6 +189,9 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
 
   @override
   void dispose() {
+    for (final e in _eds.values) {
+      e.dispose();
+    }
     for (final p in _pics.values) {
       p.dispose();
     }
@@ -126,7 +199,120 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
     unawaited(_doc?.dispose());
     _ctl.dispose();
     _focus.dispose();
+    _hScroll.dispose();
+    _vScroll.dispose();
     super.dispose();
+  }
+
+  InkEditor _ed(int i) => _eds.putIfAbsent(
+        i,
+        () => InkEditor(video: false, clock: () => 0)
+          ..beforeChange = _mark
+          ..undoAll = _undoOne
+          ..redoAll = _redoOne,
+      );
+
+  _Snap _now() => _Snap(
+        [for (final e in _edits) e.copy()],
+        [for (final p in _puts) p.copy()],
+        {for (final e in _eds.entries) e.key: [for (final m in e.value.inks) m.copy()]},
+      );
+
+  /// Remembers everything as it is now, before a change.
+  void _mark() {
+    _undo.add(_now());
+    if (_undo.length > 100) _undo.removeAt(0);
+    _redo.clear();
+    if (mounted) setState(() {});
+  }
+
+  void _restore(_Snap w) {
+    _edits
+      ..clear()
+      ..addAll([for (final e in w.edits) e.copy()]);
+    _puts
+      ..clear()
+      ..addAll([for (final p in w.puts) p.copy()]);
+    for (final e in _eds.entries) {
+      e.value.restore(w.inks[e.key] ?? const []);
+    }
+    _sel = null;
+  }
+
+  void _undoOne() {
+    if (_undo.isEmpty) return;
+    _cancel();
+    _redo.add(_now());
+    setState(() => _restore(_undo.removeLast()));
+  }
+
+  void _redoOne() {
+    if (_redo.isEmpty) return;
+    _cancel();
+    _undo.add(_now());
+    setState(() => _restore(_redo.removeLast()));
+  }
+
+  int get _markCount => _eds.values.fold(0, (n, e) => n + e.inks.length);
+
+  /// Changes of every kind not saved yet.
+  int get _changes => _edits.length + _puts.length + _markCount;
+
+  void _setMode(_Mode m) {
+    if (m == _Mode.sign || m == _Mode.picture) {
+      unawaited(_addPut(picture: m == _Mode.picture));
+      return;
+    }
+    _done();
+    setState(() {
+      _mode = m;
+      _sel = null;
+    });
+  }
+
+  /// A signature (saved, drawn, from a file) or a picture, in the middle of
+  /// the page shown; chosen, to move / size / turn.
+  Future<void> _addPut({required bool picture}) async {
+    _done();
+    final sig = picture ? await pictureCutout(context, s) : await pickSignature(context, s);
+    if (sig == null || !mounted) {
+      if (mounted) setState(() => _mode = picture ? _Mode.picture : _Mode.sign);
+      return;
+    }
+    final d = _doc;
+    if (d == null) return;
+    final pg = d.pages[_page];
+    final w = picture ? 0.4 : 0.3;
+    final h = w * pg.width / pg.height * sig.height / sig.width;
+    _mark();
+    final p = _Put(_page, sig, Rect.fromCenter(center: const Offset(0.5, 0.5), width: w, height: h));
+    setState(() {
+      _puts.add(p);
+      _sel = p;
+      _mode = picture ? _Mode.picture : _Mode.sign;
+    });
+  }
+
+  /// The chosen one on every page too (a logo).
+  void _everyPage() {
+    final p = _sel, d = _doc;
+    if (p == null || d == null) return;
+    _mark();
+    setState(() {
+      for (var i = 0; i < d.pages.length; i++) {
+        if (i != p.page) _puts.add(_Put(i, p.sig, p.rect, angle: p.angle));
+      }
+    });
+  }
+
+  void _removeSel() {
+    final p = _sel;
+    if (p == null) return;
+    _mark();
+    setState(() {
+      _puts.remove(p);
+      _sel = null;
+    });
   }
 
   Future<void> _open() async {
@@ -351,7 +537,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
   }
 
   /// Something not saved yet (done, or still being typed).
-  bool get _unsaved => _edits.isNotEmpty || _typing;
+  bool get _unsaved => _changes > 0 || _typing;
 
   void _start(_Line l) {
     final e = _editOf(l);
@@ -395,6 +581,12 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
     if (l == null) return;
     final text = _ctl.text.replaceAll('\n', ' ').trimRight();
     final (size, bold, italic, _) = _lookOf(l);
+    final e0 = _editOf(l);
+    final same0 = text == l.text && _size == size && _bold == bold && _italic == italic && identical(_from ?? l, l);
+    final unchanged = e0 == null
+        ? same0
+        : text == e0.text && _size == e0.size && _bold == e0.bold && _italic == e0.italic && _color == e0.color && identical(_from ?? l, e0.from);
+    if (!unchanged) _mark();
     setState(() {
       final e = _editOf(l);
       final same = text == l.text && _size == size && _bold == bold && _italic == italic && identical(_from ?? l, l);
@@ -460,8 +652,9 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
     // What is still being typed counts too.
     _done();
     final d = _doc;
-    if (d == null || _edits.isEmpty) return false;
-    DiagLog.log('tools', 'pdf edit save: ${_edits.length} change(s), ${replace ? 'replace' : 'new file'}');
+    if (d == null || _changes == 0) return false;
+    DiagLog.log('tools',
+        'pdf edit save: ${_edits.length} word change(s), $_markCount mark(s), ${_puts.length} signature(s)/picture(s), ${replace ? 'replace' : 'new file'}');
     try {
       return await _saving(d, replace: replace);
     } catch (e, st) {
@@ -505,9 +698,49 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
       ));
     }
     DiagLog.log('tools', 'pdf edit fonts: ${[for (final p in made.values) for (final e in p) e.font.isEmpty ? '?' : e.font.split(r'\\').last].join(', ')}');
-    final plan = <PdfPlanPage>[for (var i = 0; i < d.pages.length; i++) PdfFromDoc(widget.path, i, edits: made[i] ?? const [])];
-    final out = replace ? '${widget.path}.lr-edit.pdf' : toolOutPath(s, widget.path, tr('pdfedit.suffix'), 'pdf');
-    final n = _edits.length;
+    // Marks: one see-through picture per page (about 200 dpi) and the
+    // numbers' notes; signatures and pictures each laid where they are.
+    final plan = <PdfPlanPage>[];
+    for (var i = 0; i < d.pages.length; i++) {
+      final stamps = <PdfStamp>[];
+      var notes = const <PdfNote>[];
+      final ed = _eds[i];
+      if (ed != null && !ed.isEmpty) {
+        final pg = d.pages[i];
+        const k = 200 / 72;
+        final w = (pg.width * k).round(), h = (pg.height * k).round();
+        final rec = ui.PictureRecorder();
+        final c = Canvas(rec);
+        for (final m in ed.inks) {
+          InkGeometry.paint(c, Size(w.toDouble(), h.toDouble()), m);
+        }
+        final im = await rec.endRecording().toImage(w, h);
+        final bd = await im.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
+        im.dispose();
+        final b = bd!.buffer.asUint8List();
+        for (var j = 0; j + 3 < b.length; j += 4) {
+          final r = b[j];
+          b[j] = b[j + 2];
+          b[j + 2] = r;
+        }
+        stamps.add(PdfStamp(b, w, h, const Rect.fromLTWH(0, 0, 1, 1)));
+        notes = [
+          for (final m in ed.inks)
+            if (m.tool == InkTool.number && (m.note ?? '').isNotEmpty && m.points.isNotEmpty)
+              PdfNote((m.points.first.dx + m.dx).clamp(0.0, 1.0), (m.points.first.dy + m.dy).clamp(0.0, 1.0), '${m.number ?? ''}. ${m.note}',
+                  rgb: (m.color & 0xFFFFFF).toRadixString(16).padLeft(6, '0')),
+        ];
+      }
+      for (final p in _puts) {
+        if (p.page != i) continue;
+        final px = await p.sig.bgra();
+        if (px != null) stamps.add(PdfStamp(px, p.sig.width, p.sig.height, p.rect, angle: p.angle));
+      }
+      plan.add(PdfFromDoc(widget.path, i, edits: made[i] ?? const [], stamps: stamps, notes: notes));
+    }
+    if (!mounted) return false;
+    final out = replace ? '${widget.path}.lr-edit.pdf' : toolOutPath(s, _named, tr('pdfedit.suffix'), 'pdf');
+    final n = _changes;
     String? err;
     var skipped = 0;
     await runBusy(context, tr('pdf.saving'), () async {
@@ -541,7 +774,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
         _px.clear();
         _colors.clear();
         _lines.clear();
-        _edits.clear();
+        _clearAll();
       });
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(note ?? tr('pdfedit.replaced'))));
       widget.onSaved?.call(widget.path);
@@ -549,10 +782,22 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
       return true;
     }
     // Saved as a new file: the changes are in it, nothing left to keep.
-    setState(_edits.clear);
+    setState(_clearAll);
     widget.onSaved?.call(out);
     await showToolResult(context, s, [out], note: note);
     return true;
+  }
+
+  /// Everything saved (or dropped): nothing left to keep or undo.
+  void _clearAll() {
+    _edits.clear();
+    _puts.clear();
+    _sel = null;
+    for (final e in _eds.values) {
+      e.restore(const []);
+    }
+    _undo.clear();
+    _redo.clear();
   }
 
   @override
@@ -564,13 +809,22 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) unawaited(_leave());
       },
-      child: Theme(
+      child: CallbackShortcuts(
+        bindings: {
+          const SingleActivator(LogicalKeyboardKey.keyZ, control: true): _undoOne,
+          const SingleActivator(LogicalKeyboardKey.keyY, control: true): _redoOne,
+          const SingleActivator(LogicalKeyboardKey.keyZ, control: true, shift: true): _redoOne,
+          const SingleActivator(LogicalKeyboardKey.delete): _removeSel,
+        },
+        child: Focus(
+          autofocus: true,
+          child: Theme(
       data: LightLook.theme(Theme.of(context)),
       child: Scaffold(
         backgroundColor: LightLook.page,
-        appBar: AppBar(
+        appBar: AppBar(automaticallyImplyLeading: false,
           backgroundColor: Colors.white,
-          title: Text('${tr('pdfedit.title')} · ${widget.path.split(Platform.pathSeparator).last}', overflow: TextOverflow.ellipsis),
+          title: Text('${tr('edit.title')} · ${_named.split(Platform.pathSeparator).last}', overflow: TextOverflow.ellipsis),
           actions: [
             if (d != null) ...[
               IconButton(onPressed: _page > 0 ? () => _go(_page - 1) : null, icon: const Icon(Icons.chevron_left_rounded)),
@@ -585,10 +839,76 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
             : d == null
                 ? const Center(child: CircularProgressIndicator())
                 : Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                    Expanded(child: _pageView(d)),
+                    Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                        _modeBar(),
+                        if (_mode == _Mode.mark)
+                          InkToolbar(
+                            editor: _ed(_page),
+                            doneLabel: tr('pdfedit.save_new'),
+                            onDone: () => unawaited(_save(replace: false)),
+                          ),
+                        Expanded(child: _pageView(d)),
+                      ]),
+                    ),
                     SizedBox(width: 320, child: _side(d)),
                   ]),
       ),
+      ),
+        ),
+      ),
+    );
+  }
+
+  /// 改字 | 标注 | 签名 | 插图片 — undo / redo — page size.
+  Widget _modeBar() {
+    Widget mode(_Mode m, IconData icon, String label, Color color) {
+      final on = _mode == m;
+      return Padding(
+        padding: const EdgeInsets.only(right: 8),
+        child: FilledButton.tonalIcon(
+          style: FilledButton.styleFrom(
+            backgroundColor: on ? color : Colors.white,
+            foregroundColor: on ? Colors.white : color,
+            side: BorderSide(color: color.withValues(alpha: on ? 1 : 0.4)),
+          ),
+          onPressed: () => _setMode(m),
+          icon: Icon(icon, size: 18),
+          label: Text(label),
+        ),
+      );
+    }
+
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(16, 8, 12, 8),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(children: [
+        if (!_office) mode(_Mode.text, Icons.edit_note_rounded, tr('pdfedit.title'), LightLook.blue),
+        mode(_Mode.mark, Icons.gesture_rounded, tr('ann.title'), const Color(0xFFE5484D)),
+        mode(_Mode.sign, Icons.draw_rounded, tr('pdf.sign'), const Color(0xFF7B4DEB)),
+        mode(_Mode.picture, Icons.add_photo_alternate_outlined, tr('pdf.add_picture'), const Color(0xFF0E9F6E)),
+        const SizedBox(width: 8),
+        IconButton(tooltip: '${tr('pdf.undo')} (Ctrl+Z)', onPressed: _undo.isEmpty ? null : _undoOne, icon: const Icon(Icons.undo_rounded)),
+        IconButton(tooltip: '${tr('pdf.redo')} (Ctrl+Y)', onPressed: _redo.isEmpty ? null : _redoOne, icon: const Icon(Icons.redo_rounded)),
+        const SizedBox(width: 24),
+        // Page size.
+        IconButton(
+          tooltip: '−',
+          onPressed: _zoom > 0.4 ? () => setState(() => _zoom = (_zoom / 1.2).clamp(0.3, 6.0)) : null,
+          icon: const Icon(Icons.zoom_out_rounded),
+        ),
+        SizedBox(width: 48, child: Text('${(_zoom * 100).round()}%', textAlign: TextAlign.center, style: const TextStyle(color: LightLook.muted))),
+        IconButton(
+          tooltip: '+',
+          onPressed: _zoom < 6 ? () => setState(() => _zoom = (_zoom * 1.2).clamp(0.3, 6.0)) : null,
+          icon: const Icon(Icons.zoom_in_rounded),
+        ),
+        TextButton(onPressed: () => setState(() => _zoom = 1), child: Text(tr('edit.zoom_fit'))),
+        TextButton(onPressed: () => setState(() => _zoom = 2), child: const Text('200%')),
+        TextButton(onPressed: () => setState(() => _zoom = 3), child: const Text('300%')),
+      ]),
       ),
     );
   }
@@ -596,7 +916,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
   /// Leaving with changes not saved: save, drop them, or stay.
   Future<void> _leave() async {
     _done();
-    final n = _edits.length;
+    final n = _changes;
     if (n == 0) {
       if (mounted) Navigator.of(context).pop();
       return;
@@ -617,65 +937,201 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
     DiagLog.log('tools', 'pdf edit leave: $pick');
     if (pick == 'save' && !await _save(replace: false)) return;
     if (!mounted) return;
-    setState(_edits.clear);
+    setState(_clearAll);
     Navigator.of(context).pop();
   }
+
+  final _hScroll = ScrollController(), _vScroll = ScrollController();
 
   Widget _pageView(PdfDocument d) {
     final page = d.pages[_page];
     final pic = _pics[_page];
     final lines = _lines[_page] ?? const [];
     return LayoutBuilder(builder: (context, box) {
-      final w = (box.maxWidth - 48).clamp(300.0, 900.0);
+      final w = (box.maxWidth - 48).clamp(300.0, 900.0) * _zoom;
       final scale = w / page.width;
       final size = Size(w, page.height * scale);
       Rect at(PdfRect r) => r.toRect(page: page, scaledPageSize: size);
-      return SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Center(
-          child: Container(
-            width: size.width,
-            height: size.height,
-            decoration: const BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Color(0x261F3B70), blurRadius: 24, offset: Offset(0, 8))]),
-            child: pic == null
-                ? const Center(child: CircularProgressIndicator())
-                : Stack(clipBehavior: Clip.none, children: [
-                    Positioned.fill(child: RawImage(image: pic, fit: BoxFit.fill)),
-                    // Changed lines: the old words covered, the new shown.
-                    for (final e in _edits)
-                      if (e.line.page == _page && !identical(e.line, _editing)) _preview(e, at(e.line.box), scale),
-                    // Every line can be clicked.
-                    for (final l in lines)
-                      if (!identical(l, _editing))
-                        Positioned.fromRect(
-                          rect: at(l.box).inflate(2),
-                          child: MouseRegion(
-                            cursor: _brush ? SystemMouseCursors.precise : SystemMouseCursors.text,
-                            onEnter: (_) => setState(() => _hover = l),
-                            onExit: (_) {
-                              if (identical(_hover, l)) setState(() => _hover = null);
-                            },
-                            child: GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap: () => _brush && _editing != null ? _copyLook(l) : _start(l),
-                              child: Container(
-                                decoration: identical(_hover, l)
-                                    ? BoxDecoration(
-                                        color: const Color(0x0F2F6BFF),
-                                        border: Border.all(color: LightLook.blue.withValues(alpha: 0.7)),
-                                        borderRadius: BorderRadius.circular(2),
-                                      )
-                                    : null,
-                              ),
+      final ed = _ed(_page);
+      final putting = _mode == _Mode.sign || _mode == _Mode.picture;
+      final content = Container(
+        width: size.width,
+        height: size.height,
+        decoration: const BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Color(0x261F3B70), blurRadius: 24, offset: Offset(0, 8))]),
+        child: pic == null
+            ? const Center(child: CircularProgressIndicator())
+            : Stack(clipBehavior: Clip.none, children: [
+                Positioned.fill(child: RawImage(image: pic, fit: BoxFit.fill)),
+                // Changed lines: the old words covered, the new shown.
+                for (final e in _edits)
+                  if (e.line.page == _page && !identical(e.line, _editing)) _preview(e, at(e.line.box), scale),
+                // Signatures and pictures.
+                for (final p in _puts)
+                  if (p.page == _page)
+                    Positioned(
+                      left: p.rect.left * size.width,
+                      top: p.rect.top * size.height,
+                      width: p.rect.width * size.width,
+                      height: p.rect.height * size.height,
+                      child: IgnorePointer(
+                        child: Transform.rotate(angle: p.angle, child: Image.memory(p.sig.png, fit: BoxFit.fill)),
+                      ),
+                    ),
+                // Marks: drawn on only while marking.
+                Positioned.fill(
+                  child: IgnorePointer(
+                    ignoring: _mode != _Mode.mark,
+                    child: InkLayer(key: ValueKey('ink$_page'), notes: const [], video: false, editor: ed),
+                  ),
+                ),
+                Positioned.fill(child: NumberNotes(marks: () => ed.inks, repaint: ed)),
+                // Changing words: every line can be clicked.
+                if (_mode == _Mode.text)
+                  for (final l in lines)
+                    if (!identical(l, _editing))
+                      Positioned.fromRect(
+                        rect: at(l.box).inflate(2),
+                        child: MouseRegion(
+                          cursor: _brush ? SystemMouseCursors.precise : SystemMouseCursors.text,
+                          onEnter: (_) => setState(() => _hover = l),
+                          onExit: (_) {
+                            if (identical(_hover, l)) setState(() => _hover = null);
+                          },
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () => _brush && _editing != null ? _copyLook(l) : _start(l),
+                            child: Container(
+                              decoration: identical(_hover, l)
+                                  ? BoxDecoration(
+                                      color: const Color(0x0F2F6BFF),
+                                      border: Border.all(color: LightLook.blue.withValues(alpha: 0.7)),
+                                      borderRadius: BorderRadius.circular(2),
+                                    )
+                                  : null,
                             ),
                           ),
                         ),
-                    if (_editing case final l? when l.page == _page) ..._editor(l, at(l.box), scale, size),
-                  ]),
+                      ),
+                // Signatures and pictures: choose, move, size, turn.
+                if (putting) Positioned.fill(child: _putLayer(size)),
+                if (_mode == _Mode.text)
+                  if (_editing case final l? when l.page == _page) ..._editor(l, at(l.box), scale, size),
+              ]),
+      );
+      return Listener(
+        // Ctrl + wheel: the page bigger / smaller.
+        onPointerSignal: (e) {
+          if (e is PointerScrollEvent && HardwareKeyboard.instance.isControlPressed) {
+            GestureBinding.instance.pointerSignalResolver.register(e, (ev) {
+              if (ev is PointerScrollEvent) setState(() => _zoom = (_zoom * (ev.scrollDelta.dy < 0 ? 1.1 : 1 / 1.1)).clamp(0.3, 6.0));
+            });
+          }
+        },
+        child: Scrollbar(
+          controller: _vScroll,
+          child: SingleChildScrollView(
+            controller: _vScroll,
+            child: Scrollbar(
+              controller: _hScroll,
+              notificationPredicate: (n) => n.depth == 0,
+              child: SingleChildScrollView(
+                controller: _hScroll,
+                scrollDirection: Axis.horizontal,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: box.maxWidth),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Center(child: content),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       );
     });
+  }
+
+  /// The chosen signature / picture: its corners and its turning knob, in
+  /// pixels of the page shown.
+  (List<Offset>, Offset, Offset) _handles(_Put p, Size size) {
+    final c = Offset(p.rect.center.dx * size.width, p.rect.center.dy * size.height);
+    final bw = p.rect.width * size.width, bh = p.rect.height * size.height;
+    final cs = math.cos(p.angle), sn = math.sin(p.angle);
+    Offset turn(double x, double y) => c + Offset(x * cs - y * sn, x * sn + y * cs);
+    return ([turn(-bw / 2, -bh / 2), turn(bw / 2, -bh / 2), turn(bw / 2, bh / 2), turn(-bw / 2, bh / 2)], turn(0, -bh / 2 - 26), c);
+  }
+
+  bool _onPut(_Put p, Offset at, Size size) {
+    final c = Offset(p.rect.center.dx * size.width, p.rect.center.dy * size.height);
+    final d = at - c;
+    final cs = math.cos(-p.angle), sn = math.sin(-p.angle);
+    final x = d.dx * cs - d.dy * sn, y = d.dx * sn + d.dy * cs;
+    return x.abs() <= p.rect.width * size.width / 2 + 4 && y.abs() <= p.rect.height * size.height / 2 + 4;
+  }
+
+  static double _snap(double a) {
+    final q = (a / (math.pi / 2)).roundToDouble() * (math.pi / 2);
+    return (a - q).abs() < 3 * math.pi / 180 ? q : a;
+  }
+
+  Widget _putLayer(Size size) {
+    final sel = _sel != null && _sel!.page == _page ? _sel : null;
+    final h = sel == null ? null : _handles(sel, size);
+    _Put? hit(Offset at) => _puts.reversed.where((p) => p.page == _page && _onPut(p, at, size)).firstOrNull;
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTapDown: (e) => setState(() => _sel = hit(e.localPosition) ?? (h != null && (e.localPosition - h.$2).distance < 14 ? sel : null)),
+      onPanStart: (e) {
+        final at = e.localPosition;
+        _grab = null;
+        var p = sel;
+        if (p != null && h != null && (at - h.$2).distance < 14) {
+          _grab = 'turn';
+        } else if (p != null && h != null && h.$1.any((q) => (at - q).distance < 14)) {
+          _grab = 'size';
+        } else {
+          p = hit(at);
+          if (p != null) _grab = 'move';
+        }
+        if (p == null || _grab == null) return;
+        _mark();
+        setState(() => _sel = p);
+        _grabFrom = at;
+        _grabStart = p.copy();
+      },
+      onPanUpdate: (e) {
+        final p = _sel, st = _grabStart;
+        if (p == null || st == null || _grab == null) return;
+        final at = e.localPosition;
+        final c = Offset(st.rect.center.dx * size.width, st.rect.center.dy * size.height);
+        setState(() {
+          switch (_grab) {
+            case 'move':
+              final dx = (at.dx - _grabFrom.dx) / size.width, dy = (at.dy - _grabFrom.dy) / size.height;
+              p.rect = st.rect.shift(Offset(dx, dy));
+            case 'size':
+              final r0 = (_grabFrom - c).distance;
+              if (r0 > 1) {
+                final k = ((at - c).distance / r0).clamp(0.05, 20.0);
+                final w = (st.rect.width * k).clamp(0.02, 1.5), hh = st.rect.height * w / st.rect.width;
+                p.rect = Rect.fromCenter(center: st.rect.center, width: w, height: hh);
+              }
+            case 'turn':
+              final v = at - c;
+              p.angle = _snap(math.atan2(v.dy, v.dx) + math.pi / 2);
+          }
+        });
+      },
+      onPanEnd: (_) {
+        _grab = null;
+        _grabStart = null;
+      },
+      child: MouseRegion(
+        cursor: SystemMouseCursors.move,
+        child: h == null ? const SizedBox.expand() : CustomPaint(size: Size.infinite, painter: _PutHandles(h.$1, h.$2)),
+      ),
+    );
   }
 
   Widget _preview(_Edit e, Rect r, double scale) => Positioned(
@@ -852,22 +1308,81 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
       );
 
   Widget _side(PdfDocument d) => ListView(padding: const EdgeInsets.fromLTRB(0, 24, 20, 24), children: [
-        _box(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(tr('pdfedit.title'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: LightLook.text)),
+        // What a click does now.
+        _box(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Text(
+            switch (_mode) {
+              _Mode.text => tr('pdfedit.title'),
+              _Mode.mark => tr('ann.title'),
+              _Mode.sign => tr('pdf.sign'),
+              _Mode.picture => tr('pdf.add_picture'),
+            },
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: LightLook.text),
+          ),
           const SizedBox(height: 6),
-          Text(tr('pdfedit.hint'), style: const TextStyle(color: LightLook.muted, fontSize: 12.5, height: 1.5)),
-          if ((_lines[_page]?.isEmpty ?? false) && _pics.containsKey(_page)) ...[
+          Text(
+            switch (_mode) {
+              _Mode.text => tr('pdfedit.hint'),
+              _Mode.mark => tr('ann.hint'),
+              _ => tr('edit.put_hint'),
+            },
+            style: const TextStyle(color: LightLook.muted, fontSize: 12.5, height: 1.5),
+          ),
+          if (_mode == _Mode.text && (_lines[_page]?.isEmpty ?? false) && _pics.containsKey(_page)) ...[
             const SizedBox(height: 8),
             Text(tr('pdfedit.no_text'), style: const TextStyle(color: Color(0xFFC0560A), fontSize: 12.5, height: 1.5)),
+          ],
+          if (_mode == _Mode.sign || _mode == _Mode.picture) ...[
+            const SizedBox(height: 10),
+            FilledButton.tonalIcon(
+              onPressed: () => unawaited(_addPut(picture: _mode == _Mode.picture)),
+              icon: Icon(_mode == _Mode.picture ? Icons.add_photo_alternate_outlined : Icons.draw_rounded, size: 18),
+              label: Text(tr(_mode == _Mode.picture ? 'edit.add_picture' : 'edit.add_sign')),
+            ),
+            if (_sel != null) ...[
+              const SizedBox(height: 8),
+              Row(children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () {
+                      _mark();
+                      setState(() => _sel!.angle = _snap(_sel!.angle + math.pi / 2));
+                    },
+                    child: Text(tr('pdf.turn')),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                if (d.pages.length > 1) ...[
+                  Expanded(child: OutlinedButton(onPressed: _everyPage, child: Text(tr('edit.every_page')))),
+                  const SizedBox(width: 8),
+                ],
+                Expanded(
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(foregroundColor: const Color(0xFFE5484D)),
+                    onPressed: _removeSel,
+                    child: Text(tr('pdf.sign_remove')),
+                  ),
+                ),
+              ]),
+            ],
           ],
         ])),
         const SizedBox(height: 14),
         _box(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Text(tr('pdfedit.changed', {'count': _edits.length}), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: LightLook.text)),
+          Text(tr('edit.changes', {'count': _changes}), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: LightLook.text)),
+          if (_markCount > 0 || _puts.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                tr('edit.counts', {'words': _edits.length, 'marks': _markCount, 'signs': _puts.length}),
+                style: const TextStyle(color: LightLook.muted, fontSize: 12.5),
+              ),
+            ),
           for (final e in _edits)
             InkWell(
               onTap: () async {
                 await _go(e.line.page);
+                setState(() => _mode = _Mode.text);
                 _start(e.line);
               },
               child: Padding(
@@ -890,15 +1405,20 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
                     tooltip: tr('pdfedit.undo'),
                     visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.undo_rounded, size: 18),
-                    onPressed: () => setState(() => _edits.remove(e)),
+                    onPressed: () {
+                      _mark();
+                      setState(() => _edits.remove(e));
+                    },
                   ),
                 ]),
               ),
             ),
           const SizedBox(height: 10),
           FilledButton(onPressed: _unsaved ? () => _save(replace: false) : null, child: Text(tr('pdfedit.save_new'))),
-          const SizedBox(height: 8),
-          OutlinedButton(onPressed: _unsaved ? _confirmReplace : null, child: Text(tr('pdfedit.save_over'))),
+          if (!_office) ...[
+            const SizedBox(height: 8),
+            OutlinedButton(onPressed: _unsaved ? _confirmReplace : null, child: Text(tr('pdfedit.save_over'))),
+          ],
           const SizedBox(height: 8),
           Text(tr('pdfedit.save_note'), style: const TextStyle(color: LightLook.muted, fontSize: 12, height: 1.5)),
         ])),
@@ -925,4 +1445,68 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
         decoration: LightLook.card(),
         child: child,
       );
+}
+
+/// The chosen signature / picture: its (turned) box, four corners, and the
+/// knob above it that turns it.
+class _PutHandles extends CustomPainter {
+  _PutHandles(this.corners, this.knob);
+
+  final List<Offset> corners;
+  final Offset knob;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const blue = Color(0xFF2F6BFF);
+    final line = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5
+      ..color = blue;
+    canvas.drawPath(Path()..addPolygon(corners, true), line);
+    canvas.drawLine((corners[0] + corners[1]) / 2, knob, line);
+    final fill = Paint()..color = Colors.white;
+    for (final q in corners) {
+      final r = Rect.fromCenter(center: q, width: 12, height: 12);
+      canvas.drawRect(r, fill);
+      canvas.drawRect(r, line..strokeWidth = 2);
+    }
+    canvas.drawCircle(knob, 7, fill);
+    canvas.drawCircle(knob, 7, line..strokeWidth = 2);
+  }
+
+  @override
+  bool shouldRepaint(_PutHandles old) => true;
+}
+
+/// 编辑 for any file: a PDF in the editor (words, marks, signatures,
+/// pictures); an Office document made into a PDF first (no word changes);
+/// a photo with the marking page.
+Future<void> openEditor(BuildContext context, AppServices s, String path,
+    {int page = 0, ValueChanged<String>? onSaved, bool mark = false}) async {
+  final lower = path.toLowerCase();
+  if (lower.endsWith('.pdf')) {
+    await Navigator.of(context).push(MaterialPageRoute<void>(
+      builder: (_) => PdfTextEditPage(services: s, path: path, page: page, onSaved: onSaved, mark: mark),
+    ));
+    return;
+  }
+  if (OfficePdf.handles(path)) {
+    final tmp = await Directory.systemTemp.createTemp('lr_edit');
+    final name = path.split(Platform.pathSeparator).last;
+    final dot = name.lastIndexOf('.');
+    final out = '${tmp.path}${Platform.pathSeparator}${dot > 0 ? name.substring(0, dot) : name}.pdf';
+    if (!context.mounted) return;
+    final err = await runBusy(context, tr('print.preparing'), () => OfficePdf.convert(path, out));
+    if (!context.mounted) return;
+    if (err != null || !File(out).existsSync()) {
+      DiagLog.log('tools', 'edit: office not made a pdf: $err');
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('ann.cannot'))));
+      return;
+    }
+    await Navigator.of(context).push(MaterialPageRoute<void>(
+      builder: (_) => PdfTextEditPage(services: s, path: out, original: path, onSaved: onSaved),
+    ));
+    return;
+  }
+  await openAnnotate(context, s, path, page: page, onSaved: onSaved);
 }

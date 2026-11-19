@@ -58,6 +58,8 @@
 #include <utility>
 #include <vector>
 
+#include "subset.h"
+
 namespace {
 
 typedef void* DOC;
@@ -687,6 +689,21 @@ int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
 
   std::string plan(planBytes.begin(), planBytes.end());
   if (plan.size() >= 3 && (unsigned char)plan[0] == 0xEF && (unsigned char)plan[1] == 0xBB && (unsigned char)plan[2] == 0xBF) plan = plan.substr(3);
+  // Every letter each font file is wanted for (all EDIT lines first), so a
+  // font goes in cut down to those letters (subset.h), not whole.
+  std::map<std::string, std::set<uint32_t>> wanted;
+  int cut = 0, whole = 0;
+  for (auto& raw : split(plan, '\n')) {
+    if (raw.rfind("EDIT ", 0) != 0) continue;
+    auto p = split(raw.substr(5), '|');
+    if (p.size() < 10 || p[8] == "obj" || p[8].rfind("objat:", 0) == 0) continue;
+    std::string t9 = p[9];
+    while (!t9.empty() && (t9.back() == '\r' || t9.back() == ' ')) t9.pop_back();
+    std::vector<unsigned char> tb;
+    auto& set = wanted[p[8]];
+    set.insert(0x20);
+    if (readAll(t9, tb)) subset::codePoints(std::string(tb.begin(), tb.end()), set);
+  }
   for (auto& raw : split(plan, '\n')) {
     std::string line = raw;
     while (!line.empty() && (line.back() == '\r' || line.back() == ' ')) line.pop_back();
@@ -863,7 +880,22 @@ int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
       }
       if (!font) {
         auto* fb = new std::vector<unsigned char>();
-        if (readAll(p[8], *fb)) font = api.LoadFont(out, fb->data(), (unsigned int)fb->size(), 2 /* TrueType */, 1 /* CID */);
+        if (readAll(p[8], *fb)) {
+          // Only the letters used; the whole font if that can't be done.
+          std::vector<unsigned char> small;
+          auto w = wanted.find(p[8]);
+          if (w != wanted.end() && subset::make(*fb, w->second, small)) {
+            font = api.LoadFont(out, small.data(), (unsigned int)small.size(), 2 /* TrueType */, 1 /* CID */);
+            if (font) {
+              fb->swap(small);
+              cut++;
+            }
+          }
+          if (!font) {
+            font = api.LoadFont(out, fb->data(), (unsigned int)fb->size(), 2 /* TrueType */, 1 /* CID */);
+            if (font) whole++;
+          }
+        }
         if (!font) {
           delete fb;
           skipped++;
@@ -983,6 +1015,7 @@ int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
     say("error " + err);
     return 1;
   }
-  say("ok " + std::to_string(pages) + (skipped ? " skipped " + std::to_string(skipped) : ""));
+  say("ok " + std::to_string(pages) + (skipped ? " skipped " + std::to_string(skipped) : "") +
+      (cut || whole ? " fonts " + std::to_string(cut) + " cut " + std::to_string(whole) + " whole" : ""));
   return 0;
 }

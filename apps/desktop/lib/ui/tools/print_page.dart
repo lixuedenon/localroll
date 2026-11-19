@@ -261,7 +261,7 @@ class _PrintPageState extends State<PrintPage> {
       data: LightLook.theme(Theme.of(context)),
       child: Scaffold(
         backgroundColor: LightLook.page,
-        appBar: AppBar(title: Text(tr('print.title'))),
+        appBar: AppBar(automaticallyImplyLeading: false, title: Text(tr('print.title'))),
         body: d == null
             ? Center(
                 child: _why == null
