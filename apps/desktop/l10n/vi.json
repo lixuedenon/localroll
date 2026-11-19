@@ -1925,7 +1925,6 @@
   "pdf.sign_new": "Chữ ký mới",
   "pdf.sign_same": "Dùng chữ ký này",
   "pdf.place_sign": "Đặt chữ ký",
-  "pdf.place_hint": "Kéo đến đúng chỗ; kích thước ở bên dưới",
   "pdf.sign_size": "Kích thước",
   "pdf.place_ok": "Xong",
   "qr.sub": "Tạo mã QR, hoặc đọc mã từ ảnh",
@@ -2274,5 +2273,11 @@
   "sig.add_file": "Từ tệp",
   "sig.pick_page": "Chọn trang có chữ ký",
   "sig.pick_page_sub": "Bấm trang có chữ ký; sau đó khoanh chữ ký và bỏ nền.",
-  "sig.mine_sub": "Bấm để dùng, viết chữ ký mới, hoặc lấy từ tệp (ảnh hoặc PDF)"
+  "sig.mine_sub": "Bấm để dùng, viết chữ ký mới, hoặc lấy từ tệp (ảnh hoặc PDF)",
+  "pdf.undo": "Hoàn tác",
+  "pdf.redo": "Làm lại",
+  "pdf.sign_edit": "Sửa chữ ký / hình này",
+  "pdf.sign_remove": "Xóa",
+  "pdf.turn_reset": "Đặt thẳng",
+  "pdf.place_hint": "Kéo đến chỗ cần đặt; kéo góc để đổi cỡ, kéo chấm phía trên để xoay"
 }

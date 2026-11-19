@@ -1925,7 +1925,6 @@
   "pdf.sign_new": "新しい署名",
   "pdf.sign_same": "これを使う",
   "pdf.place_sign": "署名を配置",
-  "pdf.place_hint": "置きたい場所へドラッグ；サイズは下で",
   "pdf.sign_size": "サイズ",
   "pdf.place_ok": "完了",
   "qr.sub": "QR コードを作るか、画像から読み取ります",
@@ -2274,5 +2273,11 @@
   "sig.add_file": "ファイルから",
   "sig.pick_page": "署名のあるページを選択",
   "sig.pick_page_sub": "署名のあるページをクリック。次に署名を囲み、背景を消します。",
-  "sig.mine_sub": "クリックで使用。新しく書くか、ファイル（写真または PDF）から取り込めます"
+  "sig.mine_sub": "クリックで使用。新しく書くか、ファイル（写真または PDF）から取り込めます",
+  "pdf.undo": "元に戻す",
+  "pdf.redo": "やり直す",
+  "pdf.sign_edit": "この署名/画像を変更",
+  "pdf.sign_remove": "削除",
+  "pdf.turn_reset": "まっすぐに戻す",
+  "pdf.place_hint": "ドラッグして配置。四隅でサイズ、上の丸で回転"
 }

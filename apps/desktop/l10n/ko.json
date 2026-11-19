@@ -1925,7 +1925,6 @@
   "pdf.sign_new": "새 서명",
   "pdf.sign_same": "이것 사용",
   "pdf.place_sign": "서명 배치",
-  "pdf.place_hint": "원하는 곳으로 끌어 놓으세요. 크기는 아래에서",
   "pdf.sign_size": "크기",
   "pdf.place_ok": "완료",
   "qr.sub": "QR 코드를 만들거나 그림에서 읽습니다",
@@ -2274,5 +2273,11 @@
   "sig.add_file": "파일에서",
   "sig.pick_page": "서명이 있는 페이지 선택",
   "sig.pick_page_sub": "서명이 있는 페이지를 클릭하세요. 다음에 서명을 상자로 고르고 배경을 지웁니다.",
-  "sig.mine_sub": "클릭해서 사용하거나 새로 쓰거나 파일(사진 또는 PDF)에서 가져오세요"
+  "sig.mine_sub": "클릭해서 사용하거나 새로 쓰거나 파일(사진 또는 PDF)에서 가져오세요",
+  "pdf.undo": "실행 취소",
+  "pdf.redo": "다시 실행",
+  "pdf.sign_edit": "이 서명/그림 바꾸기",
+  "pdf.sign_remove": "삭제",
+  "pdf.turn_reset": "바로 세우기",
+  "pdf.place_hint": "끌어서 놓으세요. 네 모서리로 크기, 위의 점으로 회전"
 }

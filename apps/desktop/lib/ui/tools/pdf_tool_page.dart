@@ -33,12 +33,36 @@ class _Doc {
 }
 
 /// A signature laid on a page: where (0–1 of the page as it was, before
-/// our turning).
+/// our turning), turned about its middle ([angle], clockwise, radians).
 class _Sign {
-  _Sign(this.sig, this.rect);
+  _Sign(this.sig, this.rect, {this.angle = 0});
 
   final Signature sig;
   Rect rect;
+  double angle;
+
+  _Sign copy() => _Sign(sig, rect, angle: angle);
+}
+
+/// One page in a remembered state (undo / redo).
+class _Was {
+  _Was(this.page) : turns = page.turns, signs = [for (final s in page.signs) s.copy()];
+  _Was.of(this.page, this.turns, this.signs);
+
+  final _Page page;
+  final int turns;
+  final List<_Sign> signs;
+}
+
+/// Where a signature / picture ends up: its box, its turn, on every page;
+/// or taken away.
+class _Placed {
+  const _Placed(this.rect, this.angle, {this.all = false, this.remove = false});
+
+  final Rect rect;
+  final double angle;
+  final bool all;
+  final bool remove;
 }
 
 class _Page {
@@ -78,6 +102,45 @@ class _PdfToolPageState extends State<PdfToolPage> {
   final Set<_Page> _picked = {};
   bool _loading = true;
 
+  /// Undo / redo: the pages as they were (order, turning, signatures).
+  final List<List<_Was>> _undo = [], _redo = [];
+
+  List<_Was> _now() => [for (final p in _pages) _Was(p)];
+
+  /// Remembers the pages as they are now, before a change.
+  void _mark() {
+    _undo.add(_now());
+    if (_undo.length > 100) _undo.removeAt(0);
+    _redo.clear();
+  }
+
+  /// A change that can be undone.
+  void _change(VoidCallback f) {
+    _mark();
+    setState(f);
+  }
+
+  void _back(List<List<_Was>> from, List<List<_Was>> to) {
+    if (from.isEmpty) return;
+    to.add(_now());
+    final was = from.removeLast();
+    setState(() {
+      _pages
+        ..clear()
+        ..addAll([for (final w in was) w.page]);
+      for (final w in was) {
+        w.page.turns = w.turns;
+        w.page.signs
+          ..clear()
+          ..addAll([for (final s in w.signs) s.copy()]);
+      }
+      _picked.retainWhere(_pages.contains);
+    });
+  }
+
+  void _undoOne() => _back(_undo, _redo);
+  void _redoOne() => _back(_redo, _undo);
+
   AppServices get s => widget.services;
 
   @override
@@ -86,7 +149,7 @@ class _PdfToolPageState extends State<PdfToolPage> {
     unawaited(OfficeEngines.installed().then((a) {
       if (mounted) setState(() => _apps = a);
     }));
-    unawaited(_add(widget.files));
+    unawaited(_add(widget.files, undoable: false));
   }
 
   @override
@@ -97,7 +160,8 @@ class _PdfToolPageState extends State<PdfToolPage> {
     super.dispose();
   }
 
-  Future<void> _add(List<String> files) async {
+  Future<void> _add(List<String> files, {bool undoable = true}) async {
+    if (undoable) _mark();
     setState(() => _loading = true);
     for (final f in files) {
       try {
@@ -133,7 +197,7 @@ class _PdfToolPageState extends State<PdfToolPage> {
       final stamps = <PdfStamp>[];
       for (final sg in p.signs) {
         final px = await sg.sig.bgra();
-        if (px != null) stamps.add(PdfStamp(px, sg.sig.width, sg.sig.height, sg.rect));
+        if (px != null) stamps.add(PdfStamp(px, sg.sig.width, sg.sig.height, sg.rect, angle: sg.angle));
       }
       out.add(PdfFromDoc(p.doc.path, p.number - 1, turns: p.turns, stamps: stamps));
     }
@@ -222,12 +286,17 @@ class _PdfToolPageState extends State<PdfToolPage> {
     c.drawImage(base, Offset.zero, Paint()..filterQuality = FilterQuality.high);
     for (final sg in p.signs) {
       final r = sg.rect;
+      final box = Rect.fromLTWH(r.left * w, r.top * h, r.width * w, r.height * h);
+      c.save();
+      c.translate(box.center.dx, box.center.dy);
+      c.rotate(sg.angle);
       c.drawImageRect(
         sg.sig.image,
         Rect.fromLTWH(0, 0, sg.sig.width.toDouble(), sg.sig.height.toDouble()),
-        Rect.fromLTWH(r.left * w, r.top * h, r.width * w, r.height * h),
+        Rect.fromCenter(center: Offset.zero, width: box.width, height: box.height),
         Paint()..filterQuality = FilterQuality.high,
       );
+      c.restore();
     }
     final out = await rec.endRecording().toImage(ow, oh);
     base.dispose();
@@ -385,9 +454,28 @@ class _PdfToolPageState extends State<PdfToolPage> {
     if (target == null) return;
     final sig = await pickSignature(context, s);
     if (sig == null || !mounted) return;
-    final placed = await showLrDialog<(Rect, bool)>(context: context, builder: (_) => _PlaceSign(page: target, sig: sig));
-    if (placed == null) return;
-    setState(() => target.signs.add(_Sign(sig, placed.$1)));
+    final placed = await showLrDialog<_Placed>(context: context, builder: (_) => _PlaceSign(page: target, sig: sig));
+    if (placed == null || placed.remove) return;
+    _change(() => target.signs.add(_Sign(sig, placed.rect, angle: placed.angle)));
+  }
+
+  /// A signature / picture already on [p]: moved, resized, turned, or
+  /// taken away.
+  Future<void> _editSign(_Page p, _Sign sg) async {
+    final placed = await showLrDialog<_Placed>(
+      context: context,
+      builder: (_) => _PlaceSign(page: p, sig: sg.sig, start: sg),
+    );
+    if (placed == null || !mounted || !p.signs.contains(sg)) return;
+    _change(() {
+      if (placed.remove) {
+        p.signs.remove(sg);
+      } else {
+        sg
+          ..rect = placed.rect
+          ..angle = placed.angle;
+      }
+    });
   }
 
   /// A picture (cropped, its background taken away if asked) on the page
@@ -397,11 +485,11 @@ class _PdfToolPageState extends State<PdfToolPage> {
     if (target == null) return;
     final pic = await pictureCutout(context, s);
     if (pic == null || !mounted) return;
-    final placed = await showLrDialog<(Rect, bool)>(context: context, builder: (_) => _PlaceSign(page: target, sig: pic, everyPage: true));
-    if (placed == null) return;
-    setState(() {
-      for (final p in placed.$2 ? _pages : [target]) {
-        p.signs.add(_Sign(pic, placed.$1));
+    final placed = await showLrDialog<_Placed>(context: context, builder: (_) => _PlaceSign(page: target, sig: pic, everyPage: true));
+    if (placed == null || placed.remove) return;
+    _change(() {
+      for (final p in placed.all ? _pages : [target]) {
+        p.signs.add(_Sign(pic, placed.rect, angle: placed.angle));
       }
     });
   }
@@ -447,13 +535,31 @@ class _PdfToolPageState extends State<PdfToolPage> {
       return;
     }
     final doc = _Doc(path, d);
+    // Each old page has one new page (also in undo / redo).
+    final made = <_Page, _Page>{};
+    _Page? next(_Page p) => p.doc != old
+        ? p
+        : p.number > d.pages.length
+            ? null
+            : made.putIfAbsent(p, () => _Page(doc, p.number)
+              ..turns = p.turns
+              ..signs.addAll(p.signs));
+    for (final list in [..._undo, ..._redo]) {
+      for (var i = list.length - 1; i >= 0; i--) {
+        final n = next(list[i].page);
+        if (n == null) {
+          list.removeAt(i);
+        } else if (n != list[i].page) {
+          list[i] = _Was.of(n, list[i].turns, list[i].signs);
+        }
+      }
+    }
     setState(() {
       _docs[_docs.indexOf(old)] = doc;
       for (var i = 0; i < _pages.length; i++) {
         final p = _pages[i];
-        if (p.doc != old || p.number > d.pages.length) continue;
-        final n = _Page(doc, p.number)..turns = p.turns;
-        n.signs.addAll(p.signs);
+        final n = next(p);
+        if (n == null || n == p) continue;
         if (_picked.remove(p)) _picked.add(n);
         _pages[i] = n;
       }
@@ -502,7 +608,15 @@ class _PdfToolPageState extends State<PdfToolPage> {
           ),
         );
     final busy = _loading || _pages.isEmpty;
-    return Theme(
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.keyZ, control: true): _undoOne,
+        const SingleActivator(LogicalKeyboardKey.keyY, control: true): _redoOne,
+        const SingleActivator(LogicalKeyboardKey.keyZ, control: true, shift: true): _redoOne,
+      },
+      child: Focus(
+        autofocus: true,
+        child: Theme(
       data: LightLook.theme(Theme.of(context)),
       child: Scaffold(
         backgroundColor: LightLook.page,
@@ -544,20 +658,38 @@ class _PdfToolPageState extends State<PdfToolPage> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
             child: Wrap(children: [
+              // Undo / redo (Ctrl+Z, Ctrl+Y): order, turning, deleting,
+              // adding, signatures and pictures.
+              Padding(
+                padding: const EdgeInsets.only(right: 4, bottom: 8),
+                child: IconButton.outlined(
+                  tooltip: '${tr('pdf.undo')} (Ctrl+Z)',
+                  onPressed: _undo.isEmpty ? null : _undoOne,
+                  icon: const Icon(Icons.undo_rounded, size: 20),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 12, bottom: 8),
+                child: IconButton.outlined(
+                  tooltip: '${tr('pdf.redo')} (Ctrl+Y)',
+                  onPressed: _redo.isEmpty ? null : _redoOne,
+                  icon: const Icon(Icons.redo_rounded, size: 20),
+                ),
+              ),
               act(Icons.add_rounded, tr('pdf.add'), () async {
                 final f = await pickPdfs(context, s);
                 if (f.isNotEmpty) await _add(f);
               }),
               act(Icons.rotate_right_rounded, tr('pdf.turn'), busy
                   ? null
-                  : () => setState(() {
+                  : () => _change(() {
                         for (final p in _chosen) {
                           p.turns = (p.turns + 1) % 4;
                         }
                       })),
               act(Icons.delete_outline_rounded, tr('pdf.delete'), _picked.isEmpty
                   ? null
-                  : () => setState(() {
+                  : () => _change(() {
                         _pages.removeWhere(_picked.contains);
                         _picked.clear();
                       })),
@@ -620,16 +752,18 @@ class _PdfToolPageState extends State<PdfToolPage> {
           ),
         ]),
       ),
+        ),
+      ),
     );
   }
 
   Widget _tile(int i) {
     final p = _pages[i];
     final on = _picked.contains(p);
-    final thumb = _Thumb(page: p, width: _thumbW, picked: on);
+    final thumb = _Thumb(page: p, width: _thumbW, picked: on, onSign: (sg) => unawaited(_editSign(p, sg)));
     return DragTarget<int>(
       onWillAcceptWithDetails: (d) => d.data != i,
-      onAcceptWithDetails: (d) => setState(() {
+      onAcceptWithDetails: (d) => _change(() {
         final moved = _pages.removeAt(d.data);
         _pages.insert(i, moved);
       }),
@@ -659,11 +793,14 @@ class _PdfToolPageState extends State<PdfToolPage> {
 
 /// One page, small: its picture turned as asked, its signatures on it.
 class _Thumb extends StatelessWidget {
-  const _Thumb({required this.page, required this.width, required this.picked});
+  const _Thumb({required this.page, required this.width, required this.picked, this.onSign});
 
   final _Page page;
   final double width;
   final bool picked;
+
+  /// A signature / picture on the page clicked (to change it).
+  final ValueChanged<_Sign>? onSign;
 
   @override
   Widget build(BuildContext context) {
@@ -681,7 +818,21 @@ class _Thumb extends StatelessWidget {
             top: sg.rect.top * h,
             width: sg.rect.width * width,
             height: sg.rect.height * h,
-            child: Image.memory(sg.sig.png, fit: BoxFit.fill),
+            child: Transform.rotate(
+              angle: sg.angle,
+              child: onSign == null
+                  ? Image.memory(sg.sig.png, fit: BoxFit.fill)
+                  : Tooltip(
+                      message: tr('pdf.sign_edit'),
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: GestureDetector(
+                          onTap: () => onSign!(sg),
+                          child: Image.memory(sg.sig.png, fit: BoxFit.fill),
+                        ),
+                      ),
+                    ),
+            ),
           ),
       ]),
     );
@@ -697,24 +848,60 @@ class _Thumb extends StatelessWidget {
   }
 }
 
-/// Where the signature goes: drag it on the page, make it bigger / smaller.
+/// Where the signature / picture goes: drag it on the page; a corner makes
+/// it bigger / smaller (same shape), the round knob above it turns it.
+/// [start]: one already on the page (it can be taken away too).
 class _PlaceSign extends StatefulWidget {
-  const _PlaceSign({required this.page, required this.sig, this.everyPage = false});
+  const _PlaceSign({required this.page, required this.sig, this.everyPage = false, this.start});
 
   final _Page page;
   final Signature sig;
 
   /// Offer "on every page" (a picture such as a logo).
   final bool everyPage;
+  final _Sign? start;
 
   @override
   State<_PlaceSign> createState() => _PlaceSignState();
 }
 
 class _PlaceSignState extends State<_PlaceSign> {
-  Offset _at = const Offset(0.55, 0.8);
-  double _w = 0.3;
+  /// Its middle and width, 0–1 of the page; its turn (radians, clockwise).
+  late Offset _at = widget.start?.rect.center ?? const Offset(0.55, 0.8);
+  late double _w = widget.start?.rect.width ?? 0.3;
+  late double _angle = widget.start?.angle ?? 0;
   bool _all = false;
+
+  // What the mouse holds, and how things were when it took hold.
+  String? _grab;
+  Offset _from = Offset.zero;
+  double _w0 = 0;
+
+  static const _knob = 26.0;
+
+  /// The box's corners and the knob, in shown pixels.
+  (List<Offset>, Offset) _handles(Offset c, double bw, double bh) {
+    final cs = math.cos(_angle), sn = math.sin(_angle);
+    Offset turn(double x, double y) => c + Offset(x * cs - y * sn, x * sn + y * cs);
+    return (
+      [turn(-bw / 2, -bh / 2), turn(bw / 2, -bh / 2), turn(bw / 2, bh / 2), turn(-bw / 2, bh / 2)],
+      turn(0, -bh / 2 - _knob),
+    );
+  }
+
+  /// Whether [p] is on the (turned) box.
+  bool _inside(Offset p, Offset c, double bw, double bh) {
+    final d = p - c;
+    final cs = math.cos(-_angle), sn = math.sin(-_angle);
+    final x = d.dx * cs - d.dy * sn, y = d.dx * sn + d.dy * cs;
+    return x.abs() <= bw / 2 + 4 && y.abs() <= bh / 2 + 4;
+  }
+
+  /// Near 0°, 90°, 180°, 270°: exactly that.
+  static double _snap(double a) {
+    final q = (a / (math.pi / 2)).roundToDouble() * (math.pi / 2);
+    return (a - q).abs() < 3 * math.pi / 180 ? q : a;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -722,10 +909,12 @@ class _PlaceSignState extends State<_PlaceSign> {
     const maxH = 640.0, maxW = 620.0;
     final k = math.min(maxW / pg.width, maxH / pg.height);
     final w = pg.width * k, h = pg.height * k;
-    final sw = _w * w, sh = sw * widget.sig.height / widget.sig.width;
-    final rect = Rect.fromLTWH(_at.dx * w - sw / 2, _at.dy * h - sh / 2, sw, sh);
+    final bw = _w * w, bh = bw * widget.sig.height / widget.sig.width;
+    final c = Offset(_at.dx * w, _at.dy * h);
+    final (corners, knob) = _handles(c, bw, bh);
+    final deg = ((_angle * 180 / math.pi) % 360 + 360) % 360;
     return AlertDialog(
-      title: Text(tr('pdf.place_sign')),
+      title: Text(tr(widget.start != null ? 'pdf.sign_edit' : 'pdf.place_sign')),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
         Text(tr('pdf.place_hint'), style: const TextStyle(color: LightLook.muted, fontSize: 13)),
         const SizedBox(height: 8),
@@ -734,23 +923,66 @@ class _PlaceSignState extends State<_PlaceSign> {
           height: h,
           color: Colors.white,
           child: GestureDetector(
-            onPanUpdate: (d) => setState(() => _at = Offset(((_at.dx * w + d.delta.dx) / w).clamp(0.0, 1.0), ((_at.dy * h + d.delta.dy) / h).clamp(0.0, 1.0))),
-            onTapDown: (d) => setState(() => _at = Offset(d.localPosition.dx / w, d.localPosition.dy / h)),
-            child: Stack(children: [
+            onPanStart: (d) {
+              final p = d.localPosition;
+              _from = p;
+              _w0 = _w;
+              if ((p - knob).distance < 14) {
+                _grab = 'turn';
+              } else if (corners.any((q) => (p - q).distance < 14)) {
+                _grab = 'size';
+              } else {
+                _grab = 'move';
+                if (!_inside(p, c, bw, bh)) setState(() => _at = Offset(p.dx / w, p.dy / h));
+              }
+            },
+            onPanUpdate: (d) {
+              final p = d.localPosition;
+              setState(() {
+                switch (_grab) {
+                  case 'turn':
+                    final v = p - c;
+                    _angle = _snap(math.atan2(v.dy, v.dx) + math.pi / 2);
+                  case 'size':
+                    final r0 = (_from - c).distance;
+                    if (r0 > 1) _w = (_w0 * (p - c).distance / r0).clamp(0.03, 1.5);
+                  case 'move':
+                    _at = Offset(((_at.dx * w + d.delta.dx) / w).clamp(0.0, 1.0), ((_at.dy * h + d.delta.dy) / h).clamp(0.0, 1.0));
+                }
+              });
+            },
+            onPanEnd: (_) => _grab = null,
+            onTapDown: (d) {
+              if (!_inside(d.localPosition, c, bw, bh)) setState(() => _at = Offset(d.localPosition.dx / w, d.localPosition.dy / h));
+            },
+            child: Stack(clipBehavior: Clip.none, children: [
               Positioned.fill(child: PdfPageView(document: widget.page.doc.doc, pageNumber: widget.page.number)),
-              Positioned.fromRect(
-                rect: rect,
-                child: Container(
-                  decoration: BoxDecoration(border: Border.all(color: const Color(0x882F6BFF))),
-                  child: Image.memory(widget.sig.png, fit: BoxFit.fill),
-                ),
+              Positioned(
+                left: c.dx - bw / 2,
+                top: c.dy - bh / 2,
+                width: bw,
+                height: bh,
+                child: Transform.rotate(angle: _angle, child: Image.memory(widget.sig.png, fit: BoxFit.fill)),
               ),
+              Positioned.fill(child: IgnorePointer(child: CustomPaint(painter: _Handles(corners, knob, (corners[0] + corners[1]) / 2)))),
             ]),
           ),
         ),
+        const SizedBox(height: 6),
         Row(children: [
           Text(tr('pdf.sign_size')),
-          Expanded(child: Slider(value: _w, min: 0.05, max: 1, onChanged: (v) => setState(() => _w = v))),
+          Expanded(child: Slider(value: _w.clamp(0.03, 1.5), min: 0.03, max: 1.5, onChanged: (v) => setState(() => _w = v))),
+          Text('${deg.round()}°', style: const TextStyle(color: LightLook.muted, fontSize: 13)),
+          IconButton(
+            tooltip: tr('pdf.turn'),
+            onPressed: () => setState(() => _angle = _snap(_angle + math.pi / 2)),
+            icon: const Icon(Icons.rotate_right_rounded),
+          ),
+          IconButton(
+            tooltip: tr('pdf.turn_reset'),
+            onPressed: _angle == 0 ? null : () => setState(() => _angle = 0),
+            icon: const Icon(Icons.screen_rotation_alt_rounded),
+          ),
         ]),
         if (widget.everyPage)
           CheckboxListTile(
@@ -762,12 +994,52 @@ class _PlaceSignState extends State<_PlaceSign> {
           ),
       ]),
       actions: [
+        if (widget.start != null)
+          TextButton.icon(
+            style: TextButton.styleFrom(foregroundColor: const Color(0xFFE5484D)),
+            onPressed: () => Navigator.pop(context, const _Placed(Rect.zero, 0, remove: true)),
+            icon: const Icon(Icons.delete_outline_rounded, size: 18),
+            label: Text(tr('pdf.sign_remove')),
+          ),
         TextButton(onPressed: () => Navigator.pop(context), child: Text(tr('common.cancel'))),
         FilledButton(
-          onPressed: () => Navigator.pop(context, (Rect.fromLTWH(rect.left / w, rect.top / h, rect.width / w, rect.height / h), _all)),
+          onPressed: () => Navigator.pop(
+            context,
+            _Placed(Rect.fromCenter(center: _at, width: bw / w, height: bh / h), _angle, all: _all),
+          ),
           child: Text(tr('pdf.place_ok')),
         ),
       ],
     );
   }
+}
+
+/// The box (turned), its four corners and the knob that turns it.
+class _Handles extends CustomPainter {
+  _Handles(this.corners, this.knob, this.top);
+
+  final List<Offset> corners;
+  final Offset knob, top;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const blue = Color(0xFF2F6BFF);
+    final line = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5
+      ..color = blue;
+    canvas.drawPath(Path()..addPolygon(corners, true), line);
+    canvas.drawLine(top, knob, line);
+    final fill = Paint()..color = Colors.white;
+    for (final q in corners) {
+      final r = Rect.fromCenter(center: q, width: 12, height: 12);
+      canvas.drawRect(r, fill);
+      canvas.drawRect(r, line..strokeWidth = 2);
+    }
+    canvas.drawCircle(knob, 7, fill);
+    canvas.drawCircle(knob, 7, line..strokeWidth = 2);
+  }
+
+  @override
+  bool shouldRepaint(_Handles old) => true;
 }

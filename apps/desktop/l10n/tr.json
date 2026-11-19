@@ -1925,7 +1925,6 @@
   "pdf.sign_new": "Yeni imza",
   "pdf.sign_same": "Bunu kullan",
   "pdf.place_sign": "İmzayı yerleştir",
-  "pdf.place_hint": "Yerine sürükleyin; boyut aşağıda",
   "pdf.sign_size": "Boyut",
   "pdf.place_ok": "Bitti",
   "qr.sub": "QR kod oluşturun ya da bir resimden okuyun",
@@ -2274,5 +2273,11 @@
   "sig.add_file": "Dosyadan",
   "sig.pick_page": "İmzanın olduğu sayfayı seçin",
   "sig.pick_page_sub": "İmzanın olduğu sayfaya tıklayın; sonra çerçeveleyip arka planı kaldırın.",
-  "sig.mine_sub": "Kullanmak için tıklayın, yenisini yazın ya da dosyadan (fotoğraf veya PDF) alın"
+  "sig.mine_sub": "Kullanmak için tıklayın, yenisini yazın ya da dosyadan (fotoğraf veya PDF) alın",
+  "pdf.undo": "Geri al",
+  "pdf.redo": "Yinele",
+  "pdf.sign_edit": "Bu imzayı / resmi değiştir",
+  "pdf.sign_remove": "Kaldır",
+  "pdf.turn_reset": "Düzelt",
+  "pdf.place_hint": "Yerine sürükleyin; köşe boyut, üstteki nokta döndürme"
 }

@@ -1925,7 +1925,6 @@
   "pdf.sign_new": "Nouvelle signature",
   "pdf.sign_same": "Utiliser celle-ci",
   "pdf.place_sign": "Placer la signature",
-  "pdf.place_hint": "Faites-la glisser à sa place ; taille ci-dessous",
   "pdf.sign_size": "Taille",
   "pdf.place_ok": "Terminé",
   "qr.sub": "Créer un QR code, ou en lire un dans une image",
@@ -2274,5 +2273,11 @@
   "sig.add_file": "Depuis un fichier",
   "sig.pick_page": "Choisir la page avec la signature",
   "sig.pick_page_sub": "Cliquez la page de la signature ; ensuite encadrez-la et retirez le fond.",
-  "sig.mine_sub": "Cliquez pour l'utiliser, écrivez-en une ou importez-la d'un fichier (photo ou PDF)"
+  "sig.mine_sub": "Cliquez pour l'utiliser, écrivez-en une ou importez-la d'un fichier (photo ou PDF)",
+  "pdf.undo": "Annuler",
+  "pdf.redo": "Rétablir",
+  "pdf.sign_edit": "Modifier cette signature / image",
+  "pdf.sign_remove": "Retirer",
+  "pdf.turn_reset": "Redresser",
+  "pdf.place_hint": "Faites glisser à sa place ; un coin pour la taille, le point au-dessus pour tourner"
 }

@@ -740,6 +740,8 @@ int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
       if (!last || p.size() < 7) continue;
       int pw = atoi(p[1].c_str()), ph = atoi(p[2].c_str());
       double x = atof(p[3].c_str()), y = atof(p[4].c_str()), w = atof(p[5].c_str()), h = atof(p[6].c_str());
+      // Turned about its middle, clockwise as seen (radians).
+      const double spin = p.size() > 7 ? atof(p[7].c_str()) : 0.0;
       auto* px = new std::vector<unsigned char>();
       if (!readAll(p[0], *px) || pw <= 0 || ph <= 0 || px->size() < (size_t)pw * ph * 4) {
         delete px;
@@ -748,8 +750,11 @@ int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
       keep.push_back(px);
       // Size as shown: before our turn.
       double dW = (lastRot & 1) ? lastH : lastW, dH = (lastRot & 1) ? lastW : lastH;
+      const double cs = cos(spin), sn = sin(spin);
       auto at = [&](double u, double v, double& ox, double& oy) {
-        double X = (x + u * w) * dW, Y = (y + (1 - v) * h) * dH;
+        // From the middle, in shown units (y down), then turned.
+        const double a = (u - 0.5) * w * dW, b = (0.5 - v) * h * dH;
+        double X = (x + w / 2) * dW + a * cs - b * sn, Y = (y + h / 2) * dH + a * sn + b * cs;
         toPage(lastRot, lastW, lastH, X, Y, ox, oy);
         ox += lastX0;
         oy += lastY0;

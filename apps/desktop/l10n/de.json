@@ -1925,7 +1925,6 @@
   "pdf.sign_new": "Neue Unterschrift",
   "pdf.sign_same": "Diese verwenden",
   "pdf.place_sign": "Unterschrift platzieren",
-  "pdf.place_hint": "An die richtige Stelle ziehen; Größe unten",
   "pdf.sign_size": "Größe",
   "pdf.place_ok": "Fertig",
   "qr.sub": "Einen QR-Code erstellen oder aus einem Bild lesen",
@@ -2274,5 +2273,11 @@
   "sig.add_file": "Aus einer Datei",
   "sig.pick_page": "Seite mit der Unterschrift wählen",
   "sig.pick_page_sub": "Seite mit der Unterschrift anklicken; danach einrahmen und Hintergrund entfernen.",
-  "sig.mine_sub": "Zum Verwenden anklicken, neu schreiben oder aus einer Datei holen (Foto oder PDF)"
+  "sig.mine_sub": "Zum Verwenden anklicken, neu schreiben oder aus einer Datei holen (Foto oder PDF)",
+  "pdf.undo": "Rückgängig",
+  "pdf.redo": "Wiederholen",
+  "pdf.sign_edit": "Diese Unterschrift / dieses Bild ändern",
+  "pdf.sign_remove": "Entfernen",
+  "pdf.turn_reset": "Gerade stellen",
+  "pdf.place_hint": "An die Stelle ziehen; Ecke ziehen für die Größe, Punkt darüber zum Drehen"
 }

@@ -123,11 +123,14 @@ class PdfTextStyle {
 /// A picture laid on a page: raw BGRA pixels; where, 0–1 of the page as
 /// shown (from the top left).
 class PdfStamp {
-  const PdfStamp(this.bgra, this.width, this.height, this.rect);
+  const PdfStamp(this.bgra, this.width, this.height, this.rect, {this.angle = 0});
 
   final List<int> bgra;
   final int width, height;
   final ui.Rect rect;
+
+  /// Turned about its middle, clockwise as seen (radians).
+  final double angle;
 }
 
 /// A page made from a JPEG photo: [pageW]×[pageH] points, the photo at
@@ -242,7 +245,7 @@ class PdfBuilder {
               final f = File('${tmp.path}${Platform.pathSeparator}s${n++}.bgra');
               await f.writeAsBytes(st.bgra);
               final r = st.rect;
-              plan.writeln('STAMP ${f.path}|${st.width}|${st.height}|${r.left}|${r.top}|${r.width}|${r.height}');
+              plan.writeln('STAMP ${f.path}|${st.width}|${st.height}|${r.left}|${r.top}|${r.width}|${r.height}|${st.angle}');
             }
             for (final nt in p.notes) {
               final f = File('${tmp.path}${Platform.pathSeparator}n${n++}.txt');

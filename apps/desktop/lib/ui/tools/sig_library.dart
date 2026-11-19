@@ -576,25 +576,51 @@ class _CropBox extends StatefulWidget {
 class _CropBoxState extends State<_CropBox> {
   String? _grab;
 
+  /// Room around the picture, so corners and edges on its border are as
+  /// easy to take hold of as the others.
+  static const _m = 14.0;
+
+  /// What a press at [p] takes hold of: a corner, an edge, the box, none.
+  String? _what(Offset p, Rect box) {
+    const near = 14.0;
+    final l = (p.dx - box.left).abs() < near, r = (p.dx - box.right).abs() < near;
+    final t = (p.dy - box.top).abs() < near, b = (p.dy - box.bottom).abs() < near;
+    final inX = p.dx > box.left - near && p.dx < box.right + near, inY = p.dy > box.top - near && p.dy < box.bottom + near;
+    final h = l ? 'l' : (r ? 'r' : ''), v = t ? 't' : (b ? 'b' : '');
+    if (h.isNotEmpty && v.isNotEmpty) return '$h$v';
+    if (h.isNotEmpty && inY) return h;
+    if (v.isNotEmpty && inX) return v;
+    return box.contains(p) ? 'move' : null;
+  }
+
+  static MouseCursor _cursor(String? g) => switch (g) {
+        'lt' || 'rb' => SystemMouseCursors.resizeUpLeftDownRight,
+        'rt' || 'lb' => SystemMouseCursors.resizeUpRightDownLeft,
+        'l' || 'r' => SystemMouseCursors.resizeLeftRight,
+        't' || 'b' => SystemMouseCursors.resizeUpDown,
+        'move' => SystemMouseCursors.move,
+        _ => SystemMouseCursors.basic,
+      };
+
+  MouseCursor _hover = SystemMouseCursors.basic;
+
   @override
   Widget build(BuildContext context) => LayoutBuilder(builder: (context, c) {
         final iw = widget.image.width.toDouble(), ih = widget.image.height.toDouble();
-        final k = math.min(c.maxWidth / iw, c.maxHeight / ih);
+        final k = math.min((c.maxWidth - 2 * _m) / iw, (c.maxHeight - 2 * _m) / ih);
         final w = iw * k, h = ih * k;
         final r = widget.crop;
         final box = Rect.fromLTRB(r.left * w, r.top * h, r.right * w, r.bottom * h);
+        Offset at(Offset p) => p - const Offset(_m, _m);
         return Center(
-          child: SizedBox(
-            width: w,
-            height: h,
+          child: MouseRegion(
+            cursor: _grab != null ? _cursor(_grab) : _hover,
+            onHover: (e) {
+              final cur = _cursor(_what(at(e.localPosition), box));
+              if (cur != _hover) setState(() => _hover = cur);
+            },
             child: GestureDetector(
-              onPanStart: (d) {
-                final p = d.localPosition;
-                const near = 16.0;
-                final l = (p.dx - box.left).abs() < near, rr = (p.dx - box.right).abs() < near;
-                final t = (p.dy - box.top).abs() < near, b = (p.dy - box.bottom).abs() < near;
-                _grab = (l || rr) && (t || b) ? '${l ? 'l' : 'r'}${t ? 't' : 'b'}' : (box.contains(p) ? 'move' : null);
-              },
+              onPanStart: (d) => setState(() => _grab = _what(at(d.localPosition), box)),
               onPanUpdate: (d) {
                 final g = _grab;
                 if (g == null) return;
@@ -613,11 +639,19 @@ class _CropBoxState extends State<_CropBox> {
                 }
                 widget.onCrop(n);
               },
-              onPanEnd: (_) => _grab = null,
-              child: Stack(children: [
-                Positioned.fill(child: RawImage(image: widget.image, fit: BoxFit.fill)),
-                Positioned.fill(child: CustomPaint(painter: _Shade(box))),
-              ]),
+              onPanEnd: (_) => setState(() => _grab = null),
+              child: Container(
+                color: Colors.transparent,
+                padding: const EdgeInsets.all(_m),
+                child: SizedBox(
+                  width: w,
+                  height: h,
+                  child: Stack(clipBehavior: Clip.none, children: [
+                    Positioned.fill(child: RawImage(image: widget.image, fit: BoxFit.fill)),
+                    Positioned.fill(child: CustomPaint(painter: _Shade(box))),
+                  ]),
+                ),
+              ),
             ),
           ),
         );
@@ -640,9 +674,9 @@ class _Shade extends CustomPainter {
           ..color = const Color(0xFF2F6BFF));
     final h = Paint()..color = Colors.white;
     for (final p in [box.topLeft, box.topRight, box.bottomLeft, box.bottomRight]) {
-      canvas.drawRect(Rect.fromCenter(center: p, width: 10, height: 10), h);
+      canvas.drawRect(Rect.fromCenter(center: p, width: 14, height: 14), h);
       canvas.drawRect(
-          Rect.fromCenter(center: p, width: 10, height: 10),
+          Rect.fromCenter(center: p, width: 14, height: 14),
           Paint()
             ..style = PaintingStyle.stroke
             ..color = const Color(0xFF2F6BFF)

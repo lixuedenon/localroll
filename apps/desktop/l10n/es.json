@@ -1925,7 +1925,6 @@
   "pdf.sign_new": "Firma nueva",
   "pdf.sign_same": "Usar esta",
   "pdf.place_sign": "Colocar la firma",
-  "pdf.place_hint": "Arrástrala a su sitio; tamaño abajo",
   "pdf.sign_size": "Tamaño",
   "pdf.place_ok": "Hecho",
   "qr.sub": "Crea un código QR o lee uno de una imagen",
@@ -2274,5 +2273,11 @@
   "sig.add_file": "Desde un archivo",
   "sig.pick_page": "Elige la página con la firma",
   "sig.pick_page_sub": "Haz clic en la página de la firma; luego enmárcala y quita el fondo.",
-  "sig.mine_sub": "Haz clic para usarla, escribe una nueva o tráela de un archivo (foto o PDF)"
+  "sig.mine_sub": "Haz clic para usarla, escribe una nueva o tráela de un archivo (foto o PDF)",
+  "pdf.undo": "Deshacer",
+  "pdf.redo": "Rehacer",
+  "pdf.sign_edit": "Cambiar esta firma / imagen",
+  "pdf.sign_remove": "Quitar",
+  "pdf.turn_reset": "Enderezar",
+  "pdf.place_hint": "Arrástrala a su sitio; una esquina para el tamaño, el punto de arriba para girar"
 }

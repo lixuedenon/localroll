@@ -1925,7 +1925,6 @@
   "pdf.sign_new": "重新簽",
   "pdf.sign_same": "用這個簽名",
   "pdf.place_sign": "把簽名放到頁面上",
-  "pdf.place_hint": "拖動簽名放到要簽的地方；下面調大小",
   "pdf.sign_size": "大小",
   "pdf.place_ok": "放好了",
   "qr.sub": "產生 QR 碼，或讀出圖片裡的 QR 碼",
@@ -2274,5 +2273,11 @@
   "sig.add_file": "從檔案匯入",
   "sig.pick_page": "選簽名所在的頁",
   "sig.pick_page_sub": "點簽名所在的那一頁，下一步框出簽名、去掉背景。",
-  "sig.mine_sub": "點一個就用；也可以新寫一個，或從檔案匯入（照片或 PDF）"
+  "sig.mine_sub": "點一個就用；也可以新寫一個，或從檔案匯入（照片或 PDF）",
+  "pdf.undo": "復原",
+  "pdf.redo": "重做",
+  "pdf.sign_edit": "修改這個簽名/圖片",
+  "pdf.sign_remove": "刪除",
+  "pdf.turn_reset": "擺正",
+  "pdf.place_hint": "拖動放到要放的地方；拖四個角調大小，拖上面的圓點旋轉"
 }

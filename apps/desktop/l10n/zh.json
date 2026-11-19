@@ -1925,7 +1925,6 @@
   "pdf.sign_new": "重新签",
   "pdf.sign_same": "用这个签名",
   "pdf.place_sign": "把签名放到页面上",
-  "pdf.place_hint": "拖动签名放到要签的地方；下面调大小",
   "pdf.sign_size": "大小",
   "pdf.place_ok": "放好了",
   "qr.sub": "生成二维码，或读出图片里的二维码",
@@ -2274,5 +2273,11 @@
   "sig.add_file": "从文件导入",
   "sig.pick_page": "选签名所在的页",
   "sig.pick_page_sub": "点签名所在的那一页，下一步框出签名、去掉背景。",
-  "sig.mine_sub": "点一个就用；也可以新写一个，或从文件导入（照片或 PDF）"
+  "sig.mine_sub": "点一个就用；也可以新写一个，或从文件导入（照片或 PDF）",
+  "pdf.undo": "撤销",
+  "pdf.redo": "重做",
+  "pdf.sign_edit": "改这个签名/图片",
+  "pdf.sign_remove": "删掉",
+  "pdf.turn_reset": "摆正",
+  "pdf.place_hint": "拖动放到要放的地方；拖四个角调大小，拖上面的圆点旋转"
 }
