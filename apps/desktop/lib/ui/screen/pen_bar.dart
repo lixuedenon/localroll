@@ -267,16 +267,29 @@ class _PenToolbarState extends State<PenToolbar> {
       const SizedBox(width: 8),
       SizedBox(
         width: 360,
-        child: TextField(
-          controller: _words,
-          focusNode: _wordsFocus,
-          style: const TextStyle(color: _ink),
-          decoration: InputDecoration(isDense: true, hintText: tr('ink.type_here'), hintStyle: const TextStyle(color: Color(0xFF8A97B0))),
-          onSubmitted: (v) {
-            o.putText(v);
-            _words.clear();
-            _typingFor = null;
+        // Enter: a new line; Ctrl+Enter puts the words, Esc drops them.
+        child: CallbackShortcuts(
+          bindings: {
+            const SingleActivator(LogicalKeyboardKey.enter, control: true): () {
+              o.putText(_words.text);
+              _words.clear();
+              _typingFor = null;
+            },
+            const SingleActivator(LogicalKeyboardKey.escape): () {
+              o.putText('');
+              _words.clear();
+              _typingFor = null;
+            },
           },
+          child: TextField(
+            controller: _words,
+            focusNode: _wordsFocus,
+            minLines: 1,
+            maxLines: 4,
+            keyboardType: TextInputType.multiline,
+            style: const TextStyle(color: _ink),
+            decoration: InputDecoration(isDense: true, hintText: tr('ink.type_here'), hintStyle: const TextStyle(color: Color(0xFF8A97B0))),
+          ),
         ),
       ),
       const SizedBox(width: 8),

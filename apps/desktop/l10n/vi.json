@@ -2145,7 +2145,7 @@
   "pdfedit.title": "Sửa chữ",
   "pdfedit.page": "Trang {n} / {count}",
   "pdfedit.cannot_open": "Không mở được PDF này (có mật khẩu hoặc bị hỏng)",
-  "pdfedit.no_text": "Trang này không có chữ để sửa — có thể là bản quét (cả trang là ảnh). Dùng Chữ ký / Con dấu để viết lên.",
+  "pdfedit.no_text": "Trang này không có chữ để bấm — có thể là bản quét. Kéo khung quanh chữ để sửa.",
   "pdfedit.hint": "Bấm vào một dòng để sửa ngay tại chỗ; Enter để xong. Chỉ chữ được sửa thay đổi — bảng, con dấu và chữ khác giữ nguyên.\n\nChữ mới dùng phông của máy này (tiếng Trung: DengXian hoặc SimHei) nên có thể hơi khác chữ bên cạnh; PDF sửa chữ Trung sẽ lớn thêm vài MB.",
   "pdfedit.changed": "Đã sửa {count} chỗ",
   "pdfedit.page_short": "tr. {n}",
@@ -2288,5 +2288,6 @@
   "ocrbox.picked": "{count} trang đã chọn",
   "ocrbox.all": "Tất cả {count} trang",
   "ocrbox.whole": "Trang này",
-  "ocrbox.hint": "Kéo khung để lấy chữ bên trong, hoặc lấy trang này / nhiều trang cùng lúc. PDF điện tử lấy đúng chữ trong tệp; bản quét được nhận dạng trên PC này, không gửi đi."
+  "ocrbox.hint": "Kéo khung để lấy chữ bên trong, hoặc lấy trang này / nhiều trang cùng lúc. PDF điện tử lấy đúng chữ trong tệp; bản quét được nhận dạng trên PC này, không gửi đi.",
+  "edit.box_hint": "Chữ trong bản quét hoặc hình: kéo khung quanh chữ; chữ được nhận dạng rồi bạn sửa (chữ cũ được che bằng màu giấy)."
 }

@@ -17,6 +17,7 @@ import '../../services/annotations.dart';
 import '../../services/file_tools.dart';
 import '../../services/pdf_fonts.dart';
 import '../../services/tool_outputs.dart';
+import '../../services/windows_ocr.dart';
 import '../light_look.dart';
 import '../lr_dialog.dart';
 import '../player/ink_editor.dart';
@@ -74,13 +75,29 @@ class _Put {
   _Put copy() => _Put(page, sig, rect, angle: angle);
 }
 
+/// Words written over a scan (or a picture in the page): the old ones
+/// covered with the paper's colour, the new ones written on it. [size] in
+/// page points; [rect] 0–1 of the page as shown.
+class _Patch {
+  _Patch(this.page, this.rect, this.text, this.bg, this.color, this.size);
+
+  final int page;
+  Rect rect;
+  String text;
+  int bg, color;
+  double size;
+
+  _Patch copy() => _Patch(page, rect, text, bg, color, size);
+}
+
 /// Everything as it was (one undo for all kinds of change).
 class _Snap {
-  _Snap(this.edits, this.puts, this.inks);
+  _Snap(this.edits, this.puts, this.inks, this.patches);
 
   final List<_Edit> edits;
   final List<_Put> puts;
   final Map<int, List<InkMark>> inks;
+  final List<_Patch> patches;
 }
 
 /// What a click on the page does.
@@ -142,9 +159,19 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
   String? _grab;
   Offset _grabFrom = Offset.zero;
   _Put? _grabStart;
+  MouseCursor _putCursor = SystemMouseCursors.basic;
 
   /// One undo / redo for words, marks, signatures and pictures.
   final List<_Snap> _undo = [], _redo = [];
+
+  /// Words changed on a scan, the one being written, and a box being drawn.
+  final List<_Patch> _patches = [];
+  _Patch? _patching;
+  final TextEditingController _patchCtl = TextEditingController();
+  Rect? _boxing;
+  Offset? _boxFrom;
+  bool _reading = false;
+  static final WindowsOcr _ocr = WindowsOcr();
 
   PdfDocument? _doc;
   String? _error;
@@ -201,6 +228,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
     _focus.dispose();
     _hScroll.dispose();
     _vScroll.dispose();
+    _patchCtl.dispose();
     super.dispose();
   }
 
@@ -209,13 +237,17 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
         () => InkEditor(video: false, clock: () => 0)
           ..beforeChange = _mark
           ..undoAll = _undoOne
-          ..redoAll = _redoOne,
+          ..redoAll = _redoOne
+          ..forgetChange = () {
+            if (_undo.isNotEmpty) setState(() => _undo.removeLast());
+          },
       );
 
   _Snap _now() => _Snap(
         [for (final e in _edits) e.copy()],
         [for (final p in _puts) p.copy()],
         {for (final e in _eds.entries) e.key: [for (final m in e.value.inks) m.copy()]},
+        [for (final p in _patches) p.copy()],
       );
 
   /// Remembers everything as it is now, before a change.
@@ -236,6 +268,10 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
     for (final e in _eds.entries) {
       e.value.restore(w.inks[e.key] ?? const []);
     }
+    _patches
+      ..clear()
+      ..addAll([for (final p in w.patches) p.copy()]);
+    _patching = null;
     _sel = null;
   }
 
@@ -256,9 +292,10 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
   int get _markCount => _eds.values.fold(0, (n, e) => n + e.inks.length);
 
   /// Changes of every kind not saved yet.
-  int get _changes => _edits.length + _puts.length + _markCount;
+  int get _changes => _edits.length + _puts.length + _markCount + _patches.length;
 
   void _setMode(_Mode m) {
+    _finishPatch();
     if (m == _Mode.sign || m == _Mode.picture) {
       unawaited(_addPut(picture: m == _Mode.picture));
       return;
@@ -314,6 +351,241 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
       _sel = null;
     });
   }
+
+  // ------------------------------------------------- words on a scan
+
+  /// A box drawn on the page (改字): its words read (Windows' own text
+  /// recognition, on this PC), the paper's colour and the ink's taken from
+  /// the page; then they can be written anew.
+  Future<void> _scanEdit(Rect box) async {
+    _done();
+    _finishPatch();
+    final d = _doc, pic = _pics[_page], px = _px[_page];
+    if (d == null || pic == null || px == null) return;
+    final pg = d.pages[_page];
+    final w = pic.width, h = pic.height;
+    final l = (box.left * w).floor().clamp(0, w - 1), t = (box.top * h).floor().clamp(0, h - 1);
+    final r = (box.right * w).ceil().clamp(l + 1, w), b = (box.bottom * h).ceil().clamp(t + 1, h);
+    int at(int x, int y) {
+      final o = (y * w + x) * 4;
+      return (px.getUint8(o) << 16) | (px.getUint8(o + 1) << 8) | px.getUint8(o + 2);
+    }
+
+    int lum(int c) => ((c >> 16) & 255) * 3 + ((c >> 8) & 255) * 6 + (c & 255);
+    // Paper: the middle colour along the box's edge; ink: the darkest inside.
+    final edge = <int>[
+      for (var x = l; x < r; x += 2) ...[at(x, t), at(x, b - 1)],
+      for (var y = t; y < b; y += 2) ...[at(l, y), at(r - 1, y)],
+    ]..sort((a, c) => lum(a).compareTo(lum(c)));
+    final bg = edge.isEmpty ? 0xFFFFFF : edge[edge.length ~/ 2];
+    final inside = <int>[
+      for (var y = t; y < b; y += 2)
+        for (var x = l; x < r; x += 2) at(x, y),
+    ]..sort((a, c) => lum(a).compareTo(lum(c)));
+    final dark = inside.take(math.max(1, inside.length ~/ 12)).toList();
+    var ink = 0x000000;
+    if (dark.isNotEmpty && lum(bg) - lum(dark.first) > 400) {
+      var rr = 0, gg = 0, bb = 0;
+      for (final c in dark) {
+        rr += (c >> 16) & 255;
+        gg += (c >> 8) & 255;
+        bb += c & 255;
+      }
+      ink = ((rr ~/ dark.length) << 16) | ((gg ~/ dark.length) << 8) | (bb ~/ dark.length);
+    }
+    setState(() => _reading = true);
+    String words = '';
+    try {
+      // The box made larger (letters 20+ px high read best).
+      const k = 2.0;
+      final rec = ui.PictureRecorder();
+      final c = Canvas(rec);
+      final src = Rect.fromLTRB(l.toDouble(), t.toDouble(), r.toDouble(), b.toDouble());
+      c.drawImageRect(pic, src, Rect.fromLTWH(0, 0, src.width * k, src.height * k), Paint()..filterQuality = FilterQuality.high);
+      final im = await rec.endRecording().toImage((src.width * k).round(), (src.height * k).round());
+      final png = await im.toByteData(format: ui.ImageByteFormat.png);
+      im.dispose();
+      final f = File('${Directory.systemTemp.path}${Platform.pathSeparator}keepnear_scan_${DateTime.now().millisecondsSinceEpoch}.png');
+      await f.writeAsBytes(png!.buffer.asUint8List(), flush: true);
+      words = (await _ocr.read(f.path))?.trim() ?? '';
+      unawaited(f.delete().then((_) {}, onError: (_) {}));
+    } catch (e) {
+      DiagLog.log('tools', 'scan edit read: $e');
+    }
+    if (!mounted) return;
+    final lines = math.max(1, '\n'.allMatches(words).length + 1);
+    final size = (box.height * pg.height / lines * 0.72).clamp(5.0, 96.0);
+    DiagLog.log('tools', 'scan edit: ${words.length} chars, ${size.toStringAsFixed(1)} pt');
+    _mark();
+    final p = _Patch(_page, box, words, bg, ink, size);
+    setState(() {
+      _reading = false;
+      _patches.add(p);
+      _patching = p;
+      _patchCtl.text = words;
+    });
+  }
+
+  void _startPatch(_Patch p) {
+    _done();
+    _finishPatch();
+    setState(() {
+      _patching = p;
+      _patchCtl.text = p.text;
+    });
+  }
+
+  /// The words written: kept (remembered for undo when changed).
+  void _finishPatch() {
+    final p = _patching;
+    if (p == null) return;
+    final t = _patchCtl.text.trimRight();
+    if (t != p.text) {
+      _mark();
+      p.text = t;
+    }
+    setState(() => _patching = null);
+  }
+
+  void _patchSize(double by) {
+    final p = _patching;
+    if (p == null) return;
+    _mark();
+    setState(() => p.size = (p.size + by).clamp(4.0, 120.0));
+  }
+
+  void _dropPatch() {
+    final p = _patching;
+    if (p == null) return;
+    _mark();
+    setState(() {
+      _patches.remove(p);
+      _patching = null;
+    });
+  }
+
+  /// The patch as a picture for the PDF (4 px per point): the paper's
+  /// colour, the words on it.
+  Future<PdfStamp?> _patchStamp(_Patch p, PdfPage pg) async {
+    const k = 4.0;
+    final w = math.max(1, (p.rect.width * pg.width * k).round()), h = math.max(1, (p.rect.height * pg.height * k).round());
+    final rec = ui.PictureRecorder();
+    final c = Canvas(rec);
+    c.drawRect(Rect.fromLTWH(0, 0, w.toDouble(), h.toDouble()), Paint()..color = Color(0xFF000000 | p.bg));
+    final tp = TextPainter(
+      text: TextSpan(text: p.text, style: TextStyle(color: Color(0xFF000000 | p.color), fontSize: p.size * k, height: 1.15)),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    tp.paint(c, Offset(p.size * k * 0.1, math.max(0, (h - tp.height) / 2)));
+    final im = await rec.endRecording().toImage(w, h);
+    final bd = await im.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
+    im.dispose();
+    if (bd == null) return null;
+    final bytes = bd.buffer.asUint8List();
+    for (var j = 0; j + 3 < bytes.length; j += 4) {
+      final r = bytes[j];
+      bytes[j] = bytes[j + 2];
+      bytes[j + 2] = r;
+    }
+    return PdfStamp(bytes, w, h, p.rect);
+  }
+
+  /// A patch on the page: shown, or being written.
+  List<Widget> _patchViews(Size size, double scale) => [
+        for (final p in _patches)
+          if (p.page == _page)
+            Positioned(
+              left: p.rect.left * size.width,
+              top: p.rect.top * size.height,
+              width: p.rect.width * size.width,
+              height: p.rect.height * size.height,
+              child: identical(p, _patching)
+                  ? Container(
+                      color: Color(0xFF000000 | p.bg),
+                      child: TextField(
+                        controller: _patchCtl,
+                        autofocus: true,
+                        maxLines: null,
+                        expands: true,
+                        style: TextStyle(color: Color(0xFF000000 | p.color), fontSize: p.size * scale, height: 1.15),
+                        decoration: const InputDecoration(
+                          isDense: true,
+                          contentPadding: EdgeInsets.zero,
+                          border: OutlineInputBorder(borderSide: BorderSide(color: LightLook.blue)),
+                          focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: LightLook.blue, width: 2)),
+                        ),
+                      ),
+                    )
+                  : MouseRegion(
+                      cursor: _mode == _Mode.text ? SystemMouseCursors.text : MouseCursor.defer,
+                      child: GestureDetector(
+                        onTap: _mode == _Mode.text ? () => _startPatch(p) : null,
+                        child: Container(
+                          color: Color(0xFF000000 | p.bg),
+                          padding: EdgeInsets.only(left: p.size * scale * 0.1),
+                          alignment: Alignment.centerLeft,
+                          child: ClipRect(
+                            child: Text(p.text,
+                                softWrap: false,
+                                overflow: TextOverflow.visible,
+                                style: TextStyle(color: Color(0xFF000000 | p.color), fontSize: p.size * scale, height: 1.15)),
+                          ),
+                        ),
+                      ),
+                    ),
+            ),
+        // The bar over the one being written.
+        for (final p in _patches)
+          if (identical(p, _patching) && p.page == _page)
+            Positioned(
+              left: p.rect.left * size.width,
+              top: p.rect.top * size.height - 40,
+              child: Material(
+                elevation: 3,
+                borderRadius: BorderRadius.circular(8),
+                color: Colors.white,
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  IconButton(tooltip: 'A−', onPressed: () => _patchSize(-1), icon: const Icon(Icons.text_decrease_rounded, size: 18)),
+                  Text('${p.size.toStringAsFixed(0)} pt', style: const TextStyle(fontSize: 12, color: LightLook.muted)),
+                  IconButton(tooltip: 'A+', onPressed: () => _patchSize(1), icon: const Icon(Icons.text_increase_rounded, size: 18)),
+                  IconButton(
+                    tooltip: tr('pdf.sign_remove'),
+                    onPressed: _dropPatch,
+                    icon: const Icon(Icons.delete_outline_rounded, size: 18, color: Color(0xFFE5484D)),
+                  ),
+                  TextButton(onPressed: _finishPatch, child: Text(tr('pdfedit.done'))),
+                ]),
+              ),
+            ),
+      ];
+
+  /// 改字: a box drawn where there are no words to click (a scan).
+  Widget _boxLayer(Size size) => GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onPanStart: (e) {
+          if (_reading) return;
+          _finishPatch();
+          _boxFrom = Offset(e.localPosition.dx / size.width, e.localPosition.dy / size.height);
+        },
+        onPanUpdate: (e) {
+          final f = _boxFrom;
+          if (f == null) return;
+          final p = Offset((e.localPosition.dx / size.width).clamp(0.0, 1.0), (e.localPosition.dy / size.height).clamp(0.0, 1.0));
+          setState(() => _boxing = Rect.fromPoints(f, p));
+        },
+        onPanEnd: (_) {
+          final r = _boxing;
+          _boxFrom = null;
+          setState(() => _boxing = null);
+          if (r != null && r.width * size.width > 8 && r.height * size.height > 6) unawaited(_scanEdit(r));
+        },
+        child: CustomPaint(
+          size: Size.infinite,
+          painter: _BoxPaint(_boxing == null
+              ? null
+              : Rect.fromLTRB(_boxing!.left * size.width, _boxing!.top * size.height, _boxing!.right * size.width, _boxing!.bottom * size.height)),
+        ),
+      );
 
   Future<void> _open() async {
     try {
@@ -651,6 +923,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
   Future<bool> _save({required bool replace}) async {
     // What is still being typed counts too.
     _done();
+    _finishPatch();
     final d = _doc;
     if (d == null || _changes == 0) return false;
     DiagLog.log('tools',
@@ -731,6 +1004,11 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
                   rgb: (m.color & 0xFFFFFF).toRadixString(16).padLeft(6, '0')),
         ];
       }
+      for (final p in _patches) {
+        if (p.page != i) continue;
+        final st = await _patchStamp(p, d.pages[i]);
+        if (st != null) stamps.add(st);
+      }
       for (final p in _puts) {
         if (p.page != i) continue;
         final px = await p.sig.bgra();
@@ -790,6 +1068,8 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
 
   /// Everything saved (or dropped): nothing left to keep or undo.
   void _clearAll() {
+    _patches.clear();
+    _patching = null;
     _edits.clear();
     _puts.clear();
     _sel = null;
@@ -916,6 +1196,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
   /// Leaving with changes not saved: save, drop them, or stay.
   Future<void> _leave() async {
     _done();
+    _finishPatch();
     final n = _changes;
     if (n == 0) {
       if (mounted) Navigator.of(context).pop();
@@ -985,6 +1266,11 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
                   ),
                 ),
                 Positioned.fill(child: NumberNotes(marks: () => ed.inks, repaint: ed)),
+                // Words on a scan (or in a picture): covered and written anew.
+                ..._patchViews(size, scale),
+                // 改字 where no line can be clicked: draw a box.
+                if (_mode == _Mode.text && _patching == null) Positioned.fill(child: _boxLayer(size)),
+                if (_reading) const Positioned.fill(child: Center(child: CircularProgressIndicator())),
                 // Changing words: every line can be clicked.
                 if (_mode == _Mode.text)
                   for (final l in lines)
@@ -1128,7 +1414,23 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
         _grabStart = null;
       },
       child: MouseRegion(
-        cursor: SystemMouseCursors.move,
+        // The pointer's shape: slanted arrows on corners, four arrows on
+        // the knob, a hand on a signature / picture.
+        cursor: _putCursor,
+        onHover: (e) {
+          final at = e.localPosition;
+          var c = SystemMouseCursors.basic;
+          if (sel != null && h != null && (at - h.$2).distance < 14) {
+            c = SystemMouseCursors.move;
+          } else if (sel != null && h != null && h.$1.any((q) => (at - q).distance < 14)) {
+            final q = h.$1.firstWhere((q) => (at - q).distance < 14);
+            final d = q - h.$3;
+            c = d.dx * d.dy > 0 ? SystemMouseCursors.resizeUpLeftDownRight : SystemMouseCursors.resizeUpRightDownLeft;
+          } else if (hit(at) != null) {
+            c = SystemMouseCursors.click;
+          }
+          if (c != _putCursor) setState(() => _putCursor = c);
+        },
         child: h == null ? const SizedBox.expand() : CustomPaint(size: Size.infinite, painter: _PutHandles(h.$1, h.$2)),
       ),
     );
@@ -1322,7 +1624,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
           const SizedBox(height: 6),
           Text(
             switch (_mode) {
-              _Mode.text => tr('pdfedit.hint'),
+              _Mode.text => '${tr('pdfedit.hint')}\n${tr('edit.box_hint')}',
               _Mode.mark => tr('ann.hint'),
               _ => tr('edit.put_hint'),
             },
@@ -1509,4 +1811,27 @@ Future<void> openEditor(BuildContext context, AppServices s, String path,
     return;
   }
   await openAnnotate(context, s, path, page: page, onSaved: onSaved);
+}
+
+/// The box being drawn for 改字 on a scan.
+class _BoxPaint extends CustomPainter {
+  _BoxPaint(this.box);
+
+  final Rect? box;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final b = box;
+    if (b == null) return;
+    canvas.drawRect(b, Paint()..color = const Color(0x1A2F6BFF));
+    canvas.drawRect(
+        b,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.5
+          ..color = const Color(0xFF2F6BFF));
+  }
+
+  @override
+  bool shouldRepaint(_BoxPaint old) => old.box != box;
 }

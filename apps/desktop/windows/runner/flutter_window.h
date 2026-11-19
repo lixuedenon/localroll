@@ -45,6 +45,11 @@ class FlutterWindow : public Win32Window {
   std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> admin_drop_;
   void AllowDropWhenElevated();
 
+  // "Show in folder": reveal(paths) opens the folder with the files chosen
+  // (SHOpenFolderAndSelectItems — explorer /select often only opens the
+  // folder when Keepnear runs as administrator).
+  std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> shell_;
+
  public:
   void OnFilesDropped(HDROP drop);
 };

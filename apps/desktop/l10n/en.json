@@ -2145,7 +2145,7 @@
   "pdfedit.title": "Edit text",
   "pdfedit.page": "Page {n} / {count}",
   "pdfedit.cannot_open": "This PDF can't be opened (password or damaged)",
-  "pdfedit.no_text": "No text to change on this page — probably a scan (the page is a picture). Use Sign / Stamp to write on it.",
+  "pdfedit.no_text": "No words to click on this page — maybe a scan. Drag a box around the words to change them.",
   "pdfedit.hint": "Click any line to change it in place; Enter when done. Font, size, bold, italic and colour stay as they were; only the changed words are touched — tables, stamps and the rest stay.\n\nIf the original font holds all the new letters it is used, so the change can't be seen; otherwise the closest font on this PC. “Copy look” writes like another piece of text.",
   "pdfedit.changed": "{count} change(s)",
   "pdfedit.page_short": "p. {n}",
@@ -2288,5 +2288,6 @@
   "ocrbox.picked": "The {count} picked pages",
   "ocrbox.all": "All {count} pages",
   "ocrbox.whole": "This page",
-  "ocrbox.hint": "Drag a box on the page to get the words in it, or get this page or several pages at once. A digital PDF's own words are taken exactly; a scan is read on this PC, nothing sent anywhere."
+  "ocrbox.hint": "Drag a box on the page to get the words in it, or get this page or several pages at once. A digital PDF's own words are taken exactly; a scan is read on this PC, nothing sent anywhere.",
+  "edit.box_hint": "Words in a scan or picture: drag a box around them; they are read and you change them (the old ones are covered with the paper's colour)."
 }

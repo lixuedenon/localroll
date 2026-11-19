@@ -2145,7 +2145,7 @@
   "pdfedit.title": "Editar texto",
   "pdfedit.page": "Página {n} / {count}",
   "pdfedit.cannot_open": "Não é possível abrir este PDF (senha ou arquivo danificado)",
-  "pdfedit.no_text": "Não há texto editável nesta página — provavelmente é uma digitalização (a página é uma imagem). Use Assinar / Carimbo para escrever por cima.",
+  "pdfedit.no_text": "Não há texto clicável nesta página — talvez seja digitalizada. Desenhe uma caixa em volta do texto para alterá-lo.",
   "pdfedit.hint": "Clique numa linha para mudá-la no lugar; Enter para concluir. Só as palavras mudadas são tocadas — tabelas, carimbos e o resto do texto ficam como estão.\n\nAs palavras novas usam uma fonte deste PC (chinês: DengXian ou SimHei) e podem parecer um pouco diferentes; um PDF com chinês alterado cresce alguns MB.",
   "pdfedit.changed": "{count} alteração(ões)",
   "pdfedit.page_short": "p. {n}",
@@ -2288,5 +2288,6 @@
   "ocrbox.picked": "As {count} páginas escolhidas",
   "ocrbox.all": "Todas as {count} páginas",
   "ocrbox.whole": "Esta página",
-  "ocrbox.hint": "Desenhe uma caixa para pegar o texto, ou esta página ou várias de uma vez. O texto de um PDF digital vem exato; uma digitalização é lida neste PC, nada é enviado."
+  "ocrbox.hint": "Desenhe uma caixa para pegar o texto, ou esta página ou várias de uma vez. O texto de um PDF digital vem exato; uma digitalização é lida neste PC, nada é enviado.",
+  "edit.box_hint": "Texto em digitalização ou imagem: desenhe uma caixa em volta; ele é lido e você o altera (o antigo é coberto com a cor do papel)."
 }

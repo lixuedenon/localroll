@@ -2145,7 +2145,7 @@
   "pdfedit.title": "Modifier le texte",
   "pdfedit.page": "Page {n} / {count}",
   "pdfedit.cannot_open": "Impossible d'ouvrir ce PDF (mot de passe ou fichier abîmé)",
-  "pdfedit.no_text": "Aucun texte modifiable sur cette page — sans doute un scan (la page est une image). Utilisez Signer / Tampon pour écrire dessus.",
+  "pdfedit.no_text": "Pas de texte cliquable sur cette page — peut-être un scan. Tracez un cadre autour du texte pour le modifier.",
   "pdfedit.hint": "Cliquez sur une ligne pour la modifier sur place ; Entrée pour valider. Seuls les mots changés sont touchés — tableaux, tampons et le reste du texte restent tels quels.\n\nLes nouveaux mots utilisent une police de ce PC (chinois : DengXian ou SimHei) et peuvent légèrement différer ; un PDF avec du chinois modifié grossit de quelques Mo.",
   "pdfedit.changed": "{count} modification(s)",
   "pdfedit.page_short": "p. {n}",
@@ -2288,5 +2288,6 @@
   "ocrbox.picked": "Les {count} pages choisies",
   "ocrbox.all": "Les {count} pages",
   "ocrbox.whole": "Cette page",
-  "ocrbox.hint": "Tracez un cadre pour obtenir le texte qu'il contient, ou cette page / plusieurs pages d'un coup. Le texte d'un PDF numérique est repris tel quel ; un scan est lu sur ce PC, rien n'est envoyé."
+  "ocrbox.hint": "Tracez un cadre pour obtenir le texte qu'il contient, ou cette page / plusieurs pages d'un coup. Le texte d'un PDF numérique est repris tel quel ; un scan est lu sur ce PC, rien n'est envoyé.",
+  "edit.box_hint": "Texte d'un scan ou d'une image : tracez un cadre autour ; il est lu et vous le modifiez (l'ancien est couvert de la couleur du papier)."
 }

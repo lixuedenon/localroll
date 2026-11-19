@@ -2145,7 +2145,7 @@
   "pdfedit.title": "Text ändern",
   "pdfedit.page": "Seite {n} / {count}",
   "pdfedit.cannot_open": "Diese PDF lässt sich nicht öffnen (Passwort oder beschädigt)",
-  "pdfedit.no_text": "Auf dieser Seite gibt es keinen änderbaren Text – vermutlich ein Scan (die Seite ist ein Bild). Mit Unterschrift / Stempel kannst du darauf schreiben.",
+  "pdfedit.no_text": "Auf dieser Seite gibt es keinen anklickbaren Text – vielleicht ein Scan. Rahmen um den Text ziehen, um ihn zu ändern.",
   "pdfedit.hint": "Klick auf eine Zeile, um sie an Ort und Stelle zu ändern; Enter zum Abschließen. Nur die geänderten Wörter werden angefasst – Tabellen, Stempel und der übrige Text bleiben.\n\nNeue Wörter nutzen eine Schrift dieses PCs (Chinesisch: DengXian oder SimHei) und können etwas anders aussehen; eine PDF mit geändertem chinesischem Text wird ein paar MB größer.",
   "pdfedit.changed": "{count} Änderung(en)",
   "pdfedit.page_short": "S. {n}",
@@ -2288,5 +2288,6 @@
   "ocrbox.picked": "Die {count} gewählten Seiten",
   "ocrbox.all": "Alle {count} Seiten",
   "ocrbox.whole": "Diese Seite",
-  "ocrbox.hint": "Rahmen ziehen, um den Text darin zu holen, oder diese bzw. mehrere Seiten auf einmal. Digitale PDFs liefern ihren Text exakt; Scans werden auf diesem PC gelesen, nichts wird gesendet."
+  "ocrbox.hint": "Rahmen ziehen, um den Text darin zu holen, oder diese bzw. mehrere Seiten auf einmal. Digitale PDFs liefern ihren Text exakt; Scans werden auf diesem PC gelesen, nichts wird gesendet.",
+  "edit.box_hint": "Text in Scan oder Bild: Rahmen darum ziehen; er wird gelesen und Sie ändern ihn (der alte wird in Papierfarbe abgedeckt)."
 }

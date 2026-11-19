@@ -959,6 +959,28 @@ ULONGLONG g_heldUntil = 0;
 // without dragging on the chosen one asks for new words, after a moment
 // (in case a second click comes).
 int g_justPicked = 0, g_maybeEdit = 0, g_editId = 0;
+
+// Drawing began on a mark already there: a click (no drag) chooses that
+// mark instead of leaving a dot.
+int g_clickOn = 0;
+D2D1_POINT_2F g_clickFrom{};
+bool g_clickMoved = false;
+
+// New lines travel as U+2028 (one command / event per line).
+std::wstring fromWire(std::wstring w) {
+  for (auto& c : w) {
+    if (c == 0x2028) c = L'\n';
+  }
+  return w;
+}
+std::wstring toWire(std::wstring w) {
+  std::wstring out;
+  for (auto c : w) {
+    if (c == L'\r') continue;
+    out.push_back(c == L'\n' ? 0x2028 : c);
+  }
+  return out;
+}
 ULONGLONG g_editAt = 0;
 POINT g_editPt{};
 
@@ -969,7 +991,7 @@ void askEdit() {
   if (!m || m->tool != kText || id != g_selected) return;
   char b[64];
   std::snprintf(b, sizeof b, "textedit %d %ld %ld ", id, g_editPt.x, g_editPt.y);
-  emit(std::string(b) + utf8(m->text));
+  emit(std::string(b) + utf8(toWire(m->text)));
 }
 D2D1_POINT_2F g_heldAt{};
 
@@ -1083,6 +1105,25 @@ void onDown(D2D1_POINT_2F p) {
     }
     select(0);
   }
+  // A click on a mark already there chooses it (any drawing tool).
+  g_clickOn = 0;
+  if (g_tool != kSelect && g_tool != kEraser && g_tool != kText) {
+    if (Mark* under = topAt(p)) {
+      if (g_tool == kCheck || g_tool == kCross || g_tool == kNumber) {
+        select(under->id);
+        g_justPicked = under->id;
+        remember();
+        g_drag = kMoving;
+        g_from = p;
+        g_start = *under;
+        render();
+        return;
+      }
+      g_clickOn = under->id;
+      g_clickFrom = p;
+      g_clickMoved = false;
+    }
+  }
   switch (g_tool) {
     case kEraser:
       g_drag = kErasing;
@@ -1174,6 +1215,7 @@ void onMove(D2D1_POINT_2F p) {
   const bool shift = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
   switch (g_drag) {
     case kDrawing: {
+      if (dist(p, g_clickFrom) > 3) g_clickMoved = true;
       auto& d = g_draft;
       RECT before = areaOf(d);
       if (d.tool == kPen || d.tool == kMarker) {
@@ -1270,6 +1312,19 @@ void onUp() {
   }
   if (g_drag == kDrawing) {
     g_drag = kNone;
+    if (g_clickOn && !g_clickMoved && findMark(g_clickOn)) {
+      // A click on a mark: choose it, no dot.
+      const int id = g_clickOn;
+      g_clickOn = 0;
+      g_hasDraft = false;
+      g_made = 0;
+      select(id);
+      g_justPicked = id;
+      render();
+      emitState();
+      return;
+    }
+    g_clickOn = 0;
     endDrawing();
     return;
   }
@@ -1283,6 +1338,30 @@ void onUp() {
   g_drag = kNone;
 }
 
+// The pointer's shape where it is: on the chosen mark's corners, slanted
+// arrows (as turned); on its turning knob, four arrows; on the mark (or
+// any mark with the pointer tool), a hand; else the tool's own.
+LPCWSTR cursorAt() {
+  LPCWSTR own = g_tool == kSelect ? IDC_ARROW : g_tool == kText ? IDC_IBEAM : IDC_CROSS;
+  POINT sp{};
+  if (!GetCursorPos(&sp)) return own;
+  const D2D1_POINT_2F p = D2D1::Point2F(static_cast<float>(sp.x), static_cast<float>(sp.y));
+  if (Mark* s = findMark(g_selected)) {
+    D2D1_POINT_2F c[4], knob;
+    handles(*s, c, knob);
+    if (dist(p, knob) < 12 && !s->noTurn) return IDC_SIZEALL;
+    D2D1_POINT_2F mid{(c[0].x + c[2].x) / 2, (c[0].y + c[2].y) / 2};
+    for (const auto& q : c) {
+      if (dist(p, q) < 10) return (q.x - mid.x) * (q.y - mid.y) > 0 ? IDC_SIZENWSE : IDC_SIZENESW;
+    }
+    if (insideBox(*s, p) || hits(*s, p, 8)) return IDC_HAND;
+  }
+  if ((g_tool == kSelect || g_tool == kText) && topAt(p)) {
+    if (g_tool == kSelect || topAt(p)->tool == kText) return IDC_HAND;
+  }
+  return own;
+}
+
 D2D1_POINT_2F screenPoint(LPARAM lp) {
   // Client coordinates of the layer → screen pixels.
   return D2D1::Point2F(static_cast<float>(static_cast<short>(LOWORD(lp)) + g_virt.left),
@@ -1294,7 +1373,7 @@ LRESULT CALLBACK layerProc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
     case WM_MOUSEACTIVATE:
       return MA_NOACTIVATE;
     case WM_SETCURSOR:
-      SetCursor(LoadCursorW(nullptr, g_tool == kSelect ? IDC_ARROW : g_tool == kText ? IDC_IBEAM : IDC_CROSS));
+      SetCursor(LoadCursorW(nullptr, cursorAt()));
       return TRUE;
     case WM_LBUTTONDOWN:
       SetCapture(h);
@@ -1901,7 +1980,7 @@ void command(const std::string& line) {
     const long x = std::strtol(arg.c_str(), &end, 10);
     const long y = std::strtol(end, &end, 10);
     while (end && *end == ' ') ++end;
-    const std::wstring words = wide(end ? std::string(end) : std::string());
+    const std::wstring words = fromWire(wide(end ? std::string(end) : std::string()));
     if (!words.empty()) {
       remember();
       Mark m = newMark(kText, D2D1::Point2F(static_cast<float>(x), static_cast<float>(y)));
@@ -1918,7 +1997,7 @@ void command(const std::string& line) {
     char* end = nullptr;
     const int id = static_cast<int>(std::strtol(arg.c_str(), &end, 10));
     while (end && *end == ' ') ++end;
-    const std::wstring words = wide(end ? std::string(end) : std::string());
+    const std::wstring words = fromWire(wide(end ? std::string(end) : std::string()));
     Mark* m = findMark(id);
     if (m && m->tool == kText && !words.empty() && words != m->text) {
       remember();

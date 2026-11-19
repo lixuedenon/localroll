@@ -2145,7 +2145,7 @@
   "pdfedit.title": "Ubah teks",
   "pdfedit.page": "Halaman {n} / {count}",
   "pdfedit.cannot_open": "PDF ini tidak bisa dibuka (ada kata sandi atau rusak)",
-  "pdfedit.no_text": "Tidak ada teks yang bisa diubah di halaman ini — mungkin hasil pindaian (halaman berupa gambar). Gunakan Tanda tangan / Stempel untuk menulis di atasnya.",
+  "pdfedit.no_text": "Tidak ada teks yang bisa diklik di halaman ini — mungkin hasil pindai. Seret kotak di sekeliling teks untuk mengubahnya.",
   "pdfedit.hint": "Klik satu baris untuk mengubahnya di tempat; Enter untuk selesai. Hanya kata yang diubah yang tersentuh — tabel, stempel, dan teks lain tetap.\n\nKata baru memakai font di PC ini (Tionghoa: DengXian atau SimHei) sehingga bisa sedikit berbeda; PDF dengan teks Tionghoa yang diubah bertambah beberapa MB.",
   "pdfedit.changed": "{count} perubahan",
   "pdfedit.page_short": "hlm. {n}",
@@ -2288,5 +2288,6 @@
   "ocrbox.picked": "{count} halaman terpilih",
   "ocrbox.all": "Semua {count} halaman",
   "ocrbox.whole": "Halaman ini",
-  "ocrbox.hint": "Seret kotak untuk mengambil teks di dalamnya, atau halaman ini / beberapa halaman sekaligus. Teks PDF digital diambil persis; hasil pindai dibaca di PC ini, tidak dikirim."
+  "ocrbox.hint": "Seret kotak untuk mengambil teks di dalamnya, atau halaman ini / beberapa halaman sekaligus. Teks PDF digital diambil persis; hasil pindai dibaca di PC ini, tidak dikirim.",
+  "edit.box_hint": "Teks di pindaian atau gambar: seret kotak di sekelilingnya; teks dibaca lalu Anda ubah (yang lama ditutup warna kertas)."
 }

@@ -2,6 +2,7 @@
 
 #include <optional>
 #include <string>
+#include <vector>
 
 #include <commctrl.h>
 #include <ole2.h>
@@ -21,6 +22,38 @@ LRESULT CALLBACK DropSubclass(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam,
     return 0;
   }
   return DefSubclassProc(hwnd, msg, wparam, lparam);
+}
+
+std::wstring Wide(const std::string& s) {
+  if (s.empty()) return std::wstring();
+  const int n = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), static_cast<int>(s.size()), nullptr, 0);
+  std::wstring out(n, L'\0');
+  MultiByteToWideChar(CP_UTF8, 0, s.c_str(), static_cast<int>(s.size()), out.data(), n);
+  return out;
+}
+
+// Opens the folder of paths[0] with every path in it chosen.
+bool Reveal(const std::vector<std::wstring>& paths) {
+  if (paths.empty()) return false;
+  const std::wstring& first = paths.front();
+  const size_t cut = first.find_last_of(L"\\/");
+  if (cut == std::wstring::npos) return false;
+  const std::wstring dir = first.substr(0, cut);
+  PIDLIST_ABSOLUTE folder = ILCreateFromPathW(dir.c_str());
+  if (!folder) return false;
+  std::vector<PIDLIST_ABSOLUTE> items;
+  for (const auto& p : paths) {
+    if (PIDLIST_ABSOLUTE item = ILCreateFromPathW(p.c_str())) items.push_back(item);
+  }
+  bool ok = false;
+  if (!items.empty()) {
+    std::vector<PCUITEMID_CHILD> kids;
+    for (auto item : items) kids.push_back(ILFindLastID(item));
+    ok = SUCCEEDED(SHOpenFolderAndSelectItems(folder, static_cast<UINT>(kids.size()), kids.data(), 0));
+  }
+  for (auto item : items) ILFree(item);
+  ILFree(folder);
+  return ok;
 }
 
 std::string Utf8(const std::wstring& w) {
@@ -82,6 +115,25 @@ bool FlutterWindow::OnCreate() {
         } else {
           result->NotImplemented();
         }
+      });
+  // Show in folder: reveal([path, …]) → true when the files were chosen.
+  shell_ = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+      flutter_controller_->engine()->messenger(), "keepnear/shell",
+      &flutter::StandardMethodCodec::GetInstance());
+  shell_->SetMethodCallHandler(
+      [](const flutter::MethodCall<flutter::EncodableValue>& call,
+         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+        if (call.method_name() != "reveal") {
+          result->NotImplemented();
+          return;
+        }
+        std::vector<std::wstring> paths;
+        if (const auto* args = std::get_if<flutter::EncodableList>(call.arguments())) {
+          for (const auto& v : *args) {
+            if (const auto* s = std::get_if<std::string>(&v)) paths.push_back(Wide(*s));
+          }
+        }
+        result->Success(flutter::EncodableValue(Reveal(paths)));
       });
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
   AllowDropWhenElevated();

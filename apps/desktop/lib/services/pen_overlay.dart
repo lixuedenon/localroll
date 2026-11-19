@@ -209,7 +209,7 @@ class PenOverlay extends ChangeNotifier implements PenControls {
         if (m != null) {
           _textEdit = int.parse(m.group(1)!);
           textAt = (x: int.parse(m.group(2)!), y: int.parse(m.group(3)!));
-          textWords = m.group(4) ?? '';
+          textWords = (m.group(4) ?? '').replaceAll('\u2028', '\n');
           notifyListeners();
         }
       case 'error':
@@ -361,7 +361,8 @@ class PenOverlay extends ChangeNotifier implements PenControls {
     textAt = null;
     _textEdit = null;
     textWords = '';
-    final w = words.replaceAll('\n', ' ').trim();
+    // New lines travel as U+2028 (the layer reads one command per line).
+    final w = words.trim().replaceAll('\r', '').replaceAll('\n', '\u2028');
     if (at != null && w.isNotEmpty) _send(edit != null ? 'retext $edit $w' : 'text ${at.x} ${at.y} $w');
     notifyListeners();
   }

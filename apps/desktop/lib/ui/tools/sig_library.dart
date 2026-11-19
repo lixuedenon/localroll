@@ -598,7 +598,7 @@ class _CropBoxState extends State<_CropBox> {
         'rt' || 'lb' => SystemMouseCursors.resizeUpRightDownLeft,
         'l' || 'r' => SystemMouseCursors.resizeLeftRight,
         't' || 'b' => SystemMouseCursors.resizeUpDown,
-        'move' => SystemMouseCursors.move,
+        'move' => SystemMouseCursors.click,
         _ => SystemMouseCursors.basic,
       };
 

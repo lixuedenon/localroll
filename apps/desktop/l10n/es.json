@@ -2145,7 +2145,7 @@
   "pdfedit.title": "Editar texto",
   "pdfedit.page": "Página {n} / {count}",
   "pdfedit.cannot_open": "No se puede abrir este PDF (contraseña o dañado)",
-  "pdfedit.no_text": "No hay texto editable en esta página; seguramente es un escaneo (la página es una imagen). Usa Firmar / Sello para escribir encima.",
+  "pdfedit.no_text": "No hay texto que pulsar en esta página — quizá es un escaneo. Dibuja un cuadro alrededor del texto para cambiarlo.",
   "pdfedit.hint": "Haz clic en una línea para cambiarla en su sitio; Intro para terminar. Solo se tocan las palabras cambiadas: tablas, sellos y el resto del texto se quedan igual.\n\nLas palabras nuevas usan una fuente de este PC (chino: DengXian o SimHei) y pueden verse algo distintas; un PDF con chino cambiado crece unos MB.",
   "pdfedit.changed": "{count} cambio(s)",
   "pdfedit.page_short": "p. {n}",
@@ -2288,5 +2288,6 @@
   "ocrbox.picked": "Las {count} páginas elegidas",
   "ocrbox.all": "Las {count} páginas",
   "ocrbox.whole": "Esta página",
-  "ocrbox.hint": "Dibuja un cuadro para sacar el texto, o esta página o varias a la vez. El texto de un PDF digital se toma tal cual; un escaneo se lee en este PC, sin enviar nada."
+  "ocrbox.hint": "Dibuja un cuadro para sacar el texto, o esta página o varias a la vez. El texto de un PDF digital se toma tal cual; un escaneo se lee en este PC, sin enviar nada.",
+  "edit.box_hint": "Texto en un escaneo o imagen: dibuja un cuadro alrededor; se lee y lo cambias (el antiguo se tapa con el color del papel)."
 }

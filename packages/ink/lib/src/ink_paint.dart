@@ -33,7 +33,8 @@ class InkGeometry {
           ),
         ),
         textDirection: TextDirection.ltr,
-      )..layout(maxWidth: math.max(40, s.width * 0.9));
+      // One line until a new line is typed (no wrapping of its own).
+      )..layout();
 
   /// The box around the mark before it was moved / turned (pixels).
   static Rect box(InkMark i, Size s) {

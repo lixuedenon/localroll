@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:localroll_core/localroll_core.dart';
 import 'package:nsd/nsd.dart' as nsd;
 
@@ -133,6 +134,15 @@ Future<NetworkHealth> checkNetworkHealth(int port) async {
 /// Opens Explorer with [path] selected (or the folder itself).
 Future<void> revealInExplorer(String path) async {
   if (!Platform.isWindows) return;
+  // The folder opened with the file chosen (Windows' own call; explorer
+  // /select often only opens the folder when Keepnear runs as admin).
+  if (await File(path).exists()) {
+    try {
+      if (await const MethodChannel('keepnear/shell').invokeMethod<bool>('reveal', [path]) == true) return;
+    } catch (e) {
+      DiagLog.log('ui', 'reveal: $e');
+    }
+  }
   if (await File(path).exists()) {
     await Process.start('explorer.exe', ['/select,', path]);
   } else {

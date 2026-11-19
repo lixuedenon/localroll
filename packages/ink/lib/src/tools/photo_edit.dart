@@ -409,7 +409,7 @@ class _PhotoEditorState extends State<PhotoEditor> {
   String? _hoverGrab;
 
   static MouseCursor _cursorFor(String? g) => switch (g) {
-        'move' => SystemMouseCursors.move,
+        'move' => SystemMouseCursors.click,
         'lt' || 'rb' => SystemMouseCursors.resizeUpLeftDownRight,
         'rt' || 'lb' => SystemMouseCursors.resizeUpRightDownLeft,
         'l' || 'r' => SystemMouseCursors.resizeLeftRight,

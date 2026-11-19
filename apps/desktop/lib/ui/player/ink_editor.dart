@@ -135,6 +135,10 @@ class InkEditor extends ChangeNotifier {
   /// each change, and does undo / redo itself.
   VoidCallback? beforeChange, undoAll, redoAll;
 
+  /// The last change told by [beforeChange] came to nothing (a dot taken
+  /// back): forget it.
+  VoidCallback? forgetChange;
+
   /// The marks put back as they were (the page's own undo).
   void restore(List<InkMark> marks) {
     inks
@@ -503,6 +507,7 @@ class InkEditor extends ChangeNotifier {
     if (gone != null) {
       inks.remove(gone);
       if (_undoInks.isNotEmpty) _undoInks.removeLast();
+      forgetChange?.call();
     }
     sessionStart.remove(id);
     sessionTimes.remove(id);
@@ -555,6 +560,12 @@ class _InkLayerState extends State<InkLayer> {
   /// click.
   String? _justPicked;
   String? _maybeEdit;
+
+  /// Drawing began on a mark already there: a click (no drag) chooses that
+  /// mark instead of leaving a dot.
+  InkMark? _clickOn;
+  Offset _clickFrom = Offset.zero;
+  bool _clickMoved = false;
   Timer? _editSoon;
   final TextEditingController _text = TextEditingController();
   final FocusNode _textFocus = FocusNode();
@@ -718,16 +729,21 @@ class _InkLayerState extends State<InkLayer> {
         _startTyping();
       default:
         const oneClick = {EditTool.stamp, EditTool.check, EditTool.cross, EditTool.number};
-        if (oneClick.contains(ed.tool) && ed.topAt(p, s) != null) {
-          final at = _heldAt = _n(p, s);
-          _held = Timer(const Duration(milliseconds: 380), () {
-            if (!mounted) return;
-            ed.begin(at);
-            ed.end();
-          });
+        // A click on a mark already there chooses it (any tool).
+        final under = ed.topAt(p, s);
+        if (oneClick.contains(ed.tool) && under != null) {
+          ed.select(under.id);
+          _justPicked = under.id;
+          ed.remember();
+          _drag = _Drag.move;
+          _from = p;
+          _start = under.copy();
           return;
         }
         _drag = _Drag.draw;
+        _clickOn = under;
+        _clickFrom = p;
+        _clickMoved = false;
         final before = ed.inks.length;
         ed.begin(_n(p, s));
         _clickMade = ed.drawing?.id ?? (ed.inks.length > before ? ed.inks.last.id : null);
@@ -742,6 +758,12 @@ class _InkLayerState extends State<InkLayer> {
       content: Text(tr('ink.deleted')),
       action: SnackBarAction(label: tr('ink.undo'), onPressed: ed.undo),
     ));
+  }
+
+  void _finishTyping() {
+    _textFocus.unfocus();
+    _endTyping();
+    setState(() {});
   }
 
   void _startTyping() {
@@ -763,6 +785,7 @@ class _InkLayerState extends State<InkLayer> {
     final p = e.localPosition;
     switch (_drag) {
       case _Drag.draw:
+        if ((p - _clickFrom).distance > 3) _clickMoved = true;
         ed.extend(_n(p, s), straight: HardwareKeyboard.instance.isShiftPressed);
       case _Drag.erase:
         ed.eraseAt(p, s, first: false);
@@ -818,7 +841,21 @@ class _InkLayerState extends State<InkLayer> {
         _startTyping();
       });
     }
-    if (_drag == _Drag.draw) widget.editor?.end();
+    final ed0 = widget.editor;
+    if (_drag == _Drag.draw && ed0 != null) {
+      final made = ed0.drawing?.id;
+      ed0.end();
+      // A click (no drag) on a mark already there: choose it, no dot.
+      final on = _clickOn;
+      if (on != null && !_clickMoved && ed0.inks.any((i) => i.id == on.id)) {
+        final dot = made ?? _clickMade;
+        if (dot != null) ed0.dropMade(dot);
+        _clickMade = null;
+        ed0.select(on.id);
+        _justPicked = on.id;
+      }
+    }
+    _clickOn = null;
     if (_drag == _Drag.candle) {
       final sel = widget.editor?.selected;
       if (sel != null) Candles.tidy(sel);
@@ -840,9 +877,16 @@ class _InkLayerState extends State<InkLayer> {
       left: at.dx,
       top: at.dy - 4,
       child: ConstrainedBox(
-        constraints: BoxConstraints(minWidth: 120, maxWidth: math.max(160, s.width - at.dx - 8)),
+        // As wide as the words: a new line only where Enter was pressed
+        // (Backspace takes one back). Ctrl+Enter / Esc: done.
+        constraints: const BoxConstraints(minWidth: 120, maxWidth: 4000),
         child: IntrinsicWidth(
-          child: TextField(
+          child: CallbackShortcuts(
+            bindings: {
+              const SingleActivator(LogicalKeyboardKey.enter, control: true): _finishTyping,
+              const SingleActivator(LogicalKeyboardKey.escape): _finishTyping,
+            },
+            child: TextField(
             controller: _text,
             focusNode: _textFocus,
             autofocus: true,
@@ -860,17 +904,28 @@ class _InkLayerState extends State<InkLayer> {
               border: OutlineInputBorder(borderSide: BorderSide(color: Color(i.color))),
             ),
           ),
+          ),
         ),
       ),
     );
   }
 
-  MouseCursor get _cursor => switch (widget.editor?.tool) {
+  MouseCursor get _own => switch (widget.editor?.tool) {
         null => MouseCursor.defer,
         EditTool.select => SystemMouseCursors.basic,
         EditTool.text => SystemMouseCursors.text,
         _ => SystemMouseCursors.precise,
       };
+
+  /// The pointer's shape where it is (see [inkCursor]).
+  MouseCursor? _hoverCursor;
+
+  void _hover(Offset p, Size s) {
+    final ed = widget.editor;
+    if (ed == null || _drag != _Drag.none) return;
+    final c = inkCursor(ed, p, s) ?? _own;
+    if (c != _hoverCursor) setState(() => _hoverCursor = c);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -898,7 +953,8 @@ class _InkLayerState extends State<InkLayer> {
       );
       if (ed == null) return IgnorePointer(child: paint);
       return MouseRegion(
-        cursor: _cursor,
+        cursor: _hoverCursor ?? _own,
+        onHover: (e) => _hover(e.localPosition, size),
         child: Listener(
           behavior: HitTestBehavior.opaque,
           onPointerDown: (e) => _down(e, size),
@@ -910,6 +966,32 @@ class _InkLayerState extends State<InkLayer> {
       );
     });
   }
+}
+
+/// The pointer's shape over the marks: on the chosen mark's corners,
+/// slanted arrows (as it is turned); on its turning knob, four arrows
+/// (Windows has no turning shape); on the chosen mark, a hand; on any mark
+/// with the pointer / text tool (a click chooses it), a hand; else null
+/// (the tool's own shape).
+MouseCursor? inkCursor(InkEditor ed, Offset p, Size s) {
+  final sel = ed.selected;
+  if (sel != null) {
+    if ((p - InkPainter.rotateKnob(sel, s)).distance < 12 && !Candles.noTurn(sel)) return SystemMouseCursors.move;
+    final cs = InkGeometry.corners(sel, s);
+    if (cs.length == 4) {
+      final mid = (cs[0] + cs[2]) / 2;
+      for (final q in cs) {
+        if ((p - q).distance < 10) {
+          final d = q - mid;
+          return d.dx * d.dy > 0 ? SystemMouseCursors.resizeUpLeftDownRight : SystemMouseCursors.resizeUpRightDownLeft;
+        }
+      }
+    }
+    if (InkGeometry.hits(sel, s, p, slop: 8)) return SystemMouseCursors.click;
+  }
+  final over = ed.topAt(p, s);
+  if (over != null && (ed.tool == EditTool.select || (ed.tool == EditTool.text && over.tool == InkTool.text))) return SystemMouseCursors.click;
+  return null;
 }
 
 /// Writes what the chosen number says.
