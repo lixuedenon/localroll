@@ -712,12 +712,21 @@ class LibraryIndex extends ChangeNotifier {
           }
         }
       }
-      // 5. Copied in from elsewhere: add to the library.
+      // 5. Copied in from elsewhere: add to the library — once it is
+      // written (a file changed in the last 3 s may still be being written,
+      // e.g. a video a tool is making: looked at again a little later, so
+      // no picture is asked of half a file).
       final now = DateTime.now().millisecondsSinceEpoch;
+      final later = <String>{};
       for (final rel in found) {
         try {
           final f = File(_abs(rel));
           final stat = await f.stat();
+          if (now - stat.modified.millisecondsSinceEpoch < 3000) {
+            final slash = rel.lastIndexOf('/');
+            later.add(slash < 0 ? '' : rel.substring(0, slash));
+            continue;
+          }
           final name = rel.substring(rel.lastIndexOf('/') + 1);
           _items.add(MediaItem(
             relPath: rel,
@@ -749,6 +758,15 @@ class LibraryIndex extends ChangeNotifier {
         _scheduleSave();
       }
       notifyListeners();
+      if (later.isNotEmpty) {
+        _dirtyDirs.addAll(later);
+        _debounce?.cancel();
+        _debounce = Timer(const Duration(seconds: 3), () {
+          final scopes = Set.of(_dirtyDirs);
+          _dirtyDirs.clear();
+          unawaited(reconcile(scopes: scopes));
+        });
+      }
     } finally {
       _reconciling = false;
       if (_again) {

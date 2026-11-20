@@ -218,6 +218,7 @@ class ConverterService extends ChangeNotifier {
   Future<void> _run(ConvertJob job) async {
     job.state = JobState.running;
     notifyListeners();
+    String? flatTmp;
     try {
       if (!ffmpeg.available) throw Exception(tr('convert.no_ffmpeg'));
       final src = job.path.isNotEmpty ? job.path : library.absPath(job.item);
@@ -226,12 +227,19 @@ class ConverterService extends ChangeNotifier {
       // Photos: ffmpeg drops EXIF, so lift it from the original now and put
       // it back into the JPEG afterwards (capture time, GPS, camera, lens).
       final exif = job.item.kind == MediaKind.image ? await readExif(src) : null;
+      // A tiled photo (iPhone HEIC): made a plain picture first, so turning
+      // it upright / resizing works (a filter on the tiles fails).
+      final flat = job.item.kind == MediaKind.image && FfmpegService.tiledPicture(src)
+          ? await ffmpeg.flatJpeg(src, asStored: exif != null && Exif.orientation(exif) != null)
+          : null;
+      flatTmp = flat;
+      final from = flat ?? src;
       final fmt = job.format;
       final args = fmt != null
-          ? await _formatArgs(job, fmt, src, out, exif)
+          ? await _formatArgs(job, fmt, from, out, exif)
           : job.item.kind == MediaKind.video
-              ? await _videoArgs(job, src, out)
-              : _imageArgs(job, src, out, exif);
+              ? await _videoArgs(job, from, out)
+              : _imageArgs(job, from, out, exif);
       final durationUs = job.item.kind == MediaKind.video
           ? ((await ffmpeg.probe(src)).durationSec ?? 0) * 1e6
           : 0.0;
@@ -273,6 +281,11 @@ class ConverterService extends ChangeNotifier {
     } catch (e) {
       job.state = JobState.failed;
       job.error = e.toString();
+    }
+    if (flatTmp != null) {
+      try {
+        await File(flatTmp).delete();
+      } catch (_) {}
     }
     notifyListeners();
   }

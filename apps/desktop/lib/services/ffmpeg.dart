@@ -152,10 +152,30 @@ class FfmpegService extends ChangeNotifier {
     );
   }
 
+  /// Pictures ffmpeg puts together from tiles itself (iPhone HEIC, HEIF,
+  /// AVIF): a filter of our own on them fails ("simple and complex
+  /// filtering cannot be used together") — make a plain picture first.
+  static bool tiledPicture(String path) {
+    final e = extensionOf(path);
+    return e == 'heic' || e == 'heif' || e == 'avif';
+  }
+
+  /// A plain JPEG of a tiled picture ([tiledPicture]) to filter, in the
+  /// temp folder (the caller deletes it); null if it can't be made.
+  /// [asStored]: not turned upright (the caller turns it from the EXIF).
+  Future<String?> flatJpeg(String src, {bool asStored = false}) async {
+    final tmp = '${Directory.systemTemp.path}${Platform.pathSeparator}lr_flat_${shortKey(src)}_${DateTime.now().microsecondsSinceEpoch}.jpg';
+    final ok = await _limited(() => _run([if (asStored) '-noautorotate', '-i', src, '-frames:v', '1', '-q:v', '1', tmp]));
+    return ok && File(tmp).existsSync() ? tmp : null;
+  }
+
   /// A JPEG of [src] for text recognition (HEIC, RAW, WebP…), at most
   /// 2560 pixels a side, written to [out]. Not kept in the picture cache.
   Future<bool> ocrPicture(String src, String out) async {
     if (!available) return false;
+    // HEIC is a tile grid ffmpeg stitches itself: no filter of our own on
+    // top (it would fail); full size is fine (Windows reads up to 10000 px).
+    if (tiledPicture(src)) return _limited(() => _run(['-i', src, '-frames:v', '1', '-q:v', '3', out]));
     final ok = await _limited(() => _run([
           '-i', src,
           '-frames:v', '1',
@@ -235,8 +255,13 @@ class FfmpegService extends ChangeNotifier {
   /// tile grid ffmpeg stitches itself, and a filter on top of it fails),
   /// once more on a plain JPEG made from it first.
   Future<T?> _viaJpeg<T>(String src, bool video, Future<T?> Function(String from) read) async {
-    final direct = await read(src);
-    if (direct != null || video) return direct;
+    // A tile grid (HEIC, HEIF, AVIF): the plain JPEG first, no failing try.
+    if (!video && !tiledPicture(src)) {
+      final direct = await read(src);
+      if (direct != null) return direct;
+    } else if (video) {
+      return read(src);
+    }
     final tmp = File('${Directory.systemTemp.path}${Platform.pathSeparator}lr_${shortKey(src)}_${DateTime.now().microsecondsSinceEpoch}.jpg');
     try {
       final ok = await _limited(() => _run(['-i', src, '-frames:v', '1', '-q:v', '2', tmp.path]));
