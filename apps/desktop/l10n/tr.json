@@ -2293,5 +2293,11 @@
   "tool.name_taken": "Bu adda bir dosya zaten var — başka bir ad seçin.",
   "tool.name_bad": "Bu ad kullanılamaz (\\ / : * ? \" < > | olmaz).",
   "print.page_of": "Sayfa {n} / {count}",
-  "notes.title": "Not"
+  "notes.title": "Not",
+  "common.copy": "Kopyala",
+  "lib.copied": "{count} kopyalandı — yapıştırılabilir",
+  "lib.copy_failed": "Kopyalanamadı",
+  "pdf.first": "İlk sayfa",
+  "pdf.last": "Son sayfa",
+  "pdf.thumbs": "Sayfa küçük resimleri"
 }

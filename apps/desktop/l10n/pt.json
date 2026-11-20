@@ -2293,5 +2293,11 @@
   "tool.name_taken": "Já existe um arquivo com este nome; escolha outro.",
   "tool.name_bad": "Este nome não pode ser usado (sem \\ / : * ? \" < > |).",
   "print.page_of": "Página {n} de {count}",
-  "notes.title": "Nota"
+  "notes.title": "Nota",
+  "common.copy": "Copiar",
+  "lib.copied": "{count} copiado(s) — pronto para colar",
+  "lib.copy_failed": "Não foi possível copiar",
+  "pdf.first": "Primeira página",
+  "pdf.last": "Última página",
+  "pdf.thumbs": "Miniaturas das páginas"
 }

@@ -60,10 +60,14 @@ class PdfNoteAt {
 /// A note on a page: its icon at [x] [y] (0–1 of the page as shown), its
 /// [text] shown by PDF readers on a click; [rgb] its colour (hex).
 class PdfNote {
-  const PdfNote(this.x, this.y, this.text, {this.rgb = 'E5484D'});
+  const PdfNote(this.x, this.y, this.text, {this.rgb = 'E5484D', this.ax, this.ay});
   final double x, y;
   final String text;
   final String rgb;
+
+  /// What the note is about (a number's middle, 0–1), when the note's icon
+  /// sits beside it ([x], [y]) so as not to hide it.
+  final double? ax, ay;
 }
 
 /// One line of text changed on a page: the old text in [l] [b] [r] [t]
@@ -316,7 +320,7 @@ class PdfBuilder {
             for (final nt in p.notes) {
               final f = File('${tmp.path}${Platform.pathSeparator}n${n++}.txt');
               await f.writeAsString(nt.text, encoding: utf8);
-              plan.writeln('NOTE ${nt.x}|${nt.y}|${f.path}|${nt.rgb}');
+              plan.writeln('NOTE ${nt.x}|${nt.y}|${f.path}|${nt.rgb}|${nt.ax ?? ''}|${nt.ay ?? ''}');
             }
           case PdfFromJpeg():
             final r = p.rect;

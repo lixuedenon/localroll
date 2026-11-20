@@ -2293,5 +2293,11 @@
   "tool.name_taken": "A file with this name is already there — choose another.",
   "tool.name_bad": "This name can't be used (no \\ / : * ? \" < > |).",
   "print.page_of": "Page {n} of {count}",
-  "notes.title": "Note"
+  "notes.title": "Note",
+  "common.copy": "Copy",
+  "lib.copied": "{count} copied — ready to paste",
+  "lib.copy_failed": "Couldn't copy",
+  "pdf.first": "First page",
+  "pdf.last": "Last page",
+  "pdf.thumbs": "Page thumbnails"
 }

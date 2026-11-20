@@ -14,6 +14,23 @@ import '../../l10n/l10n.dart';
 import '../../services/annotations.dart';
 import '../../services/file_tools.dart';
 
+/// A number's words as a PDF note: its icon just outside the number's
+/// circle (up and right), so the number stays readable; [pw] × [ph]: the
+/// page's size (points).
+PdfNote numberNote(InkMark m, double pw, double ph) {
+  final size = Size(pw, ph);
+  final r = InkGeometry.box(m, size);
+  final c = r.center;
+  return PdfNote(
+    ((r.right + 9) / pw).clamp(0.0, 1.0),
+    ((r.top - 9) / ph).clamp(0.0, 1.0),
+    '${m.number ?? ''}. ${m.note}',
+    rgb: (m.color & 0xFFFFFF).toRadixString(16).padLeft(6, '0'),
+    ax: (c.dx / pw).clamp(0.0, 1.0),
+    ay: (c.dy / ph).clamp(0.0, 1.0),
+  );
+}
+
 /// Marks → the text kept in a PDF (zlib-packed JSON, base64).
 String packMarks(List<InkMark> inks) =>
     base64.encode(zlib.encode(utf8.encode(jsonEncode({'v': 1, 'inks': [for (final m in inks) m.toJson()]}))));

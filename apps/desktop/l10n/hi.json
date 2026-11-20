@@ -2293,5 +2293,11 @@
   "tool.name_taken": "इस नाम की फ़ाइल पहले से है — दूसरा नाम चुनें।",
   "tool.name_bad": "यह नाम नहीं चल सकता (\\ / : * ? \" < > | नहीं)।",
   "print.page_of": "पेज {n} / {count}",
-  "notes.title": "नोट"
+  "notes.title": "नोट",
+  "common.copy": "कॉपी",
+  "lib.copied": "{count} कॉपी हुए — पेस्ट कर सकते हैं",
+  "lib.copy_failed": "कॉपी नहीं हो सका",
+  "pdf.first": "पहला पेज",
+  "pdf.last": "आख़िरी पेज",
+  "pdf.thumbs": "पेज थंबनेल"
 }

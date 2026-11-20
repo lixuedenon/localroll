@@ -2293,5 +2293,11 @@
   "tool.name_taken": "يوجد ملف بهذا الاسم — اختر اسمًا آخر.",
   "tool.name_bad": "لا يمكن استخدام هذا الاسم (بدون \\ / : * ? \" < > |).",
   "print.page_of": "صفحة {n} من {count}",
-  "notes.title": "ملاحظة"
+  "notes.title": "ملاحظة",
+  "common.copy": "نسخ",
+  "lib.copied": "تم نسخ {count} — جاهز للصق",
+  "lib.copy_failed": "تعذّر النسخ",
+  "pdf.first": "الصفحة الأولى",
+  "pdf.last": "الصفحة الأخيرة",
+  "pdf.thumbs": "مصغّرات الصفحات"
 }

@@ -817,8 +817,18 @@ int listNotes(const std::string& pdf) {
             else one.push_back(c);
           }
           const bool own = api.AnnotHasKey && api.AnnotHasKey(a, "KeepnearNote");
+          double nx = sw > 0 ? X / sw : 0, ny = sh > 0 ? Y / sh : 0;
+          // A number's note: shown over the number itself.
+          if (own) {
+            const std::string at = annotText(a, "KeepnearAt");
+            double ax = 0, ay = 0;
+            if (!at.empty() && std::sscanf(at.c_str(), "%lf %lf", &ax, &ay) == 2) {
+              nx = ax;
+              ny = ay;
+            }
+          }
           char head[96];
-          std::snprintf(head, sizeof head, "note %d %.5f %.5f %d ", i, sw > 0 ? X / sw : 0, sh > 0 ? Y / sh : 0, own ? 1 : 0);
+          std::snprintf(head, sizeof head, "note %d %.5f %.5f %d ", i, nx, ny, own ? 1 : 0);
           say(head + one);
         }
       }
@@ -1040,6 +1050,14 @@ int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
       // From Keepnear's marks: taken off with them (--clean).
       const unsigned short one[2] = {'1', 0};
       api.AnnotSetString(a, "KeepnearNote", one);
+      // What it is about (a number's middle, 0–1 of the page as shown): its
+      // icon sits beside the number; Keepnear shows the words over the number.
+      if (p.size() > 5 && !p[4].empty() && !p[5].empty()) {
+        const std::string at = p[4] + " " + p[5];
+        std::vector<unsigned short> a16(at.begin(), at.end());
+        a16.push_back(0);
+        api.AnnotSetString(a, "KeepnearAt", a16.data());
+      }
       if (api.AnnotSetColor && p.size() > 3) {
         unsigned int rgb = (unsigned int)strtoul(p[3].c_str(), nullptr, 16);
         api.AnnotSetColor(a, 0, (rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF, 255);

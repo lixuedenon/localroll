@@ -2293,5 +2293,11 @@
   "tool.name_taken": "Sudah ada file dengan nama ini — pilih nama lain.",
   "tool.name_bad": "Nama ini tidak bisa dipakai (tanpa \\ / : * ? \" < > |).",
   "print.page_of": "Halaman {n} dari {count}",
-  "notes.title": "Catatan"
+  "notes.title": "Catatan",
+  "common.copy": "Salin",
+  "lib.copied": "{count} disalin — siap ditempel",
+  "lib.copy_failed": "Gagal menyalin",
+  "pdf.first": "Halaman pertama",
+  "pdf.last": "Halaman terakhir",
+  "pdf.thumbs": "Gambar kecil halaman"
 }

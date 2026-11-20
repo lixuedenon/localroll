@@ -2293,5 +2293,11 @@
   "tool.name_taken": "同じ名前のファイルがあります。別の名前にしてください。",
   "tool.name_bad": "この名前は使えません（\\ / : * ? \" < > | は不可）。",
   "print.page_of": "{n} / {count} ページ",
-  "notes.title": "注釈"
+  "notes.title": "注釈",
+  "common.copy": "コピー",
+  "lib.copied": "{count} 件コピーしました。貼り付けできます",
+  "lib.copy_failed": "コピーできませんでした",
+  "pdf.first": "最初のページ",
+  "pdf.last": "最後のページ",
+  "pdf.thumbs": "ページのサムネイル"
 }

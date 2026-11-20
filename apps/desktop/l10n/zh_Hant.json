@@ -2293,5 +2293,11 @@
   "tool.name_taken": "已經有同名的檔案，換一個名字。",
   "tool.name_bad": "這個名字不能用（不能有 \\ / : * ? \" < > |）。",
   "print.page_of": "第 {n} / {count} 頁",
-  "notes.title": "註解"
+  "notes.title": "註解",
+  "common.copy": "複製",
+  "lib.copied": "已複製 {count} 個，可以貼上了",
+  "lib.copy_failed": "複製失敗",
+  "pdf.first": "首頁",
+  "pdf.last": "末頁",
+  "pdf.thumbs": "頁面縮圖"
 }

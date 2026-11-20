@@ -14,6 +14,7 @@ import 'package:window_manager/window_manager.dart';
 
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
+import '../../services/clipboard_files.dart';
 import '../../services/bg_tasks.dart';
 import '../../services/annotations.dart';
 import '../../services/camera_bubble.dart';
@@ -570,6 +571,18 @@ class _PlayerPageState extends State<PlayerPage> {
         unawaited(_finishDraw());
         return KeyEventResult.handled;
       }
+    }
+    // Ctrl+C: the photo / file shown onto the clipboard.
+    if (down && ed == null && ctrl && k == LogicalKeyboardKey.keyC && _entries.isNotEmpty) {
+      final path = _entry.path;
+      unawaited(copyToClipboard(widget.services, [path]).then((ok) {
+        if (!mounted) return;
+        ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(
+          duration: const Duration(seconds: 2),
+          content: Text(ok ? tr('lib.copied', {'count': 1}) : tr('lib.copy_failed')),
+        ));
+      }));
+      return KeyEventResult.handled;
     }
     // Delete: the file shown goes to "Recently deleted" (not while drawing
     // or recording).

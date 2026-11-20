@@ -1034,8 +1034,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
         notes = [
           for (final m in ed.inks)
             if (m.tool == InkTool.number && (m.note ?? '').isNotEmpty && m.points.isNotEmpty)
-              PdfNote((m.points.first.dx + m.dx).clamp(0.0, 1.0), (m.points.first.dy + m.dy).clamp(0.0, 1.0), '${m.number ?? ''}. ${m.note}',
-                  rgb: (m.color & 0xFFFFFF).toRadixString(16).padLeft(6, '0')),
+              numberNote(m, d.pages[i].width, d.pages[i].height),
         ];
       }
       for (final p in _patches) {

@@ -14,6 +14,7 @@ import '../services/file_actions.dart';
 import '../services/file_tools.dart' show OfficePdf;
 import '../services/format_convert.dart';
 import '../services/library_index.dart';
+import '../services/clipboard_files.dart';
 import '../services/network.dart';
 import '../services/peers.dart';
 import '../services/picture_model.dart';
@@ -957,9 +958,32 @@ class _LibraryPageState extends State<LibraryPage> {
     return n;
   }
 
+  /// 复制: onto the clipboard (pasted as files into a folder; one photo
+  /// also as a picture into a chat, Word…).
+  Future<void> _copy(List<String> paths) async {
+    if (paths.isEmpty) return;
+    final ok = await copyToClipboard(widget.services, paths);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      duration: const Duration(seconds: 2),
+      content: Text(ok ? tr('lib.copied', {'count': paths.length}) : tr('lib.copy_failed')),
+    ));
+  }
+
   KeyEventResult _onKey(KeyEvent e, List<MediaItem> items) {
-    if (e is! KeyDownEvent || _filesTab) return KeyEventResult.ignored;
+    if (e is! KeyDownEvent) return KeyEventResult.ignored;
     final ctrl = HardwareKeyboard.instance.isControlPressed;
+    // Ctrl+C: what is chosen.
+    if (ctrl && e.logicalKey == LogicalKeyboardKey.keyC && _selecting) {
+      final s = widget.services;
+      unawaited(_copy([
+        for (final i in items)
+          if (_selected.contains(i.relPath)) s.library.absPath(i),
+        ..._chosenFiles(),
+      ]));
+      return KeyEventResult.handled;
+    }
+    if (_filesTab) return KeyEventResult.ignored;
     if (ctrl && e.logicalKey == LogicalKeyboardKey.keyA) {
       setState(() {
         _selected.addAll(_order);
@@ -1346,6 +1370,7 @@ class _LibraryPageState extends State<LibraryPage> {
       position: RelativeRect.fromRect(at & const Size(1, 1), Offset.zero & overlay.size),
       items: [
         if (targets.length == 1) PopupMenuItem(value: 'open', child: _menuRow(Icons.open_in_full_rounded, tr('lib.open'))),
+        PopupMenuItem(value: 'copy', child: _menuRow(Icons.content_copy_rounded, '${tr('common.copy')}    Ctrl+C')),
         PopupMenuItem(
           value: 'select',
           child: _menuRow(Icons.check_circle_outline_rounded,
@@ -1386,6 +1411,8 @@ class _LibraryPageState extends State<LibraryPage> {
       return;
     }
     switch (choice) {
+      case 'copy':
+        await _copy([for (final i in targets) s.library.absPath(i)]);
       case 'open':
         await openLibraryItems(this.context, s, items, index);
       case 'select':
@@ -2152,6 +2179,7 @@ class _LibraryPageState extends State<LibraryPage> {
       position: RelativeRect.fromRect(at & const Size(1, 1), Offset.zero & overlay.size),
       items: [
         PopupMenuItem(value: 'open', child: _menuRow(Icons.open_in_full_rounded, tr('lib.open'))),
+        PopupMenuItem(value: 'copy', child: _menuRow(Icons.content_copy_rounded, '${tr('common.copy')}    Ctrl+C')),
         PopupMenuItem(
           value: 'select',
           child: _menuRow(Icons.check_circle_outline_rounded, _selected.contains(key) ? tr('lib.unselect') : tr('lib.select')),
@@ -2178,6 +2206,8 @@ class _LibraryPageState extends State<LibraryPage> {
       return;
     }
     switch (choice) {
+      case 'copy':
+        await _copy(_selected.contains(key) ? _chosenFiles() : [f.path]);
       case 'open':
         await openReceivedFile(this.context, widget.services, f.path);
       case 'annotate':

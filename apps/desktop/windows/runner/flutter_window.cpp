@@ -56,6 +56,70 @@ bool Reveal(const std::vector<std::wstring>& paths) {
   return ok;
 }
 
+// The clipboard: files (pasted into a folder as copies) and, for one
+// photo, the picture too (pasted into a chat, Word, Paint…). [bgra]: top
+// row first, 4 bytes a pixel.
+bool CopyToClipboard(HWND hwnd, const std::vector<std::wstring>& files, const std::vector<uint8_t>* bgra, int w, int h) {
+  if (!OpenClipboard(hwnd)) return false;
+  EmptyClipboard();
+  bool ok = false;
+  if (!files.empty()) {
+    size_t chars = 1;
+    for (const auto& f : files) chars += f.size() + 1;
+    HGLOBAL g = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, sizeof(DROPFILES) + chars * sizeof(wchar_t));
+    if (g) {
+      auto* df = static_cast<DROPFILES*>(GlobalLock(g));
+      df->pFiles = sizeof(DROPFILES);
+      df->fWide = TRUE;
+      auto* p = reinterpret_cast<wchar_t*>(reinterpret_cast<BYTE*>(df) + sizeof(DROPFILES));
+      for (const auto& f : files) {
+        memcpy(p, f.c_str(), f.size() * sizeof(wchar_t));
+        p += f.size();
+        *p++ = 0;
+      }
+      *p = 0;
+      GlobalUnlock(g);
+      if (SetClipboardData(CF_HDROP, g)) {
+        ok = true;
+      } else {
+        GlobalFree(g);
+      }
+    }
+    // A copy, not a move, when pasted into a folder.
+    const UINT effect = RegisterClipboardFormatW(L"Preferred DropEffect");
+    if (HGLOBAL e = GlobalAlloc(GMEM_MOVEABLE, sizeof(DWORD))) {
+      *static_cast<DWORD*>(GlobalLock(e)) = DROPEFFECT_COPY;
+      GlobalUnlock(e);
+      if (!SetClipboardData(effect, e)) GlobalFree(e);
+    }
+  }
+  if (bgra && w > 0 && h > 0 && bgra->size() >= static_cast<size_t>(w) * h * 4) {
+    const size_t row = static_cast<size_t>(w) * 4;
+    HGLOBAL g = GlobalAlloc(GMEM_MOVEABLE, sizeof(BITMAPINFOHEADER) + row * h);
+    if (g) {
+      auto* bi = static_cast<BITMAPINFOHEADER*>(GlobalLock(g));
+      ZeroMemory(bi, sizeof(BITMAPINFOHEADER));
+      bi->biSize = sizeof(BITMAPINFOHEADER);
+      bi->biWidth = w;
+      bi->biHeight = h;  // bottom row first
+      bi->biPlanes = 1;
+      bi->biBitCount = 32;
+      bi->biCompression = BI_RGB;
+      bi->biSizeImage = static_cast<DWORD>(row * h);
+      auto* dst = reinterpret_cast<BYTE*>(bi + 1);
+      for (int y = 0; y < h; y++) memcpy(dst + (h - 1 - y) * row, bgra->data() + y * row, row);
+      GlobalUnlock(g);
+      if (SetClipboardData(CF_DIB, g)) {
+        ok = true;
+      } else {
+        GlobalFree(g);
+      }
+    }
+  }
+  CloseClipboard();
+  return ok;
+}
+
 std::string Utf8(const std::wstring& w) {
   if (w.empty()) return std::string();
   const int n = WideCharToMultiByte(CP_UTF8, 0, w.c_str(), static_cast<int>(w.size()), nullptr, 0, nullptr, nullptr);
@@ -121,8 +185,36 @@ bool FlutterWindow::OnCreate() {
       flutter_controller_->engine()->messenger(), "keepnear/shell",
       &flutter::StandardMethodCodec::GetInstance());
   shell_->SetMethodCallHandler(
-      [](const flutter::MethodCall<flutter::EncodableValue>& call,
-         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+      [this](const flutter::MethodCall<flutter::EncodableValue>& call,
+             std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+        if (call.method_name() == "copy") {
+          // copy({files: [...], bgra: bytes?, w, h})
+          std::vector<std::wstring> files;
+          const std::vector<uint8_t>* bgra = nullptr;
+          int w = 0, h = 0;
+          if (const auto* m = std::get_if<flutter::EncodableMap>(call.arguments())) {
+            auto at = [m](const char* k) -> const flutter::EncodableValue* {
+              auto it = m->find(flutter::EncodableValue(std::string(k)));
+              return it == m->end() ? nullptr : &it->second;
+            };
+            if (const auto* v = at("files")) {
+              if (const auto* l = std::get_if<flutter::EncodableList>(v)) {
+                for (const auto& f : *l) {
+                  if (const auto* str = std::get_if<std::string>(&f)) files.push_back(Wide(*str));
+                }
+              }
+            }
+            if (const auto* v = at("bgra")) bgra = std::get_if<std::vector<uint8_t>>(v);
+            if (const auto* v = at("w")) {
+              if (const auto* i = std::get_if<int32_t>(v)) w = *i;
+            }
+            if (const auto* v = at("h")) {
+              if (const auto* i = std::get_if<int32_t>(v)) h = *i;
+            }
+          }
+          result->Success(flutter::EncodableValue(CopyToClipboard(GetHandle(), files, bgra, w, h)));
+          return;
+        }
         if (call.method_name() != "reveal") {
           result->NotImplemented();
           return;

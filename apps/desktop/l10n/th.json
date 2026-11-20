@@ -2293,5 +2293,11 @@
   "tool.name_taken": "มีไฟล์ชื่อนี้อยู่แล้ว เลือกชื่ออื่น",
   "tool.name_bad": "ใช้ชื่อนี้ไม่ได้ (ห้ามมี \\ / : * ? \" < > |)",
   "print.page_of": "หน้า {n} / {count}",
-  "notes.title": "บันทึก"
+  "notes.title": "บันทึก",
+  "common.copy": "คัดลอก",
+  "lib.copied": "คัดลอกแล้ว {count} รายการ วางได้เลย",
+  "lib.copy_failed": "คัดลอกไม่สำเร็จ",
+  "pdf.first": "หน้าแรก",
+  "pdf.last": "หน้าสุดท้าย",
+  "pdf.thumbs": "ภาพย่อหน้า"
 }

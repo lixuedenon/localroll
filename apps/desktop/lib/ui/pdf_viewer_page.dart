@@ -46,6 +46,13 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   /// Notes in the file (numbers' words, other programs' notes).
   List<PdfNoteAt> _notes = const [];
 
+  /// The page number typed (Enter: go there); the pages down the left.
+  final TextEditingController _pageCtl = TextEditingController();
+  final FocusNode _pageFocus = FocusNode();
+  final ScrollController _thumbScroll = ScrollController();
+  PdfDocument? _doc;
+  bool _thumbs = false;
+
   String get _name => widget.path.split(Platform.pathSeparator).last;
 
   @override
@@ -61,6 +68,9 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   void dispose() {
     DiagLog.log('ui', 'pdf reader closed');
     _focus.dispose();
+    _pageCtl.dispose();
+    _pageFocus.dispose();
+    _thumbScroll.dispose();
     super.dispose();
   }
 
@@ -69,6 +79,123 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     final p = page.clamp(1, _count);
     _c.goToPage(pageNumber: p);
   }
+
+  void _showPage(int n) {
+    _page = n;
+    if (!_pageFocus.hasFocus) _pageCtl.text = '$n';
+    // The page's picture in view down the left.
+    if (_thumbs && _thumbScroll.hasClients) {
+      const h = 182.0;
+      final y = (n - 1) * h;
+      final pos = _thumbScroll.position;
+      if (y < pos.pixels || y + h > pos.pixels + pos.viewportDimension) {
+        unawaited(_thumbScroll.animateTo((y - pos.viewportDimension / 3).clamp(0.0, pos.maxScrollExtent),
+            duration: const Duration(milliseconds: 200), curve: Curves.easeOut));
+      }
+    }
+  }
+
+  /// 首页 · 上一页 · [ n ] / N · 下一页 · 尾页 · the pages down the left.
+  Widget _pageBar() => Container(
+        color: const Color(0xFF151A24),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          IconButton(
+            tooltip: tr('pdf.thumbs'),
+            isSelected: _thumbs,
+            onPressed: () => setState(() => _thumbs = !_thumbs),
+            icon: const Icon(Icons.view_sidebar_outlined, color: Colors.white70),
+            selectedIcon: const Icon(Icons.view_sidebar_rounded, color: Colors.white),
+          ),
+          const SizedBox(width: 16),
+          IconButton(
+            tooltip: '${tr('pdf.first')} (Home)',
+            onPressed: _page > 1 ? () => _go(1) : null,
+            icon: const Icon(Icons.first_page_rounded, color: Colors.white70),
+          ),
+          IconButton(
+            tooltip: tr('pdf.prev'),
+            onPressed: _page > 1 ? () => _go(_page - 1) : null,
+            icon: const Icon(Icons.chevron_left_rounded, color: Colors.white70),
+          ),
+          SizedBox(
+            width: 64,
+            child: TextField(
+              controller: _pageCtl,
+              focusNode: _pageFocus,
+              textAlign: TextAlign.center,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              style: const TextStyle(color: Colors.white, fontSize: 14),
+              decoration: const InputDecoration(
+                isDense: true,
+                contentPadding: EdgeInsets.symmetric(vertical: 8),
+                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
+                focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.white70)),
+              ),
+              onSubmitted: (v) {
+                final n = int.tryParse(v);
+                if (n != null) _go(n);
+                _focus.requestFocus();
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Text('/ $_count', style: const TextStyle(color: Colors.white70)),
+          ),
+          IconButton(
+            tooltip: tr('pdf.next'),
+            onPressed: _page < _count ? () => _go(_page + 1) : null,
+            icon: const Icon(Icons.chevron_right_rounded, color: Colors.white70),
+          ),
+          IconButton(
+            tooltip: '${tr('pdf.last')} (End)',
+            onPressed: _page < _count ? () => _go(_count) : null,
+            icon: const Icon(Icons.last_page_rounded, color: Colors.white70),
+          ),
+          const SizedBox(width: 64),
+        ]),
+      );
+
+  /// Every page small, down the left: click to go there.
+  Widget _thumbList(PdfDocument d) => Container(
+        width: 150,
+        color: const Color(0xFF151A24),
+        child: ListView.builder(
+          controller: _thumbScroll,
+          itemExtent: 182,
+          itemCount: d.pages.length,
+          itemBuilder: (_, i) {
+            final on = i + 1 == _page;
+            final pg = d.pages[i];
+            return InkWell(
+              onTap: () => _go(i + 1),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(14, 10, 14, 4),
+                child: Column(children: [
+                  Expanded(
+                    child: Center(
+                      child: AspectRatio(
+                        aspectRatio: pg.width / pg.height,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(color: on ? const Color(0xFF4C8DFF) : Colors.transparent, width: 3),
+                          ),
+                          child: PdfPageView(key: ValueKey('t$i'), document: d, pageNumber: i + 1, maximumDpi: 36),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text('${i + 1}', style: TextStyle(color: on ? Colors.white : Colors.white54, fontSize: 12)),
+                ]),
+              ),
+            );
+          },
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -141,7 +268,11 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
             const SizedBox(width: 8),
           ],
         ),
-        body: Container(
+        bottomNavigationBar: _count > 1 ? _pageBar() : null,
+        body: Row(children: [
+          if (_thumbs && _doc != null) _thumbList(_doc!),
+          Expanded(
+            child: Container(
           color: LrColors.ink,
           child: PdfViewer.file(
             widget.path,
@@ -151,11 +282,35 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
               maxScale: 8,
               onViewerReady: (document, controller) {
                 DiagLog.log('ui', 'pdf ready: ${document.pages.length} pages');
-                if (mounted) setState(() => _count = document.pages.length);
+                if (mounted) {
+                  setState(() {
+                    _count = document.pages.length;
+                    _doc = document;
+                    _pageCtl.text = '$_page';
+                  });
+                }
               },
               onPageChanged: (n) {
-                if (n != null && mounted) setState(() => _page = n);
+                if (n != null && mounted) setState(() => _showPage(n));
               },
+              // A thumb down the right: drag it to any page (its number shown).
+              viewerOverlayBuilder: (context, size, handleLinkTap) => [
+                PdfViewerScrollThumb(
+                  controller: _c,
+                  orientation: ScrollbarOrientation.right,
+                  thumbSize: const Size(52, 30),
+                  thumbBuilder: (context, thumbSize, pageNumber, controller) => Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xEE2F6BFF),
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: const [BoxShadow(color: Color(0x55000000), blurRadius: 6)],
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(pageNumber == null ? '' : '$pageNumber',
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13)),
+                  ),
+                ),
+              ],
               // Notes on their pages: hover for the words.
               pageOverlaysBuilder: _notes.isEmpty
                   ? null
@@ -170,7 +325,9 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
                       ],
             ),
           ),
-        ),
+            ),
+          ),
+        ]),
       ),
     );
   }
