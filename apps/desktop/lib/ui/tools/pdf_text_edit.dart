@@ -310,7 +310,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
   int get _markCount => _eds.values.fold(0, (n, e) => n + e.inks.length);
 
   /// Changes of every kind not saved yet.
-  int get _changes => _edits.length + _puts.length + (_inkTouched ? math.max(1, _markCount) : 0) + _patches.length;
+  int get _changes => _edits.length + _puts.length + (_inkTouched ? math.max<int>(1, _markCount) : 0) + _patches.length;
 
   void _setMode(_Mode m) {
     _finishPatch();
