@@ -2289,5 +2289,9 @@
   "ocrbox.all": "Alle {count} Seiten",
   "ocrbox.whole": "Diese Seite",
   "ocrbox.hint": "Rahmen ziehen, um den Text darin zu holen, oder diese bzw. mehrere Seiten auf einmal. Digitale PDFs liefern ihren Text exakt; Scans werden auf diesem PC gelesen, nichts wird gesendet.",
-  "edit.box_hint": "Text in Scan oder Bild: Rahmen darum ziehen; er wird gelesen und Sie ändern ihn (der alte wird in Papierfarbe abgedeckt)."
+  "edit.box_hint": "Text in Scan oder Bild: Rahmen darum ziehen; er wird gelesen und Sie ändern ihn (der alte wird in Papierfarbe abgedeckt).",
+  "tool.name_taken": "Eine Datei mit diesem Namen gibt es schon – bitte einen anderen wählen.",
+  "tool.name_bad": "Dieser Name geht nicht (kein \\ / : * ? \" < > |).",
+  "print.page_of": "Seite {n} von {count}",
+  "notes.title": "Notiz"
 }

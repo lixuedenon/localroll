@@ -22,6 +22,7 @@ import '../light_look.dart';
 import '../lr_dialog.dart';
 import '../player/ink_editor.dart';
 import 'annotate_page.dart';
+import 'pdf_notes.dart';
 import 'sig_library.dart';
 import 'tools.dart';
 
@@ -143,6 +144,19 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
   AppServices get s => widget.services;
 
   bool get _office => widget.original != null;
+
+  /// What the pages come from: the file, or — when it holds Keepnear's marks
+  /// from before — a copy with them taken off (they are back as marks to
+  /// change, and saved again into the new file).
+  String? _clean;
+  String get _src => _clean ?? widget.path;
+
+  /// Marks changed since the file was opened (marks brought back don't
+  /// count as changes).
+  bool _inkTouched = false;
+
+  /// Notes of other programs in the file (hover for their words).
+  List<PdfNoteAt> _notes = const [];
   String get _named => widget.original ?? widget.path;
 
   late _Mode _mode = _office || widget.mark ? _Mode.mark : _Mode.text;
@@ -229,13 +243,17 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
     _hScroll.dispose();
     _vScroll.dispose();
     _patchCtl.dispose();
+    if (_clean case final c?) unawaited(File(c).delete().then((_) {}, onError: (_) {}));
     super.dispose();
   }
 
   InkEditor _ed(int i) => _eds.putIfAbsent(
         i,
         () => InkEditor(video: false, clock: () => 0)
-          ..beforeChange = _mark
+          ..beforeChange = () {
+            _inkTouched = true;
+            _mark();
+          }
           ..undoAll = _undoOne
           ..redoAll = _redoOne
           ..forgetChange = () {
@@ -292,7 +310,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
   int get _markCount => _eds.values.fold(0, (n, e) => n + e.inks.length);
 
   /// Changes of every kind not saved yet.
-  int get _changes => _edits.length + _puts.length + _markCount + _patches.length;
+  int get _changes => _edits.length + _puts.length + (_inkTouched ? math.max(1, _markCount) : 0) + _patches.length;
 
   void _setMode(_Mode m) {
     _finishPatch();
@@ -589,11 +607,27 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
 
   Future<void> _open() async {
     try {
-      final d = await PdfDocument.openFile(widget.path);
+      // Keepnear's marks saved in the file earlier: taken off the pages and
+      // brought back as marks that can be changed.
+      final clean = '${Directory.systemTemp.path}${Platform.pathSeparator}keepnear_clean_${DateTime.now().microsecondsSinceEpoch}.pdf';
+      final marks = _office ? null : await PdfBuilder.cleanMarks(widget.path, clean);
+      final old = _clean;
+      _clean = marks == null ? null : clean;
+      if (old != null) unawaited(File(old).delete().then((_) {}, onError: (_) {}));
+      final d = await PdfDocument.openFile(_src);
       if (!mounted) {
         await d.dispose();
         return;
       }
+      if (marks != null) {
+        for (final m in marks.entries) {
+          if (m.key < d.pages.length) _ed(m.key).restore(unpackMarks(m.value));
+        }
+        DiagLog.log('tools', 'pdf edit: marks of ${marks.length} page(s) back to change');
+      }
+      _inkTouched = false;
+      final notes = await PdfBuilder.notesOf(_src);
+      if (mounted) _notes = notes;
       final at = _page == 0 ? widget.page.clamp(0, d.pages.length - 1) : _page.clamp(0, d.pages.length - 1);
       setState(() {
         _doc = d;
@@ -618,7 +652,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
     final px = await im?.toByteData(format: ui.ImageByteFormat.rawRgba);
     final lines = await _readLines(page, i);
     // How each line is drawn (font, size, bold, italic, colour).
-    final styles = await PdfBuilder.styles(widget.path, i);
+    final styles = await PdfBuilder.styles(_src, i);
     final chars = <int, Set<int>>{};
     for (final st in styles) {
       (chars[st.font] ??= <int>{}).addAll(st.text.runes);
@@ -996,7 +1030,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
           b[j] = b[j + 2];
           b[j + 2] = r;
         }
-        stamps.add(PdfStamp(b, w, h, const Rect.fromLTWH(0, 0, 1, 1)));
+        stamps.add(PdfStamp(b, w, h, const Rect.fromLTWH(0, 0, 1, 1), marks: true));
         notes = [
           for (final m in ed.inks)
             if (m.tool == InkTool.number && (m.note ?? '').isNotEmpty && m.points.isNotEmpty)
@@ -1014,7 +1048,13 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
         final px = await p.sig.bgra();
         if (px != null) stamps.add(PdfStamp(px, p.sig.width, p.sig.height, p.rect, angle: p.angle));
       }
-      plan.add(PdfFromDoc(widget.path, i, edits: made[i] ?? const [], stamps: stamps, notes: notes));
+      final ink = _eds[i];
+      plan.add(PdfFromDoc(_src, i,
+          edits: made[i] ?? const [],
+          stamps: stamps,
+          notes: notes,
+          // The marks kept too: changed again when the file is edited again.
+          marks: ink == null || ink.isEmpty ? null : packMarks(ink.inks)));
     }
     if (!mounted) return false;
     final out = replace ? '${widget.path}.lr-edit.pdf' : toolOutPath(s, _named, tr('pdfedit.suffix'), 'pdf');
@@ -1068,6 +1108,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
 
   /// Everything saved (or dropped): nothing left to keep or undo.
   void _clearAll() {
+    _inkTouched = false;
     _patches.clear();
     _patching = null;
     _edits.clear();
@@ -1266,6 +1307,8 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
                   ),
                 ),
                 Positioned.fill(child: NumberNotes(marks: () => ed.inks, repaint: ed)),
+                // Other programs' notes: hover for their words.
+                ...noteMarkers(context, [for (final n in _notes) if (n.page == _page) n], size),
                 // Words on a scan (or in a picture): covered and written anew.
                 ..._patchViews(size, scale),
                 // 改字 where no line can be clicked: draw a box.

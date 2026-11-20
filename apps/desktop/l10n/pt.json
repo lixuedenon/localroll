@@ -2289,5 +2289,9 @@
   "ocrbox.all": "Todas as {count} páginas",
   "ocrbox.whole": "Esta página",
   "ocrbox.hint": "Desenhe uma caixa para pegar o texto, ou esta página ou várias de uma vez. O texto de um PDF digital vem exato; uma digitalização é lida neste PC, nada é enviado.",
-  "edit.box_hint": "Texto em digitalização ou imagem: desenhe uma caixa em volta; ele é lido e você o altera (o antigo é coberto com a cor do papel)."
+  "edit.box_hint": "Texto em digitalização ou imagem: desenhe uma caixa em volta; ele é lido e você o altera (o antigo é coberto com a cor do papel).",
+  "tool.name_taken": "Já existe um arquivo com este nome; escolha outro.",
+  "tool.name_bad": "Este nome não pode ser usado (sem \\ / : * ? \" < > |).",
+  "print.page_of": "Página {n} de {count}",
+  "notes.title": "Nota"
 }

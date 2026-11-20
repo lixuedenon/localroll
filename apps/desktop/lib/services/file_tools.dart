@@ -23,7 +23,8 @@ sealed class PdfPlanPage {
 }
 
 class PdfFromDoc extends PdfPlanPage {
-  const PdfFromDoc(this.path, this.page, {this.turns = 0, this.stamps = const [], this.edits = const [], this.notes = const []});
+  const PdfFromDoc(this.path, this.page,
+      {this.turns = 0, this.stamps = const [], this.edits = const [], this.notes = const [], this.marks});
 
   final String path;
 
@@ -39,6 +40,21 @@ class PdfFromDoc extends PdfPlanPage {
 
   /// Notes (PDF text annotations) on the page.
   final List<PdfNote> notes;
+
+  /// Keepnear's own marks (their data, [PdfBuilder.cleanMarks]) kept in the
+  /// page, so they can be changed again.
+  final String? marks;
+}
+
+/// A note found in a PDF ([PdfBuilder.notesOf]): page (0-based), where (0–1
+/// of the page as shown), its words; [own]: from Keepnear's marks.
+class PdfNoteAt {
+  const PdfNoteAt(this.page, this.x, this.y, this.text, {this.own = false});
+
+  final int page;
+  final double x, y;
+  final String text;
+  final bool own;
 }
 
 /// A note on a page: its icon at [x] [y] (0–1 of the page as shown), its
@@ -123,7 +139,7 @@ class PdfTextStyle {
 /// A picture laid on a page: raw BGRA pixels; where, 0–1 of the page as
 /// shown (from the top left).
 class PdfStamp {
-  const PdfStamp(this.bgra, this.width, this.height, this.rect, {this.angle = 0});
+  const PdfStamp(this.bgra, this.width, this.height, this.rect, {this.angle = 0, this.marks = false});
 
   final List<int> bgra;
   final int width, height;
@@ -131,6 +147,10 @@ class PdfStamp {
 
   /// Turned about its middle, clockwise as seen (radians).
   final double angle;
+
+  /// Keepnear's marks drawn as one picture: tagged, taken off when they are
+  /// changed again.
+  final bool marks;
 }
 
 /// A page made from a JPEG photo: [pageW]×[pageH] points, the photo at
@@ -156,6 +176,47 @@ class PdfBuilder {
   static int lastSkipped = 0;
 
   /// The text objects of page [index] (0-based) of [pdf], with their looks.
+  /// Keepnear's marks put in [pdf] earlier, taken off into [out]: each
+  /// page's marks data (0-based page → data); null when it has none (or
+  /// they can't be taken off).
+  static Future<Map<int, String>?> cleanMarks(String pdf, String out) async {
+    if (!available) return null;
+    try {
+      final r = await Process.run(exe, ['--clean', pdf, out], stdoutEncoding: utf8).timeout(const Duration(seconds: 60));
+      final lines = '${r.stdout}'.split('\n').map((l) => l.trim()).where((l) => l.isNotEmpty).toList();
+      if (!lines.contains('ok') || !File(out).existsSync()) return null;
+      final marks = <int, String>{};
+      for (final l in lines) {
+        final m = RegExp(r'^marks (\d+) (\S+)$').firstMatch(l);
+        if (m != null) marks[int.parse(m.group(1)!)] = m.group(2)!;
+      }
+      return marks;
+    } catch (e) {
+      DiagLog.log('tools', 'pdf clean: $e');
+      return null;
+    }
+  }
+
+  /// Every note (PDF text annotation) in [pdf].
+  static Future<List<PdfNoteAt>> notesOf(String pdf) async {
+    if (!available) return const [];
+    try {
+      final r = await Process.run(exe, ['--notes', pdf], stdoutEncoding: utf8).timeout(const Duration(seconds: 30));
+      final out = <PdfNoteAt>[];
+      for (final l in '${r.stdout}'.split('\n')) {
+        final m = RegExp(r'^note (\d+) (\S+) (\S+) ([01]) (.*)$').firstMatch(l.trimRight());
+        if (m == null) continue;
+        out.add(PdfNoteAt(int.parse(m.group(1)!), double.tryParse(m.group(2)!) ?? 0, double.tryParse(m.group(3)!) ?? 0,
+            m.group(5)!.replaceAll('\u2028', '\n'),
+            own: m.group(4) == '1'));
+      }
+      return out;
+    } catch (e) {
+      DiagLog.log('tools', 'pdf notes: $e');
+      return const [];
+    }
+  }
+
   static Future<List<PdfTextStyle>> styles(String pdf, int index) async {
     if (!available) return const [];
     final tmp = await Directory.systemTemp.createTemp('lr_sty');
@@ -245,7 +306,12 @@ class PdfBuilder {
               final f = File('${tmp.path}${Platform.pathSeparator}s${n++}.bgra');
               await f.writeAsBytes(st.bgra);
               final r = st.rect;
-              plan.writeln('STAMP ${f.path}|${st.width}|${st.height}|${r.left}|${r.top}|${r.width}|${r.height}|${st.angle}');
+              plan.writeln('STAMP ${f.path}|${st.width}|${st.height}|${r.left}|${r.top}|${r.width}|${r.height}|${st.angle}|${st.marks ? 'marks' : ''}');
+            }
+            if (p.marks case final m? when m.isNotEmpty) {
+              final f = File('${tmp.path}${Platform.pathSeparator}m${n++}.txt');
+              await f.writeAsString(m);
+              plan.writeln('MARKS ${f.path}');
             }
             for (final nt in p.notes) {
               final f = File('${tmp.path}${Platform.pathSeparator}n${n++}.txt');

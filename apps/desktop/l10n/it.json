@@ -2289,5 +2289,9 @@
   "ocrbox.all": "Tutte le {count} pagine",
   "ocrbox.whole": "Questa pagina",
   "ocrbox.hint": "Traccia un riquadro per prendere il testo, oppure questa pagina o più pagine insieme. Il testo di un PDF digitale è preso così com'è; una scansione è letta su questo PC, nulla viene inviato.",
-  "edit.box_hint": "Testo in una scansione o immagine: traccia un riquadro intorno; viene letto e lo modifichi (il vecchio è coperto col colore della carta)."
+  "edit.box_hint": "Testo in una scansione o immagine: traccia un riquadro intorno; viene letto e lo modifichi (il vecchio è coperto col colore della carta).",
+  "tool.name_taken": "Esiste già un file con questo nome: scegline un altro.",
+  "tool.name_bad": "Questo nome non si può usare (niente \\ / : * ? \" < > |).",
+  "print.page_of": "Pagina {n} di {count}",
+  "notes.title": "Nota"
 }

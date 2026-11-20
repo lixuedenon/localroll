@@ -2289,5 +2289,9 @@
   "ocrbox.all": "Tất cả {count} trang",
   "ocrbox.whole": "Trang này",
   "ocrbox.hint": "Kéo khung để lấy chữ bên trong, hoặc lấy trang này / nhiều trang cùng lúc. PDF điện tử lấy đúng chữ trong tệp; bản quét được nhận dạng trên PC này, không gửi đi.",
-  "edit.box_hint": "Chữ trong bản quét hoặc hình: kéo khung quanh chữ; chữ được nhận dạng rồi bạn sửa (chữ cũ được che bằng màu giấy)."
+  "edit.box_hint": "Chữ trong bản quét hoặc hình: kéo khung quanh chữ; chữ được nhận dạng rồi bạn sửa (chữ cũ được che bằng màu giấy).",
+  "tool.name_taken": "Đã có tệp trùng tên — hãy chọn tên khác.",
+  "tool.name_bad": "Không dùng được tên này (không có \\ / : * ? \" < > |).",
+  "print.page_of": "Trang {n} / {count}",
+  "notes.title": "Ghi chú"
 }

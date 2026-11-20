@@ -2289,5 +2289,9 @@
   "ocrbox.all": "Semua {count} halaman",
   "ocrbox.whole": "Halaman ini",
   "ocrbox.hint": "Seret kotak untuk mengambil teks di dalamnya, atau halaman ini / beberapa halaman sekaligus. Teks PDF digital diambil persis; hasil pindai dibaca di PC ini, tidak dikirim.",
-  "edit.box_hint": "Teks di pindaian atau gambar: seret kotak di sekelilingnya; teks dibaca lalu Anda ubah (yang lama ditutup warna kertas)."
+  "edit.box_hint": "Teks di pindaian atau gambar: seret kotak di sekelilingnya; teks dibaca lalu Anda ubah (yang lama ditutup warna kertas).",
+  "tool.name_taken": "Sudah ada file dengan nama ini — pilih nama lain.",
+  "tool.name_bad": "Nama ini tidak bisa dipakai (tanpa \\ / : * ? \" < > |).",
+  "print.page_of": "Halaman {n} dari {count}",
+  "notes.title": "Catatan"
 }

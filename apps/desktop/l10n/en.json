@@ -2289,5 +2289,9 @@
   "ocrbox.all": "All {count} pages",
   "ocrbox.whole": "This page",
   "ocrbox.hint": "Drag a box on the page to get the words in it, or get this page or several pages at once. A digital PDF's own words are taken exactly; a scan is read on this PC, nothing sent anywhere.",
-  "edit.box_hint": "Words in a scan or picture: drag a box around them; they are read and you change them (the old ones are covered with the paper's colour)."
+  "edit.box_hint": "Words in a scan or picture: drag a box around them; they are read and you change them (the old ones are covered with the paper's colour).",
+  "tool.name_taken": "A file with this name is already there — choose another.",
+  "tool.name_bad": "This name can't be used (no \\ / : * ? \" < > |).",
+  "print.page_of": "Page {n} of {count}",
+  "notes.title": "Note"
 }

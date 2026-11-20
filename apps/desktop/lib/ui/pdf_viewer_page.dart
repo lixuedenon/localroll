@@ -9,10 +9,12 @@ import 'package:pdfrx/pdfrx.dart';
 
 import '../app_services.dart';
 import '../l10n/l10n.dart';
+import '../services/file_tools.dart';
 import '../services/network.dart';
 import 'theme.dart';
 import 'tools/pdf_text_edit.dart';
 import 'tools/ocr_box_page.dart';
+import 'tools/pdf_notes.dart';
 import 'tools/print_page.dart';
 import 'trash_actions.dart';
 
@@ -41,12 +43,18 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   int _page = 1;
   int _count = 0;
 
+  /// Notes in the file (numbers' words, other programs' notes).
+  List<PdfNoteAt> _notes = const [];
+
   String get _name => widget.path.split(Platform.pathSeparator).last;
 
   @override
   void initState() {
     super.initState();
     DiagLog.log('ui', 'pdf reader open');
+    unawaited(PdfBuilder.notesOf(widget.path).then((n) {
+      if (mounted && n.isNotEmpty) setState(() => _notes = n);
+    }));
   }
 
   @override
@@ -148,6 +156,18 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
               onPageChanged: (n) {
                 if (n != null && mounted) setState(() => _page = n);
               },
+              // Notes on their pages: hover for the words.
+              pageOverlaysBuilder: _notes.isEmpty
+                  ? null
+                  : (context, rect, page) => [
+                        Positioned.fill(
+                          child: LayoutBuilder(
+                            builder: (context, box) => Stack(clipBehavior: Clip.none, children: [
+                              ...noteMarkers(context, [for (final n in _notes) if (n.page == page.pageNumber - 1) n], box.biggest),
+                            ]),
+                          ),
+                        ),
+                      ],
             ),
           ),
         ),

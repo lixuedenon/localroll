@@ -355,19 +355,23 @@ Future<void> showToolResult(BuildContext context, AppServices s, List<String> ou
   // and into the tools' record.
   await s.tools.saved(outs);
   if (!context.mounted) return;
-  final where = savedWhere(s, outs.first);
-  final printable = [for (final o in outs) if (DocPages.handles(o)) o];
+  // The names can be changed here: everything below uses the paths as they
+  // are now.
+  final paths = [...outs];
+  final where = savedWhere(s, paths.first);
   return showLrDialog<void>(
-      context: context,
-      builder: (c) => LightDialog(
+    context: context,
+    builder: (c) => StatefulBuilder(builder: (c, set) {
+      final printable = [for (final o in paths) if (DocPages.handles(o)) o];
+      return LightDialog(
         icon: Icons.check_circle_rounded,
         title: tr('tool.done_title'),
-        subtitle: '${note ?? tr('tool.done_sub', {'count': outs.length})}\n$where',
+        subtitle: '${note ?? tr('tool.done_sub', {'count': paths.length})}\n$where',
         actions: [
           OutlinedButton.icon(
             onPressed: () {
               Navigator.pop(c);
-              s.guest.share(outs);
+              s.guest.share(paths);
               ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('tool.guest_added'))));
             },
             icon: const Icon(Icons.qr_code_2_rounded, size: 18),
@@ -386,8 +390,8 @@ Future<void> showToolResult(BuildContext context, AppServices s, List<String> ou
           FilledButton.icon(
             onPressed: () async {
               Navigator.pop(c);
-              final ids = await pickDevices(context, s, count: outs.length, first: baseNameOf(outs.first));
-              if (ids != null && ids.isNotEmpty && context.mounted) await sendPathsTo(context, s, ids, outs);
+              final ids = await pickDevices(context, s, count: paths.length, first: baseNameOf(paths.first));
+              if (ids != null && ids.isNotEmpty && context.mounted) await sendPathsTo(context, s, ids, paths);
             },
             icon: const Icon(Icons.send_rounded, size: 18),
             label: Text(tr('tool.send')),
@@ -395,31 +399,128 @@ Future<void> showToolResult(BuildContext context, AppServices s, List<String> ou
           FilledButton.tonal(onPressed: () => Navigator.pop(c), child: Text(tr('common.done'))),
         ],
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          for (final o in outs.take(8))
+          for (var i = 0; i < paths.length && i < 8; i++)
             LightRow(
+              key: ValueKey('out$i'),
               icon: Icons.insert_drive_file_rounded,
               iconBg: const Color(0xFFE6F0FF),
-              title: baseNameOf(o),
-              sub: File(o).existsSync() ? formatBytes(File(o).lengthSync()) : null,
+              title: baseNameOf(paths[i]),
+              // The name (without its extension) can be changed in place.
+              titleWidget: _OutName(
+                path: paths[i],
+                rename: (name) async {
+                  final to = await s.tools.renameOut(paths[i], name);
+                  paths[i] = to;
+                  if (c.mounted) set(() {});
+                  return to;
+                },
+              ),
+              sub: File(paths[i]).existsSync() ? formatBytes(File(paths[i]).lengthSync()) : null,
               trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                 IconButton(
                   tooltip: tr('common.open'),
-                  onPressed: () => unawaited(openReceivedFile(context, s, o)),
+                  onPressed: () => unawaited(openReceivedFile(context, s, paths[i])),
                   icon: const Icon(Icons.open_in_new_rounded, size: 20),
                 ),
                 IconButton(
                   tooltip: tr('common.show_in_folder'),
-                  onPressed: () => unawaited(revealInExplorer(o)),
+                  onPressed: () => unawaited(revealInExplorer(paths[i])),
                   icon: const Icon(Icons.folder_open_rounded, size: 20),
                 ),
               ]),
             ),
-          if (outs.length > 8) Text('… +${outs.length - 8}', style: const TextStyle(color: LightLook.muted)),
+          if (paths.length > 8) Text('… +${paths.length - 8}', style: const TextStyle(color: LightLook.muted)),
           const SizedBox(height: 6),
           Align(alignment: Alignment.centerLeft, child: ToolSaveChip(services: s)),
         ]),
-      ),
-    );
+      );
+    }),
+  );
+}
+
+/// A result's name, changed in place (Enter, or leaving the box): its
+/// extension stays; a name taken or not allowed is said under it.
+class _OutName extends StatefulWidget {
+  const _OutName({required this.path, required this.rename});
+
+  final String path;
+  final Future<String> Function(String name) rename;
+
+  @override
+  State<_OutName> createState() => _OutNameState();
+}
+
+class _OutNameState extends State<_OutName> {
+  late final String _ext;
+  late final TextEditingController _ctl;
+  final FocusNode _focus = FocusNode();
+  String? _error;
+  bool _busy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final name = baseNameOf(widget.path);
+    final dot = name.lastIndexOf('.');
+    _ext = dot > 0 ? name.substring(dot) : '';
+    _ctl = TextEditingController(text: dot > 0 ? name.substring(0, dot) : name);
+    _focus.addListener(() {
+      if (!_focus.hasFocus) unawaited(_commit());
+    });
+  }
+
+  @override
+  void dispose() {
+    _ctl.dispose();
+    _focus.dispose();
+    super.dispose();
+  }
+
+  Future<void> _commit() async {
+    if (_busy) return;
+    final name = '${_ctl.text.trim()}$_ext';
+    if (name == baseNameOf(widget.path)) {
+      if (_error != null) setState(() => _error = null);
+      return;
+    }
+    _busy = true;
+    try {
+      await widget.rename(name);
+      if (mounted) setState(() => _error = null);
+    } on StateError {
+      if (mounted) setState(() => _error = tr('tool.name_taken'));
+    } on ArgumentError {
+      if (mounted) setState(() => _error = tr('tool.name_bad'));
+    } catch (e) {
+      DiagLog.log('tools', 'rename result: $e');
+      if (mounted) setState(() => _error = tr('tool.failed', {'why': '$e'}));
+    } finally {
+      _busy = false;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+        Row(children: [
+          Expanded(
+            child: TextField(
+              controller: _ctl,
+              focusNode: _focus,
+              style: const TextStyle(fontWeight: FontWeight.w700, color: LightLook.text, fontSize: 14.5),
+              decoration: InputDecoration(
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                hoverColor: const Color(0x0A2F6BFF),
+                border: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey.shade300)),
+                enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Color(0xFFE3E8F2))),
+              ),
+              onSubmitted: (_) => unawaited(_commit()),
+            ),
+          ),
+          if (_ext.isNotEmpty) Text(_ext, style: const TextStyle(color: LightLook.muted, fontSize: 13.5)),
+        ]),
+        if (_error != null) Padding(padding: const EdgeInsets.only(top: 4), child: Text(_error!, style: const TextStyle(color: Color(0xFFE5484D), fontSize: 12))),
+      ]);
 }
 
 /// "Saved in the library (Keepnear Tools)" / "Saved next to the original".

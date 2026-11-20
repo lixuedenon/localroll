@@ -1,8 +1,10 @@
 // apps/desktop/lib/ui/tools/annotate_page.dart
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:crypto/crypto.dart' show sha1;
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:localroll_core/localroll_core.dart' show DiagLog;
@@ -43,21 +45,68 @@ class _AnnotatePageState extends State<AnnotatePage> {
   final Map<int, InkEditor> _eds = {};
   bool _saving = false;
 
+  /// A photo marked here before: the photo as it was (the marks come back
+  /// to be changed), kept beside Keepnear's settings (see [_sidecar]).
+  String? _base;
+
+  /// Marks changed since opening (marks brought back don't count).
+  bool _touched = false;
+
   AppServices get s => widget.services;
+
+  /// Where a marked photo's marks are kept: found by the file's own bytes
+  /// (the first 256 KB and its length), so renaming / moving it keeps them.
+  Future<File> _sidecar(String photo) async {
+    final f = File(photo);
+    final len = await f.length();
+    final raf = await f.open();
+    final head = await raf.read(256 * 1024);
+    await raf.close();
+    final h = sha1.convert([...head, ...utf8.encode('$len')]).toString();
+    final dir = Directory('${s.settings.dataDir.path}${Platform.pathSeparator}marks');
+    return File('${dir.path}${Platform.pathSeparator}$h.json');
+  }
+
+  /// The photo marked before and its marks, if [photo] is one.
+  Future<(String, List<InkMark>)?> _marksBefore(String photo) async {
+    if (!DocPages.isPicture(photo)) return null;
+    try {
+      final f = await _sidecar(photo);
+      if (!await f.exists()) return null;
+      final j = jsonDecode(await f.readAsString());
+      if (j is! Map<String, dynamic>) return null;
+      final base = j['base'] as String?;
+      if (base == null || !await File(base).exists()) return null;
+      return (base, [for (final i in (j['inks'] as List?) ?? const []) if (i is Map<String, dynamic>) InkMark.fromJson(i)]);
+    } catch (e) {
+      DiagLog.log('tools', 'marks before: $e');
+      return null;
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     DiagLog.log('tools', 'annotate open');
-    unawaited(DocPages.open(s, widget.path, why: (w) => _why = w).then((d) {
-      if (mounted) {
-        setState(() {
-          _doc = d;
-          if (d != null) _at = widget.page.clamp(0, d.count - 1);
-        });
+    unawaited(() async {
+      // A photo marked here before: its marks come back to be changed.
+      final before = await _marksBefore(widget.path);
+      _base = before?.$1;
+      final d = await DocPages.open(s, _base ?? widget.path, why: (w) => _why = w);
+      if (!mounted) {
+        unawaited(d?.dispose());
+        return;
       }
+      setState(() {
+        _doc = d;
+        if (d != null) _at = widget.page.clamp(0, d.count - 1);
+        if (before != null && before.$2.isNotEmpty) {
+          _ed(0).restore(before.$2);
+          DiagLog.log('tools', 'annotate: ${before.$2.length} mark(s) back to change');
+        }
+      });
       if (d == null && mounted) setState(() => _why ??= 'kind');
-    }));
+    }());
   }
 
   @override
@@ -69,7 +118,7 @@ class _AnnotatePageState extends State<AnnotatePage> {
     super.dispose();
   }
 
-  InkEditor _ed(int i) => _eds.putIfAbsent(i, () => InkEditor(video: false, clock: () => 0));
+  InkEditor _ed(int i) => _eds.putIfAbsent(i, () => InkEditor(video: false, clock: () => 0)..beforeChange = () => _touched = true);
 
   bool get _any => _eds.values.any((e) => !e.isEmpty);
 
@@ -139,6 +188,17 @@ class _AnnotatePageState extends State<AnnotatePage> {
         im.dispose();
         final pic = img.Image.fromBytes(width: base.width, height: base.height, bytes: bd!.buffer, numChannels: 4);
         await File(out).writeAsBytes(img.encodeJpg(pic, quality: 92), flush: true);
+        // The marks kept (and the photo they are on), to be changed again.
+        try {
+          final side = await _sidecar(out);
+          await side.parent.create(recursive: true);
+          await side.writeAsString(jsonEncode({
+            'base': _base ?? widget.path,
+            'inks': [for (final m in _ed(0).inks) m.toJson()],
+          }));
+        } catch (e) {
+          DiagLog.log('tools', 'marks not kept: $e');
+        }
       }
       DiagLog.log('tools', 'annotate saved: ${err ?? 'ok'}');
       if (!mounted) {
@@ -163,7 +223,7 @@ class _AnnotatePageState extends State<AnnotatePage> {
   }
 
   Future<bool> _leaveOk() async {
-    if (!_any) return true;
+    if (!_any || !_touched) return true;
     final r = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(

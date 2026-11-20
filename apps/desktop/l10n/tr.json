@@ -2289,5 +2289,9 @@
   "ocrbox.all": "Tüm {count} sayfa",
   "ocrbox.whole": "Bu sayfa",
   "ocrbox.hint": "Çerçeve çizerek içindeki metni alın ya da bu sayfayı / birkaç sayfayı birden. Dijital PDF'nin metni aynen alınır; tarama bu PC'de okunur, hiçbir şey gönderilmez.",
-  "edit.box_hint": "Tarama ya da resimdeki metin: çevresine çerçeve çizin; okunur ve değiştirirsiniz (eskisi kâğıt rengiyle örtülür)."
+  "edit.box_hint": "Tarama ya da resimdeki metin: çevresine çerçeve çizin; okunur ve değiştirirsiniz (eskisi kâğıt rengiyle örtülür).",
+  "tool.name_taken": "Bu adda bir dosya zaten var — başka bir ad seçin.",
+  "tool.name_bad": "Bu ad kullanılamaz (\\ / : * ? \" < > | olmaz).",
+  "print.page_of": "Sayfa {n} / {count}",
+  "notes.title": "Not"
 }

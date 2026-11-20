@@ -2289,5 +2289,9 @@
   "ocrbox.all": "Les {count} pages",
   "ocrbox.whole": "Cette page",
   "ocrbox.hint": "Tracez un cadre pour obtenir le texte qu'il contient, ou cette page / plusieurs pages d'un coup. Le texte d'un PDF numérique est repris tel quel ; un scan est lu sur ce PC, rien n'est envoyé.",
-  "edit.box_hint": "Texte d'un scan ou d'une image : tracez un cadre autour ; il est lu et vous le modifiez (l'ancien est couvert de la couleur du papier)."
+  "edit.box_hint": "Texte d'un scan ou d'une image : tracez un cadre autour ; il est lu et vous le modifiez (l'ancien est couvert de la couleur du papier).",
+  "tool.name_taken": "Un fichier porte déjà ce nom — choisissez-en un autre.",
+  "tool.name_bad": "Ce nom n'est pas possible (pas de \\ / : * ? \" < > |).",
+  "print.page_of": "Page {n} sur {count}",
+  "notes.title": "Note"
 }

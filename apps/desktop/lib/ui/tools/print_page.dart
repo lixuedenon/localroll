@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 import 'package:localroll_core/localroll_core.dart' show DiagLog;
 import 'package:pdfrx/pdfrx.dart';
@@ -50,6 +51,10 @@ class _PrintPageState extends State<PrintPage> {
   bool _landscape = false, _fit = true, _gray = false, _duplex = false;
   bool _busy = false;
 
+  /// The pages one under another: where each starts (for 第 n 页 and jumps).
+  final ScrollController _scroll = ScrollController();
+  List<double> _tops = const [];
+
   AppServices get s => widget.services;
 
   @override
@@ -58,11 +63,38 @@ class _PrintPageState extends State<PrintPage> {
     DiagLog.log('tools', 'print: ${widget.paths.length} files');
     unawaited(_prepare());
     unawaited(_loadPrinters());
+    // Pages left out of the range are shown faint as it is typed.
+    _range.addListener(() {
+      if (mounted) setState(() {});
+    });
+    _scroll.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_tops.isEmpty || !_scroll.hasClients) return;
+    final y = _scroll.offset + _scroll.position.viewportDimension / 3;
+    var at = 0;
+    for (var i = 0; i < _tops.length; i++) {
+      if (_tops[i] <= y) at = i;
+    }
+    if (at != _at) setState(() => _at = at);
+  }
+
+  void _go(int i) {
+    final d = _doc;
+    if (d == null || _tops.isEmpty) return;
+    final n = i.clamp(0, d.pages.length - 1);
+    setState(() => _at = n);
+    if (_scroll.hasClients) {
+      unawaited(_scroll.animateTo(_tops[n].clamp(0.0, _scroll.position.maxScrollExtent),
+          duration: const Duration(milliseconds: 220), curve: Curves.easeOut));
+    }
   }
 
   @override
   void dispose() {
     _range.dispose();
+    _scroll.dispose();
     unawaited(_doc?.dispose());
     super.dispose();
   }
@@ -281,7 +313,7 @@ class _PrintPageState extends State<PrintPage> {
                     itemBuilder: (_, i) => Padding(
                       padding: const EdgeInsets.only(bottom: 10),
                       child: InkWell(
-                        onTap: () => setState(() => _at = i),
+                        onTap: () => _go(i),
                         child: Column(children: [
                           Container(
                             decoration: BoxDecoration(
@@ -299,22 +331,67 @@ class _PrintPageState extends State<PrintPage> {
                     ),
                   ),
                 ),
+                // Every page, one under another (wheel, PageUp / PageDown);
+                // pages left out of the range shown faint.
                 Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Center(
-                      child: AspectRatio(
-                        aspectRatio: d.pages[_at].width / d.pages[_at].height,
-                        child: Container(
-                          decoration: const BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Color(0x22000000), blurRadius: 12)]),
-                          child: ColorFiltered(
-                            colorFilter: _gray
-                                ? const ColorFilter.matrix([0.3, 0.59, 0.11, 0, 0, 0.3, 0.59, 0.11, 0, 0, 0.3, 0.59, 0.11, 0, 0, 0, 0, 0, 1, 0])
-                                : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
-                            child: PdfPageView(document: d, pageNumber: _at + 1),
-                          ),
+                  child: CallbackShortcuts(
+                    bindings: {
+                      const SingleActivator(LogicalKeyboardKey.pageDown): () => _go(_at + 1),
+                      const SingleActivator(LogicalKeyboardKey.pageUp): () => _go(_at - 1),
+                    },
+                    child: Focus(
+                      autofocus: true,
+                      child: Column(children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 12),
+                          child: Text(tr('print.page_of', {'n': _at + 1, 'count': d.pages.length}),
+                              style: const TextStyle(color: LightLook.muted, fontSize: 13)),
                         ),
-                      ),
+                        Expanded(
+                          child: LayoutBuilder(builder: (context, box) {
+                            final w = math.min(box.maxWidth - 40, 820.0);
+                            final chosen = _pages()?.toSet();
+                            final tops = <double>[];
+                            var y = 12.0;
+                            for (final p in d.pages) {
+                              tops.add(y);
+                              y += w * p.height / p.width + 24;
+                            }
+                            _tops = tops;
+                            return Scrollbar(
+                              controller: _scroll,
+                              child: ListView.builder(
+                                controller: _scroll,
+                                padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
+                                itemCount: d.pages.length,
+                                itemBuilder: (_, i) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 24),
+                                  child: Center(
+                                    child: SizedBox(
+                                      width: w,
+                                      height: w * d.pages[i].height / d.pages[i].width,
+                                      child: Opacity(
+                                        opacity: chosen == null || chosen.contains(i) ? 1 : 0.35,
+                                        child: Container(
+                                          decoration: const BoxDecoration(
+                                              color: Colors.white, boxShadow: [BoxShadow(color: Color(0x22000000), blurRadius: 12)]),
+                                          child: ColorFiltered(
+                                            colorFilter: _gray
+                                                ? const ColorFilter.matrix(
+                                                    [0.3, 0.59, 0.11, 0, 0, 0.3, 0.59, 0.11, 0, 0, 0.3, 0.59, 0.11, 0, 0, 0, 0, 0, 1, 0])
+                                                : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
+                                            child: PdfPageView(key: ValueKey('p$i'), document: d, pageNumber: i + 1),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+                      ]),
                     ),
                   ),
                 ),

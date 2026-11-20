@@ -25,6 +25,9 @@
 //                                                as skipped: changing it would move
 //                                                the text beside it).
 //
+//   MARKS <file>                                 on the last PAGE: Keepnear's own marks
+//                                                (base64 text) kept in a hidden annotation,
+//                                                so they can be changed again later
 //   NOTE <x>|<y>|<text>|<rgb>                    on the last PAGE: a note (a PDF text
 //                                                annotation: its icon at x y, 0–1 of
 //                                                the page as shown; <text> a UTF-8
@@ -36,6 +39,13 @@
 // Prints: ok <pages> [skipped <n>]   or   error <why>
 //
 //   lr_pdf.exe --thumb "<pdf>" "<out.bmp>" <width>
+//   lr_pdf.exe --clean "<pdf>" "<out.pdf>"   Keepnear's marks taken off (the picture
+//                                            tagged KeepnearMarks, its notes, the
+//                                            hidden data): prints "marks <page> <data>"
+//                                            per page and "ok", or "none"
+//   lr_pdf.exe --notes "<pdf>"     every note (PDF text annotation): prints
+//                                  "note <page> <x> <y> <own> <text>" (x, y 0–1 of
+//                                  the page as shown; new lines as U+2028)
 //   lr_pdf.exe --styles "<pdf>" <page> "<out.txt>"   (the page's text objects,
 //              one per line: l|b|r|t|size|weight|italic|rgb|font#|embedded|name|text
 //              — size in points as drawn, text as base64 UTF-8)
@@ -147,6 +157,19 @@ struct Api {
   int (*AnnotSetString)(void*, const char*, const unsigned short*);
   int (*AnnotSetColor)(void*, int, unsigned int, unsigned int, unsigned int, unsigned int);
   void (*CloseAnnot)(void*);
+  // Keepnear's marks: tagged, kept, taken off again (MARKS, --clean, --notes).
+  void* (*AddMark)(OBJ, const char*);
+  int (*CountMarks)(OBJ);
+  void* (*GetMark)(OBJ, unsigned long);
+  int (*MarkGetName)(void*, void*, unsigned long, unsigned long*);
+  int (*AnnotCount)(PAGE);
+  void* (*GetAnnot)(PAGE, int);
+  int (*RemoveAnnot)(PAGE, int);
+  int (*AnnotHasKey)(void*, const char*);
+  unsigned long (*AnnotGetString)(void*, const char*, unsigned short*, unsigned long);
+  int (*AnnotGetSubtype)(void*);
+  int (*AnnotGetRect)(void*, float*);
+  int (*AnnotSetFlags)(void*, int);
   // Printing (--print): straight to the printer, or through a picture.
   void (*RenderPage)(HDC, PAGE, int, int, int, int, int, int);
   // For --thumb only.
@@ -231,6 +254,18 @@ bool load() {
   find(m, "FPDFAnnot_SetStringValue", api.AnnotSetString);
   find(m, "FPDFAnnot_SetColor", api.AnnotSetColor);
   find(m, "FPDFPage_CloseAnnot", api.CloseAnnot);
+  find(m, "FPDFPageObj_AddMark", api.AddMark);
+  find(m, "FPDFPageObj_CountMarks", api.CountMarks);
+  find(m, "FPDFPageObj_GetMark", api.GetMark);
+  find(m, "FPDFPageObjMark_GetName", api.MarkGetName);
+  find(m, "FPDFPage_GetAnnotCount", api.AnnotCount);
+  find(m, "FPDFPage_GetAnnot", api.GetAnnot);
+  find(m, "FPDFPage_RemoveAnnot", api.RemoveAnnot);
+  find(m, "FPDFAnnot_HasKey", api.AnnotHasKey);
+  find(m, "FPDFAnnot_GetStringValue", api.AnnotGetString);
+  find(m, "FPDFAnnot_GetSubtype", api.AnnotGetSubtype);
+  find(m, "FPDFAnnot_GetRect", api.AnnotGetRect);
+  find(m, "FPDFAnnot_SetFlags", api.AnnotSetFlags);
   find(m, "FPDF_RenderPage", api.RenderPage);
   find(m, "FPDFBitmap_FillRect", api.FillRect);
   // Optional: changing text (EDIT).
@@ -628,6 +663,174 @@ int printPdf(const std::string& path, const std::wstring& printer, int copies, c
   return 0;
 }
 
+// A page object tagged as Keepnear's marks picture.
+bool taggedMarks(OBJ o) {
+  if (!api.CountMarks || !api.GetMark || !api.MarkGetName) return false;
+  const int n = api.CountMarks(o);
+  for (int i = 0; i < n; i++) {
+    void* m = api.GetMark(o, (unsigned long)i);
+    if (!m) continue;
+    unsigned short buf[64] = {0};
+    unsigned long len = 0;
+    if (!api.MarkGetName(m, buf, sizeof buf, &len)) continue;
+    std::wstring name;
+    for (int k = 0; k < 64 && buf[k]; k++) name.push_back((wchar_t)buf[k]);
+    if (name == L"KeepnearMarks") return true;
+  }
+  return false;
+}
+
+// An annotation's text value [key] (UTF-8).
+std::string annotText(void* a, const char* key) {
+  if (!api.AnnotGetString) return "";
+  const unsigned long n = api.AnnotGetString(a, key, nullptr, 0);
+  if (n <= 2) return "";
+  std::vector<unsigned short> buf(n / 2 + 1, 0);
+  api.AnnotGetString(a, key, buf.data(), n);
+  std::wstring w;
+  for (auto c : buf) {
+    if (!c) break;
+    w.push_back((wchar_t)c);
+  }
+  return narrow(w.c_str());
+}
+
+DOC openPdf(const std::string& pdf, std::vector<unsigned char>& bytes) {
+  if (!readAll(pdf, bytes) || bytes.empty()) return nullptr;
+  return api.LoadMemDocument(bytes.data(), (int)bytes.size(), nullptr);
+}
+
+// --clean: Keepnear's marks taken off, their data printed.
+int cleanPdf(const std::string& pdf, const std::wstring& outPath) {
+  if (!load() || !api.CountObjects || !api.GetObject || !api.RemoveObject || !api.AnnotCount || !api.GetAnnot ||
+      !api.RemoveAnnot || !api.AnnotHasKey) {
+    say("error pdfium.dll not usable");
+    return 3;
+  }
+  api.InitLibrary();
+  std::vector<unsigned char> bytes;
+  DOC doc = openPdf(pdf, bytes);
+  if (!doc) {
+    say("error cannot open");
+    return 1;
+  }
+  bool any = false;
+  const int pages = api.GetPageCount(doc);
+  for (int i = 0; i < pages; i++) {
+    PAGE pg = api.LoadPage(doc, i);
+    if (!pg) continue;
+    bool changed = false;
+    for (int k = api.CountObjects(pg) - 1; k >= 0; k--) {
+      OBJ o = api.GetObject(pg, k);
+      if (o && taggedMarks(o) && api.RemoveObject(pg, o)) {
+        if (api.ObjDestroy) api.ObjDestroy(o);
+        changed = true;
+      }
+    }
+    for (int k = api.AnnotCount(pg) - 1; k >= 0; k--) {
+      void* a = api.GetAnnot(pg, k);
+      if (!a) continue;
+      const bool data = api.AnnotHasKey(a, "KeepnearMarks") != 0;
+      const bool note = api.AnnotHasKey(a, "KeepnearNote") != 0;
+      if (data) {
+        const std::string d = annotText(a, "KeepnearMarks");
+        if (!d.empty()) say("marks " + std::to_string(i) + " " + d);
+      }
+      if (api.CloseAnnot) api.CloseAnnot(a);
+      if (data || note) {
+        api.RemoveAnnot(pg, k);
+        any = true;
+      }
+    }
+    if (changed) {
+      api.GenerateContent(pg);
+      any = true;
+    }
+    api.ClosePage(pg);
+  }
+  if (!any) {
+    api.CloseDocument(doc);
+    say("none");
+    return 0;
+  }
+  FILE* f = _wfopen(outPath.c_str(), L"wb");
+  bool ok = false;
+  if (f) {
+    Writer w{};
+    w.version = 1;
+    w.writeBlock = writeBlock;
+    w.f = f;
+    ok = api.SaveAsCopy(doc, &w, 0) != 0;
+    fclose(f);
+  }
+  api.CloseDocument(doc);
+  say(ok ? "ok" : "error save failed");
+  return ok ? 0 : 1;
+}
+
+// --notes: every PDF text note, where it is on the page as shown.
+int listNotes(const std::string& pdf) {
+  if (!load() || !api.AnnotCount || !api.GetAnnot || !api.AnnotGetSubtype || !api.AnnotGetRect) {
+    say("error pdfium.dll not usable");
+    return 3;
+  }
+  api.InitLibrary();
+  std::vector<unsigned char> bytes;
+  DOC doc = openPdf(pdf, bytes);
+  if (!doc) {
+    say("error cannot open");
+    return 1;
+  }
+  const int pages = api.GetPageCount(doc);
+  for (int i = 0; i < pages; i++) {
+    PAGE pg = api.LoadPage(doc, i);
+    if (!pg) continue;
+    const int rot = api.GetRotation(pg) & 3;
+    const double dw = api.GetPageWidth(pg), dh = api.GetPageHeight(pg);
+    const double W = (rot & 1) ? dh : dw, H = (rot & 1) ? dw : dh;
+    float l = 0, b = 0, r = 0, t = 0;
+    double x0 = 0, y0 = 0;
+    if ((api.GetCropBox && api.GetCropBox(pg, &l, &b, &r, &t)) || (api.GetMediaBox && api.GetMediaBox(pg, &l, &b, &r, &t))) {
+      x0 = l;
+      y0 = b;
+    }
+    for (int k = 0; k < api.AnnotCount(pg); k++) {
+      void* a = api.GetAnnot(pg, k);
+      if (!a) continue;
+      if (api.AnnotGetSubtype(a) == 1 /* text */) {
+        std::string text = annotText(a, "Contents");
+        float rc[4] = {0, 0, 0, 0};
+        if (!text.empty() && api.AnnotGetRect(a, rc)) {
+          const double ux = (rc[0] + rc[2]) / 2 - x0, uy = (rc[1] + rc[3]) / 2 - y0;
+          double X, Y;
+          switch (rot) {
+            case 1: X = uy; Y = ux; break;
+            case 2: X = W - ux; Y = uy; break;
+            case 3: X = H - uy; Y = W - ux; break;
+            default: X = ux; Y = H - uy; break;
+          }
+          const double sw = (rot & 1) ? H : W, sh = (rot & 1) ? W : H;
+          std::string one;
+          for (char c : text) {
+            if (c == '\r') continue;
+            if (c == '\n') one += "\xE2\x80\xA8";
+            else one.push_back(c);
+          }
+          const bool own = api.AnnotHasKey && api.AnnotHasKey(a, "KeepnearNote");
+          char head[96];
+          std::snprintf(head, sizeof head, "note %d %.5f %.5f %d ", i, sw > 0 ? X / sw : 0, sh > 0 ? Y / sh : 0, own ? 1 : 0);
+          say(head + one);
+        }
+      }
+      if (api.CloseAnnot) api.CloseAnnot(a);
+    }
+    api.ClosePage(pg);
+  }
+  api.CloseDocument(doc);
+  say("ok");
+  return 0;
+}
+
 }  // namespace
 
 int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
@@ -639,6 +842,12 @@ int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
   if (argc >= 10 && wcscmp(argv[1], L"--print") == 0) {
     return printPdf(narrow(argv[2]), argv[3], _wtoi(argv[4]), narrow(argv[5]), _wtoi(argv[6]) != 0, _wtoi(argv[7]) != 0,
                     _wtoi(argv[8]) != 0, _wtoi(argv[9]) != 0);
+  }
+  if (argc >= 4 && wcscmp(argv[1], L"--clean") == 0) {
+    return cleanPdf(narrow(argv[2]), argv[3]);
+  }
+  if (argc >= 3 && wcscmp(argv[1], L"--notes") == 0) {
+    return listNotes(narrow(argv[2]));
   }
   if (argc >= 5 && wcscmp(argv[1], L"--thumb") == 0) {
     return thumb(narrow(argv[2]), narrow(argv[3]), _wtoi(argv[4]));
@@ -786,9 +995,26 @@ int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
       PAGE pg[1] = {last};
       if (api.SetBitmap(pg, 1, img, bmp)) {
         api.SetMatrix(img, x10 - x00, y10 - y00, x01 - x00, y01 - y00, x00, y00);
+        // Keepnear's marks drawn as one picture: tagged, to be taken off
+        // when they are changed again (--clean).
+        if (p.size() > 8 && p[8] == "marks" && api.AddMark) api.AddMark(img, "KeepnearMarks");
         api.InsertObject(last, img);
       }
       api.BitmapDestroy(bmp);
+    } else if (cmd == "MARKS") {
+      // MARKS <file>: the marks' data in a hidden annotation.
+      if (!last || !api.CreateAnnot || !api.AnnotSetString || !api.CloseAnnot) continue;
+      std::vector<unsigned char> t;
+      if (!readAll(arg, t) || t.empty()) continue;
+      std::vector<unsigned short> u16(t.begin(), t.end());
+      u16.push_back(0);
+      void* a = api.CreateAnnot(last, 5 /* FPDF_ANNOT_SQUARE */);
+      if (!a) continue;
+      const float r[4] = {(float)lastX0, (float)lastY0, (float)lastX0, (float)lastY0};
+      if (api.AnnotSetRect) api.AnnotSetRect(a, r);
+      if (api.AnnotSetFlags) api.AnnotSetFlags(a, 2 /* hidden */ | 32 /* no view */);
+      api.AnnotSetString(a, "KeepnearMarks", u16.data());
+      api.CloseAnnot(a);
     } else if (cmd == "NOTE") {
       auto p = split(arg, '|');
       if (!last || p.size() < 3 || !api.CreateAnnot || !api.AnnotSetRect || !api.AnnotSetString || !api.CloseAnnot) continue;
@@ -811,6 +1037,9 @@ int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
       std::vector<unsigned short> w16(who.begin(), who.end());
       w16.push_back(0);
       api.AnnotSetString(a, "T", w16.data());
+      // From Keepnear's marks: taken off with them (--clean).
+      const unsigned short one[2] = {'1', 0};
+      api.AnnotSetString(a, "KeepnearNote", one);
       if (api.AnnotSetColor && p.size() > 3) {
         unsigned int rgb = (unsigned int)strtoul(p[3].c_str(), nullptr, 16);
         api.AnnotSetColor(a, 0, (rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF, 255);

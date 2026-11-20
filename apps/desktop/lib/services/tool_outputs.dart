@@ -204,6 +204,63 @@ class ToolRecords extends ChangeNotifier {
     await _save();
   }
 
+  /// A result renamed to [newName] (same folder, its own extension kept by
+  /// the caller): the file, the library / files list, the copy next to the
+  /// original, and the record. Returns the new path. Throws [ArgumentError]
+  /// for a name that can't be used, [StateError] if it is taken.
+  Future<String> renameOut(String path, String newName) async {
+    final name = newName.trim();
+    if (name.isEmpty ||
+        name.startsWith('.') ||
+        name.contains(RegExp(r'[\\/:*?"<>|]')) ||
+        name.toLowerCase() == 'desktop.ini' ||
+        name.endsWith('.') ||
+        name.endsWith(' ')) {
+      throw ArgumentError.value(newName, 'newName');
+    }
+    final folder = File(path).parent.path;
+    final to = '$folder$_sep$name';
+    if (to == path) return path;
+    if (to.toLowerCase() != path.toLowerCase() && FileSystemEntity.typeSync(to) != FileSystemEntityType.notFound) {
+      throw StateError('taken');
+    }
+    final root = s.library.rootPath;
+    final kind = MediaKind.fromName(name);
+    if (_inside(path, root) && MediaKind.fromName(baseNameOf(path)) == MediaKind.other && kind == MediaKind.other) {
+      // A file in the files list: renamed there (who made it stays).
+      await s.server.files.rename(path, name);
+      s.server.files.changed();
+    } else {
+      final rel = _inside(path, root) ? path.substring(root.length + 1).replaceAll(_sep, '/') : null;
+      final item = rel == null ? null : s.library.findByRel(rel);
+      await File(path).rename(to);
+      if (item != null) s.library.removeItems([item]);
+      await register(to);
+    }
+    // The copy next to the original, and the record.
+    for (var i = 0; i < items.length; i++) {
+      final r = items[i];
+      if (r.out != path) continue;
+      String? copy = r.copy;
+      if (copy != null && File(copy).existsSync()) {
+        final c = '${File(copy).parent.path}$_sep$name';
+        if (FileSystemEntity.typeSync(c) == FileSystemEntityType.notFound) {
+          try {
+            await File(copy).rename(c);
+            copy = c;
+          } catch (e) {
+            DiagLog.log('tools', 'copy not renamed: $e');
+          }
+        }
+      }
+      items[i] = ToolRecord(ms: r.ms, tool: r.tool, out: to, src: r.src, copy: copy);
+    }
+    DiagLog.log('tools', 'result renamed: ${baseNameOf(path)} → $name');
+    notifyListeners();
+    await _save();
+    return to;
+  }
+
   /// [path] in the library's folder: a photo / video into the library, any
   /// other file into the files list (from "Tools").
   Future<void> register(String path) async {

@@ -83,7 +83,16 @@ class LightDialog extends StatelessWidget {
 
 /// One row: a coloured icon, a title and a line under it, something at the end.
 class LightRow extends StatelessWidget {
-  const LightRow({super.key, required this.icon, required this.iconBg, required this.title, this.sub, this.trailing, this.iconColor});
+  const LightRow({
+    super.key,
+    required this.icon,
+    required this.iconBg,
+    required this.title,
+    this.sub,
+    this.trailing,
+    this.iconColor,
+    this.titleWidget,
+  });
 
   final IconData icon;
   final Color iconBg;
@@ -91,6 +100,9 @@ class LightRow extends StatelessWidget {
   final String title;
   final String? sub;
   final Widget? trailing;
+
+  /// In place of [title] (a name that can be changed).
+  final Widget? titleWidget;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -111,7 +123,7 @@ class LightRow extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.w700, color: LightLook.text, fontSize: 14.5)),
+              titleWidget ?? Text(title, style: const TextStyle(fontWeight: FontWeight.w700, color: LightLook.text, fontSize: 14.5)),
               if (sub != null) ...[
                 const SizedBox(height: 2),
                 Text(sub!, style: const TextStyle(fontSize: 12.5, color: LightLook.muted)),
