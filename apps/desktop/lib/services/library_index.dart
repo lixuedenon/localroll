@@ -713,16 +713,24 @@ class LibraryIndex extends ChangeNotifier {
         }
       }
       // 5. Copied in from elsewhere: add to the library — once it is
-      // written (a file changed in the last 3 s may still be being written,
-      // e.g. a video a tool is making: looked at again a little later, so
-      // no picture is asked of half a file).
+      // written. A file changed in the last 3 s that is still growing (a
+      // video a tool is making) is looked at again a little later, so no
+      // picture is asked of half a file.
       final now = DateTime.now().millisecondsSinceEpoch;
       final later = <String>{};
+      final recent = <String, int>{};
+      for (final rel in found) {
+        try {
+          final st = await File(_abs(rel)).stat();
+          if (now - st.modified.millisecondsSinceEpoch < 3000) recent[rel] = st.size;
+        } catch (_) {}
+      }
+      if (recent.isNotEmpty) await Future<void>.delayed(const Duration(milliseconds: 500));
       for (final rel in found) {
         try {
           final f = File(_abs(rel));
           final stat = await f.stat();
-          if (now - stat.modified.millisecondsSinceEpoch < 3000) {
+          if (recent.containsKey(rel) && recent[rel] != stat.size) {
             final slash = rel.lastIndexOf('/');
             later.add(slash < 0 ? '' : rel.substring(0, slash));
             continue;
