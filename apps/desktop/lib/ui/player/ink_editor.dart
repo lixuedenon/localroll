@@ -76,6 +76,10 @@ class InkEditor extends ChangeNotifier {
   /// A text being typed (its mark).
   String? typingId;
 
+  /// The number whose words are being written (a box by it): opened when
+  /// a number is put down, or with its ✎.
+  String? notingId;
+
   /// The next number: the smallest one not on the page (5 deleted: 5 again).
   int get _nextNumber {
     final used = {for (final i in inks) if (i.number != null) i.number!};
@@ -146,6 +150,7 @@ class InkEditor extends ChangeNotifier {
       ..addAll([for (final m in marks) m.copy()]);
     selectedId = null;
     typingId = null;
+    notingId = null;
     notifyListeners();
   }
 
@@ -219,10 +224,16 @@ class InkEditor extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// The words box by a number opened / closed.
+  void openNote(String? id) {
+    notingId = id;
+    notifyListeners();
+  }
+
   /// What a number says.
   void setNote(String id, String text) {
     final m = inks.where((i) => i.id == id).firstOrNull;
-    if (m == null) return;
+    if (m == null || (m.note ?? '') == text) return;
     remember();
     m.note = text.isEmpty ? null : text;
     notifyListeners();
@@ -343,6 +354,8 @@ class InkEditor extends ChangeNotifier {
       final i = _new(t, at);
       if (t == InkTool.number) i.number = _nextNumber;
       inks.add(i);
+      // A number: what it says can be written straight away.
+      if (t == InkTool.number) notingId = i.id;
       notifyListeners();
       return;
     }
@@ -561,6 +574,11 @@ class _InkLayerState extends State<InkLayer> {
   String? _justPicked;
   String? _maybeEdit;
 
+  /// The words box by a number ([InkEditor.notingId]).
+  final TextEditingController _noteCtl = TextEditingController();
+  final FocusNode _noteFocus = FocusNode();
+  String? _noteFor;
+
   /// Drawing began on a mark already there: a click (no drag) chooses that
   /// mark instead of leaving a dot.
   InkMark? _clickOn;
@@ -583,10 +601,140 @@ class _InkLayerState extends State<InkLayer> {
   void dispose() {
     _held?.cancel();
     _editSoon?.cancel();
+    _noteCtl.dispose();
+    _noteFocus.dispose();
     _endTyping();
     _text.dispose();
     _textFocus.dispose();
     super.dispose();
+  }
+
+  /// The words box by a number: right of it (left when there is no room).
+  static const _noteW = 240.0, _noteH = 132.0;
+
+  Rect? _noteRect(Size s) {
+    final ed = widget.editor;
+    final id = ed?.notingId;
+    if (ed == null || id == null) return null;
+    final m = ed.inks.where((i) => i.id == id).firstOrNull;
+    if (m == null) return null;
+    final b = InkGeometry.box(m, s);
+    final left = b.right + 8 + _noteW > s.width && b.left - 8 - _noteW >= 0 ? b.left - 8 - _noteW : b.right + 8;
+    return Rect.fromLTWH(left, b.top - 6, _noteW, _noteH);
+  }
+
+  /// The ✎ by the chosen number (its words opened again).
+  Rect? _pencilRect(Size s) {
+    final ed = widget.editor;
+    final m = ed?.selected;
+    if (ed == null || m == null || m.tool != InkTool.number || ed.notingId != null) return null;
+    final b = InkGeometry.box(m, s);
+    return Rect.fromLTWH(b.right - 2, b.top - 20, 22, 22);
+  }
+
+  void _openNote(String id) {
+    final ed = widget.editor;
+    final m = ed?.inks.where((i) => i.id == id).firstOrNull;
+    if (ed == null || m == null) return;
+    _noteFor = id;
+    _noteCtl.text = m.note ?? '';
+    _noteCtl.selection = TextSelection.collapsed(offset: _noteCtl.text.length);
+    ed.openNote(id);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _noteFocus.requestFocus();
+    });
+  }
+
+  /// ✓ (or a click elsewhere): the words kept.
+  void _saveNote() {
+    final ed = widget.editor;
+    final id = ed?.notingId;
+    if (ed == null || id == null) return;
+    ed.setNote(id, _noteCtl.text.trim());
+    _noteFor = null;
+    ed.openNote(null);
+  }
+
+  /// ✕: the words not kept (the number stays).
+  void _cancelNote() {
+    _noteFor = null;
+    widget.editor?.openNote(null);
+  }
+
+  /// The words box, and the ✎ by a chosen number.
+  List<Widget> _noteWidgets(Size s) {
+    final ed = widget.editor;
+    final r = _noteRect(s);
+    final pen = _pencilRect(s);
+    Widget icon(IconData i, String tip, Color c, VoidCallback on) => Tooltip(
+          message: tip,
+          child: InkWell(
+            onTap: on,
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(padding: const EdgeInsets.all(3), child: Icon(i, size: 18, color: c)),
+          ),
+        );
+    return [
+      if (ed != null && r != null)
+        Positioned.fromRect(
+          rect: r,
+          child: Material(
+            elevation: 4,
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            child: CallbackShortcuts(
+              bindings: {
+                const SingleActivator(LogicalKeyboardKey.enter, control: true): _saveNote,
+                const SingleActivator(LogicalKeyboardKey.escape): _cancelNote,
+              },
+              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                Row(children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10),
+                    child: Text(
+                      '${ed.inks.where((i) => i.id == ed.notingId).firstOrNull?.number ?? ''}',
+                      style: const TextStyle(fontWeight: FontWeight.w800, color: Color(0xFF1F2937)),
+                    ),
+                  ),
+                  const Spacer(),
+                  icon(Icons.check_rounded, '${tr('common.ok')} (Ctrl+Enter)', const Color(0xFF16A34A), _saveNote),
+                  icon(Icons.close_rounded, '${tr('common.cancel')} (Esc)', const Color(0xFF6B7280), _cancelNote),
+                  const SizedBox(width: 4),
+                ]),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
+                    child: TextField(
+                      controller: _noteCtl,
+                      focusNode: _noteFocus,
+                      maxLines: null,
+                      expands: true,
+                      keyboardType: TextInputType.multiline,
+                      style: const TextStyle(fontSize: 13.5, color: Color(0xFF1F2937), height: 1.35),
+                      decoration: const InputDecoration(isDense: true, border: InputBorder.none, contentPadding: EdgeInsets.zero),
+                    ),
+                  ),
+                ),
+              ]),
+            ),
+          ),
+        ),
+      if (pen != null)
+        Positioned.fromRect(
+          rect: pen,
+          child: Tooltip(
+            message: tr('ink.note'),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: const [BoxShadow(color: Color(0x40000000), blurRadius: 4)],
+              ),
+              child: const Icon(Icons.edit_rounded, size: 13, color: Color(0xFF2F6BFF)),
+            ),
+          ),
+        ),
+    ];
   }
 
   void _endTyping() {
@@ -601,6 +749,23 @@ class _InkLayerState extends State<InkLayer> {
   void _down(PointerDownEvent e, Size s) {
     final ed = widget.editor;
     if (ed == null || e.buttons != kPrimaryButton) return;
+    final p0 = e.localPosition;
+    // On the words box or a ✎: theirs.
+    final box = _noteRect(s);
+    if (box != null && box.contains(p0)) return;
+    final pen = _pencilRect(s);
+    if (pen != null && pen.contains(p0)) {
+      _openNote(ed.selectedId!);
+      return;
+    }
+    // Clicked elsewhere with the box open: words written are kept (that
+    // click does nothing else); an empty box just closes (and the click
+    // goes on — the next number is put down at once).
+    if (ed.notingId != null) {
+      final written = _noteCtl.text.trim().isNotEmpty;
+      _saveNote();
+      if (written) return;
+    }
     _editSoon?.cancel();
     _editSoon = null;
     _maybeEdit = null;
@@ -726,6 +891,7 @@ class _InkLayerState extends State<InkLayer> {
           return;
         }
         ed.begin(_n(p, s));
+        if (ed.notingId != null && ed.notingId != _noteFor) _openNote(ed.notingId!);
         _startTyping();
       default:
         const oneClick = {EditTool.stamp, EditTool.check, EditTool.cross, EditTool.number};
@@ -746,6 +912,7 @@ class _InkLayerState extends State<InkLayer> {
         _clickMoved = false;
         final before = ed.inks.length;
         ed.begin(_n(p, s));
+        if (ed.notingId != null && ed.notingId != _noteFor) _openNote(ed.notingId!);
         _clickMade = ed.drawing?.id ?? (ed.inks.length > before ? ed.inks.last.id : null);
     }
   }
@@ -961,7 +1128,7 @@ class _InkLayerState extends State<InkLayer> {
           onPointerMove: (e) => _move(e, size),
           onPointerUp: (_) => _up(),
           onPointerCancel: (_) => _up(),
-          child: Stack(clipBehavior: Clip.none, children: [paint, _typingField(size)]),
+          child: Stack(clipBehavior: Clip.none, children: [paint, _typingField(size), ..._noteWidgets(size)]),
         ),
       );
     });
@@ -992,29 +1159,6 @@ MouseCursor? inkCursor(InkEditor ed, Offset p, Size s) {
   final over = ed.topAt(p, s);
   if (over != null && (ed.tool == EditTool.select || (ed.tool == EditTool.text && over.tool == InkTool.text))) return SystemMouseCursors.click;
   return null;
-}
-
-/// Writes what the chosen number says.
-Future<void> editNumberNote(BuildContext context, InkEditor ed) async {
-  final m = ed.selected;
-  if (m == null || m.tool != InkTool.number) return;
-  final ctl = TextEditingController(text: m.note ?? '');
-  final ok = await showDialog<bool>(
-    context: context,
-    builder: (c) => AlertDialog(
-      title: Text(tr('ink.note_title', {'n': m.number ?? ''})),
-      content: SizedBox(
-        width: 420,
-        child: TextField(controller: ctl, autofocus: true, maxLines: 6, minLines: 3, decoration: InputDecoration(hintText: tr('ink.note_hint'))),
-      ),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('common.cancel'))),
-        FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(tr('common.ok'))),
-      ],
-    ),
-  );
-  if (ok == true) ed.setNote(m.id, ctl.text.trim());
-  ctl.dispose();
 }
 
 /// What numbers say: a small card by a number when the pointer is on it
@@ -1240,13 +1384,6 @@ class InkToolbar extends StatelessWidget {
               icon: const Icon(Icons.redo_rounded, size: 20),
               color: Colors.white,
             ),
-            // A number chosen: what it says (shown when the pointer is on it).
-            if (editor.selected?.tool == InkTool.number)
-              TextButton.icon(
-                onPressed: () => unawaited(editNumberNote(context, editor)),
-                icon: const Icon(Icons.sticky_note_2_outlined, size: 18),
-                label: Text(tr('ink.note')),
-              ),
             if (editor.hasNumbers)
               IconButton(
                 tooltip: tr('ink.renumber'),
@@ -1275,4 +1412,20 @@ class InkToolbar extends StatelessWidget {
           ]),
         ),
       );
+}
+
+/// A digit key (top row or number pad) → its digit.
+int? inkDigitOf(LogicalKeyboardKey k) {
+  const top = [
+    LogicalKeyboardKey.digit0, LogicalKeyboardKey.digit1, LogicalKeyboardKey.digit2, LogicalKeyboardKey.digit3, LogicalKeyboardKey.digit4,
+    LogicalKeyboardKey.digit5, LogicalKeyboardKey.digit6, LogicalKeyboardKey.digit7, LogicalKeyboardKey.digit8, LogicalKeyboardKey.digit9,
+  ];
+  const pad = [
+    LogicalKeyboardKey.numpad0, LogicalKeyboardKey.numpad1, LogicalKeyboardKey.numpad2, LogicalKeyboardKey.numpad3, LogicalKeyboardKey.numpad4,
+    LogicalKeyboardKey.numpad5, LogicalKeyboardKey.numpad6, LogicalKeyboardKey.numpad7, LogicalKeyboardKey.numpad8, LogicalKeyboardKey.numpad9,
+  ];
+  final a = top.indexOf(k);
+  if (a >= 0) return a;
+  final b = pad.indexOf(k);
+  return b >= 0 ? b : null;
 }

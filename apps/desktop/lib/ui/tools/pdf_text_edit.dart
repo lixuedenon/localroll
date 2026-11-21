@@ -360,6 +360,16 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
     });
   }
 
+  /// Delete: the chosen mark (marking) or signature / picture.
+  void _deleteKey() {
+    final ed = _eds[_page];
+    if (_mode == _Mode.mark && ed != null && ed.selected != null) {
+      ed.deleteSelected();
+      return;
+    }
+    _removeSel();
+  }
+
   void _removeSel() {
     final p = _sel;
     if (p == null) return;
@@ -650,9 +660,9 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
     final im = await pic?.createImage();
     pic?.dispose();
     final px = await im?.toByteData(format: ui.ImageByteFormat.rawRgba);
-    final lines = await _readLines(page, i);
-    // How each line is drawn (font, size, bold, italic, colour).
+    // How the text is drawn (font, size, bold, italic, colour).
     final styles = await PdfBuilder.styles(_src, i);
+    final lines = await _readLines(page, i, styles);
     final chars = <int, Set<int>>{};
     for (final st in styles) {
       (chars[st.font] ??= <int>{}).addAll(st.text.runes);
@@ -682,8 +692,10 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
   static bool _cjk(int c) => (c >= 0x2E80 && c <= 0x9FFF) || (c >= 0xAC00 && c <= 0xD7AF) || (c >= 0xF900 && c <= 0xFAFF) || (c >= 0xFF00 && c <= 0xFFEF);
 
   /// The page's text cut into lines; a big gap (table cells side by side)
-  /// starts a new one, so each can be changed alone.
-  Future<List<_Line>> _readLines(PdfPage page, int index) async {
+  /// starts a new one, so each can be changed alone. A line drawn in two
+  /// looks (a red amount after black words, bold then plain) is cut where
+  /// the look changes: each part changed keeps its own colour and font.
+  Future<List<_Line>> _readLines(PdfPage page, int index, List<PdfTextStyle> styles) async {
     final PdfPageText t;
     try {
       t = await page.loadText();
@@ -698,10 +710,26 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
     }
     final out = <_Line>[];
     var cur = <(int, PdfRect)>[];
-    void flush() {
-      final seen = [for (final c in cur) if (c.$2.width > 0.1 && c.$2.height > 0.1 && c.$1 > 32) c];
-      final text = String.fromCharCodes([for (final c in cur) c.$1]).trim();
-      cur = [];
+
+    // The look of the text object a letter belongs to (null: can't tell).
+    String? lookOf((int, PdfRect) c) {
+      final r = c.$2;
+      if (r.width <= 0.1 || r.height <= 0.1 || c.$1 <= 32) return null;
+      final cx = (r.left + r.right) / 2, cy = (r.top + r.bottom) / 2;
+      PdfTextStyle? hit;
+      for (final st in styles) {
+        if (cx >= st.l - 0.5 && cx <= st.r + 0.5 && cy >= st.b - 0.5 && cy <= st.t + 0.5) {
+          // The smallest object holding it (a word inside a line object).
+          if (hit == null || (st.r - st.l) < (hit.r - hit.l)) hit = st;
+        }
+      }
+      if (hit == null) return null;
+      return '${hit.font}|${hit.rgb}|${hit.weight >= 600}|${hit.italic}|${hit.size.round()}';
+    }
+
+    void emit(List<(int, PdfRect)> part) {
+      final seen = [for (final c in part) if (c.$2.width > 0.1 && c.$2.height > 0.1 && c.$1 > 32) c];
+      final text = String.fromCharCodes([for (final c in part) c.$1]).trim();
       if (seen.isEmpty || text.isEmpty) return;
       var l = double.infinity, b = double.infinity, r = -double.infinity, tp = -double.infinity;
       for (final c in seen) {
@@ -723,6 +751,25 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
         base = bs.isEmpty ? b + size * 0.2 : bs[bs.length ~/ 2];
       }
       out.add(_Line(index, PdfRect(l, tp, r, b), text, size, base));
+    }
+
+    void flush() {
+      final all = cur;
+      cur = [];
+      if (all.isEmpty) return;
+      // Cut where the look changes (spaces go with the letters before).
+      var part = <(int, PdfRect)>[];
+      String? look;
+      for (final c in all) {
+        final k = lookOf(c);
+        if (k != null && look != null && k != look && part.isNotEmpty) {
+          emit(part);
+          part = [];
+        }
+        if (k != null) look = k;
+        part.add(c);
+      }
+      emit(part);
     }
 
     for (final c in chars) {
@@ -1134,10 +1181,17 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
           const SingleActivator(LogicalKeyboardKey.keyZ, control: true): _undoOne,
           const SingleActivator(LogicalKeyboardKey.keyY, control: true): _redoOne,
           const SingleActivator(LogicalKeyboardKey.keyZ, control: true, shift: true): _redoOne,
-          const SingleActivator(LogicalKeyboardKey.delete): _removeSel,
+          const SingleActivator(LogicalKeyboardKey.delete): _deleteKey,
         },
         child: Focus(
           autofocus: true,
+          // Marking: a chosen number changes with a digit key.
+          onKeyEvent: (node, e) {
+            if (e is! KeyDownEvent || _mode != _Mode.mark) return KeyEventResult.ignored;
+            final digit = inkDigitOf(e.logicalKey);
+            if (digit != null && _ed(_page).typeDigit(digit)) return KeyEventResult.handled;
+            return KeyEventResult.ignored;
+          },
           child: Theme(
       data: LightLook.theme(Theme.of(context)),
       child: Scaffold(

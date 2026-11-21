@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:crypto/crypto.dart' show sha1;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 import 'package:localroll_core/localroll_core.dart' show DiagLog;
 
@@ -253,7 +254,23 @@ class _AnnotatePageState extends State<AnnotatePage> {
           if (context.mounted) Navigator.of(context).pop();
         }
       },
-      child: Scaffold(
+      child: Focus(
+        autofocus: true,
+        // A chosen number: a digit key changes it; Delete takes the chosen
+        // mark away.
+        onKeyEvent: (node, e) {
+          if (e is! KeyDownEvent) return KeyEventResult.ignored;
+          final ed = _eds[_at];
+          if (ed == null) return KeyEventResult.ignored;
+          final digit = inkDigitOf(e.logicalKey);
+          if (digit != null && ed.typeDigit(digit)) return KeyEventResult.handled;
+          if (e.logicalKey == LogicalKeyboardKey.delete && ed.selected != null) {
+            ed.deleteSelected();
+            return KeyEventResult.handled;
+          }
+          return KeyEventResult.ignored;
+        },
+        child: Scaffold(
         backgroundColor: LrColors.ink,
         appBar: AppBar(automaticallyImplyLeading: false, title: Text('${tr('ann.title')} · $name', overflow: TextOverflow.ellipsis)),
         body: d == null
@@ -310,6 +327,7 @@ class _AnnotatePageState extends State<AnnotatePage> {
                   ]),
                 ),
               ]),
+      ),
       ),
     );
   }
