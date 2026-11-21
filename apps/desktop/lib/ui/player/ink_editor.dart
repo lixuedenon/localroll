@@ -661,7 +661,7 @@ class _InkLayerState extends State<InkLayer> {
     final b = InkGeometry.box(m, s);
     final left = b.right + 8 + _noteW > s.width && b.left - 8 - _noteW >= 0 ? b.left - 8 - _noteW : b.right + 8;
     // Inside the layer: a box hanging off it could not be clicked.
-    final top = (b.top - 6).clamp(0.0, math.max(0.0, s.height - _noteH));
+    final top = (b.top - 6).clamp(0.0, math.max(0.0, s.height - _noteH)).toDouble();
     return Rect.fromLTWH(left.clamp(0.0, math.max(0.0, s.width - _noteW)).toDouble(), top, _noteW, _noteH);
   }
 
