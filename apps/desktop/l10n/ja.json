@@ -2299,5 +2299,9 @@
   "lib.copy_failed": "コピーできませんでした",
   "pdf.first": "最初のページ",
   "pdf.last": "最後のページ",
-  "pdf.thumbs": "ページのサムネイル"
+  "pdf.thumbs": "ページのサムネイル",
+  "pdf.delete_all_title": "全 {count} ページを削除すると、このファイルを削除します",
+  "pdf.delete_all_body": "PDF には少なくとも 1 ページ必要です。ファイル全体を削除しますか？削除したファイルは「最近削除した項目」に入り、30 日間は元に戻せます。",
+  "pdf.delete_file": "このファイルを削除",
+  "pdf.keep_one": "PDF には少なくとも 1 ページ必要です"
 }

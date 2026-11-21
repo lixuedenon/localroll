@@ -2299,5 +2299,9 @@
   "lib.copy_failed": "複製失敗",
   "pdf.first": "首頁",
   "pdf.last": "末頁",
-  "pdf.thumbs": "頁面縮圖"
+  "pdf.thumbs": "頁面縮圖",
+  "pdf.delete_all_title": "刪除全部 {count} 頁，就是刪除這個檔案",
+  "pdf.delete_all_body": "PDF 至少要有一頁。要刪除整個檔案嗎？刪除的檔案會放進「最近刪除」，30 天內可以找回。",
+  "pdf.delete_file": "刪除這個檔案",
+  "pdf.keep_one": "PDF 至少要保留一頁"
 }

@@ -13,14 +13,15 @@ import 'lr_dialog.dart';
 
 /// One open file (a PDF, a document, a text…): as a library item when it
 /// is one, else as a file. True when it went to "Recently deleted".
-Future<bool> deleteOneFile(BuildContext context, AppServices s, String path) async {
+/// [ask] false: the caller asked already.
+Future<bool> deleteOneFile(BuildContext context, AppServices s, String path, {bool ask = true}) async {
   final lib = s.library;
   MediaItem? item;
   final root = lib.rootPath;
   if (root.isNotEmpty && path.toLowerCase().startsWith('${root.toLowerCase()}${Platform.pathSeparator}')) {
     item = lib.findByRel(path.substring(root.length + 1).replaceAll(Platform.pathSeparator, '/'));
   }
-  final n = await deleteToTrash(context, s, media: [?item], files: item == null ? [path] : const []);
+  final n = await deleteToTrash(context, s, media: [?item], files: item == null ? [path] : const [], ask: ask);
   return n > 0;
 }
 
@@ -34,6 +35,7 @@ Future<int> deleteToTrash(
   AppServices s, {
   List<MediaItem> media = const [],
   List<String> files = const [],
+  bool ask = true,
 }) async {
   final count = media.length + files.length;
   if (count == 0) return 0;
@@ -48,7 +50,8 @@ Future<int> deleteToTrash(
     } catch (_) {}
   }
   final messenger = ScaffoldMessenger.of(context);
-  final ok = await showLrDialog<bool>(
+  final ok = !ask ||
+      await showLrDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
       icon: const Icon(Icons.delete_outline_rounded, size: 32),
@@ -62,8 +65,9 @@ Future<int> deleteToTrash(
         FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('lib.delete'))),
       ],
     ),
-  );
-  if (ok != true || !context.mounted) return 0;
+  ) ==
+          true;
+  if (!ok || !context.mounted) return 0;
 
   // Many files: show how far it got (moving is quick, but thousands add up).
   final total = lib.withLive(media).length + files.length;

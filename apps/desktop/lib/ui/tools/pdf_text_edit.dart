@@ -161,6 +161,14 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
 
   late _Mode _mode = _office || widget.mark ? _Mode.mark : _Mode.text;
 
+  /// The right side (hints, changes, saving) shown; folded: a thin strip,
+  /// saving in the title bar.
+  late bool _sideOpen = s.settings.editSideOpen;
+
+  /// The page number in the title bar being typed (go to that page).
+  bool _jumping = false;
+  final TextEditingController _jumpCtl = TextEditingController();
+
   /// Page size: 1 = as wide as the room (up to 900); Ctrl + wheel, −/+.
   double _zoom = 1;
 
@@ -230,6 +238,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
 
   @override
   void dispose() {
+    _jumpCtl.dispose();
     for (final e in _eds.values) {
       e.dispose();
     }
@@ -315,6 +324,8 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
   void _setMode(_Mode m) {
     _finishPatch();
     if (m == _Mode.sign || m == _Mode.picture) {
+      // Its buttons are on the right side: shown (this time only).
+      if (!_sideOpen) setState(() => _sideOpen = true);
       unawaited(_addPut(picture: m == _Mode.picture));
       return;
     }
@@ -1181,13 +1192,18 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
           const SingleActivator(LogicalKeyboardKey.keyZ, control: true): _undoOne,
           const SingleActivator(LogicalKeyboardKey.keyY, control: true): _redoOne,
           const SingleActivator(LogicalKeyboardKey.keyZ, control: true, shift: true): _redoOne,
-          const SingleActivator(LogicalKeyboardKey.delete): _deleteKey,
         },
         child: Focus(
           autofocus: true,
-          // Marking: a chosen number changes with a digit key.
+          // Delete: the chosen mark / signature away; marking: a chosen
+          // number changes with a digit key. Typing in a box: its own keys.
           onKeyEvent: (node, e) {
-            if (e is! KeyDownEvent || _mode != _Mode.mark) return KeyEventResult.ignored;
+            if (e is! KeyDownEvent || inkTyping()) return KeyEventResult.ignored;
+            if (e.logicalKey == LogicalKeyboardKey.delete) {
+              _deleteKey();
+              return KeyEventResult.handled;
+            }
+            if (_mode != _Mode.mark) return KeyEventResult.ignored;
             final digit = inkDigitOf(e.logicalKey);
             if (digit != null && _ed(_page).typeDigit(digit)) return KeyEventResult.handled;
             return KeyEventResult.ignored;
@@ -1202,8 +1218,20 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
           actions: [
             if (d != null) ...[
               IconButton(onPressed: _page > 0 ? () => _go(_page - 1) : null, icon: const Icon(Icons.chevron_left_rounded)),
-              Text(tr('pdfedit.page', {'n': _page + 1, 'count': d.pages.length}), style: const TextStyle(color: LightLook.muted)),
+              _pageJump(d),
               IconButton(onPressed: _page < d.pages.length - 1 ? () => _go(_page + 1) : null, icon: const Icon(Icons.chevron_right_rounded)),
+            ],
+            // The right side folded: saving here.
+            if (d != null && !_sideOpen) ...[
+              const SizedBox(width: 8),
+              FilledButton.tonal(onPressed: _unsaved ? () => _save(replace: false) : null, child: Text(tr('pdfedit.save_new'))),
+              if (!_office)
+                PopupMenuButton<String>(
+                  enabled: _unsaved,
+                  icon: const Icon(Icons.arrow_drop_down_rounded),
+                  onSelected: (_) => unawaited(_confirmReplace()),
+                  itemBuilder: (_) => [PopupMenuItem(value: 'over', child: Text(tr('pdfedit.save_over')))],
+                ),
             ],
             const SizedBox(width: 12),
           ],
@@ -1225,7 +1253,8 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
                         Expanded(child: _pageView(d)),
                       ]),
                     ),
-                    SizedBox(width: 320, child: _side(d)),
+                    _sideStrip(),
+                    if (_sideOpen) SizedBox(width: 320, child: _side(d)),
                   ]),
       ),
       ),
@@ -1703,6 +1732,69 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
               ),
             ]),
           ),
+      );
+
+  /// The page number: a click makes it a box — type a page, Enter goes
+  /// there, Esc (or a click elsewhere) leaves it.
+  Widget _pageJump(PdfDocument d) {
+    final label = tr('pdfedit.page', {'n': _page + 1, 'count': d.pages.length});
+    if (!_jumping) {
+      return TextButton(
+        onPressed: d.pages.length < 2
+            ? null
+            : () {
+                _jumpCtl.text = '${_page + 1}';
+                _jumpCtl.selection = TextSelection(baseOffset: 0, extentOffset: _jumpCtl.text.length);
+                setState(() => _jumping = true);
+              },
+        style: TextButton.styleFrom(foregroundColor: LightLook.muted, disabledForegroundColor: LightLook.muted),
+        child: Text(label),
+      );
+    }
+    return Row(mainAxisSize: MainAxisSize.min, children: [
+      SizedBox(
+        width: 56,
+        child: CallbackShortcuts(
+          bindings: {const SingleActivator(LogicalKeyboardKey.escape): () => setState(() => _jumping = false)},
+          child: TextField(
+            controller: _jumpCtl,
+            autofocus: true,
+            textAlign: TextAlign.center,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            decoration: const InputDecoration(isDense: true, contentPadding: EdgeInsets.symmetric(vertical: 8), border: OutlineInputBorder()),
+            onTapOutside: (_) => setState(() => _jumping = false),
+            onSubmitted: (v) {
+              final n = int.tryParse(v);
+              setState(() => _jumping = false);
+              if (n != null) unawaited(_go((n - 1).clamp(0, d.pages.length - 1)));
+            },
+          ),
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        child: Text('/ ${d.pages.length}', style: const TextStyle(color: LightLook.muted)),
+      ),
+    ]);
+  }
+
+  /// The thin strip between the page and the right side: › folds the side
+  /// away, ‹ brings it back (remembered).
+  Widget _sideStrip() => Material(
+        color: const Color(0xFFF1F3F7),
+        child: InkWell(
+          onTap: () {
+            setState(() => _sideOpen = !_sideOpen);
+            unawaited(s.settings.update((x) => x.editSideOpen = _sideOpen));
+          },
+          child: Container(
+            width: 16,
+            decoration: const BoxDecoration(border: Border(left: BorderSide(color: Color(0xFFE3E7EE)))),
+            alignment: Alignment.center,
+            child: Icon(_sideOpen ? Icons.chevron_right_rounded : Icons.chevron_left_rounded, size: 16, color: LightLook.blue),
+          ),
+        ),
       );
 
   Widget _side(PdfDocument d) => ListView(padding: const EdgeInsets.fromLTRB(0, 24, 20, 24), children: [

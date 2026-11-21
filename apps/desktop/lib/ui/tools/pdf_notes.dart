@@ -21,13 +21,16 @@ PdfNote numberNote(InkMark m, double pw, double ph) {
   final size = Size(pw, ph);
   final r = InkGeometry.box(m, size);
   final c = r.center;
+  // Over the number, with no icon: readers show the words on a click on
+  // the number itself (no yellow box beside it).
   return PdfNote(
-    ((r.right + 9) / pw).clamp(0.0, 1.0),
-    ((r.top - 9) / ph).clamp(0.0, 1.0),
+    (c.dx / pw).clamp(0.0, 1.0),
+    (c.dy / ph).clamp(0.0, 1.0),
     '${m.number ?? ''}. ${m.note}',
     rgb: (m.color & 0xFFFFFF).toRadixString(16).padLeft(6, '0'),
     ax: (c.dx / pw).clamp(0.0, 1.0),
     ay: (c.dy / ph).clamp(0.0, 1.0),
+    half: (r.width / 2 / pw).clamp(0.002, 0.2),
   );
 }
 

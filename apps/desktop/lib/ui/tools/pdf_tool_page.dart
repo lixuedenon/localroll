@@ -22,6 +22,7 @@ import 'ocr_box_page.dart';
 import 'pdf_text_edit.dart';
 import 'tools.dart';
 import '../lr_dialog.dart';
+import '../trash_actions.dart';
 
 class _Doc {
   _Doc(this.path, this.doc);
@@ -220,6 +221,59 @@ class _PdfToolPageState extends State<PdfToolPage> {
 
   void _failed(String why) =>
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('tool.failed', {'why': why}))));
+
+  /// The pages picked away. Every page picked: that is the file itself —
+  /// asked, it goes to "Recently deleted" (a PDF has at least one page).
+  Future<void> _delete() async {
+    if (_picked.length < _pages.length) {
+      _change(() {
+        _pages.removeWhere(_picked.contains);
+        _picked.clear();
+      });
+      return;
+    }
+    if (_docs.length != 1) {
+      await showLrDialog<void>(
+        context: context,
+        builder: (c) => AlertDialog(
+          content: Text(tr('pdf.keep_one')),
+          actions: [FilledButton(onPressed: () => Navigator.pop(c), child: Text(tr('common.ok')))],
+        ),
+      );
+      return;
+    }
+    final ok = await showLrDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        icon: const Icon(Icons.delete_outline_rounded, size: 32),
+        title: Text(tr('pdf.delete_all_title', {'count': _pages.length})),
+        content: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 440), child: Text(tr('pdf.delete_all_body'))),
+        actions: [
+          OutlinedButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('common.cancel'))),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: const Color(0xFFE5484D)),
+            onPressed: () => Navigator.pop(c, true),
+            child: Text(tr('pdf.delete_file')),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    // The file let go first (an open file can't be moved), then away.
+    final path = _docs.first.path;
+    final docs = List.of(_docs);
+    setState(() {
+      _docs.clear();
+      _pages.clear();
+      _picked.clear();
+    });
+    for (final d in docs) {
+      await d.doc.dispose();
+    }
+    if (!mounted) return;
+    await deleteOneFile(context, s, path, ask: false);
+    if (mounted) unawaited(Navigator.of(context).maybePop());
+  }
 
   Future<void> _split() async {
     final how = await showLrDialog<String>(
@@ -563,16 +617,12 @@ class _PdfToolPageState extends State<PdfToolPage> {
                           p.turns = (p.turns + 1) % 4;
                         }
                       })),
-              act(Icons.delete_outline_rounded, tr('pdf.delete'), _picked.isEmpty
-                  ? null
-                  : () => _change(() {
-                        _pages.removeWhere(_picked.contains);
-                        _picked.clear();
-                      })),
+              act(Icons.delete_outline_rounded, tr('pdf.delete'), _picked.isEmpty ? null : () => unawaited(_delete())),
               // 编辑: change words, mark, sign, pictures — in the file of
               // the page picked.
               act(Icons.edit_document, tr('edit.title'), busy ? null : _edit, color: LightLook.blue),
-              act(Icons.call_split_rounded, tr('pdf.split'), busy ? null : _split),
+              // One page: nothing to split.
+              act(Icons.call_split_rounded, tr('pdf.split'), busy || _pages.length < 2 ? null : _split),
               act(Icons.compress_rounded, tr('pdf.compress'), busy ? null : _compress),
               act(Icons.image_outlined, tr('pdf.images'), busy ? null : _toImages),
               act(Icons.crop_free_rounded, tr('pdf.text'), busy ? null : _boxText),

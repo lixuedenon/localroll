@@ -2299,5 +2299,9 @@
   "lib.copy_failed": "Não foi possível copiar",
   "pdf.first": "Primeira página",
   "pdf.last": "Última página",
-  "pdf.thumbs": "Miniaturas das páginas"
+  "pdf.thumbs": "Miniaturas das páginas",
+  "pdf.delete_all_title": "Excluir todas as {count} páginas exclui este arquivo",
+  "pdf.delete_all_body": "Um PDF precisa de pelo menos uma página. Excluir o arquivo inteiro? Ele vai para «Excluídos recentemente» e pode ser recuperado por 30 dias.",
+  "pdf.delete_file": "Excluir este arquivo",
+  "pdf.keep_one": "Um PDF precisa de pelo menos uma página"
 }

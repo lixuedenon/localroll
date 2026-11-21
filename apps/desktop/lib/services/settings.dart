@@ -273,6 +273,9 @@ class AppSettings extends ChangeNotifier {
   /// old way); else a floating panel of its own and LocalRoll stays as it is.
   bool oldPenBar = false;
 
+  /// The PDF editor's right side (hints, changes, saving) shown.
+  bool editSideOpen = true;
+
   /// Compact library: date labels by 0 day, 1 month, 2 year (month and year
   /// also use smaller squares).
   int libraryZoom = 0;
@@ -326,6 +329,7 @@ class AppSettings extends ChangeNotifier {
     s.thumbSize = ((j['thumbSize'] as num?)?.toInt() ?? 1).clamp(0, 2);
     s.libraryCompact = j['libraryCompact'] != false;
     s.oldPenBar = j['oldPenBar'] == true;
+    s.editSideOpen = j['editSideOpen'] != false;
     s.libraryZoom = ((j['libraryZoom'] as num?)?.toInt() ?? 0).clamp(0, 2);
     if (s.avatarVersion != 0 && !await s.avatarFile.exists()) s.avatarVersion = 0;
     for (final t in (j['trusted'] as List? ?? const [])) {
@@ -386,6 +390,7 @@ class AppSettings extends ChangeNotifier {
       'thumbSize': thumbSize,
       'libraryCompact': libraryCompact,
       'oldPenBar': oldPenBar,
+      'editSideOpen': editSideOpen,
       'libraryZoom': libraryZoom,
       'trusted': trusted.values.map((t) => t.toJson()).toList(),
       'peers': peers.values.map((p) => p.toJson()).toList(),

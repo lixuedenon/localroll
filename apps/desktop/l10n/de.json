@@ -2299,5 +2299,9 @@
   "lib.copy_failed": "Kopieren fehlgeschlagen",
   "pdf.first": "Erste Seite",
   "pdf.last": "Letzte Seite",
-  "pdf.thumbs": "Seitenminiaturen"
+  "pdf.thumbs": "Seitenminiaturen",
+  "pdf.delete_all_title": "Alle {count} Seiten zu löschen löscht diese Datei",
+  "pdf.delete_all_body": "Ein PDF braucht mindestens eine Seite. Die ganze Datei löschen? Sie kommt in „Zuletzt gelöscht“ und lässt sich 30 Tage lang wiederherstellen.",
+  "pdf.delete_file": "Diese Datei löschen",
+  "pdf.keep_one": "Ein PDF braucht mindestens eine Seite"
 }

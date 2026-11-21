@@ -2299,5 +2299,9 @@
   "lib.copy_failed": "Gagal menyalin",
   "pdf.first": "Halaman pertama",
   "pdf.last": "Halaman terakhir",
-  "pdf.thumbs": "Gambar kecil halaman"
+  "pdf.thumbs": "Gambar kecil halaman",
+  "pdf.delete_all_title": "Menghapus semua {count} halaman berarti menghapus file ini",
+  "pdf.delete_all_body": "PDF harus punya minimal satu halaman. Hapus seluruh file? File akan masuk ke Baru dihapus dan bisa dikembalikan selama 30 hari.",
+  "pdf.delete_file": "Hapus file ini",
+  "pdf.keep_one": "PDF harus punya minimal satu halaman"
 }

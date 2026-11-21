@@ -2299,5 +2299,9 @@
   "lib.copy_failed": "Couldn't copy",
   "pdf.first": "First page",
   "pdf.last": "Last page",
-  "pdf.thumbs": "Page thumbnails"
+  "pdf.thumbs": "Page thumbnails",
+  "pdf.delete_all_title": "Deleting all {count} pages deletes this file",
+  "pdf.delete_all_body": "A PDF needs at least one page. Delete the whole file? It goes to Recently deleted, where you can get it back for 30 days.",
+  "pdf.delete_file": "Delete this file",
+  "pdf.keep_one": "A PDF needs at least one page"
 }

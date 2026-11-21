@@ -2299,5 +2299,9 @@
   "lib.copy_failed": "복사하지 못했습니다",
   "pdf.first": "첫 페이지",
   "pdf.last": "마지막 페이지",
-  "pdf.thumbs": "페이지 미리보기"
+  "pdf.thumbs": "페이지 미리보기",
+  "pdf.delete_all_title": "{count}페이지를 모두 삭제하면 이 파일이 삭제됩니다",
+  "pdf.delete_all_body": "PDF에는 최소 한 페이지가 있어야 합니다. 파일 전체를 삭제할까요? 삭제한 파일은 '최근 삭제'로 이동하며 30일 동안 되돌릴 수 있습니다.",
+  "pdf.delete_file": "이 파일 삭제",
+  "pdf.keep_one": "PDF에는 최소 한 페이지가 있어야 합니다"
 }

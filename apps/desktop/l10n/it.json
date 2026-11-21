@@ -2299,5 +2299,9 @@
   "lib.copy_failed": "Copia non riuscita",
   "pdf.first": "Prima pagina",
   "pdf.last": "Ultima pagina",
-  "pdf.thumbs": "Miniature delle pagine"
+  "pdf.thumbs": "Miniature delle pagine",
+  "pdf.delete_all_title": "Eliminare tutte le {count} pagine elimina questo file",
+  "pdf.delete_all_body": "Un PDF deve avere almeno una pagina. Eliminare l'intero file? Andrà in «Eliminati di recente» e potrai recuperarlo per 30 giorni.",
+  "pdf.delete_file": "Elimina questo file",
+  "pdf.keep_one": "Un PDF deve avere almeno una pagina"
 }

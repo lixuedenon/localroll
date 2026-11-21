@@ -60,10 +60,14 @@ class PdfNoteAt {
 /// A note on a page: its icon at [x] [y] (0–1 of the page as shown), its
 /// [text] shown by PDF readers on a click; [rgb] its colour (hex).
 class PdfNote {
-  const PdfNote(this.x, this.y, this.text, {this.rgb = 'E5484D', this.ax, this.ay});
+  const PdfNote(this.x, this.y, this.text, {this.rgb = 'E5484D', this.ax, this.ay, this.half});
   final double x, y;
   final String text;
   final String rgb;
+
+  /// A number's note: no icon of its own — the note lies over the number
+  /// ([x] [y] its middle), [half] its half width (0–1 of the page width).
+  final double? half;
 
   /// What the note is about (a number's middle, 0–1), when the note's icon
   /// sits beside it ([x], [y]) so as not to hide it.
@@ -320,7 +324,7 @@ class PdfBuilder {
             for (final nt in p.notes) {
               final f = File('${tmp.path}${Platform.pathSeparator}n${n++}.txt');
               await f.writeAsString(nt.text, encoding: utf8);
-              plan.writeln('NOTE ${nt.x}|${nt.y}|${f.path}|${nt.rgb}|${nt.ax ?? ''}|${nt.ay ?? ''}');
+              plan.writeln('NOTE ${nt.x}|${nt.y}|${f.path}|${nt.rgb}|${nt.ax ?? ''}|${nt.ay ?? ''}|${nt.half ?? ''}');
             }
           case PdfFromJpeg():
             final r = p.rect;

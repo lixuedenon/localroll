@@ -28,10 +28,12 @@
 //   MARKS <file>                                 on the last PAGE: Keepnear's own marks
 //                                                (base64 text) kept in a hidden annotation,
 //                                                so they can be changed again later
-//   NOTE <x>|<y>|<text>|<rgb>                    on the last PAGE: a note (a PDF text
+//   NOTE <x>|<y>|<text>|<rgb>|<ax>|<ay>|<half>   on the last PAGE: a note (a PDF text
 //                                                annotation: its icon at x y, 0–1 of
 //                                                the page as shown; <text> a UTF-8
-//                                                file; readers show it on a click)
+//                                                file; readers show it on a click).
+//                                                <half> (0–1 of the page width): no
+//                                                icon, a spot that size over x y
 //
 //   lr_pdf.exe "<plan file>"
 //   lr_pdf.exe --print "<pdf>" "<printer>" <copies> <pages> <landscape> <fit> <gray> <duplex>
@@ -170,6 +172,7 @@ struct Api {
   int (*AnnotGetSubtype)(void*);
   int (*AnnotGetRect)(void*, float*);
   int (*AnnotSetFlags)(void*, int);
+  int (*AnnotSetAP)(void*, int, const unsigned short*);
   // Printing (--print): straight to the printer, or through a picture.
   void (*RenderPage)(HDC, PAGE, int, int, int, int, int, int);
   // For --thumb only.
@@ -266,6 +269,7 @@ bool load() {
   find(m, "FPDFAnnot_GetSubtype", api.AnnotGetSubtype);
   find(m, "FPDFAnnot_GetRect", api.AnnotGetRect);
   find(m, "FPDFAnnot_SetFlags", api.AnnotSetFlags);
+  find(m, "FPDFAnnot_SetAP", api.AnnotSetAP);
   find(m, "FPDF_RenderPage", api.RenderPage);
   find(m, "FPDFBitmap_FillRect", api.FillRect);
   // Optional: changing text (EDIT).
@@ -1040,8 +1044,17 @@ int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
       oy += lastY0;
       void* a = api.CreateAnnot(last, 1 /* FPDF_ANNOT_TEXT */);
       if (!a) continue;
-      const float r[4] = {(float)ox - 10, (float)oy + 10, (float)ox + 10, (float)oy - 10};  // left top right bottom
+      // A number's note (<half> given): over the number, the size of it, with
+      // an empty look — no icon; readers show the words on a click on the
+      // number. Otherwise a note icon at x y.
+      const double half = p.size() > 6 && !p[6].empty() ? atof(p[6].c_str()) * dW : 0;
+      const double hs = half > 0 ? half : 10;
+      const float r[4] = {(float)(ox - hs), (float)(oy + hs), (float)(ox + hs), (float)(oy - hs)};  // left top right bottom
       api.AnnotSetRect(a, r);
+      if (half > 0 && api.AnnotSetAP) {
+        const unsigned short none[1] = {0};
+        api.AnnotSetAP(a, 0 /* normal */, none);
+      }
       api.AnnotSetString(a, "Contents", u16.data());
       std::wstring who = L"Keepnear";
       std::vector<unsigned short> w16(who.begin(), who.end());

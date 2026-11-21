@@ -2299,5 +2299,9 @@
   "lib.copy_failed": "Copie impossible",
   "pdf.first": "Première page",
   "pdf.last": "Dernière page",
-  "pdf.thumbs": "Miniatures des pages"
+  "pdf.thumbs": "Miniatures des pages",
+  "pdf.delete_all_title": "Supprimer les {count} pages supprime ce fichier",
+  "pdf.delete_all_body": "Un PDF doit avoir au moins une page. Supprimer tout le fichier ? Il va dans « Supprimés récemment », récupérable pendant 30 jours.",
+  "pdf.delete_file": "Supprimer ce fichier",
+  "pdf.keep_one": "Un PDF doit garder au moins une page"
 }

@@ -1445,6 +1445,12 @@ class InkToolbar extends StatelessWidget {
       );
 }
 
+/// Typing in a text box now: keys are its own (a digit, Delete…).
+bool inkTyping() {
+  final c = FocusManager.instance.primaryFocus?.context;
+  return c != null && (c.widget is EditableText || c.findAncestorWidgetOfExactType<EditableText>() != null);
+}
+
 /// A digit key (top row or number pad) → its digit.
 int? inkDigitOf(LogicalKeyboardKey k) {
   const top = [

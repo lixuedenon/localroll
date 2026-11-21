@@ -18,6 +18,7 @@ import '../../services/tool_outputs.dart';
 import '../player/ink_editor.dart';
 import '../theme.dart';
 import 'doc_pages.dart';
+import 'pdf_notes.dart';
 import 'tools.dart';
 
 /// Marks on any file (PDF, photo, Office document), with the screen pen's
@@ -134,11 +135,9 @@ class _AnnotatePageState extends State<AnnotatePage> {
     return rec.endRecording().toImage(w, h);
   }
 
-  List<PdfNote> _notesOf(InkEditor ed) => [
+  List<PdfNote> _notesOf(InkEditor ed, int w, int h) => [
         for (final m in ed.inks)
-          if (m.tool == InkTool.number && (m.note ?? '').isNotEmpty && m.points.isNotEmpty)
-            PdfNote((m.points.first.dx + m.dx).clamp(0.0, 1.0), (m.points.first.dy + m.dy).clamp(0.0, 1.0), '${m.number ?? ''}. ${m.note}',
-                rgb: (m.color & 0xFFFFFF).toRadixString(16).padLeft(6, '0')),
+          if (m.tool == InkTool.number && (m.note ?? '').isNotEmpty && m.points.isNotEmpty) numberNote(m, w.toDouble(), h.toDouble()),
       ];
 
   Future<void> _save() async {
@@ -170,7 +169,7 @@ class _AnnotatePageState extends State<AnnotatePage> {
             b[j] = b[j + 2];
             b[j + 2] = r;
           }
-          pages.add(PdfFromDoc(d.pdfPath!, i, stamps: [PdfStamp(b, w, h, const Rect.fromLTWH(0, 0, 1, 1))], notes: _notesOf(ed)));
+          pages.add(PdfFromDoc(d.pdfPath!, i, stamps: [PdfStamp(b, w, h, const Rect.fromLTWH(0, 0, 1, 1))], notes: _notesOf(ed, w, h)));
         }
         err = await PdfBuilder.build(out, pages);
       } else {
@@ -259,7 +258,7 @@ class _AnnotatePageState extends State<AnnotatePage> {
         // A chosen number: a digit key changes it; Delete takes the chosen
         // mark away.
         onKeyEvent: (node, e) {
-          if (e is! KeyDownEvent) return KeyEventResult.ignored;
+          if (e is! KeyDownEvent || inkTyping()) return KeyEventResult.ignored;
           final ed = _eds[_at];
           if (ed == null) return KeyEventResult.ignored;
           final digit = inkDigitOf(e.logicalKey);

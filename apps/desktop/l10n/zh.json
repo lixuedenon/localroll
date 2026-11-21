@@ -2299,5 +2299,9 @@
   "lib.copy_failed": "复制失败",
   "pdf.first": "首页",
   "pdf.last": "尾页",
-  "pdf.thumbs": "页面缩略图"
+  "pdf.thumbs": "页面缩略图",
+  "pdf.delete_all_title": "删除全部 {count} 页，就是删除这个文件",
+  "pdf.delete_all_body": "PDF 至少要有一页。要删除整个文件吗？删除的文件会放进「最近删除」，30 天内可以找回。",
+  "pdf.delete_file": "删除这个文件",
+  "pdf.keep_one": "PDF 至少要保留一页"
 }

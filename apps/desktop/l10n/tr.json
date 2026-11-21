@@ -2299,5 +2299,9 @@
   "lib.copy_failed": "Kopyalanamadı",
   "pdf.first": "İlk sayfa",
   "pdf.last": "Son sayfa",
-  "pdf.thumbs": "Sayfa küçük resimleri"
+  "pdf.thumbs": "Sayfa küçük resimleri",
+  "pdf.delete_all_title": "{count} sayfanın tümünü silmek bu dosyayı siler",
+  "pdf.delete_all_body": "Bir PDF'de en az bir sayfa olmalı. Dosyanın tamamı silinsin mi? Son silinenler'e gider ve 30 gün boyunca geri alınabilir.",
+  "pdf.delete_file": "Bu dosyayı sil",
+  "pdf.keep_one": "Bir PDF'de en az bir sayfa kalmalı"
 }
