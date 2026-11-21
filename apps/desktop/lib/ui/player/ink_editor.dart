@@ -589,18 +589,58 @@ class _InkLayerState extends State<InkLayer> {
   final FocusNode _textFocus = FocusNode();
   String? _textFor;
 
+  /// The layer's own keys: a digit changes the chosen number, Enter opens
+  /// its words. Clicks on the layer (and the words box closing) bring the
+  /// keys back here.
+  final FocusNode _keys = FocusNode(debugLabel: 'ink');
+  String? _shownNote;
+
   @override
   void initState() {
     super.initState();
     _textFocus.addListener(() {
       if (!_textFocus.hasFocus) _endTyping();
     });
+    widget.editor?.addListener(_edChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant InkLayer old) {
+    super.didUpdateWidget(old);
+    if (old.editor != widget.editor) {
+      old.editor?.removeListener(_edChanged);
+      widget.editor?.addListener(_edChanged);
+    }
+  }
+
+  /// The words box shown / gone as soon as the editor says so.
+  void _edChanged() {
+    final id = widget.editor?.notingId;
+    if (id != _shownNote && mounted) setState(() => _shownNote = id);
+  }
+
+  KeyEventResult _key(FocusNode _, KeyEvent e) {
+    final ed = widget.editor;
+    if (ed == null || e is! KeyDownEvent || ed.notingId != null || _textFor != null) return KeyEventResult.ignored;
+    final digit = inkDigitOf(e.logicalKey);
+    if (digit != null && ed.typeDigit(digit)) return KeyEventResult.handled;
+    final sel = ed.selected;
+    if ((e.logicalKey == LogicalKeyboardKey.enter || e.logicalKey == LogicalKeyboardKey.numpadEnter) &&
+        !HardwareKeyboard.instance.isControlPressed &&
+        sel != null &&
+        sel.tool == InkTool.number) {
+      _openNote(sel.id);
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
   }
 
   @override
   void dispose() {
     _held?.cancel();
     _editSoon?.cancel();
+    widget.editor?.removeListener(_edChanged);
+    _keys.dispose();
     _noteCtl.dispose();
     _noteFocus.dispose();
     _endTyping();
@@ -620,16 +660,9 @@ class _InkLayerState extends State<InkLayer> {
     if (m == null) return null;
     final b = InkGeometry.box(m, s);
     final left = b.right + 8 + _noteW > s.width && b.left - 8 - _noteW >= 0 ? b.left - 8 - _noteW : b.right + 8;
-    return Rect.fromLTWH(left, b.top - 6, _noteW, _noteH);
-  }
-
-  /// The ✎ by the chosen number (its words opened again).
-  Rect? _pencilRect(Size s) {
-    final ed = widget.editor;
-    final m = ed?.selected;
-    if (ed == null || m == null || m.tool != InkTool.number || ed.notingId != null) return null;
-    final b = InkGeometry.box(m, s);
-    return Rect.fromLTWH(b.right - 2, b.top - 20, 22, 22);
+    // Inside the layer: a box hanging off it could not be clicked.
+    final top = (b.top - 6).clamp(0.0, math.max(0.0, s.height - _noteH));
+    return Rect.fromLTWH(left.clamp(0.0, math.max(0.0, s.width - _noteW)), top, _noteW, _noteH);
   }
 
   void _openNote(String id) {
@@ -653,19 +686,20 @@ class _InkLayerState extends State<InkLayer> {
     ed.setNote(id, _noteCtl.text.trim());
     _noteFor = null;
     ed.openNote(null);
+    _keys.requestFocus();
   }
 
   /// ✕: the words not kept (the number stays).
   void _cancelNote() {
     _noteFor = null;
     widget.editor?.openNote(null);
+    _keys.requestFocus();
   }
 
-  /// The words box, and the ✎ by a chosen number.
+  /// The words box by a number.
   List<Widget> _noteWidgets(Size s) {
     final ed = widget.editor;
     final r = _noteRect(s);
-    final pen = _pencilRect(s);
     Widget icon(IconData i, String tip, Color c, VoidCallback on) => Tooltip(
           message: tip,
           child: InkWell(
@@ -719,21 +753,6 @@ class _InkLayerState extends State<InkLayer> {
             ),
           ),
         ),
-      if (pen != null)
-        Positioned.fromRect(
-          rect: pen,
-          child: Tooltip(
-            message: tr('ink.note'),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: const [BoxShadow(color: Color(0x40000000), blurRadius: 4)],
-              ),
-              child: const Icon(Icons.edit_rounded, size: 13, color: Color(0xFF2F6BFF)),
-            ),
-          ),
-        ),
     ];
   }
 
@@ -749,23 +768,14 @@ class _InkLayerState extends State<InkLayer> {
   void _down(PointerDownEvent e, Size s) {
     final ed = widget.editor;
     if (ed == null || e.buttons != kPrimaryButton) return;
-    final p0 = e.localPosition;
-    // On the words box or a ✎: theirs.
-    final box = _noteRect(s);
-    if (box != null && box.contains(p0)) return;
-    final pen = _pencilRect(s);
-    if (pen != null && pen.contains(p0)) {
-      _openNote(ed.selectedId!);
+    // The words box is above this layer: clicks on it never come here.
+    // Clicked elsewhere with the box open: the words kept, the box closed,
+    // and that click does nothing else.
+    if (ed.notingId != null) {
+      _saveNote();
       return;
     }
-    // Clicked elsewhere with the box open: words written are kept (that
-    // click does nothing else); an empty box just closes (and the click
-    // goes on — the next number is put down at once).
-    if (ed.notingId != null) {
-      final written = _noteCtl.text.trim().isNotEmpty;
-      _saveNote();
-      if (written) return;
-    }
+    if (_textFor == null) _keys.requestFocus();
     _editSoon?.cancel();
     _editSoon = null;
     _maybeEdit = null;
@@ -810,6 +820,14 @@ class _InkLayerState extends State<InkLayer> {
     if (twice || heldBack) {
       if (made != null) ed.dropMade(made);
       final hit = ed.topAt(p, s);
+      // A double-click on a number: its words.
+      if (hit != null && hit.tool == InkTool.number) {
+        ed.select(hit.id);
+        _drag = _Drag.none;
+        _lastDown = DateTime(0);
+        _openNote(hit.id);
+        return;
+      }
       if (hit != null) {
         if (ed.selectedId == hit.id && picked == hit.id) {
           // The first click of this double-click chose it: keep it chosen.
@@ -1119,16 +1137,29 @@ class _InkLayerState extends State<InkLayer> {
         ),
       );
       if (ed == null) return IgnorePointer(child: paint);
-      return MouseRegion(
-        cursor: _hoverCursor ?? _own,
-        onHover: (e) => _hover(e.localPosition, size),
-        child: Listener(
-          behavior: HitTestBehavior.opaque,
-          onPointerDown: (e) => _down(e, size),
-          onPointerMove: (e) => _move(e, size),
-          onPointerUp: (_) => _up(),
-          onPointerCancel: (_) => _up(),
-          child: Stack(clipBehavior: Clip.none, children: [paint, _typingField(size), ..._noteWidgets(size)]),
+      return Focus(
+        focusNode: _keys,
+        onKeyEvent: _key,
+        child: SizedBox.fromSize(
+          size: size,
+          child: Stack(clipBehavior: Clip.none, children: [
+            Positioned.fill(
+              child: MouseRegion(
+                cursor: _hoverCursor ?? _own,
+                onHover: (e) => _hover(e.localPosition, size),
+                child: Listener(
+                  behavior: HitTestBehavior.opaque,
+                  onPointerDown: (e) => _down(e, size),
+                  onPointerMove: (e) => _move(e, size),
+                  onPointerUp: (_) => _up(),
+                  onPointerCancel: (_) => _up(),
+                  child: Stack(clipBehavior: Clip.none, children: [paint, _typingField(size)]),
+                ),
+              ),
+            ),
+            // Above the clicking layer: clicks on the box are the box's.
+            ..._noteWidgets(size),
+          ]),
         ),
       );
     });
