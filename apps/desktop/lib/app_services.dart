@@ -207,7 +207,7 @@ class AppServices {
     for (final id in now.difference(_onlineSeen)) {
       if (!quiet) _presence.add(PresenceEvent(id, online: true));
       // What waited for it goes now.
-      sender.online(id, fresh: true);
+      sender.online(id, justCame: true);
     }
     for (final id in _onlineSeen.difference(now)) {
       _presence.add(PresenceEvent(id, online: false));

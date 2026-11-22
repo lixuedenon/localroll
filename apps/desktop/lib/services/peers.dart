@@ -850,16 +850,16 @@ class PeerSender extends ChangeNotifier {
     unawaited(_saveHeld());
   }
 
-  /// [id] came online: what waits for it starts. [fresh]: it has just come
+  /// [id] came online: what waits for it starts. [justCame]: it has just come
   /// online (not a periodic look) — a blocked job is knocked on at once.
-  void online(String id, {bool fresh = false}) {
+  void online(String id, {bool justCame = false}) {
     var any = false;
     final now = DateTime.now();
     for (final j in jobs) {
       if (j.state != SendJobState.held || j.peer.id != id) continue;
       if (j.blocked) {
         // Couldn't be reached last time: quietly, when due.
-        if (fresh || j.nextTry == null || now.isAfter(j.nextTry!)) unawaited(_probe(j));
+        if (justCame || j.nextTry == null || now.isAfter(j.nextTry!)) unawaited(_probe(j));
         continue;
       }
       final fresh = j.toPhone ? phoneTarget?.call(id) : settings.peers[id];
