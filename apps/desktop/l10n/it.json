@@ -2304,5 +2304,12 @@
   "pdf.delete_all_body": "Un PDF deve avere almeno una pagina. Eliminare l'intero file? Andrà in «Eliminati di recente» e potrai recuperarlo per 30 giorni.",
   "pdf.delete_file": "Elimina questo file",
   "pdf.keep_one": "Un PDF deve avere almeno una pagina",
-  "pdfedit.replace_busy": "L'originale è aperto in un altro programma e non può essere sostituito: le modifiche sono state salvate come {name}"
+  "pdfedit.replace_busy": "L'originale è aperto in un altro programma e non può essere sostituito: le modifiche sono state salvate come {name}",
+  "lib.vault_missing": "{count} file di backup sono stati eliminati fuori da Keepnear. I dati ci sono ancora e si possono ripristinare.",
+  "lib.vault_delete": "Elimina definitivamente (libera spazio)",
+  "lib.vault_restore": "Ripristina",
+  "lib.vault_title": "{count} file di backup sono stati eliminati",
+  "lib.vault_body": "Sono stati eliminati fuori da Keepnear (per esempio in Esplora file). I dati sono ancora conservati, quindi puoi ripristinarli com'erano. Se volevi davvero eliminarli, scegli Elimina definitivamente: solo allora si libera spazio.",
+  "lib.vault_later": "Più tardi",
+  "xfer.reconnect": "Riconnetti"
 }

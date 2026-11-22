@@ -2304,5 +2304,12 @@
   "pdf.delete_all_body": "Ein PDF braucht mindestens eine Seite. Die ganze Datei löschen? Sie kommt in „Zuletzt gelöscht“ und lässt sich 30 Tage lang wiederherstellen.",
   "pdf.delete_file": "Diese Datei löschen",
   "pdf.keep_one": "Ein PDF braucht mindestens eine Seite",
-  "pdfedit.replace_busy": "Das Original ist in einem anderen Programm geöffnet und kann nicht ersetzt werden. Die Änderungen wurden als {name} gespeichert"
+  "pdfedit.replace_busy": "Das Original ist in einem anderen Programm geöffnet und kann nicht ersetzt werden. Die Änderungen wurden als {name} gespeichert",
+  "lib.vault_missing": "{count} gesicherte Dateien wurden außerhalb von Keepnear gelöscht. Die Daten sind noch da und lassen sich wiederherstellen.",
+  "lib.vault_delete": "Endgültig löschen (Platz freigeben)",
+  "lib.vault_restore": "Wiederherstellen",
+  "lib.vault_title": "{count} gesicherte Dateien wurden gelöscht",
+  "lib.vault_body": "Sie wurden außerhalb von Keepnear gelöscht (z. B. im Explorer). Die Daten sind noch vorhanden, du kannst sie unverändert wiederherstellen. Wenn du sie wirklich löschen wolltest, wähle „Endgültig löschen“ – erst dann wird Speicherplatz frei.",
+  "lib.vault_later": "Später",
+  "xfer.reconnect": "Neu verbinden"
 }

@@ -2304,5 +2304,12 @@
   "pdf.delete_all_body": "PDF 至少要有一页。要删除整个文件吗？删除的文件会放进「最近删除」，30 天内可以找回。",
   "pdf.delete_file": "删除这个文件",
   "pdf.keep_one": "PDF 至少要保留一页",
-  "pdfedit.replace_busy": "原文件正被其他程序打开，不能覆盖，改动已另存为 {name}"
+  "pdfedit.replace_busy": "原文件正被其他程序打开，不能覆盖，改动已另存为 {name}",
+  "lib.vault_missing": "有 {count} 个备份文件在 Keepnear 之外被删除了，数据还在，可以恢复。",
+  "lib.vault_delete": "确实要删（释放空间）",
+  "lib.vault_restore": "恢复",
+  "lib.vault_title": "{count} 个备份文件被删除了",
+  "lib.vault_body": "这些文件是在 Keepnear 之外（比如资源管理器里）删除的。数据还保留着，可以原样恢复。如果确实要删，选「确实要删」，这时才真正释放硬盘空间。",
+  "lib.vault_later": "稍后再说",
+  "xfer.reconnect": "重新连接"
 }

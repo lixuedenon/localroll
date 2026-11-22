@@ -8,6 +8,7 @@ import 'package:localroll_core/localroll_core.dart';
 import 'l10n/l10n.dart';
 import 'server/transfer_server.dart';
 import 'services/annotations.dart';
+import 'services/backup_vault.dart';
 import 'services/boot.dart';
 import 'services/converter.dart';
 import 'services/office_engines.dart';
@@ -168,6 +169,35 @@ class AppServices {
   /// announced as "came online" — they didn't, we did.
   DateTime _quietUntil = DateTime.now().add(const Duration(seconds: 20));
 
+  // -------------------------------------------------------------- vault
+
+  Timer? _vaultTimer;
+  String? _vaultRoot;
+
+  /// The library's hidden second names (see [BackupVault]): opened for the
+  /// library folder (again when it moves), kept in line a few seconds
+  /// after the library changes.
+  Future<void> _startVault() async {
+    Future<void> openFor(String root) async {
+      _vaultRoot = root;
+      library.vault = await BackupVault.open(root, settings.dataDir);
+      final v = library.vault;
+      if (v != null) DiagLog.log('vault', 'on: ${v.dir}');
+    }
+
+    await openFor(library.rootPath);
+    library.addListener(() {
+      _vaultTimer?.cancel();
+      _vaultTimer = Timer(const Duration(seconds: 5), () async {
+        if (library.offline) return;
+        if (_vaultRoot != library.rootPath) await openFor(library.rootPath);
+        await library.syncVault();
+      });
+    });
+    await Future<void>.delayed(const Duration(seconds: 10));
+    await library.syncVault();
+  }
+
   /// Call when this PC (re)joins the network.
   void settlePresence() => _quietUntil = DateTime.now().add(const Duration(seconds: 20));
 
@@ -177,7 +207,7 @@ class AppServices {
     for (final id in now.difference(_onlineSeen)) {
       if (!quiet) _presence.add(PresenceEvent(id, online: true));
       // What waited for it goes now.
-      sender.online(id);
+      sender.online(id, fresh: true);
     }
     for (final id in _onlineSeen.difference(now)) {
       _presence.add(PresenceEvent(id, online: false));
@@ -259,6 +289,7 @@ class AppServices {
       }
     };
     server.onlineNow = () => s.onlineDevices;
+    unawaited(s._startVault());
     s.sender.phoneTarget = s.phoneTarget;
     s.sender.formatter = PhoneFormatter(ffmpeg);
     // A phone can be sent to while LocalRoll is open on it; a PC while it answers.

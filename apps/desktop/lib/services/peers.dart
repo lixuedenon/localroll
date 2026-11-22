@@ -684,6 +684,12 @@ class SendJob {
   /// (most often its firewall).
   bool blocked = false;
 
+  /// Blocked: tried again quietly (no transfer shown) after a growing
+  /// pause — 30 s, 1, 2, then every 5 minutes.
+  int tries = 0;
+  DateTime? nextTry;
+  bool _probing = false;
+
   /// Files deleted or changed while it waited: left out.
   int goneFiles = 0;
 
@@ -782,6 +788,56 @@ class PeerSender extends ChangeNotifier {
       ..heldSince ??= DateTime.now()
       ..blocked = tried && (isOnline?.call(j.peer.id) ?? false)
       ..error = null;
+    if (j.blocked) _later(j);
+  }
+
+  static const List<Duration> _pauses = [
+    Duration(seconds: 30),
+    Duration(minutes: 1),
+    Duration(minutes: 2),
+    Duration(minutes: 5),
+  ];
+
+  void _later(SendJob j) {
+    j.nextTry = DateTime.now().add(_pauses[min(j.tries, _pauses.length - 1)]);
+    j.tries++;
+  }
+
+  /// "Reconnect" (transfer records): a quiet try now.
+  void retryNow(SendJob j) {
+    if (j.state != SendJobState.held) return;
+    j.nextTry = null;
+    unawaited(_probe(j));
+  }
+
+  /// Seen online but not reachable: knocked on quietly first; only when it
+  /// answers does the transfer start (and show).
+  Future<void> _probe(SendJob j) async {
+    if (j._probing) return;
+    j._probing = true;
+    LrClient? c;
+    try {
+      c = await _connect(j.peer);
+    } catch (_) {}
+    j._probing = false;
+    if (j.state != SendJobState.held) {
+      c?.close();
+      return;
+    }
+    if (c == null) {
+      _later(j);
+      notifyListeners();
+      return;
+    }
+    c.close();
+    j
+      ..blocked = false
+      ..tries = 0
+      ..nextTry = null
+      ..state = SendJobState.waiting;
+    DiagLog.log('send', '${j.peer.name} answers again: sending');
+    notifyListeners();
+    unawaited(_pump());
   }
 
   void cancel(SendJob j) {
@@ -794,11 +850,18 @@ class PeerSender extends ChangeNotifier {
     unawaited(_saveHeld());
   }
 
-  /// [id] came online: what waits for it starts.
-  void online(String id) {
+  /// [id] came online: what waits for it starts. [fresh]: it has just come
+  /// online (not a periodic look) — a blocked job is knocked on at once.
+  void online(String id, {bool fresh = false}) {
     var any = false;
+    final now = DateTime.now();
     for (final j in jobs) {
       if (j.state != SendJobState.held || j.peer.id != id) continue;
+      if (j.blocked) {
+        // Couldn't be reached last time: quietly, when due.
+        if (fresh || j.nextTry == null || now.isAfter(j.nextTry!)) unawaited(_probe(j));
+        continue;
+      }
       final fresh = j.toPhone ? phoneTarget?.call(id) : settings.peers[id];
       // A phone that has not said yet where it receives: a few seconds
       // more ([_checkHeld] looks again).
@@ -992,6 +1055,64 @@ class PeerSender extends ChangeNotifier {
       if (seen != null) for (final h in seen.hosts) (h, seen.port),
       for (final h in p.tryHosts) (h, p.port),
     };
+    final first = await _connectAt(p, candidates);
+    if (first != null) return first;
+    // Its port may have changed (Windows keeps some ports for itself, so
+    // Keepnear moves to a fallback): the usual ports, all at once.
+    for (final h in p.tryHosts) {
+      final other = <(String, int)>{
+        for (final port in {LrProtocol.defaultPort, ...LrProtocol.fallbackPorts})
+          if (!candidates.contains((h, port))) (h, port),
+      };
+      final c = await _firstAnswer(p, other);
+      if (c != null) return c;
+    }
+    return null;
+  }
+
+  /// Several addresses at once: the first that opens (remembered), the
+  /// rest closed.
+  Future<LrClient?> _firstAnswer(PeerPc p, Set<(String, int)> at) async {
+    if (at.isEmpty) return null;
+    final done = Completer<(LrClient, String, int)?>();
+    var left = at.length;
+    for (final (host, port) in at) {
+      unawaited(() async {
+        LrClient? c;
+        Object? err;
+        try {
+          c = await openPeer(settings, p, host, port);
+        } catch (e) {
+          err = e;
+        }
+        if (c != null) {
+          if (done.isCompleted) {
+            c.close();
+          } else {
+            done.complete((c, host, port));
+          }
+          return;
+        }
+        if (err is PeerError && !done.isCompleted) {
+          done.completeError(err);
+          return;
+        }
+        if (--left == 0 && !done.isCompleted) done.complete(null);
+      }());
+    }
+    final got = await done.future;
+    if (got == null) return null;
+    final (c, host, port) = got;
+    DiagLog.log('send', '${p.name} found at $host:$port (its port changed)');
+    await settings.update((_) {
+      p
+        ..lastHost = host
+        ..port = port;
+    });
+    return c;
+  }
+
+  Future<LrClient?> _connectAt(PeerPc p, Set<(String, int)> candidates) async {
     for (final (host, port) in candidates) {
       try {
         final c = await openPeer(settings, p, host, port);

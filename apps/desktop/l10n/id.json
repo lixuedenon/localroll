@@ -2304,5 +2304,12 @@
   "pdf.delete_all_body": "PDF harus punya minimal satu halaman. Hapus seluruh file? File akan masuk ke Baru dihapus dan bisa dikembalikan selama 30 hari.",
   "pdf.delete_file": "Hapus file ini",
   "pdf.keep_one": "PDF harus punya minimal satu halaman",
-  "pdfedit.replace_busy": "File asli sedang dibuka di program lain dan tidak bisa ditimpa, jadi perubahan disimpan sebagai {name}"
+  "pdfedit.replace_busy": "File asli sedang dibuka di program lain dan tidak bisa ditimpa, jadi perubahan disimpan sebagai {name}",
+  "lib.vault_missing": "{count} file cadangan dihapus di luar Keepnear. Datanya masih tersimpan dan bisa dipulihkan.",
+  "lib.vault_delete": "Hapus permanen (kosongkan ruang)",
+  "lib.vault_restore": "Pulihkan",
+  "lib.vault_title": "{count} file cadangan dihapus",
+  "lib.vault_body": "File ini dihapus di luar Keepnear (misalnya di File Explorer). Datanya masih tersimpan, jadi bisa dipulihkan seperti semula. Kalau memang ingin menghapusnya, pilih Hapus permanen — baru saat itu ruang disk kosong.",
+  "lib.vault_later": "Nanti",
+  "xfer.reconnect": "Hubungkan ulang"
 }

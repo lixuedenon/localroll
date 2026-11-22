@@ -312,6 +312,21 @@ class TransferServer extends ChangeNotifier {
   static const Duration phoneWindow = Duration(seconds: 30);
   static const Duration pcWindow = Duration(seconds: 90);
 
+  /// A paired PC says where its own server is now: remembered when it
+  /// changed (its port moved, or it has a new address).
+  void _followPort(String id, String? said, String ip) {
+    final peer = settings.peers[id];
+    final port = int.tryParse(said ?? '');
+    if (peer == null || port == null || port <= 0 || port > 65535 || ip.isEmpty) return;
+    if (peer.port == port && peer.lastHost == ip) return;
+    DiagLog.log('server', '${peer.name} is now at $ip:$port');
+    unawaited(settings.update((_) {
+      peer
+        ..port = port
+        ..lastHost = ip;
+    }));
+  }
+
   bool isOnline(String deviceId) {
     // A live link open: there (closed the moment the app ends).
     if (_live[deviceId]?.isNotEmpty ?? false) return true;
@@ -710,6 +725,8 @@ class TransferServer extends ChangeNotifier {
       DiagLog.log('server', 'no port: ${failures.join(', ')}');
     } else {
       DiagLog.log('server', 'listening on ${_mux!.port} (https: ${tls != null})');
+      // Told to paired PCs with each request: they follow a change of port.
+      LrClient.ownPort = _mux!.port;
     }
     notifyListeners();
   }
@@ -847,6 +864,7 @@ class TransferServer extends ChangeNotifier {
       }
       final wasOnline = isOnline(device.id);
       lastSeen[device.id] = DateTime.now();
+      _followPort(device.id, req.headers.value(LrProtocol.headerPort), ip);
       if (!wasOnline && !(path == LrProtocol.pathLive)) notifyListeners(); // came online
       try {
         return await _signedIn(req, res, device, path, segs, secure: secure, wasOnline: wasOnline);

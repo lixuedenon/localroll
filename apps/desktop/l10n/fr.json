@@ -2304,5 +2304,12 @@
   "pdf.delete_all_body": "Un PDF doit avoir au moins une page. Supprimer tout le fichier ? Il va dans « Supprimés récemment », récupérable pendant 30 jours.",
   "pdf.delete_file": "Supprimer ce fichier",
   "pdf.keep_one": "Un PDF doit garder au moins une page",
-  "pdfedit.replace_busy": "L'original est ouvert dans un autre programme et ne peut pas être remplacé : vos modifications sont enregistrées sous {name}"
+  "pdfedit.replace_busy": "L'original est ouvert dans un autre programme et ne peut pas être remplacé : vos modifications sont enregistrées sous {name}",
+  "lib.vault_missing": "{count} fichiers sauvegardés ont été supprimés en dehors de Keepnear. Leurs données sont toujours là et peuvent être restaurées.",
+  "lib.vault_delete": "Supprimer définitivement (libérer l'espace)",
+  "lib.vault_restore": "Restaurer",
+  "lib.vault_title": "{count} fichiers sauvegardés ont été supprimés",
+  "lib.vault_body": "Ils ont été supprimés en dehors de Keepnear (dans l'Explorateur, par exemple). Leurs données sont conservées : vous pouvez les restaurer tels quels. Si vous vouliez vraiment les supprimer, choisissez Supprimer définitivement — l'espace disque n'est libéré qu'à ce moment-là.",
+  "lib.vault_later": "Plus tard",
+  "xfer.reconnect": "Reconnecter"
 }

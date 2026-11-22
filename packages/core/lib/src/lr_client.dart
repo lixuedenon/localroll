@@ -50,6 +50,10 @@ class LrClient {
           ..idleTimeout = const Duration(seconds: 30));
   }
 
+  /// This device's own server port (set by a PC when its server starts):
+  /// sent with signed-in requests (see [LrProtocol.headerPort]).
+  static int? ownPort;
+
   final String host;
   final int port;
   final String? deviceId;
@@ -75,7 +79,11 @@ class LrClient {
     var uri = Uri(scheme: secure ? 'https' : 'http', host: host, port: port, path: path);
     if (query != null) uri = uri.replace(queryParameters: query);
     final req = await _http.openUrl(method, uri).timeout(timeout);
-    if (deviceId != null) req.headers.set(LrProtocol.headerDeviceId, deviceId!);
+    if (deviceId != null) {
+      req.headers.set(LrProtocol.headerDeviceId, deviceId!);
+      final own = ownPort;
+      if (own != null) req.headers.set(LrProtocol.headerPort, '$own');
+    }
     if (token != null) req.headers.set(LrProtocol.headerToken, token!);
     if (json != null) {
       final b = utf8.encode(jsonEncode(json));
@@ -240,7 +248,11 @@ class LrClient {
   /// Signed-in GET of [uri] with optional Range, as a streamed response.
   Future<HttpClientResponse> open(Uri uri, {String? range}) async {
     final req = await _http.getUrl(uri).timeout(const Duration(seconds: 20));
-    if (deviceId != null) req.headers.set(LrProtocol.headerDeviceId, deviceId!);
+    if (deviceId != null) {
+      req.headers.set(LrProtocol.headerDeviceId, deviceId!);
+      final own = ownPort;
+      if (own != null) req.headers.set(LrProtocol.headerPort, '$own');
+    }
     if (token != null) req.headers.set(LrProtocol.headerToken, token!);
     if (range != null) req.headers.set(HttpHeaders.rangeHeader, range);
     return req.close().timeout(const Duration(seconds: 20));
@@ -249,7 +261,11 @@ class LrClient {
   Future<Uint8List> _bytes(String path, String item, {Duration timeout = const Duration(seconds: 30)}) async {
     final uri = Uri(scheme: secure ? 'https' : 'http', host: host, port: port, path: path, queryParameters: {'p': item});
     final req = await _http.getUrl(uri).timeout(timeout);
-    if (deviceId != null) req.headers.set(LrProtocol.headerDeviceId, deviceId!);
+    if (deviceId != null) {
+      req.headers.set(LrProtocol.headerDeviceId, deviceId!);
+      final own = ownPort;
+      if (own != null) req.headers.set(LrProtocol.headerPort, '$own');
+    }
     if (token != null) req.headers.set(LrProtocol.headerToken, token!);
     final res = await req.close().timeout(timeout);
     final b = BytesBuilder(copy: false);

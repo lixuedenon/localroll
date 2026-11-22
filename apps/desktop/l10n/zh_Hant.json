@@ -2304,5 +2304,12 @@
   "pdf.delete_all_body": "PDF 至少要有一頁。要刪除整個檔案嗎？刪除的檔案會放進「最近刪除」，30 天內可以找回。",
   "pdf.delete_file": "刪除這個檔案",
   "pdf.keep_one": "PDF 至少要保留一頁",
-  "pdfedit.replace_busy": "原檔案正被其他程式開啟，無法覆蓋，變更已另存為 {name}"
+  "pdfedit.replace_busy": "原檔案正被其他程式開啟，無法覆蓋，變更已另存為 {name}",
+  "lib.vault_missing": "有 {count} 個備份檔案在 Keepnear 以外被刪除了，資料還在，可以還原。",
+  "lib.vault_delete": "確實要刪（釋放空間）",
+  "lib.vault_restore": "還原",
+  "lib.vault_title": "{count} 個備份檔案被刪除了",
+  "lib.vault_body": "這些檔案是在 Keepnear 以外（例如檔案總管裡）刪除的。資料還保留著，可以原樣還原。如果確實要刪，選「確實要刪」，這時才真正釋放磁碟空間。",
+  "lib.vault_later": "稍後再說",
+  "xfer.reconnect": "重新連線"
 }

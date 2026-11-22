@@ -2304,5 +2304,12 @@
   "pdf.delete_all_body": "PDF cần ít nhất một trang. Xóa cả tệp? Tệp sẽ vào Đã xóa gần đây và có thể lấy lại trong 30 ngày.",
   "pdf.delete_file": "Xóa tệp này",
   "pdf.keep_one": "PDF cần giữ ít nhất một trang",
-  "pdfedit.replace_busy": "Tệp gốc đang mở trong chương trình khác nên không thể ghi đè; thay đổi đã được lưu thành {name}"
+  "pdfedit.replace_busy": "Tệp gốc đang mở trong chương trình khác nên không thể ghi đè; thay đổi đã được lưu thành {name}",
+  "lib.vault_missing": "{count} tệp sao lưu đã bị xóa bên ngoài Keepnear. Dữ liệu vẫn được giữ và có thể khôi phục.",
+  "lib.vault_delete": "Xóa hẳn (giải phóng dung lượng)",
+  "lib.vault_restore": "Khôi phục",
+  "lib.vault_title": "{count} tệp sao lưu đã bị xóa",
+  "lib.vault_body": "Các tệp này bị xóa bên ngoài Keepnear (ví dụ trong File Explorer). Dữ liệu vẫn được giữ nên bạn có thể khôi phục nguyên vẹn. Nếu thật sự muốn xóa, hãy chọn Xóa hẳn — khi đó dung lượng ổ đĩa mới được giải phóng.",
+  "lib.vault_later": "Để sau",
+  "xfer.reconnect": "Kết nối lại"
 }

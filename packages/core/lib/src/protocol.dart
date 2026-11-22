@@ -134,6 +134,10 @@ class LrProtocol {
 
   /// Request headers used for authentication after pairing.
   static const String headerDeviceId = 'x-lr-device';
+
+  /// The port this device's own server listens on now (PCs): a paired PC
+  /// that remembered an old one learns the new one at once.
+  static const String headerPort = 'x-lr-port';
   static const String headerToken = 'x-lr-token';
 }
 

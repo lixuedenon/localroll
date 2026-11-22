@@ -2304,5 +2304,12 @@
   "pdf.delete_all_body": "A PDF needs at least one page. Delete the whole file? It goes to Recently deleted, where you can get it back for 30 days.",
   "pdf.delete_file": "Delete this file",
   "pdf.keep_one": "A PDF needs at least one page",
-  "pdfedit.replace_busy": "The original is open in another program and can't be replaced, so your changes were saved as {name}"
+  "pdfedit.replace_busy": "The original is open in another program and can't be replaced, so your changes were saved as {name}",
+  "lib.vault_missing": "{count} backed-up files were deleted outside Keepnear. Their data is still kept and can be restored.",
+  "lib.vault_delete": "Delete for good (free space)",
+  "lib.vault_restore": "Restore",
+  "lib.vault_title": "{count} backed-up files were deleted",
+  "lib.vault_body": "They were deleted outside Keepnear (in File Explorer, for example). Their data is still kept, so you can restore them as they were. If you really meant to delete them, choose Delete for good — only then is the disk space freed.",
+  "lib.vault_later": "Later",
+  "xfer.reconnect": "Reconnect"
 }

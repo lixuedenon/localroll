@@ -299,6 +299,7 @@ class _TransferRecordsState extends State<TransferRecords> {
       actions: [
         if (paused) _small(tr('xfer.resume'), () => s.sender.resume(j), icon: Icons.play_arrow_rounded, strong: true),
         if (!paused && !waiting && j.active) _small(tr('xfer.pause'), () => s.sender.pause(j), icon: Icons.pause_rounded),
+        if (waiting && j.blocked) _small(tr('xfer.reconnect'), () => s.sender.retryNow(j), icon: Icons.refresh_rounded),
         _small(tr('common.cancel'), () {
           if (paused) {
             s.sender.drop(j);

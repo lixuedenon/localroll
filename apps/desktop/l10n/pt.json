@@ -2304,5 +2304,12 @@
   "pdf.delete_all_body": "Um PDF precisa de pelo menos uma página. Excluir o arquivo inteiro? Ele vai para «Excluídos recentemente» e pode ser recuperado por 30 dias.",
   "pdf.delete_file": "Excluir este arquivo",
   "pdf.keep_one": "Um PDF precisa de pelo menos uma página",
-  "pdfedit.replace_busy": "O original está aberto em outro programa e não pode ser substituído; as alterações foram salvas como {name}"
+  "pdfedit.replace_busy": "O original está aberto em outro programa e não pode ser substituído; as alterações foram salvas como {name}",
+  "lib.vault_missing": "{count} arquivos de backup foram excluídos fora do Keepnear. Os dados continuam guardados e podem ser restaurados.",
+  "lib.vault_delete": "Excluir de vez (liberar espaço)",
+  "lib.vault_restore": "Restaurar",
+  "lib.vault_title": "{count} arquivos de backup foram excluídos",
+  "lib.vault_body": "Eles foram excluídos fora do Keepnear (no Explorador, por exemplo). Os dados continuam guardados, então você pode restaurá-los como estavam. Se queria mesmo excluí-los, escolha Excluir de vez — só então o espaço é liberado.",
+  "lib.vault_later": "Mais tarde",
+  "xfer.reconnect": "Reconectar"
 }

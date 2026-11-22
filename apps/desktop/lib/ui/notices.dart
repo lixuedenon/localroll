@@ -32,6 +32,7 @@ class Notices {
     s.server.membershipAsks.addListener(_onMembership);
     s.hub.addListener(_onHub);
     s.sender.addListener(_onSender);
+    s.library.addListener(_onLibrary);
     for (final j in s.sender.jobs) {
       if (j.over) _announced.add(j.id);
     }
@@ -45,6 +46,7 @@ class Notices {
     s.server.membershipAsks.removeListener(_onMembership);
     s.hub.removeListener(_onHub);
     s.sender.removeListener(_onSender);
+    s.library.removeListener(_onLibrary);
     _quiet?.cancel();
     _doneTimer?.cancel();
     _doneNote?.remove();
@@ -361,6 +363,40 @@ class Notices {
         ],
       ),
     );
+  }
+
+  // ------------------------------------------------- deleted in Explorer
+
+  int _kept = 0;
+  bool _keptShown = false;
+
+  /// Backed-up files deleted outside Keepnear (data still kept): said once
+  /// each time more go — put back, or deleted for good.
+  void _onLibrary() {
+    final k = s.library.missingKept;
+    final more = k > _kept;
+    _kept = k;
+    if (!more || _keptShown) return;
+    final ctx = _ctx;
+    if (ctx == null || !ctx.mounted) return;
+    _keptShown = true;
+    unawaited(showLrDialog<String>(
+      context: ctx,
+      builder: (c) => AlertDialog(
+        icon: const Icon(Icons.shield_outlined, size: 40, color: LrColors.safelight),
+        title: Text(tr('lib.vault_title', {'count': k})),
+        content: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 460), child: Text(tr('lib.vault_body'))),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, 'later'), child: Text(tr('lib.vault_later'))),
+          OutlinedButton(onPressed: () => Navigator.pop(c, 'delete'), child: Text(tr('lib.vault_delete'))),
+          FilledButton(onPressed: () => Navigator.pop(c, 'restore'), child: Text(tr('lib.vault_restore'))),
+        ],
+      ),
+    ).then((v) async {
+      _keptShown = false;
+      if (v == 'restore') await s.library.restoreMissing();
+      if (v == 'delete') s.library.confirmMissing();
+    }));
   }
 
   // ---------------------------------------------------------- sent all

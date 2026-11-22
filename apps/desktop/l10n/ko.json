@@ -2304,5 +2304,12 @@
   "pdf.delete_all_body": "PDF에는 최소 한 페이지가 있어야 합니다. 파일 전체를 삭제할까요? 삭제한 파일은 '최근 삭제'로 이동하며 30일 동안 되돌릴 수 있습니다.",
   "pdf.delete_file": "이 파일 삭제",
   "pdf.keep_one": "PDF에는 최소 한 페이지가 있어야 합니다",
-  "pdfedit.replace_busy": "원본 파일이 다른 프로그램에서 열려 있어 덮어쓸 수 없습니다. 변경 내용을 {name}(으)로 저장했습니다"
+  "pdfedit.replace_busy": "원본 파일이 다른 프로그램에서 열려 있어 덮어쓸 수 없습니다. 변경 내용을 {name}(으)로 저장했습니다",
+  "lib.vault_missing": "백업 파일 {count}개가 Keepnear 밖에서 삭제되었습니다. 데이터는 남아 있어 복원할 수 있습니다.",
+  "lib.vault_delete": "완전히 삭제(공간 확보)",
+  "lib.vault_restore": "복원",
+  "lib.vault_title": "백업 파일 {count}개가 삭제되었습니다",
+  "lib.vault_body": "Keepnear 밖(예: 파일 탐색기)에서 삭제된 파일입니다. 데이터가 남아 있어 그대로 복원할 수 있습니다. 정말 삭제하려면 '완전히 삭제'를 선택하세요. 그때 디스크 공간이 확보됩니다.",
+  "lib.vault_later": "나중에",
+  "xfer.reconnect": "다시 연결"
 }

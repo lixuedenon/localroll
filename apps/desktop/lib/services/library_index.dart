@@ -6,6 +6,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:localroll_core/localroll_core.dart';
 
+import 'backup_vault.dart';
+
 /// One received file in the library.
 class MediaItem {
   MediaItem({
@@ -152,6 +154,32 @@ class LibraryIndex extends ChangeNotifier {
   /// Many files vanished at once (folder moved? mistake?): they wait here,
   /// hidden, until the user confirms. Phones are not told before that.
   List<MediaItem> pendingMissing = const [];
+
+  /// Hidden second names of the files (see [BackupVault]): a file deleted
+  /// in Explorer can be brought back.
+  BackupVault? vault;
+
+  /// Of [pendingMissing], those whose data is still kept ([vault]).
+  int get missingKept {
+    final v = vault;
+    return v == null ? 0 : pendingMissing.where((i) => v.has(i.relPath)).length;
+  }
+
+  /// Every file gets its hidden second name; names of files gone from
+  /// the library go (not those waiting for the "deleted?" answer).
+  Future<void> syncVault() async {
+    final v = vault;
+    if (v == null || offline || _reconciling) return;
+    await v.sync([for (final i in _items) i.relPath], {for (final i in pendingMissing) i.relPath});
+  }
+
+  /// Files deleted in Explorer, kept in the vault: back in their place.
+  Future<void> restoreMissing() async {
+    final v = vault;
+    if (v == null) return;
+    v.restore([for (final i in pendingMissing) i.relPath]);
+    await reconcile();
+  }
 
   /// More missing files than this in one go → ask before treating as deleted.
   static const int askAbove = 30;
@@ -749,17 +777,23 @@ class LibraryIndex extends ChangeNotifier {
       }
 
       // 6. Gone: a few → deleted (phones are told). Many at once → ask first.
+      // Kept in the vault (deleted in Explorer, data still there): always
+      // asked — put back, or deleted for good.
+      final v = vault;
+      final kept = v == null ? const <MediaItem>[] : [for (final i in missing) if (v.has(i.relPath)) i];
+      final plain = [for (final i in missing) if (!kept.contains(i)) i];
       final stillPending = pendingMissing.where((i) => !File(absPath(i)).existsSync() && _items.contains(i)).toList();
-      final waiting = {...stillPending, ...missing}.toList();
-      if (waiting.length > askAbove || (stillPending.isNotEmpty && missing.isNotEmpty)) {
-        pendingMissing = waiting;
+      final waiting = {...stillPending, ...plain}.toList();
+      if (waiting.length > askAbove || (stillPending.isNotEmpty && plain.isNotEmpty)) {
+        pendingMissing = {...waiting, ...kept}.toList();
       } else {
-        pendingMissing = stillPending;
-        if (missing.isNotEmpty) {
-          _forget(missing);
+        pendingMissing = {...stillPending, ...kept}.toList();
+        if (plain.isNotEmpty) {
+          _forget(plain);
           changed = true;
         }
       }
+      if (kept.isNotEmpty) DiagLog.log('vault', '${kept.length} deleted outside Keepnear, still kept: asking');
 
       if (changed) {
         _sort();
@@ -799,6 +833,8 @@ class LibraryIndex extends ChangeNotifier {
     final gone = pendingMissing.where((i) => !File(absPath(i)).existsSync()).toList();
     pendingMissing = const [];
     if (gone.isNotEmpty) _forget(gone);
+    // Their kept data goes too: the space is freed.
+    if (gone.isNotEmpty) unawaited(vault?.purge([for (final i in gone) i.relPath]));
     _scheduleSave();
     notifyListeners();
   }
