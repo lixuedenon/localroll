@@ -2303,5 +2303,6 @@
   "pdf.delete_all_title": "刪除全部 {count} 頁，就是刪除這個檔案",
   "pdf.delete_all_body": "PDF 至少要有一頁。要刪除整個檔案嗎？刪除的檔案會放進「最近刪除」，30 天內可以找回。",
   "pdf.delete_file": "刪除這個檔案",
-  "pdf.keep_one": "PDF 至少要保留一頁"
+  "pdf.keep_one": "PDF 至少要保留一頁",
+  "pdfedit.replace_busy": "原檔案正被其他程式開啟，無法覆蓋，變更已另存為 {name}"
 }

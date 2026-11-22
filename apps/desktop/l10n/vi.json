@@ -2303,5 +2303,6 @@
   "pdf.delete_all_title": "Xóa cả {count} trang tức là xóa tệp này",
   "pdf.delete_all_body": "PDF cần ít nhất một trang. Xóa cả tệp? Tệp sẽ vào Đã xóa gần đây và có thể lấy lại trong 30 ngày.",
   "pdf.delete_file": "Xóa tệp này",
-  "pdf.keep_one": "PDF cần giữ ít nhất một trang"
+  "pdf.keep_one": "PDF cần giữ ít nhất một trang",
+  "pdfedit.replace_busy": "Tệp gốc đang mở trong chương trình khác nên không thể ghi đè; thay đổi đã được lưu thành {name}"
 }

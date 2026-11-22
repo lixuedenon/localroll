@@ -2303,5 +2303,6 @@
   "pdf.delete_all_title": "{count} sayfanın tümünü silmek bu dosyayı siler",
   "pdf.delete_all_body": "Bir PDF'de en az bir sayfa olmalı. Dosyanın tamamı silinsin mi? Son silinenler'e gider ve 30 gün boyunca geri alınabilir.",
   "pdf.delete_file": "Bu dosyayı sil",
-  "pdf.keep_one": "Bir PDF'de en az bir sayfa kalmalı"
+  "pdf.keep_one": "Bir PDF'de en az bir sayfa kalmalı",
+  "pdfedit.replace_busy": "Orijinal dosya başka bir programda açık olduğu için değiştirilemiyor; değişiklikler {name} olarak kaydedildi"
 }

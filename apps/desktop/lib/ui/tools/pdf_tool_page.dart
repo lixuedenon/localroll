@@ -15,6 +15,7 @@ import '../../app_services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/office_engines.dart';
 import '../../services/file_tools.dart';
+import '../../services/pdf_open.dart';
 import '../../services/win_dialogs.dart';
 import '../light_look.dart';
 import '../send_page.dart' show baseNameOf;
@@ -153,7 +154,7 @@ class _PdfToolPageState extends State<PdfToolPage> {
     setState(() => _loading = true);
     for (final f in files) {
       try {
-        final d = await PdfDocument.openFile(f);
+        final d = await openPdfLoose(f);
         final doc = _Doc(f, d);
         _docs.add(doc);
         for (var i = 1; i <= d.pages.length; i++) {
@@ -462,7 +463,7 @@ class _PdfToolPageState extends State<PdfToolPage> {
   Future<void> _swap(_Doc old, String path) async {
     PdfDocument d;
     try {
-      d = await PdfDocument.openFile(path);
+      d = await openPdfLoose(path);
     } catch (e) {
       DiagLog.log('tools', 'pdf swap not opened: $e');
       return;

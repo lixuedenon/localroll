@@ -2303,5 +2303,6 @@
   "pdf.delete_all_title": "Alle {count} Seiten zu löschen löscht diese Datei",
   "pdf.delete_all_body": "Ein PDF braucht mindestens eine Seite. Die ganze Datei löschen? Sie kommt in „Zuletzt gelöscht“ und lässt sich 30 Tage lang wiederherstellen.",
   "pdf.delete_file": "Diese Datei löschen",
-  "pdf.keep_one": "Ein PDF braucht mindestens eine Seite"
+  "pdf.keep_one": "Ein PDF braucht mindestens eine Seite",
+  "pdfedit.replace_busy": "Das Original ist in einem anderen Programm geöffnet und kann nicht ersetzt werden. Die Änderungen wurden als {name} gespeichert"
 }

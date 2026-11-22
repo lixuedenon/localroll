@@ -2303,5 +2303,6 @@
   "pdf.delete_all_title": "Menghapus semua {count} halaman berarti menghapus file ini",
   "pdf.delete_all_body": "PDF harus punya minimal satu halaman. Hapus seluruh file? File akan masuk ke Baru dihapus dan bisa dikembalikan selama 30 hari.",
   "pdf.delete_file": "Hapus file ini",
-  "pdf.keep_one": "PDF harus punya minimal satu halaman"
+  "pdf.keep_one": "PDF harus punya minimal satu halaman",
+  "pdfedit.replace_busy": "File asli sedang dibuka di program lain dan tidak bisa ditimpa, jadi perubahan disimpan sebagai {name}"
 }

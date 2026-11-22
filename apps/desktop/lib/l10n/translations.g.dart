@@ -2309,6 +2309,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.delete_all_body': 'A PDF needs at least one page. Delete the whole file? It goes to Recently deleted, where you can get it back for 30 days.',
     'pdf.delete_file': 'Delete this file',
     'pdf.keep_one': 'A PDF needs at least one page',
+    'pdfedit.replace_busy': 'The original is open in another program and can\'t be replaced, so your changes were saved as {name}',
   },
   'zh': {
     'nav.library': '媒体库',
@@ -4616,6 +4617,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.delete_all_body': 'PDF 至少要有一页。要删除整个文件吗？删除的文件会放进「最近删除」，30 天内可以找回。',
     'pdf.delete_file': '删除这个文件',
     'pdf.keep_one': 'PDF 至少要保留一页',
+    'pdfedit.replace_busy': '原文件正被其他程序打开，不能覆盖，改动已另存为 {name}',
   },
   'zh_Hant': {
     'nav.library': '媒體庫',
@@ -6923,6 +6925,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.delete_all_body': 'PDF 至少要有一頁。要刪除整個檔案嗎？刪除的檔案會放進「最近刪除」，30 天內可以找回。',
     'pdf.delete_file': '刪除這個檔案',
     'pdf.keep_one': 'PDF 至少要保留一頁',
+    'pdfedit.replace_busy': '原檔案正被其他程式開啟，無法覆蓋，變更已另存為 {name}',
   },
   'ja': {
     'nav.library': 'ライブラリ',
@@ -9230,6 +9233,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.delete_all_body': 'PDF には少なくとも 1 ページ必要です。ファイル全体を削除しますか？削除したファイルは「最近削除した項目」に入り、30 日間は元に戻せます。',
     'pdf.delete_file': 'このファイルを削除',
     'pdf.keep_one': 'PDF には少なくとも 1 ページ必要です',
+    'pdfedit.replace_busy': '元のファイルが他のプログラムで開かれているため上書きできません。変更は {name} として保存しました',
   },
   'ko': {
     'nav.library': '라이브러리',
@@ -11537,6 +11541,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.delete_all_body': 'PDF에는 최소 한 페이지가 있어야 합니다. 파일 전체를 삭제할까요? 삭제한 파일은 \'최근 삭제\'로 이동하며 30일 동안 되돌릴 수 있습니다.',
     'pdf.delete_file': '이 파일 삭제',
     'pdf.keep_one': 'PDF에는 최소 한 페이지가 있어야 합니다',
+    'pdfedit.replace_busy': '원본 파일이 다른 프로그램에서 열려 있어 덮어쓸 수 없습니다. 변경 내용을 {name}(으)로 저장했습니다',
   },
   'es': {
     'nav.library': 'Biblioteca',
@@ -13844,6 +13849,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.delete_all_body': 'Un PDF necesita al menos una página. ¿Eliminar el archivo entero? Irá a «Eliminados recientemente» y podrás recuperarlo durante 30 días.',
     'pdf.delete_file': 'Eliminar este archivo',
     'pdf.keep_one': 'Un PDF necesita al menos una página',
+    'pdfedit.replace_busy': 'El original está abierto en otro programa y no se puede reemplazar; los cambios se guardaron como {name}',
   },
   'fr': {
     'nav.library': 'Bibliothèque',
@@ -16151,6 +16157,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.delete_all_body': 'Un PDF doit avoir au moins une page. Supprimer tout le fichier ? Il va dans « Supprimés récemment », récupérable pendant 30 jours.',
     'pdf.delete_file': 'Supprimer ce fichier',
     'pdf.keep_one': 'Un PDF doit garder au moins une page',
+    'pdfedit.replace_busy': 'L\'original est ouvert dans un autre programme et ne peut pas être remplacé : vos modifications sont enregistrées sous {name}',
   },
   'de': {
     'nav.library': 'Mediathek',
@@ -18458,6 +18465,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.delete_all_body': 'Ein PDF braucht mindestens eine Seite. Die ganze Datei löschen? Sie kommt in „Zuletzt gelöscht“ und lässt sich 30 Tage lang wiederherstellen.',
     'pdf.delete_file': 'Diese Datei löschen',
     'pdf.keep_one': 'Ein PDF braucht mindestens eine Seite',
+    'pdfedit.replace_busy': 'Das Original ist in einem anderen Programm geöffnet und kann nicht ersetzt werden. Die Änderungen wurden als {name} gespeichert',
   },
   'pt': {
     'nav.library': 'Biblioteca',
@@ -20765,6 +20773,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.delete_all_body': 'Um PDF precisa de pelo menos uma página. Excluir o arquivo inteiro? Ele vai para «Excluídos recentemente» e pode ser recuperado por 30 dias.',
     'pdf.delete_file': 'Excluir este arquivo',
     'pdf.keep_one': 'Um PDF precisa de pelo menos uma página',
+    'pdfedit.replace_busy': 'O original está aberto em outro programa e não pode ser substituído; as alterações foram salvas como {name}',
   },
   'ru': {
     'nav.library': 'Медиатека',
@@ -23072,6 +23081,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.delete_all_body': 'В PDF должна быть хотя бы одна страница. Удалить весь файл? Он попадёт в «Недавно удалённые», вернуть его можно в течение 30 дней.',
     'pdf.delete_file': 'Удалить этот файл',
     'pdf.keep_one': 'В PDF должна остаться хотя бы одна страница',
+    'pdfedit.replace_busy': 'Исходный файл открыт в другой программе и не может быть заменён. Изменения сохранены как {name}',
   },
   'it': {
     'nav.library': 'Libreria',
@@ -25379,6 +25389,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.delete_all_body': 'Un PDF deve avere almeno una pagina. Eliminare l\'intero file? Andrà in «Eliminati di recente» e potrai recuperarlo per 30 giorni.',
     'pdf.delete_file': 'Elimina questo file',
     'pdf.keep_one': 'Un PDF deve avere almeno una pagina',
+    'pdfedit.replace_busy': 'L\'originale è aperto in un altro programma e non può essere sostituito: le modifiche sono state salvate come {name}',
   },
   'ar': {
     'nav.library': 'المكتبة',
@@ -27686,6 +27697,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.delete_all_body': 'يجب أن يحتوي PDF على صفحة واحدة على الأقل. هل تريد حذف الملف كله؟ سينتقل إلى «المحذوفة مؤخرًا» ويمكن استعادته خلال 30 يومًا.',
     'pdf.delete_file': 'حذف هذا الملف',
     'pdf.keep_one': 'يجب أن يبقى في PDF صفحة واحدة على الأقل',
+    'pdfedit.replace_busy': 'الملف الأصلي مفتوح في برنامج آخر ولا يمكن استبداله، لذلك حُفظت التغييرات باسم {name}',
   },
   'hi': {
     'nav.library': 'लाइब्रेरी',
@@ -29993,6 +30005,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.delete_all_body': 'PDF में कम से कम एक पेज होना चाहिए। पूरी फ़ाइल हटाएँ? हटाई गई फ़ाइल \'हाल ही में हटाए गए\' में जाएगी और 30 दिनों तक वापस लाई जा सकती है।',
     'pdf.delete_file': 'यह फ़ाइल हटाएँ',
     'pdf.keep_one': 'PDF में कम से कम एक पेज रहना चाहिए',
+    'pdfedit.replace_busy': 'मूल फ़ाइल किसी दूसरे प्रोग्राम में खुली है और बदली नहीं जा सकती, इसलिए बदलाव {name} नाम से सेव किए गए',
   },
   'id': {
     'nav.library': 'Pustaka',
@@ -32300,6 +32313,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.delete_all_body': 'PDF harus punya minimal satu halaman. Hapus seluruh file? File akan masuk ke Baru dihapus dan bisa dikembalikan selama 30 hari.',
     'pdf.delete_file': 'Hapus file ini',
     'pdf.keep_one': 'PDF harus punya minimal satu halaman',
+    'pdfedit.replace_busy': 'File asli sedang dibuka di program lain dan tidak bisa ditimpa, jadi perubahan disimpan sebagai {name}',
   },
   'vi': {
     'nav.library': 'Thư viện',
@@ -34607,6 +34621,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.delete_all_body': 'PDF cần ít nhất một trang. Xóa cả tệp? Tệp sẽ vào Đã xóa gần đây và có thể lấy lại trong 30 ngày.',
     'pdf.delete_file': 'Xóa tệp này',
     'pdf.keep_one': 'PDF cần giữ ít nhất một trang',
+    'pdfedit.replace_busy': 'Tệp gốc đang mở trong chương trình khác nên không thể ghi đè; thay đổi đã được lưu thành {name}',
   },
   'th': {
     'nav.library': 'คลังสื่อ',
@@ -36914,6 +36929,7 @@ const Map<String, Map<String, String>> translations = {
     'pdf.delete_all_body': 'PDF ต้องมีอย่างน้อยหนึ่งหน้า ลบทั้งไฟล์ไหม ไฟล์ที่ลบจะไปอยู่ใน \'ลบล่าสุด\' และกู้คืนได้ภายใน 30 วัน',
     'pdf.delete_file': 'ลบไฟล์นี้',
     'pdf.keep_one': 'PDF ต้องเหลืออย่างน้อยหนึ่งหน้า',
+    'pdfedit.replace_busy': 'ไฟล์ต้นฉบับเปิดอยู่ในโปรแกรมอื่นจึงเขียนทับไม่ได้ บันทึกการเปลี่ยนแปลงเป็น {name} แล้ว',
   },
   'tr': {
     'nav.library': 'Kitaplık',
@@ -39221,5 +39237,6 @@ const Map<String, Map<String, String>> translations = {
     'pdf.delete_all_body': 'Bir PDF\'de en az bir sayfa olmalı. Dosyanın tamamı silinsin mi? Son silinenler\'e gider ve 30 gün boyunca geri alınabilir.',
     'pdf.delete_file': 'Bu dosyayı sil',
     'pdf.keep_one': 'Bir PDF\'de en az bir sayfa kalmalı',
+    'pdfedit.replace_busy': 'Orijinal dosya başka bir programda açık olduğu için değiştirilemiyor; değişiklikler {name} olarak kaydedildi',
   },
 };

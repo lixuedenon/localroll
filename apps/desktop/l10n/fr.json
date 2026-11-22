@@ -2303,5 +2303,6 @@
   "pdf.delete_all_title": "Supprimer les {count} pages supprime ce fichier",
   "pdf.delete_all_body": "Un PDF doit avoir au moins une page. Supprimer tout le fichier ? Il va dans « Supprimés récemment », récupérable pendant 30 jours.",
   "pdf.delete_file": "Supprimer ce fichier",
-  "pdf.keep_one": "Un PDF doit garder au moins une page"
+  "pdf.keep_one": "Un PDF doit garder au moins une page",
+  "pdfedit.replace_busy": "L'original est ouvert dans un autre programme et ne peut pas être remplacé : vos modifications sont enregistrées sous {name}"
 }

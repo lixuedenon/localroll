@@ -2303,5 +2303,6 @@
   "pdf.delete_all_title": "{count}페이지를 모두 삭제하면 이 파일이 삭제됩니다",
   "pdf.delete_all_body": "PDF에는 최소 한 페이지가 있어야 합니다. 파일 전체를 삭제할까요? 삭제한 파일은 '최근 삭제'로 이동하며 30일 동안 되돌릴 수 있습니다.",
   "pdf.delete_file": "이 파일 삭제",
-  "pdf.keep_one": "PDF에는 최소 한 페이지가 있어야 합니다"
+  "pdf.keep_one": "PDF에는 최소 한 페이지가 있어야 합니다",
+  "pdfedit.replace_busy": "원본 파일이 다른 프로그램에서 열려 있어 덮어쓸 수 없습니다. 변경 내용을 {name}(으)로 저장했습니다"
 }

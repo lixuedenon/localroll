@@ -16,6 +16,7 @@ import '../../l10n/l10n.dart';
 import '../../services/annotations.dart';
 import '../../services/file_tools.dart';
 import '../../services/pdf_fonts.dart';
+import '../../services/pdf_open.dart';
 import '../../services/tool_outputs.dart';
 import '../../services/windows_ocr.dart';
 import '../light_look.dart';
@@ -635,7 +636,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
       final old = _clean;
       _clean = marks == null ? null : clean;
       if (old != null) unawaited(File(old).delete().then((_) {}, onError: (_) {}));
-      final d = await PdfDocument.openFile(_src);
+      final d = await openPdfLoose(_src);
       if (!mounted) {
         await d.dispose();
         return;
@@ -1117,21 +1118,26 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
     final out = replace ? '${widget.path}.lr-edit.pdf' : toolOutPath(s, _named, tr('pdfedit.suffix'), 'pdf');
     final n = _changes;
     String? err;
+    // Saving over the file failed (held open elsewhere, e.g. in WPS): the
+    // changes kept as a new file instead.
+    String? beside;
     var skipped = 0;
     await runBusy(context, tr('pdf.saving'), () async {
       err = await PdfBuilder.build(out, plan);
       skipped = PdfBuilder.lastSkipped;
       if (err == null && replace) {
-        // The open copy lets go of the file first.
+        // The open copy lets go first (it is read into memory anyway).
         await _doc?.dispose();
         _doc = null;
-        await File(out).copy(widget.path);
-        await File(out).delete();
+        if (!await replaceFileWith(out, widget.path)) {
+          final alt = toolOutPath(s, _named, tr('pdfedit.suffix'), 'pdf');
+          beside = await replaceFileWith(out, alt) ? alt : out;
+        }
       }
     });
-    DiagLog.log('tools', 'pdf edit saved: ${err ?? 'ok'}, skipped $skipped');
+    DiagLog.log('tools', 'pdf edit saved: ${err ?? 'ok'}, skipped $skipped${beside == null ? '' : ', beside: $beside'}');
     if (!mounted) {
-      if (err == null && !replace) await s.tools.saved([out]);
+      if (err == null && (!replace || beside != null)) await s.tools.saved([beside ?? out]);
       return err == null;
     }
     if (err != null) {
@@ -1139,6 +1145,17 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
       return false;
     }
     final note = skipped > 0 ? tr('pdfedit.skipped', {'count': skipped, 'all': n}) : null;
+    final kept = beside;
+    if (kept != null) {
+      // The file as it was, shown again; the changes are in [kept].
+      await _open();
+      if (!mounted) return true;
+      setState(_clearAll);
+      widget.onSaved?.call(kept);
+      final name = kept.split(RegExp(r'[\\/]')).last;
+      await showToolResult(context, s, [kept], note: tr('pdfedit.replace_busy', {'name': name}));
+      return true;
+    }
     if (replace) {
       // Open again: the file now has the changes.
       for (final p in _pics.values) {
