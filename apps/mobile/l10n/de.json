@@ -652,5 +652,9 @@
   "ptool.page_alone": "Diese Seite als eigenes PDF speichern",
   "ptool.delete_page": "Diese Seite löschen",
   "ptool.pdf_to_pc": "An einen PC senden und dort ändern (Wörter, Absätze, Word gibt es am PC)",
-  "mylib.edit": "Bearbeiten"
+  "mylib.edit": "Bearbeiten",
+  "ptool.form": "Formular ausfüllen",
+  "ptool.form_hint": "Dieses PDF hat eigene Felder zum Ausfüllen. Es wird als neues PDF gespeichert, das ein Formular bleibt: andere können weiter ausfüllen oder die Eingaben lesen.",
+  "ptool.form_filled": "ausgefüllt",
+  "ptool.form_failed": "Das ausgefüllte Formular konnte nicht gespeichert werden"
 }

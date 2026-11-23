@@ -652,5 +652,9 @@
   "ptool.page_alone": "このページだけを PDF に保存",
   "ptool.delete_page": "このページを削除",
   "ptool.pdf_to_pc": "PC に送って編集（文字・段落の修正や Word 変換は PC で）",
-  "mylib.edit": "編集"
+  "mylib.edit": "編集",
+  "ptool.form": "フォームに入力",
+  "ptool.form_hint": "この PDF には入力欄があります。入力後は新しい PDF として保存され、フォームのままなので続けて入力したり内容を読み取ったりできます。",
+  "ptool.form_filled": "入力済み",
+  "ptool.form_failed": "入力したフォームを保存できませんでした"
 }

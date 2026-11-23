@@ -652,5 +652,9 @@
   "ptool.page_alone": "Lưu riêng trang này thành PDF",
   "ptool.delete_page": "Xóa trang này",
   "ptool.pdf_to_pc": "Gửi sang máy tính để sửa (sửa chữ, đoạn và Word làm trên máy tính)",
-  "mylib.edit": "Sửa"
+  "mylib.edit": "Sửa",
+  "ptool.form": "Điền biểu mẫu",
+  "ptool.form_hint": "PDF này có sẵn ô để điền. Điền xong sẽ lưu thành PDF mới vẫn là biểu mẫu: người khác có thể điền tiếp hoặc đọc nội dung.",
+  "ptool.form_filled": "da-dien",
+  "ptool.form_failed": "Không lưu được biểu mẫu đã điền"
 }

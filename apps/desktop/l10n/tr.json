@@ -2336,5 +2336,8 @@
   "pdfword.not_now": "Şimdi değil",
   "pdfword.making_pdf": "PDF oluşturuluyor…",
   "pdfword.suffix": "-duzenlendi",
-  "files.edit_verb": "{app} ile düzenle"
+  "files.edit_verb": "{app} ile düzenle",
+  "pdfedit.form": "Doldur",
+  "files.old_need_office": "Bu eski bir Office / WPS biçimi. Keepnear onu bu bilgisayardaki Word, WPS veya LibreOffice PDF'e çevirdikten sonra gösterir; hiçbiri bulunamadı. LibreOffice ücretsizdir.",
+  "files.old_opening": "{name} açılıyor…"
 }

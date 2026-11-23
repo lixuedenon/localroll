@@ -652,5 +652,9 @@
   "ptool.page_alone": "Salvar esta página como PDF separado",
   "ptool.delete_page": "Excluir esta página",
   "ptool.pdf_to_pc": "Enviar para um PC e alterar lá (palavras, parágrafos e Word ficam no PC)",
-  "mylib.edit": "Editar"
+  "mylib.edit": "Editar",
+  "ptool.form": "Preencher o formulário",
+  "ptool.form_hint": "Este PDF tem campos próprios para preencher. Ele é salvo como um novo PDF que continua sendo formulário: outros podem continuar preenchendo ou ler o que foi digitado.",
+  "ptool.form_filled": "preenchido",
+  "ptool.form_failed": "Não foi possível salvar o formulário preenchido"
 }

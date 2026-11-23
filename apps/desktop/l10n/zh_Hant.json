@@ -2336,5 +2336,8 @@
   "pdfword.not_now": "不用了",
   "pdfword.making_pdf": "正在轉回 PDF…",
   "pdfword.suffix": "-已改",
-  "files.edit_verb": "用 {app} 編輯"
+  "files.edit_verb": "用 {app} 編輯",
+  "pdfedit.form": "填表",
+  "files.old_need_office": "這是舊版 Office / WPS 格式，Keepnear 要借這台電腦上的 Word、WPS 或 LibreOffice 先轉成 PDF 才能顯示。現在一個都沒找到；LibreOffice 是免費的。",
+  "files.old_opening": "正在開啟 {name}…"
 }

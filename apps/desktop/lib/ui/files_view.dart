@@ -10,6 +10,8 @@ import '../l10n/l10n.dart';
 import '../services/file_actions.dart';
 import '../services/library_index.dart';
 import '../services/network.dart';
+import '../services/open_with.dart';
+import '../services/office_engines.dart';
 import 'first_page_view.dart';
 import 'format.dart';
 import 'theme.dart';
@@ -19,6 +21,7 @@ import 'pdf_viewer_page.dart';
 import 'player/player_entry.dart';
 import 'player/player_page.dart';
 import 'text_window.dart';
+import 'tools/tools.dart' show runBusy;
 import 'trash_actions.dart';
 import 'lr_dialog.dart';
 
@@ -330,6 +333,8 @@ Future<void> openFromOutside(BuildContext context, AppServices services, List<St
     final name = p.split(Platform.pathSeparator).last;
     if (isPdfPath(p)) {
       unawaited(nav.push(MaterialPageRoute(builder: (_) => PdfViewerPage(path: p, services: services))));
+    } else if (OpenWith.legacyExtensions.contains(extensionOf(name))) {
+      await _openLegacy(context, services, p);
     } else if (OfficeViewPage.canShow(name)) {
       previewOffice(context, p, services: services);
     } else if (isPlainTextPath(p)) {
@@ -339,6 +344,47 @@ Future<void> openFromOutside(BuildContext context, AppServices services, List<St
     }
   }
   if (media.isNotEmpty && context.mounted) await openInPlayer(context, services, media);
+}
+
+/// An older Office / WPS file: made a PDF by the Office, WPS or
+/// LibreOffice on this PC (kept a while, to open again at once), then shown.
+Future<void> _openLegacy(BuildContext context, AppServices services, String path) async {
+  final name = path.split(Platform.pathSeparator).last;
+  final have = await OfficeEngines.installed();
+  if (!context.mounted) return;
+  if (have.isEmpty) {
+    await showLrDialog<void>(
+      context: context,
+      builder: (c) => AlertDialog(
+        icon: const Icon(Icons.info_outline_rounded, size: 30),
+        title: Text(name, overflow: TextOverflow.ellipsis),
+        content: SizedBox(width: 440, child: Text(tr('files.old_need_office'))),
+        actions: [FilledButton(onPressed: () => Navigator.pop(c), child: Text(tr('common.ok')))],
+      ),
+    );
+    return;
+  }
+  final dir = Directory('${Directory.systemTemp.path}${Platform.pathSeparator}keepnear_view');
+  final dot = name.lastIndexOf('.');
+  final out = '${dir.path}${Platform.pathSeparator}${dot > 0 ? name.substring(0, dot) : name}.pdf';
+  String? err;
+  try {
+    await dir.create(recursive: true);
+    final made = File(out);
+    final fresh = made.existsSync() && made.lastModifiedSync().isAfter(File(path).lastModifiedSync());
+    if (!fresh) {
+      if (!context.mounted) return;
+      err = await runBusy(context, tr('files.old_opening', {'name': name}), () => OfficeEngines.run('pdf', path, out));
+    }
+  } catch (e) {
+    err = '$e';
+  }
+  if (!context.mounted) return;
+  if (err != null || !File(out).existsSync()) {
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('tool.failed', {'why': err ?? '?'}))));
+    return;
+  }
+  unawaited(Navigator.of(context).push(MaterialPageRoute(builder: (_) => PdfViewerPage(path: out, services: services))));
 }
 
 Future<void> openReceivedFile(BuildContext context, AppServices services, String path) async {

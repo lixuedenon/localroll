@@ -2336,5 +2336,8 @@
   "pdfword.not_now": "Jetzt nicht",
   "pdfword.making_pdf": "PDF wird erstellt…",
   "pdfword.suffix": "-bearbeitet",
-  "files.edit_verb": "Mit {app} bearbeiten"
+  "files.edit_verb": "Mit {app} bearbeiten",
+  "pdfedit.form": "Ausfüllen",
+  "files.old_need_office": "Ein älteres Office-/WPS-Format. Keepnear zeigt es, nachdem Word, WPS oder LibreOffice auf diesem PC ein PDF daraus macht – keines davon wurde gefunden. LibreOffice ist kostenlos.",
+  "files.old_opening": "{name} wird geöffnet…"
 }

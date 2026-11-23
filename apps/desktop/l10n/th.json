@@ -2336,5 +2336,8 @@
   "pdfword.not_now": "ไม่ต้อง",
   "pdfword.making_pdf": "กำลังสร้าง PDF…",
   "pdfword.suffix": "-แก้แล้ว",
-  "files.edit_verb": "แก้ไขด้วย {app}"
+  "files.edit_verb": "แก้ไขด้วย {app}",
+  "pdfedit.form": "กรอกแบบฟอร์ม",
+  "files.old_need_office": "นี่เป็นรูปแบบ Office / WPS รุ่นเก่า Keepnear จะแสดงได้หลังจาก Word, WPS หรือ LibreOffice ในเครื่องนี้แปลงเป็น PDF แต่ไม่พบโปรแกรมเหล่านี้เลย LibreOffice ใช้ฟรี",
+  "files.old_opening": "กำลังเปิด {name}…"
 }

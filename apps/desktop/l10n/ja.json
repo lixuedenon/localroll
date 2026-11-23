@@ -2336,5 +2336,8 @@
   "pdfword.not_now": "今はしない",
   "pdfword.making_pdf": "PDF を作成中…",
   "pdfword.suffix": "-編集済み",
-  "files.edit_verb": "{app} で編集"
+  "files.edit_verb": "{app} で編集",
+  "pdfedit.form": "フォーム入力",
+  "files.old_need_office": "古い Office / WPS 形式です。この PC の Word・WPS・LibreOffice で PDF にしてから表示しますが、どれも見つかりませんでした。LibreOffice は無料です。",
+  "files.old_opening": "{name} を開いています…"
 }

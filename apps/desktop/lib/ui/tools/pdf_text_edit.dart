@@ -130,7 +130,7 @@ class _Snap {
 }
 
 /// What a click on the page does.
-enum _Mode { text, mark, sign, picture }
+enum _Mode { text, mark, sign, picture, form }
 
 /// 编辑: one page for changing words in place, marks, signatures and
 /// pictures — mixed in any order, one undo, saved together once. Changing
@@ -273,6 +273,9 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
   @override
   void dispose() {
     _jumpCtl.dispose();
+    for (final c in _fieldCtl.values) {
+      c.dispose();
+    }
     for (final e in _eds.values) {
       e.dispose();
     }
@@ -353,7 +356,117 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
   int get _markCount => _eds.values.fold(0, (n, e) => n + e.inks.length);
 
   /// Changes of every kind not saved yet.
-  int get _changes => _edits.length + _puts.length + (_inkTouched ? math.max<int>(1, _markCount) : 0) + _patches.length;
+  int get _changes => _edits.length + _puts.length + (_inkTouched ? math.max<int>(1, _markCount) : 0) + _patches.length + _fills.length;
+
+  // ------------------------------------------------------------ forms
+
+  /// The PDF's own form fields (boxes to fill in, check boxes, choices).
+  List<PdfField> _fields = const [];
+
+  /// What was filled in, by [PdfField.key].
+  final Map<String, Object> _fills = {};
+  final Map<String, TextEditingController> _fieldCtl = {};
+
+  bool get _hasForm => _fields.any((f) => f.fillable);
+
+  void _fill(PdfField f, Object v) {
+    setState(() {
+      if (f.type == 3 && v == true) {
+        // A radio button: the others of its group are off.
+        for (final o in _fields) {
+          if (o.type == 3 && o.name == f.name && o.key != f.key) _fills.remove(o.key);
+        }
+      }
+      _fills[f.key] = v;
+    });
+  }
+
+  bool _checkedNow(PdfField f) {
+    final v = _fills[f.key];
+    if (v is bool) return v;
+    if (f.type == 3) {
+      // Another of the group chosen here: this one is off.
+      if (_fields.any((o) => o.type == 3 && o.name == f.name && o.key != f.key && _fills[o.key] == true)) return false;
+    }
+    return f.checked;
+  }
+
+  /// The fields of the page shown, where they are, to fill in.
+  List<Widget> _formLayer(Rect Function(PdfRect) at, double scale) => [
+        for (final f in _fields)
+          if (f.page == _page && f.fillable)
+            Positioned.fromRect(
+              rect: at(PdfRect(f.l, f.t, f.r, f.b)),
+              child: _fieldBox(f, scale),
+            ),
+      ];
+
+  Widget _fieldBox(PdfField f, double scale) {
+    final h = (f.t - f.b) * scale;
+    final fill = const Color(0x142F6BFF);
+    final edge = Border.all(color: LightLook.blue.withValues(alpha: 0.6));
+    switch (f.type) {
+      case 2 || 3:
+        final on = _checkedNow(f);
+        return Tooltip(
+          message: f.label,
+          child: InkWell(
+            onTap: () => _fill(f, f.type == 3 ? true : !on),
+            child: Container(
+              decoration: BoxDecoration(color: fill, border: edge, shape: f.type == 3 ? BoxShape.circle : BoxShape.rectangle),
+              alignment: Alignment.center,
+              child: on ? Icon(f.type == 3 ? Icons.circle : Icons.check_rounded, size: h * 0.8, color: const Color(0xFF1A1A1A)) : null,
+            ),
+          ),
+        );
+      case 4 || 5:
+        final v = _fills[f.key];
+        final sel = v is int ? v : f.selected;
+        return Tooltip(
+          message: f.label,
+          child: Container(
+            decoration: BoxDecoration(color: Colors.white, border: edge),
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<int>(
+                isExpanded: true,
+                isDense: true,
+                value: sel >= 0 && sel < f.options.length ? sel : null,
+                style: TextStyle(fontSize: (h * 0.55).clamp(9.0, 18.0), color: const Color(0xFF1A1A1A)),
+                items: [for (var i = 0; i < f.options.length; i++) DropdownMenuItem(value: i, child: Text(f.options[i], overflow: TextOverflow.ellipsis))],
+                onChanged: (i) {
+                  if (i != null) _fill(f, i);
+                },
+              ),
+            ),
+          ),
+        );
+      default:
+        final ctl = _fieldCtl[f.key] ??= TextEditingController(text: f.value);
+        return Tooltip(
+          message: f.label,
+          child: Container(
+            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.9), border: edge),
+            padding: const EdgeInsets.symmetric(horizontal: 3),
+            alignment: f.multiline ? Alignment.topLeft : Alignment.centerLeft,
+            child: TextField(
+              controller: ctl,
+              maxLines: f.multiline ? null : 1,
+              expands: f.multiline,
+              style: TextStyle(fontSize: f.multiline ? 12 * scale.clamp(0.8, 2.0) : (h * 0.6).clamp(8.0, 22.0), color: const Color(0xFF1A1A1A)),
+              decoration: const InputDecoration(isDense: true, border: InputBorder.none, contentPadding: EdgeInsets.zero),
+              onChanged: (t) {
+                if (t == f.value) {
+                  setState(() => _fills.remove(f.key));
+                } else {
+                  _fill(f, t);
+                }
+              },
+            ),
+          ),
+        );
+    }
+  }
 
   void _setMode(_Mode m) {
     _finishPatch();
@@ -683,6 +796,16 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
       _inkTouched = false;
       final notes = await PdfBuilder.notesOf(_src);
       if (mounted) _notes = notes;
+      // A form: its fields can be filled in here.
+      final fields = _office ? const <PdfField>[] : await PdfBuilder.formFields(widget.path);
+      if (mounted) {
+        _fields = fields;
+        for (final c in _fieldCtl.values) {
+          c.dispose();
+        }
+        _fieldCtl.clear();
+        if (fields.isNotEmpty) DiagLog.log('tools', 'pdf edit: a form, ${fields.where((f) => f.fillable).length} field(s)');
+      }
       final at = _page == 0 ? widget.page.clamp(0, d.pages.length - 1) : _page.clamp(0, d.pages.length - 1);
       setState(() {
         _doc = d;
@@ -1287,6 +1410,20 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
   }
 
   Future<bool> _saving(PdfDocument d, {required bool replace}) async {
+    // A form filled in: done first. Nothing else changed: the file itself
+    // filled (it stays a form); else the pages are taken from the filled copy.
+    final onlyForm = _fills.isNotEmpty && _edits.isEmpty && _puts.isEmpty && !_inkTouched && _patches.isEmpty;
+    var src = _src;
+    String? filled;
+    if (_fills.isNotEmpty) {
+      filled = '${Directory.systemTemp.path}${Platform.pathSeparator}keepnear_form_${DateTime.now().microsecondsSinceEpoch}.pdf';
+      final e = await PdfBuilder.formFill(onlyForm ? widget.path : _src, Map.of(_fills), filled);
+      if (e != null) {
+        if (mounted) ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('tool.failed', {'why': e}))));
+        return false;
+      }
+      src = filled;
+    }
     // Each change: the PDF's own font when it holds all the new letters,
     // else the closest Windows font (bold / italic drawn if it has none).
     final made = <int, List<PdfTextEdit>>{};
@@ -1388,7 +1525,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
         if (px != null) stamps.add(PdfStamp(px, p.sig.width, p.sig.height, p.rect, angle: p.angle));
       }
       final ink = _eds[i];
-      plan.add(PdfFromDoc(_src, i,
+      plan.add(PdfFromDoc(src, i,
           edits: made[i] ?? const [],
           stamps: stamps,
           notes: notes,
@@ -1404,8 +1541,17 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
     String? beside;
     var skipped = 0;
     await runBusy(context, tr('pdf.saving'), () async {
-      err = await PdfBuilder.build(out, plan);
-      skipped = PdfBuilder.lastSkipped;
+      if (onlyForm && filled != null) {
+        try {
+          await File(filled).copy(out);
+        } catch (e) {
+          err = '$e';
+        }
+      } else {
+        err = await PdfBuilder.build(out, plan);
+        skipped = PdfBuilder.lastSkipped;
+      }
+      if (filled != null) unawaited(File(filled).delete().then((_) {}, onError: (_) {}));
       if (err == null && replace) {
         // The open copy lets go first (it is read into memory anyway).
         await _doc?.dispose();
@@ -1468,6 +1614,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
     _patching = null;
     _edits.clear();
     _puts.clear();
+    _fills.clear();
     _sel = null;
     for (final e in _eds.values) {
       e.restore(const []);
@@ -1590,6 +1737,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
         mode(_Mode.mark, Icons.gesture_rounded, tr('ann.title'), const Color(0xFFE5484D)),
         mode(_Mode.sign, Icons.draw_rounded, tr('pdf.sign'), const Color(0xFF7B4DEB)),
         mode(_Mode.picture, Icons.add_photo_alternate_outlined, tr('pdf.add_picture'), const Color(0xFF0E9F6E)),
+        if (_hasForm) mode(_Mode.form, Icons.fact_check_outlined, tr('pdfedit.form'), const Color(0xFFD97706)),
         const SizedBox(width: 8),
         IconButton(tooltip: '${tr('pdf.undo')} (Ctrl+Z)', onPressed: _undo.isEmpty ? null : _undoOne, icon: const Icon(Icons.undo_rounded)),
         IconButton(tooltip: '${tr('pdf.redo')} (Ctrl+Y)', onPressed: _redo.isEmpty ? null : _redoOne, icon: const Icon(Icons.redo_rounded)),
@@ -1723,6 +1871,8 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
                       ),
                 // Signatures and pictures: choose, move, size, turn.
                 if (putting) Positioned.fill(child: _putLayer(size)),
+                // Filling in the form: its own boxes, where they are.
+                if (_mode == _Mode.form) ..._formLayer(at, scale),
                 if (_mode == _Mode.text)
                   if (_editing case final l? when l.page == _page) ..._editor(l, _editRect(l, at), scale, size),
               ]),

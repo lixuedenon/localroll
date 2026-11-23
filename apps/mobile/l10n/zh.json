@@ -652,5 +652,9 @@
   "ptool.page_alone": "把这一页单独存成 PDF",
   "ptool.delete_page": "删掉这一页",
   "ptool.pdf_to_pc": "发到电脑上改（改字、按段落改、转 Word 都在电脑上）",
-  "mylib.edit": "编辑"
+  "mylib.edit": "编辑",
+  "ptool.form": "填表",
+  "ptool.form_hint": "这个 PDF 自带要填的格子。填好后存成一个新的 PDF，它还是表单，别人还能接着填或读出内容。",
+  "ptool.form_filled": "已填",
+  "ptool.form_failed": "没能存下填好的表单"
 }

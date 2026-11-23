@@ -652,5 +652,9 @@
   "ptool.page_alone": "이 페이지만 PDF로 저장",
   "ptool.delete_page": "이 페이지 삭제",
   "ptool.pdf_to_pc": "PC로 보내서 수정 (글자·단락 수정, Word 변환은 PC에서)",
-  "mylib.edit": "편집"
+  "mylib.edit": "편집",
+  "ptool.form": "양식 작성",
+  "ptool.form_hint": "이 PDF에는 입력 칸이 있습니다. 작성 후 새 PDF로 저장되며 양식 그대로라 다른 사람이 계속 작성하거나 내용을 읽을 수 있습니다.",
+  "ptool.form_filled": "작성됨",
+  "ptool.form_failed": "작성한 양식을 저장하지 못했습니다"
 }

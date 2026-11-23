@@ -652,5 +652,9 @@
   "ptool.page_alone": "Enregistrer cette page seule en PDF",
   "ptool.delete_page": "Supprimer cette page",
   "ptool.pdf_to_pc": "Envoyer à un PC pour le modifier (mots, paragraphes et Word sur le PC)",
-  "mylib.edit": "Modifier"
+  "mylib.edit": "Modifier",
+  "ptool.form": "Remplir le formulaire",
+  "ptool.form_hint": "Ce PDF a ses propres champs à remplir. Il est enregistré comme un nouveau PDF qui reste un formulaire : on peut continuer à le remplir ou lire les saisies.",
+  "ptool.form_filled": "rempli",
+  "ptool.form_failed": "Le formulaire rempli n’a pas pu être enregistré"
 }

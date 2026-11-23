@@ -652,5 +652,9 @@
   "ptool.page_alone": "Salva questa pagina come PDF a sé",
   "ptool.delete_page": "Elimina questa pagina",
   "ptool.pdf_to_pc": "Invia a un PC per modificarlo lì (parole, paragrafi e Word sono sul PC)",
-  "mylib.edit": "Modifica"
+  "mylib.edit": "Modifica",
+  "ptool.form": "Compila il modulo",
+  "ptool.form_hint": "Questo PDF ha i suoi campi da compilare. Viene salvato come nuovo PDF che resta un modulo: altri possono continuare a compilarlo o leggerne i dati.",
+  "ptool.form_filled": "compilato",
+  "ptool.form_failed": "Impossibile salvare il modulo compilato"
 }

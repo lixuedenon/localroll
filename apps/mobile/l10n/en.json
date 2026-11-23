@@ -652,5 +652,9 @@
   "ptool.page_alone": "Save this page as its own PDF",
   "ptool.delete_page": "Delete this page",
   "ptool.pdf_to_pc": "Send to a PC to change it there (changing words, paragraphs and Word are on the PC)",
-  "mylib.edit": "Edit"
+  "mylib.edit": "Edit",
+  "ptool.form": "Fill in the form",
+  "ptool.form_hint": "This PDF has its own boxes to fill in. It is saved as a new PDF that is still a form: others can keep filling it in or read what was entered.",
+  "ptool.form_filled": "filled",
+  "ptool.form_failed": "The filled-in form could not be saved"
 }

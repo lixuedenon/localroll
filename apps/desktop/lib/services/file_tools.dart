@@ -181,6 +181,50 @@ class PdfFromJpeg extends PdfPlanPage {
 
 /// lr_pdf.exe (next to the app; pdfium underneath): writes PDFs from pages
 /// of other PDFs (turned, signed) and photos. Text stays text.
+/// A form field of a PDF (one widget): [type] 1 button, 2 check box,
+/// 3 radio button, 4 drop-down, 5 list, 6 text, 7 signature; its box in
+/// PDF points (the page's own space).
+class PdfField {
+  PdfField({
+    required this.page,
+    required this.type,
+    required this.flags,
+    required this.l,
+    required this.b,
+    required this.r,
+    required this.t,
+    required this.checked,
+    required this.selected,
+    required this.name,
+    required this.alt,
+    required this.value,
+    required this.options,
+  });
+
+  final int page, type, flags;
+  final double l, b, r, t;
+  final bool checked;
+  final int selected;
+  final String name, alt, value;
+  final List<String> options;
+
+  bool get readOnly => flags & 1 != 0;
+  bool get multiline => type == 6 && flags & (1 << 12) != 0;
+
+  /// Something a person fills in (not a button, not a signature).
+  bool get fillable => !readOnly && (type == 2 || type == 3 || type == 4 || type == 5 || type == 6);
+
+  /// Its key: page and box (the same in every copy of the file).
+  String get key => '$page|${l.toStringAsFixed(2)}|${b.toStringAsFixed(2)}|${r.toStringAsFixed(2)}|${t.toStringAsFixed(2)}';
+
+  /// A name to show: the form's own label, else the last part of its name.
+  String get label {
+    if (alt.trim().isNotEmpty) return alt.trim();
+    final parts = name.split('.');
+    return parts.last.replaceAll(RegExp(r'\[\d+\]'), '').trim();
+  }
+}
+
 class PdfBuilder {
   PdfBuilder._();
 
@@ -230,6 +274,87 @@ class PdfBuilder {
     } catch (e) {
       DiagLog.log('tools', 'pdf notes: $e');
       return const [];
+    }
+  }
+
+  /// The PDF's form fields (empty: none, or it can't tell).
+  static Future<List<PdfField>> formFields(String pdf) async {
+    if (!available) return const [];
+    final tmp = await Directory.systemTemp.createTemp('lr_fld');
+    final out = '${tmp.path}${Platform.pathSeparator}f.txt';
+    final list = <PdfField>[];
+    String d(String s) {
+      try {
+        return utf8.decode(base64.decode(s));
+      } catch (_) {
+        return '';
+      }
+    }
+
+    try {
+      final r = await Process.run(exe, ['--fields', pdf, out]).timeout(const Duration(seconds: 30));
+      if ('${r.stdout}'.trim() == 'ok') {
+        for (final line in await File(out).readAsLines()) {
+          final p = line.split('|');
+          if (p.length < 15 || p[0] != 'F') continue;
+          final opts = d(p[14]);
+          list.add(PdfField(
+            page: int.tryParse(p[1]) ?? 0,
+            type: int.tryParse(p[3]) ?? -1,
+            flags: int.tryParse(p[4]) ?? 0,
+            l: double.tryParse(p[5]) ?? 0,
+            b: double.tryParse(p[6]) ?? 0,
+            r: double.tryParse(p[7]) ?? 0,
+            t: double.tryParse(p[8]) ?? 0,
+            checked: p[9] == '1',
+            selected: int.tryParse(p[10]) ?? -1,
+            name: d(p[11]),
+            alt: d(p[12]),
+            value: d(p[13]),
+            options: opts.isEmpty ? const [] : opts.split('\n'),
+          ));
+        }
+      }
+    } catch (e) {
+      DiagLog.log('tools', 'pdf fields: $e');
+    }
+    try {
+      await tmp.delete(recursive: true);
+    } catch (_) {}
+    return list;
+  }
+
+  /// [pdf] with fields set ([PdfField.key] → a String for text, a bool for
+  /// a check box / radio button, an int for a choice), saved to [out]
+  /// still as a form. Null when done, else why not.
+  static Future<String?> formFill(String pdf, Map<String, Object> values, String out) async {
+    if (!available) return 'lr_pdf.exe missing';
+    final tmp = await Directory.systemTemp.createTemp('lr_fill');
+    try {
+      final spec = StringBuffer();
+      final keys = values.keys.toList()..sort((a, b) => (int.tryParse(a.split('|').first) ?? 0).compareTo(int.tryParse(b.split('|').first) ?? 0));
+      for (final k in keys) {
+        final v = values[k];
+        if (v is String) {
+          spec.writeln('$k|text|${[for (final c in utf8.encode(v)) c.toRadixString(16).padLeft(2, '0')].join()}');
+        } else if (v is bool) {
+          spec.writeln('$k|check|${v ? 1 : 0}');
+        } else if (v is int) {
+          spec.writeln('$k|pick|$v');
+        }
+      }
+      final f = File('${tmp.path}${Platform.pathSeparator}spec.txt');
+      await f.writeAsString(spec.toString());
+      final r = await Process.run(exe, ['--fill', pdf, f.path, out]).timeout(const Duration(minutes: 2));
+      final said = '${r.stdout}'.trim();
+      DiagLog.log('tools', 'pdf form fill: $said');
+      return said.startsWith('ok') && File(out).existsSync() ? null : (said.isEmpty ? 'no answer' : said);
+    } catch (e) {
+      return '$e';
+    } finally {
+      try {
+        await tmp.delete(recursive: true);
+      } catch (_) {}
     }
   }
 

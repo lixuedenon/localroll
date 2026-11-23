@@ -2336,5 +2336,8 @@
   "pdfword.not_now": "Agora não",
   "pdfword.making_pdf": "Criando o PDF…",
   "pdfword.suffix": "-editado",
-  "files.edit_verb": "Editar com {app}"
+  "files.edit_verb": "Editar com {app}",
+  "pdfedit.form": "Preencher",
+  "files.old_need_office": "Formato antigo do Office / WPS. O Keepnear o mostra depois que o Word, WPS ou LibreOffice deste PC o converte em PDF, e nenhum foi encontrado. O LibreOffice é gratuito.",
+  "files.old_opening": "Abrindo {name}…"
 }

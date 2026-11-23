@@ -2336,5 +2336,8 @@
   "pdfword.not_now": "Not now",
   "pdfword.making_pdf": "Making the PDF…",
   "pdfword.suffix": "-edited",
-  "files.edit_verb": "Edit with {app}"
+  "files.edit_verb": "Edit with {app}",
+  "pdfedit.form": "Fill in",
+  "files.old_need_office": "This is an older Office / WPS format. Keepnear shows it after Word, WPS or LibreOffice on this PC turns it into a PDF, and none of them was found. LibreOffice is free.",
+  "files.old_opening": "Opening {name}…"
 }

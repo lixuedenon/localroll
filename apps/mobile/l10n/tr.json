@@ -652,5 +652,9 @@
   "ptool.page_alone": "Bu sayfayı ayrı PDF olarak kaydet",
   "ptool.delete_page": "Bu sayfayı sil",
   "ptool.pdf_to_pc": "PC'ye gönderip orada değiştir (kelime, paragraf ve Word PC'de)",
-  "mylib.edit": "Düzenle"
+  "mylib.edit": "Düzenle",
+  "ptool.form": "Formu doldur",
+  "ptool.form_hint": "Bu PDF'in kendi doldurma kutuları var. Hâlâ form olan yeni bir PDF olarak kaydedilir: başkaları doldurmaya devam edebilir veya girilenleri okuyabilir.",
+  "ptool.form_filled": "dolduruldu",
+  "ptool.form_failed": "Doldurulan form kaydedilemedi"
 }

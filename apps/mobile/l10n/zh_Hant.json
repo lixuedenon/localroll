@@ -652,5 +652,9 @@
   "ptool.page_alone": "把這一頁單獨存成 PDF",
   "ptool.delete_page": "刪掉這一頁",
   "ptool.pdf_to_pc": "發到電腦上改（改字、按段落改、轉 Word 都在電腦上）",
-  "mylib.edit": "編輯"
+  "mylib.edit": "編輯",
+  "ptool.form": "填表",
+  "ptool.form_hint": "這個 PDF 自帶要填的格子。填好後存成一個新的 PDF，它還是表單，別人還能接著填或讀出內容。",
+  "ptool.form_filled": "已填",
+  "ptool.form_failed": "沒能存下填好的表單"
 }

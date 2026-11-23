@@ -2336,5 +2336,8 @@
   "pdfword.not_now": "Nanti saja",
   "pdfword.making_pdf": "Membuat PDF…",
   "pdfword.suffix": "-diedit",
-  "files.edit_verb": "Edit dengan {app}"
+  "files.edit_verb": "Edit dengan {app}",
+  "pdfedit.form": "Isi formulir",
+  "files.old_need_office": "Ini format Office / WPS lama. Keepnear menampilkannya setelah Word, WPS, atau LibreOffice di PC ini mengubahnya ke PDF, dan tidak ada yang ditemukan. LibreOffice gratis.",
+  "files.old_opening": "Membuka {name}…"
 }

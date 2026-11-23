@@ -2336,5 +2336,8 @@
   "pdfword.not_now": "अभी नहीं",
   "pdfword.making_pdf": "PDF बन रही है…",
   "pdfword.suffix": "-संपादित",
-  "files.edit_verb": "{app} से संपादित करें"
+  "files.edit_verb": "{app} से संपादित करें",
+  "pdfedit.form": "भरें",
+  "files.old_need_office": "यह पुराना Office / WPS प्रारूप है। Keepnear इसे इस PC के Word, WPS या LibreOffice से PDF बनवाकर दिखाता है, पर इनमें से कोई नहीं मिला। LibreOffice मुफ़्त है।",
+  "files.old_opening": "{name} खुल रही है…"
 }

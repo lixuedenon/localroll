@@ -652,5 +652,9 @@
   "ptool.page_alone": "Simpan halaman ini sebagai PDF sendiri",
   "ptool.delete_page": "Hapus halaman ini",
   "ptool.pdf_to_pc": "Kirim ke PC untuk diubah di sana (kata, paragraf, dan Word ada di PC)",
-  "mylib.edit": "Edit"
+  "mylib.edit": "Edit",
+  "ptool.form": "Isi formulir",
+  "ptool.form_hint": "PDF ini punya kotak isian sendiri. Disimpan sebagai PDF baru yang tetap berupa formulir: orang lain bisa melanjutkan mengisi atau membaca isiannya.",
+  "ptool.form_filled": "terisi",
+  "ptool.form_failed": "Formulir yang diisi tidak dapat disimpan"
 }

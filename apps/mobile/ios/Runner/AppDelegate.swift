@@ -379,18 +379,117 @@ enum PdfWriter {
   static func register(messenger: FlutterBinaryMessenger) {
     let ch = FlutterMethodChannel(name: "localroll/pdfedit", binaryMessenger: messenger)
     ch.setMethodCallHandler { call, result in
-      guard call.method == "write",
-            let args = call.arguments as? [String: Any],
-            let pages = args["pages"] as? [[String: Any]],
-            let out = args["out"] as? String
-      else {
+      let args = call.arguments as? [String: Any] ?? [:]
+      switch call.method {
+      case "write":
+        guard let pages = args["pages"] as? [[String: Any]], let out = args["out"] as? String else {
+          result(FlutterError(code: "arg", message: "pages / out missing", details: nil))
+          return
+        }
+        PdfPages.queue.async {
+          let ok = write(pages, to: out)
+          DispatchQueue.main.async { result(ok) }
+        }
+      case "fields":
+        guard let path = args["path"] as? String else {
+          result(FlutterError(code: "arg", message: "path missing", details: nil))
+          return
+        }
+        PdfPages.queue.async {
+          let list = fields(path)
+          DispatchQueue.main.async { result(list) }
+        }
+      case "fill":
+        guard let path = args["path"] as? String, let values = args["values"] as? [[String: Any]], let out = args["out"] as? String else {
+          result(FlutterError(code: "arg", message: "path / values / out missing", details: nil))
+          return
+        }
+        PdfPages.queue.async {
+          let ok = fill(path, values, to: out)
+          DispatchQueue.main.async { result(ok) }
+        }
+      default:
         result(FlutterMethodNotImplemented)
-        return
       }
-      PdfPages.queue.async {
-        let ok = write(pages, to: out)
-        DispatchQueue.main.async { result(ok) }
+    }
+  }
+
+  /// The form's fields that can be filled in (see PdfFormField).
+  static func fields(_ path: String) -> [[String: Any]] {
+    guard let doc = PDFDocument(url: URL(fileURLWithPath: path)) else { return [] }
+    var out: [[String: Any]] = []
+    for pi in 0..<doc.pageCount {
+      guard let page = doc.page(at: pi) else { continue }
+      for a in page.annotations where a.type == "Widget" && !a.isReadOnly {
+        var kind: String? = nil
+        switch a.widgetFieldType {
+        case .text: kind = "text"
+        case .choice: kind = "choice"
+        case .button:
+          if a.widgetControlType == .checkBoxControl { kind = "check" }
+          else if a.widgetControlType == .radioButtonControl { kind = "radio" }
+        default: kind = nil
+        }
+        guard let k = kind else { continue }
+        let choices = a.choices ?? []
+        let value = a.widgetStringValue ?? ""
+        let b = a.bounds
+        out.append([
+          "page": pi,
+          "kind": k,
+          "name": a.fieldName ?? "",
+          "label": a.toolTip ?? "",
+          "value": value,
+          "checked": a.buttonWidgetState == .onState,
+          "options": choices,
+          "selected": choices.firstIndex(of: value) ?? -1,
+          "multiline": a.isMultiline,
+          "l": Double(b.minX), "b": Double(b.minY), "r": Double(b.maxX), "t": Double(b.maxY),
+        ])
       }
+    }
+    return out
+  }
+
+  /// The fields set; the PDF written to [out] (still a form).
+  static func fill(_ path: String, _ values: [[String: Any]], to out: String) -> Bool {
+    guard let doc = PDFDocument(url: URL(fileURLWithPath: path)) else { return false }
+    for v in values {
+      guard let pi = v["page"] as? Int, pi >= 0, pi < doc.pageCount, let page = doc.page(at: pi) else { continue }
+      let l = v["l"] as? Double ?? 0, b = v["b"] as? Double ?? 0, r = v["r"] as? Double ?? 0, t = v["t"] as? Double ?? 0
+      guard let a = page.annotations.first(where: {
+        $0.type == "Widget" && abs(Double($0.bounds.minX) - l) < 0.6 && abs(Double($0.bounds.minY) - b) < 0.6 &&
+          abs(Double($0.bounds.maxX) - r) < 0.6 && abs(Double($0.bounds.maxY) - t) < 0.6
+      }) else { continue }
+      switch v["kind"] as? String {
+      case "text":
+        a.widgetStringValue = v["value"] as? String ?? ""
+      case "check":
+        let on = (v["value"] as? Int ?? 0) == 1
+        if on, a.widgetControlType == .radioButtonControl, let name = a.fieldName {
+          // The others of its group off.
+          for p2 in 0..<doc.pageCount {
+            for o in doc.page(at: p2)?.annotations ?? [] where o !== a && o.fieldName == name && o.widgetControlType == .radioButtonControl {
+              o.buttonWidgetState = .offState
+            }
+          }
+        }
+        a.buttonWidgetState = on ? .onState : .offState
+      case "pick":
+        let i = v["value"] as? Int ?? -1
+        if let c = a.choices, i >= 0, i < c.count { a.widgetStringValue = c[i] }
+      default:
+        break
+      }
+    }
+    let tmp = out + ".part"
+    guard doc.write(to: URL(fileURLWithPath: tmp)) else { return false }
+    try? FileManager.default.removeItem(atPath: out)
+    do {
+      try FileManager.default.moveItem(atPath: tmp, toPath: out)
+      return true
+    } catch {
+      return false
     }
   }
 

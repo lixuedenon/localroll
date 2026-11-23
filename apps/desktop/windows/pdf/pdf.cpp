@@ -38,6 +38,8 @@
 //                                                <half> (0–1 of the page width): no
 //                                                icon, a spot that size over x y
 //
+//   lr_pdf.exe --fields "<pdf>" "<out>"        form fields, one line each
+//   lr_pdf.exe --fill "<pdf>" "<spec>" "<out>"  fields set, saved (still a form)
 //   lr_pdf.exe "<plan file>"
 //   lr_pdf.exe --print "<pdf>" "<printer>" <copies> <pages> <landscape> <fit> <gray> <duplex>
 //              <pages>: 0-based, comma separated; the rest 0 / 1. Prints: ok <n>
@@ -181,6 +183,27 @@ struct Api {
   // For --thumb only.
   void (*RenderPageBitmap)(BMP, PAGE, int, int, int, int, int, int);
   int (*FillRect)(BMP, int, int, int, int, unsigned long);
+  // Forms (--fields, --fill): optional.
+  void* (*InitFormFill)(DOC, void*);
+  void (*ExitFormFill)(void*);
+  void (*FormAfterLoad)(PAGE, void*);
+  void (*FormBeforeClose)(PAGE, void*);
+  int (*FieldType)(void*, void*);
+  unsigned long (*FieldName)(void*, void*, unsigned short*, unsigned long);
+  unsigned long (*FieldAltName)(void*, void*, unsigned short*, unsigned long);
+  unsigned long (*FieldValue)(void*, void*, unsigned short*, unsigned long);
+  int (*FieldFlags)(void*, void*);
+  int (*FieldChecked)(void*, void*);
+  int (*OptionCount)(void*, void*);
+  unsigned long (*OptionLabel)(void*, void*, int, unsigned short*, unsigned long);
+  int (*OptionSelected)(void*, void*, int);
+  int (*FormFocus)(void*, void*);
+  int (*FormSelectAll)(void*, PAGE);
+  void (*FormReplace)(void*, PAGE, const unsigned short*);
+  int (*FormKillFocus)(void*);
+  int (*FormSetIndex)(void*, PAGE, int, int);
+  int (*FormDown)(void*, PAGE, int, double, double);
+  int (*FormUp)(void*, PAGE, int, double, double);
 };
 
 Api api{};
@@ -303,6 +326,27 @@ bool load() {
   find(m, "FPDFTextObj_SetTextRenderMode", api.TextObjSetRenderMode);
   find(m, "FPDFPageObj_SetStrokeColor", api.ObjSetStrokeColor);
   find(m, "FPDFPageObj_SetStrokeWidth", api.ObjSetStrokeWidth);
+  // Optional: forms.
+  find(m, "FPDFDOC_InitFormFillEnvironment", api.InitFormFill);
+  find(m, "FPDFDOC_ExitFormFillEnvironment", api.ExitFormFill);
+  find(m, "FORM_OnAfterLoadPage", api.FormAfterLoad);
+  find(m, "FORM_OnBeforeClosePage", api.FormBeforeClose);
+  find(m, "FPDFAnnot_GetFormFieldType", api.FieldType);
+  find(m, "FPDFAnnot_GetFormFieldName", api.FieldName);
+  find(m, "FPDFAnnot_GetFormFieldAlternateName", api.FieldAltName);
+  find(m, "FPDFAnnot_GetFormFieldValue", api.FieldValue);
+  find(m, "FPDFAnnot_GetFormFieldFlags", api.FieldFlags);
+  find(m, "FPDFAnnot_IsChecked", api.FieldChecked);
+  find(m, "FPDFAnnot_GetOptionCount", api.OptionCount);
+  find(m, "FPDFAnnot_GetOptionLabel", api.OptionLabel);
+  find(m, "FPDFAnnot_IsOptionSelected", api.OptionSelected);
+  find(m, "FORM_SetFocusedAnnot", api.FormFocus);
+  find(m, "FORM_SelectAllText", api.FormSelectAll);
+  find(m, "FORM_ReplaceSelection", api.FormReplace);
+  find(m, "FORM_ForceToKillFocus", api.FormKillFocus);
+  find(m, "FORM_SetIndexSelected", api.FormSetIndex);
+  find(m, "FORM_OnLButtonDown", api.FormDown);
+  find(m, "FORM_OnLButtonUp", api.FormUp);
   // Optional (the page box's corner; 0,0 without them).
   find(m, "FPDFPage_GetCropBox", api.GetCropBox);
   find(m, "FPDFPage_GetMediaBox", api.GetMediaBox);
@@ -786,6 +830,233 @@ int cleanPdf(const std::string& pdf, const std::wstring& outPath) {
   return ok ? 0 : 1;
 }
 
+// ---------------------------------------------------------------- forms
+
+// FPDF_FORMFILLINFO with no callbacks (version 1): enough to read and set
+// fields; pdfium checks each callback before calling it.
+static unsigned char formInfo[1024];
+
+static void* openForm(DOC doc) {
+  if (!api.InitFormFill) return nullptr;
+  memset(formInfo, 0, sizeof formInfo);
+  *(int*)formInfo = 1;
+  return api.InitFormFill(doc, formInfo);
+}
+
+static std::string u16str(unsigned long (*get)(void*, void*, unsigned short*, unsigned long), void* h, void* a) {
+  if (!get) return "";
+  unsigned long n = get(h, a, nullptr, 0);
+  if (n <= 2 || n > 200000) return "";
+  std::vector<unsigned short> w(n / 2 + 1, 0);
+  get(h, a, w.data(), n);
+  std::wstring ws(w.begin(), w.end());
+  ws = ws.c_str();
+  int need = WideCharToMultiByte(CP_UTF8, 0, ws.c_str(), -1, nullptr, 0, nullptr, nullptr);
+  if (need <= 1) return "";
+  std::string u(need - 1, '\0');
+  WideCharToMultiByte(CP_UTF8, 0, ws.c_str(), -1, &u[0], need, nullptr, nullptr);
+  return u;
+}
+
+// --fields: every form field (widget), one line each:
+// F|page|annot|type|flags|l|b|r|t|checked|selected|b64 name|b64 alt|b64 value|b64 options (\n)
+int formFields(const std::string& pdf, const std::wstring& outPath) {
+  if (!load() || !api.AnnotCount || !api.GetAnnot || !api.AnnotGetSubtype || !api.AnnotGetRect || !api.FieldType) {
+    say("error pdfium.dll not usable");
+    return 3;
+  }
+  api.InitLibrary();
+  std::vector<unsigned char> bytes;
+  DOC doc = openPdf(pdf, bytes);
+  if (!doc) {
+    say("error cannot open");
+    return 1;
+  }
+  void* form = openForm(doc);
+  std::string out;
+  int n = api.GetPageCount(doc);
+  for (int pi = 0; pi < n; pi++) {
+    PAGE pg = api.LoadPage(doc, pi);
+    if (!pg) continue;
+    if (form && api.FormAfterLoad) api.FormAfterLoad(pg, form);
+    int c = api.AnnotCount(pg);
+    for (int ai = 0; ai < c; ai++) {
+      void* a = api.GetAnnot(pg, ai);
+      if (!a) continue;
+      if (api.AnnotGetSubtype(a) == 20 /* widget */) {
+        int type = form ? api.FieldType(form, a) : -1;
+        float r[4] = {0, 0, 0, 0};
+        api.AnnotGetRect(a, r);
+        int flags = form && api.FieldFlags ? api.FieldFlags(form, a) : 0;
+        int checked = form && api.FieldChecked ? api.FieldChecked(form, a) : 0;
+        std::string opts;
+        int sel = -1;
+        int oc = form && api.OptionCount ? api.OptionCount(form, a) : 0;
+        for (int k = 0; k < oc && k < 500 && api.OptionLabel; k++) {
+          unsigned long len = api.OptionLabel(form, a, k, nullptr, 0);
+          std::string label;
+          if (len > 2 && len < 20000) {
+            std::vector<unsigned short> w(len / 2 + 1, 0);
+            api.OptionLabel(form, a, k, w.data(), len);
+            std::wstring ws(w.begin(), w.end());
+            ws = ws.c_str();
+            int need = WideCharToMultiByte(CP_UTF8, 0, ws.c_str(), -1, nullptr, 0, nullptr, nullptr);
+            if (need > 1) {
+              label.assign(need - 1, '\0');
+              WideCharToMultiByte(CP_UTF8, 0, ws.c_str(), -1, &label[0], need, nullptr, nullptr);
+            }
+          }
+          if (k > 0) opts += "\n";
+          opts += label;
+          if (sel < 0 && api.OptionSelected && api.OptionSelected(form, a, k)) sel = k;
+        }
+        char line[256];
+        // FS_RECTF: left, top, right, bottom → l b r t.
+        snprintf(line, sizeof line, "F|%d|%d|%d|%d|%.2f|%.2f|%.2f|%.2f|%d|%d|", pi, ai, type, flags, r[0], r[3], r[2], r[1], checked, sel);
+        out += line;
+        out += b64(u16str(api.FieldName, form, a)) + "|" + b64(u16str(api.FieldAltName, form, a)) + "|" +
+               b64(u16str(api.FieldValue, form, a)) + "|" + b64(opts) + "\n";
+      }
+      api.CloseAnnot(a);
+    }
+    if (form && api.FormBeforeClose) api.FormBeforeClose(pg, form);
+    api.ClosePage(pg);
+  }
+  if (form && api.ExitFormFill) api.ExitFormFill(form);
+  api.CloseDocument(doc);
+  FILE* f = _wfopen(outPath.c_str(), L"wb");
+  if (!f) {
+    say("error cannot write");
+    return 1;
+  }
+  fwrite(out.data(), 1, out.size(), f);
+  fclose(f);
+  say("ok");
+  return 0;
+}
+
+static int hexv(char c) { return c >= '0' && c <= '9' ? c - '0' : c >= 'a' && c <= 'f' ? c - 'a' + 10 : c >= 'A' && c <= 'F' ? c - 'A' + 10 : 0; }
+
+// --fill: fields set as the spec file says, the PDF saved (still a form).
+// Spec lines: page|l|b|r|t|text|<hex UTF-8>, …|check|0/1, …|pick|<index>
+// (the widget found by its box: annotation numbers differ between copies).
+int formFill(const std::string& pdf, const std::string& specPath, const std::wstring& outPath) {
+  if (!load() || !api.GetAnnot || !api.AnnotCount || !api.AnnotGetSubtype || !api.AnnotGetRect || !api.FormFocus ||
+      !api.FormSelectAll || !api.FormReplace ||
+      !api.FormAfterLoad || !api.FormBeforeClose) {
+    say("error pdfium.dll not usable");
+    return 3;
+  }
+  api.InitLibrary();
+  std::vector<unsigned char> bytes, spec;
+  DOC doc = openPdf(pdf, bytes);
+  if (!doc || !readAll(specPath, spec)) {
+    say("error cannot open");
+    return 1;
+  }
+  void* form = openForm(doc);
+  if (!form) {
+    api.CloseDocument(doc);
+    say("error no form");
+    return 1;
+  }
+  std::string all(spec.begin(), spec.end());
+  int done = 0, cur = -1;
+  PAGE pg = nullptr;
+  size_t at = 0;
+  while (at < all.size()) {
+    size_t nl = all.find('\n', at);
+    std::string line = all.substr(at, nl == std::string::npos ? std::string::npos : nl - at);
+    at = nl == std::string::npos ? all.size() : nl + 1;
+    if (!line.empty() && line.back() == '\r') line.pop_back();
+    auto q = split(line, '|');
+    if (q.size() < 7) continue;
+    int pi = atoi(q[0].c_str());
+    double L = atof(q[1].c_str()), B = atof(q[2].c_str()), R = atof(q[3].c_str()), T = atof(q[4].c_str());
+    std::vector<std::string> p = {q[0], "", q[5], q[6]};
+    if (pi != cur) {
+      if (pg) {
+        api.FormKillFocus(form);
+        api.FormBeforeClose(pg, form);
+        api.ClosePage(pg);
+      }
+      pg = pi >= 0 && pi < api.GetPageCount(doc) ? api.LoadPage(doc, pi) : nullptr;
+      cur = pi;
+      if (pg) api.FormAfterLoad(pg, form);
+    }
+    if (!pg) continue;
+    void* a = nullptr;
+    int cnt = api.AnnotCount ? api.AnnotCount(pg) : 0;
+    for (int k = 0; k < cnt && !a; k++) {
+      void* x = api.GetAnnot(pg, k);
+      if (!x) continue;
+      float r[4] = {0, 0, 0, 0};
+      if (api.AnnotGetSubtype(x) == 20 && api.AnnotGetRect(x, r) && fabs(r[0] - L) < 0.6 && fabs(r[3] - B) < 0.6 &&
+          fabs(r[2] - R) < 0.6 && fabs(r[1] - T) < 0.6) {
+        a = x;
+      } else {
+        api.CloseAnnot(x);
+      }
+    }
+    if (!a) continue;
+    if (p[2] == "text") {
+      std::string u;
+      for (size_t k = 0; k + 1 < p[3].size(); k += 2) u += (char)(hexv(p[3][k]) * 16 + hexv(p[3][k + 1]));
+      std::wstring w = wide(u);
+      std::vector<unsigned short> u16(w.begin(), w.end());
+      u16.push_back(0);
+      if (api.FormFocus(form, a)) {
+        api.FormSelectAll(form, pg);
+        api.FormReplace(form, pg, u16.data());
+        if (api.FormKillFocus) api.FormKillFocus(form);
+        done++;
+      }
+    } else if (p[2] == "check") {
+      bool want = p[3] == "1";
+      bool now = api.FieldChecked && api.FieldChecked(form, a);
+      if (want != now && api.FormDown && api.FormUp) {
+        float r[4] = {0, 0, 0, 0};
+        api.AnnotGetRect(a, r);
+        double x = (r[0] + r[2]) / 2, y = (r[1] + r[3]) / 2;
+        api.FormDown(form, pg, 0, x, y);
+        api.FormUp(form, pg, 0, x, y);
+        if (api.FormKillFocus) api.FormKillFocus(form);
+        done++;
+      }
+    } else if (p[2] == "pick" && api.FormSetIndex) {
+      if (api.FormFocus(form, a)) {
+        api.FormSetIndex(form, pg, atoi(p[3].c_str()), 1);
+        if (api.FormKillFocus) api.FormKillFocus(form);
+        done++;
+      }
+    }
+    api.CloseAnnot(a);
+  }
+  if (pg) {
+    api.FormKillFocus(form);
+    api.FormBeforeClose(pg, form);
+    api.ClosePage(pg);
+  }
+  if (api.ExitFormFill) api.ExitFormFill(form);
+  FILE* f = _wfopen(outPath.c_str(), L"wb");
+  bool ok = false;
+  if (f) {
+    Writer w{};
+    w.version = 1;
+    w.writeBlock = writeBlock;
+    w.f = f;
+    ok = api.SaveAsCopy(doc, &w, 0) != 0;
+    fclose(f);
+  }
+  api.CloseDocument(doc);
+  if (!ok) {
+    say("error save failed");
+    return 1;
+  }
+  say("ok " + std::to_string(done));
+  return 0;
+}
+
 // --notes: every PDF text note, where it is on the page as shown.
 int listNotes(const std::string& pdf) {
   if (!load() || !api.AnnotCount || !api.GetAnnot || !api.AnnotGetSubtype || !api.AnnotGetRect) {
@@ -873,6 +1144,12 @@ int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
   }
   if (argc >= 4 && wcscmp(argv[1], L"--clean") == 0) {
     return cleanPdf(narrow(argv[2]), argv[3]);
+  }
+  if (argc >= 4 && wcscmp(argv[1], L"--fields") == 0) {
+    return formFields(narrow(argv[2]), argv[3]);
+  }
+  if (argc >= 5 && wcscmp(argv[1], L"--fill") == 0) {
+    return formFill(narrow(argv[2]), narrow(argv[3]), argv[4]);
   }
   if (argc >= 3 && wcscmp(argv[1], L"--notes") == 0) {
     return listNotes(narrow(argv[2]));

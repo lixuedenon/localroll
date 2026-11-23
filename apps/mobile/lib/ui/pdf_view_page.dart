@@ -9,7 +9,8 @@ import '../l10n/l10n.dart';
 import '../services/clip_maker.dart' show ClipEnv;
 import '../services/pdf_pages.dart';
 import 'theme.dart';
-import 'tools_page.dart' show openPdfTools;
+import '../services/pdf_writer.dart';
+import 'tools_page.dart' show openPdfForm, openPdfTools;
 
 /// Reads a PDF inside LocalRoll: swipe between pages, pinch to zoom.
 /// "Share" hands it to other apps (print, mail, another PDF app…).
@@ -27,6 +28,7 @@ class _PdfViewPageState extends State<PdfViewPage> {
   int? _count;
   int _page = 0;
   final Map<int, Future<Uint8List?>> _pages = {};
+  List<PdfFormField> _fields = const [];
 
   String get _name => widget.title ?? widget.path.split(Platform.pathSeparator).last;
 
@@ -35,6 +37,10 @@ class _PdfViewPageState extends State<PdfViewPage> {
     super.initState();
     PdfPages.count(widget.path).then((n) {
       if (mounted) setState(() => _count = n);
+    });
+    // A form: its boxes can be filled in.
+    PdfForms.fields(widget.path).then((f) {
+      if (mounted && f.isNotEmpty) setState(() => _fields = f);
     });
   }
 
@@ -61,6 +67,12 @@ class _PdfViewPageState extends State<PdfViewPage> {
       appBar: AppBar(
         title: Text(_name, overflow: TextOverflow.ellipsis),
         actions: [
+          if (_fields.isNotEmpty && ClipEnv.settings != null && ClipEnv.discovery != null)
+            IconButton(
+              tooltip: tr('ptool.form'),
+              onPressed: () => openPdfForm(context, ClipEnv.settings!, ClipEnv.discovery!, widget.path, _fields),
+              icon: const Icon(Icons.fact_check_outlined),
+            ),
           // Mark, sign, turn, take pages out (the PDF keeps its text).
           if (ClipEnv.settings != null && ClipEnv.discovery != null)
             IconButton(

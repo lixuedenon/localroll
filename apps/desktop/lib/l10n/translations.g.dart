@@ -2342,6 +2342,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.making_pdf': 'Making the PDF…',
     'pdfword.suffix': '-edited',
     'files.edit_verb': 'Edit with Keepnear',
+    'pdfedit.form': 'Fill in',
+    'files.old_need_office': 'This is an older Office / WPS format. Keepnear shows it after Word, WPS or LibreOffice on this PC turns it into a PDF, and none of them was found. LibreOffice is free.',
+    'files.old_opening': 'Opening {name}…',
   },
   'zh': {
     'nav.library': '媒体库',
@@ -4682,6 +4685,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.making_pdf': '正在转回 PDF…',
     'pdfword.suffix': '-已改',
     'files.edit_verb': '用 Keepnear 编辑',
+    'pdfedit.form': '填表',
+    'files.old_need_office': '这是旧版 Office / WPS 格式，Keepnear 要借这台电脑上的 Word、WPS 或 LibreOffice 先转成 PDF 才能显示。现在一个都没找到；LibreOffice 是免费的。',
+    'files.old_opening': '正在打开 {name}…',
   },
   'zh_Hant': {
     'nav.library': '媒體庫',
@@ -7022,6 +7028,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.making_pdf': '正在轉回 PDF…',
     'pdfword.suffix': '-已改',
     'files.edit_verb': '用 Keepnear 編輯',
+    'pdfedit.form': '填表',
+    'files.old_need_office': '這是舊版 Office / WPS 格式，Keepnear 要借這台電腦上的 Word、WPS 或 LibreOffice 先轉成 PDF 才能顯示。現在一個都沒找到；LibreOffice 是免費的。',
+    'files.old_opening': '正在開啟 {name}…',
   },
   'ja': {
     'nav.library': 'ライブラリ',
@@ -9362,6 +9371,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.making_pdf': 'PDF を作成中…',
     'pdfword.suffix': '-編集済み',
     'files.edit_verb': 'Keepnear で編集',
+    'pdfedit.form': 'フォーム入力',
+    'files.old_need_office': '古い Office / WPS 形式です。この PC の Word・WPS・LibreOffice で PDF にしてから表示しますが、どれも見つかりませんでした。LibreOffice は無料です。',
+    'files.old_opening': '{name} を開いています…',
   },
   'ko': {
     'nav.library': '라이브러리',
@@ -11702,6 +11714,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.making_pdf': 'PDF로 만드는 중…',
     'pdfword.suffix': '-수정됨',
     'files.edit_verb': 'Keepnear(으)로 편집',
+    'pdfedit.form': '양식 작성',
+    'files.old_need_office': '예전 Office / WPS 형식입니다. 이 PC의 Word, WPS, LibreOffice로 PDF를 만든 뒤 보여 주는데 하나도 찾지 못했습니다. LibreOffice는 무료입니다.',
+    'files.old_opening': '{name} 여는 중…',
   },
   'es': {
     'nav.library': 'Biblioteca',
@@ -14042,6 +14057,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.making_pdf': 'Creando el PDF…',
     'pdfword.suffix': '-editado',
     'files.edit_verb': 'Editar con Keepnear',
+    'pdfedit.form': 'Rellenar',
+    'files.old_need_office': 'Formato antiguo de Office / WPS. Keepnear lo muestra después de que Word, WPS o LibreOffice de este PC lo conviertan en PDF, y no se encontró ninguno. LibreOffice es gratis.',
+    'files.old_opening': 'Abriendo {name}…',
   },
   'fr': {
     'nav.library': 'Bibliothèque',
@@ -16382,6 +16400,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.making_pdf': 'Création du PDF…',
     'pdfword.suffix': '-modifie',
     'files.edit_verb': 'Modifier avec Keepnear',
+    'pdfedit.form': 'Remplir',
+    'files.old_need_office': 'Ancien format Office / WPS. Keepnear l’affiche après conversion en PDF par Word, WPS ou LibreOffice sur ce PC, mais aucun n’a été trouvé. LibreOffice est gratuit.',
+    'files.old_opening': 'Ouverture de {name}…',
   },
   'de': {
     'nav.library': 'Mediathek',
@@ -18722,6 +18743,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.making_pdf': 'PDF wird erstellt…',
     'pdfword.suffix': '-bearbeitet',
     'files.edit_verb': 'Mit Keepnear bearbeiten',
+    'pdfedit.form': 'Ausfüllen',
+    'files.old_need_office': 'Ein älteres Office-/WPS-Format. Keepnear zeigt es, nachdem Word, WPS oder LibreOffice auf diesem PC ein PDF daraus macht – keines davon wurde gefunden. LibreOffice ist kostenlos.',
+    'files.old_opening': '{name} wird geöffnet…',
   },
   'pt': {
     'nav.library': 'Biblioteca',
@@ -21062,6 +21086,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.making_pdf': 'Criando o PDF…',
     'pdfword.suffix': '-editado',
     'files.edit_verb': 'Editar com Keepnear',
+    'pdfedit.form': 'Preencher',
+    'files.old_need_office': 'Formato antigo do Office / WPS. O Keepnear o mostra depois que o Word, WPS ou LibreOffice deste PC o converte em PDF, e nenhum foi encontrado. O LibreOffice é gratuito.',
+    'files.old_opening': 'Abrindo {name}…',
   },
   'ru': {
     'nav.library': 'Медиатека',
@@ -23402,6 +23429,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.making_pdf': 'Создание PDF…',
     'pdfword.suffix': '-изменено',
     'files.edit_verb': 'Изменить в Keepnear',
+    'pdfedit.form': 'Заполнить',
+    'files.old_need_office': 'Это старый формат Office / WPS. Keepnear показывает его после перевода в PDF программой Word, WPS или LibreOffice на этом ПК, но ни одна не найдена. LibreOffice бесплатен.',
+    'files.old_opening': 'Открывается {name}…',
   },
   'it': {
     'nav.library': 'Libreria',
@@ -25742,6 +25772,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.making_pdf': 'Creazione del PDF…',
     'pdfword.suffix': '-modificato',
     'files.edit_verb': 'Modifica con Keepnear',
+    'pdfedit.form': 'Compila',
+    'files.old_need_office': 'Vecchio formato Office / WPS. Keepnear lo mostra dopo che Word, WPS o LibreOffice di questo PC lo trasforma in PDF, ma non ne è stato trovato nessuno. LibreOffice è gratuito.',
+    'files.old_opening': 'Apertura di {name}…',
   },
   'ar': {
     'nav.library': 'المكتبة',
@@ -28082,6 +28115,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.making_pdf': 'جارٍ إنشاء PDF…',
     'pdfword.suffix': '-معدل',
     'files.edit_verb': 'تحرير باستخدام Keepnear',
+    'pdfedit.form': 'تعبئة',
+    'files.old_need_office': 'هذا تنسيق Office / WPS قديم. يعرضه Keepnear بعد أن يحوّله Word أو WPS أو LibreOffice على هذا الحاسوب إلى PDF، ولم يُعثر على أي منها. LibreOffice مجاني.',
+    'files.old_opening': 'جارٍ فتح {name}…',
   },
   'hi': {
     'nav.library': 'लाइब्रेरी',
@@ -30422,6 +30458,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.making_pdf': 'PDF बन रही है…',
     'pdfword.suffix': '-संपादित',
     'files.edit_verb': 'Keepnear से संपादित करें',
+    'pdfedit.form': 'भरें',
+    'files.old_need_office': 'यह पुराना Office / WPS प्रारूप है। Keepnear इसे इस PC के Word, WPS या LibreOffice से PDF बनवाकर दिखाता है, पर इनमें से कोई नहीं मिला। LibreOffice मुफ़्त है।',
+    'files.old_opening': '{name} खुल रही है…',
   },
   'id': {
     'nav.library': 'Pustaka',
@@ -32762,6 +32801,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.making_pdf': 'Membuat PDF…',
     'pdfword.suffix': '-diedit',
     'files.edit_verb': 'Edit dengan Keepnear',
+    'pdfedit.form': 'Isi formulir',
+    'files.old_need_office': 'Ini format Office / WPS lama. Keepnear menampilkannya setelah Word, WPS, atau LibreOffice di PC ini mengubahnya ke PDF, dan tidak ada yang ditemukan. LibreOffice gratis.',
+    'files.old_opening': 'Membuka {name}…',
   },
   'vi': {
     'nav.library': 'Thư viện',
@@ -35102,6 +35144,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.making_pdf': 'Đang tạo PDF…',
     'pdfword.suffix': '-da-sua',
     'files.edit_verb': 'Sửa bằng Keepnear',
+    'pdfedit.form': 'Điền biểu mẫu',
+    'files.old_need_office': 'Đây là định dạng Office / WPS cũ. Keepnear hiển thị sau khi Word, WPS hoặc LibreOffice trên máy chuyển nó sang PDF, nhưng không tìm thấy chương trình nào. LibreOffice miễn phí.',
+    'files.old_opening': 'Đang mở {name}…',
   },
   'th': {
     'nav.library': 'คลังสื่อ',
@@ -37442,6 +37487,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.making_pdf': 'กำลังสร้าง PDF…',
     'pdfword.suffix': '-แก้แล้ว',
     'files.edit_verb': 'แก้ไขด้วย Keepnear',
+    'pdfedit.form': 'กรอกแบบฟอร์ม',
+    'files.old_need_office': 'นี่เป็นรูปแบบ Office / WPS รุ่นเก่า Keepnear จะแสดงได้หลังจาก Word, WPS หรือ LibreOffice ในเครื่องนี้แปลงเป็น PDF แต่ไม่พบโปรแกรมเหล่านี้เลย LibreOffice ใช้ฟรี',
+    'files.old_opening': 'กำลังเปิด {name}…',
   },
   'tr': {
     'nav.library': 'Kitaplık',
@@ -39782,5 +39830,8 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.making_pdf': 'PDF oluşturuluyor…',
     'pdfword.suffix': '-duzenlendi',
     'files.edit_verb': 'Keepnear ile düzenle',
+    'pdfedit.form': 'Doldur',
+    'files.old_need_office': 'Bu eski bir Office / WPS biçimi. Keepnear onu bu bilgisayardaki Word, WPS veya LibreOffice PDF\'e çevirdikten sonra gösterir; hiçbiri bulunamadı. LibreOffice ücretsizdir.',
+    'files.old_opening': '{name} açılıyor…',
   },
 };

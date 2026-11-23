@@ -1066,3 +1066,135 @@ class _QrPageState extends State<_QrPage> {
         ]),
       );
 }
+
+// ------------------------------------------------------------- PDF form
+
+/// Filling in a PDF's own form: each box, check box and choice as a list
+/// (by page); saved as a new PDF in "My files" that is still a form.
+Future<void> openPdfForm(BuildContext context, MobileSettings settings, DesktopDiscovery discovery, String path, List<PdfFormField> fields) =>
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => _PdfFormPage(settings: settings, discovery: discovery, path: path, fields: fields)));
+
+class _PdfFormPage extends StatefulWidget {
+  const _PdfFormPage({required this.settings, required this.discovery, required this.path, required this.fields});
+
+  final MobileSettings settings;
+  final DesktopDiscovery discovery;
+  final String path;
+  final List<PdfFormField> fields;
+
+  @override
+  State<_PdfFormPage> createState() => _PdfFormPageState();
+}
+
+class _PdfFormPageState extends State<_PdfFormPage> {
+  final Map<PdfFormField, Object> _values = {};
+  final Map<PdfFormField, TextEditingController> _ctl = {};
+
+  @override
+  void dispose() {
+    for (final c in _ctl.values) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  bool _on(PdfFormField f) {
+    final v = _values[f];
+    if (v is bool) return v;
+    if (f.kind == 'radio' && widget.fields.any((o) => o.kind == 'radio' && o.name == f.name && o != f && _values[o] == true)) return false;
+    return f.checked;
+  }
+
+  void _set(PdfFormField f, Object v) => setState(() {
+        if (f.kind == 'radio' && v == true) {
+          _values.removeWhere((o, _) => o.kind == 'radio' && o.name == f.name && o != f);
+        }
+        _values[f] = v;
+      });
+
+  Future<void> _save() async {
+    final out = await _busy(context, () async {
+      final dir = await _outDir();
+      final name = '${_stem(widget.path.split('/').last)}-${tr('ptool.form_filled')}.pdf';
+      final f = File('${dir.path}/$name');
+      if (!await PdfForms.fill(widget.path, Map.of(_values), f.path) || !await f.exists()) return null;
+      return _toMyFiles(widget.settings, f);
+    });
+    if (!mounted) return;
+    if (out == null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('ptool.form_failed'))));
+      return;
+    }
+    await showPhoneResult(context, widget.settings, widget.discovery, [out], note: tr('ptool.in_myfiles'));
+  }
+
+  Widget _field(PdfFormField f) {
+    switch (f.kind) {
+      case 'check':
+        return CheckboxListTile(value: _on(f), onChanged: (v) => _set(f, v ?? false), title: Text(f.shown));
+      case 'radio':
+        return ListTile(
+          leading: Icon(_on(f) ? Icons.radio_button_checked_rounded : Icons.radio_button_unchecked_rounded, color: const Color(0xFF2F6BFF)),
+          title: Text(f.shown),
+          onTap: () => _set(f, true),
+        );
+      case 'choice':
+        final v = _values[f];
+        final sel = v is int ? v : f.selected;
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          child: InputDecorator(
+            decoration: InputDecoration(labelText: f.shown, border: const OutlineInputBorder(), isDense: true),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<int>(
+                value: sel >= 0 && sel < f.options.length ? sel : null,
+                isExpanded: true,
+                isDense: true,
+                items: [for (var i = 0; i < f.options.length; i++) DropdownMenuItem(value: i, child: Text(f.options[i], overflow: TextOverflow.ellipsis))],
+                onChanged: (i) {
+                  if (i != null) _set(f, i);
+                },
+              ),
+            ),
+          ),
+        );
+      default:
+        final c = _ctl[f] ??= TextEditingController(text: f.value);
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          child: TextField(
+            controller: c,
+            minLines: 1,
+            maxLines: f.multiline ? 5 : 1,
+            decoration: InputDecoration(labelText: f.shown, border: const OutlineInputBorder()),
+            onChanged: (t) => t == f.value ? setState(() => _values.remove(f)) : _set(f, t),
+          ),
+        );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pages = <int>{for (final f in widget.fields) f.page}.toList()..sort();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(tr('ptool.form')),
+        actions: [TextButton(onPressed: _values.isEmpty ? null : _save, child: Text(tr('ptool.save')))],
+      ),
+      body: ListView(padding: const EdgeInsets.only(bottom: 24), children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+          child: Text(tr('ptool.form_hint'), style: const TextStyle(color: Color(0xFF6B7A99), fontSize: 12.5)),
+        ),
+        for (final p in pages) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
+            child: Text(tr('ptool.page_n', {'n': p + 1}), style: const TextStyle(fontWeight: FontWeight.w700)),
+          ),
+          for (final f in widget.fields)
+            if (f.page == p) _field(f),
+        ],
+      ]),
+    );
+  }
+}

@@ -652,5 +652,9 @@
   "ptool.page_alone": "Guardar esta página como PDF aparte",
   "ptool.delete_page": "Eliminar esta página",
   "ptool.pdf_to_pc": "Enviar a un PC para cambiarlo allí (palabras, párrafos y Word están en el PC)",
-  "mylib.edit": "Editar"
+  "mylib.edit": "Editar",
+  "ptool.form": "Rellenar el formulario",
+  "ptool.form_hint": "Este PDF tiene sus propias casillas para rellenar. Se guarda como un PDF nuevo que sigue siendo formulario: otros pueden seguir rellenándolo o leer lo escrito.",
+  "ptool.form_filled": "relleno",
+  "ptool.form_failed": "No se pudo guardar el formulario rellenado"
 }

@@ -2336,5 +2336,8 @@
   "pdfword.not_now": "ليس الآن",
   "pdfword.making_pdf": "جارٍ إنشاء PDF…",
   "pdfword.suffix": "-معدل",
-  "files.edit_verb": "تحرير باستخدام {app}"
+  "files.edit_verb": "تحرير باستخدام {app}",
+  "pdfedit.form": "تعبئة",
+  "files.old_need_office": "هذا تنسيق Office / WPS قديم. يعرضه Keepnear بعد أن يحوّله Word أو WPS أو LibreOffice على هذا الحاسوب إلى PDF، ولم يُعثر على أي منها. LibreOffice مجاني.",
+  "files.old_opening": "جارٍ فتح {name}…"
 }

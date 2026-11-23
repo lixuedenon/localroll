@@ -17,11 +17,15 @@ class OpenWith {
   static const String progId = 'LocalRoll.Media';
 
   /// Bumped when what is written changes.
-  static const String _version = '4';
+  static const String _version = '5';
 
   /// What Keepnear shows itself besides photos and videos: PDF, Office
   /// (the ZIP kinds it reads), plain text.
-  static Set<String> get documentExtensions => {'pdf', ...OfficeDoc.extensions, 'txt', 'md', 'log'};
+  static Set<String> get documentExtensions => {'pdf', ...OfficeDoc.extensions, 'txt', 'md', 'log', ...legacyExtensions};
+
+  /// Older Office / WPS / OpenDocument files: shown after Office, WPS or
+  /// LibreOffice on this PC makes them a PDF.
+  static const Set<String> legacyExtensions = {'doc', 'xls', 'ppt', 'rtf', 'wps', 'et', 'dps', 'odt', 'ods', 'odp'};
 
   static String get _exe => Platform.resolvedExecutable;
   static String get _exeName => _exe.split(Platform.pathSeparator).last;
