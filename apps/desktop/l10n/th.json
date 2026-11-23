@@ -2335,5 +2335,6 @@
   "pdfword.back": "สร้าง PDF",
   "pdfword.not_now": "ไม่ต้อง",
   "pdfword.making_pdf": "กำลังสร้าง PDF…",
-  "pdfword.suffix": "-แก้แล้ว"
+  "pdfword.suffix": "-แก้แล้ว",
+  "files.edit_verb": "แก้ไขด้วย {app}"
 }

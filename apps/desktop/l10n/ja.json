@@ -2335,5 +2335,6 @@
   "pdfword.back": "PDF にする",
   "pdfword.not_now": "今はしない",
   "pdfword.making_pdf": "PDF を作成中…",
-  "pdfword.suffix": "-編集済み"
+  "pdfword.suffix": "-編集済み",
+  "files.edit_verb": "{app} で編集"
 }

@@ -2335,5 +2335,6 @@
   "pdfword.back": "Buat PDF",
   "pdfword.not_now": "Nanti saja",
   "pdfword.making_pdf": "Membuat PDF…",
-  "pdfword.suffix": "-diedit"
+  "pdfword.suffix": "-diedit",
+  "files.edit_verb": "Edit dengan {app}"
 }

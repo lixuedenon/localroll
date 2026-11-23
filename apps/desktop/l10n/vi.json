@@ -2335,5 +2335,6 @@
   "pdfword.back": "Tạo PDF",
   "pdfword.not_now": "Để sau",
   "pdfword.making_pdf": "Đang tạo PDF…",
-  "pdfword.suffix": "-da-sua"
+  "pdfword.suffix": "-da-sua",
+  "files.edit_verb": "Sửa bằng {app}"
 }

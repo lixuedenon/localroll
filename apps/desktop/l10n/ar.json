@@ -2335,5 +2335,6 @@
   "pdfword.back": "إنشاء PDF",
   "pdfword.not_now": "ليس الآن",
   "pdfword.making_pdf": "جارٍ إنشاء PDF…",
-  "pdfword.suffix": "-معدل"
+  "pdfword.suffix": "-معدل",
+  "files.edit_verb": "تحرير باستخدام {app}"
 }

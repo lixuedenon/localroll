@@ -2335,5 +2335,6 @@
   "pdfword.back": "Criar PDF",
   "pdfword.not_now": "Agora não",
   "pdfword.making_pdf": "Criando o PDF…",
-  "pdfword.suffix": "-editado"
+  "pdfword.suffix": "-editado",
+  "files.edit_verb": "Editar com {app}"
 }

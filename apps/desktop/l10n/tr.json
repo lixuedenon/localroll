@@ -2335,5 +2335,6 @@
   "pdfword.back": "PDF oluştur",
   "pdfword.not_now": "Şimdi değil",
   "pdfword.making_pdf": "PDF oluşturuluyor…",
-  "pdfword.suffix": "-duzenlendi"
+  "pdfword.suffix": "-duzenlendi",
+  "files.edit_verb": "{app} ile düzenle"
 }

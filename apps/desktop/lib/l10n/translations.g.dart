@@ -2341,6 +2341,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.not_now': 'Not now',
     'pdfword.making_pdf': 'Making the PDF…',
     'pdfword.suffix': '-edited',
+    'files.edit_verb': 'Edit with Keepnear',
   },
   'zh': {
     'nav.library': '媒体库',
@@ -4680,6 +4681,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.not_now': '不用了',
     'pdfword.making_pdf': '正在转回 PDF…',
     'pdfword.suffix': '-已改',
+    'files.edit_verb': '用 Keepnear 编辑',
   },
   'zh_Hant': {
     'nav.library': '媒體庫',
@@ -7019,6 +7021,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.not_now': '不用了',
     'pdfword.making_pdf': '正在轉回 PDF…',
     'pdfword.suffix': '-已改',
+    'files.edit_verb': '用 Keepnear 編輯',
   },
   'ja': {
     'nav.library': 'ライブラリ',
@@ -9358,6 +9361,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.not_now': '今はしない',
     'pdfword.making_pdf': 'PDF を作成中…',
     'pdfword.suffix': '-編集済み',
+    'files.edit_verb': 'Keepnear で編集',
   },
   'ko': {
     'nav.library': '라이브러리',
@@ -11697,6 +11701,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.not_now': '나중에',
     'pdfword.making_pdf': 'PDF로 만드는 중…',
     'pdfword.suffix': '-수정됨',
+    'files.edit_verb': 'Keepnear(으)로 편집',
   },
   'es': {
     'nav.library': 'Biblioteca',
@@ -14036,6 +14041,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.not_now': 'Ahora no',
     'pdfword.making_pdf': 'Creando el PDF…',
     'pdfword.suffix': '-editado',
+    'files.edit_verb': 'Editar con Keepnear',
   },
   'fr': {
     'nav.library': 'Bibliothèque',
@@ -16375,6 +16381,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.not_now': 'Pas maintenant',
     'pdfword.making_pdf': 'Création du PDF…',
     'pdfword.suffix': '-modifie',
+    'files.edit_verb': 'Modifier avec Keepnear',
   },
   'de': {
     'nav.library': 'Mediathek',
@@ -18714,6 +18721,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.not_now': 'Jetzt nicht',
     'pdfword.making_pdf': 'PDF wird erstellt…',
     'pdfword.suffix': '-bearbeitet',
+    'files.edit_verb': 'Mit Keepnear bearbeiten',
   },
   'pt': {
     'nav.library': 'Biblioteca',
@@ -21053,6 +21061,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.not_now': 'Agora não',
     'pdfword.making_pdf': 'Criando o PDF…',
     'pdfword.suffix': '-editado',
+    'files.edit_verb': 'Editar com Keepnear',
   },
   'ru': {
     'nav.library': 'Медиатека',
@@ -23392,6 +23401,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.not_now': 'Не сейчас',
     'pdfword.making_pdf': 'Создание PDF…',
     'pdfword.suffix': '-изменено',
+    'files.edit_verb': 'Изменить в Keepnear',
   },
   'it': {
     'nav.library': 'Libreria',
@@ -25731,6 +25741,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.not_now': 'Non ora',
     'pdfword.making_pdf': 'Creazione del PDF…',
     'pdfword.suffix': '-modificato',
+    'files.edit_verb': 'Modifica con Keepnear',
   },
   'ar': {
     'nav.library': 'المكتبة',
@@ -28070,6 +28081,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.not_now': 'ليس الآن',
     'pdfword.making_pdf': 'جارٍ إنشاء PDF…',
     'pdfword.suffix': '-معدل',
+    'files.edit_verb': 'تحرير باستخدام Keepnear',
   },
   'hi': {
     'nav.library': 'लाइब्रेरी',
@@ -30409,6 +30421,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.not_now': 'अभी नहीं',
     'pdfword.making_pdf': 'PDF बन रही है…',
     'pdfword.suffix': '-संपादित',
+    'files.edit_verb': 'Keepnear से संपादित करें',
   },
   'id': {
     'nav.library': 'Pustaka',
@@ -32748,6 +32761,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.not_now': 'Nanti saja',
     'pdfword.making_pdf': 'Membuat PDF…',
     'pdfword.suffix': '-diedit',
+    'files.edit_verb': 'Edit dengan Keepnear',
   },
   'vi': {
     'nav.library': 'Thư viện',
@@ -35087,6 +35101,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.not_now': 'Để sau',
     'pdfword.making_pdf': 'Đang tạo PDF…',
     'pdfword.suffix': '-da-sua',
+    'files.edit_verb': 'Sửa bằng Keepnear',
   },
   'th': {
     'nav.library': 'คลังสื่อ',
@@ -37426,6 +37441,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.not_now': 'ไม่ต้อง',
     'pdfword.making_pdf': 'กำลังสร้าง PDF…',
     'pdfword.suffix': '-แก้แล้ว',
+    'files.edit_verb': 'แก้ไขด้วย Keepnear',
   },
   'tr': {
     'nav.library': 'Kitaplık',
@@ -39765,5 +39781,6 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.not_now': 'Şimdi değil',
     'pdfword.making_pdf': 'PDF oluşturuluyor…',
     'pdfword.suffix': '-duzenlendi',
+    'files.edit_verb': 'Keepnear ile düzenle',
   },
 };

@@ -2335,5 +2335,6 @@
   "pdfword.back": "轉回 PDF",
   "pdfword.not_now": "不用了",
   "pdfword.making_pdf": "正在轉回 PDF…",
-  "pdfword.suffix": "-已改"
+  "pdfword.suffix": "-已改",
+  "files.edit_verb": "用 {app} 編輯"
 }

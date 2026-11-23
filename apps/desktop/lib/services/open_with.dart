@@ -17,7 +17,7 @@ class OpenWith {
   static const String progId = 'LocalRoll.Media';
 
   /// Bumped when what is written changes.
-  static const String _version = '3';
+  static const String _version = '4';
 
   /// What Keepnear shows itself besides photos and videos: PDF, Office
   /// (the ZIP kinds it reads), plain text.
@@ -29,6 +29,9 @@ class OpenWith {
   /// Explorer's right-click "Send to → Keepnear": a shortcut in the user's
   /// SendTo folder starting this copy with [sendFlag] and the files.
   static const String sendFlag = '--send';
+
+  /// Explorer's right-click "Edit with Keepnear" on a PDF.
+  static const String editFlag = '--edit';
 
   static Future<void> registerSendTo() async {
     if (!Platform.isWindows) return;
@@ -64,8 +67,9 @@ class OpenWith {
       // Already there for this copy of LocalRoll?
       final verb = tr('player.open_verb');
       final docVerb = tr('files.open_verb');
+      final editVerb = tr('files.edit_verb');
       final q = await Process.run('reg', ['query', r'HKCU\Software\Classes\' '$progId', '/v', 'LocalRollSetup']);
-      if (q.exitCode == 0 && '${q.stdout}'.contains('$_version|$_exe|${shortKey('$verb|$docVerb')}')) return;
+      if (q.exitCode == 0 && '${q.stdout}'.contains('$_version|$_exe|${shortKey('$verb|$docVerb|$editVerb')}')) return;
       final file = File('${Directory.systemTemp.path}${Platform.pathSeparator}localroll-openwith.reg');
       // .reg files are UTF-16 LE with a byte-order mark.
       final text = regFile(
@@ -73,6 +77,7 @@ class OpenWith {
           exeName: _exeName,
           verb: verb,
           docVerb: docVerb,
+          editVerb: editVerb,
           extensions: [...playerImageExtensions, ...playerVideoExtensions],
           documents: documentExtensions);
       final units = text.codeUnits;
@@ -113,6 +118,7 @@ class OpenWith {
       required String exeName,
       required String verb,
       String? docVerb,
+      String? editVerb,
       required Iterable<String> extensions,
       Iterable<String> documents = const []}) {
     const root = r'HKEY_CURRENT_USER\Software\Classes';
@@ -120,7 +126,7 @@ class OpenWith {
     final docs = documents.toSet().difference(extensions.toSet()).toList()..sort();
     final b = StringBuffer('Windows Registry Editor Version 5.00\r\n\r\n')
       ..write('[$root\\$progId]\r\n@=${_q(appName)}\r\n"FriendlyTypeName"=${_q(appName)}\r\n')
-      ..write('"LocalRollSetup"=${_q('$_version|$exe|${shortKey(docVerb == null ? verb : '$verb|$docVerb')}')}\r\n\r\n')
+      ..write('"LocalRollSetup"=${_q('$_version|$exe|${shortKey(docVerb == null ? verb : '$verb|$docVerb|$editVerb')}')}\r\n\r\n')
       ..write('[$root\\$progId\\DefaultIcon]\r\n@=${_q('"$exe",0')}\r\n\r\n')
       ..write('[$root\\$progId\\shell\\open]\r\n"FriendlyAppName"=${_q(appName)}\r\n\r\n')
       ..write('[$root\\$progId\\shell\\open\\command]\r\n@=$command\r\n\r\n')
@@ -139,6 +145,13 @@ class OpenWith {
         ..write('[$root\\SystemFileAssociations\\.$e\\shell\\LocalRoll.Open]\r\n')
         ..write('"MUIVerb"=${_q(docVerb ?? verb)}\r\n"Icon"=${_q('"$exe",0')}\r\n\r\n')
         ..write('[$root\\SystemFileAssociations\\.$e\\shell\\LocalRoll.Open\\command]\r\n@=$command\r\n\r\n');
+      // A PDF: also "Edit with Keepnear" (straight into the editor).
+      if (e == 'pdf' && editVerb != null) {
+        b
+          ..write('[$root\\SystemFileAssociations\\.$e\\shell\\LocalRoll.Edit]\r\n')
+          ..write('"MUIVerb"=${_q(editVerb)}\r\n"Icon"=${_q('"$exe",0')}\r\n\r\n')
+          ..write('[$root\\SystemFileAssociations\\.$e\\shell\\LocalRoll.Edit\\command]\r\n@=${_q('"$exe" $editFlag "%1"')}\r\n\r\n');
+      }
     }
     for (final e in exts) {
       // Listed under "Open with" — the default stays untouched.

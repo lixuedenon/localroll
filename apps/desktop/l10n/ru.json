@@ -2335,5 +2335,6 @@
   "pdfword.back": "Сделать PDF",
   "pdfword.not_now": "Не сейчас",
   "pdfword.making_pdf": "Создание PDF…",
-  "pdfword.suffix": "-изменено"
+  "pdfword.suffix": "-изменено",
+  "files.edit_verb": "Изменить в {app}"
 }

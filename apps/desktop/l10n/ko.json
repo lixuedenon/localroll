@@ -2335,5 +2335,6 @@
   "pdfword.back": "PDF로 만들기",
   "pdfword.not_now": "나중에",
   "pdfword.making_pdf": "PDF로 만드는 중…",
-  "pdfword.suffix": "-수정됨"
+  "pdfword.suffix": "-수정됨",
+  "files.edit_verb": "{app}(으)로 편집"
 }

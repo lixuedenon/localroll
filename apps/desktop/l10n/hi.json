@@ -2335,5 +2335,6 @@
   "pdfword.back": "PDF बनाएँ",
   "pdfword.not_now": "अभी नहीं",
   "pdfword.making_pdf": "PDF बन रही है…",
-  "pdfword.suffix": "-संपादित"
+  "pdfword.suffix": "-संपादित",
+  "files.edit_verb": "{app} से संपादित करें"
 }

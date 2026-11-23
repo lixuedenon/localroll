@@ -33,6 +33,7 @@ import '../convert_dialog.dart';
 import '../home_shell.dart' show AppRail;
 import '../library_picker.dart';
 import '../files_view.dart';
+import '../tools/pdf_text_edit.dart' show openEditor;
 import '../format.dart';
 import '../media_thumb.dart';
 import '../send_page.dart';
@@ -106,8 +107,16 @@ class PlayerLauncher {
   /// outside go into that player's list (the recording goes on).
   static bool Function(List<String> paths)? whileRecording;
 
-  static void request(AppServices s, List<String> paths) {
+  /// [edit]: a PDF straight into the editor (Explorer's "Edit with
+  /// Keepnear").
+  static bool _edit = false;
+
+  static void request(AppServices s, List<String> paths, {bool edit = false}) {
     if (paths.isEmpty) return;
+    if (edit) {
+      _pending.clear();
+      _edit = true;
+    }
     _pending.addAll(paths);
     _timer?.cancel();
     _timer = Timer(const Duration(milliseconds: 900), () => _launch(s, 0));
@@ -123,6 +132,15 @@ class PlayerLauncher {
     }
     final paths = {for (final p in _pending) p.toLowerCase(): p}.values.toList();
     _pending.clear();
+    if (_edit) {
+      _edit = false;
+      final pdf = paths.where((p) => p.toLowerCase().endsWith('.pdf')).firstOrNull;
+      if (pdf != null) {
+        nav.popUntil((r) => r.isFirst);
+        await openEditor(ctx, s, pdf);
+        return;
+      }
+    }
     final media = [for (final p in paths) if (PlayerEntry.playable(p)) p];
     if (media.length == paths.length && (whileRecording?.call(paths) ?? false)) return;
     nav.popUntil((r) => r.isFirst);
