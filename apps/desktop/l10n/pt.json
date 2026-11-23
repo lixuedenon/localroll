@@ -2311,5 +2311,8 @@
   "lib.vault_title": "{count} arquivos de backup foram excluídos",
   "lib.vault_body": "Eles foram excluídos fora do Keepnear (no Explorador, por exemplo). Os dados continuam guardados, então você pode restaurá-los como estavam. Se queria mesmo excluí-los, escolha Excluir de vez — só então o espaço é liberado.",
   "lib.vault_later": "Mais tarde",
-  "xfer.reconnect": "Reconectar"
+  "xfer.reconnect": "Reconectar",
+  "settings.vault_on": "Proteção contra exclusão: ativada. Fotos, vídeos e documentos têm um nome de cópia oculto; se forem excluídos no Explorador, o Keepnear pode recuperá-los.",
+  "settings.vault_fs": "Proteção contra exclusão: desativada. A unidade da biblioteca é {fs}, que não a suporta; funciona em unidades NTFS.",
+  "settings.vault_err": "Proteção contra exclusão: desativada (falhou ao iniciar; veja o registro de diagnóstico)."
 }

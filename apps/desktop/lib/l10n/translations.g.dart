@@ -2317,6 +2317,9 @@ const Map<String, Map<String, String>> translations = {
     'lib.vault_body': 'They were deleted outside Keepnear (in File Explorer, for example). Their data is still kept, so you can restore them as they were. If you really meant to delete them, choose Delete for good — only then is the disk space freed.',
     'lib.vault_later': 'Later',
     'xfer.reconnect': 'Reconnect',
+    'settings.vault_on': 'Delete protection: on. Photos, videos and documents each have a hidden backup name; if one is deleted in File Explorer, Keepnear can bring it back.',
+    'settings.vault_fs': 'Delete protection: off. The library\'s drive is {fs}, which doesn\'t support it; it works on NTFS drives.',
+    'settings.vault_err': 'Delete protection: off (it failed to start; see the diagnostic log).',
   },
   'zh': {
     'nav.library': '媒体库',
@@ -4632,6 +4635,9 @@ const Map<String, Map<String, String>> translations = {
     'lib.vault_body': '这些文件是在 Keepnear 之外（比如资源管理器里）删除的。数据还保留着，可以原样恢复。如果确实要删，选「确实要删」，这时才真正释放硬盘空间。',
     'lib.vault_later': '稍后再说',
     'xfer.reconnect': '重新连接',
+    'settings.vault_on': '防误删：已开启。照片、视频、文档都有一个隐藏的备份名字，在资源管理器里被删了也能在 Keepnear 里恢复。',
+    'settings.vault_fs': '防误删：没有开启。媒体库所在的盘是 {fs} 格式，不支持；放到 NTFS 格式的盘上才有。',
+    'settings.vault_err': '防误删：没有开启（打开时出错，详情见诊断日志）。',
   },
   'zh_Hant': {
     'nav.library': '媒體庫',
@@ -6947,6 +6953,9 @@ const Map<String, Map<String, String>> translations = {
     'lib.vault_body': '這些檔案是在 Keepnear 以外（例如檔案總管裡）刪除的。資料還保留著，可以原樣還原。如果確實要刪，選「確實要刪」，這時才真正釋放磁碟空間。',
     'lib.vault_later': '稍後再說',
     'xfer.reconnect': '重新連線',
+    'settings.vault_on': '防誤刪：已開啟。照片、影片、文件都有一個隱藏的備份名稱，在檔案總管裡被刪了也能在 Keepnear 裡還原。',
+    'settings.vault_fs': '防誤刪：沒有開啟。媒體庫所在的磁碟是 {fs} 格式，不支援；放到 NTFS 格式的磁碟上才有。',
+    'settings.vault_err': '防誤刪：沒有開啟（開啟時出錯，詳情見診斷日誌）。',
   },
   'ja': {
     'nav.library': 'ライブラリ',
@@ -9262,6 +9271,9 @@ const Map<String, Map<String, String>> translations = {
     'lib.vault_body': 'これらは Keepnear の外（エクスプローラーなど）で削除されました。データは残っているので、そのまま元に戻せます。本当に削除する場合は「完全に削除」を選んでください。そのとき初めてディスク容量が空きます。',
     'lib.vault_later': 'あとで',
     'xfer.reconnect': '再接続',
+    'settings.vault_on': '削除保護：オン。写真・動画・書類には隠しバックアップ名があり、エクスプローラーで削除されても Keepnear で復元できます。',
+    'settings.vault_fs': '削除保護：オフ。ライブラリのドライブは {fs} 形式で非対応です。NTFS ドライブで使えます。',
+    'settings.vault_err': '削除保護：オフ（開始に失敗しました。診断ログを参照）。',
   },
   'ko': {
     'nav.library': '라이브러리',
@@ -11577,6 +11589,9 @@ const Map<String, Map<String, String>> translations = {
     'lib.vault_body': 'Keepnear 밖(예: 파일 탐색기)에서 삭제된 파일입니다. 데이터가 남아 있어 그대로 복원할 수 있습니다. 정말 삭제하려면 \'완전히 삭제\'를 선택하세요. 그때 디스크 공간이 확보됩니다.',
     'lib.vault_later': '나중에',
     'xfer.reconnect': '다시 연결',
+    'settings.vault_on': '삭제 보호: 켜짐. 사진, 동영상, 문서마다 숨겨진 백업 이름이 있어 파일 탐색기에서 삭제돼도 Keepnear에서 복원할 수 있습니다.',
+    'settings.vault_fs': '삭제 보호: 꺼짐. 라이브러리 드라이브가 {fs} 형식이라 지원되지 않습니다. NTFS 드라이브에서 작동합니다.',
+    'settings.vault_err': '삭제 보호: 꺼짐 (시작하지 못했습니다. 진단 로그 참고).',
   },
   'es': {
     'nav.library': 'Biblioteca',
@@ -13892,6 +13907,9 @@ const Map<String, Map<String, String>> translations = {
     'lib.vault_body': 'Se eliminaron fuera de Keepnear (por ejemplo, en el Explorador). Sus datos siguen guardados, así que puedes restaurarlos tal como estaban. Si de verdad querías eliminarlos, elige Eliminar definitivamente: solo entonces se libera el espacio.',
     'lib.vault_later': 'Más tarde',
     'xfer.reconnect': 'Reconectar',
+    'settings.vault_on': 'Protección contra borrado: activada. Fotos, vídeos y documentos tienen un nombre de copia oculto; si se borran en el Explorador, Keepnear puede recuperarlos.',
+    'settings.vault_fs': 'Protección contra borrado: desactivada. La unidad de la biblioteca es {fs}, que no la admite; funciona en unidades NTFS.',
+    'settings.vault_err': 'Protección contra borrado: desactivada (no se pudo iniciar; ver el registro de diagnóstico).',
   },
   'fr': {
     'nav.library': 'Bibliothèque',
@@ -16207,6 +16225,9 @@ const Map<String, Map<String, String>> translations = {
     'lib.vault_body': 'Ils ont été supprimés en dehors de Keepnear (dans l\'Explorateur, par exemple). Leurs données sont conservées : vous pouvez les restaurer tels quels. Si vous vouliez vraiment les supprimer, choisissez Supprimer définitivement — l\'espace disque n\'est libéré qu\'à ce moment-là.',
     'lib.vault_later': 'Plus tard',
     'xfer.reconnect': 'Reconnecter',
+    'settings.vault_on': 'Protection contre la suppression : activée. Photos, vidéos et documents ont chacun un nom de sauvegarde caché ; supprimés dans l’Explorateur, Keepnear peut les restaurer.',
+    'settings.vault_fs': 'Protection contre la suppression : désactivée. Le lecteur de la bibliothèque est en {fs}, non pris en charge ; elle fonctionne sur les lecteurs NTFS.',
+    'settings.vault_err': 'Protection contre la suppression : désactivée (échec du démarrage ; voir le journal de diagnostic).',
   },
   'de': {
     'nav.library': 'Mediathek',
@@ -18522,6 +18543,9 @@ const Map<String, Map<String, String>> translations = {
     'lib.vault_body': 'Sie wurden außerhalb von Keepnear gelöscht (z. B. im Explorer). Die Daten sind noch vorhanden, du kannst sie unverändert wiederherstellen. Wenn du sie wirklich löschen wolltest, wähle „Endgültig löschen“ – erst dann wird Speicherplatz frei.',
     'lib.vault_later': 'Später',
     'xfer.reconnect': 'Neu verbinden',
+    'settings.vault_on': 'Löschschutz: an. Fotos, Videos und Dokumente haben je einen versteckten Sicherungsnamen; im Explorer Gelöschtes kann Keepnear zurückholen.',
+    'settings.vault_fs': 'Löschschutz: aus. Das Laufwerk der Mediathek ist {fs} und unterstützt ihn nicht; er funktioniert auf NTFS-Laufwerken.',
+    'settings.vault_err': 'Löschschutz: aus (Start fehlgeschlagen; siehe Diagnoseprotokoll).',
   },
   'pt': {
     'nav.library': 'Biblioteca',
@@ -20837,6 +20861,9 @@ const Map<String, Map<String, String>> translations = {
     'lib.vault_body': 'Eles foram excluídos fora do Keepnear (no Explorador, por exemplo). Os dados continuam guardados, então você pode restaurá-los como estavam. Se queria mesmo excluí-los, escolha Excluir de vez — só então o espaço é liberado.',
     'lib.vault_later': 'Mais tarde',
     'xfer.reconnect': 'Reconectar',
+    'settings.vault_on': 'Proteção contra exclusão: ativada. Fotos, vídeos e documentos têm um nome de cópia oculto; se forem excluídos no Explorador, o Keepnear pode recuperá-los.',
+    'settings.vault_fs': 'Proteção contra exclusão: desativada. A unidade da biblioteca é {fs}, que não a suporta; funciona em unidades NTFS.',
+    'settings.vault_err': 'Proteção contra exclusão: desativada (falhou ao iniciar; veja o registro de diagnóstico).',
   },
   'ru': {
     'nav.library': 'Медиатека',
@@ -23152,6 +23179,9 @@ const Map<String, Map<String, String>> translations = {
     'lib.vault_body': 'Их удалили вне Keepnear (например, в Проводнике). Данные сохранены — можно восстановить файлы как были. Если вы действительно хотели их удалить, выберите «Удалить окончательно» — только тогда освободится место на диске.',
     'lib.vault_later': 'Позже',
     'xfer.reconnect': 'Переподключить',
+    'settings.vault_on': 'Защита от удаления: включена. У фото, видео и документов есть скрытое резервное имя; удалённое в Проводнике Keepnear может вернуть.',
+    'settings.vault_fs': 'Защита от удаления: выключена. Диск медиатеки в формате {fs}, он не поддерживается; защита работает на дисках NTFS.',
+    'settings.vault_err': 'Защита от удаления: выключена (не удалось запустить; см. журнал диагностики).',
   },
   'it': {
     'nav.library': 'Libreria',
@@ -25467,6 +25497,9 @@ const Map<String, Map<String, String>> translations = {
     'lib.vault_body': 'Sono stati eliminati fuori da Keepnear (per esempio in Esplora file). I dati sono ancora conservati, quindi puoi ripristinarli com\'erano. Se volevi davvero eliminarli, scegli Elimina definitivamente: solo allora si libera spazio.',
     'lib.vault_later': 'Più tardi',
     'xfer.reconnect': 'Riconnetti',
+    'settings.vault_on': 'Protezione eliminazione: attiva. Foto, video e documenti hanno un nome di backup nascosto; se eliminati in Esplora file, Keepnear può recuperarli.',
+    'settings.vault_fs': 'Protezione eliminazione: disattivata. L\'unità della libreria è {fs}, non supportata; funziona su unità NTFS.',
+    'settings.vault_err': 'Protezione eliminazione: disattivata (avvio non riuscito; vedi il registro diagnostico).',
   },
   'ar': {
     'nav.library': 'المكتبة',
@@ -27782,6 +27815,9 @@ const Map<String, Map<String, String>> translations = {
     'lib.vault_body': 'حُذفت خارج Keepnear (في مستكشف الملفات مثلًا). بياناتها ما زالت محفوظة، ويمكنك استعادتها كما كانت. إن كنت تقصد حذفها فعلًا فاختر «احذف نهائيًا»، وعندها فقط تتحرر مساحة القرص.',
     'lib.vault_later': 'لاحقًا',
     'xfer.reconnect': 'إعادة الاتصال',
+    'settings.vault_on': 'الحماية من الحذف: مفعّلة. لكل صورة وفيديو ومستند اسم نسخ احتياطي مخفي؛ إذا حُذف في مستكشف الملفات يمكن لـ Keepnear استعادته.',
+    'settings.vault_fs': 'الحماية من الحذف: غير مفعّلة. قرص المكتبة بتنسيق {fs} غير المدعوم؛ تعمل على أقراص NTFS.',
+    'settings.vault_err': 'الحماية من الحذف: غير مفعّلة (تعذّر بدؤها؛ راجع سجل التشخيص).',
   },
   'hi': {
     'nav.library': 'लाइब्रेरी',
@@ -30097,6 +30133,9 @@ const Map<String, Map<String, String>> translations = {
     'lib.vault_body': 'ये Keepnear के बाहर (जैसे File Explorer में) हटाई गई थीं। डेटा अभी भी रखा है, इसलिए आप इन्हें जैसी थीं वैसी वापस ला सकते हैं। अगर सच में हटाना था, तो \'हमेशा के लिए हटाएँ\' चुनें — तभी डिस्क की जगह खाली होगी।',
     'lib.vault_later': 'बाद में',
     'xfer.reconnect': 'फिर से कनेक्ट करें',
+    'settings.vault_on': 'हटाने से सुरक्षा: चालू। फ़ोटो, वीडियो और दस्तावेज़ों का एक छिपा बैकअप नाम है; File Explorer में हटाए जाने पर भी Keepnear उन्हें वापस ला सकता है।',
+    'settings.vault_fs': 'हटाने से सुरक्षा: बंद। लाइब्रेरी की ड्राइव {fs} है, जो समर्थित नहीं है; यह NTFS ड्राइव पर काम करती है।',
+    'settings.vault_err': 'हटाने से सुरक्षा: बंद (शुरू नहीं हो सकी; डायग्नोस्टिक लॉग देखें)।',
   },
   'id': {
     'nav.library': 'Pustaka',
@@ -32412,6 +32451,9 @@ const Map<String, Map<String, String>> translations = {
     'lib.vault_body': 'File ini dihapus di luar Keepnear (misalnya di File Explorer). Datanya masih tersimpan, jadi bisa dipulihkan seperti semula. Kalau memang ingin menghapusnya, pilih Hapus permanen — baru saat itu ruang disk kosong.',
     'lib.vault_later': 'Nanti',
     'xfer.reconnect': 'Hubungkan ulang',
+    'settings.vault_on': 'Perlindungan hapus: aktif. Foto, video, dan dokumen punya nama cadangan tersembunyi; jika dihapus di File Explorer, Keepnear dapat memulihkannya.',
+    'settings.vault_fs': 'Perlindungan hapus: nonaktif. Drive pustaka berformat {fs}, tidak didukung; berfungsi di drive NTFS.',
+    'settings.vault_err': 'Perlindungan hapus: nonaktif (gagal dimulai; lihat log diagnostik).',
   },
   'vi': {
     'nav.library': 'Thư viện',
@@ -34727,6 +34769,9 @@ const Map<String, Map<String, String>> translations = {
     'lib.vault_body': 'Các tệp này bị xóa bên ngoài Keepnear (ví dụ trong File Explorer). Dữ liệu vẫn được giữ nên bạn có thể khôi phục nguyên vẹn. Nếu thật sự muốn xóa, hãy chọn Xóa hẳn — khi đó dung lượng ổ đĩa mới được giải phóng.',
     'lib.vault_later': 'Để sau',
     'xfer.reconnect': 'Kết nối lại',
+    'settings.vault_on': 'Chống xóa nhầm: đang bật. Ảnh, video và tài liệu đều có một tên sao lưu ẩn; bị xóa trong File Explorer thì Keepnear vẫn khôi phục được.',
+    'settings.vault_fs': 'Chống xóa nhầm: đang tắt. Ổ chứa thư viện là {fs}, không hỗ trợ; chỉ hoạt động trên ổ NTFS.',
+    'settings.vault_err': 'Chống xóa nhầm: đang tắt (không khởi động được; xem nhật ký chẩn đoán).',
   },
   'th': {
     'nav.library': 'คลังสื่อ',
@@ -37042,6 +37087,9 @@ const Map<String, Map<String, String>> translations = {
     'lib.vault_body': 'ไฟล์เหล่านี้ถูกลบนอก Keepnear (เช่น ใน File Explorer) ข้อมูลยังเก็บไว้ จึงกู้คืนได้ตามเดิม ถ้าตั้งใจลบจริงให้เลือก \'ลบถาวร\' พื้นที่ดิสก์จะว่างเมื่อนั้น',
     'lib.vault_later': 'ไว้ทีหลัง',
     'xfer.reconnect': 'เชื่อมต่อใหม่',
+    'settings.vault_on': 'ป้องกันการลบ: เปิดอยู่ รูป วิดีโอ และเอกสารมีชื่อสำรองที่ซ่อนไว้ หากถูกลบใน File Explorer Keepnear กู้คืนได้',
+    'settings.vault_fs': 'ป้องกันการลบ: ปิดอยู่ ไดรฟ์ของคลังเป็น {fs} ซึ่งไม่รองรับ ใช้ได้บนไดรฟ์ NTFS',
+    'settings.vault_err': 'ป้องกันการลบ: ปิดอยู่ (เริ่มไม่สำเร็จ ดูบันทึกการวินิจฉัย)',
   },
   'tr': {
     'nav.library': 'Kitaplık',
@@ -39357,5 +39405,8 @@ const Map<String, Map<String, String>> translations = {
     'lib.vault_body': 'Bunlar Keepnear dışında (örneğin Dosya Gezgini\'nde) silindi. Verileri hâlâ saklanıyor, olduğu gibi geri yükleyebilirsiniz. Gerçekten silmek istediyseniz Kalıcı olarak sil\'i seçin — disk alanı ancak o zaman açılır.',
     'lib.vault_later': 'Sonra',
     'xfer.reconnect': 'Yeniden bağlan',
+    'settings.vault_on': 'Silme koruması: açık. Fotoğraf, video ve belgelerin gizli bir yedek adı var; Dosya Gezgini\'nde silinseler de Keepnear geri getirebilir.',
+    'settings.vault_fs': 'Silme koruması: kapalı. Kitaplığın sürücüsü {fs}, desteklenmiyor; NTFS sürücülerde çalışır.',
+    'settings.vault_err': 'Silme koruması: kapalı (başlatılamadı; tanılama günlüğüne bakın).',
   },
 };

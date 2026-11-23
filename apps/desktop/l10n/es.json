@@ -2311,5 +2311,8 @@
   "lib.vault_title": "Se eliminaron {count} archivos respaldados",
   "lib.vault_body": "Se eliminaron fuera de Keepnear (por ejemplo, en el Explorador). Sus datos siguen guardados, así que puedes restaurarlos tal como estaban. Si de verdad querías eliminarlos, elige Eliminar definitivamente: solo entonces se libera el espacio.",
   "lib.vault_later": "Más tarde",
-  "xfer.reconnect": "Reconectar"
+  "xfer.reconnect": "Reconectar",
+  "settings.vault_on": "Protección contra borrado: activada. Fotos, vídeos y documentos tienen un nombre de copia oculto; si se borran en el Explorador, Keepnear puede recuperarlos.",
+  "settings.vault_fs": "Protección contra borrado: desactivada. La unidad de la biblioteca es {fs}, que no la admite; funciona en unidades NTFS.",
+  "settings.vault_err": "Protección contra borrado: desactivada (no se pudo iniciar; ver el registro de diagnóstico)."
 }

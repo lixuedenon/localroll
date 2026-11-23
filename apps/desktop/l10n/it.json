@@ -2311,5 +2311,8 @@
   "lib.vault_title": "{count} file di backup sono stati eliminati",
   "lib.vault_body": "Sono stati eliminati fuori da Keepnear (per esempio in Esplora file). I dati sono ancora conservati, quindi puoi ripristinarli com'erano. Se volevi davvero eliminarli, scegli Elimina definitivamente: solo allora si libera spazio.",
   "lib.vault_later": "Più tardi",
-  "xfer.reconnect": "Riconnetti"
+  "xfer.reconnect": "Riconnetti",
+  "settings.vault_on": "Protezione eliminazione: attiva. Foto, video e documenti hanno un nome di backup nascosto; se eliminati in Esplora file, Keepnear può recuperarli.",
+  "settings.vault_fs": "Protezione eliminazione: disattivata. L'unità della libreria è {fs}, non supportata; funziona su unità NTFS.",
+  "settings.vault_err": "Protezione eliminazione: disattivata (avvio non riuscito; vedi il registro diagnostico)."
 }

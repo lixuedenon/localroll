@@ -2311,5 +2311,8 @@
   "lib.vault_title": "{count} backed-up files were deleted",
   "lib.vault_body": "They were deleted outside Keepnear (in File Explorer, for example). Their data is still kept, so you can restore them as they were. If you really meant to delete them, choose Delete for good — only then is the disk space freed.",
   "lib.vault_later": "Later",
-  "xfer.reconnect": "Reconnect"
+  "xfer.reconnect": "Reconnect",
+  "settings.vault_on": "Delete protection: on. Photos, videos and documents each have a hidden backup name; if one is deleted in File Explorer, Keepnear can bring it back.",
+  "settings.vault_fs": "Delete protection: off. The library's drive is {fs}, which doesn't support it; it works on NTFS drives.",
+  "settings.vault_err": "Delete protection: off (it failed to start; see the diagnostic log)."
 }

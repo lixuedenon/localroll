@@ -2311,5 +2311,8 @@
   "lib.vault_title": "{count} fichiers sauvegardés ont été supprimés",
   "lib.vault_body": "Ils ont été supprimés en dehors de Keepnear (dans l'Explorateur, par exemple). Leurs données sont conservées : vous pouvez les restaurer tels quels. Si vous vouliez vraiment les supprimer, choisissez Supprimer définitivement — l'espace disque n'est libéré qu'à ce moment-là.",
   "lib.vault_later": "Plus tard",
-  "xfer.reconnect": "Reconnecter"
+  "xfer.reconnect": "Reconnecter",
+  "settings.vault_on": "Protection contre la suppression : activée. Photos, vidéos et documents ont chacun un nom de sauvegarde caché ; supprimés dans l’Explorateur, Keepnear peut les restaurer.",
+  "settings.vault_fs": "Protection contre la suppression : désactivée. Le lecteur de la bibliothèque est en {fs}, non pris en charge ; elle fonctionne sur les lecteurs NTFS.",
+  "settings.vault_err": "Protection contre la suppression : désactivée (échec du démarrage ; voir le journal de diagnostic)."
 }

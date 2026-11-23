@@ -180,7 +180,7 @@ class AppServices {
   Future<void> _startVault() async {
     Future<void> openFor(String root) async {
       _vaultRoot = root;
-      library.vault = await BackupVault.open(root, settings.dataDir);
+      library.setVault(await BackupVault.open(root, settings.dataDir), BackupVault.offReason);
       final v = library.vault;
       if (v != null) DiagLog.log('vault', 'on: ${v.dir}');
     }

@@ -2311,5 +2311,8 @@
   "lib.vault_title": "{count} file cadangan dihapus",
   "lib.vault_body": "File ini dihapus di luar Keepnear (misalnya di File Explorer). Datanya masih tersimpan, jadi bisa dipulihkan seperti semula. Kalau memang ingin menghapusnya, pilih Hapus permanen — baru saat itu ruang disk kosong.",
   "lib.vault_later": "Nanti",
-  "xfer.reconnect": "Hubungkan ulang"
+  "xfer.reconnect": "Hubungkan ulang",
+  "settings.vault_on": "Perlindungan hapus: aktif. Foto, video, dan dokumen punya nama cadangan tersembunyi; jika dihapus di File Explorer, Keepnear dapat memulihkannya.",
+  "settings.vault_fs": "Perlindungan hapus: nonaktif. Drive pustaka berformat {fs}, tidak didukung; berfungsi di drive NTFS.",
+  "settings.vault_err": "Perlindungan hapus: nonaktif (gagal dimulai; lihat log diagnostik)."
 }

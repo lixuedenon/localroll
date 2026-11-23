@@ -2311,5 +2311,8 @@
   "lib.vault_title": "{count} 個備份檔案被刪除了",
   "lib.vault_body": "這些檔案是在 Keepnear 以外（例如檔案總管裡）刪除的。資料還保留著，可以原樣還原。如果確實要刪，選「確實要刪」，這時才真正釋放磁碟空間。",
   "lib.vault_later": "稍後再說",
-  "xfer.reconnect": "重新連線"
+  "xfer.reconnect": "重新連線",
+  "settings.vault_on": "防誤刪：已開啟。照片、影片、文件都有一個隱藏的備份名稱，在檔案總管裡被刪了也能在 Keepnear 裡還原。",
+  "settings.vault_fs": "防誤刪：沒有開啟。媒體庫所在的磁碟是 {fs} 格式，不支援；放到 NTFS 格式的磁碟上才有。",
+  "settings.vault_err": "防誤刪：沒有開啟（開啟時出錯，詳情見診斷日誌）。"
 }

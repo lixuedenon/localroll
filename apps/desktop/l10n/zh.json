@@ -2311,5 +2311,8 @@
   "lib.vault_title": "{count} 个备份文件被删除了",
   "lib.vault_body": "这些文件是在 Keepnear 之外（比如资源管理器里）删除的。数据还保留着，可以原样恢复。如果确实要删，选「确实要删」，这时才真正释放硬盘空间。",
   "lib.vault_later": "稍后再说",
-  "xfer.reconnect": "重新连接"
+  "xfer.reconnect": "重新连接",
+  "settings.vault_on": "防误删：已开启。照片、视频、文档都有一个隐藏的备份名字，在资源管理器里被删了也能在 Keepnear 里恢复。",
+  "settings.vault_fs": "防误删：没有开启。媒体库所在的盘是 {fs} 格式，不支持；放到 NTFS 格式的盘上才有。",
+  "settings.vault_err": "防误删：没有开启（打开时出错，详情见诊断日志）。"
 }

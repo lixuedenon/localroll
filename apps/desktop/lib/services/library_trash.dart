@@ -210,13 +210,13 @@ class LibraryTrash extends ChangeNotifier {
     for (final i in items) {
       final id = _newId();
       final video = videoOf[i];
-      if (await _moveIn(library.absPath(i), id, i.name)) {
+      if (await _moveInKept(library.absPath(i), id, i.name, i.relPath)) {
         final e = TrashEntry(id: id, rel: i.relPath, size: i.size, deletedMs: now, kind: TrashKind.media, item: i.toJson());
         _entries.add(e);
         shown.add(e);
         if (video != null) {
           final vid = _newId();
-          if (await _moveIn(library.absPath(video), vid, video.name)) {
+          if (await _moveInKept(library.absPath(video), vid, video.name, video.relPath)) {
             _entries.add(TrashEntry(
                 id: vid, rel: video.relPath, size: video.size, deletedMs: now, kind: TrashKind.media, group: id, item: video.toJson()));
           } else {
@@ -255,12 +255,10 @@ class LibraryTrash extends ChangeNotifier {
         } catch (_) {}
         final id = _newId();
         final name = rel.substring(rel.lastIndexOf('/') + 1);
-        // Deleted by Keepnear itself: its backup's hidden name may go, no
-        // "deleted outside Keepnear?" question.
-        library.vault?.leaving(rel);
-        if (!await _moveIn(p, id, name)) {
-          library.vault?.stays(rel);
-        } else {
+        // Deleted by Keepnear itself: no "deleted outside Keepnear?"
+        // question; its hidden name stays while it is in here.
+        final copy = rel.startsWith('_converted/');
+        if (copy ? await _moveIn(p, id, name) : await _moveInKept(p, id, name, rel)) {
           final e = TrashEntry(
             id: id,
             rel: rel,
@@ -279,6 +277,19 @@ class LibraryTrash extends ChangeNotifier {
     await _save();
     notifyListeners();
     return out;
+  }
+
+  /// [_moveIn], the backup's hidden name ([BackupVault]) going along: it
+  /// stays while the file is in "Recently deleted".
+  Future<bool> _moveInKept(String from, String id, String name, String rel) async {
+    final v = library.vault;
+    v?.trashing(id, rel);
+    if (!await _moveIn(from, id, name)) {
+      v?.trashFailed(id, rel);
+      return false;
+    }
+    v?.trashed(id, '$_dir$_sep$id$_sep$name');
+    return true;
   }
 
   List<TrashEntry> _withGroup(Iterable<TrashEntry> list) {
@@ -300,12 +311,18 @@ class LibraryTrash extends ChangeNotifier {
       try {
         await Directory(folder).create(recursive: true);
         final to = File(want).existsSync() ? LibraryIndex.uniquePath(folder, e.name) : want;
-        await File(from).rename(to);
+        if (File(from).existsSync()) {
+          await File(from).rename(to);
+        } else if (!(library.vault?.trashRecover(e.id, to) ?? false)) {
+          // Deleted outside Keepnear, and no hidden name to bring it back.
+          throw FileSystemException('gone', from);
+        }
         try {
           await Directory('$_dir$_sep${e.id}').delete();
         } catch (_) {}
         done.add(e);
         final rel = to.substring(library.rootPath.length + 1).replaceAll(_sep, '/');
+        if (e.kind != TrashKind.copy) library.vault?.trashRestored(e.id, rel, media: e.kind == TrashKind.media);
         final item = e.item;
         if (e.kind == TrashKind.media && item != null) {
           back.add(MediaItem.fromJson(item)
@@ -340,6 +357,7 @@ class LibraryTrash extends ChangeNotifier {
       }
     }
     _entries.removeWhere(done.contains);
+    await library.vault?.trashPurged([for (final e in done) e.id]);
     await _save();
     notifyListeners();
     return done.where((e) => e.shown).length;

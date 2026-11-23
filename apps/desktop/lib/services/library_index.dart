@@ -159,6 +159,17 @@ class LibraryIndex extends ChangeNotifier {
   /// in Explorer can be brought back.
   BackupVault? vault;
 
+  /// Why there is no [vault] ([BackupVault.offReason]); null when it is on
+  /// or not opened yet.
+  String? vaultOff;
+
+  /// The vault (re)opened for this library.
+  void setVault(BackupVault? v, String? off) {
+    vault = v;
+    vaultOff = v == null ? (off ?? 'err') : null;
+    notifyListeners();
+  }
+
   /// Of [pendingMissing], those whose data is still kept ([vault]).
   int get missingKept {
     final v = vault;

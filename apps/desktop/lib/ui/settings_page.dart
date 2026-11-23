@@ -194,6 +194,29 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                       ]),
                     ),
+                    // Protection against deleting by mistake (hidden second
+                    // names): on, or why not.
+                    ListenableBuilder(
+                      listenable: s.library,
+                      builder: (_, _) {
+                        final off = s.library.vaultOff;
+                        if (s.library.vault == null && off == null) return const SizedBox.shrink();
+                        final on = s.library.vault != null;
+                        final text = on
+                            ? tr('settings.vault_on')
+                            : off!.startsWith('fs:')
+                                ? tr('settings.vault_fs', {'fs': off.substring(3)})
+                                : tr('settings.vault_err');
+                        return Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+                          child: Row(children: [
+                            Icon(on ? Icons.shield_outlined : Icons.gpp_maybe_outlined, size: 18, color: on ? Colors.green : Colors.amber),
+                            const SizedBox(width: 8),
+                            Expanded(child: Text(text, style: Theme.of(context).textTheme.bodySmall)),
+                          ]),
+                        );
+                      },
+                    ),
                     const Divider(height: 1),
                     SwitchListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16),

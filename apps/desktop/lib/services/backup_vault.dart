@@ -72,6 +72,10 @@ class BackupVault {
   /// deletion to ask about. Path → since when.
   final Map<String, DateTime> _leaving = {};
   bool _syncingFiles = false;
+
+  /// In Keepnear's "Recently deleted": trash entry id → its hidden name
+  /// (and where it came from), kept until it goes for good.
+  final Map<String, _Trashed> _trash = {};
   Timer? _saveTimer;
   Timer? _lockTimer;
   bool _syncing = false;
@@ -80,7 +84,12 @@ class BackupVault {
   static const String _everyone = '*S-1-1-0';
 
   /// The vault for [root], or null (not Windows, not NTFS, not writable).
+  /// Why the last [open] gave null: "fs:<name>" (the drive isn't NTFS),
+  /// "err" (it failed); null when it opened.
+  static String? offReason;
+
   static Future<BackupVault?> open(String root, Directory dataDir) async {
+    offReason = 'err';
     if (!Platform.isWindows) return null;
     try {
       final drive = root.length >= 2 && root[1] == ':' ? root.substring(0, 2).toUpperCase() : null;
@@ -88,6 +97,7 @@ class BackupVault {
       final fs = _fileSystem('$drive\\');
       if (fs != 'NTFS') {
         DiagLog.log('vault', 'off: the library drive is $fs, not NTFS');
+        offReason = 'fs:${fs ?? '?'}';
         return null;
       }
       final id = crypto.sha1.convert(utf8.encode(root.toLowerCase())).toString().substring(0, 12);
@@ -107,6 +117,7 @@ class BackupVault {
           root, dir, File('${dataDir.path}${sep}vault_$id.json'), File('${dataDir.path}${sep}vault_${id}_files.json'));
       await v._load();
       await v._loadFiles();
+      offReason = null;
       return v;
     } catch (e) {
       DiagLog.log('vault', 'off: $e');
@@ -279,6 +290,15 @@ class BackupVault {
       }
       final g = j['g'];
       if (g is List) _gone.addAll([for (final r in g) if (r is String && _files.containsKey(r)) r]);
+      final t = j['t'];
+      if (t is Map) {
+        for (final e in t.entries) {
+          final v = e.value;
+          if (e.key is String && v is List && v.length == 3 && v.every((x) => x is String)) {
+            _trash[e.key as String] = _Trashed(v[0] as String, v[1] as String, (v[2] as String).isEmpty ? null : v[2] as String);
+          }
+        }
+      }
     } catch (e) {
       DiagLog.log('vault', 'files list unreadable: $e');
     }
@@ -294,6 +314,7 @@ class BackupVault {
         await tmp.writeAsString(jsonEncode({
           'k': {for (final e in _files.entries) e.key: [e.value.name, e.value.id]},
           'g': _gone.toList(),
+          't': {for (final e in _trash.entries) e.key: [e.value.name, e.value.rel, e.value.id ?? '']},
         }));
         await tmp.rename(_filesManifest.path);
       } catch (e) {
@@ -311,6 +332,93 @@ class BackupVault {
 
   /// It didn't go after all ([leaving]).
   void stays(String rel) => _leaving.remove(rel);
+
+  // ------------------------------------------------- Recently deleted
+
+  /// Keepnear is about to move [rel] into "Recently deleted" as entry [id]:
+  /// its hidden name stays, under [id], until the entry goes for good.
+  void trashing(String id, String rel) {
+    _leaving[rel] = DateTime.now();
+    final n = _names.remove(rel);
+    if (n != null) {
+      _trash[id] = _Trashed(n, rel, null);
+      _save();
+    } else {
+      final k = _files.remove(rel);
+      if (k == null) return;
+      _gone.remove(rel);
+      _trash[id] = _Trashed(k.name, rel, k.id);
+    }
+    _saveFiles();
+  }
+
+  /// The move of [trashing] failed: back as it was.
+  void trashFailed(String id, String rel) {
+    _leaving.remove(rel);
+    final t = _trash.remove(id);
+    if (t == null) return;
+    if (t.id == null) {
+      _names[rel] = t.name;
+      _save();
+    } else {
+      _files[rel] = _Kept(t.name, t.id!);
+    }
+    _saveFiles();
+  }
+
+  /// Entry [id] is in "Recently deleted" at [stored]: if it had no hidden
+  /// name yet, it gets one now.
+  void trashed(String id, String stored) {
+    if (_trash.containsKey(id)) return;
+    final rel = 'trash/$id';
+    final name = _newName(rel);
+    if (_link(_kept(name), stored)) {
+      _trash[id] = _Trashed(name, rel, '');
+      _lockSoon();
+      _saveFiles();
+    }
+  }
+
+  /// Entry [id]'s file is gone from "Recently deleted" (deleted outside
+  /// Keepnear): put back at [to] from its hidden name. True if it worked.
+  bool trashRecover(String id, String to) {
+    final t = _trash[id];
+    if (t == null || !File(_kept(t.name)).existsSync()) return false;
+    final ok = _link(to, _kept(t.name));
+    DiagLog.log('vault', ok ? 'a deleted item came back from its hidden name' : 'a deleted item could not come back');
+    return ok;
+  }
+
+  /// Entry [id] is back in the library at [rel]: its hidden name serves
+  /// that place now.
+  void trashRestored(String id, String rel, {required bool media}) {
+    final t = _trash.remove(id);
+    if (t == null) return;
+    if (media) {
+      if (_names.containsKey(rel)) {
+        unawaited(_removeNames([t.name]));
+      } else {
+        _names[rel] = t.name;
+        _save();
+      }
+    } else {
+      final fid = _fileId(_abs(rel));
+      if (fid == null || _files.containsKey(rel)) {
+        unawaited(_removeNames([t.name]));
+      } else {
+        _files[rel] = _Kept(t.name, fid);
+      }
+    }
+    _saveFiles();
+  }
+
+  /// Entries gone for good from "Recently deleted": their hidden names go.
+  Future<void> trashPurged(Iterable<String> ids) async {
+    final names = [for (final id in ids) ?_trash.remove(id)?.name];
+    if (names.isEmpty) return;
+    await _removeNames(names);
+    _saveFiles();
+  }
 
   /// Brings the Documents / Other files in line with [rels] (every such
   /// file now, paths inside the library). Every file gets its hidden name;
@@ -527,6 +635,16 @@ class BackupVault {
       calloc.free(info);
     }
   }
+}
+
+/// A "Recently deleted" entry's hidden name; [rel] where it was, [id] its
+/// file id when it was a Documents / Other file (null: a library photo /
+/// video; empty: it had no hidden name before).
+class _Trashed {
+  const _Trashed(this.name, this.rel, this.id);
+  final String name;
+  final String rel;
+  final String? id;
 }
 
 /// A Documents / Other file's hidden name, and its file id.

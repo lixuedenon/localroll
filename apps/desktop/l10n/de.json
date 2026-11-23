@@ -2311,5 +2311,8 @@
   "lib.vault_title": "{count} gesicherte Dateien wurden gelöscht",
   "lib.vault_body": "Sie wurden außerhalb von Keepnear gelöscht (z. B. im Explorer). Die Daten sind noch vorhanden, du kannst sie unverändert wiederherstellen. Wenn du sie wirklich löschen wolltest, wähle „Endgültig löschen“ – erst dann wird Speicherplatz frei.",
   "lib.vault_later": "Später",
-  "xfer.reconnect": "Neu verbinden"
+  "xfer.reconnect": "Neu verbinden",
+  "settings.vault_on": "Löschschutz: an. Fotos, Videos und Dokumente haben je einen versteckten Sicherungsnamen; im Explorer Gelöschtes kann Keepnear zurückholen.",
+  "settings.vault_fs": "Löschschutz: aus. Das Laufwerk der Mediathek ist {fs} und unterstützt ihn nicht; er funktioniert auf NTFS-Laufwerken.",
+  "settings.vault_err": "Löschschutz: aus (Start fehlgeschlagen; siehe Diagnoseprotokoll)."
 }

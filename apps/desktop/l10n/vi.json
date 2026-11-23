@@ -2311,5 +2311,8 @@
   "lib.vault_title": "{count} tệp sao lưu đã bị xóa",
   "lib.vault_body": "Các tệp này bị xóa bên ngoài Keepnear (ví dụ trong File Explorer). Dữ liệu vẫn được giữ nên bạn có thể khôi phục nguyên vẹn. Nếu thật sự muốn xóa, hãy chọn Xóa hẳn — khi đó dung lượng ổ đĩa mới được giải phóng.",
   "lib.vault_later": "Để sau",
-  "xfer.reconnect": "Kết nối lại"
+  "xfer.reconnect": "Kết nối lại",
+  "settings.vault_on": "Chống xóa nhầm: đang bật. Ảnh, video và tài liệu đều có một tên sao lưu ẩn; bị xóa trong File Explorer thì Keepnear vẫn khôi phục được.",
+  "settings.vault_fs": "Chống xóa nhầm: đang tắt. Ổ chứa thư viện là {fs}, không hỗ trợ; chỉ hoạt động trên ổ NTFS.",
+  "settings.vault_err": "Chống xóa nhầm: đang tắt (không khởi động được; xem nhật ký chẩn đoán)."
 }
