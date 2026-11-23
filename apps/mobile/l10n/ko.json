@@ -606,7 +606,7 @@
   "ptool.make_video": "만들어서 사진에 저장",
   "ptool.pdf_add": "PDF 추가",
   "ptool.save": "저장",
-  "ptool.pdf_hint": "끌어서 순서를 바꿉니다. 저장한 페이지는 그림이 됩니다(글자 선택 불가). 글자를 유지하려면 PC에서 서명하세요.",
+  "ptool.pdf_hint": "페이지를 눌러 그리기·쓰기·형광펜. 오른쪽에서 회전·서명·사진 넣기·따로 저장. 오른쪽을 길게 눌러 끌면 순서 변경. 저장해도 글자는 그대로 선택됩니다.",
   "ptool.page_n": "{n}페이지",
   "ptool.signed": "서명됨",
   "ptool.place_sign": "서명 배치",
@@ -644,5 +644,13 @@
   "sig.clear": "지우기",
   "sig.cancel": "취소",
   "sig.ok": "이것 사용",
-  "sig.hint": "아래에 마우스나 손가락으로 서명하세요"
+  "sig.hint": "아래에 마우스나 손가락으로 서명하세요",
+  "ptool.mark": "그리기 / 쓰기 / 형광펜",
+  "ptool.marked": "표시됨",
+  "ptool.sign": "서명",
+  "ptool.add_picture": "사진 넣기",
+  "ptool.page_alone": "이 페이지만 PDF로 저장",
+  "ptool.delete_page": "이 페이지 삭제",
+  "ptool.pdf_to_pc": "PC로 보내서 수정 (글자·단락 수정, Word 변환은 PC에서)",
+  "mylib.edit": "편집"
 }

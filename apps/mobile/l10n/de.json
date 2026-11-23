@@ -606,7 +606,7 @@
   "ptool.make_video": "Erstellen & in Fotos speichern",
   "ptool.pdf_add": "PDF hinzufügen",
   "ptool.save": "Speichern",
-  "ptool.pdf_hint": "Ziehen zum Umsortieren. Gespeicherte Seiten werden zu Bildern (Text nicht mehr markierbar); am PC unterschreiben, um den Text zu behalten.",
+  "ptool.pdf_hint": "Seite antippen zum Zeichnen, Schreiben, Markieren; rechts: drehen, unterschreiben, Bild einfügen, einzeln speichern. Rechts halten und ziehen zum Umsortieren. Gespeicherte PDFs behalten ihren Text (auswählbar).",
   "ptool.page_n": "Seite {n}",
   "ptool.signed": "unterschrieben",
   "ptool.place_sign": "Unterschrift platzieren",
@@ -644,5 +644,13 @@
   "sig.clear": "Löschen",
   "sig.cancel": "Abbrechen",
   "sig.ok": "Verwenden",
-  "sig.hint": "Unten mit Maus oder Finger unterschreiben"
+  "sig.hint": "Unten mit Maus oder Finger unterschreiben",
+  "ptool.mark": "Zeichnen / Schreiben / Markieren",
+  "ptool.marked": "Markiert",
+  "ptool.sign": "Unterschreiben",
+  "ptool.add_picture": "Bild einfügen",
+  "ptool.page_alone": "Diese Seite als eigenes PDF speichern",
+  "ptool.delete_page": "Diese Seite löschen",
+  "ptool.pdf_to_pc": "An einen PC senden und dort ändern (Wörter, Absätze, Word gibt es am PC)",
+  "mylib.edit": "Bearbeiten"
 }

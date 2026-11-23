@@ -606,7 +606,7 @@
   "ptool.make_video": "做好并存进相册",
   "ptool.pdf_add": "加 PDF",
   "ptool.save": "保存",
-  "ptool.pdf_hint": "按住右边拖动改顺序。保存后每页会变成图片（文字不能再选中）；要保留文字请在电脑上签。",
+  "ptool.pdf_hint": "点一页就能在上面画、写字、高亮；右边可以转、签名、插图片、单独存。按住右边拖动改顺序。保存后文字还是文字，可以选中。",
   "ptool.page_n": "第 {n} 页",
   "ptool.signed": "已签名",
   "ptool.place_sign": "放签名",
@@ -644,5 +644,13 @@
   "sig.clear": "清除",
   "sig.cancel": "取消",
   "sig.ok": "用这个签名",
-  "sig.hint": "用鼠标或手指在下面签名"
+  "sig.hint": "用鼠标或手指在下面签名",
+  "ptool.mark": "画 / 写 / 高亮",
+  "ptool.marked": "已标注",
+  "ptool.sign": "签名",
+  "ptool.add_picture": "插图片",
+  "ptool.page_alone": "把这一页单独存成 PDF",
+  "ptool.delete_page": "删掉这一页",
+  "ptool.pdf_to_pc": "发到电脑上改（改字、按段落改、转 Word 都在电脑上）",
+  "mylib.edit": "编辑"
 }

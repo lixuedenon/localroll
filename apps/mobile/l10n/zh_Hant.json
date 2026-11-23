@@ -606,7 +606,7 @@
   "ptool.make_video": "做好並存進相簿",
   "ptool.pdf_add": "加 PDF",
   "ptool.save": "儲存",
-  "ptool.pdf_hint": "按住右邊拖動改順序。儲存後每頁會變成圖片（文字不能再選取）；要保留文字請在電腦上簽。",
+  "ptool.pdf_hint": "點一頁就能在上面畫、寫字、螢光筆；右邊可以轉、簽名、插圖片、單獨存。按住右邊拖動改順序。儲存後文字還是文字，可以選取。",
   "ptool.page_n": "第 {n} 頁",
   "ptool.signed": "已簽名",
   "ptool.place_sign": "放簽名",
@@ -644,5 +644,13 @@
   "sig.clear": "清除",
   "sig.cancel": "取消",
   "sig.ok": "用這個簽名",
-  "sig.hint": "用滑鼠或手指在下面簽名"
+  "sig.hint": "用滑鼠或手指在下面簽名",
+  "ptool.mark": "畫 / 寫 / 螢光筆",
+  "ptool.marked": "已標註",
+  "ptool.sign": "簽名",
+  "ptool.add_picture": "插入圖片",
+  "ptool.page_alone": "把這一頁單獨存成 PDF",
+  "ptool.delete_page": "刪掉這一頁",
+  "ptool.pdf_to_pc": "發到電腦上改（改字、按段落改、轉 Word 都在電腦上）",
+  "mylib.edit": "編輯"
 }

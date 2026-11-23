@@ -606,7 +606,7 @@
   "ptool.make_video": "Crea e salva in Foto",
   "ptool.pdf_add": "Aggiungi PDF",
   "ptool.save": "Salva",
-  "ptool.pdf_hint": "Trascina per riordinare. Le pagine salvate diventano immagini (testo non più selezionabile); firma sul PC per mantenere il testo.",
+  "ptool.pdf_hint": "Tocca una pagina per disegnare, scrivere o evidenziare; a destra: ruota, firma, inserisci immagine, salva a sé. Tieni premuto a destra e trascina per riordinare. Il testo resta testo (selezionabile).",
   "ptool.page_n": "Pagina {n}",
   "ptool.signed": "firmato",
   "ptool.place_sign": "Posiziona firma",
@@ -644,5 +644,13 @@
   "sig.clear": "Cancella",
   "sig.cancel": "Annulla",
   "sig.ok": "Usa",
-  "sig.hint": "Firma qui sotto con il mouse o con un dito"
+  "sig.hint": "Firma qui sotto con il mouse o con un dito",
+  "ptool.mark": "Disegna / scrivi / evidenzia",
+  "ptool.marked": "Annotato",
+  "ptool.sign": "Firma",
+  "ptool.add_picture": "Inserisci immagine",
+  "ptool.page_alone": "Salva questa pagina come PDF a sé",
+  "ptool.delete_page": "Elimina questa pagina",
+  "ptool.pdf_to_pc": "Invia a un PC per modificarlo lì (parole, paragrafi e Word sono sul PC)",
+  "mylib.edit": "Modifica"
 }

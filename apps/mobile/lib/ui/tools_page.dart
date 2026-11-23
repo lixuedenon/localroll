@@ -27,9 +27,11 @@ import '../services/media_saver.dart';
 import '../services/mobile_settings.dart';
 import '../services/my_library.dart';
 import '../services/pdf_pages.dart';
+import '../services/pdf_writer.dart';
 import '../services/scan_pdf.dart';
 import 'cleanup_page.dart' show formatSize;
 import 'home_look.dart';
+import 'ink_editor_page.dart';
 import 'open_file.dart';
 import 'send_files_page.dart';
 
@@ -561,12 +563,24 @@ class _PPage {
   final String path;
   final int index;
   int turns = 0;
+
+  /// Signatures and pictures laid on it (0–1 of the page as shown).
   final List<(Signature, Rect)> signs = [];
+
+  /// What was drawn / written on it (pen, highlighter, text, shapes).
+  List<Note> notes = [];
   Uint8List? thumb;
+
+  bool get touched => signs.isNotEmpty || notes.any((n) => n.inks.isNotEmpty);
 }
 
-/// PDF on the phone: sign, join, turn, delete, reorder. Pages are saved as
-/// pictures (their text can no longer be selected — said on screen).
+/// The PDF tool, opened on [files] (from the PDF reader too).
+Future<void> openPdfTools(BuildContext context, MobileSettings settings, DesktopDiscovery discovery, List<String> files) =>
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => _PdfToolPage(settings: settings, discovery: discovery, files: files)));
+
+/// PDF on the phone: mark, sign, add pictures, join, turn, delete,
+/// reorder, take pages out. Saved as a PDF that keeps its text (iPhone:
+/// PDFKit; Android: pdfium); only if that fails, as pictures.
 class _PdfToolPage extends StatefulWidget {
   const _PdfToolPage({required this.settings, required this.discovery, required this.files});
 
@@ -620,6 +634,11 @@ class _PdfToolPageState extends State<_PdfToolPage> {
     c.rotate(t * math.pi / 2);
     c.translate(-w / 2, -h / 2);
     c.drawImage(base, Offset.zero, Paint()..filterQuality = FilterQuality.high);
+    for (final n in p.notes) {
+      for (final m in n.inks) {
+        InkGeometry.paint(c, Size(w.toDouble(), h.toDouble()), m);
+      }
+    }
     for (final (sg, r) in p.signs) {
       c.drawImageRect(sg.image, Rect.fromLTWH(0, 0, sg.width.toDouble(), sg.height.toDouble()),
           Rect.fromLTWH(r.left * w, r.top * h, r.width * w, r.height * h), Paint()..filterQuality = FilterQuality.high);
@@ -634,21 +653,123 @@ class _PdfToolPageState extends State<_PdfToolPage> {
     return f.path;
   }
 
-  Future<void> _save() async {
-    final out = await _busy(context, () async {
-      final dir = await _outDir();
-      final files = <String>[];
-      for (var k = 0; k < _pages.length; k++) {
-        final f = await _pageFile(_pages[k], dir.path, k);
-        if (f != null) files.add(f);
+  /// What was drawn / placed on [p], as files covering the page as shown
+  /// (null: nothing on it).
+  Future<PdfStampFile?> _stamp(_PPage p, String dir, int k) async {
+    if (!p.touched) return null;
+    final small = p.thumb ?? await PdfPages.render(p.path, p.index, 240);
+    if (small == null) return null;
+    final dims = await decodeImageFromList(small);
+    final aspect = dims.width / dims.height;
+    dims.dispose();
+    const w = 1600;
+    final h = (w / aspect).round().clamp(1, 6000);
+    final size = Size(w.toDouble(), h.toDouble());
+    final rec = ui.PictureRecorder();
+    final c = Canvas(rec);
+    for (final n in p.notes) {
+      for (final m in n.inks) {
+        InkGeometry.paint(c, size, m);
       }
-      if (files.isEmpty) return null;
-      final signed = _pages.any((p) => p.signs.isNotEmpty);
-      final name = '${_stem(widget.files.first.split('/').last)}${signed ? '-signed' : '-edited'}.pdf';
-      final pdf = await ScanPdf.build(files, File('${dir.path}/$name'));
-      return _toMyFiles(widget.settings, pdf);
+    }
+    for (final (sg, r) in p.signs) {
+      c.drawImageRect(sg.image, Rect.fromLTWH(0, 0, sg.width.toDouble(), sg.height.toDouble()),
+          Rect.fromLTWH(r.left * w, r.top * h, r.width * w, r.height * h), Paint()..filterQuality = FilterQuality.high);
+    }
+    final img = await rec.endRecording().toImage(w, h);
+    try {
+      final png = await img.toByteData(format: ui.ImageByteFormat.png);
+      final raw = await img.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
+      if (png == null || raw == null) return null;
+      final b = raw.buffer.asUint8List();
+      for (var i = 0; i + 3 < b.length; i += 4) {
+        final r = b[i];
+        b[i] = b[i + 2];
+        b[i + 2] = r;
+      }
+      final pf = File('$dir/s$k.png'), bf = File('$dir/s$k.bgra');
+      await pf.writeAsBytes(png.buffer.asUint8List());
+      await bf.writeAsBytes(b);
+      return PdfStampFile(png: pf.path, bgra: bf.path, width: w, height: h);
+    } finally {
+      img.dispose();
+    }
+  }
+
+  /// [pages] into a new PDF in "My files": kept as they are (text stays
+  /// text); as pictures only if that can't be done.
+  Future<File?> _write(List<_PPage> pages, String name) async {
+    final dir = await _outDir();
+    final out = File('${dir.path}/$name');
+    final list = <PdfOutPage>[];
+    for (var k = 0; k < pages.length; k++) {
+      final p = pages[k];
+      list.add(PdfOutPage(p.path, p.index, turn: p.turns, stamp: await _stamp(p, dir.path, k)));
+    }
+    if (await PdfWriter.write(list, out.path) && await out.exists()) return _toMyFiles(widget.settings, out);
+    DiagLog.log('pdf', 'kept-as-is writing failed: pages saved as pictures');
+    final files = <String>[];
+    for (var k = 0; k < pages.length; k++) {
+      final f = await _pageFile(pages[k], dir.path, k);
+      if (f != null) files.add(f);
+    }
+    if (files.isEmpty) return null;
+    final pdf = await ScanPdf.build(files, out);
+    return _toMyFiles(widget.settings, pdf);
+  }
+
+  Future<void> _save({List<_PPage>? only}) async {
+    final pages = only ?? _pages;
+    final out = await _busy(context, () async {
+      final signed = pages.any((p) => p.signs.isNotEmpty);
+      final stem = _stem(widget.files.first.split('/').last);
+      final name = only != null ? '$stem-${tr('ptool.page_n', {'n': _pages.indexOf(only.first) + 1})}.pdf' : '$stem${signed ? '-signed' : '-edited'}.pdf';
+      return _write(pages, name);
     });
     if (mounted && out != null) await showPhoneResult(context, widget.settings, widget.discovery, [out], note: tr('ptool.in_myfiles'));
+  }
+
+  /// Draw / write / highlight on [p] (the same tools as on photos).
+  Future<void> _mark(_PPage p) async {
+    final big = await PdfPages.render(p.path, p.index, 1400);
+    if (big == null || !mounted) return;
+    final dims = await decodeImageFromList(big);
+    final aspect = dims.width / dims.height;
+    dims.dispose();
+    if (!mounted) return;
+    final out = await Navigator.of(context).push<List<Note>>(MaterialPageRoute(
+      fullscreenDialog: true,
+      builder: (_) => InkEditorPage(
+        notes: [for (final n in p.notes) Note.fromJson(n.toJson())],
+        aspect: aspect,
+        background: ColoredBox(color: Colors.white, child: Image.memory(big, fit: BoxFit.fill)),
+      ),
+    ));
+    if (out != null && mounted) setState(() => p.notes = out);
+  }
+
+  /// A photo laid on [p] (moved and sized like a signature).
+  Future<void> _picture(_PPage p) async {
+    final x = await ImagePicker().pickImage(source: ImageSource.gallery, maxWidth: 2000, maxHeight: 2000);
+    if (x == null || !mounted) return;
+    final bytes = await x.readAsBytes();
+    final codec = await ui.instantiateImageCodec(bytes);
+    final im = (await codec.getNextFrame()).image;
+    final png = await im.toByteData(format: ui.ImageByteFormat.png);
+    if (png == null || !mounted) return;
+    final pic = Signature(im, png.buffer.asUint8List());
+    final big = await PdfPages.render(p.path, p.index, 900);
+    if (big == null || !mounted) return;
+    final r = await Navigator.of(context).push<Rect>(MaterialPageRoute(builder: (_) => _PlaceSign(page: big, sig: pic)));
+    if (r != null) setState(() => p.signs.add((pic, r)));
+  }
+
+  /// The PDF to a PC, to change it there (Keepnear's full editor).
+  Future<void> _toPc() async {
+    final files = [for (final f in widget.files) File(f)];
+    final sender = await pickFileTarget(context, widget.settings, widget.discovery, files);
+    if (sender == null || !mounted) return;
+    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => SendFilesPage(sender: sender)));
   }
 
   Future<void> _sign(_PPage p) async {
@@ -666,6 +787,11 @@ class _PdfToolPageState extends State<_PdfToolPage> {
         appBar: AppBar(
           title: Text(PhoneTool.pdfTools.title),
           actions: [
+            IconButton(
+              tooltip: tr('ptool.pdf_to_pc'),
+              onPressed: _toPc,
+              icon: const Icon(Icons.laptop_rounded),
+            ),
             IconButton(
               tooltip: tr('ptool.pdf_add'),
               onPressed: () async {
@@ -707,11 +833,35 @@ class _PdfToolPageState extends State<_PdfToolPage> {
                         subtitle: Text([
                           if (widget.files.length > 1 || p.path != widget.files.first) p.path.split('/').last,
                           if (p.signs.isNotEmpty) tr('ptool.signed'),
+                          if (p.notes.any((n) => n.inks.isNotEmpty)) tr('ptool.marked'),
                         ].join(' · ')),
+                        onTap: () => unawaited(_mark(p)),
                         trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                          IconButton(onPressed: () => unawaited(_sign(p)), icon: const Icon(Icons.draw_rounded, color: Color(0xFF7B4DEB))),
+                          IconButton(
+                              tooltip: tr('ptool.mark'),
+                              onPressed: () => unawaited(_mark(p)),
+                              icon: const Icon(Icons.edit_note_rounded, color: Color(0xFF7B4DEB))),
                           IconButton(onPressed: () => setState(() => p.turns = (p.turns + 1) % 4), icon: const Icon(Icons.rotate_right_rounded)),
-                          IconButton(onPressed: () => setState(() => _pages.removeAt(i)), icon: const Icon(Icons.delete_outline_rounded)),
+                          PopupMenuButton<String>(
+                            onSelected: (v) {
+                              switch (v) {
+                                case 'sign':
+                                  unawaited(_sign(p));
+                                case 'pic':
+                                  unawaited(_picture(p));
+                                case 'alone':
+                                  unawaited(_save(only: [p]));
+                                case 'del':
+                                  setState(() => _pages.remove(p));
+                              }
+                            },
+                            itemBuilder: (_) => [
+                              PopupMenuItem(value: 'sign', child: ListTile(leading: const Icon(Icons.draw_rounded), title: Text(tr('ptool.sign')))),
+                              PopupMenuItem(value: 'pic', child: ListTile(leading: const Icon(Icons.image_rounded), title: Text(tr('ptool.add_picture')))),
+                              PopupMenuItem(value: 'alone', child: ListTile(leading: const Icon(Icons.call_split_rounded), title: Text(tr('ptool.page_alone')))),
+                              PopupMenuItem(value: 'del', child: ListTile(leading: const Icon(Icons.delete_outline_rounded), title: Text(tr('ptool.delete_page')))),
+                            ],
+                          ),
                         ]),
                       );
                     },

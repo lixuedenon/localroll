@@ -606,7 +606,7 @@
   "ptool.make_video": "Créer et enregistrer dans Photos",
   "ptool.pdf_add": "Ajouter un PDF",
   "ptool.save": "Enregistrer",
-  "ptool.pdf_hint": "Glissez pour réordonner. Les pages enregistrées deviennent des images (texte non sélectionnable) ; signez sur le PC pour garder le texte.",
+  "ptool.pdf_hint": "Touchez une page pour dessiner, écrire ou surligner ; à droite : pivoter, signer, ajouter une image, enregistrer seule. Maintenez la droite et glissez pour réordonner. Le texte reste du texte (sélectionnable).",
   "ptool.page_n": "Page {n}",
   "ptool.signed": "signé",
   "ptool.place_sign": "Placer la signature",
@@ -644,5 +644,13 @@
   "sig.clear": "Effacer",
   "sig.cancel": "Annuler",
   "sig.ok": "Utiliser",
-  "sig.hint": "Signez ci-dessous avec la souris ou un doigt"
+  "sig.hint": "Signez ci-dessous avec la souris ou un doigt",
+  "ptool.mark": "Dessiner / écrire / surligner",
+  "ptool.marked": "Annoté",
+  "ptool.sign": "Signer",
+  "ptool.add_picture": "Ajouter une image",
+  "ptool.page_alone": "Enregistrer cette page seule en PDF",
+  "ptool.delete_page": "Supprimer cette page",
+  "ptool.pdf_to_pc": "Envoyer à un PC pour le modifier (mots, paragraphes et Word sur le PC)",
+  "mylib.edit": "Modifier"
 }

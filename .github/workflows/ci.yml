@@ -373,6 +373,16 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
+      - name: Bundle pdfium (PDF editing that keeps text)
+        working-directory: apps/mobile
+        run: |
+          set -e
+          # bblanchon/pdfium-binaries (BSD-3 / Apache-2.0), arm64 only.
+          curl -sSfL -o pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/latest/download/pdfium-android-arm64.tgz
+          mkdir -p pdfium-dl android/app/src/main/jniLibs/arm64-v8a
+          tar -xzf pdfium.tgz -C pdfium-dl
+          cp pdfium-dl/lib/libpdfium.so android/app/src/main/jniLibs/arm64-v8a/
+          ls -la android/app/src/main/jniLibs/arm64-v8a/
       - name: Build APK
         working-directory: apps/mobile
         env:
@@ -387,7 +397,8 @@ jobs:
             echo "$LR_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/localroll.jks"
             export LR_KEYSTORE_PATH="$RUNNER_TEMP/localroll.jks"
           fi
-          flutter build apk --release --dart-define=LR_VERSION="$LR_VERSION" 2>&1 | tee build.log
+          # 64-bit ARM phones only (every phone of the last years).
+          flutter build apk --release --target-platform android-arm64 --dart-define=LR_VERSION="$LR_VERSION" 2>&1 | tee build.log
       - name: Report build errors
         if: failure()
         working-directory: apps/mobile

@@ -2,6 +2,7 @@
 import 'dart:io';
 import 'dart:ui' show PlatformDispatcher;
 
+import 'package:flutter/foundation.dart' show LicenseEntryWithLineBreaks, LicenseRegistry;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:localroll_core/localroll_core.dart';
@@ -25,6 +26,10 @@ Future<void> main() async {
   final discovery = DesktopDiscovery();
   ClipEnv.settings = settings;
   ClipEnv.discovery = discovery;
+  if (Platform.isAndroid) {
+    // Android edits PDFs with pdfium (bundled libpdfium.so).
+    LicenseRegistry.addLicense(() => Stream.value(const LicenseEntryWithLineBreaks(['pdfium'], _pdfiumLicense)));
+  }
   runApp(LocalRollMobileApp(settings: settings, discovery: discovery));
 }
 
@@ -85,3 +90,13 @@ class LocalRollMobileApp extends StatelessWidget {
     );
   }
 }
+
+/// pdfium (Android build by bblanchon/pdfium-binaries): BSD-3-Clause and
+/// Apache-2.0 (its parts).
+const String _pdfiumLicense = '''PDFium — Copyright 2014 The PDFium Authors.
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+3. Neither the name of Google Inc. nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+Parts of PDFium are under the Apache License 2.0 (https://www.apache.org/licenses/LICENSE-2.0).''';

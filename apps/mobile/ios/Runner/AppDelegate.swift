@@ -34,6 +34,7 @@ import UIKit
     }
     if let reg = engineBridge.pluginRegistry.registrar(forPlugin: "LocalRollPdf") {
       PdfPages.register(messenger: reg.messenger())
+      PdfWriter.register(messenger: reg.messenger())
     }
     if let reg = engineBridge.pluginRegistry.registrar(forPlugin: "LocalRollFiles") {
       FilePreview.register(messenger: reg.messenger())
@@ -367,6 +368,84 @@ enum PdfPages {
       thumb.draw(in: CGRect(origin: .zero, size: size))
     }
     return image.jpegData(compressionQuality: 0.88)
+  }
+}
+
+/// Writes a new PDF from pages of others with PDFKit: each page drawn as it
+/// is (its text stays text, its notes drawn in), turned, with a see-through
+/// picture of what was drawn / placed on it (see lib/services/pdf_writer.dart).
+/// Page by page into the file. Channel: localroll/pdfedit.
+enum PdfWriter {
+  static func register(messenger: FlutterBinaryMessenger) {
+    let ch = FlutterMethodChannel(name: "localroll/pdfedit", binaryMessenger: messenger)
+    ch.setMethodCallHandler { call, result in
+      guard call.method == "write",
+            let args = call.arguments as? [String: Any],
+            let pages = args["pages"] as? [[String: Any]],
+            let out = args["out"] as? String
+      else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      PdfPages.queue.async {
+        let ok = write(pages, to: out)
+        DispatchQueue.main.async { result(ok) }
+      }
+    }
+  }
+
+  static func write(_ pages: [[String: Any]], to out: String) -> Bool {
+    var docs: [String: PDFDocument] = [:]
+    struct One { let page: PDFPage; let size: CGSize; let stamp: String?; let turn: Int }
+    var list: [One] = []
+    for p in pages {
+      guard let src = p["src"] as? String, let index = p["index"] as? Int else { continue }
+      if docs[src] == nil { docs[src] = PDFDocument(url: URL(fileURLWithPath: src)) }
+      guard let doc = docs[src], index >= 0, index < doc.pageCount,
+            let original = doc.page(at: index), let page = original.copy() as? PDFPage else { continue }
+      let turn = (p["turn"] as? Int ?? 0) % 4
+      page.rotation = (page.rotation + turn * 90) % 360
+      let box = page.bounds(for: .cropBox)
+      let turned = abs(page.rotation) % 180 == 90
+      let size = turned ? CGSize(width: box.height, height: box.width) : box.size
+      list.append(One(page: page, size: size, stamp: p["png"] as? String, turn: turn))
+    }
+    guard !list.isEmpty else { return false }
+    let tmp = URL(fileURLWithPath: out + ".part")
+    let renderer = UIGraphicsPDFRenderer(bounds: CGRect(origin: .zero, size: list[0].size))
+    do {
+      try renderer.writePDF(to: tmp) { ctx in
+        for one in list {
+          let rect = CGRect(origin: .zero, size: one.size)
+          ctx.beginPage(withBounds: rect, pageInfo: [:])
+          let cg = ctx.cgContext
+          cg.saveGState()
+          // PDFKit draws in the PDF's own space (y up), turned as the page is.
+          cg.translateBy(x: 0, y: one.size.height)
+          cg.scaleBy(x: 1, y: -1)
+          one.page.transform(cg, for: .cropBox)
+          one.page.draw(with: .cropBox, to: cg)
+          cg.restoreGState()
+          // What was drawn / placed: it covers the page as it was shown
+          // before the turn, so it turns with the page.
+          if let s = one.stamp, let img = UIImage(contentsOfFile: s) {
+            let before = one.turn % 2 == 1 ? CGSize(width: one.size.height, height: one.size.width) : one.size
+            cg.saveGState()
+            cg.translateBy(x: one.size.width / 2, y: one.size.height / 2)
+            cg.rotate(by: CGFloat(one.turn) * .pi / 2)
+            img.draw(in: CGRect(x: -before.width / 2, y: -before.height / 2, width: before.width, height: before.height))
+            cg.restoreGState()
+          }
+        }
+      }
+      let dest = URL(fileURLWithPath: out)
+      try? FileManager.default.removeItem(at: dest)
+      try FileManager.default.moveItem(at: tmp, to: dest)
+      return true
+    } catch {
+      try? FileManager.default.removeItem(at: tmp)
+      return false
+    }
   }
 }
 

@@ -606,7 +606,7 @@
   "ptool.make_video": "Tạo & lưu vào Ảnh",
   "ptool.pdf_add": "Thêm PDF",
   "ptool.save": "Lưu",
-  "ptool.pdf_hint": "Kéo để sắp xếp. Trang đã lưu sẽ thành ảnh (không chọn được chữ); muốn giữ chữ hãy ký trên PC.",
+  "ptool.pdf_hint": "Chạm vào trang để vẽ, viết hoặc tô sáng; bên phải: xoay, ký, chèn ảnh, lưu riêng. Giữ bên phải rồi kéo để đổi thứ tự. Lưu xong chữ vẫn là chữ (chọn được).",
   "ptool.page_n": "Trang {n}",
   "ptool.signed": "đã ký",
   "ptool.place_sign": "Đặt chữ ký",
@@ -644,5 +644,13 @@
   "sig.clear": "Xóa",
   "sig.cancel": "Hủy",
   "sig.ok": "Dùng",
-  "sig.hint": "Ký bên dưới bằng chuột hoặc ngón tay"
+  "sig.hint": "Ký bên dưới bằng chuột hoặc ngón tay",
+  "ptool.mark": "Vẽ / viết / tô sáng",
+  "ptool.marked": "Đã ghi chú",
+  "ptool.sign": "Ký tên",
+  "ptool.add_picture": "Chèn ảnh",
+  "ptool.page_alone": "Lưu riêng trang này thành PDF",
+  "ptool.delete_page": "Xóa trang này",
+  "ptool.pdf_to_pc": "Gửi sang máy tính để sửa (sửa chữ, đoạn và Word làm trên máy tính)",
+  "mylib.edit": "Sửa"
 }

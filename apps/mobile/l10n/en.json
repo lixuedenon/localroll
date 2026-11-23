@@ -606,7 +606,7 @@
   "ptool.make_video": "Make & save to Photos",
   "ptool.pdf_add": "Add PDF",
   "ptool.save": "Save",
-  "ptool.pdf_hint": "Drag to reorder. Saved pages become pictures (text no longer selectable); sign on the PC to keep the text.",
+  "ptool.pdf_hint": "Tap a page to draw, write or highlight on it; on the right: turn, sign, add a picture, save alone. Hold the right side and drag to reorder. Saved PDFs keep their text (it can still be selected).",
   "ptool.page_n": "Page {n}",
   "ptool.signed": "signed",
   "ptool.place_sign": "Place signature",
@@ -644,5 +644,13 @@
   "sig.clear": "Clear",
   "sig.cancel": "Cancel",
   "sig.ok": "Use it",
-  "sig.hint": "Sign below with the mouse or a finger"
+  "sig.hint": "Sign below with the mouse or a finger",
+  "ptool.mark": "Draw / write / highlight",
+  "ptool.marked": "Marked",
+  "ptool.sign": "Sign",
+  "ptool.add_picture": "Add a picture",
+  "ptool.page_alone": "Save this page as its own PDF",
+  "ptool.delete_page": "Delete this page",
+  "ptool.pdf_to_pc": "Send to a PC to change it there (changing words, paragraphs and Word are on the PC)",
+  "mylib.edit": "Edit"
 }

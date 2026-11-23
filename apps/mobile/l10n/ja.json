@@ -606,7 +606,7 @@
   "ptool.make_video": "作成して写真に保存",
   "ptool.pdf_add": "PDF を追加",
   "ptool.save": "保存",
-  "ptool.pdf_hint": "ドラッグで並べ替え。保存したページは画像になります（文字は選択不可）。文字を残すには PC で署名してください。",
+  "ptool.pdf_hint": "ページをタップして描く・書く・ハイライト。右側で回転・署名・画像挿入・単独保存。右端を長押しして並べ替え。保存しても文字は文字のまま選択できます。",
   "ptool.page_n": "{n} ページ",
   "ptool.signed": "署名済み",
   "ptool.place_sign": "署名を配置",
@@ -644,5 +644,13 @@
   "sig.clear": "消去",
   "sig.cancel": "キャンセル",
   "sig.ok": "これを使う",
-  "sig.hint": "下にマウスか指で署名してください"
+  "sig.hint": "下にマウスか指で署名してください",
+  "ptool.mark": "描く / 書く / ハイライト",
+  "ptool.marked": "書き込み済み",
+  "ptool.sign": "署名",
+  "ptool.add_picture": "画像を挿入",
+  "ptool.page_alone": "このページだけを PDF に保存",
+  "ptool.delete_page": "このページを削除",
+  "ptool.pdf_to_pc": "PC に送って編集（文字・段落の修正や Word 変換は PC で）",
+  "mylib.edit": "編集"
 }

@@ -6,8 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../l10n/l10n.dart';
+import '../services/clip_maker.dart' show ClipEnv;
 import '../services/pdf_pages.dart';
 import 'theme.dart';
+import 'tools_page.dart' show openPdfTools;
 
 /// Reads a PDF inside LocalRoll: swipe between pages, pinch to zoom.
 /// "Share" hands it to other apps (print, mail, another PDF app…).
@@ -59,6 +61,13 @@ class _PdfViewPageState extends State<PdfViewPage> {
       appBar: AppBar(
         title: Text(_name, overflow: TextOverflow.ellipsis),
         actions: [
+          // Mark, sign, turn, take pages out (the PDF keeps its text).
+          if (ClipEnv.settings != null && ClipEnv.discovery != null)
+            IconButton(
+              tooltip: tr('mylib.edit'),
+              onPressed: () => openPdfTools(context, ClipEnv.settings!, ClipEnv.discovery!, [widget.path]),
+              icon: const Icon(Icons.edit_note_rounded),
+            ),
           Builder(
             builder: (c) => IconButton(
               tooltip: tr('mylib.share'),

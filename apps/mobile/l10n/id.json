@@ -606,7 +606,7 @@
   "ptool.make_video": "Buat & simpan ke Foto",
   "ptool.pdf_add": "Tambah PDF",
   "ptool.save": "Simpan",
-  "ptool.pdf_hint": "Seret untuk mengurutkan. Halaman yang disimpan menjadi gambar (teks tidak bisa dipilih); tanda tangani di PC untuk mempertahankan teks.",
+  "ptool.pdf_hint": "Ketuk halaman untuk menggambar, menulis, atau menyorot; di kanan: putar, tanda tangan, sisipkan gambar, simpan terpisah. Tahan sisi kanan lalu seret untuk mengurutkan. Teks tetap teks (bisa dipilih).",
   "ptool.page_n": "Halaman {n}",
   "ptool.signed": "ditandatangani",
   "ptool.place_sign": "Letakkan tanda tangan",
@@ -644,5 +644,13 @@
   "sig.clear": "Hapus",
   "sig.cancel": "Batal",
   "sig.ok": "Pakai",
-  "sig.hint": "Tanda tangani di bawah dengan mouse atau jari"
+  "sig.hint": "Tanda tangani di bawah dengan mouse atau jari",
+  "ptool.mark": "Gambar / tulis / sorot",
+  "ptool.marked": "Ditandai",
+  "ptool.sign": "Tanda tangan",
+  "ptool.add_picture": "Sisipkan gambar",
+  "ptool.page_alone": "Simpan halaman ini sebagai PDF sendiri",
+  "ptool.delete_page": "Hapus halaman ini",
+  "ptool.pdf_to_pc": "Kirim ke PC untuk diubah di sana (kata, paragraf, dan Word ada di PC)",
+  "mylib.edit": "Edit"
 }

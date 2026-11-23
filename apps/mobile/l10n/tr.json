@@ -606,7 +606,7 @@
   "ptool.make_video": "Oluştur ve Fotoğraflar'a kaydet",
   "ptool.pdf_add": "PDF ekle",
   "ptool.save": "Kaydet",
-  "ptool.pdf_hint": "Sıralamak için sürükleyin. Kaydedilen sayfalar resme dönüşür (metin seçilemez); metni korumak için bilgisayarda imzalayın.",
+  "ptool.pdf_hint": "Çizmek, yazmak veya vurgulamak için sayfaya dokunun; sağda: döndür, imzala, resim ekle, ayrı kaydet. Sıralamak için sağı basılı tutup sürükleyin. Kaydedilen PDF'te yazı yazı olarak kalır (seçilebilir).",
   "ptool.page_n": "Sayfa {n}",
   "ptool.signed": "imzalı",
   "ptool.place_sign": "İmzayı yerleştir",
@@ -644,5 +644,13 @@
   "sig.clear": "Temizle",
   "sig.cancel": "İptal",
   "sig.ok": "Kullan",
-  "sig.hint": "Aşağıya fare ya da parmakla imza atın"
+  "sig.hint": "Aşağıya fare ya da parmakla imza atın",
+  "ptool.mark": "Çiz / yaz / vurgula",
+  "ptool.marked": "İşaretli",
+  "ptool.sign": "İmzala",
+  "ptool.add_picture": "Resim ekle",
+  "ptool.page_alone": "Bu sayfayı ayrı PDF olarak kaydet",
+  "ptool.delete_page": "Bu sayfayı sil",
+  "ptool.pdf_to_pc": "PC'ye gönderip orada değiştir (kelime, paragraf ve Word PC'de)",
+  "mylib.edit": "Düzenle"
 }
