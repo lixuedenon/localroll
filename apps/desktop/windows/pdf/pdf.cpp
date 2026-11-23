@@ -24,6 +24,9 @@
 //                                                outside it is left alone (counted
 //                                                as skipped: changing it would move
 //                                                the text beside it).
+//        …|<fake>|<hscale>|<add>                 optional: 1 bold / 2 italic drawn by
+//                                                hand; the letters' width × hscale;
+//                                                "add": no old text to take out
 //
 //   MARKS <file>                                 on the last PAGE: Keepnear's own marks
 //                                                (base64 text) kept in a hidden annotation,
@@ -1105,10 +1108,15 @@ int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
         }
         old.push_back(o);
       }
-      if (mixed || old.empty()) {
+      // "add": new words where there were none (a paragraph that grew).
+      bool adding = p.size() > 12 && p[12] == "add";
+      if (adding) old.clear();
+      if (!adding && (mixed || old.empty())) {
         skipped++;
         continue;
       }
+      double hscale = p.size() > 11 ? atof(p[11].c_str()) : 1;
+      if (!(hscale > 0.2 && hscale <= 1.5)) hscale = 1;
       std::vector<unsigned char> textBytes;
       if (!readAll(p[9], textBytes)) {
         skipped++;
@@ -1120,7 +1128,7 @@ int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
       // it); "objat:x,y": the font of the text at that point of this page.
       FONT font = nullptr;
       OBJ like = nullptr;
-      if (p[8] == "obj") {
+      if (p[8] == "obj" && !old.empty()) {
         like = old[0];
       } else if (p[8].rfind("objat:", 0) == 0) {
         double px = atof(p[8].c_str() + 6);
@@ -1166,7 +1174,7 @@ int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
       }
       unsigned int cr = 0, cg = 0, cb = 0, ca = 255;
       if (p[7] == "auto") {
-        if (!api.ObjGetFillColor || !api.ObjGetFillColor(old[0], &cr, &cg, &cb, &ca)) cr = cg = cb = 0;
+        if (old.empty() || !api.ObjGetFillColor || !api.ObjGetFillColor(old[0], &cr, &cg, &cb, &ca)) cr = cg = cb = 0;
       } else {
         unsigned long v = strtoul(p[7].c_str(), nullptr, 16);
         cr = (v >> 16) & 255;
@@ -1209,7 +1217,8 @@ int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
             api.ObjSetStrokeColor(to, cr, cg, cb, 255);
             api.ObjSetStrokeWidth(to, (float)(rawSize * 0.035));
           }
-          api.ObjTransform(to, ma, mb, mc, md, X, base);
+          // Squeezed: narrower letters, same height.
+          api.ObjTransform(to, ma * hscale, mb * hscale, mc, md, X, base);
         }
       }
       for (OBJ o : old) {

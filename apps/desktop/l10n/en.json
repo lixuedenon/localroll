@@ -2314,5 +2314,11 @@
   "xfer.reconnect": "Reconnect",
   "settings.vault_on": "Delete protection: on. Photos, videos and documents each have a hidden backup name; if one is deleted in File Explorer, Keepnear can bring it back.",
   "settings.vault_fs": "Delete protection: off. The library's drive is {fs}, which doesn't support it; it works on NTFS drives.",
-  "settings.vault_err": "Delete protection: off (it failed to start; see the diagnostic log)."
+  "settings.vault_err": "Delete protection: off (it failed to start; see the diagnostic log).",
+  "pdfedit.move_tip": "Drag to move this line (or paragraph); its old place is left blank",
+  "pdfedit.para": "Paragraph",
+  "pdfedit.para_tip": "Change the whole paragraph at once: it is re-wrapped inside its old area",
+  "pdfedit.too_long": "Too long even squeezed to 75%: try Paragraph, or edit it as a Word file",
+  "pdfedit.para_too_long": "The paragraph doesn't fit its old area (letters already at 85%) and runs a few lines lower: shorten it, or edit it as a Word file",
+  "pdfedit.squeezed": "Squeezed to {pct}% so it doesn't run into the text beside it"
 }

@@ -91,9 +91,17 @@ class PdfTextEdit {
     required this.text,
     this.rgb = 'auto',
     this.fake = 0,
+    this.hscale = 1,
+    this.add = false,
   });
 
   final double l, b, r, t, x, base, size;
+
+  /// The letters' width × this (squeezed to fit; 1: as is).
+  final double hscale;
+
+  /// New words with no old ones to take out (a paragraph that grew).
+  final bool add;
 
   /// A .ttf file, "obj" (the old text's own font) or "objat:x,y" (the
   /// font of the text at that point of the page).
@@ -308,7 +316,7 @@ class PdfBuilder {
             for (final e in p.edits) {
               final f = File('${tmp.path}${Platform.pathSeparator}t${n++}.txt');
               await f.writeAsString(e.text, encoding: utf8);
-              plan.writeln('EDIT ${e.l}|${e.b}|${e.r}|${e.t}|${e.x}|${e.base}|${e.size}|${e.rgb}|${e.font}|${f.path}|${e.fake}');
+              plan.writeln('EDIT ${e.l}|${e.b}|${e.r}|${e.t}|${e.x}|${e.base}|${e.size}|${e.rgb}|${e.font}|${f.path}|${e.fake}|${e.hscale}|${e.add ? 'add' : ''}');
             }
             for (final st in p.stamps) {
               final f = File('${tmp.path}${Platform.pathSeparator}s${n++}.bgra');

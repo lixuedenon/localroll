@@ -2314,5 +2314,11 @@
   "xfer.reconnect": "Reconectar",
   "settings.vault_on": "Proteção contra exclusão: ativada. Fotos, vídeos e documentos têm um nome de cópia oculto; se forem excluídos no Explorador, o Keepnear pode recuperá-los.",
   "settings.vault_fs": "Proteção contra exclusão: desativada. A unidade da biblioteca é {fs}, que não a suporta; funciona em unidades NTFS.",
-  "settings.vault_err": "Proteção contra exclusão: desativada (falhou ao iniciar; veja o registro de diagnóstico)."
+  "settings.vault_err": "Proteção contra exclusão: desativada (falhou ao iniciar; veja o registro de diagnóstico).",
+  "pdfedit.move_tip": "Arraste para mover esta linha (ou parágrafo); o lugar antigo fica em branco",
+  "pdfedit.para": "Parágrafo",
+  "pdfedit.para_tip": "Alterar o parágrafo inteiro: ele é reorganizado dentro da área original",
+  "pdfedit.too_long": "Longo demais mesmo a 75%: tente Parágrafo ou edite como Word",
+  "pdfedit.para_too_long": "O parágrafo não cabe na área (letras já a 85%) e desce algumas linhas: encurte-o ou edite como Word",
+  "pdfedit.squeezed": "Comprimido a {pct}% para não sobrepor o texto ao lado"
 }

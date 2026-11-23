@@ -2314,5 +2314,11 @@
   "xfer.reconnect": "Hubungkan ulang",
   "settings.vault_on": "Perlindungan hapus: aktif. Foto, video, dan dokumen punya nama cadangan tersembunyi; jika dihapus di File Explorer, Keepnear dapat memulihkannya.",
   "settings.vault_fs": "Perlindungan hapus: nonaktif. Drive pustaka berformat {fs}, tidak didukung; berfungsi di drive NTFS.",
-  "settings.vault_err": "Perlindungan hapus: nonaktif (gagal dimulai; lihat log diagnostik)."
+  "settings.vault_err": "Perlindungan hapus: nonaktif (gagal dimulai; lihat log diagnostik).",
+  "pdfedit.move_tip": "Seret untuk memindahkan baris (atau paragraf) ini; tempat lamanya dibiarkan kosong",
+  "pdfedit.para": "Paragraf",
+  "pdfedit.para_tip": "Ubah seluruh paragraf sekaligus: baris disusun ulang di area lamanya",
+  "pdfedit.too_long": "Terlalu panjang meski dipadatkan ke 75%: coba Paragraf, atau edit sebagai Word",
+  "pdfedit.para_too_long": "Paragraf tidak muat di area lamanya (huruf sudah 85%) dan turun beberapa baris: persingkat, atau edit sebagai Word",
+  "pdfedit.squeezed": "Dipadatkan ke {pct}% agar tidak menimpa teks di sebelahnya"
 }

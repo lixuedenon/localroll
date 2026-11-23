@@ -2314,5 +2314,11 @@
   "xfer.reconnect": "重新连接",
   "settings.vault_on": "防误删：已开启。照片、视频、文档都有一个隐藏的备份名字，在资源管理器里被删了也能在 Keepnear 里恢复。",
   "settings.vault_fs": "防误删：没有开启。媒体库所在的盘是 {fs} 格式，不支持；放到 NTFS 格式的盘上才有。",
-  "settings.vault_err": "防误删：没有开启（打开时出错，详情见诊断日志）。"
+  "settings.vault_err": "防误删：没有开启（打开时出错，详情见诊断日志）。",
+  "pdfedit.move_tip": "拖动：把这一行（或这一段）挪到别处，原来的地方留白",
+  "pdfedit.para": "整段",
+  "pdfedit.para_tip": "把这一段当成一整段来改：改完在原来的区域里重新换行",
+  "pdfedit.too_long": "太长了，挤到 75% 也放不下：试试「整段」，或转成 Word 改",
+  "pdfedit.para_too_long": "这一段在原来的区域里放不下（字已缩小到 85%），会往下多占几行：可以删减文字，或转成 Word 改",
+  "pdfedit.squeezed": "已自动挤到 {pct}%，不会压到旁边的字"
 }

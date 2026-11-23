@@ -2314,5 +2314,11 @@
   "xfer.reconnect": "Neu verbinden",
   "settings.vault_on": "Löschschutz: an. Fotos, Videos und Dokumente haben je einen versteckten Sicherungsnamen; im Explorer Gelöschtes kann Keepnear zurückholen.",
   "settings.vault_fs": "Löschschutz: aus. Das Laufwerk der Mediathek ist {fs} und unterstützt ihn nicht; er funktioniert auf NTFS-Laufwerken.",
-  "settings.vault_err": "Löschschutz: aus (Start fehlgeschlagen; siehe Diagnoseprotokoll)."
+  "settings.vault_err": "Löschschutz: aus (Start fehlgeschlagen; siehe Diagnoseprotokoll).",
+  "pdfedit.move_tip": "Ziehen, um diese Zeile (oder den Absatz) zu verschieben; die alte Stelle bleibt leer",
+  "pdfedit.para": "Absatz",
+  "pdfedit.para_tip": "Den ganzen Absatz auf einmal ändern: er wird im alten Bereich neu umbrochen",
+  "pdfedit.too_long": "Auch auf 75 % gestaucht zu lang: „Absatz“ versuchen oder als Word-Datei bearbeiten",
+  "pdfedit.para_too_long": "Der Absatz passt nicht in den alten Bereich (Schrift schon 85 %) und läuft einige Zeilen tiefer: kürzen oder als Word bearbeiten",
+  "pdfedit.squeezed": "Auf {pct} % gestaucht, damit es den Text daneben nicht überlappt"
 }

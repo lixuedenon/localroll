@@ -2314,5 +2314,11 @@
   "xfer.reconnect": "Reconectar",
   "settings.vault_on": "Protección contra borrado: activada. Fotos, vídeos y documentos tienen un nombre de copia oculto; si se borran en el Explorador, Keepnear puede recuperarlos.",
   "settings.vault_fs": "Protección contra borrado: desactivada. La unidad de la biblioteca es {fs}, que no la admite; funciona en unidades NTFS.",
-  "settings.vault_err": "Protección contra borrado: desactivada (no se pudo iniciar; ver el registro de diagnóstico)."
+  "settings.vault_err": "Protección contra borrado: desactivada (no se pudo iniciar; ver el registro de diagnóstico).",
+  "pdfedit.move_tip": "Arrastra para mover esta línea (o párrafo); su lugar anterior queda en blanco",
+  "pdfedit.para": "Párrafo",
+  "pdfedit.para_tip": "Cambiar todo el párrafo: se reajusta dentro de su área original",
+  "pdfedit.too_long": "Demasiado largo incluso al 75 %: prueba Párrafo o edítalo como Word",
+  "pdfedit.para_too_long": "El párrafo no cabe en su área (letra ya al 85 %) y baja unas líneas: acórtalo o edítalo como Word",
+  "pdfedit.squeezed": "Comprimido al {pct} % para no pisar el texto de al lado"
 }

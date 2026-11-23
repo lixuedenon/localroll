@@ -2314,5 +2314,11 @@
   "xfer.reconnect": "Yeniden bağlan",
   "settings.vault_on": "Silme koruması: açık. Fotoğraf, video ve belgelerin gizli bir yedek adı var; Dosya Gezgini'nde silinseler de Keepnear geri getirebilir.",
   "settings.vault_fs": "Silme koruması: kapalı. Kitaplığın sürücüsü {fs}, desteklenmiyor; NTFS sürücülerde çalışır.",
-  "settings.vault_err": "Silme koruması: kapalı (başlatılamadı; tanılama günlüğüne bakın)."
+  "settings.vault_err": "Silme koruması: kapalı (başlatılamadı; tanılama günlüğüne bakın).",
+  "pdfedit.move_tip": "Bu satırı (veya paragrafı) taşımak için sürükleyin; eski yeri boş kalır",
+  "pdfedit.para": "Paragraf",
+  "pdfedit.para_tip": "Tüm paragrafı birden değiştir: eski alanı içinde yeniden satırlara bölünür",
+  "pdfedit.too_long": "%75'e sıkıştırılsa da uzun: Paragraf'ı deneyin ya da Word olarak düzenleyin",
+  "pdfedit.para_too_long": "Paragraf eski alanına sığmıyor (harfler zaten %85) ve birkaç satır aşağı taşıyor: kısaltın ya da Word olarak düzenleyin",
+  "pdfedit.squeezed": "Yanındaki yazıya binmemesi için %{pct} sıkıştırıldı"
 }

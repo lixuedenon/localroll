@@ -2314,5 +2314,11 @@
   "xfer.reconnect": "再接続",
   "settings.vault_on": "削除保護：オン。写真・動画・書類には隠しバックアップ名があり、エクスプローラーで削除されても Keepnear で復元できます。",
   "settings.vault_fs": "削除保護：オフ。ライブラリのドライブは {fs} 形式で非対応です。NTFS ドライブで使えます。",
-  "settings.vault_err": "削除保護：オフ（開始に失敗しました。診断ログを参照）。"
+  "settings.vault_err": "削除保護：オフ（開始に失敗しました。診断ログを参照）。",
+  "pdfedit.move_tip": "ドラッグでこの行（または段落）を移動。元の場所は空白になります",
+  "pdfedit.para": "段落",
+  "pdfedit.para_tip": "段落全体をまとめて編集：元の範囲内で改行し直します",
+  "pdfedit.too_long": "75% に詰めても入りません：「段落」を試すか、Word で編集してください",
+  "pdfedit.para_too_long": "段落が元の範囲に収まりません（文字は 85% まで縮小済み）。下に数行はみ出します：文を短くするか Word で編集してください",
+  "pdfedit.squeezed": "隣の文字に重ならないよう {pct}% に詰めました"
 }

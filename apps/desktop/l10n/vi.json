@@ -2314,5 +2314,11 @@
   "xfer.reconnect": "Kết nối lại",
   "settings.vault_on": "Chống xóa nhầm: đang bật. Ảnh, video và tài liệu đều có một tên sao lưu ẩn; bị xóa trong File Explorer thì Keepnear vẫn khôi phục được.",
   "settings.vault_fs": "Chống xóa nhầm: đang tắt. Ổ chứa thư viện là {fs}, không hỗ trợ; chỉ hoạt động trên ổ NTFS.",
-  "settings.vault_err": "Chống xóa nhầm: đang tắt (không khởi động được; xem nhật ký chẩn đoán)."
+  "settings.vault_err": "Chống xóa nhầm: đang tắt (không khởi động được; xem nhật ký chẩn đoán).",
+  "pdfedit.move_tip": "Kéo để di chuyển dòng (hoặc đoạn) này; chỗ cũ để trống",
+  "pdfedit.para": "Cả đoạn",
+  "pdfedit.para_tip": "Sửa cả đoạn một lần: tự xuống dòng lại trong vùng cũ",
+  "pdfedit.too_long": "Quá dài dù đã ép còn 75%: thử «Cả đoạn», hoặc sửa bằng Word",
+  "pdfedit.para_too_long": "Đoạn không vừa vùng cũ (chữ đã còn 85%) và tràn xuống vài dòng: rút gọn, hoặc sửa bằng Word",
+  "pdfedit.squeezed": "Đã tự ép còn {pct}% để không đè lên chữ bên cạnh"
 }

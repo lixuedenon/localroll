@@ -47,9 +47,9 @@ class _Line {
   PdfTextStyle? style;
 }
 
-/// A line changed.
+/// A line changed (or, with [para], a whole paragraph).
 class _Edit {
-  _Edit(this.line, this.text, this.size, this.bold, this.italic, this.color, this.from);
+  _Edit(this.line, this.text, this.size, this.bold, this.italic, this.color, this.from, {this.para, this.dx = 0, this.dy = 0});
 
   final _Line line;
   String text;
@@ -61,7 +61,33 @@ class _Edit {
   /// Whose look it has: the line itself, or one picked with the brush.
   _Line from;
 
-  _Edit copy() => _Edit(line, text, size, bold, italic, color, from);
+  /// The paragraph's lines, top first ([line] is the first): [text] is all
+  /// of it, laid out again inside the lines' area.
+  List<_Line>? para;
+
+  /// Moved by this much (page points; dy down the page).
+  double dx, dy;
+
+  List<_Line> get lines => para ?? [line];
+
+  _Edit copy() => _Edit(line, text, size, bold, italic, color, from, para: para, dx: dx, dy: dy);
+}
+
+/// One line as it will be written: page points, [hscale] its width
+/// squeezed (1: as is).
+class _Out {
+  const _Out(this.text, this.x, this.base, this.size, this.hscale);
+  final String text;
+  final double x, base, size, hscale;
+}
+
+/// How an edit's words are laid out; [squeezed] 0–1 how much it had to
+/// give (1: not at all), [tooLong] it still doesn't fit.
+class _Layout {
+  const _Layout(this.out, this.squeezed, this.tooLong);
+  final List<_Out> out;
+  final double squeezed;
+  final bool tooLong;
 }
 
 /// A signature or picture laid on a page: its box 0–1 of the page as
@@ -217,6 +243,12 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
 
   /// Whose look the line being changed takes (itself unless brushed).
   _Line? _from;
+
+  /// The paragraph being changed as one (its lines, top first), or null.
+  List<_Line>? _paraLines;
+
+  /// The line / paragraph being changed is moved by this much (points).
+  double _dx = 0, _dy = 0;
 
   /// The brush is on: the next line clicked gives its look.
   bool _brush = false;
@@ -866,7 +898,146 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
   static String _hex(Color c) =>
       [(c.r * 255).round(), (c.g * 255).round(), (c.b * 255).round()].map((v) => v.toRadixString(16).padLeft(2, '0')).join();
 
-  _Edit? _editOf(_Line l) => _edits.where((e) => identical(e.line, l)).firstOrNull;
+  _Edit? _editOf(_Line l) => _edits.where((e) => identical(e.line, l) || (e.para?.any((x) => identical(x, l)) ?? false)).firstOrNull;
+
+  // ------------------------------------------------ laying the words out
+
+  final Map<String, double> _widths = {};
+
+  /// [text]'s width on screen at [size] points (in points), in [family].
+  double _measure(String text, double size, String family, bool bold, bool italic) {
+    final key = '$family|$size|$bold|$italic|$text';
+    return _widths[key] ??= () {
+      final tp = TextPainter(
+        text: TextSpan(
+          text: text,
+          style: TextStyle(
+            fontSize: size,
+            fontFamily: family,
+            fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
+            fontStyle: italic ? FontStyle.italic : FontStyle.normal,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+      )..layout();
+      final w = tp.width;
+      tp.dispose();
+      return w;
+    }();
+  }
+
+  /// The paragraph [l] is in: lines above / below it on its page that line
+  /// up on the left, are about as big and follow at a line's distance.
+  List<_Line> _paraOf(_Line l) {
+    final all = [...?_lines[l.page]]..sort((a, b) => b.base.compareTo(a.base));
+    bool near(_Line a, _Line b) =>
+        (a.box.left - b.box.left).abs() < math.max(a.size, b.size) * 1.2 &&
+        (a.size - b.size).abs() < math.max(a.size, b.size) * 0.15 &&
+        (a.base - b.base).abs() > a.size * 0.8 &&
+        (a.base - b.base).abs() < a.size * 2.0;
+    final out = [l];
+    // Up, then down: each next line close to the one before.
+    var cur = l;
+    for (final x in all.where((x) => x.base > l.base).toList().reversed) {
+      if (!near(cur, x)) break;
+      out.insert(0, x);
+      cur = x;
+    }
+    cur = l;
+    for (final x in all.where((x) => x.base < l.base)) {
+      if (!near(cur, x)) break;
+      out.add(x);
+      cur = x;
+    }
+    return out;
+  }
+
+  /// How far to the right [l]'s words may go before they run into the
+  /// text beside it (page points); [x] where they start now.
+  double _roomRight(_Line l, double x, double pageWidth, {bool moved = false}) {
+    var limit = pageWidth - 18;
+    if (!moved) {
+      for (final o in _lines[l.page] ?? const <_Line>[]) {
+        if (identical(o, l) || o.box.left < l.box.right - 1) continue;
+        final overlap = math.min(o.box.top, l.box.top) - math.max(o.box.bottom, l.box.bottom);
+        if (overlap > (l.box.top - l.box.bottom) * 0.5 && o.box.left - 2 < limit) limit = o.box.left - 2;
+      }
+    }
+    return math.max(limit - x, 10);
+  }
+
+  static bool _cjkText(String s) => s.runes.any(PdfFonts.isCjk);
+
+  /// Where [e]'s words go: a line squeezed a little when it grew past the
+  /// text beside it (letters narrower first, then smaller; not below 75%);
+  /// a paragraph laid out again inside its lines' area (smaller, down to
+  /// 85%, only when it doesn't fit).
+  _Layout _layout(_Edit e, {String? text, double? size, bool? bold, bool? italic, List<_Line>? para, double? dx, double? dy}) {
+    final t = text ?? e.text;
+    final sz = size ?? e.size;
+    final b = bold ?? e.bold, it = italic ?? e.italic;
+    final lines = para ?? e.para ?? [e.line];
+    final mx = dx ?? e.dx, my = dy ?? e.dy;
+    final pw = (_doc?.pages[e.line.page].width ?? 600).toDouble();
+    final fam = _screenFamily(t, e.from);
+    // Screen widths → the PDF's (its font is not the one shown).
+    var shown = 0.0, real = 0.0;
+    for (final l in lines) {
+      final w = _measure(l.text, l.size, _screenFamily(l.text, l), b, it);
+      if (w > 0) {
+        shown += w;
+        real += l.box.width;
+      }
+    }
+    final k = shown > 0 && real > 0 ? (real / shown).clamp(0.5, 2.0) : 1.0;
+    double width(String s, double z) => _measure(s, z, fam, b, it) * k;
+    if (lines.length == 1) {
+      final l = lines.first;
+      final x = l.box.left + mx, base = l.base - my;
+      final room = _roomRight(l, x, pw, moved: mx != 0 || my != 0);
+      final need = width(t, sz);
+      if (need <= room || t.isEmpty) return _Layout([_Out(t, x, base, sz, 1)], 1, false);
+      final f = room / need;
+      if (f >= 0.85) return _Layout([_Out(t, x, base, sz, f)], f, false);
+      final g = math.max(f, 0.75);
+      return _Layout([_Out(t, x, base, sz * g / 0.85, 0.85)], g, f < 0.75);
+    }
+    // A paragraph: its area, its line distance.
+    final x0 = lines.map((l) => l.box.left).reduce(math.min) + mx;
+    final w = lines.map((l) => l.box.right).reduce(math.max) - lines.map((l) => l.box.left).reduce(math.min);
+    final top = lines.first.base - my;
+    final pitch = (lines.first.base - lines.last.base) / (lines.length - 1);
+    List<String> wrap(double z) {
+      final out = <String>[];
+      for (final hard in t.split('\n')) {
+        var cur = '';
+        // CJK breaks between any two letters; other text at spaces.
+        final parts = _cjkText(hard) ? hard.split('') : hard.split(RegExp(r'(?<= )'));
+        for (final piece in parts) {
+          final next = cur + piece;
+          if (cur.isNotEmpty && width(next.trimRight(), z) > w) {
+            out.add(cur.trimRight());
+            cur = piece.trimLeft();
+          } else {
+            cur = next;
+          }
+        }
+        out.add(cur.trimRight());
+      }
+      return out;
+    }
+
+    var scale = 1.0;
+    var rows = wrap(sz);
+    while (rows.length > lines.length && scale > 0.851) {
+      scale -= 0.05;
+      rows = wrap(sz * scale);
+    }
+    return _Layout([
+      for (var i = 0; i < rows.length; i++) _Out(rows[i], x0, top - i * pitch * scale, sz * scale, 1),
+    ], scale, rows.length > lines.length);
+  }
 
   static Color? _rgbColor(String? hex) {
     final v = int.tryParse(hex ?? '', radix: 16);
@@ -892,13 +1063,27 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
   bool get _typing {
     final l = _editing;
     if (l == null) return false;
-    final text = _ctl.text.replaceAll('\n', ' ').trimRight();
+    final text = _paraLines == null ? _ctl.text.replaceAll('\n', ' ').trimRight() : _ctl.text.trimRight();
     final e = _editOf(l);
     if (e != null) {
-      return text != e.text || _size != e.size || _bold != e.bold || _italic != e.italic || !identical(_from ?? l, e.from);
+      return text != e.text ||
+          _size != e.size ||
+          _bold != e.bold ||
+          _italic != e.italic ||
+          !identical(_from ?? l, e.from) ||
+          _dx != e.dx ||
+          _dy != e.dy ||
+          !identical(_paraLines, e.para);
     }
     final (size, bold, italic, _) = _lookOf(l);
-    return text != l.text || _size != size || _bold != bold || _italic != italic || !identical(_from ?? l, l);
+    return text != l.text ||
+        _size != size ||
+        _bold != bold ||
+        _italic != italic ||
+        !identical(_from ?? l, l) ||
+        _dx != 0 ||
+        _dy != 0 ||
+        _paraLines != null;
   }
 
   /// Something not saved yet (done, or still being typed).
@@ -906,10 +1091,14 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
 
   void _start(_Line l) {
     final e = _editOf(l);
+    if (e != null) l = e.line;
     final (size, bold, italic, color) = _lookOf(l);
     setState(() {
       _brush = false;
       _editing = l;
+      _paraLines = e?.para;
+      _dx = e?.dx ?? 0;
+      _dy = e?.dy ?? 0;
       _ctl.text = e?.text ?? l.text;
       _ctl.selection = TextSelection(baseOffset: 0, extentOffset: _ctl.text.length);
       _size = e?.size ?? size;
@@ -937,24 +1126,83 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
   }
 
   void _cancel() {
-    if (_editing != null) setState(() => _editing = _from = null);
+    if (_editing != null) {
+      setState(() {
+        _editing = _from = null;
+        _paraLines = null;
+        _dx = _dy = 0;
+      });
+    }
     _bar.hide();
+  }
+
+  /// The line being changed becomes its whole paragraph (or back).
+  void _togglePara() {
+    final l = _editing;
+    if (l == null) return;
+    setState(() {
+      if (_paraLines != null) {
+        _paraLines = null;
+        _ctl.text = l.text;
+      } else {
+        final p = _paraOf(l);
+        if (p.length < 2) return;
+        _paraLines = p;
+        _editing = p.first;
+        _ctl.text = _joinPara(p);
+      }
+      _ctl.selection = TextSelection(baseOffset: 0, extentOffset: _ctl.text.length);
+    });
+    _focus.requestFocus();
+  }
+
+  /// A paragraph's lines as one text (CJK joined straight, others with a
+  /// space; a hyphen at a line's end joins the word).
+  static String _joinPara(List<_Line> p) {
+    final b = StringBuffer();
+    for (var i = 0; i < p.length; i++) {
+      var s = p[i].text;
+      if (i > 0) {
+        final prev = b.toString();
+        final cjk = prev.isNotEmpty && PdfFonts.isCjk(prev.runes.last) && s.isNotEmpty && PdfFonts.isCjk(s.runes.first);
+        if (prev.endsWith('-')) {
+          b.clear();
+          b.write(prev.substring(0, prev.length - 1));
+        } else if (!cjk) {
+          b.write(' ');
+        }
+      }
+      b.write(s);
+    }
+    return b.toString();
   }
 
   void _done() {
     final l = _editing;
     if (l == null) return;
-    final text = _ctl.text.replaceAll('\n', ' ').trimRight();
+    final para = _paraLines;
+    final text = para == null ? _ctl.text.replaceAll('\n', ' ').trimRight() : _ctl.text.trimRight();
     final (size, bold, italic, _) = _lookOf(l);
     final e0 = _editOf(l);
-    final same0 = text == l.text && _size == size && _bold == bold && _italic == italic && identical(_from ?? l, l);
+    final still = _dx == 0 && _dy == 0 && para == null;
+    final same0 = still && text == l.text && _size == size && _bold == bold && _italic == italic && identical(_from ?? l, l);
     final unchanged = e0 == null
         ? same0
-        : text == e0.text && _size == e0.size && _bold == e0.bold && _italic == e0.italic && _color == e0.color && identical(_from ?? l, e0.from);
+        : text == e0.text &&
+            _size == e0.size &&
+            _bold == e0.bold &&
+            _italic == e0.italic &&
+            _color == e0.color &&
+            identical(_from ?? l, e0.from) &&
+            _dx == e0.dx &&
+            _dy == e0.dy &&
+            identical(para, e0.para);
     if (!unchanged) _mark();
     setState(() {
       final e = _editOf(l);
-      final same = text == l.text && _size == size && _bold == bold && _italic == italic && identical(_from ?? l, l);
+      // A paragraph changed now replaces changes made in its lines alone.
+      if (para != null) _edits.removeWhere((x) => !identical(x, e) && x.lines.any((y) => para.any((z) => identical(y, z))));
+      final same = still && text == l.text && _size == size && _bold == bold && _italic == italic && identical(_from ?? l, l);
       if (same) {
         // Back as it was.
         if (e != null) _edits.remove(e);
@@ -965,12 +1213,17 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
           ..bold = _bold
           ..italic = _italic
           ..color = _color
-          ..from = _from ?? l;
+          ..from = _from ?? l
+          ..para = para
+          ..dx = _dx
+          ..dy = _dy;
       } else {
-        _edits.add(_Edit(l, text, _size, _bold, _italic, _color, _from ?? l));
+        _edits.add(_Edit(l, text, _size, _bold, _italic, _color, _from ?? l, para: para, dx: _dx, dy: _dy));
       }
       _editing = null;
       _from = null;
+      _paraLines = null;
+      _dx = _dy = 0;
       _brush = false;
     });
     _bar.hide();
@@ -1039,29 +1292,56 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
     for (final e in _edits) {
       String font;
       var fake = 0;
-      if (_canReuse(e.text, e.from, e.line, e.bold, e.italic)) {
+      final plain = e.text.replaceAll('\n', '');
+      // Lines added below a paragraph (it grew) are written first: the
+      // old text whose font they copy is still there then.
+      String? addFont;
+      if (_canReuse(plain, e.from, e.line, e.bold, e.italic)) {
         final st = e.from.style!;
-        font = identical(e.from, e.line) ? 'obj' : 'objat:${(st.l + st.r) / 2},${(st.b + st.t) / 2}';
+        final at = 'objat:${(st.l + st.r) / 2},${(st.b + st.t) / 2}';
+        font = identical(e.from, e.line) ? 'obj' : at;
+        addFont = at;
       } else {
-        final c = await PdfFonts.pick(e.text, like: e.from.style?.name, bold: e.bold, italic: e.italic);
+        final c = await PdfFonts.pick(plain, like: e.from.style?.name, bold: e.bold, italic: e.italic);
         font = c?.path ?? '';
         if (e.bold && !(c?.hasBold ?? false)) fake |= 1;
         if (e.italic && !(c?.hasItalic ?? false)) fake |= 2;
       }
-      (made[e.line.page] ??= []).add(PdfTextEdit(
-        l: e.line.box.left,
-        b: e.line.box.bottom,
-        r: e.line.box.right,
-        t: e.line.box.top,
-        x: e.line.box.left,
-        base: e.from.style != null && identical(e.from, e.line) ? e.line.base : e.line.base,
-        size: e.size,
-        font: font,
-        text: e.text,
-        // The colour the old words had (red stays red), or the brushed one.
-        rgb: e.color == null ? 'auto' : _hex(e.color!),
-        fake: fake,
-      ));
+      final lay = _layout(e);
+      final rgb = e.color == null ? 'auto' : _hex(e.color!);
+      final list = made[e.line.page] ??= [];
+      final lines = e.lines;
+      for (var i = lines.length; i < lay.out.length; i++) {
+        final o = lay.out[i];
+        list.insert(
+            0,
+            PdfTextEdit(
+              l: 0, b: 0, r: 0, t: 0, x: o.x, base: o.base, size: o.size,
+              // "obj" has no old text to copy here: the paragraph's first line's.
+              font: addFont ?? font, text: o.text, rgb: rgb == 'auto' ? _hex(_lookOf(e.line).$4 ?? const Color(0xFF000000)) : rgb,
+              fake: fake, hscale: o.hscale, add: true,
+            ));
+      }
+      for (var i = 0; i < lines.length; i++) {
+        final l = lines[i];
+        final o = i < lay.out.length ? lay.out[i] : null;
+        list.add(PdfTextEdit(
+          l: l.box.left,
+          b: l.box.bottom,
+          r: l.box.right,
+          t: l.box.top,
+          x: o?.x ?? l.box.left,
+          base: o?.base ?? l.base,
+          size: o?.size ?? e.size,
+          font: font,
+          // Nothing left for this line: its old words just go.
+          text: o?.text ?? '',
+          // The colour the old words had (red stays red), or the brushed one.
+          rgb: rgb,
+          fake: fake,
+          hscale: o?.hscale ?? 1,
+        ));
+      }
     }
     DiagLog.log('tools', 'pdf edit fonts: ${[for (final p in made.values) for (final e in p) e.font.isEmpty ? '?' : e.font.split(r'\\').last].join(', ')}');
     // Marks: one see-through picture per page (about 200 dpi) and the
@@ -1385,7 +1665,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
                 Positioned.fill(child: RawImage(image: pic, fit: BoxFit.fill)),
                 // Changed lines: the old words covered, the new shown.
                 for (final e in _edits)
-                  if (e.line.page == _page && !identical(e.line, _editing)) _preview(e, at(e.line.box), scale),
+                  if (e.line.page == _page && !identical(e.line, _editing)) ..._preview(e, at, scale, page.height),
                 // Signatures and pictures.
                 for (final p in _puts)
                   if (p.page == _page)
@@ -1443,7 +1723,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
                 // Signatures and pictures: choose, move, size, turn.
                 if (putting) Positioned.fill(child: _putLayer(size)),
                 if (_mode == _Mode.text)
-                  if (_editing case final l? when l.page == _page) ..._editor(l, at(l.box), scale, size),
+                  if (_editing case final l? when l.page == _page) ..._editor(l, _editRect(l, at), scale, size),
               ]),
       );
       return Listener(
@@ -1578,42 +1858,104 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
     );
   }
 
-  Widget _preview(_Edit e, Rect r, double scale) => Positioned(
-        left: r.left - 1,
-        top: r.top - 1,
-        child: Container(
-          constraints: BoxConstraints(minWidth: r.width + 2, minHeight: r.height + 2),
-          color: Colors.white,
-          alignment: Alignment.centerLeft,
-          child: Text(
-            e.text,
-            softWrap: false,
-            style: TextStyle(
-              fontSize: e.size * scale,
-              height: 1.0,
-              fontWeight: e.bold ? FontWeight.w700 : FontWeight.w400,
-              fontStyle: e.italic ? FontStyle.italic : FontStyle.normal,
-              fontFamily: _screenFamily(e.text, e.from),
-              color: e.color ?? const Color(0xFF1A1A1A),
-              decoration: TextDecoration.underline,
-              decorationColor: const Color(0x8012A35F),
-              decorationThickness: 2,
+  /// A change as it will look: the old words covered, the new ones where
+  /// they go (squeezed, laid out, moved).
+  List<Widget> _preview(_Edit e, Rect Function(PdfRect) at, double scale, double pageHeight) {
+    final lay = _layout(e);
+    return [
+      for (final l in e.lines)
+        Positioned.fromRect(rect: at(l.box).inflate(1), child: const ColoredBox(color: Colors.white)),
+      for (final o in lay.out)
+        _words(o.text, o, scale, pageHeight, bold: e.bold, italic: e.italic, family: _screenFamily(e.text, e.from), color: e.color, mark: true),
+    ];
+  }
+
+  /// [text] drawn as [o] lays it (baseline at [o].base, page points).
+  Widget _words(String text, _Out o, double scale, double pageHeight,
+          {required bool bold, required bool italic, required String family, Color? color, bool mark = false}) =>
+      Positioned(
+        left: o.x * scale,
+        // The box's top: about one size above the baseline.
+        top: (pageHeight - o.base - o.size * 0.88) * scale,
+        child: IgnorePointer(
+          child: Transform(
+            alignment: Alignment.centerLeft,
+            transform: Matrix4.diagonal3Values(o.hscale, 1, 1),
+            child: Text(
+              text,
+              softWrap: false,
+              style: TextStyle(
+                fontSize: o.size * scale,
+                height: 1.0,
+                fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
+                fontStyle: italic ? FontStyle.italic : FontStyle.normal,
+                fontFamily: family,
+                color: color ?? const Color(0xFF1A1A1A),
+                decoration: mark ? TextDecoration.underline : null,
+                decorationColor: const Color(0x8012A35F),
+                decorationThickness: 2,
+              ),
             ),
           ),
         ),
       );
 
+  /// Where the line (or paragraph) being changed is, as shown (moved too).
+  Rect _editRect(_Line l, Rect Function(PdfRect) at) {
+    final lines = _paraLines ?? [l];
+    var r = at(lines.first.box);
+    for (final x in lines.skip(1)) {
+      r = r.expandToInclude(at(x.box));
+    }
+    // The page's scale: screen pixels per point.
+    final w = lines.first.box.width;
+    final s = w <= 0 ? 1.0 : at(lines.first.box).width / w;
+    return r.shift(Offset(_dx * s, _dy * s));
+  }
+
   List<Widget> _editor(_Line l, Rect r, double scale, Size page) {
+    final para = _paraLines != null;
     // Room to type more; not past the page's right edge if it can help it.
-    var width = r.width + 80;
+    var width = para ? r.width + 8 : r.width + 80;
     if (width < 220) width = 220;
     final room = page.width - r.left + 40;
     if (width > room && room >= 220) width = room;
+    final moved = _dx != 0 || _dy != 0;
     // The bar goes under the line, or over it near the page's foot; lined
     // up on the right for a line on the right half (so it stays in view).
     final up = page.height - r.bottom < 120;
     final right = r.left > page.width / 2;
     return [
+      // Moved: the old place shows blank (the words go with the box).
+      if (moved)
+        Positioned.fromRect(
+          rect: r.shift(Offset(-_dx * scale, -_dy * scale)).inflate(1),
+          child: const IgnorePointer(child: ColoredBox(color: Colors.white)),
+        ),
+      // Drag to move the line (or paragraph); the old place stays blank.
+      Positioned(
+        left: r.left - 30,
+        top: r.top - 4,
+        child: Tooltip(
+          message: tr('pdfedit.move_tip'),
+          child: MouseRegion(
+            cursor: SystemMouseCursors.move,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onPanUpdate: (d) => setState(() {
+                _dx += d.delta.dx / scale;
+                _dy += d.delta.dy / scale;
+              }),
+              child: Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(color: LightLook.blue, borderRadius: BorderRadius.circular(6)),
+                child: const Icon(Icons.open_with_rounded, size: 16, color: Colors.white),
+              ),
+            ),
+          ),
+        ),
+      ),
       Positioned(
         left: r.left - 4,
         top: r.top - 5,
@@ -1636,7 +1978,9 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
               child: TextField(
                 controller: _ctl,
                 focusNode: _focus,
-                maxLines: 1,
+                // A paragraph: lines wrap (Shift+Enter: a new line).
+                maxLines: para ? null : 1,
+                minLines: para ? (_paraLines!.length) : 1,
                 style: TextStyle(
                   fontSize: _size * scale,
                   height: 1.15,
@@ -1676,6 +2020,15 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
         ),
       ),
     ];
+  }
+
+  /// "· squeezed to 88%" / "· too long…" for what is being typed.
+  String _fitNote(_Line l) {
+    final probe = _Edit(l, _ctl.text.trimRight(), _size, _bold, _italic, _color, _from ?? l, para: _paraLines, dx: _dx, dy: _dy);
+    final lay = _layout(probe);
+    if (lay.tooLong) return '  ·  ${tr(_paraLines == null ? 'pdfedit.too_long' : 'pdfedit.para_too_long')}';
+    if (lay.squeezed < 0.995) return '  ·  ${tr('pdfedit.squeezed', {'pct': (lay.squeezed * 100).round()})}';
+    return '';
   }
 
   /// Size, bold, italic, colour, brush, cancel / done.
@@ -1726,6 +2079,18 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
                 ),
               ),
               const SizedBox(width: 6),
+              // The whole paragraph as one: its lines laid out again.
+              if (_paraLines != null || _paraOf(l).length > 1) ...[
+                FilterChip(
+                  avatar: const Icon(Icons.notes_rounded, size: 16),
+                  label: Text(tr('pdfedit.para')),
+                  tooltip: tr('pdfedit.para_tip'),
+                  selected: _paraLines != null,
+                  onSelected: (_) => _togglePara(),
+                  visualDensity: VisualDensity.compact,
+                ),
+                const SizedBox(width: 6),
+              ],
               // The brush: take the look of another line.
               FilterChip(
                 avatar: const Icon(Icons.format_paint_rounded, size: 16),
@@ -1743,7 +2108,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(4, 0, 4, 4),
                 child: Text(
-                  _brush ? tr('pdfedit.brush_hint') : _fontNote(_ctl.text, _from ?? l, l, _bold, _italic),
+                  _brush ? tr('pdfedit.brush_hint') : '${_fontNote(_ctl.text, _from ?? l, l, _bold, _italic)}${_fitNote(l)}',
                   style: TextStyle(fontSize: 12, color: _brush ? LightLook.blue : LightLook.muted),
                 ),
               ),
@@ -1899,7 +2264,9 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
                     child: Text.rich(
                       TextSpan(children: [
                         TextSpan(text: '${tr('pdfedit.page_short', {'n': e.line.page + 1})}  ', style: const TextStyle(color: LightLook.muted)),
-                        TextSpan(text: e.line.text, style: const TextStyle(decoration: TextDecoration.lineThrough, color: Color(0xFFA3AEC0))),
+                        TextSpan(
+                            text: e.para == null ? e.line.text : _joinPara(e.para!),
+                            style: const TextStyle(decoration: TextDecoration.lineThrough, color: Color(0xFFA3AEC0))),
                         const TextSpan(text: '  →  '),
                         TextSpan(text: e.text, style: const TextStyle(color: Color(0xFF15803D), fontWeight: FontWeight.w600)),
                       ]),

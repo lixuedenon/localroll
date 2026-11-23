@@ -2314,5 +2314,11 @@
   "xfer.reconnect": "Riconnetti",
   "settings.vault_on": "Protezione eliminazione: attiva. Foto, video e documenti hanno un nome di backup nascosto; se eliminati in Esplora file, Keepnear può recuperarli.",
   "settings.vault_fs": "Protezione eliminazione: disattivata. L'unità della libreria è {fs}, non supportata; funziona su unità NTFS.",
-  "settings.vault_err": "Protezione eliminazione: disattivata (avvio non riuscito; vedi il registro diagnostico)."
+  "settings.vault_err": "Protezione eliminazione: disattivata (avvio non riuscito; vedi il registro diagnostico).",
+  "pdfedit.move_tip": "Trascina per spostare questa riga (o paragrafo); il posto originale resta vuoto",
+  "pdfedit.para": "Paragrafo",
+  "pdfedit.para_tip": "Modifica l’intero paragrafo: viene rimpaginato nella sua area originale",
+  "pdfedit.too_long": "Troppo lungo anche al 75%: prova Paragrafo o modificalo in Word",
+  "pdfedit.para_too_long": "Il paragrafo non entra nella sua area (lettere già all’85%) e scende di alcune righe: accorcialo o modificalo in Word",
+  "pdfedit.squeezed": "Compresso al {pct}% per non sovrapporsi al testo accanto"
 }
