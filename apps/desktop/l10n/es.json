@@ -2339,5 +2339,6 @@
   "files.edit_verb": "Editar con {app}",
   "pdfedit.form": "Rellenar",
   "files.old_need_office": "Formato antiguo de Office / WPS. Keepnear lo muestra después de que Word, WPS o LibreOffice de este PC lo conviertan en PDF, y no se encontró ninguno. LibreOffice es gratis.",
-  "files.old_opening": "Abriendo {name}…"
+  "files.old_opening": "Abriendo {name}…",
+  "pdfedit.form_hint": "Haz clic en una casilla para escribir y en una de marcar para marcarla. Si solo se rellenó el formulario, el PDF guardado sigue siendo formulario."
 }

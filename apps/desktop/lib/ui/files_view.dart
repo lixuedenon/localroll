@@ -374,7 +374,7 @@ Future<void> _openLegacy(BuildContext context, AppServices services, String path
     final fresh = made.existsSync() && made.lastModifiedSync().isAfter(File(path).lastModifiedSync());
     if (!fresh) {
       if (!context.mounted) return;
-      err = await runBusy(context, tr('files.old_opening', {'name': name}), () => OfficeEngines.run('pdf', path, out));
+      err = await runBusy<String?>(context, tr('files.old_opening', {'name': name}), () => OfficeEngines.run('pdf', path, out));
     }
   } catch (e) {
     err = '$e';

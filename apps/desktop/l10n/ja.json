@@ -2339,5 +2339,6 @@
   "files.edit_verb": "{app} で編集",
   "pdfedit.form": "フォーム入力",
   "files.old_need_office": "古い Office / WPS 形式です。この PC の Word・WPS・LibreOffice で PDF にしてから表示しますが、どれも見つかりませんでした。LibreOffice は無料です。",
-  "files.old_opening": "{name} を開いています…"
+  "files.old_opening": "{name} を開いています…",
+  "pdfedit.form_hint": "フォームの欄をクリックして入力、チェック欄はクリックで切り替え。フォームだけを入力した場合、保存後もフォームのまま続けて入力できます。"
 }

@@ -2339,5 +2339,6 @@
   "files.edit_verb": "แก้ไขด้วย {app}",
   "pdfedit.form": "กรอกแบบฟอร์ม",
   "files.old_need_office": "นี่เป็นรูปแบบ Office / WPS รุ่นเก่า Keepnear จะแสดงได้หลังจาก Word, WPS หรือ LibreOffice ในเครื่องนี้แปลงเป็น PDF แต่ไม่พบโปรแกรมเหล่านี้เลย LibreOffice ใช้ฟรี",
-  "files.old_opening": "กำลังเปิด {name}…"
+  "files.old_opening": "กำลังเปิด {name}…",
+  "pdfedit.form_hint": "คลิกช่องในแบบฟอร์มเพื่อพิมพ์ คลิกช่องทำเครื่องหมายเพื่อติ๊ก ถ้ากรอกแค่แบบฟอร์ม PDF ที่บันทึกยังเป็นแบบฟอร์ม"
 }

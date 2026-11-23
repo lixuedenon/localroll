@@ -2339,5 +2339,6 @@
   "files.edit_verb": "{app}(으)로 편집",
   "pdfedit.form": "양식 작성",
   "files.old_need_office": "예전 Office / WPS 형식입니다. 이 PC의 Word, WPS, LibreOffice로 PDF를 만든 뒤 보여 주는데 하나도 찾지 못했습니다. LibreOffice는 무료입니다.",
-  "files.old_opening": "{name} 여는 중…"
+  "files.old_opening": "{name} 여는 중…",
+  "pdfedit.form_hint": "양식 칸을 클릭해 입력하고, 체크 칸은 클릭하면 표시됩니다. 양식만 작성했으면 저장 후에도 양식 그대로라 계속 작성할 수 있습니다."
 }

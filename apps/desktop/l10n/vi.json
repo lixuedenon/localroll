@@ -2339,5 +2339,6 @@
   "files.edit_verb": "Sửa bằng {app}",
   "pdfedit.form": "Điền biểu mẫu",
   "files.old_need_office": "Đây là định dạng Office / WPS cũ. Keepnear hiển thị sau khi Word, WPS hoặc LibreOffice trên máy chuyển nó sang PDF, nhưng không tìm thấy chương trình nào. LibreOffice miễn phí.",
-  "files.old_opening": "Đang mở {name}…"
+  "files.old_opening": "Đang mở {name}…",
+  "pdfedit.form_hint": "Bấm vào ô của biểu mẫu để gõ, bấm ô đánh dấu để tích. Nếu chỉ điền biểu mẫu, PDF lưu xong vẫn là biểu mẫu."
 }

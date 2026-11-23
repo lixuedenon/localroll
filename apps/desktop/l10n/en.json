@@ -2339,5 +2339,6 @@
   "files.edit_verb": "Edit with {app}",
   "pdfedit.form": "Fill in",
   "files.old_need_office": "This is an older Office / WPS format. Keepnear shows it after Word, WPS or LibreOffice on this PC turns it into a PDF, and none of them was found. LibreOffice is free.",
-  "files.old_opening": "Opening {name}…"
+  "files.old_opening": "Opening {name}…",
+  "pdfedit.form_hint": "Click a box of the form to type in it; click a check box to tick it. When only the form was filled in, the saved PDF is still a form others can keep filling in."
 }

@@ -2339,5 +2339,6 @@
   "files.edit_verb": "Изменить в {app}",
   "pdfedit.form": "Заполнить",
   "files.old_need_office": "Это старый формат Office / WPS. Keepnear показывает его после перевода в PDF программой Word, WPS или LibreOffice на этом ПК, но ни одна не найдена. LibreOffice бесплатен.",
-  "files.old_opening": "Открывается {name}…"
+  "files.old_opening": "Открывается {name}…",
+  "pdfedit.form_hint": "Щёлкните поле формы и вводите текст, флажок — щелчком. Если заполнена только форма, сохранённый PDF останется формой."
 }

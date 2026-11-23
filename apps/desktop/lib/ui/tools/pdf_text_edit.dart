@@ -2339,6 +2339,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
               _Mode.mark => tr('ann.title'),
               _Mode.sign => tr('pdf.sign'),
               _Mode.picture => tr('pdf.add_picture'),
+              _Mode.form => tr('pdfedit.form'),
             },
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: LightLook.text),
           ),
@@ -2347,6 +2348,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
             switch (_mode) {
               _Mode.text => '${tr('pdfedit.hint')}\n${tr('edit.box_hint')}',
               _Mode.mark => tr('ann.hint'),
+              _Mode.form => tr('pdfedit.form_hint'),
               _ => tr('edit.put_hint'),
             },
             style: const TextStyle(color: LightLook.muted, fontSize: 12.5, height: 1.5),

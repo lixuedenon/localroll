@@ -2339,5 +2339,6 @@
   "files.edit_verb": "Mit {app} bearbeiten",
   "pdfedit.form": "Ausfüllen",
   "files.old_need_office": "Ein älteres Office-/WPS-Format. Keepnear zeigt es, nachdem Word, WPS oder LibreOffice auf diesem PC ein PDF daraus macht – keines davon wurde gefunden. LibreOffice ist kostenlos.",
-  "files.old_opening": "{name} wird geöffnet…"
+  "files.old_opening": "{name} wird geöffnet…",
+  "pdfedit.form_hint": "Auf ein Feld klicken und tippen, Kontrollkästchen per Klick abhaken. Wurde nur das Formular ausgefüllt, bleibt das gespeicherte PDF ein Formular."
 }

@@ -2339,5 +2339,6 @@
   "files.edit_verb": "تحرير باستخدام {app}",
   "pdfedit.form": "تعبئة",
   "files.old_need_office": "هذا تنسيق Office / WPS قديم. يعرضه Keepnear بعد أن يحوّله Word أو WPS أو LibreOffice على هذا الحاسوب إلى PDF، ولم يُعثر على أي منها. LibreOffice مجاني.",
-  "files.old_opening": "جارٍ فتح {name}…"
+  "files.old_opening": "جارٍ فتح {name}…",
+  "pdfedit.form_hint": "انقر خانة النموذج للكتابة، وانقر مربع الاختيار لتحديده. إذا عُبّئ النموذج فقط يبقى ملف PDF المحفوظ نموذجًا."
 }

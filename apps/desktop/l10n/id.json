@@ -2339,5 +2339,6 @@
   "files.edit_verb": "Edit dengan {app}",
   "pdfedit.form": "Isi formulir",
   "files.old_need_office": "Ini format Office / WPS lama. Keepnear menampilkannya setelah Word, WPS, atau LibreOffice di PC ini mengubahnya ke PDF, dan tidak ada yang ditemukan. LibreOffice gratis.",
-  "files.old_opening": "Membuka {name}…"
+  "files.old_opening": "Membuka {name}…",
+  "pdfedit.form_hint": "Klik kotak formulir untuk mengetik, klik kotak centang untuk mencentang. Jika hanya formulir yang diisi, PDF yang disimpan tetap formulir."
 }

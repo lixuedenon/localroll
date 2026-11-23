@@ -2339,5 +2339,6 @@
   "files.edit_verb": "Modifica con {app}",
   "pdfedit.form": "Compila",
   "files.old_need_office": "Vecchio formato Office / WPS. Keepnear lo mostra dopo che Word, WPS o LibreOffice di questo PC lo trasforma in PDF, ma non ne è stato trovato nessuno. LibreOffice è gratuito.",
-  "files.old_opening": "Apertura di {name}…"
+  "files.old_opening": "Apertura di {name}…",
+  "pdfedit.form_hint": "Clicca su un campo per scrivere, su una casella per spuntarla. Se è stato compilato solo il modulo, il PDF salvato resta un modulo."
 }

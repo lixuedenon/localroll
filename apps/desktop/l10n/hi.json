@@ -2339,5 +2339,6 @@
   "files.edit_verb": "{app} से संपादित करें",
   "pdfedit.form": "भरें",
   "files.old_need_office": "यह पुराना Office / WPS प्रारूप है। Keepnear इसे इस PC के Word, WPS या LibreOffice से PDF बनवाकर दिखाता है, पर इनमें से कोई नहीं मिला। LibreOffice मुफ़्त है।",
-  "files.old_opening": "{name} खुल रही है…"
+  "files.old_opening": "{name} खुल रही है…",
+  "pdfedit.form_hint": "फ़ॉर्म के खाने पर क्लिक कर लिखें, चेकबॉक्स पर क्लिक कर टिक करें। केवल फ़ॉर्म भरा हो तो सहेजी गई PDF फ़ॉर्म ही रहती है।"
 }

@@ -2345,6 +2345,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfedit.form': 'Fill in',
     'files.old_need_office': 'This is an older Office / WPS format. Keepnear shows it after Word, WPS or LibreOffice on this PC turns it into a PDF, and none of them was found. LibreOffice is free.',
     'files.old_opening': 'Opening {name}…',
+    'pdfedit.form_hint': 'Click a box of the form to type in it; click a check box to tick it. When only the form was filled in, the saved PDF is still a form others can keep filling in.',
   },
   'zh': {
     'nav.library': '媒体库',
@@ -4688,6 +4689,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfedit.form': '填表',
     'files.old_need_office': '这是旧版 Office / WPS 格式，Keepnear 要借这台电脑上的 Word、WPS 或 LibreOffice 先转成 PDF 才能显示。现在一个都没找到；LibreOffice 是免费的。',
     'files.old_opening': '正在打开 {name}…',
+    'pdfedit.form_hint': '点表单里的格子直接填，勾选框点一下就勾上。只填了表时，保存后还是表单，别人还能接着填。',
   },
   'zh_Hant': {
     'nav.library': '媒體庫',
@@ -7031,6 +7033,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfedit.form': '填表',
     'files.old_need_office': '這是舊版 Office / WPS 格式，Keepnear 要借這台電腦上的 Word、WPS 或 LibreOffice 先轉成 PDF 才能顯示。現在一個都沒找到；LibreOffice 是免費的。',
     'files.old_opening': '正在開啟 {name}…',
+    'pdfedit.form_hint': '點表單裡的格子直接填，勾選框點一下就勾上。只填了表時，儲存後還是表單，別人還能接著填。',
   },
   'ja': {
     'nav.library': 'ライブラリ',
@@ -9374,6 +9377,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfedit.form': 'フォーム入力',
     'files.old_need_office': '古い Office / WPS 形式です。この PC の Word・WPS・LibreOffice で PDF にしてから表示しますが、どれも見つかりませんでした。LibreOffice は無料です。',
     'files.old_opening': '{name} を開いています…',
+    'pdfedit.form_hint': 'フォームの欄をクリックして入力、チェック欄はクリックで切り替え。フォームだけを入力した場合、保存後もフォームのまま続けて入力できます。',
   },
   'ko': {
     'nav.library': '라이브러리',
@@ -11717,6 +11721,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfedit.form': '양식 작성',
     'files.old_need_office': '예전 Office / WPS 형식입니다. 이 PC의 Word, WPS, LibreOffice로 PDF를 만든 뒤 보여 주는데 하나도 찾지 못했습니다. LibreOffice는 무료입니다.',
     'files.old_opening': '{name} 여는 중…',
+    'pdfedit.form_hint': '양식 칸을 클릭해 입력하고, 체크 칸은 클릭하면 표시됩니다. 양식만 작성했으면 저장 후에도 양식 그대로라 계속 작성할 수 있습니다.',
   },
   'es': {
     'nav.library': 'Biblioteca',
@@ -14060,6 +14065,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfedit.form': 'Rellenar',
     'files.old_need_office': 'Formato antiguo de Office / WPS. Keepnear lo muestra después de que Word, WPS o LibreOffice de este PC lo conviertan en PDF, y no se encontró ninguno. LibreOffice es gratis.',
     'files.old_opening': 'Abriendo {name}…',
+    'pdfedit.form_hint': 'Haz clic en una casilla para escribir y en una de marcar para marcarla. Si solo se rellenó el formulario, el PDF guardado sigue siendo formulario.',
   },
   'fr': {
     'nav.library': 'Bibliothèque',
@@ -16403,6 +16409,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfedit.form': 'Remplir',
     'files.old_need_office': 'Ancien format Office / WPS. Keepnear l’affiche après conversion en PDF par Word, WPS ou LibreOffice sur ce PC, mais aucun n’a été trouvé. LibreOffice est gratuit.',
     'files.old_opening': 'Ouverture de {name}…',
+    'pdfedit.form_hint': 'Cliquez sur un champ pour écrire, sur une case pour la cocher. Si seul le formulaire a été rempli, le PDF enregistré reste un formulaire.',
   },
   'de': {
     'nav.library': 'Mediathek',
@@ -18746,6 +18753,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfedit.form': 'Ausfüllen',
     'files.old_need_office': 'Ein älteres Office-/WPS-Format. Keepnear zeigt es, nachdem Word, WPS oder LibreOffice auf diesem PC ein PDF daraus macht – keines davon wurde gefunden. LibreOffice ist kostenlos.',
     'files.old_opening': '{name} wird geöffnet…',
+    'pdfedit.form_hint': 'Auf ein Feld klicken und tippen, Kontrollkästchen per Klick abhaken. Wurde nur das Formular ausgefüllt, bleibt das gespeicherte PDF ein Formular.',
   },
   'pt': {
     'nav.library': 'Biblioteca',
@@ -21089,6 +21097,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfedit.form': 'Preencher',
     'files.old_need_office': 'Formato antigo do Office / WPS. O Keepnear o mostra depois que o Word, WPS ou LibreOffice deste PC o converte em PDF, e nenhum foi encontrado. O LibreOffice é gratuito.',
     'files.old_opening': 'Abrindo {name}…',
+    'pdfedit.form_hint': 'Clique em um campo para digitar e numa caixa para marcá-la. Se só o formulário foi preenchido, o PDF salvo continua sendo formulário.',
   },
   'ru': {
     'nav.library': 'Медиатека',
@@ -23432,6 +23441,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfedit.form': 'Заполнить',
     'files.old_need_office': 'Это старый формат Office / WPS. Keepnear показывает его после перевода в PDF программой Word, WPS или LibreOffice на этом ПК, но ни одна не найдена. LibreOffice бесплатен.',
     'files.old_opening': 'Открывается {name}…',
+    'pdfedit.form_hint': 'Щёлкните поле формы и вводите текст, флажок — щелчком. Если заполнена только форма, сохранённый PDF останется формой.',
   },
   'it': {
     'nav.library': 'Libreria',
@@ -25775,6 +25785,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfedit.form': 'Compila',
     'files.old_need_office': 'Vecchio formato Office / WPS. Keepnear lo mostra dopo che Word, WPS o LibreOffice di questo PC lo trasforma in PDF, ma non ne è stato trovato nessuno. LibreOffice è gratuito.',
     'files.old_opening': 'Apertura di {name}…',
+    'pdfedit.form_hint': 'Clicca su un campo per scrivere, su una casella per spuntarla. Se è stato compilato solo il modulo, il PDF salvato resta un modulo.',
   },
   'ar': {
     'nav.library': 'المكتبة',
@@ -28118,6 +28129,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfedit.form': 'تعبئة',
     'files.old_need_office': 'هذا تنسيق Office / WPS قديم. يعرضه Keepnear بعد أن يحوّله Word أو WPS أو LibreOffice على هذا الحاسوب إلى PDF، ولم يُعثر على أي منها. LibreOffice مجاني.',
     'files.old_opening': 'جارٍ فتح {name}…',
+    'pdfedit.form_hint': 'انقر خانة النموذج للكتابة، وانقر مربع الاختيار لتحديده. إذا عُبّئ النموذج فقط يبقى ملف PDF المحفوظ نموذجًا.',
   },
   'hi': {
     'nav.library': 'लाइब्रेरी',
@@ -30461,6 +30473,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfedit.form': 'भरें',
     'files.old_need_office': 'यह पुराना Office / WPS प्रारूप है। Keepnear इसे इस PC के Word, WPS या LibreOffice से PDF बनवाकर दिखाता है, पर इनमें से कोई नहीं मिला। LibreOffice मुफ़्त है।',
     'files.old_opening': '{name} खुल रही है…',
+    'pdfedit.form_hint': 'फ़ॉर्म के खाने पर क्लिक कर लिखें, चेकबॉक्स पर क्लिक कर टिक करें। केवल फ़ॉर्म भरा हो तो सहेजी गई PDF फ़ॉर्म ही रहती है।',
   },
   'id': {
     'nav.library': 'Pustaka',
@@ -32804,6 +32817,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfedit.form': 'Isi formulir',
     'files.old_need_office': 'Ini format Office / WPS lama. Keepnear menampilkannya setelah Word, WPS, atau LibreOffice di PC ini mengubahnya ke PDF, dan tidak ada yang ditemukan. LibreOffice gratis.',
     'files.old_opening': 'Membuka {name}…',
+    'pdfedit.form_hint': 'Klik kotak formulir untuk mengetik, klik kotak centang untuk mencentang. Jika hanya formulir yang diisi, PDF yang disimpan tetap formulir.',
   },
   'vi': {
     'nav.library': 'Thư viện',
@@ -35147,6 +35161,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfedit.form': 'Điền biểu mẫu',
     'files.old_need_office': 'Đây là định dạng Office / WPS cũ. Keepnear hiển thị sau khi Word, WPS hoặc LibreOffice trên máy chuyển nó sang PDF, nhưng không tìm thấy chương trình nào. LibreOffice miễn phí.',
     'files.old_opening': 'Đang mở {name}…',
+    'pdfedit.form_hint': 'Bấm vào ô của biểu mẫu để gõ, bấm ô đánh dấu để tích. Nếu chỉ điền biểu mẫu, PDF lưu xong vẫn là biểu mẫu.',
   },
   'th': {
     'nav.library': 'คลังสื่อ',
@@ -37490,6 +37505,7 @@ const Map<String, Map<String, String>> translations = {
     'pdfedit.form': 'กรอกแบบฟอร์ม',
     'files.old_need_office': 'นี่เป็นรูปแบบ Office / WPS รุ่นเก่า Keepnear จะแสดงได้หลังจาก Word, WPS หรือ LibreOffice ในเครื่องนี้แปลงเป็น PDF แต่ไม่พบโปรแกรมเหล่านี้เลย LibreOffice ใช้ฟรี',
     'files.old_opening': 'กำลังเปิด {name}…',
+    'pdfedit.form_hint': 'คลิกช่องในแบบฟอร์มเพื่อพิมพ์ คลิกช่องทำเครื่องหมายเพื่อติ๊ก ถ้ากรอกแค่แบบฟอร์ม PDF ที่บันทึกยังเป็นแบบฟอร์ม',
   },
   'tr': {
     'nav.library': 'Kitaplık',
@@ -39833,5 +39849,6 @@ const Map<String, Map<String, String>> translations = {
     'pdfedit.form': 'Doldur',
     'files.old_need_office': 'Bu eski bir Office / WPS biçimi. Keepnear onu bu bilgisayardaki Word, WPS veya LibreOffice PDF\'e çevirdikten sonra gösterir; hiçbiri bulunamadı. LibreOffice ücretsizdir.',
     'files.old_opening': '{name} açılıyor…',
+    'pdfedit.form_hint': 'Yazmak için form kutusuna, işaretlemek için onay kutusuna tıklayın. Yalnızca form doldurulduysa kaydedilen PDF form olarak kalır.',
   },
 };
