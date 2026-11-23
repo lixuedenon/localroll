@@ -2320,5 +2320,20 @@
   "pdfedit.para_tip": "단락 전체를 한 번에 수정: 원래 영역 안에서 다시 줄바꿈합니다",
   "pdfedit.too_long": "75%로 줄여도 들어가지 않습니다: '단락'을 쓰거나 Word로 편집하세요",
   "pdfedit.para_too_long": "단락이 원래 영역에 들어가지 않습니다(글자 85%로 축소됨). 아래로 몇 줄 넘칩니다: 줄이거나 Word로 편집하세요",
-  "pdfedit.squeezed": "옆 글자와 겹치지 않도록 {pct}%로 줄였습니다"
+  "pdfedit.squeezed": "옆 글자와 겹치지 않도록 {pct}%로 줄였습니다",
+  "files.open_verb": "{app}(으)로 열기",
+  "pdfword.edit": "Word / WPS / LibreOffice에서 편집",
+  "pdfword.edit_tip": "크게 고칠 때: PDF 전체를 Word 파일로 바꿔 Word·WPS·LibreOffice에서 편집하고, 저장 후 닫으면 PDF로 되돌릴 수 있습니다. 레이아웃은 조금 달라집니다. 몇 글자만 고칠 땐 위 편집이 낫습니다.",
+  "pdfword.save_first": "여기서 한 변경을 먼저 저장한 뒤 Word로 바꾸세요",
+  "pdfword.making": "Word 파일로 바꾸는 중…",
+  "pdfword.none_title": "Word, WPS, LibreOffice를 찾지 못했습니다",
+  "pdfword.none_body": "PDF를 Word 파일로 편집하려면 이 PC에 그중 하나가 필요합니다. LibreOffice는 무료입니다. 몇 글자 수정, 이동, 단락 수정은 Keepnear 편집으로 충분합니다.",
+  "pdfword.get_libre": "LibreOffice 받기(무료)",
+  "pdfword.waiting": "{name} 편집을 기다리는 중 (저장하고 닫으면 PDF로 되돌릴지 묻습니다)",
+  "pdfword.back_title": "PDF로 되돌릴까요?",
+  "pdfword.back_body": "{name} 편집이 저장되고 닫혔습니다. 새 PDF로 만들까요(원래 PDF는 그대로)?",
+  "pdfword.back": "PDF로 만들기",
+  "pdfword.not_now": "나중에",
+  "pdfword.making_pdf": "PDF로 만드는 중…",
+  "pdfword.suffix": "-수정됨"
 }

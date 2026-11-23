@@ -2320,5 +2320,20 @@
   "pdfedit.para_tip": "Change the whole paragraph at once: it is re-wrapped inside its old area",
   "pdfedit.too_long": "Too long even squeezed to 75%: try Paragraph, or edit it as a Word file",
   "pdfedit.para_too_long": "The paragraph doesn't fit its old area (letters already at 85%) and runs a few lines lower: shorten it, or edit it as a Word file",
-  "pdfedit.squeezed": "Squeezed to {pct}% so it doesn't run into the text beside it"
+  "pdfedit.squeezed": "Squeezed to {pct}% so it doesn't run into the text beside it",
+  "files.open_verb": "Open with {app}",
+  "pdfword.edit": "Edit in Word / WPS / LibreOffice",
+  "pdfword.edit_tip": "For big changes: the whole PDF becomes a Word file to edit in Word, WPS or LibreOffice; once saved and closed it can go back to PDF. The layout changes somewhat; for a few words the editor above is better.",
+  "pdfword.save_first": "Save the changes here first, then make it a Word file",
+  "pdfword.making": "Making a Word file…",
+  "pdfword.none_title": "No Word, WPS or LibreOffice found",
+  "pdfword.none_body": "To edit a PDF as a Word file, this PC needs one of them; LibreOffice is free. For a few words, moving a line or rewriting a paragraph, Keepnear's editor is enough.",
+  "pdfword.get_libre": "Get LibreOffice (free)",
+  "pdfword.waiting": "Waiting while you edit {name} (save and close it to be asked about PDF)",
+  "pdfword.back_title": "Back to PDF?",
+  "pdfword.back_body": "{name} was saved and closed. Make it a new PDF (the original PDF stays as it is)?",
+  "pdfword.back": "Make PDF",
+  "pdfword.not_now": "Not now",
+  "pdfword.making_pdf": "Making the PDF…",
+  "pdfword.suffix": "-edited"
 }

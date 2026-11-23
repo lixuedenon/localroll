@@ -318,6 +318,29 @@ Future<String?> renameReceivedFile(BuildContext context, AppServices services, S
   return null;
 }
 
+/// Files handed over by Explorer ("Open with Keepnear"): photos and videos
+/// in the player (together), each PDF / Word / Excel / PowerPoint / text
+/// file in Keepnear's own viewer — never passed on to another program.
+Future<void> openFromOutside(BuildContext context, AppServices services, List<String> paths) async {
+  final media = [for (final p in paths) if (PlayerEntry.playable(p)) p];
+  final rest = [for (final p in paths) if (!PlayerEntry.playable(p)) p];
+  final nav = Navigator.of(context);
+  for (final p in rest.take(8)) {
+    if (!context.mounted) return;
+    final name = p.split(Platform.pathSeparator).last;
+    if (isPdfPath(p)) {
+      unawaited(nav.push(MaterialPageRoute(builder: (_) => PdfViewerPage(path: p, services: services))));
+    } else if (OfficeViewPage.canShow(name)) {
+      previewOffice(context, p, services: services);
+    } else if (isPlainTextPath(p)) {
+      await showTextFile(context, services, p);
+    } else {
+      DiagLog.log('ui', 'opened from Explorer, not shown: $name');
+    }
+  }
+  if (media.isNotEmpty && context.mounted) await openInPlayer(context, services, media);
+}
+
 Future<void> openReceivedFile(BuildContext context, AppServices services, String path) async {
   final name = path.split(Platform.pathSeparator).last;
   var size = 0;

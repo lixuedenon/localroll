@@ -2320,5 +2320,20 @@
   "pdfedit.para_tip": "Cambiar todo el párrafo: se reajusta dentro de su área original",
   "pdfedit.too_long": "Demasiado largo incluso al 75 %: prueba Párrafo o edítalo como Word",
   "pdfedit.para_too_long": "El párrafo no cabe en su área (letra ya al 85 %) y baja unas líneas: acórtalo o edítalo como Word",
-  "pdfedit.squeezed": "Comprimido al {pct} % para no pisar el texto de al lado"
+  "pdfedit.squeezed": "Comprimido al {pct} % para no pisar el texto de al lado",
+  "files.open_verb": "Abrir con {app}",
+  "pdfword.edit": "Editar en Word / WPS / LibreOffice",
+  "pdfword.edit_tip": "Para cambios grandes: todo el PDF pasa a Word para editarlo en Word, WPS o LibreOffice; guardado y cerrado, puede volver a PDF. El diseño cambia algo; para pocas palabras es mejor el editor de arriba.",
+  "pdfword.save_first": "Guarda primero los cambios de aquí y luego pásalo a Word",
+  "pdfword.making": "Creando el archivo Word…",
+  "pdfword.none_title": "No se encontró Word, WPS ni LibreOffice",
+  "pdfword.none_body": "Para editar un PDF como Word, este PC necesita uno de ellos; LibreOffice es gratis. Para unas palabras, mover una línea o reescribir un párrafo basta el editor de Keepnear.",
+  "pdfword.get_libre": "Obtener LibreOffice (gratis)",
+  "pdfword.waiting": "Esperando a que edites {name} (guarda y cierra para volver a PDF)",
+  "pdfword.back_title": "¿Volver a PDF?",
+  "pdfword.back_body": "{name} se guardó y cerró. ¿Hacer un PDF nuevo (el original no cambia)?",
+  "pdfword.back": "Crear PDF",
+  "pdfword.not_now": "Ahora no",
+  "pdfword.making_pdf": "Creando el PDF…",
+  "pdfword.suffix": "-editado"
 }

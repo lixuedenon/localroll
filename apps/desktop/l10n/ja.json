@@ -2320,5 +2320,20 @@
   "pdfedit.para_tip": "段落全体をまとめて編集：元の範囲内で改行し直します",
   "pdfedit.too_long": "75% に詰めても入りません：「段落」を試すか、Word で編集してください",
   "pdfedit.para_too_long": "段落が元の範囲に収まりません（文字は 85% まで縮小済み）。下に数行はみ出します：文を短くするか Word で編集してください",
-  "pdfedit.squeezed": "隣の文字に重ならないよう {pct}% に詰めました"
+  "pdfedit.squeezed": "隣の文字に重ならないよう {pct}% に詰めました",
+  "files.open_verb": "{app} で開く",
+  "pdfword.edit": "Word / WPS / LibreOffice で編集",
+  "pdfword.edit_tip": "大きな変更向け：PDF 全体を Word ファイルにして Word・WPS・LibreOffice で編集し、保存して閉じたら PDF に戻せます。レイアウトは多少変わります。数文字なら上の編集が向いています。",
+  "pdfword.save_first": "先にここでの変更を保存してから Word にしてください",
+  "pdfword.making": "Word ファイルを作成中…",
+  "pdfword.none_title": "Word・WPS・LibreOffice が見つかりません",
+  "pdfword.none_body": "PDF を Word として編集するには、この PC にいずれかが必要です。LibreOffice は無料です。数文字の修正・移動・段落の書き直しなら Keepnear の編集で十分です。",
+  "pdfword.get_libre": "LibreOffice を入手（無料）",
+  "pdfword.waiting": "{name} の編集待ち（保存して閉じると PDF に戻すか確認します）",
+  "pdfword.back_title": "PDF に戻しますか？",
+  "pdfword.back_body": "{name} は保存して閉じられました。新しい PDF にしますか（元の PDF はそのまま）？",
+  "pdfword.back": "PDF にする",
+  "pdfword.not_now": "今はしない",
+  "pdfword.making_pdf": "PDF を作成中…",
+  "pdfword.suffix": "-編集済み"
 }

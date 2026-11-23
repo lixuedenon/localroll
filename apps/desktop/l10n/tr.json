@@ -2320,5 +2320,20 @@
   "pdfedit.para_tip": "Tüm paragrafı birden değiştir: eski alanı içinde yeniden satırlara bölünür",
   "pdfedit.too_long": "%75'e sıkıştırılsa da uzun: Paragraf'ı deneyin ya da Word olarak düzenleyin",
   "pdfedit.para_too_long": "Paragraf eski alanına sığmıyor (harfler zaten %85) ve birkaç satır aşağı taşıyor: kısaltın ya da Word olarak düzenleyin",
-  "pdfedit.squeezed": "Yanındaki yazıya binmemesi için %{pct} sıkıştırıldı"
+  "pdfedit.squeezed": "Yanındaki yazıya binmemesi için %{pct} sıkıştırıldı",
+  "files.open_verb": "{app} ile aç",
+  "pdfword.edit": "Word / WPS / LibreOffice'te düzenle",
+  "pdfword.edit_tip": "Büyük değişiklikler için: PDF'in tamamı Word, WPS veya LibreOffice'te düzenlenecek bir Word dosyası olur; kaydedip kapatınca PDF'e dönebilir. Düzen biraz değişir; birkaç kelime için yukarıdaki düzenleyici daha iyidir.",
+  "pdfword.save_first": "Önce buradaki değişiklikleri kaydedin, sonra Word'e çevirin",
+  "pdfword.making": "Word dosyası oluşturuluyor…",
+  "pdfword.none_title": "Word, WPS veya LibreOffice bulunamadı",
+  "pdfword.none_body": "PDF'i Word gibi düzenlemek için bu bilgisayarda birinin kurulu olması gerekir; LibreOffice ücretsizdir. Birkaç kelime, satır taşıma veya paragraf için Keepnear düzenleyicisi yeterli.",
+  "pdfword.get_libre": "LibreOffice'i edinin (ücretsiz)",
+  "pdfword.waiting": "{name} düzenlenirken bekleniyor (kaydedip kapatınca PDF sorulur)",
+  "pdfword.back_title": "PDF'e dönülsün mü?",
+  "pdfword.back_body": "{name} kaydedilip kapatıldı. Yeni bir PDF yapılsın mı (orijinal PDF aynı kalır)?",
+  "pdfword.back": "PDF oluştur",
+  "pdfword.not_now": "Şimdi değil",
+  "pdfword.making_pdf": "PDF oluşturuluyor…",
+  "pdfword.suffix": "-duzenlendi"
 }

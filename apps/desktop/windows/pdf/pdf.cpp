@@ -493,7 +493,18 @@ int styles(const std::string& pdf, int index, const std::wstring& outPath) {
   int n = api.CountObjects(page);
   for (int i = 0; i < n; i++) {
     OBJ o = api.GetObject(page, i);
-    if (!o || api.ObjGetType(o) != 1) continue;
+    if (!o) continue;
+    // Pictures: only where they are ("IMG|l|b|r|t"), for PDF → Word.
+    if (api.ObjGetType(o) == 3 /* image */) {
+      float l = 0, b = 0, r = 0, t = 0;
+      if (api.ObjGetBounds(o, &l, &b, &r, &t) && r - l > 4 && t - b > 4) {
+        char line[160];
+        snprintf(line, sizeof line, "IMG|%.2f|%.2f|%.2f|%.2f\n", l, b, r, t);
+        out += line;
+      }
+      continue;
+    }
+    if (api.ObjGetType(o) != 1) continue;
     float l = 0, b = 0, r = 0, t = 0;
     if (!api.ObjGetBounds(o, &l, &b, &r, &t)) continue;
     FONT f = api.TextObjGetFont(o);

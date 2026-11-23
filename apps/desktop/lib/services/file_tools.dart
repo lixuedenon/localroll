@@ -233,16 +233,25 @@ class PdfBuilder {
     }
   }
 
-  static Future<List<PdfTextStyle>> styles(String pdf, int index) async {
-    if (!available) return const [];
+  static Future<List<PdfTextStyle>> styles(String pdf, int index) async => (await stylesAndPictures(pdf, index)).$1;
+
+  /// [styles], and where the page's pictures are (PDF points: l, b, r, t).
+  static Future<(List<PdfTextStyle>, List<(double, double, double, double)>)> stylesAndPictures(String pdf, int index) async {
+    if (!available) return (const <PdfTextStyle>[], const <(double, double, double, double)>[]);
     final tmp = await Directory.systemTemp.createTemp('lr_sty');
     final out = '${tmp.path}${Platform.pathSeparator}s.txt';
     final list = <PdfTextStyle>[];
+    final pics = <(double, double, double, double)>[];
     try {
       final r = await Process.run(exe, ['--styles', pdf, '$index', out]).timeout(const Duration(seconds: 30));
       if ('${r.stdout}'.trim() == 'ok') {
         for (final line in await File(out).readAsLines()) {
           final p = line.split('|');
+          if (p.length == 5 && p[0] == 'IMG') {
+            final v = [for (final x in p.skip(1)) double.tryParse(x) ?? 0];
+            pics.add((v[0], v[1], v[2], v[3]));
+            continue;
+          }
           if (p.length < 12) continue;
           String text;
           try {
@@ -272,7 +281,7 @@ class PdfBuilder {
     try {
       await tmp.delete(recursive: true);
     } catch (_) {}
-    return list;
+    return (list, pics);
   }
 
   /// Writes [pages] to [out]; null when done, else why not.

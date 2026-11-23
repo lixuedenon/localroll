@@ -2320,5 +2320,20 @@
   "pdfedit.para_tip": "Modifier tout le paragraphe : il est remis en page dans sa zone d’origine",
   "pdfedit.too_long": "Trop long même resserré à 75 % : essayez Paragraphe, ou modifiez-le en Word",
   "pdfedit.para_too_long": "Le paragraphe ne tient pas dans sa zone (lettres déjà à 85 %) et descend de quelques lignes : raccourcissez-le, ou modifiez-le en Word",
-  "pdfedit.squeezed": "Resserré à {pct} % pour ne pas chevaucher le texte voisin"
+  "pdfedit.squeezed": "Resserré à {pct} % pour ne pas chevaucher le texte voisin",
+  "files.open_verb": "Ouvrir avec {app}",
+  "pdfword.edit": "Modifier dans Word / WPS / LibreOffice",
+  "pdfword.edit_tip": "Pour de grosses modifications : tout le PDF devient un fichier Word à modifier dans Word, WPS ou LibreOffice ; enregistré et fermé, il peut redevenir PDF. La mise en page change un peu ; pour quelques mots, l’éditeur ci-dessus convient mieux.",
+  "pdfword.save_first": "Enregistrez d’abord les modifications ici, puis passez en Word",
+  "pdfword.making": "Création du fichier Word…",
+  "pdfword.none_title": "Ni Word, ni WPS, ni LibreOffice trouvé",
+  "pdfword.none_body": "Pour modifier un PDF comme un fichier Word, ce PC a besoin de l’un d’eux ; LibreOffice est gratuit. Pour quelques mots, déplacer une ligne ou réécrire un paragraphe, l’éditeur de Keepnear suffit.",
+  "pdfword.get_libre": "Obtenir LibreOffice (gratuit)",
+  "pdfword.waiting": "En attente de la modification de {name} (enregistrez et fermez pour repasser en PDF)",
+  "pdfword.back_title": "Repasser en PDF ?",
+  "pdfword.back_body": "{name} a été enregistré et fermé. En faire un nouveau PDF (l’original reste tel quel) ?",
+  "pdfword.back": "Créer le PDF",
+  "pdfword.not_now": "Pas maintenant",
+  "pdfword.making_pdf": "Création du PDF…",
+  "pdfword.suffix": "-modifie"
 }

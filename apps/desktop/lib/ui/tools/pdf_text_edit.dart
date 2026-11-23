@@ -23,6 +23,7 @@ import '../light_look.dart';
 import '../lr_dialog.dart';
 import '../player/ink_editor.dart';
 import 'annotate_page.dart';
+import 'office_edit.dart';
 import 'pdf_notes.dart';
 import 'sig_library.dart';
 import 'tools.dart';
@@ -2295,6 +2296,26 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
           ],
           const SizedBox(height: 8),
           Text(tr('pdfedit.save_note'), style: const TextStyle(color: LightLook.muted, fontSize: 12, height: 1.5)),
+          // Big changes: the whole PDF as a Word file, in Word / WPS /
+          // LibreOffice (the PDF's own look changes somewhat).
+          if (!_office) ...[
+            const SizedBox(height: 16),
+            const Divider(height: 1),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.description_outlined, size: 18),
+              label: Text(tr('pdfword.edit')),
+              onPressed: () {
+                if (_unsaved) {
+                  ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('pdfword.save_first'))));
+                  return;
+                }
+                unawaited(editPdfInOffice(context, widget.services, widget.path));
+              },
+            ),
+            const SizedBox(height: 6),
+            Text(tr('pdfword.edit_tip'), style: const TextStyle(color: LightLook.muted, fontSize: 12, height: 1.5)),
+          ],
         ])),
       ]);
 

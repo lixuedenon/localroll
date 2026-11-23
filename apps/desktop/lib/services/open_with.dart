@@ -7,7 +7,8 @@ import 'package:localroll_core/localroll_core.dart';
 import '../l10n/l10n.dart';
 import '../ui/player/player_entry.dart';
 
-/// Puts LocalRoll in Explorer's "Open with" list for photos and videos —
+/// Puts LocalRoll in Explorer's "Open with" list for what it can show
+/// (photos, videos, PDF, Word / Excel / PowerPoint, text) —
 /// for this Windows user only, no admin rights. It never makes itself the
 /// default program: what opens on a double-click stays as it was.
 class OpenWith {
@@ -16,7 +17,11 @@ class OpenWith {
   static const String progId = 'LocalRoll.Media';
 
   /// Bumped when what is written changes.
-  static const String _version = '2';
+  static const String _version = '3';
+
+  /// What Keepnear shows itself besides photos and videos: PDF, Office
+  /// (the ZIP kinds it reads), plain text.
+  static Set<String> get documentExtensions => {'pdf', ...OfficeDoc.extensions, 'txt', 'md', 'log'};
 
   static String get _exe => Platform.resolvedExecutable;
   static String get _exeName => _exe.split(Platform.pathSeparator).last;
@@ -58,11 +63,18 @@ class OpenWith {
     try {
       // Already there for this copy of LocalRoll?
       final verb = tr('player.open_verb');
+      final docVerb = tr('files.open_verb');
       final q = await Process.run('reg', ['query', r'HKCU\Software\Classes\' '$progId', '/v', 'LocalRollSetup']);
-      if (q.exitCode == 0 && '${q.stdout}'.contains('$_version|$_exe|${shortKey(verb)}')) return;
+      if (q.exitCode == 0 && '${q.stdout}'.contains('$_version|$_exe|${shortKey('$verb|$docVerb')}')) return;
       final file = File('${Directory.systemTemp.path}${Platform.pathSeparator}localroll-openwith.reg');
       // .reg files are UTF-16 LE with a byte-order mark.
-      final text = regFile(exe: _exe, exeName: _exeName, verb: verb, extensions: [...playerImageExtensions, ...playerVideoExtensions]);
+      final text = regFile(
+          exe: _exe,
+          exeName: _exeName,
+          verb: verb,
+          docVerb: docVerb,
+          extensions: [...playerImageExtensions, ...playerVideoExtensions],
+          documents: documentExtensions);
       final units = text.codeUnits;
       final bytes = <int>[0xFF, 0xFE];
       for (final u in units) {
@@ -96,12 +108,19 @@ class OpenWith {
   static String _q(String v) => '"${v.replaceAll(r'\', r'\\').replaceAll('"', r'\"')}"';
 
   /// The registry entries, as a .reg file.
-  static String regFile({required String exe, required String exeName, required String verb, required Iterable<String> extensions}) {
+  static String regFile(
+      {required String exe,
+      required String exeName,
+      required String verb,
+      String? docVerb,
+      required Iterable<String> extensions,
+      Iterable<String> documents = const []}) {
     const root = r'HKEY_CURRENT_USER\Software\Classes';
     final command = _q('"$exe" "%1"');
+    final docs = documents.toSet().difference(extensions.toSet()).toList()..sort();
     final b = StringBuffer('Windows Registry Editor Version 5.00\r\n\r\n')
       ..write('[$root\\$progId]\r\n@=${_q(appName)}\r\n"FriendlyTypeName"=${_q(appName)}\r\n')
-      ..write('"LocalRollSetup"=${_q('$_version|$exe|${shortKey(verb)}')}\r\n\r\n')
+      ..write('"LocalRollSetup"=${_q('$_version|$exe|${shortKey(docVerb == null ? verb : '$verb|$docVerb')}')}\r\n\r\n')
       ..write('[$root\\$progId\\DefaultIcon]\r\n@=${_q('"$exe",0')}\r\n\r\n')
       ..write('[$root\\$progId\\shell\\open]\r\n"FriendlyAppName"=${_q(appName)}\r\n\r\n')
       ..write('[$root\\$progId\\shell\\open\\command]\r\n@=$command\r\n\r\n')
@@ -109,10 +128,18 @@ class OpenWith {
       ..write('[$root\\Applications\\$exeName\\shell\\open\\command]\r\n@=$command\r\n\r\n')
       ..write('[$root\\Applications\\$exeName\\SupportedTypes]\r\n');
     final exts = extensions.toSet().toList()..sort();
-    for (final e in exts) {
+    for (final e in [...exts, ...docs]) {
       b.write('".$e"=""\r\n');
     }
     b.write('\r\n');
+    // Documents: "Open with Keepnear" (shown in Keepnear's own viewers).
+    for (final e in docs) {
+      b
+        ..write('[$root\\.$e\\OpenWithProgids]\r\n"$progId"=hex(0):\r\n\r\n')
+        ..write('[$root\\SystemFileAssociations\\.$e\\shell\\LocalRoll.Open]\r\n')
+        ..write('"MUIVerb"=${_q(docVerb ?? verb)}\r\n"Icon"=${_q('"$exe",0')}\r\n\r\n')
+        ..write('[$root\\SystemFileAssociations\\.$e\\shell\\LocalRoll.Open\\command]\r\n@=$command\r\n\r\n');
+    }
     for (final e in exts) {
       // Listed under "Open with" — the default stays untouched.
       b.write('[$root\\.$e\\OpenWithProgids]\r\n"$progId"=hex(0):\r\n\r\n');
@@ -128,7 +155,7 @@ class OpenWith {
       ..write('[HKEY_CURRENT_USER\\Software\\LocalRoll\\Capabilities]\r\n')
       ..write('"ApplicationName"=${_q(appName)}\r\n"ApplicationDescription"=${_q(appName)}\r\n\r\n')
       ..write('[HKEY_CURRENT_USER\\Software\\LocalRoll\\Capabilities\\FileAssociations]\r\n');
-    for (final e in exts) {
+    for (final e in [...exts, ...docs]) {
       b.write('".$e"=${_q(progId)}\r\n');
     }
     b

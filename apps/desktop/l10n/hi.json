@@ -2320,5 +2320,20 @@
   "pdfedit.para_tip": "पूरा अनुच्छेद एक साथ बदलें: यह अपनी पुरानी जगह में फिर से पंक्तियों में बँटता है",
   "pdfedit.too_long": "75% तक दबाने पर भी लंबा है: «अनुच्छेद» आज़माएँ, या Word में बदलें",
   "pdfedit.para_too_long": "अनुच्छेद पुरानी जगह में नहीं समाता (अक्षर पहले ही 85%), कुछ पंक्तियाँ नीचे जाता है: छोटा करें या Word में बदलें",
-  "pdfedit.squeezed": "{pct}% तक दबाया गया, ताकि बगल के अक्षरों से न टकराए"
+  "pdfedit.squeezed": "{pct}% तक दबाया गया, ताकि बगल के अक्षरों से न टकराए",
+  "files.open_verb": "{app} से खोलें",
+  "pdfword.edit": "Word / WPS / LibreOffice में संपादित करें",
+  "pdfword.edit_tip": "बड़े बदलावों के लिए: पूरी PDF Word फ़ाइल बनती है, जिसे Word, WPS या LibreOffice में बदलें; सहेजकर बंद करने पर वापस PDF बन सकती है। लेआउट थोड़ा बदलता है; कुछ शब्दों के लिए ऊपर का संपादक बेहतर है।",
+  "pdfword.save_first": "पहले यहाँ के बदलाव सहेजें, फिर Word बनाएँ",
+  "pdfword.making": "Word फ़ाइल बन रही है…",
+  "pdfword.none_title": "Word, WPS या LibreOffice नहीं मिला",
+  "pdfword.none_body": "PDF को Word की तरह बदलने के लिए इस PC पर इनमें से एक चाहिए; LibreOffice मुफ़्त है। कुछ शब्द, पंक्ति खिसकाना या अनुच्छेद बदलना Keepnear के संपादक से हो जाता है।",
+  "pdfword.get_libre": "LibreOffice पाएँ (मुफ़्त)",
+  "pdfword.waiting": "{name} के संपादन की प्रतीक्षा (सहेजकर बंद करें, फिर PDF के बारे में पूछेंगे)",
+  "pdfword.back_title": "वापस PDF बनाएँ?",
+  "pdfword.back_body": "{name} सहेजकर बंद हो गई। नई PDF बनाएँ (मूल PDF वैसी ही रहेगी)?",
+  "pdfword.back": "PDF बनाएँ",
+  "pdfword.not_now": "अभी नहीं",
+  "pdfword.making_pdf": "PDF बन रही है…",
+  "pdfword.suffix": "-संपादित"
 }

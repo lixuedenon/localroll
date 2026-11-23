@@ -2320,5 +2320,20 @@
   "pdfedit.para_tip": "تعديل الفقرة كاملة: يُعاد تقسيم أسطرها داخل منطقتها الأصلية",
   "pdfedit.too_long": "طويل جدًا حتى عند الضغط إلى 75%: جرّب «فقرة» أو حرّره كملف Word",
   "pdfedit.para_too_long": "الفقرة لا تتسع في منطقتها (الحروف بالفعل 85%) وتنزل بضعة أسطر: اختصرها أو حرّرها كملف Word",
-  "pdfedit.squeezed": "ضُغط إلى {pct}% كي لا يتداخل مع النص المجاور"
+  "pdfedit.squeezed": "ضُغط إلى {pct}% كي لا يتداخل مع النص المجاور",
+  "files.open_verb": "فتح باستخدام {app}",
+  "pdfword.edit": "تحرير في Word / WPS / LibreOffice",
+  "pdfword.edit_tip": "للتعديلات الكبيرة: يتحول ملف PDF كله إلى ملف Word لتحريره في Word أو WPS أو LibreOffice، وبعد الحفظ والإغلاق يمكن إرجاعه PDF. يتغير التخطيط قليلًا؛ لبضع كلمات المحرر أعلاه أفضل.",
+  "pdfword.save_first": "احفظ التغييرات هنا أولًا ثم حوّله إلى Word",
+  "pdfword.making": "جارٍ إنشاء ملف Word…",
+  "pdfword.none_title": "لم يُعثر على Word أو WPS أو LibreOffice",
+  "pdfword.none_body": "لتحرير PDF كملف Word يحتاج هذا الحاسوب أحدها؛ LibreOffice مجاني. لبضع كلمات أو نقل سطر أو إعادة كتابة فقرة يكفي محرر Keepnear.",
+  "pdfword.get_libre": "تنزيل LibreOffice (مجاني)",
+  "pdfword.waiting": "بانتظار انتهاء تحرير {name} (احفظه وأغلقه ليُسأل عن PDF)",
+  "pdfword.back_title": "إرجاعه إلى PDF؟",
+  "pdfword.back_body": "تم حفظ {name} وإغلاقه. هل تنشئ منه ملف PDF جديدًا (يبقى الأصلي كما هو)؟",
+  "pdfword.back": "إنشاء PDF",
+  "pdfword.not_now": "ليس الآن",
+  "pdfword.making_pdf": "جارٍ إنشاء PDF…",
+  "pdfword.suffix": "-معدل"
 }

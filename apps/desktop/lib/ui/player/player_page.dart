@@ -123,9 +123,12 @@ class PlayerLauncher {
     }
     final paths = {for (final p in _pending) p.toLowerCase(): p}.values.toList();
     _pending.clear();
-    if (whileRecording?.call(paths) ?? false) return;
+    final media = [for (final p in paths) if (PlayerEntry.playable(p)) p];
+    if (media.length == paths.length && (whileRecording?.call(paths) ?? false)) return;
     nav.popUntil((r) => r.isFirst);
-    await openInPlayer(ctx, s, paths);
+    // Photos / videos in the player; PDF, Office, text in Keepnear's own
+    // viewers.
+    await openFromOutside(ctx, s, paths);
   }
 }
 

@@ -2320,5 +2320,20 @@
   "pdfedit.para_tip": "把這一段當成一整段來改：改完在原來的區域裡重新換行",
   "pdfedit.too_long": "太長了，擠到 75% 也放不下：試試「整段」，或轉成 Word 改",
   "pdfedit.para_too_long": "這一段在原來的區域裡放不下（字已縮小到 85%），會往下多佔幾行：可以刪減文字，或轉成 Word 改",
-  "pdfedit.squeezed": "已自動擠到 {pct}%，不會壓到旁邊的字"
+  "pdfedit.squeezed": "已自動擠到 {pct}%，不會壓到旁邊的字",
+  "files.open_verb": "用 {app} 開啟",
+  "pdfword.edit": "用 Word / WPS / LibreOffice 改",
+  "pdfword.edit_tip": "大改時用：整份轉成 Word 檔，在 Word、WPS 或 LibreOffice 裡改，存好關掉後可以轉回 PDF。版面會有些變化；只改幾個字用上面的編輯更好。",
+  "pdfword.save_first": "先儲存這裡的改動，再轉成 Word",
+  "pdfword.making": "正在轉成 Word 檔…",
+  "pdfword.none_title": "沒有找到 Word、WPS 或 LibreOffice",
+  "pdfword.none_body": "要把 PDF 當 Word 檔來改，這台電腦需要裝其中一個。LibreOffice 是免費的。只改幾個字、挪一挪、改一段，用 Keepnear 的編輯就可以。",
+  "pdfword.get_libre": "下載 LibreOffice（免費）",
+  "pdfword.waiting": "等你改完 {name}（存好、關掉後會問要不要轉回 PDF）",
+  "pdfword.back_title": "轉回 PDF？",
+  "pdfword.back_body": "{name} 已經改好並關掉了。轉成一個新的 PDF（原來的 PDF 不變）？",
+  "pdfword.back": "轉回 PDF",
+  "pdfword.not_now": "不用了",
+  "pdfword.making_pdf": "正在轉回 PDF…",
+  "pdfword.suffix": "-已改"
 }

@@ -2320,5 +2320,20 @@
   "pdfedit.para_tip": "Sửa cả đoạn một lần: tự xuống dòng lại trong vùng cũ",
   "pdfedit.too_long": "Quá dài dù đã ép còn 75%: thử «Cả đoạn», hoặc sửa bằng Word",
   "pdfedit.para_too_long": "Đoạn không vừa vùng cũ (chữ đã còn 85%) và tràn xuống vài dòng: rút gọn, hoặc sửa bằng Word",
-  "pdfedit.squeezed": "Đã tự ép còn {pct}% để không đè lên chữ bên cạnh"
+  "pdfedit.squeezed": "Đã tự ép còn {pct}% để không đè lên chữ bên cạnh",
+  "files.open_verb": "Mở bằng {app}",
+  "pdfword.edit": "Sửa bằng Word / WPS / LibreOffice",
+  "pdfword.edit_tip": "Khi sửa nhiều: cả PDF thành tệp Word để sửa bằng Word, WPS hoặc LibreOffice; lưu và đóng xong có thể chuyển lại PDF. Bố cục sẽ thay đổi chút ít; sửa vài chữ thì dùng trình sửa ở trên tốt hơn.",
+  "pdfword.save_first": "Lưu các thay đổi ở đây trước, rồi chuyển sang Word",
+  "pdfword.making": "Đang tạo tệp Word…",
+  "pdfword.none_title": "Không tìm thấy Word, WPS hay LibreOffice",
+  "pdfword.none_body": "Để sửa PDF như tệp Word, máy cần một trong các chương trình này; LibreOffice miễn phí. Sửa vài chữ, dời dòng hay viết lại một đoạn thì trình sửa của Keepnear là đủ.",
+  "pdfword.get_libre": "Tải LibreOffice (miễn phí)",
+  "pdfword.waiting": "Đang chờ bạn sửa {name} (lưu và đóng sẽ hỏi chuyển lại PDF)",
+  "pdfword.back_title": "Chuyển lại PDF?",
+  "pdfword.back_body": "{name} đã lưu và đóng. Tạo thành PDF mới (PDF gốc giữ nguyên)?",
+  "pdfword.back": "Tạo PDF",
+  "pdfword.not_now": "Để sau",
+  "pdfword.making_pdf": "Đang tạo PDF…",
+  "pdfword.suffix": "-da-sua"
 }

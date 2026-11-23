@@ -2320,5 +2320,20 @@
   "pdfedit.para_tip": "Изменить весь абзац: он перестраивается в прежней области",
   "pdfedit.too_long": "Слишком длинно даже при сжатии до 75 %: попробуйте «Абзац» или правку в Word",
   "pdfedit.para_too_long": "Абзац не помещается в прежней области (шрифт уже 85 %) и уходит на несколько строк ниже: сократите или правьте в Word",
-  "pdfedit.squeezed": "Сжато до {pct} %, чтобы не налезать на соседний текст"
+  "pdfedit.squeezed": "Сжато до {pct} %, чтобы не налезать на соседний текст",
+  "files.open_verb": "Открыть в {app}",
+  "pdfword.edit": "Править в Word / WPS / LibreOffice",
+  "pdfword.edit_tip": "Для больших правок: весь PDF превращается в файл Word для Word, WPS или LibreOffice; после сохранения и закрытия его можно вернуть в PDF. Вёрстка немного изменится; для пары слов лучше редактор выше.",
+  "pdfword.save_first": "Сначала сохраните изменения здесь, затем делайте файл Word",
+  "pdfword.making": "Создание файла Word…",
+  "pdfword.none_title": "Word, WPS или LibreOffice не найдены",
+  "pdfword.none_body": "Чтобы править PDF как файл Word, на этом ПК нужна одна из программ; LibreOffice бесплатен. Для пары слов, переноса строки или абзаца хватит редактора Keepnear.",
+  "pdfword.get_libre": "Скачать LibreOffice (бесплатно)",
+  "pdfword.waiting": "Ждём, пока вы правите {name} (сохраните и закройте — предложим PDF)",
+  "pdfword.back_title": "Вернуть в PDF?",
+  "pdfword.back_body": "{name} сохранён и закрыт. Сделать новый PDF (исходный не изменится)?",
+  "pdfword.back": "Сделать PDF",
+  "pdfword.not_now": "Не сейчас",
+  "pdfword.making_pdf": "Создание PDF…",
+  "pdfword.suffix": "-изменено"
 }

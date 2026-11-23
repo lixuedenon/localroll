@@ -2320,5 +2320,20 @@
   "pdfedit.para_tip": "แก้ทั้งย่อหน้า: ตัดบรรทัดใหม่ภายในพื้นที่เดิม",
   "pdfedit.too_long": "ยาวเกินแม้บีบเหลือ 75%: ลอง «ทั้งย่อหน้า» หรือแก้เป็นไฟล์ Word",
   "pdfedit.para_too_long": "ย่อหน้าไม่พอในพื้นที่เดิม (ตัวอักษรเหลือ 85% แล้ว) จะล้นลงไปอีกหลายบรรทัด: ตัดข้อความให้สั้นลง หรือแก้เป็น Word",
-  "pdfedit.squeezed": "บีบเหลือ {pct}% เพื่อไม่ทับข้อความข้าง ๆ"
+  "pdfedit.squeezed": "บีบเหลือ {pct}% เพื่อไม่ทับข้อความข้าง ๆ",
+  "files.open_verb": "เปิดด้วย {app}",
+  "pdfword.edit": "แก้ใน Word / WPS / LibreOffice",
+  "pdfword.edit_tip": "สำหรับแก้มาก: แปลง PDF ทั้งไฟล์เป็น Word ไปแก้ใน Word, WPS หรือ LibreOffice บันทึกแล้วปิดก็แปลงกลับเป็น PDF ได้ เลย์เอาต์จะเปลี่ยนบ้าง แก้ไม่กี่คำใช้ตัวแก้ด้านบนดีกว่า",
+  "pdfword.save_first": "บันทึกการแก้ตรงนี้ก่อน แล้วค่อยแปลงเป็น Word",
+  "pdfword.making": "กำลังแปลงเป็นไฟล์ Word…",
+  "pdfword.none_title": "ไม่พบ Word, WPS หรือ LibreOffice",
+  "pdfword.none_body": "การแก้ PDF แบบไฟล์ Word ต้องมีโปรแกรมใดโปรแกรมหนึ่งในเครื่อง LibreOffice ใช้ฟรี ถ้าแก้ไม่กี่คำ ย้ายบรรทัด หรือแก้ทั้งย่อหน้า ใช้ตัวแก้ของ Keepnear ได้",
+  "pdfword.get_libre": "ดาวน์โหลด LibreOffice (ฟรี)",
+  "pdfword.waiting": "รอคุณแก้ {name} (บันทึกแล้วปิด จะถามว่าจะแปลงกลับเป็น PDF ไหม)",
+  "pdfword.back_title": "แปลงกลับเป็น PDF?",
+  "pdfword.back_body": "{name} บันทึกและปิดแล้ว สร้างเป็น PDF ใหม่ไหม (PDF เดิมไม่เปลี่ยน)",
+  "pdfword.back": "สร้าง PDF",
+  "pdfword.not_now": "ไม่ต้อง",
+  "pdfword.making_pdf": "กำลังสร้าง PDF…",
+  "pdfword.suffix": "-แก้แล้ว"
 }
