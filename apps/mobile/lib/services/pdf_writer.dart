@@ -207,7 +207,9 @@ class _Pdfium {
               return (ox + x0, oy + y0);
             }
 
-            final (x00, y00) = at(0, 0), (x10, y10) = at(1, 0), (x01, y01) = at(0, 1);
+            final (x00, y00) = at(0, 0);
+            final (x10, y10) = at(1, 0);
+            final (x01, y01) = at(0, 1);
             final bmp = p.bitmap(pw, ph, 4, buf.cast<Void>(), pw * 4);
             final img = p.newImage(doc);
             if (bmp != nullptr && img != nullptr) {
