@@ -438,7 +438,7 @@ enum PdfWriter {
           "page": pi,
           "kind": k,
           "name": a.fieldName ?? "",
-          "label": a.toolTip ?? "",
+          "label": (a.value(forAnnotationKey: PDFAnnotationKey(rawValue: "/TU")) as? String) ?? "",
           "value": value,
           "checked": a.buttonWidgetState == .onState,
           "options": choices,
