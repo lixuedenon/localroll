@@ -186,14 +186,32 @@ class AppServices {
     }
 
     await openFor(library.rootPath);
-    library.addListener(() {
+    void soon() {
       _vaultTimer?.cancel();
       _vaultTimer = Timer(const Duration(seconds: 5), () async {
         if (library.offline) return;
         if (_vaultRoot != library.rootPath) await openFor(library.rootPath);
         await library.syncVault();
       });
-    });
+    }
+
+    // Documents / Other files / the tools' other results: kept too.
+    library.listFiles = () async {
+      if (library.offline) return null;
+      try {
+        server.files.forget();
+        return [for (final f in await server.files.list()) ?server.files.relOf(f.path)];
+      } catch (e) {
+        DiagLog.log('vault', 'files not listed: $e');
+        return null;
+      }
+    };
+    library.onOtherFiles = () {
+      server.files.changed();
+      soon();
+    };
+    server.files.changes.addListener(soon);
+    library.addListener(soon);
     await Future<void>.delayed(const Duration(seconds: 10));
     await library.syncVault();
   }

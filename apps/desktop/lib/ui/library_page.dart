@@ -1294,9 +1294,10 @@ class _LibraryPageState extends State<LibraryPage> {
             tr('lib.copies_selected', {'count': _copies.length, 'size': formatBytes(_copies.values.fold(0, (a, b) => a + b))}), [
           TextButton(onPressed: () => setState(_copies.clear), child: Text(tr('lib.copies_drop'))),
         ]),
-      if (!lib.offline && lib.pendingMissing.isNotEmpty && lib.missingKept > 0)
-        // Deleted in Explorer, data still kept: back, or deleted for good.
-        banner(Icons.shield_outlined, Colors.amber, tr('lib.vault_missing', {'count': lib.pendingMissing.length}), [
+      if (!lib.offline && lib.keptAll > 0)
+        // Deleted in Explorer, data still kept (photos, videos, documents,
+        // other files): back, or deleted for good.
+        banner(Icons.shield_outlined, Colors.amber, tr('lib.vault_missing', {'count': lib.missingAll}), [
           TextButton(onPressed: lib.confirmMissing, child: Text(tr('lib.vault_delete'))),
           const SizedBox(width: 4),
           FilledButton(onPressed: () => unawaited(lib.restoreMissing()), child: Text(tr('lib.vault_restore'))),

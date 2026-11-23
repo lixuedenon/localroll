@@ -608,8 +608,8 @@ class _DashboardPageState extends State<DashboardPage> {
           tr(s.library.loss == LibraryLoss.gone ? 'home.issue_gone' : 'home.issue_offline'),
           () => AppNav.instance.selectTab(AppNav.library)
         ),
-      if (s.library.pendingMissing.isNotEmpty)
-        (Icons.help_outline_rounded, tr('home.issue_missing', {'count': s.library.pendingMissing.length}),
+      if (s.library.missingAll > 0)
+        (Icons.help_outline_rounded, tr('home.issue_missing', {'count': s.library.missingAll}),
             () => AppNav.instance.selectTab(AppNav.library)),
       if (!s.server.running) (Icons.wifi_off_rounded, tr('home.issue_server'), () => AppNav.instance.selectTab(AppNav.receive)),
       if (net != null && !net.firewallRule)

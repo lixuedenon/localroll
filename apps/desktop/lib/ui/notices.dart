@@ -373,7 +373,8 @@ class Notices {
   /// Backed-up files deleted outside Keepnear (data still kept): said once
   /// each time more go — put back, or deleted for good.
   void _onLibrary() {
-    final k = s.library.missingKept;
+    // Photos / videos and Documents / Other files together.
+    final k = s.library.keptAll;
     final more = k > _kept;
     _kept = k;
     if (!more || _keptShown) return;

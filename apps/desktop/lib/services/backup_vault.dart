@@ -37,8 +37,14 @@ typedef _CloseD = int Function(int handle);
 /// refuse deleting to everyone (an explicit deny, lifted by Keepnear only
 /// for a moment when it removes them itself). Needs NTFS; elsewhere it is
 /// simply off.
+///
+/// Library photos / videos: [sync] (the library index says what is gone).
+/// Documents / Other files / the tools' other results have no index:
+/// [syncFiles] keeps its own list and tells moves (same file id) from
+/// deletions outside Keepnear; Keepnear's own deletions say so first
+/// ([leaving]).
 class BackupVault {
-  BackupVault._(this.root, this.dir, this._manifest);
+  BackupVault._(this.root, this.dir, this._manifest, this._filesManifest);
 
   /// The library folder it serves.
   final String root;
@@ -50,6 +56,22 @@ class BackupVault {
 
   /// Library path ("2024/05/IMG_1.HEIC") → name in [dir].
   final Map<String, String> _names = {};
+
+  // ---- Documents / Other files (not in the library index): their own list.
+
+  final File _filesManifest;
+
+  /// Path inside the library ("文档/scan.pdf") → hidden name and file id.
+  final Map<String, _Kept> _files = {};
+
+  /// Of [_files]: gone from their place outside Keepnear, waiting for the
+  /// answer (put back, or deleted for good).
+  final Set<String> _gone = {};
+
+  /// Being removed by Keepnear itself (into "Recently deleted"): not a
+  /// deletion to ask about. Path → since when.
+  final Map<String, DateTime> _leaving = {};
+  bool _syncingFiles = false;
   Timer? _saveTimer;
   Timer? _lockTimer;
   bool _syncing = false;
@@ -80,8 +102,11 @@ class BackupVault {
       final dir = '$top\\vault\\$id';
       await Directory(dir).create(recursive: true);
       _setAttrs(top, _hidden | _system);
-      final v = BackupVault._(root, dir, File('${dataDir.path}${Platform.pathSeparator}vault_$id.json'));
+      final sep = Platform.pathSeparator;
+      final v = BackupVault._(
+          root, dir, File('${dataDir.path}${sep}vault_$id.json'), File('${dataDir.path}${sep}vault_${id}_files.json'));
       await v._load();
+      await v._loadFiles();
       return v;
     } catch (e) {
       DiagLog.log('vault', 'off: $e');
@@ -142,9 +167,7 @@ class BackupVault {
         if (has(rel)) continue;
         final abs = _abs(rel);
         if (!File(abs).existsSync()) continue;
-        final dot = rel.lastIndexOf('.');
-        final ext = dot > rel.lastIndexOf('/') ? rel.substring(dot) : '';
-        final name = '${crypto.sha1.convert(utf8.encode('$rel|${DateTime.now().microsecondsSinceEpoch}')).toString().substring(0, 24)}$ext';
+        final name = _newName(rel);
         if (_link(_kept(name), abs)) {
           _names[rel] = name;
           added++;
@@ -211,17 +234,205 @@ class BackupVault {
   }
 
   Future<void> _remove(List<String> rels) async {
-    // The deny lifted for a moment (whole folder: one call), the names
-    // removed, the rest locked again.
-    await _icacls([dir, '/remove:d', _everyone, '/T', '/C', '/Q']);
+    final names = <String>[];
     for (final rel in rels) {
       final name = _names.remove(rel);
-      if (name == null) continue;
+      if (name != null) names.add(name);
+    }
+    await _removeNames(names);
+  }
+
+  /// The hidden [names] deleted: the deny lifted for a moment (whole
+  /// folder: one call), the names removed, the rest locked again.
+  Future<void> _removeNames(List<String> names) async {
+    if (names.isEmpty) return;
+    await _icacls([dir, '/remove:d', _everyone, '/T', '/C', '/Q']);
+    for (final name in names) {
       try {
         File(_kept(name)).deleteSync();
       } catch (_) {}
     }
     _lockSoon(now: true);
+  }
+
+  String _newName(String rel) {
+    final dot = rel.lastIndexOf('.');
+    final ext = dot > rel.lastIndexOf('/') ? rel.substring(dot) : '';
+    return '${crypto.sha1.convert(utf8.encode('$rel|${DateTime.now().microsecondsSinceEpoch}')).toString().substring(0, 24)}$ext';
+  }
+
+  // ------------------------------------------- Documents / Other files
+
+  Future<void> _loadFiles() async {
+    try {
+      if (!await _filesManifest.exists()) return;
+      final j = jsonDecode(await _filesManifest.readAsString());
+      if (j is! Map) return;
+      final k = j['k'];
+      if (k is Map) {
+        for (final e in k.entries) {
+          final v = e.value;
+          if (e.key is String && v is List && v.length == 2 && v[0] is String && v[1] is String) {
+            _files[e.key as String] = _Kept(v[0] as String, v[1] as String);
+          }
+        }
+      }
+      final g = j['g'];
+      if (g is List) _gone.addAll([for (final r in g) if (r is String && _files.containsKey(r)) r]);
+    } catch (e) {
+      DiagLog.log('vault', 'files list unreadable: $e');
+    }
+  }
+
+  Timer? _filesSaveTimer;
+
+  void _saveFiles() {
+    _filesSaveTimer?.cancel();
+    _filesSaveTimer = Timer(const Duration(seconds: 2), () async {
+      try {
+        final tmp = File('${_filesManifest.path}.tmp');
+        await tmp.writeAsString(jsonEncode({
+          'k': {for (final e in _files.entries) e.key: [e.value.name, e.value.id]},
+          'g': _gone.toList(),
+        }));
+        await tmp.rename(_filesManifest.path);
+      } catch (e) {
+        DiagLog.log('vault', 'files list not saved: $e');
+      }
+    });
+  }
+
+  /// Documents / Other files deleted outside Keepnear, data still kept.
+  List<String> get filesGone => List.unmodifiable(_gone);
+
+  /// Keepnear itself is about to remove [rel] (into "Recently deleted"):
+  /// its hidden name goes at the next check, nobody is asked.
+  void leaving(String rel) => _leaving[rel] = DateTime.now();
+
+  /// It didn't go after all ([leaving]).
+  void stays(String rel) => _leaving.remove(rel);
+
+  /// Brings the Documents / Other files in line with [rels] (every such
+  /// file now, paths inside the library). Every file gets its hidden name;
+  /// one that is gone from its place is
+  /// - renamed / moved when a file with the same id (a hard link shares
+  ///   it) shows up elsewhere in [rels]: the list follows;
+  /// - removed by Keepnear itself ([leaving]): its hidden name goes;
+  /// - otherwise deleted outside Keepnear: kept, and waits for the answer
+  ///   ([filesGone]).
+  /// A file replaced at its place (new id) gets a new hidden name, the old
+  /// one goes. Returns true when [filesGone] changed.
+  Future<bool> syncFiles(Iterable<String> rels) async {
+    if (_syncingFiles) return false;
+    _syncingFiles = true;
+    try {
+      final cutoff = DateTime.now().subtract(const Duration(minutes: 10));
+      _leaving.removeWhere((_, at) => at.isBefore(cutoff));
+      final now = rels.where((r) => !_leaving.containsKey(r)).toSet();
+      // Folders unreadable (or listed wrong): nothing is judged.
+      if (now.isEmpty && _files.isNotEmpty) {
+        DiagLog.log('vault', 'files: empty list, not checked');
+        return false;
+      }
+      final goneBefore = Set.of(_gone);
+      final missing = {for (final r in _files.keys) if (!now.contains(r)) r};
+      final byId = {for (final r in missing) _files[r]!.id: r};
+      final drop = <String>[];
+      var added = 0, moved = 0;
+      for (final rel in now) {
+        final abs = _abs(rel);
+        final id = _fileId(abs);
+        if (id == null) continue;
+        final k = _files[rel];
+        if (k != null) {
+          _gone.remove(rel);
+          if (k.id == id && File(_kept(k.name)).existsSync()) continue;
+          // Replaced at its place (or its hidden name lost): a new one.
+          if (k.id != id) drop.add(k.name);
+          _files.remove(rel);
+        } else {
+          final from = byId.remove(id);
+          if (from != null) {
+            // Renamed / moved (in Keepnear or in Explorer): the same data.
+            _files[rel] = _files.remove(from)!;
+            _gone.remove(from);
+            missing.remove(from);
+            moved++;
+            continue;
+          }
+        }
+        final name = _newName(rel);
+        if (_link(_kept(name), abs)) {
+          _files[rel] = _Kept(name, id);
+          added++;
+        }
+        if (added % 200 == 199) await Future<void>.delayed(Duration.zero);
+      }
+      var gone = 0;
+      for (final rel in missing) {
+        final k = _files[rel];
+        if (k == null) continue;
+        if (_leaving.containsKey(rel) || !File(_kept(k.name)).existsSync()) {
+          drop.add(k.name);
+          _files.remove(rel);
+          _gone.remove(rel);
+          _leaving.remove(rel);
+        } else if (_gone.add(rel)) {
+          gone++;
+        }
+      }
+      if (drop.isNotEmpty) await _removeNames(drop);
+      if (added > 0) _lockSoon();
+      if (added > 0 || moved > 0 || gone > 0 || drop.isNotEmpty || _gone.length != goneBefore.length) {
+        DiagLog.log('vault', 'files: $added kept, $moved moved, ${drop.length} dropped, $gone deleted outside Keepnear');
+        _saveFiles();
+      }
+      return _gone.length != goneBefore.length || !_gone.containsAll(goneBefore);
+    } finally {
+      _syncingFiles = false;
+    }
+  }
+
+  /// The files of [filesGone] put back in their place. Returns how many.
+  int restoreFiles() {
+    var n = 0;
+    for (final rel in _gone.toList()) {
+      final k = _files[rel];
+      if (k == null) {
+        _gone.remove(rel);
+        continue;
+      }
+      final abs = _abs(rel);
+      var ok = File(abs).existsSync();
+      if (!ok) {
+        try {
+          Directory(File(abs).parent.path).createSync(recursive: true);
+        } catch (_) {}
+        ok = _link(abs, _kept(k.name));
+      }
+      if (ok) {
+        _gone.remove(rel);
+        n++;
+      }
+    }
+    DiagLog.log('vault', 'files restored $n');
+    _saveFiles();
+    return n;
+  }
+
+  /// The files of [filesGone] deleted for good: their hidden names go
+  /// (the space is freed).
+  Future<void> purgeFilesGone() async {
+    final names = <String>[];
+    for (final rel in _gone) {
+      final k = _files.remove(rel);
+      if (k != null) names.add(k.name);
+    }
+    final n = _gone.length;
+    _gone.clear();
+    await _removeNames(names);
+    _saveFiles();
+    DiagLog.log('vault', 'files deleted for good: $n');
   }
 
   void _lockSoon({bool now = false}) {
@@ -290,17 +501,24 @@ class BackupVault {
   }
 
   /// How many names the file's data has (0: not there).
-  static int _linkCount(String path) {
+  static int _linkCount(String path) => _info(path, (i) => i[10]) ?? 0;
+
+  /// The file's id on its drive ("serial:index"), shared by all its names
+  /// (hard links); null when it can't be read.
+  static String? _fileId(String path) => _info(path, (i) => '${i[7]}:${i[11]}:${i[12]}');
+
+  /// Reads BY_HANDLE_FILE_INFORMATION (as 13 Uint32: [7] volume serial,
+  /// [10] number of links, [11]/[12] file index high / low).
+  static T? _info<T>(String path, T Function(Pointer<Uint32> i) read) {
     final p = path.toNativeUtf16();
     final info = calloc<Uint8>(52);
     const readAttributes = 0x80, shareAll = 0x7, openExisting = 3, backupSemantics = 0x02000000;
     try {
       final h = _createFile(p, readAttributes, shareAll, nullptr, openExisting, backupSemantics, 0);
-      if (h == -1 || h == 0) return 0;
+      if (h == -1 || h == 0) return null;
       try {
-        if (_fileInfo(h, info) == 0) return 0;
-        // BY_HANDLE_FILE_INFORMATION.nNumberOfLinks
-        return info.cast<Uint32>()[10];
+        if (_fileInfo(h, info) == 0) return null;
+        return read(info.cast<Uint32>());
       } finally {
         _close(h);
       }
@@ -309,4 +527,11 @@ class BackupVault {
       calloc.free(info);
     }
   }
+}
+
+/// A Documents / Other file's hidden name, and its file id.
+class _Kept {
+  const _Kept(this.name, this.id);
+  final String name;
+  final String id;
 }

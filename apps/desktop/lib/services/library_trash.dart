@@ -255,7 +255,12 @@ class LibraryTrash extends ChangeNotifier {
         } catch (_) {}
         final id = _newId();
         final name = rel.substring(rel.lastIndexOf('/') + 1);
-        if (await _moveIn(p, id, name)) {
+        // Deleted by Keepnear itself: its backup's hidden name may go, no
+        // "deleted outside Keepnear?" question.
+        library.vault?.leaving(rel);
+        if (!await _moveIn(p, id, name)) {
+          library.vault?.stays(rel);
+        } else {
           final e = TrashEntry(
             id: id,
             rel: rel,

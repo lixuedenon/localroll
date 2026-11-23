@@ -165,7 +165,7 @@ class AppRail extends StatelessWidget {
                 selectedIcon: Icons.photo_library_rounded,
                 label: tr('nav.library'),
                 selected: (selected ?? _nav.tab) == AppNav.library,
-                dot: s.library.offline || s.library.pendingMissing.isNotEmpty,
+                dot: s.library.offline || s.library.missingAll > 0,
                 onTap: () => _go(AppNav.library),
               ),
               _RailItem(

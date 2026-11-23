@@ -171,13 +171,41 @@ class LibraryIndex extends ChangeNotifier {
     final v = vault;
     if (v == null || offline || _reconciling) return;
     await v.sync([for (final i in _items) i.relPath], {for (final i in pendingMissing) i.relPath});
+    // Documents / Other files (not in the index): listed by their owner.
+    final list = listFiles;
+    if (list == null || offline) return;
+    final rels = await list();
+    if (rels == null || offline || vault != v) return;
+    if (await v.syncFiles(rels)) notifyListeners();
   }
+
+  /// Paths (inside the library) of the files kept outside the index —
+  /// Documents, Other files, the tools' other results — or null when they
+  /// can't be listed now. Set by the app.
+  Future<List<String>?> Function()? listFiles;
+
+  /// Something changed in the Documents / Other folders (seen by the
+  /// folder watch, a few seconds later). Set by the app.
+  void Function()? onOtherFiles;
+
+  /// Documents / Other files deleted outside Keepnear, data still kept.
+  List<String> get filesGone => vault?.filesGone ?? const [];
+
+  /// Waiting for "were these deleted?": photos / videos and files.
+  int get missingAll => pendingMissing.length + filesGone.length;
+
+  /// Of [missingAll], those whose data is still kept.
+  int get keptAll => missingKept + filesGone.length;
 
   /// Files deleted in Explorer, kept in the vault: back in their place.
   Future<void> restoreMissing() async {
     final v = vault;
     if (v == null) return;
     v.restore([for (final i in pendingMissing) i.relPath]);
+    if (v.filesGone.isNotEmpty) {
+      v.restoreFiles();
+      onOtherFiles?.call();
+    }
     await reconcile();
   }
 
@@ -623,11 +651,21 @@ class LibraryIndex extends ChangeNotifier {
     if (!await Directory(rootPath).exists()) _goOffline();
   }
 
+  Timer? _otherTimer;
+
   void _onFsEvent(FileSystemEvent e) {
     for (final path in [e.path, if (e is FileSystemMoveEvent) e.destination]) {
       if (path == null) continue;
       final rel = _rel(path);
-      if (rel == null || _ignored(rel)) continue;
+      if (rel == null) continue;
+      if (_ignored(rel)) {
+        // Documents / Other files (not hidden ones): told, a moment later.
+        if (!rel.split('/').any((seg) => seg.startsWith('.')) && onOtherFiles != null) {
+          _otherTimer?.cancel();
+          _otherTimer = Timer(const Duration(seconds: 3), () => onOtherFiles?.call());
+        }
+        continue;
+      }
       // Re-check the folder it happened in (a deleted folder's items are
       // all under its parent).
       final slash = rel.lastIndexOf('/');
@@ -835,6 +873,7 @@ class LibraryIndex extends ChangeNotifier {
     if (gone.isNotEmpty) _forget(gone);
     // Their kept data goes too: the space is freed.
     if (gone.isNotEmpty) unawaited(vault?.purge([for (final i in gone) i.relPath]));
+    if (filesGone.isNotEmpty) unawaited(vault?.purgeFilesGone());
     _scheduleSave();
     notifyListeners();
   }
