@@ -2353,5 +2353,6 @@
   "aipack.examples": "• Expenses: pack 20 receipt photos and ask the AI \"list each one's shop and amount by date, with the total\".\n• Contracts / notices: pack a few pages and ask \"which terms should I watch?\" or \"which dates should I note?\"\n• Sorting: pack a set of PDFs and screenshots and ask \"group them by topic, one line each\".",
   "aipack.note": "All done on this PC, nothing is uploaded; which AI gets what is up to you. The files are copies: the originals stay as they are.",
   "aipack.change": "Change",
-  "aipack.go": "Pack"
+  "aipack.go": "Pack",
+  "pdfword.made_by": "Made by {app}."
 }

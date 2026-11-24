@@ -2353,5 +2353,6 @@
   "aipack.examples": "• Reembolso: empacote 20 fotos de recibos e peça à IA \"liste por data a loja e o valor, com o total\".\n• Contratos / avisos: algumas páginas e pergunte \"que cláusulas devo observar?\" \"que datas anoto?\"\n• Organizar: PDFs e capturas, e peça \"agrupe por tema, uma frase cada\".",
   "aipack.note": "Tudo é feito neste PC, nada é enviado; você decide qual IA recebe o quê. São cópias: os originais ficam como estão.",
   "aipack.change": "Alterar",
-  "aipack.go": "Empacotar"
+  "aipack.go": "Empacotar",
+  "pdfword.made_by": "Feito com {app}."
 }

@@ -2353,5 +2353,6 @@
   "aipack.examples": "• Thanh toán chi phí: gói 20 ảnh hóa đơn rồi hỏi AI \"liệt kê theo ngày tên cửa hàng và số tiền, kèm tổng\".\n• Hợp đồng / thông báo: vài trang rồi hỏi \"điều khoản nào cần chú ý?\" \"ngày nào cần ghi lại?\"\n• Sắp xếp tài liệu: PDF và ảnh chụp màn hình, rồi nhờ \"nhóm theo chủ đề, mỗi nhóm một câu\".",
   "aipack.note": "Mọi thứ làm trên máy này, không tải gì lên; đưa gì cho AI nào là do bạn quyết định. Tệp là bản sao, bản gốc giữ nguyên.",
   "aipack.change": "Đổi",
-  "aipack.go": "Đóng gói"
+  "aipack.go": "Đóng gói",
+  "pdfword.made_by": "Tạo bằng {app}."
 }

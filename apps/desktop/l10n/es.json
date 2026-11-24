@@ -2353,5 +2353,6 @@
   "aipack.examples": "• Gastos: empaqueta 20 fotos de recibos y pide a la IA «lista por fecha la tienda y el importe, con el total».\n• Contratos / avisos: unas páginas y pregunta «¿qué cláusulas debo vigilar?» «¿qué fechas apunto?»\n• Ordenar: PDF y capturas, y pide «agrúpalos por tema, una frase cada uno».",
   "aipack.note": "Todo se hace en este PC y no se sube nada; tú decides qué IA recibe qué. Son copias: los originales no cambian.",
   "aipack.change": "Cambiar",
-  "aipack.go": "Empaquetar"
+  "aipack.go": "Empaquetar",
+  "pdfword.made_by": "Hecho con {app}."
 }

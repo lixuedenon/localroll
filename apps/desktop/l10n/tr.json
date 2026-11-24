@@ -2353,5 +2353,6 @@
   "aipack.examples": "• Masraf: 20 fiş fotoğrafını paketleyip YZ'ye \"tarihe göre mağaza ve tutarı listele, toplamıyla\" deyin.\n• Sözleşme / duyuru: birkaç sayfa paketleyip \"hangi maddelere dikkat etmeliyim?\" \"hangi tarihleri not almalıyım?\" diye sorun.\n• Düzenleme: PDF ve ekran görüntülerini paketleyip \"konuya göre grupla, her birine bir cümle\" deyin.",
   "aipack.note": "Her şey bu bilgisayarda yapılır, hiçbir şey yüklenmez; hangi YZ'ye ne verileceğine siz karar verirsiniz. Dosyalar kopyadır, asılları değişmez.",
   "aipack.change": "Değiştir",
-  "aipack.go": "Paketle"
+  "aipack.go": "Paketle",
+  "pdfword.made_by": "{app} ile yapıldı."
 }

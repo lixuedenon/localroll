@@ -2353,5 +2353,6 @@
   "aipack.examples": "• Reimburse: kemas 20 foto struk lalu minta AI \"urutkan per tanggal nama toko dan jumlahnya, beserta totalnya\".\n• Kontrak / pengumuman: beberapa halaman, lalu tanya \"pasal mana yang perlu diperhatikan?\" \"tanggal apa yang perlu dicatat?\"\n• Merapikan: PDF dan tangkapan layar, lalu minta \"kelompokkan per topik, satu kalimat tiap kelompok\".",
   "aipack.note": "Semua dilakukan di PC ini, tidak ada yang diunggah; AI mana dan apa yang diberikan, Anda yang menentukan. File berupa salinan: aslinya tetap.",
   "aipack.change": "Ubah",
-  "aipack.go": "Kemas"
+  "aipack.go": "Kemas",
+  "pdfword.made_by": "Dibuat dengan {app}."
 }

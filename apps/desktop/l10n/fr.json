@@ -2353,5 +2353,6 @@
   "aipack.examples": "• Notes de frais : emballez 20 photos de reçus et demandez « liste par date le commerce et le montant, avec le total ».\n• Contrats / avis : quelques pages, puis « quelles clauses surveiller ? » « quelles dates noter ? »\n• Tri : des PDF et captures, puis « regroupe par thème, une phrase chacun ».",
   "aipack.note": "Tout se fait sur ce PC, rien n’est envoyé ; vous choisissez quelle IA reçoit quoi. Ce sont des copies : les originaux ne changent pas.",
   "aipack.change": "Modifier",
-  "aipack.go": "Créer le paquet"
+  "aipack.go": "Créer le paquet",
+  "pdfword.made_by": "Créé avec {app}."
 }

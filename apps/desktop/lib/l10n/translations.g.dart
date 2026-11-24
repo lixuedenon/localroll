@@ -2359,6 +2359,7 @@ const Map<String, Map<String, String>> translations = {
     'aipack.note': 'All done on this PC, nothing is uploaded; which AI gets what is up to you. The files are copies: the originals stay as they are.',
     'aipack.change': 'Change',
     'aipack.go': 'Pack',
+    'pdfword.made_by': 'Made by Keepnear.',
   },
   'zh': {
     'nav.library': '媒体库',
@@ -4716,6 +4717,7 @@ const Map<String, Map<String, String>> translations = {
     'aipack.note': '全在这台电脑上做，什么都不上传；交给哪个 AI、交什么，由你自己决定。文件是复制的，原文件不动。',
     'aipack.change': '更改',
     'aipack.go': '打包',
+    'pdfword.made_by': '这份是用 Keepnear 转的。',
   },
   'zh_Hant': {
     'nav.library': '媒體庫',
@@ -7073,6 +7075,7 @@ const Map<String, Map<String, String>> translations = {
     'aipack.note': '全在這台電腦上做，什麼都不上傳；交給哪個 AI、交什麼，由你自己決定。檔案是複製的，原檔不動。',
     'aipack.change': '更改',
     'aipack.go': '打包',
+    'pdfword.made_by': '這份是用 Keepnear 轉的。',
   },
   'ja': {
     'nav.library': 'ライブラリ',
@@ -9430,6 +9433,7 @@ const Map<String, Map<String, String>> translations = {
     'aipack.note': 'すべてこの PC で行い、何もアップロードしません。どの AI に何を渡すかはあなたが決めます。ファイルはコピーで、元は変わりません。',
     'aipack.change': '変更',
     'aipack.go': 'まとめる',
+    'pdfword.made_by': 'Keepnear で変換しました。',
   },
   'ko': {
     'nav.library': '라이브러리',
@@ -11787,6 +11791,7 @@ const Map<String, Map<String, String>> translations = {
     'aipack.note': '모두 이 PC에서 하며 아무것도 올리지 않습니다. 어느 AI에 무엇을 줄지는 직접 정합니다. 파일은 사본이고 원본은 그대로입니다.',
     'aipack.change': '변경',
     'aipack.go': '묶기',
+    'pdfword.made_by': 'Keepnear(으)로 변환했습니다.',
   },
   'es': {
     'nav.library': 'Biblioteca',
@@ -14144,6 +14149,7 @@ const Map<String, Map<String, String>> translations = {
     'aipack.note': 'Todo se hace en este PC y no se sube nada; tú decides qué IA recibe qué. Son copias: los originales no cambian.',
     'aipack.change': 'Cambiar',
     'aipack.go': 'Empaquetar',
+    'pdfword.made_by': 'Hecho con Keepnear.',
   },
   'fr': {
     'nav.library': 'Bibliothèque',
@@ -16501,6 +16507,7 @@ const Map<String, Map<String, String>> translations = {
     'aipack.note': 'Tout se fait sur ce PC, rien n’est envoyé ; vous choisissez quelle IA reçoit quoi. Ce sont des copies : les originaux ne changent pas.',
     'aipack.change': 'Modifier',
     'aipack.go': 'Créer le paquet',
+    'pdfword.made_by': 'Créé avec Keepnear.',
   },
   'de': {
     'nav.library': 'Mediathek',
@@ -18858,6 +18865,7 @@ const Map<String, Map<String, String>> translations = {
     'aipack.note': 'Alles geschieht auf diesem PC, nichts wird hochgeladen; welche KI was bekommt, entscheiden Sie. Es sind Kopien, die Originale bleiben unverändert.',
     'aipack.change': 'Ändern',
     'aipack.go': 'Packen',
+    'pdfword.made_by': 'Erstellt mit Keepnear.',
   },
   'pt': {
     'nav.library': 'Biblioteca',
@@ -21215,6 +21223,7 @@ const Map<String, Map<String, String>> translations = {
     'aipack.note': 'Tudo é feito neste PC, nada é enviado; você decide qual IA recebe o quê. São cópias: os originais ficam como estão.',
     'aipack.change': 'Alterar',
     'aipack.go': 'Empacotar',
+    'pdfword.made_by': 'Feito com Keepnear.',
   },
   'ru': {
     'nav.library': 'Медиатека',
@@ -23572,6 +23581,7 @@ const Map<String, Map<String, String>> translations = {
     'aipack.note': 'Всё делается на этом ПК, ничего не загружается; какому ИИ что отдать — решаете вы. Это копии, оригиналы не меняются.',
     'aipack.change': 'Изменить',
     'aipack.go': 'Упаковать',
+    'pdfword.made_by': 'Сделано в Keepnear.',
   },
   'it': {
     'nav.library': 'Libreria',
@@ -25929,6 +25939,7 @@ const Map<String, Map<String, String>> translations = {
     'aipack.note': 'Tutto avviene su questo PC, nulla viene caricato; decidi tu quale IA riceve cosa. Sono copie: gli originali restano com’erano.',
     'aipack.change': 'Cambia',
     'aipack.go': 'Crea pacchetto',
+    'pdfword.made_by': 'Creato con Keepnear.',
   },
   'ar': {
     'nav.library': 'المكتبة',
@@ -28286,6 +28297,7 @@ const Map<String, Map<String, String>> translations = {
     'aipack.note': 'يتم كل شيء على هذا الحاسوب ولا يُرفع شيء؛ أنت من يقرر ماذا يُعطى لأي ذكاء اصطناعي. الملفات نسخ والأصول كما هي.',
     'aipack.change': 'تغيير',
     'aipack.go': 'حزم',
+    'pdfword.made_by': 'تم إنشاؤه بواسطة Keepnear.',
   },
   'hi': {
     'nav.library': 'लाइब्रेरी',
@@ -30643,6 +30655,7 @@ const Map<String, Map<String, String>> translations = {
     'aipack.note': 'सब इसी PC पर होता है, कुछ अपलोड नहीं होता; किस AI को क्या देना है, आप तय करते हैं। फ़ाइलें प्रतियाँ हैं, मूल वैसे ही रहते हैं।',
     'aipack.change': 'बदलें',
     'aipack.go': 'पैक करें',
+    'pdfword.made_by': 'Keepnear से बनाया गया।',
   },
   'id': {
     'nav.library': 'Pustaka',
@@ -33000,6 +33013,7 @@ const Map<String, Map<String, String>> translations = {
     'aipack.note': 'Semua dilakukan di PC ini, tidak ada yang diunggah; AI mana dan apa yang diberikan, Anda yang menentukan. File berupa salinan: aslinya tetap.',
     'aipack.change': 'Ubah',
     'aipack.go': 'Kemas',
+    'pdfword.made_by': 'Dibuat dengan Keepnear.',
   },
   'vi': {
     'nav.library': 'Thư viện',
@@ -35357,6 +35371,7 @@ const Map<String, Map<String, String>> translations = {
     'aipack.note': 'Mọi thứ làm trên máy này, không tải gì lên; đưa gì cho AI nào là do bạn quyết định. Tệp là bản sao, bản gốc giữ nguyên.',
     'aipack.change': 'Đổi',
     'aipack.go': 'Đóng gói',
+    'pdfword.made_by': 'Tạo bằng Keepnear.',
   },
   'th': {
     'nav.library': 'คลังสื่อ',
@@ -37714,6 +37729,7 @@ const Map<String, Map<String, String>> translations = {
     'aipack.note': 'ทำทั้งหมดในเครื่องนี้ ไม่อัปโหลดอะไร จะส่งอะไรให้ AI ตัวไหนคุณเป็นคนเลือก ไฟล์เป็นสำเนา ต้นฉบับไม่เปลี่ยน',
     'aipack.change': 'เปลี่ยน',
     'aipack.go': 'แพ็ก',
+    'pdfword.made_by': 'แปลงด้วย Keepnear',
   },
   'tr': {
     'nav.library': 'Kitaplık',
@@ -40071,5 +40087,6 @@ const Map<String, Map<String, String>> translations = {
     'aipack.note': 'Her şey bu bilgisayarda yapılır, hiçbir şey yüklenmez; hangi YZ\'ye ne verileceğine siz karar verirsiniz. Dosyalar kopyadır, asılları değişmez.',
     'aipack.change': 'Değiştir',
     'aipack.go': 'Paketle',
+    'pdfword.made_by': 'Keepnear ile yapıldı.',
   },
 };

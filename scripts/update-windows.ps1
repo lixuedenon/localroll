@@ -120,5 +120,8 @@ foreach ($d in ($others | Select-Object -Unique)) {
 if ($task) {
   schtasks /run /tn 'Keepnear' | Out-Null
 } else {
-  Start-Process $exe
+  # Through Explorer: as the signed-in user, not as administrator, even
+  # when this shell runs as administrator (Keepnear then can't take
+  # drag and drop, and what it opens can't be screenshotted).
+  Start-Process explorer.exe -ArgumentList ('"' + $exe + '"')
 }

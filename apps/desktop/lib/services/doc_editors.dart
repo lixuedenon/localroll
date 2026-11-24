@@ -5,6 +5,8 @@ import 'dart:io';
 
 import 'package:localroll_core/localroll_core.dart' show DiagLog;
 
+import 'elevation.dart';
+
 /// A program that can edit Word files on this PC.
 class DocEditor {
   const DocEditor(this.name, this.exe, {this.process, this.word = false});
@@ -213,7 +215,33 @@ class DocEditors {
   }
 
   static Future<void> _start(DocEditor e, String path) async {
+    if (Elevation.isAdmin && await _startAsUser(e.exe, path)) return;
     await Process.start(e.exe, [path], mode: ProcessStartMode.detached);
+  }
+
+  /// Keepnear runs as administrator: a program it starts would too, and
+  /// then screenshots, drag and drop and other programs can't reach its
+  /// window. So the desktop (Explorer, not elevated) starts it: Explorer
+  /// opens a small script, the script starts the program with the file
+  /// (and deletes itself).
+  static Future<bool> _startAsUser(String exe, String path) async {
+    try {
+      final dir = Directory('${Directory.systemTemp.path}\\Keepnear');
+      dir.createSync(recursive: true);
+      final vbs = File('${dir.path}\\open-${DateTime.now().microsecondsSinceEpoch}.vbs');
+      String q(String s) => s.replaceAll('"', '""');
+      vbs.writeAsStringSync(
+        'CreateObject("WScript.Shell").Run """${q(exe)}"" ""${q(path)}""", 1, False\r\n'
+        'CreateObject("Scripting.FileSystemObject").DeleteFile WScript.ScriptFullName, True\r\n',
+        encoding: const SystemEncoding(),
+      );
+      final r = await Process.run('explorer.exe', [vbs.path]);
+      DiagLog.log('tools', 'start ${exe.split('\\').last} as the user (not administrator): explorer ${r.exitCode}');
+      return true;
+    } catch (e) {
+      DiagLog.log('tools', 'start as the user failed: $e');
+      return false;
+    }
   }
 
   /// The programs that can edit now (Word only when activated), in order.

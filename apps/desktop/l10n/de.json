@@ -2353,5 +2353,6 @@
   "aipack.examples": "• Spesen: 20 Belegfotos packen und die KI fragen: „Liste Geschäft und Betrag nach Datum auf, mit Summe.“\n• Verträge / Mitteilungen: ein paar Seiten packen und fragen: „Welche Klauseln sind wichtig?“ „Welche Termine muss ich notieren?“\n• Ordnen: PDFs und Screenshots packen und fragen: „Nach Thema gruppieren, je ein Satz.“",
   "aipack.note": "Alles geschieht auf diesem PC, nichts wird hochgeladen; welche KI was bekommt, entscheiden Sie. Es sind Kopien, die Originale bleiben unverändert.",
   "aipack.change": "Ändern",
-  "aipack.go": "Packen"
+  "aipack.go": "Packen",
+  "pdfword.made_by": "Erstellt mit {app}."
 }

@@ -1,9 +1,10 @@
 // apps/desktop/lib/ui/tools/office_edit.dart
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:localroll_core/localroll_core.dart' show DiagLog;
+import 'package:localroll_core/localroll_core.dart' show DiagLog, ZipReader;
 
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
@@ -28,15 +29,58 @@ Future<String?> pdfToWord(String pdf, String out, {bool Function()? stop}) async
   if (app != null) {
     final e = await OfficeEngines.runOnly(app, 'wordDocx', pdf, out);
     if (stop?.call() ?? false) return 'cancelled';
-    if (e == null) {
+    if (e == null && !_cellPerLetter(out)) {
       DiagLog.log('tools', 'pdf → docx by ${app.label}');
+      pdfWordBy[out] = app == OfficeApp.office ? 'Word' : app.label;
       return null;
     }
-    DiagLog.log('tools', 'pdf → docx by ${app.label} failed ($e): Keepnear makes it');
+    DiagLog.log('tools', e == null
+        ? 'pdf → docx by ${app.label}: the words came out a letter or two per table cell (hard to edit): Keepnear makes it again'
+        : 'pdf → docx by ${app.label} failed ($e): Keepnear makes it');
+    try {
+      if (File(out).existsSync()) File(out).deleteSync();
+    } catch (_) {}
   }
   final e = await PdfToDocx.make(pdf, out, stop: stop);
-  if (e == null) DiagLog.log('tools', 'pdf → docx by Keepnear');
+  if (e == null) {
+    DiagLog.log('tools', 'pdf → docx by Keepnear');
+    pdfWordBy[out] = 'Keepnear';
+  }
   return e;
+}
+
+/// Which program made each Word file (shown when asked to edit it).
+final Map<String, String> pdfWordBy = {};
+
+/// Word's PDF reflow sometimes puts every letter (or two) in a table cell of
+/// its own: the line can't be edited as text. True when most of the words
+/// are in such cells.
+bool _cellPerLetter(String docx) {
+  try {
+    final zip = ZipReader.open(File(docx).readAsBytesSync());
+    final xml = zip?.read('word/document.xml');
+    if (xml == null) return false;
+    final s = utf8.decode(xml, allowMalformed: true);
+    final t = RegExp(r'<w:t(?:\s[^>]*)?>([^<]*)</w:t>');
+    var all = 0;
+    for (final m in t.allMatches(s)) {
+      all += m.group(1)!.trim().length;
+    }
+    if (all == 0) return false;
+    var small = 0, cells = 0;
+    for (final c in RegExp(r'<w:tc>.*?</w:tc>|<w:tc .*?</w:tc>', dotAll: true).allMatches(s)) {
+      final n = t.allMatches(c.group(0)!).fold<int>(0, (a, m) => a + m.group(1)!.trim().length);
+      if (n > 0 && n <= 2) {
+        cells++;
+        small += n;
+      }
+    }
+    final bad = cells >= 20 && small >= all * 0.4;
+    if (bad) DiagLog.log('tools', '$cells cells of 1–2 letters hold $small of $all letters');
+    return bad;
+  } catch (_) {
+    return false;
+  }
 }
 
 /// After PDF → Word: "Edit it now?" → opened in the first program that can
@@ -64,6 +108,10 @@ Future<void> offerEdit(BuildContext context, AppServices s, String docx, {requir
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(tr('pdfword.edit_body', {'name': name})),
+              if (pdfWordBy[docx] != null) ...[
+                const SizedBox(height: 6),
+                Text(tr('pdfword.made_by', {'app': pdfWordBy[docx]!}), style: const TextStyle(fontSize: 12, color: Color(0xFF8A8F98))),
+              ],
               if (can.isNotEmpty) ...[
                 const SizedBox(height: 14),
                 Row(children: [
@@ -152,7 +200,7 @@ Future<void> _waitAndAsk(AppServices s, String pdf, String docx, DateTime before
       final start = DateTime.now();
       while (!stop) {
         await Future<void>.delayed(const Duration(seconds: 3));
-        if (!File(docx).existsSync()) return false;
+        if (!File(docx).existsSync() && _savedAs(docx, before) == null) return false;
         if (await _openNow(docx)) {
           seen = true;
           continue;
@@ -163,13 +211,17 @@ Future<void> _waitAndAsk(AppServices s, String pdf, String docx, DateTime before
           return false;
         }
         // Closed: saved (changed) or not.
-        if (seen) return File(docx).lastModifiedSync().isAfter(before);
+        if (seen) return _savedAs(docx, before) != null;
       }
       return false;
     },
     ok: (_) => true,
   );
   if (saved != true) return;
+  // What was saved: the Word file, or a copy of it in another format
+  // (LibreOffice's own .odt, .rtf, .doc).
+  final edited = _savedAs(docx, before) ?? docx;
+  if (edited != docx) DiagLog.log('tools', 'saved as ${edited.split(Platform.pathSeparator).last}');
   final ctx = AppNav.instance.navigatorKey.currentContext;
   if (ctx == null || !ctx.mounted) return;
   final back = await showLrDialog<bool>(
@@ -177,7 +229,7 @@ Future<void> _waitAndAsk(AppServices s, String pdf, String docx, DateTime before
     builder: (c) => AlertDialog(
       icon: const Icon(Icons.picture_as_pdf_outlined, size: 30),
       title: Text(tr('pdfword.back_title')),
-      content: SizedBox(width: 440, child: Text(tr('pdfword.back_body', {'name': name}))),
+      content: SizedBox(width: 440, child: Text(tr('pdfword.back_body', {'name': edited.split(Platform.pathSeparator).last}))),
       actions: [
         TextButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('pdfword.not_now'))),
         FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(tr('pdfword.back'))),
@@ -189,9 +241,17 @@ Future<void> _waitAndAsk(AppServices s, String pdf, String docx, DateTime before
   final out = toolOutPath(s, pdf, tr('pdfword.suffix'), 'pdf');
   final err = await BgTasks.instance.run<String?>(
     title: tr('pdfword.making_pdf'),
-    job: (t) {
+    job: (t) async {
       t.cancellable(() => unawaited(OfficeEngines.cancel()));
-      return OfficeEngines.run('pdf', docx, out);
+      // First the program it was edited in (it reads what it wrote best;
+      // and never a Word that isn't activated), then the usual order.
+      final app = switch (by) { 'LibreOffice' => OfficeApp.libre, 'WPS' => OfficeApp.wps, 'Word' => OfficeApp.office, _ => null };
+      if (app != null && (await OfficeEngines.installed()).contains(app)) {
+        final e = await OfficeEngines.runOnly(app, 'pdf', edited, out);
+        if (e == null || e == 'cancelled') return e;
+        DiagLog.log('tools', 'back to pdf by ${app.label} failed ($e): the next one');
+      }
+      return OfficeEngines.run('pdf', edited, out);
     },
     ok: (e) => e == null,
   );
@@ -203,4 +263,26 @@ Future<void> _waitAndAsk(AppServices s, String pdf, String docx, DateTime before
     return;
   }
   await showToolResult(ctx3, s, [out]);
+}
+
+/// The file saved after [before]: [docx] itself, or the same name as .odt /
+/// .rtf / .doc / .docx beside it (the newest). Null: nothing saved.
+String? _savedAs(String docx, DateTime before) {
+  final dot = docx.lastIndexOf('.');
+  final stem = dot > 0 ? docx.substring(0, dot) : docx;
+  String? best;
+  DateTime? at;
+  for (final ext in const ['docx', 'odt', 'rtf', 'doc', 'DOCX', 'ODT']) {
+    final f = File('$stem.$ext');
+    try {
+      if (!f.existsSync()) continue;
+      final m = f.lastModifiedSync();
+      if (!m.isAfter(before)) continue;
+      if (at == null || m.isAfter(at)) {
+        at = m;
+        best = f.path;
+      }
+    } catch (_) {}
+  }
+  return best;
 }

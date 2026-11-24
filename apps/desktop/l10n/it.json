@@ -2353,5 +2353,6 @@
   "aipack.examples": "• Note spese: impacchetta 20 foto di scontrini e chiedi all’IA «elenca per data negozio e importo, con il totale».\n• Contratti / avvisi: qualche pagina e chiedi «quali clausole controllare?» «quali date segnare?»\n• Riordino: PDF e screenshot, poi «raggruppa per tema, una frase ciascuno».",
   "aipack.note": "Tutto avviene su questo PC, nulla viene caricato; decidi tu quale IA riceve cosa. Sono copie: gli originali restano com’erano.",
   "aipack.change": "Cambia",
-  "aipack.go": "Crea pacchetto"
+  "aipack.go": "Crea pacchetto",
+  "pdfword.made_by": "Creato con {app}."
 }
