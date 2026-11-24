@@ -2342,5 +2342,8 @@
   "pdfword.word_unlicensed": "この PC の Word はライセンス認証されていないため（読み取り専用で開く）、使っていません。編集には LibreOffice（無料）を入れるか Word を認証してください。",
   "pdfword.editing": "{app} で {name} を編集中",
   "pdfword.editing_note": "保存して閉じると PDF に戻すか確認します",
-  "conv.engine_keepnear": "Keepnear（PDF → Word 用）"
+  "conv.engine_keepnear": "Keepnear（PDF → Word 用）",
+  "pdfword.open_with": "開くアプリ：",
+  "pdfword.word_off_short": "この PC の Word はライセンス認証されていない（閲覧のみ）ため、一覧にありません。",
+  "pdfword.word_switched": "Word はライセンス認証されておらず編集できないため、{app} で開きました"
 }

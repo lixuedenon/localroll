@@ -2342,5 +2342,8 @@
   "pdfword.word_unlicensed": "Word ในเครื่องนี้ยังไม่ได้เปิดใช้งาน (จะเปิดแบบอ่านอย่างเดียว) จึงไม่ได้ใช้ ถ้าจะแก้ ติดตั้ง LibreOffice ฟรี (หรือเปิดใช้งาน Word)",
   "pdfword.editing": "กำลังแก้ {name} ใน {app}",
   "pdfword.editing_note": "บันทึกแล้วปิด จะถามเรื่อง PDF",
-  "conv.engine_keepnear": "Keepnear (สำหรับ PDF → Word)"
+  "conv.engine_keepnear": "Keepnear (สำหรับ PDF → Word)",
+  "pdfword.open_with": "เปิดด้วย:",
+  "pdfword.word_off_short": "Word ในเครื่องนี้ยังไม่ได้เปิดใช้งาน (อ่านอย่างเดียว) จึงไม่อยู่ในรายการ",
+  "pdfword.word_switched": "Word ยังไม่ได้เปิดใช้งานจึงแก้ไขไม่ได้ เปิดด้วย {app} แทน"
 }

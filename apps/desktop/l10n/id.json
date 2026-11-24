@@ -2342,5 +2342,8 @@
   "pdfword.word_unlicensed": "Word di PC ini belum diaktifkan (akan terbuka hanya-baca), jadi tidak dipakai. Untuk mengedit, pasang LibreOffice gratis (atau aktifkan Word).",
   "pdfword.editing": "Mengedit {name} di {app}",
   "pdfword.editing_note": "Simpan dan tutup: Anda akan ditanya soal PDF",
-  "conv.engine_keepnear": "Keepnear (untuk PDF → Word)"
+  "conv.engine_keepnear": "Keepnear (untuk PDF → Word)",
+  "pdfword.open_with": "Buka dengan:",
+  "pdfword.word_off_short": "Word di PC ini belum diaktifkan (hanya-baca), jadi tidak tercantum.",
+  "pdfword.word_switched": "Word belum diaktifkan dan tidak bisa mengedit: dibuka di {app}"
 }

@@ -2342,5 +2342,8 @@
   "pdfword.word_unlicensed": "Bu bilgisayardaki Word etkin değil (salt okunur açılır), bu yüzden kullanılmadı. Düzenlemek için LibreOffice'i ücretsiz kurun (ya da Word'ü etkinleştirin).",
   "pdfword.editing": "{name}, {app} içinde düzenleniyor",
   "pdfword.editing_note": "Kaydedip kapatın: PDF sorulacak",
-  "conv.engine_keepnear": "Keepnear (PDF → Word için)"
+  "conv.engine_keepnear": "Keepnear (PDF → Word için)",
+  "pdfword.open_with": "Şununla aç:",
+  "pdfword.word_off_short": "Bu bilgisayardaki Word etkin değil (salt okunur), bu yüzden listede yok.",
+  "pdfword.word_switched": "Word etkin değil, düzenleyemez: {app} ile açıldı"
 }

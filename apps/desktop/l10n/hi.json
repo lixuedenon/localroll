@@ -2342,5 +2342,8 @@
   "pdfword.word_unlicensed": "इस PC पर Word सक्रिय नहीं है (केवल पढ़ने के लिए खुलेगा), इसलिए इस्तेमाल नहीं हुआ। संपादन के लिए LibreOffice मुफ़्त इंस्टॉल करें (या Word सक्रिय करें)।",
   "pdfword.editing": "{app} में {name} का संपादन",
   "pdfword.editing_note": "सहेजकर बंद करें, फिर PDF के बारे में पूछा जाएगा",
-  "conv.engine_keepnear": "Keepnear (PDF → Word के लिए)"
+  "conv.engine_keepnear": "Keepnear (PDF → Word के लिए)",
+  "pdfword.open_with": "इससे खोलें:",
+  "pdfword.word_off_short": "इस PC पर Word सक्रिय नहीं है (केवल पढ़ने के लिए), इसलिए सूची में नहीं है।",
+  "pdfword.word_switched": "Word सक्रिय नहीं है, संपादन नहीं कर सकता: {app} में खोला गया"
 }

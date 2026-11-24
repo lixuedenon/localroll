@@ -2348,6 +2348,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.editing': 'Editing {name} in Keepnear',
     'pdfword.editing_note': 'Save and close it when done: you\'ll be asked about PDF',
     'conv.engine_keepnear': 'Keepnear (for PDF → Word)',
+    'pdfword.open_with': 'Open with:',
+    'pdfword.word_off_short': 'Word on this PC isn\'t activated (read-only), so it isn\'t listed.',
+    'pdfword.word_switched': 'Word isn\'t activated and can\'t edit: opened in Keepnear instead',
   },
   'zh': {
     'nav.library': '媒体库',
@@ -4694,6 +4697,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.editing': '在 Keepnear 里编辑 {name}',
     'pdfword.editing_note': '改完保存、关掉后，会问你要不要转回 PDF',
     'conv.engine_keepnear': 'Keepnear（PDF → Word 用）',
+    'pdfword.open_with': '打开方式：',
+    'pdfword.word_off_short': '这台电脑的 Word 没有激活（只能看、不能改），所以不在列表里。',
+    'pdfword.word_switched': 'Word 没有激活，不能编辑，已改用 Keepnear 打开',
   },
   'zh_Hant': {
     'nav.library': '媒體庫',
@@ -7040,6 +7046,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.editing': '在 Keepnear 裡編輯 {name}',
     'pdfword.editing_note': '改完儲存、關掉後，會問你要不要轉回 PDF',
     'conv.engine_keepnear': 'Keepnear（PDF → Word 用）',
+    'pdfword.open_with': '開啟方式：',
+    'pdfword.word_off_short': '這台電腦的 Word 沒有啟用（只能看、不能改），所以不在清單裡。',
+    'pdfword.word_switched': 'Word 沒有啟用，不能編輯，已改用 Keepnear 開啟',
   },
   'ja': {
     'nav.library': 'ライブラリ',
@@ -9386,6 +9395,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.editing': 'Keepnear で {name} を編集中',
     'pdfword.editing_note': '保存して閉じると PDF に戻すか確認します',
     'conv.engine_keepnear': 'Keepnear（PDF → Word 用）',
+    'pdfword.open_with': '開くアプリ：',
+    'pdfword.word_off_short': 'この PC の Word はライセンス認証されていない（閲覧のみ）ため、一覧にありません。',
+    'pdfword.word_switched': 'Word はライセンス認証されておらず編集できないため、Keepnear で開きました',
   },
   'ko': {
     'nav.library': '라이브러리',
@@ -11732,6 +11744,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.editing': 'Keepnear에서 {name} 편집 중',
     'pdfword.editing_note': '저장하고 닫으면 PDF로 되돌릴지 묻습니다',
     'conv.engine_keepnear': 'Keepnear (PDF → Word용)',
+    'pdfword.open_with': '열 프로그램:',
+    'pdfword.word_off_short': '이 PC의 Word는 정품 인증이 안 되어(읽기 전용) 목록에 없습니다.',
+    'pdfword.word_switched': 'Word가 정품 인증되지 않아 편집할 수 없어 Keepnear(으)로 열었습니다',
   },
   'es': {
     'nav.library': 'Biblioteca',
@@ -14078,6 +14093,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.editing': 'Editando {name} en Keepnear',
     'pdfword.editing_note': 'Guarda y cierra: se te preguntará por el PDF',
     'conv.engine_keepnear': 'Keepnear (para PDF → Word)',
+    'pdfword.open_with': 'Abrir con:',
+    'pdfword.word_off_short': 'Word no está activado en este PC (solo lectura), por eso no aparece.',
+    'pdfword.word_switched': 'Word no está activado y no puede editar: abierto en Keepnear',
   },
   'fr': {
     'nav.library': 'Bibliothèque',
@@ -16424,6 +16442,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.editing': 'Modification de {name} dans Keepnear',
     'pdfword.editing_note': 'Enregistrez et fermez : on vous proposera le PDF',
     'conv.engine_keepnear': 'Keepnear (pour PDF → Word)',
+    'pdfword.open_with': 'Ouvrir avec :',
+    'pdfword.word_off_short': 'Word n’est pas activé sur ce PC (lecture seule), il n’est donc pas proposé.',
+    'pdfword.word_switched': 'Word n’est pas activé et ne peut pas modifier : ouvert dans Keepnear',
   },
   'de': {
     'nav.library': 'Mediathek',
@@ -18770,6 +18791,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.editing': '{name} wird in Keepnear bearbeitet',
     'pdfword.editing_note': 'Speichern und schließen – dann folgt die PDF-Frage',
     'conv.engine_keepnear': 'Keepnear (für PDF → Word)',
+    'pdfword.open_with': 'Öffnen mit:',
+    'pdfword.word_off_short': 'Word ist auf diesem PC nicht aktiviert (nur lesen) und fehlt daher.',
+    'pdfword.word_switched': 'Word ist nicht aktiviert und kann nicht bearbeiten: stattdessen in Keepnear geöffnet',
   },
   'pt': {
     'nav.library': 'Biblioteca',
@@ -21116,6 +21140,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.editing': 'Editando {name} no Keepnear',
     'pdfword.editing_note': 'Salve e feche: você será perguntado sobre o PDF',
     'conv.engine_keepnear': 'Keepnear (para PDF → Word)',
+    'pdfword.open_with': 'Abrir com:',
+    'pdfword.word_off_short': 'O Word deste PC não está ativado (só leitura), por isso não aparece.',
+    'pdfword.word_switched': 'O Word não está ativado e não pode editar: aberto no Keepnear',
   },
   'ru': {
     'nav.library': 'Медиатека',
@@ -23462,6 +23489,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.editing': '{name} правится в Keepnear',
     'pdfword.editing_note': 'Сохраните и закройте — предложим PDF',
     'conv.engine_keepnear': 'Keepnear (для PDF → Word)',
+    'pdfword.open_with': 'Открыть в:',
+    'pdfword.word_off_short': 'Word на этом ПК не активирован (только чтение), поэтому его нет в списке.',
+    'pdfword.word_switched': 'Word не активирован и не может править: открыто в Keepnear',
   },
   'it': {
     'nav.library': 'Libreria',
@@ -25808,6 +25838,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.editing': 'Modifica di {name} in Keepnear',
     'pdfword.editing_note': 'Salva e chiudi: ti verrà chiesto del PDF',
     'conv.engine_keepnear': 'Keepnear (per PDF → Word)',
+    'pdfword.open_with': 'Apri con:',
+    'pdfword.word_off_short': 'Word su questo PC non è attivato (sola lettura), quindi non è elencato.',
+    'pdfword.word_switched': 'Word non è attivato e non può modificare: aperto in Keepnear',
   },
   'ar': {
     'nav.library': 'المكتبة',
@@ -28154,6 +28187,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.editing': 'تحرير {name} في Keepnear',
     'pdfword.editing_note': 'احفظه وأغلقه لتُسأل عن PDF',
     'conv.engine_keepnear': 'Keepnear (لتحويل PDF ← Word)',
+    'pdfword.open_with': 'فتح باستخدام:',
+    'pdfword.word_off_short': 'Word على هذا الحاسوب غير مفعّل (للقراءة فقط) لذلك لا يظهر.',
+    'pdfword.word_switched': 'Word غير مفعّل ولا يمكنه التحرير: فُتح في Keepnear بدلًا منه',
   },
   'hi': {
     'nav.library': 'लाइब्रेरी',
@@ -30500,6 +30536,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.editing': 'Keepnear में {name} का संपादन',
     'pdfword.editing_note': 'सहेजकर बंद करें, फिर PDF के बारे में पूछा जाएगा',
     'conv.engine_keepnear': 'Keepnear (PDF → Word के लिए)',
+    'pdfword.open_with': 'इससे खोलें:',
+    'pdfword.word_off_short': 'इस PC पर Word सक्रिय नहीं है (केवल पढ़ने के लिए), इसलिए सूची में नहीं है।',
+    'pdfword.word_switched': 'Word सक्रिय नहीं है, संपादन नहीं कर सकता: Keepnear में खोला गया',
   },
   'id': {
     'nav.library': 'Pustaka',
@@ -32846,6 +32885,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.editing': 'Mengedit {name} di Keepnear',
     'pdfword.editing_note': 'Simpan dan tutup: Anda akan ditanya soal PDF',
     'conv.engine_keepnear': 'Keepnear (untuk PDF → Word)',
+    'pdfword.open_with': 'Buka dengan:',
+    'pdfword.word_off_short': 'Word di PC ini belum diaktifkan (hanya-baca), jadi tidak tercantum.',
+    'pdfword.word_switched': 'Word belum diaktifkan dan tidak bisa mengedit: dibuka di Keepnear',
   },
   'vi': {
     'nav.library': 'Thư viện',
@@ -35192,6 +35234,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.editing': 'Đang sửa {name} trong Keepnear',
     'pdfword.editing_note': 'Lưu và đóng: sẽ hỏi về PDF',
     'conv.engine_keepnear': 'Keepnear (cho PDF → Word)',
+    'pdfword.open_with': 'Mở bằng:',
+    'pdfword.word_off_short': 'Word trên máy này chưa kích hoạt (chỉ xem), nên không có trong danh sách.',
+    'pdfword.word_switched': 'Word chưa kích hoạt nên không sửa được: đã mở bằng Keepnear',
   },
   'th': {
     'nav.library': 'คลังสื่อ',
@@ -37538,6 +37583,9 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.editing': 'กำลังแก้ {name} ใน Keepnear',
     'pdfword.editing_note': 'บันทึกแล้วปิด จะถามเรื่อง PDF',
     'conv.engine_keepnear': 'Keepnear (สำหรับ PDF → Word)',
+    'pdfword.open_with': 'เปิดด้วย:',
+    'pdfword.word_off_short': 'Word ในเครื่องนี้ยังไม่ได้เปิดใช้งาน (อ่านอย่างเดียว) จึงไม่อยู่ในรายการ',
+    'pdfword.word_switched': 'Word ยังไม่ได้เปิดใช้งานจึงแก้ไขไม่ได้ เปิดด้วย Keepnear แทน',
   },
   'tr': {
     'nav.library': 'Kitaplık',
@@ -39884,5 +39932,8 @@ const Map<String, Map<String, String>> translations = {
     'pdfword.editing': '{name}, Keepnear içinde düzenleniyor',
     'pdfword.editing_note': 'Kaydedip kapatın: PDF sorulacak',
     'conv.engine_keepnear': 'Keepnear (PDF → Word için)',
+    'pdfword.open_with': 'Şununla aç:',
+    'pdfword.word_off_short': 'Bu bilgisayardaki Word etkin değil (salt okunur), bu yüzden listede yok.',
+    'pdfword.word_switched': 'Word etkin değil, düzenleyemez: Keepnear ile açıldı',
   },
 };

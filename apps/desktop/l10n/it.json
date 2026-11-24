@@ -2342,5 +2342,8 @@
   "pdfword.word_unlicensed": "Word su questo PC non è attivato (si aprirebbe in sola lettura), quindi non viene usato. Per modificare installa LibreOffice gratis (o attiva Word).",
   "pdfword.editing": "Modifica di {name} in {app}",
   "pdfword.editing_note": "Salva e chiudi: ti verrà chiesto del PDF",
-  "conv.engine_keepnear": "Keepnear (per PDF → Word)"
+  "conv.engine_keepnear": "Keepnear (per PDF → Word)",
+  "pdfword.open_with": "Apri con:",
+  "pdfword.word_off_short": "Word su questo PC non è attivato (sola lettura), quindi non è elencato.",
+  "pdfword.word_switched": "Word non è attivato e non può modificare: aperto in {app}"
 }

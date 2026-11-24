@@ -45,16 +45,50 @@ Future<String?> pdfToWord(String pdf, String out, {bool Function()? stop}) async
 /// bar), and it ends by itself if the file never shows up in a window.
 Future<void> offerEdit(BuildContext context, AppServices s, String docx, {required String pdf}) async {
   final name = docx.split(Platform.pathSeparator).last;
+  final all = await DocEditors.found();
+  final can = await DocEditors.usable();
+  final wordOff = all.any((e) => e.word) && !can.any((e) => e.word);
+  if (!context.mounted) return;
+  // "Edit it now?" with the program it opens in; another can be picked.
+  DocEditor? pick = can.firstOrNull;
   final edit = await showLrDialog<bool>(
     context: context,
-    builder: (c) => AlertDialog(
-      icon: const Icon(Icons.description_outlined, size: 30),
-      title: Text(tr('pdfword.edit_title')),
-      content: SizedBox(width: 440, child: Text(tr('pdfword.edit_body', {'name': name}))),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('pdfword.not_now'))),
-        FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(tr('pdfword.edit_now'))),
-      ],
+    builder: (c) => StatefulBuilder(
+      builder: (c, set) => AlertDialog(
+        icon: const Icon(Icons.description_outlined, size: 30),
+        title: Text(tr('pdfword.edit_title')),
+        content: SizedBox(
+          width: 460,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(tr('pdfword.edit_body', {'name': name})),
+              if (can.isNotEmpty) ...[
+                const SizedBox(height: 14),
+                Row(children: [
+                  Text(tr('pdfword.open_with')),
+                  const SizedBox(width: 10),
+                  DropdownButton<DocEditor>(
+                    value: pick,
+                    isDense: true,
+                    items: [for (final e in can) DropdownMenuItem(value: e, child: Text(e.name))],
+                    onChanged: (e) => set(() => pick = e),
+                  ),
+                ]),
+              ],
+              if (wordOff) ...[
+                const SizedBox(height: 8),
+                Text(tr('pdfword.word_off_short'), style: const TextStyle(fontSize: 12, color: Color(0xFF8A8F98))),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('pdfword.not_now'))),
+          FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(tr('pdfword.edit_now'))),
+        ],
+      ),
     ),
   );
   if (!context.mounted) return;
@@ -63,17 +97,17 @@ Future<void> offerEdit(BuildContext context, AppServices s, String docx, {requir
     return;
   }
   final before = File(docx).lastModifiedSync();
-  final by = await DocEditors.open(docx);
+  final r = can.isEmpty ? (by: null, wordRefused: false) : await DocEditors.open(docx, first: pick);
+  final by = r.by;
   if (!context.mounted) return;
   if (by == null) {
-    final word = (await DocEditors.found()).any((e) => e.word);
     if (!context.mounted) return;
     await showLrDialog<void>(
       context: context,
       builder: (c) => AlertDialog(
         icon: const Icon(Icons.info_outline_rounded, size: 30),
         title: Text(tr('pdfword.none_title')),
-        content: SizedBox(width: 460, child: Text(tr(word ? 'pdfword.word_unlicensed' : 'pdfword.none_body'))),
+        content: SizedBox(width: 460, child: Text(tr(wordOff || r.wordRefused ? 'pdfword.word_unlicensed' : 'pdfword.none_body'))),
         actions: [
           TextButton(
             onPressed: () => unawaited(Process.run('explorer.exe', ['https://www.libreoffice.org/download/download/'])),
@@ -83,7 +117,11 @@ Future<void> offerEdit(BuildContext context, AppServices s, String docx, {requir
         ],
       ),
     );
+    if (context.mounted) await showToolResult(context, s, [docx]);
     return;
+  }
+  if (r.wordRefused) {
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('pdfword.word_switched', {'app': by.name}))));
   }
   unawaited(_waitAndAsk(s, pdf, docx, before, by.name));
 }

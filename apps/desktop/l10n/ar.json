@@ -2342,5 +2342,8 @@
   "pdfword.word_unlicensed": "Word على هذا الحاسوب غير مفعّل (سيُفتح للقراءة فقط) لذا لم يُستخدم. للتحرير ثبّت LibreOffice مجانًا (أو فعّل Word).",
   "pdfword.editing": "تحرير {name} في {app}",
   "pdfword.editing_note": "احفظه وأغلقه لتُسأل عن PDF",
-  "conv.engine_keepnear": "Keepnear (لتحويل PDF ← Word)"
+  "conv.engine_keepnear": "Keepnear (لتحويل PDF ← Word)",
+  "pdfword.open_with": "فتح باستخدام:",
+  "pdfword.word_off_short": "Word على هذا الحاسوب غير مفعّل (للقراءة فقط) لذلك لا يظهر.",
+  "pdfword.word_switched": "Word غير مفعّل ولا يمكنه التحرير: فُتح في {app} بدلًا منه"
 }

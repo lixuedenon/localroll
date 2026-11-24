@@ -2342,5 +2342,8 @@
   "pdfword.word_unlicensed": "이 PC의 Word는 정품 인증이 안 되어(읽기 전용으로 열림) 사용하지 않았습니다. 편집하려면 LibreOffice를 무료로 설치하거나 Word를 인증하세요.",
   "pdfword.editing": "{app}에서 {name} 편집 중",
   "pdfword.editing_note": "저장하고 닫으면 PDF로 되돌릴지 묻습니다",
-  "conv.engine_keepnear": "Keepnear (PDF → Word용)"
+  "conv.engine_keepnear": "Keepnear (PDF → Word용)",
+  "pdfword.open_with": "열 프로그램:",
+  "pdfword.word_off_short": "이 PC의 Word는 정품 인증이 안 되어(읽기 전용) 목록에 없습니다.",
+  "pdfword.word_switched": "Word가 정품 인증되지 않아 편집할 수 없어 {app}(으)로 열었습니다"
 }

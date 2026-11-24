@@ -2342,5 +2342,8 @@
   "pdfword.word_unlicensed": "Word ist auf diesem PC nicht aktiviert (es öffnet nur schreibgeschützt) und wird daher nicht verwendet. Zum Bearbeiten LibreOffice kostenlos installieren (oder Word aktivieren).",
   "pdfword.editing": "{name} wird in {app} bearbeitet",
   "pdfword.editing_note": "Speichern und schließen – dann folgt die PDF-Frage",
-  "conv.engine_keepnear": "Keepnear (für PDF → Word)"
+  "conv.engine_keepnear": "Keepnear (für PDF → Word)",
+  "pdfword.open_with": "Öffnen mit:",
+  "pdfword.word_off_short": "Word ist auf diesem PC nicht aktiviert (nur lesen) und fehlt daher.",
+  "pdfword.word_switched": "Word ist nicht aktiviert und kann nicht bearbeiten: stattdessen in {app} geöffnet"
 }

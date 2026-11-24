@@ -2342,5 +2342,8 @@
   "pdfword.word_unlicensed": "Word на этом ПК не активирован (откроется только для чтения), поэтому не используется. Для правки установите бесплатный LibreOffice (или активируйте Word).",
   "pdfword.editing": "{name} правится в {app}",
   "pdfword.editing_note": "Сохраните и закройте — предложим PDF",
-  "conv.engine_keepnear": "Keepnear (для PDF → Word)"
+  "conv.engine_keepnear": "Keepnear (для PDF → Word)",
+  "pdfword.open_with": "Открыть в:",
+  "pdfword.word_off_short": "Word на этом ПК не активирован (только чтение), поэтому его нет в списке.",
+  "pdfword.word_switched": "Word не активирован и не может править: открыто в {app}"
 }

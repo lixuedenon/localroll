@@ -42,12 +42,9 @@ class _OfficeViewPageState extends State<OfficeViewPage> {
     final path = widget.path;
     final name = widget.name;
     try {
-      final doc = await Isolate.run(() {
-        final f = File(path);
-        if (f.lengthSync() > 80 * 1024 * 1024) return null;
-        final i = name.lastIndexOf('.');
-        return OfficeDoc.read(f.readAsBytesSync(), i < 0 ? '' : name.substring(i + 1));
-      });
+      // A top-level function: a closure here would take this page (and the
+      // whole widget tree) with it to the other isolate, which can't be sent.
+      final doc = await Isolate.run(_readOffice(path, name).call);
       if (!mounted) return;
       setState(() {
         _doc = doc;
@@ -251,4 +248,20 @@ class _OfficeViewPageState extends State<OfficeViewPage> {
             ),
         ]),
       );
+}
+
+/// Reads an Office file in another isolate (only the two strings go there).
+_OfficeRead _readOffice(String path, String name) => _OfficeRead(path, name);
+
+class _OfficeRead {
+  const _OfficeRead(this.path, this.name);
+  final String path;
+  final String name;
+
+  OfficeDoc? call() {
+    final f = File(path);
+    if (f.lengthSync() > 80 * 1024 * 1024) return null;
+    final i = name.lastIndexOf('.');
+    return OfficeDoc.read(f.readAsBytesSync(), i < 0 ? '' : name.substring(i + 1));
+  }
 }

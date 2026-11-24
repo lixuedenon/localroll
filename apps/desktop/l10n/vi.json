@@ -2342,5 +2342,8 @@
   "pdfword.word_unlicensed": "Word trên máy này chưa kích hoạt (chỉ mở để xem), nên không dùng. Để sửa, cài LibreOffice miễn phí (hoặc kích hoạt Word).",
   "pdfword.editing": "Đang sửa {name} trong {app}",
   "pdfword.editing_note": "Lưu và đóng: sẽ hỏi về PDF",
-  "conv.engine_keepnear": "Keepnear (cho PDF → Word)"
+  "conv.engine_keepnear": "Keepnear (cho PDF → Word)",
+  "pdfword.open_with": "Mở bằng:",
+  "pdfword.word_off_short": "Word trên máy này chưa kích hoạt (chỉ xem), nên không có trong danh sách.",
+  "pdfword.word_switched": "Word chưa kích hoạt nên không sửa được: đã mở bằng {app}"
 }

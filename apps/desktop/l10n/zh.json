@@ -2342,5 +2342,8 @@
   "pdfword.word_unlicensed": "这台电脑的 Word 没有激活，打开后只能看、不能改，所以没有用它。要编辑 Word 文件，可以免费装 LibreOffice（或激活 Word）。",
   "pdfword.editing": "在 {app} 里编辑 {name}",
   "pdfword.editing_note": "改完保存、关掉后，会问你要不要转回 PDF",
-  "conv.engine_keepnear": "Keepnear（PDF → Word 用）"
+  "conv.engine_keepnear": "Keepnear（PDF → Word 用）",
+  "pdfword.open_with": "打开方式：",
+  "pdfword.word_off_short": "这台电脑的 Word 没有激活（只能看、不能改），所以不在列表里。",
+  "pdfword.word_switched": "Word 没有激活，不能编辑，已改用 {app} 打开"
 }
