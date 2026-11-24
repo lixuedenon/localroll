@@ -195,14 +195,77 @@ class _CleanupState extends State<_Cleanup> {
 /// The chosen files, copied into one folder (and a .zip of it) with an
 /// index: names, dates, sizes and the words found in them — easy to hand
 /// to an AI assistant. Made here; nothing is uploaded.
+/// The folder packages go in: the one chosen before, else
+/// Documents\Keepnear 给 AI (outside the library: the copies must not show
+/// up there as more photos).
+String aiPackBase(AppServices s) {
+  final chosen = s.settings.aiPackFolder;
+  if (chosen != null && chosen.isNotEmpty) return chosen;
+  final home = Platform.environment['USERPROFILE'] ?? Directory.systemTemp.path;
+  final docs = Directory('$home\\Documents').existsSync() ? '$home\\Documents' : home;
+  return '$docs\\${sanitizeFileName(tr('aipack.folder'))}';
+}
+
 Future<void> packForAi(BuildContext context, AppServices s, List<MediaItem> media, List<String> files) async {
   if (media.isEmpty && files.isEmpty) return;
-  final where = await WinDialogs.pickFolder(title: tr('aipack.where'));
-  if (where == null) return;
+  // First what it is for (with examples) and where it goes; the place can
+  // be changed (and is remembered).
+  var where = aiPackBase(s);
+  final go = await showLrDialog<bool>(
+    context: context,
+    builder: (c) => StatefulBuilder(
+      builder: (c, set) => AlertDialog(
+        icon: const Icon(Icons.smart_toy_outlined, size: 30),
+        title: Text(tr('aipack.title')),
+        content: SizedBox(
+          width: 520,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(tr('aipack.what', {'count': media.length + files.length})),
+                const SizedBox(height: 10),
+                Text(tr('aipack.makes'), style: const TextStyle(fontSize: 13, height: 1.5)),
+                const SizedBox(height: 10),
+                Text(tr('aipack.examples_title'), style: const TextStyle(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 4),
+                Text(tr('aipack.examples'), style: const TextStyle(fontSize: 13, height: 1.5)),
+                const SizedBox(height: 10),
+                Text(tr('aipack.note'), style: const TextStyle(fontSize: 12, color: Color(0xFF8A8F98))),
+                const SizedBox(height: 14),
+                Row(children: [
+                  Text(tr('aipack.where')),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(where, style: const TextStyle(fontSize: 12), overflow: TextOverflow.ellipsis)),
+                  TextButton(
+                    onPressed: () async {
+                      final p = await WinDialogs.pickFolder(title: tr('aipack.where'));
+                      if (p == null) return;
+                      set(() => where = p);
+                      s.settings.aiPackFolder = p;
+                      unawaited(s.settings.update((x) => x.aiPackFolder = p));
+                    },
+                    child: Text(tr('aipack.change')),
+                  ),
+                ]),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('common.cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(tr('aipack.go'))),
+        ],
+      ),
+    ),
+  );
+  if (go != true) return;
   final sep = Platform.pathSeparator;
   final stamp = DateTime.now();
   final name = 'Keepnear-AI-${stamp.year}${stamp.month.toString().padLeft(2, '0')}${stamp.day.toString().padLeft(2, '0')}-${stamp.hour.toString().padLeft(2, '0')}${stamp.minute.toString().padLeft(2, '0')}';
-  final dir = Directory('$where$sep$name');
+  await Directory(where).create(recursive: true);
+  final dir = Directory(LibraryIndex.uniquePath(where, name));
   await dir.create(recursive: true);
   final idx = s.server.textIndex;
   await idx.load();

@@ -214,6 +214,9 @@ class AppSettings extends ChangeNotifier {
   /// named once like the two above. Part of the library view.
   String? toolsFolder;
 
+  /// Where Package for AI puts its folders (null: Documents\Keepnear 给 AI).
+  String? aiPackFolder;
+
   /// Where the tools' results go: library / beside / both (ToolSaveTo).
   String toolSaveTo = 'library';
 
@@ -305,6 +308,7 @@ class AppSettings extends ChangeNotifier {
     s.docsFolder = j['docsFolder'] as String?;
     s.otherFolder = j['otherFolder'] as String?;
     s.toolsFolder = j['toolsFolder'] as String?;
+    s.aiPackFolder = j['aiPackFolder'] as String?;
     s.toolSaveTo = j['toolSaveTo'] as String? ?? 'library';
     s.officeEngine = j['officeEngine'] as String? ?? 'auto';
     s.convertedShown = j['convertedShown'] == true;
@@ -367,6 +371,7 @@ class AppSettings extends ChangeNotifier {
       if (docsFolder != null) 'docsFolder': docsFolder,
       if (otherFolder != null) 'otherFolder': otherFolder,
       if (toolsFolder != null) 'toolsFolder': toolsFolder,
+      if (aiPackFolder != null) 'aiPackFolder': aiPackFolder,
       'toolSaveTo': toolSaveTo,
       'officeEngine': officeEngine,
       if (convertedShown) 'convertedShown': true,
