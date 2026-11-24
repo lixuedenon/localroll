@@ -2072,19 +2072,26 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
     final room = page.width - r.left + 40;
     if (width > room && room >= 220) width = room;
     final moved = _dx != 0 || _dy != 0;
+    // One line: how it fits (squeezed, smaller) as it is typed.
+    final fit = para
+        ? _Out(_ctl.text, 0, 0, _size, 1)
+        : _layout(_Edit(l, _ctl.text.trimRight(), _size, _bold, _italic, _color, _from ?? l, dx: _dx, dy: _dy)).out.first;
     // The bar goes under the line, or over it near the page's foot; lined
     // up on the right for a line on the right half (so it stays in view).
     final up = page.height - r.bottom < 120;
     final right = r.left > page.width / 2;
     return [
-      // Moved: the old place shows blank (the words go with the box).
-      if (moved)
-        Positioned.fromRect(
-          rect: r.shift(Offset(-_dx * scale, -_dy * scale)).inflate(1),
-          child: const IgnorePointer(child: ColoredBox(color: Colors.white)),
-        ),
+      // Moved: the old place shows blank (the words go with the box). Always
+      // there (empty when not moved): the box and its tool bar after it
+      // keep their places, so typing and the bar go on after a drag.
+      Positioned.fromRect(
+        key: const ValueKey('lr-edit-blank'),
+        rect: moved ? r.shift(Offset(-_dx * scale, -_dy * scale)).inflate(1) : Rect.zero,
+        child: const IgnorePointer(child: ColoredBox(color: Colors.white)),
+      ),
       // Drag to move the line (or paragraph); the old place stays blank.
       Positioned(
+        key: const ValueKey('lr-edit-move'),
         left: r.left - 30,
         top: r.top - 4,
         child: Tooltip(
@@ -2097,6 +2104,8 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
                 _dx += d.delta.dx / scale;
                 _dy += d.delta.dy / scale;
               }),
+              // Typing goes on where it was.
+              onPanEnd: (_) => _focus.requestFocus(),
               child: Container(
                 width: 24,
                 height: 24,
@@ -2108,6 +2117,7 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
         ),
       ),
       Positioned(
+        key: const ValueKey('lr-edit-box'),
         left: r.left - 4,
         top: r.top - 5,
         width: width,
@@ -2126,14 +2136,18 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
                 const SingleActivator(LogicalKeyboardKey.enter): _done,
                 const SingleActivator(LogicalKeyboardKey.escape): _cancel,
               },
-              child: TextField(
+              child: Transform(
+                // Squeezed while typing, as it will be written.
+                alignment: Alignment.centerLeft,
+                transform: Matrix4.diagonal3Values(fit.hscale, 1, 1),
+                child: TextField(
                 controller: _ctl,
                 focusNode: _focus,
                 // A paragraph: lines wrap (Shift+Enter: a new line).
                 maxLines: para ? null : 1,
                 minLines: para ? (_paraLines!.length) : 1,
                 style: TextStyle(
-                  fontSize: _size * scale,
+                  fontSize: fit.size * scale,
                   height: 1.15,
                   fontWeight: _bold ? FontWeight.w700 : FontWeight.w400,
                   fontStyle: _italic ? FontStyle.italic : FontStyle.normal,
@@ -2145,12 +2159,14 @@ class _PdfTextEditPageState extends State<PdfTextEditPage> {
                 // The font note follows what is typed.
                 onChanged: (_) => setState(() {}),
               ),
+              ),
             ),
           ),
         ),
         ),
       ),
       Positioned(
+        key: const ValueKey('lr-edit-bar'),
         left: 0,
         top: 0,
         width: 0,

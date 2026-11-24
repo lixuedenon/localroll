@@ -104,6 +104,58 @@ class OfficeEngines {
 
   static Future<void> _line = Future.value();
 
+  /// The program working now (PowerShell driving Office / WPS, or
+  /// LibreOffice): stopped by [cancel].
+  static Process? _running;
+  static bool _stopped = false;
+
+  /// Stops the conversion running now: its process, and the Word / Excel /
+  /// PowerPoint / WPS it started in the background (only those: they have
+  /// "-Embedding" / "/Automation" in their command line).
+  static Future<void> cancel() async {
+    _stopped = true;
+    final p = _running;
+    if (p != null) {
+      try {
+        await Process.run('taskkill', ['/T', '/F', '/PID', '${p.pid}']);
+      } catch (_) {}
+    }
+    try {
+      await Process.run('powershell', [
+        '-NoProfile',
+        '-NonInteractive',
+        '-Command',
+        "Get-CimInstance Win32_Process | Where-Object { @('WINWORD.EXE','EXCEL.EXE','POWERPNT.EXE','wps.exe','et.exe','wpp.exe') -contains \$_.Name -and \$_.CommandLine -match 'Embedding|Automation' } | ForEach-Object { Stop-Process -Id \$_.ProcessId -Force }",
+      ]);
+    } catch (_) {}
+    DiagLog.log('tools', 'office conversion stopped');
+  }
+
+  /// [exe] [args] to the end (or [limit]); its error output, or why it
+  /// didn't run. The process can be stopped by [cancel].
+  static Future<String?> _exec(String exe, List<String> args, Duration limit) async {
+    try {
+      final p = await Process.start(exe, args);
+      _running = p;
+      final err = StringBuffer();
+      final a = p.stdout.drain<void>();
+      final b = p.stderr.transform(const SystemEncoding().decoder).forEach(err.write);
+      await p.exitCode.timeout(limit, onTimeout: () {
+        p.kill();
+        throw TimeoutException('timeout');
+      });
+      await Future.wait([a, b]);
+      final t = '$err'.trim();
+      return t.isEmpty ? null : (t.length > 300 ? t.substring(0, 300) : t);
+    } on TimeoutException {
+      return 'timeout';
+    } catch (e) {
+      return '$e';
+    } finally {
+      _running = null;
+    }
+  }
+
   /// [kind] ('pdf', 'wordDocx', 'wordTxt', 'excelCsv', 'excelXlsx') from
   /// [src] into [out]. Null when done, else why not.
   static Future<String?> run(String kind, String src, String out) {
@@ -119,12 +171,14 @@ class OfficeEngines {
   }
 
   static Future<String?> _run(String kind, String src, String out) async {
+    _stopped = false;
     final app = pickFrom(await installed(), kind, src);
     if (app == null) return 'no_office';
     final err = switch (app) {
       OfficeApp.libre => await _libre(kind, src, out),
       _ => await _com(app, kind, src, out),
     };
+    if (_stopped) return 'cancelled';
     if (err == null && kind == 'wordTxt') await _toUtf8(out);
     if (err != null) DiagLog.log('tools', '${app.label} $kind failed: $err');
     return err;
@@ -213,19 +267,10 @@ class OfficeEngines {
       tmp.path,
       src,
     ];
-    String? err;
-    try {
-      final r = await Process.run(exe, args).timeout(const Duration(minutes: 3));
-      final t = '${r.stderr}'.trim();
-      if (t.isNotEmpty) err = t.length > 300 ? t.substring(0, 300) : t;
-    } on TimeoutException {
-      err = 'timeout';
-    } catch (x) {
-      err = '$x';
-    }
+    final err = await _exec(exe, args, const Duration(minutes: 3));
     // soffice.exe may come back before the file is written.
     File? made;
-    for (var i = 0; i < 60 && made == null; i++) {
+    for (var i = 0; i < 60 && made == null && !_stopped; i++) {
       final files = tmp.existsSync() ? tmp.listSync().whereType<File>().toList() : <File>[];
       if (files.isNotEmpty && files.first.lengthSync() > 0) {
         made = files.first;
@@ -270,16 +315,7 @@ class OfficeEngines {
         ..add(u & 0xFF)
         ..add(u >> 8);
     }
-    try {
-      final r = await Process.run('powershell', ['-NoProfile', '-NonInteractive', '-EncodedCommand', base64.encode(units)])
-          .timeout(const Duration(minutes: 3));
-      final err = '${r.stderr}'.trim();
-      return err.isEmpty ? null : (err.length > 300 ? err.substring(0, 300) : err);
-    } on TimeoutException {
-      return 'timeout';
-    } catch (e) {
-      return '$e';
-    }
+    return _exec('powershell', ['-NoProfile', '-NonInteractive', '-EncodedCommand', base64.encode(units)], const Duration(minutes: 3));
   }
 
   /// Opens [path] in another program: Word or LibreOffice by name, or

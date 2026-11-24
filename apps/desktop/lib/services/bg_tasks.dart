@@ -41,6 +41,15 @@ class BgTask {
     BgTasks.instance._changed();
   }
 
+  /// The job can be stopped by [f]: the card shows "Cancel" now.
+  void cancellable(VoidCallback f) {
+    onCancel = f;
+    BgTasks.instance._changed();
+  }
+
+  /// "Cancel" was pressed.
+  bool get cancelled => _cancelled;
+
   void cancel() {
     if (over) return;
     _cancelled = true;

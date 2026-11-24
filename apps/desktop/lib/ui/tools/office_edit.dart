@@ -43,17 +43,31 @@ Future<void> editPdfInOffice(BuildContext context, AppServices s, String pdf) as
   final word = have.contains(OfficeApp.office);
   final app = word ? OfficeApp.office : (have.contains(OfficeApp.wps) ? OfficeApp.wps : OfficeApp.libre);
   final docx = toolOutPath(s, pdf, '', 'docx');
-  final err = await runBusy(context, tr('pdfword.making'), () async {
-    // Word's own reading of a PDF is the best; without Word, Keepnear's.
-    String? e;
-    if (word) {
-      e = await OfficeEngines.run('wordDocx', pdf, docx);
-      if (e == null) return null;
-      DiagLog.log('tools', 'pdf → docx by Word failed ($e), Keepnear makes it');
-    }
-    return PdfToDocx.make(pdf, docx);
-  });
-  if (!context.mounted) return;
+  // A background task that can be stopped (Word / Keepnear's own).
+  final err = await BgTasks.instance.run<String?>(
+    title: tr('pdfword.making'),
+    job: (t) async {
+      var stop = false;
+      t.cancellable(() {
+        stop = true;
+        unawaited(OfficeEngines.cancel());
+      });
+      // Word's own reading of a PDF is the best; without Word, Keepnear's.
+      if (word) {
+        final e = await OfficeEngines.run('wordDocx', pdf, docx);
+        if (e == null || stop) return stop ? 'cancelled' : null;
+        DiagLog.log('tools', 'pdf → docx by Word failed ($e), Keepnear makes it');
+      }
+      return PdfToDocx.make(pdf, docx, stop: () => stop);
+    },
+    ok: (e) => e == null,
+  );
+  if (!context.mounted || err == 'cancelled') {
+    try {
+      if (File(docx).existsSync()) File(docx).deleteSync();
+    } catch (_) {}
+    return;
+  }
   if (err != null || !File(docx).existsSync()) {
     ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('tool.failed', {'why': err ?? '?'}))));
     return;
@@ -100,7 +114,7 @@ Future<void> _waitAndAsk(AppServices s, String pdf, String docx, DateTime before
   final saved = await BgTasks.instance.run<bool>(
     title: tr('pdfword.waiting', {'name': name}),
     job: (t) async {
-      t.onCancel = () => stop = true;
+      t.cancellable(() => stop = true);
       var seenOpen = false;
       final until = DateTime.now().add(const Duration(hours: 12));
       while (!stop && DateTime.now().isBefore(until)) {
@@ -140,7 +154,15 @@ Future<void> _waitAndAsk(AppServices s, String pdf, String docx, DateTime before
   if (ctx2 == null || !ctx2.mounted) return;
   // A new PDF beside the old one: the original stays as it was.
   final out = toolOutPath(s, pdf, tr('pdfword.suffix'), 'pdf');
-  final err = await runBusy(ctx2, tr('pdfword.making_pdf'), () => OfficeEngines.run('pdf', docx, out));
+  final err = await BgTasks.instance.run<String?>(
+    title: tr('pdfword.making_pdf'),
+    job: (t) {
+      t.cancellable(() => unawaited(OfficeEngines.cancel()));
+      return OfficeEngines.run('pdf', docx, out);
+    },
+    ok: (e) => e == null,
+  );
+  if (err == 'cancelled') return;
   final ctx3 = AppNav.instance.navigatorKey.currentContext;
   if (ctx3 == null || !ctx3.mounted) return;
   if (err != null || !File(out).existsSync()) {

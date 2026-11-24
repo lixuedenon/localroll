@@ -28,7 +28,7 @@ class PdfToDocx {
 
   /// [pdf] → [out]; null when done, else why not. [progress]: page done of
   /// all.
-  static Future<String?> make(String pdf, String out, {void Function(int done, int total)? progress}) async {
+  static Future<String?> make(String pdf, String out, {void Function(int done, int total)? progress, bool Function()? stop}) async {
     PdfDocument? doc;
     final tmp = await Directory.systemTemp.createTemp('lr_docx');
     try {
@@ -37,6 +37,7 @@ class PdfToDocx {
       final media = <String, Uint8List>{};
       double? pageW, pageH, marginL, marginR, marginT;
       for (var i = 0; i < doc.pages.length; i++) {
+        if (stop?.call() ?? false) return 'cancelled';
         final page = doc.pages[i];
         if (i > 0) body.write('<w:p><w:r><w:br w:type="page"/></w:r></w:p>');
         final (styles, pics) = await PdfBuilder.stylesAndPictures(pdf, i);
