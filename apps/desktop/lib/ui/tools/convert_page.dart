@@ -9,16 +9,19 @@ import 'package:localroll_core/localroll_core.dart' show DiagLog;
 
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
+import '../../services/bg_tasks.dart';
 import '../../services/converter.dart';
-import '../../services/office_engines.dart';
 import '../../services/file_tools.dart';
 import '../../services/format_convert.dart';
+import '../../services/office_engines.dart';
 import '../../services/win_dialogs.dart';
+import '../app_nav.dart';
 import '../library_picker.dart';
 import '../light_look.dart';
 import '../lr_dialog.dart';
 import '../send_page.dart' show baseNameOf;
 import '../theme.dart' show lrFontFallback;
+import 'office_edit.dart';
 import 'tools.dart';
 
 /// Format conversion: pick the kind of file, turn the left wheel to what it
@@ -185,6 +188,12 @@ class _ConvertPageState extends State<ConvertPage> {
 
   /// The tag after an Office pair: "with WPS" / "needs Office…".
   Widget? _engineTag(ConvOp? op, String src) {
+    if (op is PdfToWord) {
+      final word = OfficeEngines.preferred != 'keepnear' &&
+          (OfficeApp.values.any((a) => a.name == OfficeEngines.preferred && _apps.contains(a)) || _apps.contains(OfficeApp.office));
+      final a = OfficeApp.values.where((a) => a.name == OfficeEngines.preferred && _apps.contains(a)).firstOrNull ?? OfficeApp.office;
+      return _tag(tr('conv.engine_use', {'app': word ? a.label : 'Keepnear'}), const Color(0xFFFFF0E3), const Color(0xFFC0560A));
+    }
     if (op == null || !op.office) return null;
     final a = _engine(op, src);
     return a == null
@@ -244,11 +253,24 @@ class _ConvertPageState extends State<ConvertPage> {
     if (rest.isEmpty) return;
     final outs = <String>[];
     final failed = <String>[];
-    await runBusy(context, tr('conv.working', {'count': count}), () async {
-      for (final g in rest) {
-        await _convert(g.op!, g.files, outs, failed);
-      }
-    });
+    // A background task that can be stopped (Office / LibreOffice /
+    // Keepnear's own PDF → Word).
+    var stop = false;
+    await BgTasks.instance.run<void>(
+      title: tr('conv.working', {'count': count}),
+      open: () => AppNav.instance.selectTab(AppNav.convert),
+      job: (t) async {
+        t.cancellable(() {
+          stop = true;
+          unawaited(OfficeEngines.cancel());
+        });
+        for (final g in rest) {
+          if (stop) break;
+          await _convert(g.op!, g.files, outs, failed, stop: () => stop);
+        }
+      },
+    );
+    if (stop) return;
     if (!mounted) {
       // Left meanwhile: the results still go into the library / records.
       await s.tools.saved(outs);
@@ -258,11 +280,17 @@ class _ConvertPageState extends State<ConvertPage> {
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('conv.failed', {'names': failed.join('、')}))));
       return;
     }
+    // One PDF made a Word file: "Edit it now?" → edit → "Back to PDF?".
+    final words = [for (final g in rest) if (g.op is PdfToWord) ...g.files];
+    if (outs.length == 1 && words.length == 1 && outs.first.toLowerCase().endsWith('.docx')) {
+      await offerEdit(context, s, outs.first, pdf: words.first);
+      return;
+    }
     await showToolResult(context, s, outs, note: failed.isEmpty ? null : tr('conv.some_failed', {'names': failed.join('、')}));
   }
 
   /// One group's documents (PDF, text, Office work).
-  Future<void> _convert(ConvOp op, List<String> files, List<String> outs, List<String> failed) async {
+  Future<void> _convert(ConvOp op, List<String> files, List<String> outs, List<String> failed, {bool Function()? stop}) async {
     if (op is ImagesToPdf) {
       final out = toolOutPath(s, files.first, files.length > 1 ? '-${files.length}' : '', 'pdf');
       final err = await photosToPdf(s, files, out);
@@ -274,6 +302,10 @@ class _ConvertPageState extends State<ConvertPage> {
         switch (op) {
           case PdfToImages(:final ext):
             outs.addAll(await FormatConverter.pdfImages(s, f, ext));
+          case PdfToWord():
+            final out = toolOutPath(s, f, '', 'docx');
+            final err = await pdfToWord(f, out, stop: stop);
+            err == null && File(out).existsSync() ? outs.add(out) : failed.add(baseNameOf(f));
           case PdfToText():
             final out = toolOutPath(s, f, '', 'txt');
             await FormatConverter.pdfText(s, f, out);
@@ -325,7 +357,7 @@ class _ConvertPageState extends State<ConvertPage> {
           title: Text(tr('tool.convert')),
           actions: [
             // Several office programs here: which does the Office work.
-            if (_apps.length > 1) _engineMenu(),
+            if (_apps.isNotEmpty) _engineMenu(),
             const SizedBox(width: 8),
             ToolSaveChip(services: s),
             const SizedBox(width: 12),
@@ -393,12 +425,14 @@ class _ConvertPageState extends State<ConvertPage> {
           PopupMenuItem(value: 'auto', child: Text(tr('conv.engine_auto'))),
           for (final a in OfficeApp.values)
             if (_apps.contains(a)) PopupMenuItem(value: a.name, child: Text(a.label)),
+          // PDF → Word: Keepnear's own converter.
+          PopupMenuItem(value: 'keepnear', child: Text(tr('conv.engine_keepnear'))),
         ],
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
           decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: const Color(0xFFB9C8EA))),
           child: Text(
-            '${tr('conv.engine_pick')}：${OfficeApp.values.where((a) => a.name == OfficeEngines.preferred).firstOrNull?.label ?? tr('conv.engine_auto')} ▾',
+            '${tr('conv.engine_pick')}：${OfficeEngines.preferred == 'keepnear' ? 'Keepnear' : (OfficeApp.values.where((a) => a.name == OfficeEngines.preferred).firstOrNull?.label ?? tr('conv.engine_auto'))} ▾',
             style: const TextStyle(fontSize: 13, color: LightLook.text),
           ),
         ),

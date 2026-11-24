@@ -41,6 +41,17 @@ class BgTask {
     BgTasks.instance._changed();
   }
 
+  /// Waiting for the person (editing in another program), not working:
+  /// no moving bar, [note] in its place.
+  bool still = false;
+  String? note;
+
+  void waitForUser(String text) {
+    still = true;
+    note = text;
+    BgTasks.instance._changed();
+  }
+
   /// The job can be stopped by [f]: the card shows "Cancel" now.
   void cancellable(VoidCallback f) {
     onCancel = f;

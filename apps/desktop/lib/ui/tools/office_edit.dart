@@ -16,20 +16,64 @@ import '../app_nav.dart';
 import '../lr_dialog.dart';
 import 'tools.dart';
 
-/// "Edit in Word / WPS / LibreOffice": the PDF made into a Word file (by
-/// Word itself when there is Word, else by Keepnear), opened in that
-/// program; once it is saved and closed, "Back to PDF?". Waiting is a
-/// background task: the app stays usable.
-Future<void> editPdfInOffice(BuildContext context, AppServices s, String pdf) async {
+/// PDF → Word for editing: Word (activated or not, as long as it can) or
+/// the one chosen in the format converter; when that can't, Keepnear's own.
+/// [stop]: cancelled. Null when done, else why not.
+Future<String?> pdfToWord(String pdf, String out, {bool Function()? stop}) async {
+  final pick = OfficeEngines.preferred;
   final have = await OfficeEngines.installed();
+  final app = pick == 'keepnear'
+      ? null
+      : (OfficeApp.values.where((a) => a.name == pick && have.contains(a)).firstOrNull ?? (have.contains(OfficeApp.office) ? OfficeApp.office : null));
+  if (app != null) {
+    final e = await OfficeEngines.runOnly(app, 'wordDocx', pdf, out);
+    if (stop?.call() ?? false) return 'cancelled';
+    if (e == null) {
+      DiagLog.log('tools', 'pdf → docx by ${app.label}');
+      return null;
+    }
+    DiagLog.log('tools', 'pdf → docx by ${app.label} failed ($e): Keepnear makes it');
+  }
+  final e = await PdfToDocx.make(pdf, out, stop: stop);
+  if (e == null) DiagLog.log('tools', 'pdf → docx by Keepnear');
+  return e;
+}
+
+/// After PDF → Word: "Edit it now?" → opened in the first program that can
+/// edit (activated Word → WPS → ONLYOFFICE → LibreOffice → …) → once it is
+/// saved and closed, "Back to PDF?". Waiting is a still card (no moving
+/// bar), and it ends by itself if the file never shows up in a window.
+Future<void> offerEdit(BuildContext context, AppServices s, String docx, {required String pdf}) async {
+  final name = docx.split(Platform.pathSeparator).last;
+  final edit = await showLrDialog<bool>(
+    context: context,
+    builder: (c) => AlertDialog(
+      icon: const Icon(Icons.description_outlined, size: 30),
+      title: Text(tr('pdfword.edit_title')),
+      content: SizedBox(width: 440, child: Text(tr('pdfword.edit_body', {'name': name}))),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('pdfword.not_now'))),
+        FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(tr('pdfword.edit_now'))),
+      ],
+    ),
+  );
   if (!context.mounted) return;
-  if (have.isEmpty) {
+  if (edit != true) {
+    await showToolResult(context, s, [docx]);
+    return;
+  }
+  final before = File(docx).lastModifiedSync();
+  final by = await DocEditors.open(docx);
+  if (!context.mounted) return;
+  if (by == null) {
+    final word = (await DocEditors.found()).any((e) => e.word);
+    if (!context.mounted) return;
     await showLrDialog<void>(
       context: context,
       builder: (c) => AlertDialog(
         icon: const Icon(Icons.info_outline_rounded, size: 30),
         title: Text(tr('pdfword.none_title')),
-        content: SizedBox(width: 460, child: Text(tr('pdfword.none_body'))),
+        content: SizedBox(width: 460, child: Text(tr(word ? 'pdfword.word_unlicensed' : 'pdfword.none_body'))),
         actions: [
           TextButton(
             onPressed: () => unawaited(Process.run('explorer.exe', ['https://www.libreoffice.org/download/download/'])),
@@ -41,87 +85,47 @@ Future<void> editPdfInOffice(BuildContext context, AppServices s, String pdf) as
     );
     return;
   }
-  final word = have.contains(OfficeApp.office);
-  final docx = toolOutPath(s, pdf, '', 'docx');
-  // A background task that can be stopped (Word / Keepnear's own).
-  final err = await BgTasks.instance.run<String?>(
-    title: tr('pdfword.making'),
-    job: (t) async {
-      var stop = false;
-      t.cancellable(() {
-        stop = true;
-        unawaited(OfficeEngines.cancel());
-      });
-      // Word's own reading of a PDF is the best; without Word, Keepnear's.
-      if (word) {
-        final e = await OfficeEngines.run('wordDocx', pdf, docx);
-        if (e == null || stop) return stop ? 'cancelled' : null;
-        DiagLog.log('tools', 'pdf → docx by Word failed ($e), Keepnear makes it');
-      }
-      return PdfToDocx.make(pdf, docx, stop: () => stop);
-    },
-    ok: (e) => e == null,
-  );
-  if (!context.mounted || err == 'cancelled') {
-    try {
-      if (File(docx).existsSync()) File(docx).deleteSync();
-    } catch (_) {}
-    return;
-  }
-  if (err != null || !File(docx).existsSync()) {
-    ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('tool.failed', {'why': err ?? '?'}))));
-    return;
-  }
-  await s.tools.saved([docx]);
-  final before = File(docx).lastModifiedSync();
-  // Word (if activated) → WPS → ONLYOFFICE → LibreOffice → …: the first
-  // that can edit, nothing asked.
-  final by = await DocEditors.open(docx);
-  DiagLog.log('tools', 'pdf → docx (${word ? 'Word' : 'Keepnear'}), editing in ${by ?? 'nothing'}');
-  if (by == null) {
-    try {
-      await Process.start('cmd', ['/c', 'start', '', docx], mode: ProcessStartMode.detached);
-    } catch (_) {}
-  }
-  unawaited(_waitAndAsk(s, pdf, docx, before));
+  unawaited(_waitAndAsk(s, pdf, docx, before, by.name));
 }
 
-/// Open in a program, by the lock file it leaves beside it (Word / WPS:
-/// "~\$…", LibreOffice / OpenOffice: ".~lock.<name>#"). The file itself is
-/// not touched (that could make the program open it read-only).
-bool _inUse(String path) {
+/// Open somewhere: a lock file beside it (Word / WPS "~$…", LibreOffice /
+/// OpenOffice ".~lock.<name>#"), or a window with its name in the title.
+/// The file itself is not touched (that could make it open read-only).
+Future<bool> _openNow(String path) async {
   final dir = File(path).parent.path;
   final name = path.split(Platform.pathSeparator).last;
   final sep = Platform.pathSeparator;
   if (File('$dir$sep.~lock.$name#').existsSync()) return true;
   if (name.length > 2 && File('$dir$sep~\$${name.substring(2)}').existsSync()) return true;
   if (File('$dir$sep~\$$name').existsSync()) return true;
-  return false;
+  final stem = (name.contains('.') ? name.substring(0, name.lastIndexOf('.')) : name).toLowerCase();
+  return (await DocEditors.titles()).split('\n').any((t) => t.contains(stem));
 }
 
-Future<void> _waitAndAsk(AppServices s, String pdf, String docx, DateTime before) async {
+Future<void> _waitAndAsk(AppServices s, String pdf, String docx, DateTime before, String by) async {
   final name = docx.split(Platform.pathSeparator).last;
-  var stop = false;
   final saved = await BgTasks.instance.run<bool>(
-    title: tr('pdfword.waiting', {'name': name}),
+    title: tr('pdfword.editing', {'name': name, 'app': by}),
     job: (t) async {
+      var stop = false;
       t.cancellable(() => stop = true);
-      var seenOpen = false;
-      final until = DateTime.now().add(const Duration(hours: 12));
-      while (!stop && DateTime.now().isBefore(until)) {
-        await Future<void>.delayed(const Duration(seconds: 2));
+      t.waitForUser(tr('pdfword.editing_note'));
+      var seen = false;
+      final start = DateTime.now();
+      while (!stop) {
+        await Future<void>.delayed(const Duration(seconds: 3));
         if (!File(docx).existsSync()) return false;
-        final open = _inUse(docx);
-        if (open) {
-          seenOpen = true;
+        if (await _openNow(docx)) {
+          seen = true;
           continue;
         }
-        final changed = File(docx).lastModifiedSync().isAfter(before);
-        // Saved and closed: done. Closed without saving: nothing to do.
-        // A program that leaves no lock file: saved and quiet for a while.
-        if (changed && seenOpen) return true;
-        if (changed && DateTime.now().difference(File(docx).lastModifiedSync()) > const Duration(seconds: 20)) return true;
-        if (seenOpen && !changed) return false;
+        // Never seen open: the program didn't take it.
+        if (!seen && DateTime.now().difference(start) > const Duration(minutes: 2)) {
+          DiagLog.log('tools', '$by never showed $name: no more waiting');
+          return false;
+        }
+        // Closed: saved (changed) or not.
+        if (seen) return File(docx).lastModifiedSync().isAfter(before);
       }
       return false;
     },
@@ -143,8 +147,6 @@ Future<void> _waitAndAsk(AppServices s, String pdf, String docx, DateTime before
     ),
   );
   if (back != true) return;
-  final ctx2 = AppNav.instance.navigatorKey.currentContext;
-  if (ctx2 == null || !ctx2.mounted) return;
   // A new PDF beside the old one: the original stays as it was.
   final out = toolOutPath(s, pdf, tr('pdfword.suffix'), 'pdf');
   final err = await BgTasks.instance.run<String?>(

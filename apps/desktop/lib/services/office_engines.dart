@@ -170,6 +170,21 @@ class OfficeEngines {
     return done.future;
   }
 
+  /// [kind] with [app] only (no next one). Null when done.
+  static Future<String?> runOnly(OfficeApp app, String kind, String src, String out) {
+    final done = Completer<String?>();
+    _line = _line.then((_) async {
+      _stopped = false;
+      try {
+        final err = app == OfficeApp.libre ? await _libre(kind, src, out) : await _com(app, kind, src, out);
+        done.complete(_stopped ? 'cancelled' : err);
+      } catch (e) {
+        done.complete('$e');
+      }
+    });
+    return done.future;
+  }
+
   /// In order (the chosen one first, then Office, WPS, LibreOffice): the
   /// next is tried when one fails.
   static Future<String?> _run(String kind, String src, String out) async {

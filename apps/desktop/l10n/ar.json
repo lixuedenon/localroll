@@ -2322,14 +2322,9 @@
   "pdfedit.para_too_long": "الفقرة لا تتسع في منطقتها (الحروف بالفعل 85%) وتنزل بضعة أسطر: اختصرها أو حرّرها كملف Word",
   "pdfedit.squeezed": "ضُغط إلى {pct}% كي لا يتداخل مع النص المجاور",
   "files.open_verb": "فتح باستخدام {app}",
-  "pdfword.edit": "تحرير في Word / WPS / LibreOffice",
-  "pdfword.edit_tip": "للتعديلات الكبيرة: يتحول ملف PDF كله إلى ملف Word لتحريره في Word أو WPS أو LibreOffice، وبعد الحفظ والإغلاق يمكن إرجاعه PDF. يتغير التخطيط قليلًا؛ لبضع كلمات المحرر أعلاه أفضل.",
-  "pdfword.save_first": "احفظ التغييرات هنا أولًا ثم حوّله إلى Word",
-  "pdfword.making": "جارٍ إنشاء ملف Word…",
   "pdfword.none_title": "لم يُعثر على Word أو WPS أو LibreOffice",
   "pdfword.none_body": "لتحرير PDF كملف Word يحتاج هذا الحاسوب أحدها؛ LibreOffice مجاني. لبضع كلمات أو نقل سطر أو إعادة كتابة فقرة يكفي محرر Keepnear.",
   "pdfword.get_libre": "تنزيل LibreOffice (مجاني)",
-  "pdfword.waiting": "بانتظار انتهاء تحرير {name} (احفظه وأغلقه ليُسأل عن PDF)",
   "pdfword.back_title": "إرجاعه إلى PDF؟",
   "pdfword.back_body": "تم حفظ {name} وإغلاقه. هل تنشئ منه ملف PDF جديدًا (يبقى الأصلي كما هو)؟",
   "pdfword.back": "إنشاء PDF",
@@ -2340,5 +2335,12 @@
   "pdfedit.form": "تعبئة",
   "files.old_need_office": "هذا تنسيق Office / WPS قديم. يعرضه Keepnear بعد أن يحوّله Word أو WPS أو LibreOffice على هذا الحاسوب إلى PDF، ولم يُعثر على أي منها. LibreOffice مجاني.",
   "files.old_opening": "جارٍ فتح {name}…",
-  "pdfedit.form_hint": "انقر خانة النموذج للكتابة، وانقر مربع الاختيار لتحديده. إذا عُبّئ النموذج فقط يبقى ملف PDF المحفوظ نموذجًا."
+  "pdfedit.form_hint": "انقر خانة النموذج للكتابة، وانقر مربع الاختيار لتحديده. إذا عُبّئ النموذج فقط يبقى ملف PDF المحفوظ نموذجًا.",
+  "pdfword.edit_title": "تم إنشاء ملف Word",
+  "pdfword.edit_body": "{name} جاهز. هل تحرره الآن؟ بعد الحفظ والإغلاق ستُسأل عن إرجاعه إلى PDF.",
+  "pdfword.edit_now": "تحرير",
+  "pdfword.word_unlicensed": "Word على هذا الحاسوب غير مفعّل (سيُفتح للقراءة فقط) لذا لم يُستخدم. للتحرير ثبّت LibreOffice مجانًا (أو فعّل Word).",
+  "pdfword.editing": "تحرير {name} في {app}",
+  "pdfword.editing_note": "احفظه وأغلقه لتُسأل عن PDF",
+  "conv.engine_keepnear": "Keepnear (لتحويل PDF ← Word)"
 }

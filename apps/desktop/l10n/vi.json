@@ -2322,14 +2322,9 @@
   "pdfedit.para_too_long": "Đoạn không vừa vùng cũ (chữ đã còn 85%) và tràn xuống vài dòng: rút gọn, hoặc sửa bằng Word",
   "pdfedit.squeezed": "Đã tự ép còn {pct}% để không đè lên chữ bên cạnh",
   "files.open_verb": "Mở bằng {app}",
-  "pdfword.edit": "Sửa bằng Word / WPS / LibreOffice",
-  "pdfword.edit_tip": "Khi sửa nhiều: cả PDF thành tệp Word để sửa bằng Word, WPS hoặc LibreOffice; lưu và đóng xong có thể chuyển lại PDF. Bố cục sẽ thay đổi chút ít; sửa vài chữ thì dùng trình sửa ở trên tốt hơn.",
-  "pdfword.save_first": "Lưu các thay đổi ở đây trước, rồi chuyển sang Word",
-  "pdfword.making": "Đang tạo tệp Word…",
   "pdfword.none_title": "Không tìm thấy Word, WPS hay LibreOffice",
   "pdfword.none_body": "Để sửa PDF như tệp Word, máy cần một trong các chương trình này; LibreOffice miễn phí. Sửa vài chữ, dời dòng hay viết lại một đoạn thì trình sửa của Keepnear là đủ.",
   "pdfword.get_libre": "Tải LibreOffice (miễn phí)",
-  "pdfword.waiting": "Đang chờ bạn sửa {name} (lưu và đóng sẽ hỏi chuyển lại PDF)",
   "pdfword.back_title": "Chuyển lại PDF?",
   "pdfword.back_body": "{name} đã lưu và đóng. Tạo thành PDF mới (PDF gốc giữ nguyên)?",
   "pdfword.back": "Tạo PDF",
@@ -2340,5 +2335,12 @@
   "pdfedit.form": "Điền biểu mẫu",
   "files.old_need_office": "Đây là định dạng Office / WPS cũ. Keepnear hiển thị sau khi Word, WPS hoặc LibreOffice trên máy chuyển nó sang PDF, nhưng không tìm thấy chương trình nào. LibreOffice miễn phí.",
   "files.old_opening": "Đang mở {name}…",
-  "pdfedit.form_hint": "Bấm vào ô của biểu mẫu để gõ, bấm ô đánh dấu để tích. Nếu chỉ điền biểu mẫu, PDF lưu xong vẫn là biểu mẫu."
+  "pdfedit.form_hint": "Bấm vào ô của biểu mẫu để gõ, bấm ô đánh dấu để tích. Nếu chỉ điền biểu mẫu, PDF lưu xong vẫn là biểu mẫu.",
+  "pdfword.edit_title": "Đã tạo tệp Word",
+  "pdfword.edit_body": "{name} đã xong. Sửa ngay không? Lưu và đóng xong sẽ hỏi có chuyển lại PDF không.",
+  "pdfword.edit_now": "Sửa",
+  "pdfword.word_unlicensed": "Word trên máy này chưa kích hoạt (chỉ mở để xem), nên không dùng. Để sửa, cài LibreOffice miễn phí (hoặc kích hoạt Word).",
+  "pdfword.editing": "Đang sửa {name} trong {app}",
+  "pdfword.editing_note": "Lưu và đóng: sẽ hỏi về PDF",
+  "conv.engine_keepnear": "Keepnear (cho PDF → Word)"
 }

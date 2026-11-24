@@ -2322,14 +2322,9 @@
   "pdfedit.para_too_long": "Paragraf tidak muat di area lamanya (huruf sudah 85%) dan turun beberapa baris: persingkat, atau edit sebagai Word",
   "pdfedit.squeezed": "Dipadatkan ke {pct}% agar tidak menimpa teks di sebelahnya",
   "files.open_verb": "Buka dengan {app}",
-  "pdfword.edit": "Edit di Word / WPS / LibreOffice",
-  "pdfword.edit_tip": "Untuk perubahan besar: seluruh PDF menjadi file Word untuk diedit di Word, WPS, atau LibreOffice; setelah disimpan dan ditutup bisa kembali ke PDF. Tata letak sedikit berubah; untuk beberapa kata, editor di atas lebih baik.",
-  "pdfword.save_first": "Simpan dulu perubahan di sini, lalu jadikan Word",
-  "pdfword.making": "Membuat file Word…",
   "pdfword.none_title": "Word, WPS, atau LibreOffice tidak ditemukan",
   "pdfword.none_body": "Untuk mengedit PDF sebagai Word, PC ini perlu salah satunya; LibreOffice gratis. Untuk beberapa kata, memindah baris, atau menulis ulang paragraf, editor Keepnear sudah cukup.",
   "pdfword.get_libre": "Unduh LibreOffice (gratis)",
-  "pdfword.waiting": "Menunggu Anda mengedit {name} (simpan dan tutup untuk ditanya soal PDF)",
   "pdfword.back_title": "Kembali ke PDF?",
   "pdfword.back_body": "{name} sudah disimpan dan ditutup. Jadikan PDF baru (PDF asli tetap)?",
   "pdfword.back": "Buat PDF",
@@ -2340,5 +2335,12 @@
   "pdfedit.form": "Isi formulir",
   "files.old_need_office": "Ini format Office / WPS lama. Keepnear menampilkannya setelah Word, WPS, atau LibreOffice di PC ini mengubahnya ke PDF, dan tidak ada yang ditemukan. LibreOffice gratis.",
   "files.old_opening": "Membuka {name}…",
-  "pdfedit.form_hint": "Klik kotak formulir untuk mengetik, klik kotak centang untuk mencentang. Jika hanya formulir yang diisi, PDF yang disimpan tetap formulir."
+  "pdfedit.form_hint": "Klik kotak formulir untuk mengetik, klik kotak centang untuk mencentang. Jika hanya formulir yang diisi, PDF yang disimpan tetap formulir.",
+  "pdfword.edit_title": "File Word dibuat",
+  "pdfword.edit_body": "{name} sudah siap. Edit sekarang? Setelah disimpan dan ditutup, Anda akan ditanya apakah dijadikan PDF lagi.",
+  "pdfword.edit_now": "Edit",
+  "pdfword.word_unlicensed": "Word di PC ini belum diaktifkan (akan terbuka hanya-baca), jadi tidak dipakai. Untuk mengedit, pasang LibreOffice gratis (atau aktifkan Word).",
+  "pdfword.editing": "Mengedit {name} di {app}",
+  "pdfword.editing_note": "Simpan dan tutup: Anda akan ditanya soal PDF",
+  "conv.engine_keepnear": "Keepnear (untuk PDF → Word)"
 }

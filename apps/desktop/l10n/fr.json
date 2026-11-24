@@ -2322,14 +2322,9 @@
   "pdfedit.para_too_long": "Le paragraphe ne tient pas dans sa zone (lettres déjà à 85 %) et descend de quelques lignes : raccourcissez-le, ou modifiez-le en Word",
   "pdfedit.squeezed": "Resserré à {pct} % pour ne pas chevaucher le texte voisin",
   "files.open_verb": "Ouvrir avec {app}",
-  "pdfword.edit": "Modifier dans Word / WPS / LibreOffice",
-  "pdfword.edit_tip": "Pour de grosses modifications : tout le PDF devient un fichier Word à modifier dans Word, WPS ou LibreOffice ; enregistré et fermé, il peut redevenir PDF. La mise en page change un peu ; pour quelques mots, l’éditeur ci-dessus convient mieux.",
-  "pdfword.save_first": "Enregistrez d’abord les modifications ici, puis passez en Word",
-  "pdfword.making": "Création du fichier Word…",
   "pdfword.none_title": "Ni Word, ni WPS, ni LibreOffice trouvé",
   "pdfword.none_body": "Pour modifier un PDF comme un fichier Word, ce PC a besoin de l’un d’eux ; LibreOffice est gratuit. Pour quelques mots, déplacer une ligne ou réécrire un paragraphe, l’éditeur de Keepnear suffit.",
   "pdfword.get_libre": "Obtenir LibreOffice (gratuit)",
-  "pdfword.waiting": "En attente de la modification de {name} (enregistrez et fermez pour repasser en PDF)",
   "pdfword.back_title": "Repasser en PDF ?",
   "pdfword.back_body": "{name} a été enregistré et fermé. En faire un nouveau PDF (l’original reste tel quel) ?",
   "pdfword.back": "Créer le PDF",
@@ -2340,5 +2335,12 @@
   "pdfedit.form": "Remplir",
   "files.old_need_office": "Ancien format Office / WPS. Keepnear l’affiche après conversion en PDF par Word, WPS ou LibreOffice sur ce PC, mais aucun n’a été trouvé. LibreOffice est gratuit.",
   "files.old_opening": "Ouverture de {name}…",
-  "pdfedit.form_hint": "Cliquez sur un champ pour écrire, sur une case pour la cocher. Si seul le formulaire a été rempli, le PDF enregistré reste un formulaire."
+  "pdfedit.form_hint": "Cliquez sur un champ pour écrire, sur une case pour la cocher. Si seul le formulaire a été rempli, le PDF enregistré reste un formulaire.",
+  "pdfword.edit_title": "Fichier Word créé",
+  "pdfword.edit_body": "{name} est prêt. Le modifier maintenant ? Une fois enregistré et fermé, on vous proposera de refaire un PDF.",
+  "pdfword.edit_now": "Modifier",
+  "pdfword.word_unlicensed": "Word n’est pas activé sur ce PC (il ouvrirait en lecture seule), il n’est donc pas utilisé. Pour modifier, installez LibreOffice gratuitement (ou activez Word).",
+  "pdfword.editing": "Modification de {name} dans {app}",
+  "pdfword.editing_note": "Enregistrez et fermez : on vous proposera le PDF",
+  "conv.engine_keepnear": "Keepnear (pour PDF → Word)"
 }

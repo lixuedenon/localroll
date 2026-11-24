@@ -79,7 +79,7 @@ class _TaskFloatState extends State<TaskFloat> {
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: LightLook.text)),
         const SizedBox(height: 16),
-        Padding(
+        if (!t.still) Padding(
           padding: const EdgeInsets.only(right: 8),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(5),
@@ -92,7 +92,7 @@ class _TaskFloatState extends State<TaskFloat> {
           ),
         ),
         const SizedBox(height: 8),
-        Text(queued ? tr('task.queued') : (p > 0 ? '${(p * 100).round()}%' : tr('task.working')),
+        Text(t.still ? (t.note ?? '') : (queued ? tr('task.queued') : (p > 0 ? '${(p * 100).round()}%' : tr('task.working'))),
             style: const TextStyle(color: LightLook.muted, fontSize: 13)),
         const SizedBox(height: 10),
         Row(children: [

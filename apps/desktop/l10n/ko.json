@@ -2322,14 +2322,9 @@
   "pdfedit.para_too_long": "단락이 원래 영역에 들어가지 않습니다(글자 85%로 축소됨). 아래로 몇 줄 넘칩니다: 줄이거나 Word로 편집하세요",
   "pdfedit.squeezed": "옆 글자와 겹치지 않도록 {pct}%로 줄였습니다",
   "files.open_verb": "{app}(으)로 열기",
-  "pdfword.edit": "Word / WPS / LibreOffice에서 편집",
-  "pdfword.edit_tip": "크게 고칠 때: PDF 전체를 Word 파일로 바꿔 Word·WPS·LibreOffice에서 편집하고, 저장 후 닫으면 PDF로 되돌릴 수 있습니다. 레이아웃은 조금 달라집니다. 몇 글자만 고칠 땐 위 편집이 낫습니다.",
-  "pdfword.save_first": "여기서 한 변경을 먼저 저장한 뒤 Word로 바꾸세요",
-  "pdfword.making": "Word 파일로 바꾸는 중…",
   "pdfword.none_title": "Word, WPS, LibreOffice를 찾지 못했습니다",
   "pdfword.none_body": "PDF를 Word 파일로 편집하려면 이 PC에 그중 하나가 필요합니다. LibreOffice는 무료입니다. 몇 글자 수정, 이동, 단락 수정은 Keepnear 편집으로 충분합니다.",
   "pdfword.get_libre": "LibreOffice 받기(무료)",
-  "pdfword.waiting": "{name} 편집을 기다리는 중 (저장하고 닫으면 PDF로 되돌릴지 묻습니다)",
   "pdfword.back_title": "PDF로 되돌릴까요?",
   "pdfword.back_body": "{name} 편집이 저장되고 닫혔습니다. 새 PDF로 만들까요(원래 PDF는 그대로)?",
   "pdfword.back": "PDF로 만들기",
@@ -2340,5 +2335,12 @@
   "pdfedit.form": "양식 작성",
   "files.old_need_office": "예전 Office / WPS 형식입니다. 이 PC의 Word, WPS, LibreOffice로 PDF를 만든 뒤 보여 주는데 하나도 찾지 못했습니다. LibreOffice는 무료입니다.",
   "files.old_opening": "{name} 여는 중…",
-  "pdfedit.form_hint": "양식 칸을 클릭해 입력하고, 체크 칸은 클릭하면 표시됩니다. 양식만 작성했으면 저장 후에도 양식 그대로라 계속 작성할 수 있습니다."
+  "pdfedit.form_hint": "양식 칸을 클릭해 입력하고, 체크 칸은 클릭하면 표시됩니다. 양식만 작성했으면 저장 후에도 양식 그대로라 계속 작성할 수 있습니다.",
+  "pdfword.edit_title": "Word 파일로 바꿨습니다",
+  "pdfword.edit_body": "{name} 준비됐습니다. 지금 편집할까요? 저장하고 닫으면 PDF로 되돌릴지 묻습니다.",
+  "pdfword.edit_now": "편집",
+  "pdfword.word_unlicensed": "이 PC의 Word는 정품 인증이 안 되어(읽기 전용으로 열림) 사용하지 않았습니다. 편집하려면 LibreOffice를 무료로 설치하거나 Word를 인증하세요.",
+  "pdfword.editing": "{app}에서 {name} 편집 중",
+  "pdfword.editing_note": "저장하고 닫으면 PDF로 되돌릴지 묻습니다",
+  "conv.engine_keepnear": "Keepnear (PDF → Word용)"
 }

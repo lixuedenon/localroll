@@ -217,7 +217,7 @@ class _TransferFloatState extends State<TransferFloat> {
   Widget _taskLine(BgTask t) {
     final status = switch (t.state) {
       BgState.queued => tr('task.queued'),
-      BgState.running => t.progress > 0 ? '${(t.progress * 100).round()}%' : tr('task.working'),
+      BgState.running => t.still ? (t.note ?? '') : (t.progress > 0 ? '${(t.progress * 100).round()}%' : tr('task.working')),
       BgState.done => tr('task.done'),
       BgState.failed => tr('task.failed'),
       BgState.cancelled => tr('task.cancelled'),
@@ -250,7 +250,7 @@ class _TransferFloatState extends State<TransferFloat> {
               child: const Padding(padding: EdgeInsets.all(3), child: Icon(Icons.close_rounded, size: 15, color: LightLook.muted)),
             ),
         ]),
-        if (!t.over) ...[
+        if (!t.over && !t.still) ...[
           const SizedBox(height: 6),
           ClipRRect(
             borderRadius: BorderRadius.circular(5),

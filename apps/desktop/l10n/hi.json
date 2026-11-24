@@ -2322,14 +2322,9 @@
   "pdfedit.para_too_long": "अनुच्छेद पुरानी जगह में नहीं समाता (अक्षर पहले ही 85%), कुछ पंक्तियाँ नीचे जाता है: छोटा करें या Word में बदलें",
   "pdfedit.squeezed": "{pct}% तक दबाया गया, ताकि बगल के अक्षरों से न टकराए",
   "files.open_verb": "{app} से खोलें",
-  "pdfword.edit": "Word / WPS / LibreOffice में संपादित करें",
-  "pdfword.edit_tip": "बड़े बदलावों के लिए: पूरी PDF Word फ़ाइल बनती है, जिसे Word, WPS या LibreOffice में बदलें; सहेजकर बंद करने पर वापस PDF बन सकती है। लेआउट थोड़ा बदलता है; कुछ शब्दों के लिए ऊपर का संपादक बेहतर है।",
-  "pdfword.save_first": "पहले यहाँ के बदलाव सहेजें, फिर Word बनाएँ",
-  "pdfword.making": "Word फ़ाइल बन रही है…",
   "pdfword.none_title": "Word, WPS या LibreOffice नहीं मिला",
   "pdfword.none_body": "PDF को Word की तरह बदलने के लिए इस PC पर इनमें से एक चाहिए; LibreOffice मुफ़्त है। कुछ शब्द, पंक्ति खिसकाना या अनुच्छेद बदलना Keepnear के संपादक से हो जाता है।",
   "pdfword.get_libre": "LibreOffice पाएँ (मुफ़्त)",
-  "pdfword.waiting": "{name} के संपादन की प्रतीक्षा (सहेजकर बंद करें, फिर PDF के बारे में पूछेंगे)",
   "pdfword.back_title": "वापस PDF बनाएँ?",
   "pdfword.back_body": "{name} सहेजकर बंद हो गई। नई PDF बनाएँ (मूल PDF वैसी ही रहेगी)?",
   "pdfword.back": "PDF बनाएँ",
@@ -2340,5 +2335,12 @@
   "pdfedit.form": "भरें",
   "files.old_need_office": "यह पुराना Office / WPS प्रारूप है। Keepnear इसे इस PC के Word, WPS या LibreOffice से PDF बनवाकर दिखाता है, पर इनमें से कोई नहीं मिला। LibreOffice मुफ़्त है।",
   "files.old_opening": "{name} खुल रही है…",
-  "pdfedit.form_hint": "फ़ॉर्म के खाने पर क्लिक कर लिखें, चेकबॉक्स पर क्लिक कर टिक करें। केवल फ़ॉर्म भरा हो तो सहेजी गई PDF फ़ॉर्म ही रहती है।"
+  "pdfedit.form_hint": "फ़ॉर्म के खाने पर क्लिक कर लिखें, चेकबॉक्स पर क्लिक कर टिक करें। केवल फ़ॉर्म भरा हो तो सहेजी गई PDF फ़ॉर्म ही रहती है।",
+  "pdfword.edit_title": "Word फ़ाइल बन गई",
+  "pdfword.edit_body": "{name} तैयार है। अभी संपादित करें? सहेजकर बंद करने पर पूछा जाएगा कि वापस PDF बनाएँ या नहीं।",
+  "pdfword.edit_now": "संपादित करें",
+  "pdfword.word_unlicensed": "इस PC पर Word सक्रिय नहीं है (केवल पढ़ने के लिए खुलेगा), इसलिए इस्तेमाल नहीं हुआ। संपादन के लिए LibreOffice मुफ़्त इंस्टॉल करें (या Word सक्रिय करें)।",
+  "pdfword.editing": "{app} में {name} का संपादन",
+  "pdfword.editing_note": "सहेजकर बंद करें, फिर PDF के बारे में पूछा जाएगा",
+  "conv.engine_keepnear": "Keepnear (PDF → Word के लिए)"
 }

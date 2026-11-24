@@ -2322,14 +2322,9 @@
   "pdfedit.para_too_long": "Абзац не помещается в прежней области (шрифт уже 85 %) и уходит на несколько строк ниже: сократите или правьте в Word",
   "pdfedit.squeezed": "Сжато до {pct} %, чтобы не налезать на соседний текст",
   "files.open_verb": "Открыть в {app}",
-  "pdfword.edit": "Править в Word / WPS / LibreOffice",
-  "pdfword.edit_tip": "Для больших правок: весь PDF превращается в файл Word для Word, WPS или LibreOffice; после сохранения и закрытия его можно вернуть в PDF. Вёрстка немного изменится; для пары слов лучше редактор выше.",
-  "pdfword.save_first": "Сначала сохраните изменения здесь, затем делайте файл Word",
-  "pdfword.making": "Создание файла Word…",
   "pdfword.none_title": "Word, WPS или LibreOffice не найдены",
   "pdfword.none_body": "Чтобы править PDF как файл Word, на этом ПК нужна одна из программ; LibreOffice бесплатен. Для пары слов, переноса строки или абзаца хватит редактора Keepnear.",
   "pdfword.get_libre": "Скачать LibreOffice (бесплатно)",
-  "pdfword.waiting": "Ждём, пока вы правите {name} (сохраните и закройте — предложим PDF)",
   "pdfword.back_title": "Вернуть в PDF?",
   "pdfword.back_body": "{name} сохранён и закрыт. Сделать новый PDF (исходный не изменится)?",
   "pdfword.back": "Сделать PDF",
@@ -2340,5 +2335,12 @@
   "pdfedit.form": "Заполнить",
   "files.old_need_office": "Это старый формат Office / WPS. Keepnear показывает его после перевода в PDF программой Word, WPS или LibreOffice на этом ПК, но ни одна не найдена. LibreOffice бесплатен.",
   "files.old_opening": "Открывается {name}…",
-  "pdfedit.form_hint": "Щёлкните поле формы и вводите текст, флажок — щелчком. Если заполнена только форма, сохранённый PDF останется формой."
+  "pdfedit.form_hint": "Щёлкните поле формы и вводите текст, флажок — щелчком. Если заполнена только форма, сохранённый PDF останется формой.",
+  "pdfword.edit_title": "Файл Word готов",
+  "pdfword.edit_body": "{name} готов. Изменить сейчас? После сохранения и закрытия спросим, вернуть ли в PDF.",
+  "pdfword.edit_now": "Изменить",
+  "pdfword.word_unlicensed": "Word на этом ПК не активирован (откроется только для чтения), поэтому не используется. Для правки установите бесплатный LibreOffice (или активируйте Word).",
+  "pdfword.editing": "{name} правится в {app}",
+  "pdfword.editing_note": "Сохраните и закройте — предложим PDF",
+  "conv.engine_keepnear": "Keepnear (для PDF → Word)"
 }

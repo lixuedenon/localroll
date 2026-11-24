@@ -2322,14 +2322,9 @@
   "pdfedit.para_too_long": "段落が元の範囲に収まりません（文字は 85% まで縮小済み）。下に数行はみ出します：文を短くするか Word で編集してください",
   "pdfedit.squeezed": "隣の文字に重ならないよう {pct}% に詰めました",
   "files.open_verb": "{app} で開く",
-  "pdfword.edit": "Word / WPS / LibreOffice で編集",
-  "pdfword.edit_tip": "大きな変更向け：PDF 全体を Word ファイルにして Word・WPS・LibreOffice で編集し、保存して閉じたら PDF に戻せます。レイアウトは多少変わります。数文字なら上の編集が向いています。",
-  "pdfword.save_first": "先にここでの変更を保存してから Word にしてください",
-  "pdfword.making": "Word ファイルを作成中…",
   "pdfword.none_title": "Word・WPS・LibreOffice が見つかりません",
   "pdfword.none_body": "PDF を Word として編集するには、この PC にいずれかが必要です。LibreOffice は無料です。数文字の修正・移動・段落の書き直しなら Keepnear の編集で十分です。",
   "pdfword.get_libre": "LibreOffice を入手（無料）",
-  "pdfword.waiting": "{name} の編集待ち（保存して閉じると PDF に戻すか確認します）",
   "pdfword.back_title": "PDF に戻しますか？",
   "pdfword.back_body": "{name} は保存して閉じられました。新しい PDF にしますか（元の PDF はそのまま）？",
   "pdfword.back": "PDF にする",
@@ -2340,5 +2335,12 @@
   "pdfedit.form": "フォーム入力",
   "files.old_need_office": "古い Office / WPS 形式です。この PC の Word・WPS・LibreOffice で PDF にしてから表示しますが、どれも見つかりませんでした。LibreOffice は無料です。",
   "files.old_opening": "{name} を開いています…",
-  "pdfedit.form_hint": "フォームの欄をクリックして入力、チェック欄はクリックで切り替え。フォームだけを入力した場合、保存後もフォームのまま続けて入力できます。"
+  "pdfedit.form_hint": "フォームの欄をクリックして入力、チェック欄はクリックで切り替え。フォームだけを入力した場合、保存後もフォームのまま続けて入力できます。",
+  "pdfword.edit_title": "Word ファイルにしました",
+  "pdfword.edit_body": "{name} ができました。今すぐ編集しますか？保存して閉じると PDF に戻すか確認します。",
+  "pdfword.edit_now": "編集",
+  "pdfword.word_unlicensed": "この PC の Word はライセンス認証されていないため（読み取り専用で開く）、使っていません。編集には LibreOffice（無料）を入れるか Word を認証してください。",
+  "pdfword.editing": "{app} で {name} を編集中",
+  "pdfword.editing_note": "保存して閉じると PDF に戻すか確認します",
+  "conv.engine_keepnear": "Keepnear（PDF → Word 用）"
 }

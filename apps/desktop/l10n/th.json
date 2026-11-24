@@ -2322,14 +2322,9 @@
   "pdfedit.para_too_long": "ย่อหน้าไม่พอในพื้นที่เดิม (ตัวอักษรเหลือ 85% แล้ว) จะล้นลงไปอีกหลายบรรทัด: ตัดข้อความให้สั้นลง หรือแก้เป็น Word",
   "pdfedit.squeezed": "บีบเหลือ {pct}% เพื่อไม่ทับข้อความข้าง ๆ",
   "files.open_verb": "เปิดด้วย {app}",
-  "pdfword.edit": "แก้ใน Word / WPS / LibreOffice",
-  "pdfword.edit_tip": "สำหรับแก้มาก: แปลง PDF ทั้งไฟล์เป็น Word ไปแก้ใน Word, WPS หรือ LibreOffice บันทึกแล้วปิดก็แปลงกลับเป็น PDF ได้ เลย์เอาต์จะเปลี่ยนบ้าง แก้ไม่กี่คำใช้ตัวแก้ด้านบนดีกว่า",
-  "pdfword.save_first": "บันทึกการแก้ตรงนี้ก่อน แล้วค่อยแปลงเป็น Word",
-  "pdfword.making": "กำลังแปลงเป็นไฟล์ Word…",
   "pdfword.none_title": "ไม่พบ Word, WPS หรือ LibreOffice",
   "pdfword.none_body": "การแก้ PDF แบบไฟล์ Word ต้องมีโปรแกรมใดโปรแกรมหนึ่งในเครื่อง LibreOffice ใช้ฟรี ถ้าแก้ไม่กี่คำ ย้ายบรรทัด หรือแก้ทั้งย่อหน้า ใช้ตัวแก้ของ Keepnear ได้",
   "pdfword.get_libre": "ดาวน์โหลด LibreOffice (ฟรี)",
-  "pdfword.waiting": "รอคุณแก้ {name} (บันทึกแล้วปิด จะถามว่าจะแปลงกลับเป็น PDF ไหม)",
   "pdfword.back_title": "แปลงกลับเป็น PDF?",
   "pdfword.back_body": "{name} บันทึกและปิดแล้ว สร้างเป็น PDF ใหม่ไหม (PDF เดิมไม่เปลี่ยน)",
   "pdfword.back": "สร้าง PDF",
@@ -2340,5 +2335,12 @@
   "pdfedit.form": "กรอกแบบฟอร์ม",
   "files.old_need_office": "นี่เป็นรูปแบบ Office / WPS รุ่นเก่า Keepnear จะแสดงได้หลังจาก Word, WPS หรือ LibreOffice ในเครื่องนี้แปลงเป็น PDF แต่ไม่พบโปรแกรมเหล่านี้เลย LibreOffice ใช้ฟรี",
   "files.old_opening": "กำลังเปิด {name}…",
-  "pdfedit.form_hint": "คลิกช่องในแบบฟอร์มเพื่อพิมพ์ คลิกช่องทำเครื่องหมายเพื่อติ๊ก ถ้ากรอกแค่แบบฟอร์ม PDF ที่บันทึกยังเป็นแบบฟอร์ม"
+  "pdfedit.form_hint": "คลิกช่องในแบบฟอร์มเพื่อพิมพ์ คลิกช่องทำเครื่องหมายเพื่อติ๊ก ถ้ากรอกแค่แบบฟอร์ม PDF ที่บันทึกยังเป็นแบบฟอร์ม",
+  "pdfword.edit_title": "แปลงเป็น Word แล้ว",
+  "pdfword.edit_body": "{name} เสร็จแล้ว จะแก้ไขเลยไหม บันทึกแล้วปิดจะถามว่าจะแปลงกลับเป็น PDF ไหม",
+  "pdfword.edit_now": "แก้ไข",
+  "pdfword.word_unlicensed": "Word ในเครื่องนี้ยังไม่ได้เปิดใช้งาน (จะเปิดแบบอ่านอย่างเดียว) จึงไม่ได้ใช้ ถ้าจะแก้ ติดตั้ง LibreOffice ฟรี (หรือเปิดใช้งาน Word)",
+  "pdfword.editing": "กำลังแก้ {name} ใน {app}",
+  "pdfword.editing_note": "บันทึกแล้วปิด จะถามเรื่อง PDF",
+  "conv.engine_keepnear": "Keepnear (สำหรับ PDF → Word)"
 }

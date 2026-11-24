@@ -2322,14 +2322,9 @@
   "pdfedit.para_too_long": "Paragraf eski alanına sığmıyor (harfler zaten %85) ve birkaç satır aşağı taşıyor: kısaltın ya da Word olarak düzenleyin",
   "pdfedit.squeezed": "Yanındaki yazıya binmemesi için %{pct} sıkıştırıldı",
   "files.open_verb": "{app} ile aç",
-  "pdfword.edit": "Word / WPS / LibreOffice'te düzenle",
-  "pdfword.edit_tip": "Büyük değişiklikler için: PDF'in tamamı Word, WPS veya LibreOffice'te düzenlenecek bir Word dosyası olur; kaydedip kapatınca PDF'e dönebilir. Düzen biraz değişir; birkaç kelime için yukarıdaki düzenleyici daha iyidir.",
-  "pdfword.save_first": "Önce buradaki değişiklikleri kaydedin, sonra Word'e çevirin",
-  "pdfword.making": "Word dosyası oluşturuluyor…",
   "pdfword.none_title": "Word, WPS veya LibreOffice bulunamadı",
   "pdfword.none_body": "PDF'i Word gibi düzenlemek için bu bilgisayarda birinin kurulu olması gerekir; LibreOffice ücretsizdir. Birkaç kelime, satır taşıma veya paragraf için Keepnear düzenleyicisi yeterli.",
   "pdfword.get_libre": "LibreOffice'i edinin (ücretsiz)",
-  "pdfword.waiting": "{name} düzenlenirken bekleniyor (kaydedip kapatınca PDF sorulur)",
   "pdfword.back_title": "PDF'e dönülsün mü?",
   "pdfword.back_body": "{name} kaydedilip kapatıldı. Yeni bir PDF yapılsın mı (orijinal PDF aynı kalır)?",
   "pdfword.back": "PDF oluştur",
@@ -2340,5 +2335,12 @@
   "pdfedit.form": "Doldur",
   "files.old_need_office": "Bu eski bir Office / WPS biçimi. Keepnear onu bu bilgisayardaki Word, WPS veya LibreOffice PDF'e çevirdikten sonra gösterir; hiçbiri bulunamadı. LibreOffice ücretsizdir.",
   "files.old_opening": "{name} açılıyor…",
-  "pdfedit.form_hint": "Yazmak için form kutusuna, işaretlemek için onay kutusuna tıklayın. Yalnızca form doldurulduysa kaydedilen PDF form olarak kalır."
+  "pdfedit.form_hint": "Yazmak için form kutusuna, işaretlemek için onay kutusuna tıklayın. Yalnızca form doldurulduysa kaydedilen PDF form olarak kalır.",
+  "pdfword.edit_title": "Word dosyası oluşturuldu",
+  "pdfword.edit_body": "{name} hazır. Şimdi düzenlensin mi? Kaydedip kapatınca yeniden PDF yapılsın mı diye sorulur.",
+  "pdfword.edit_now": "Düzenle",
+  "pdfword.word_unlicensed": "Bu bilgisayardaki Word etkin değil (salt okunur açılır), bu yüzden kullanılmadı. Düzenlemek için LibreOffice'i ücretsiz kurun (ya da Word'ü etkinleştirin).",
+  "pdfword.editing": "{name}, {app} içinde düzenleniyor",
+  "pdfword.editing_note": "Kaydedip kapatın: PDF sorulacak",
+  "conv.engine_keepnear": "Keepnear (PDF → Word için)"
 }

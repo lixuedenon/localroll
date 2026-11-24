@@ -2322,14 +2322,9 @@
   "pdfedit.para_too_long": "Der Absatz passt nicht in den alten Bereich (Schrift schon 85 %) und läuft einige Zeilen tiefer: kürzen oder als Word bearbeiten",
   "pdfedit.squeezed": "Auf {pct} % gestaucht, damit es den Text daneben nicht überlappt",
   "files.open_verb": "Mit {app} öffnen",
-  "pdfword.edit": "In Word / WPS / LibreOffice bearbeiten",
-  "pdfword.edit_tip": "Für große Änderungen: Das ganze PDF wird eine Word-Datei für Word, WPS oder LibreOffice; gespeichert und geschlossen kann es zurück ins PDF. Das Layout ändert sich etwas; für wenige Wörter ist der Editor oben besser.",
-  "pdfword.save_first": "Zuerst die Änderungen hier speichern, dann in Word umwandeln",
-  "pdfword.making": "Word-Datei wird erstellt…",
   "pdfword.none_title": "Kein Word, WPS oder LibreOffice gefunden",
   "pdfword.none_body": "Um ein PDF als Word-Datei zu bearbeiten, braucht dieser PC eines davon; LibreOffice ist kostenlos. Für wenige Wörter, Verschieben oder einen Absatz reicht der Keepnear-Editor.",
   "pdfword.get_libre": "LibreOffice holen (kostenlos)",
-  "pdfword.waiting": "Warte, bis {name} bearbeitet ist (speichern und schließen, dann folgt die PDF-Frage)",
   "pdfword.back_title": "Zurück ins PDF?",
   "pdfword.back_body": "{name} wurde gespeichert und geschlossen. Ein neues PDF daraus machen (das Original bleibt)?",
   "pdfword.back": "PDF erstellen",
@@ -2340,5 +2335,12 @@
   "pdfedit.form": "Ausfüllen",
   "files.old_need_office": "Ein älteres Office-/WPS-Format. Keepnear zeigt es, nachdem Word, WPS oder LibreOffice auf diesem PC ein PDF daraus macht – keines davon wurde gefunden. LibreOffice ist kostenlos.",
   "files.old_opening": "{name} wird geöffnet…",
-  "pdfedit.form_hint": "Auf ein Feld klicken und tippen, Kontrollkästchen per Klick abhaken. Wurde nur das Formular ausgefüllt, bleibt das gespeicherte PDF ein Formular."
+  "pdfedit.form_hint": "Auf ein Feld klicken und tippen, Kontrollkästchen per Klick abhaken. Wurde nur das Formular ausgefüllt, bleibt das gespeicherte PDF ein Formular.",
+  "pdfword.edit_title": "Word-Datei erstellt",
+  "pdfword.edit_body": "{name} ist fertig. Jetzt bearbeiten? Nach Speichern und Schließen werden Sie gefragt, ob wieder ein PDF entstehen soll.",
+  "pdfword.edit_now": "Bearbeiten",
+  "pdfword.word_unlicensed": "Word ist auf diesem PC nicht aktiviert (es öffnet nur schreibgeschützt) und wird daher nicht verwendet. Zum Bearbeiten LibreOffice kostenlos installieren (oder Word aktivieren).",
+  "pdfword.editing": "{name} wird in {app} bearbeitet",
+  "pdfword.editing_note": "Speichern und schließen – dann folgt die PDF-Frage",
+  "conv.engine_keepnear": "Keepnear (für PDF → Word)"
 }

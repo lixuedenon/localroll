@@ -90,6 +90,14 @@ class OfficeOp extends ConvOp {
   bool get office => true;
 }
 
+/// PDF → Word to edit: Word (or the program chosen), else Keepnear's own
+/// converter — always possible, no office program needed.
+class PdfToWord extends ConvOp {
+  const PdfToWord();
+  @override
+  String get ext => 'docx';
+}
+
 class FormatTable {
   FormatTable._();
 
@@ -183,7 +191,7 @@ class FormatTable {
         return switch ((from.id, to.id)) {
           ('pdf', 'jpg') || ('pdf', 'png') => PdfToImages(to.id),
           ('pdf', 'txt') => const PdfToText(),
-          ('pdf', 'word') => const OfficeOp('wordDocx', 'docx'),
+          ('pdf', 'word') => const PdfToWord(),
           ('word', 'pdf') || ('excel', 'pdf') || ('csv', 'pdf') || ('ppt', 'pdf') => const OfficeOp('pdf', 'pdf'),
           ('word', 'txt') => const OfficeOp('wordTxt', 'txt'),
           ('txt', 'word') => const OfficeOp('wordDocx', 'docx'),

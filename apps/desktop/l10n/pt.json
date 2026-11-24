@@ -2322,14 +2322,9 @@
   "pdfedit.para_too_long": "O parágrafo não cabe na área (letras já a 85%) e desce algumas linhas: encurte-o ou edite como Word",
   "pdfedit.squeezed": "Comprimido a {pct}% para não sobrepor o texto ao lado",
   "files.open_verb": "Abrir com {app}",
-  "pdfword.edit": "Editar no Word / WPS / LibreOffice",
-  "pdfword.edit_tip": "Para grandes mudanças: o PDF inteiro vira um arquivo Word para editar no Word, WPS ou LibreOffice; salvo e fechado, pode voltar a PDF. O layout muda um pouco; para poucas palavras, o editor acima é melhor.",
-  "pdfword.save_first": "Salve as alterações aqui primeiro e depois converta para Word",
-  "pdfword.making": "Criando o arquivo Word…",
   "pdfword.none_title": "Word, WPS ou LibreOffice não encontrado",
   "pdfword.none_body": "Para editar um PDF como Word, este PC precisa de um deles; o LibreOffice é gratuito. Para poucas palavras, mover uma linha ou reescrever um parágrafo, o editor do Keepnear basta.",
   "pdfword.get_libre": "Obter o LibreOffice (grátis)",
-  "pdfword.waiting": "Aguardando a edição de {name} (salve e feche para voltar a PDF)",
   "pdfword.back_title": "Voltar para PDF?",
   "pdfword.back_body": "{name} foi salvo e fechado. Criar um novo PDF (o original continua igual)?",
   "pdfword.back": "Criar PDF",
@@ -2340,5 +2335,12 @@
   "pdfedit.form": "Preencher",
   "files.old_need_office": "Formato antigo do Office / WPS. O Keepnear o mostra depois que o Word, WPS ou LibreOffice deste PC o converte em PDF, e nenhum foi encontrado. O LibreOffice é gratuito.",
   "files.old_opening": "Abrindo {name}…",
-  "pdfedit.form_hint": "Clique em um campo para digitar e numa caixa para marcá-la. Se só o formulário foi preenchido, o PDF salvo continua sendo formulário."
+  "pdfedit.form_hint": "Clique em um campo para digitar e numa caixa para marcá-la. Se só o formulário foi preenchido, o PDF salvo continua sendo formulário.",
+  "pdfword.edit_title": "Arquivo Word criado",
+  "pdfword.edit_body": "{name} está pronto. Editar agora? Ao salvar e fechar, você será perguntado se quer voltar a PDF.",
+  "pdfword.edit_now": "Editar",
+  "pdfword.word_unlicensed": "O Word deste PC não está ativado (abriria só leitura), então não é usado. Para editar, instale o LibreOffice grátis (ou ative o Word).",
+  "pdfword.editing": "Editando {name} no {app}",
+  "pdfword.editing_note": "Salve e feche: você será perguntado sobre o PDF",
+  "conv.engine_keepnear": "Keepnear (para PDF → Word)"
 }

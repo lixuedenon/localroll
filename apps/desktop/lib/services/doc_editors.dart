@@ -1,5 +1,6 @@
 // apps/desktop/lib/services/doc_editors.dart
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:localroll_core/localroll_core.dart' show DiagLog;
@@ -26,10 +27,6 @@ class DocEditors {
   DocEditors._();
 
   static List<DocEditor>? _found;
-
-  /// Word found without a licence (it opens read-only, with a sign-in
-  /// window): not used for editing on this PC. Kept for the session.
-  static bool wordUnlicensed = false;
 
   static Future<String?> _reg(String key, {String? value}) async {
     try {
@@ -101,115 +98,115 @@ class DocEditors {
     return _found = list;
   }
 
-  /// Word has a licence, as far as can be told without opening it: Office's
-  /// own licence check (OSPP.VBS) says LICENSED, or a Microsoft 365 sign-in
-  /// licence is there.
-  static Future<bool> _wordLicensed(String exe) async {
+  /// Word has a licence, by Office's own licence tools (no Word window
+  /// opens): OSPP.VBS (bought once: "---LICENSED---") or vnextdiag.ps1
+  /// (Microsoft 365: "LicenseState: Licensed"). Neither says so, or neither
+  /// can be run: not licensed. Kept in a small file for 30 days (and until
+  /// Word itself changes).
+  static Future<bool> wordLicensed() async {
+    final list = await found();
+    final w = list.where((e) => e.word).firstOrNull;
+    if (w == null) return false;
+    final cached = _licenceCache;
+    final stamp = '${File(w.exe).lastModifiedSync().millisecondsSinceEpoch}';
     try {
-      final dir = File(exe).parent.path;
-      final ospp = _firstFile(['$dir\\OSPP.VBS', '${File(dir).parent.path}\\Office16\\OSPP.VBS']);
-      if (ospp != null) {
-        final r = await Process.run('cscript', ['//nologo', ospp, '/dstatus']).timeout(const Duration(seconds: 20));
-        if ('${r.stdout}'.contains('---LICENSED---')) return true;
+      if (cached != null && cached.existsSync()) {
+        final p = cached.readAsStringSync().trim().split('|');
+        final at = DateTime.fromMillisecondsSinceEpoch(int.tryParse(p.first) ?? 0);
+        if (p.length == 3 && p[1] == stamp && DateTime.now().difference(at).inDays < 30) return p[2] == '1';
       }
-      final local = Platform.environment['LOCALAPPDATA'];
-      if (local != null) {
-        final lic = Directory('$local\\Microsoft\\Office\\Licenses');
-        if (lic.existsSync() && lic.listSync(recursive: true).whereType<File>().isNotEmpty) return true;
-      }
-    } catch (e) {
-      DiagLog.log('tools', 'word licence check: $e');
-    }
-    return false;
-  }
-
-  static const _noLicence = [
-    'unlicensed',
-    'product activation failed',
-    '未经授权',
-    '未授权',
-    '產品啟用失敗',
-    '未經授權',
-    '产品激活失败',
-    'nicht lizenziert',
-    'sans licence',
-    'sin licencia',
-  ];
-
-  /// [process]'s window titles, lower case, one per line.
-  static Future<String> _titles(String process) async {
-    try {
-      final r = await Process.run('powershell', [
-        '-NoProfile',
-        '-NonInteractive',
-        '-Command',
-        "[Console]::OutputEncoding=[Text.Encoding]::UTF8; Get-Process $process -ErrorAction SilentlyContinue | ForEach-Object { \$_.MainWindowTitle }",
-      ]);
-      return '${r.stdout}'.toLowerCase();
-    } catch (_) {
-      return '';
-    }
-  }
-
-  /// Closes [process]'s window showing [name] (it was opened just now,
-  /// nothing changed in it).
-  static Future<void> _closeWindow(String process, String name) async {
-    try {
-      await Process.run('powershell', [
-        '-NoProfile',
-        '-NonInteractive',
-        '-Command',
-        "Get-Process $process -ErrorAction SilentlyContinue | Where-Object { \$_.MainWindowTitle -like '*${name.replaceAll("'", "''")}*' } | ForEach-Object { [void]\$_.CloseMainWindow() }",
-      ]);
     } catch (_) {}
+    var ok = false;
+    final why = <String>[];
+    final dir = File(w.exe).parent.path; // …\Microsoft Office\root\Office16
+    final pf = [Platform.environment['ProgramFiles'], Platform.environment['ProgramFiles(x86)']].whereType<String>();
+    final ospp = _firstFile([
+      '$dir\\OSPP.VBS',
+      '${File(File(dir).parent.path).parent.path}\\Office16\\OSPP.VBS',
+      for (final p in pf) '$p\\Microsoft Office\\Office16\\OSPP.VBS',
+    ]);
+    if (ospp != null) {
+      try {
+        final r = await Process.run('cscript', ['//nologo', ospp, '/dstatus'], stdoutEncoding: const SystemEncoding()).timeout(const Duration(seconds: 30));
+        final out = '${r.stdout}';
+        if (out.contains('---LICENSED---')) ok = true;
+        why.add('ospp: ${out.contains('---LICENSED---') ? 'licensed' : 'not licensed'}');
+      } catch (e) {
+        why.add('ospp: $e');
+      }
+    } else {
+      why.add('ospp: none');
+    }
+    if (!ok) {
+      final vnext = _firstFile(['$dir\\vnextdiag.ps1', for (final p in pf) '$p\\Microsoft Office\\root\\Office16\\vnextdiag.ps1']);
+      if (vnext != null) {
+        try {
+          final r = await Process.run('powershell', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', vnext, '-action', 'list'],
+                  stdoutEncoding: const SystemEncoding())
+              .timeout(const Duration(seconds: 30));
+          final out = '${r.stdout}';
+          if (RegExp(r'LicenseState"?\s*:\s*"?Licensed\b').hasMatch(out)) ok = true;
+          why.add('vnext: ${ok ? 'licensed' : 'not licensed'}');
+        } catch (e) {
+          why.add('vnext: $e');
+        }
+      } else {
+        why.add('vnext: none');
+      }
+    }
+    DiagLog.log('tools', 'Word licence: ${ok ? 'yes' : 'no'} (${why.join(', ')})');
+    try {
+      cached?.parent.createSync(recursive: true);
+      cached?.writeAsStringSync('${DateTime.now().millisecondsSinceEpoch}|$stamp|${ok ? 1 : 0}');
+    } catch (_) {}
+    return ok;
+  }
+
+  static File? get _licenceCache {
+    final local = Platform.environment['LOCALAPPDATA'];
+    return local == null ? null : File('$local\\Keepnear\\word-licence.txt');
   }
 
   static Future<void> _start(DocEditor e, String path) async {
     await Process.start(e.exe, [path], mode: ProcessStartMode.detached);
   }
 
-  /// Opens [path] for editing in the first program that can; Word without a
-  /// licence is skipped (checked first; if its window still says so, it is
-  /// closed and the next one used). Null: none; else the program's name.
-  static Future<String?> open(String path) async {
+  /// Opens [path] for editing in the first program that can: Word only
+  /// when it has a licence (else it opens read-only, with a sign-in
+  /// window). Null: none; else the program.
+  static Future<DocEditor?> open(String path) async {
     final list = await found();
-    for (var i = 0; i < list.length; i++) {
-      final e = list[i];
-      final rest = list.length - i - 1;
-      if (e.word) {
-        if (wordUnlicensed && rest > 0) continue;
-        if (rest > 0 && !await _wordLicensed(e.exe)) {
-          wordUnlicensed = true;
-          DiagLog.log('tools', 'Word has no licence here: the next program edits');
-          continue;
-        }
-      }
+    for (final e in list) {
+      if (e.word && !await wordLicensed()) continue;
       try {
         await _start(e, path);
       } catch (x) {
         DiagLog.log('tools', '${e.name} did not start: $x');
         continue;
       }
-      if (e.word && rest > 0) {
-        // Its window says "Unlicensed": closed, the next one.
-        final name = path.split('\\').last;
-        final stem = name.contains('.') ? name.substring(0, name.lastIndexOf('.')) : name;
-        for (var k = 0; k < 15; k++) {
-          await Future<void>.delayed(const Duration(seconds: 2));
-          final lines = (await _titles(e.process!)).split('\n').where((t) => t.contains(stem.toLowerCase()));
-          if (lines.isEmpty) continue;
-          if (lines.any((t) => _noLicence.any(t.contains))) {
-            wordUnlicensed = true;
-            DiagLog.log('tools', 'Word opened without a licence: closed, the next program edits');
-            await _closeWindow(e.process!, stem);
-          }
-          break;
-        }
-        if (wordUnlicensed) continue;
-      }
       DiagLog.log('tools', 'edit in ${e.name}');
-      return e.name;
+      return e;
     }
     return null;
+  }
+
+  /// Every window title of the programs running (lower case, one per
+  /// line), read as UTF-8.
+  static Future<String> titles() async {
+    try {
+      final r = await Process.run(
+        'powershell',
+        [
+          '-NoProfile',
+          '-NonInteractive',
+          '-Command',
+          "[Console]::OutputEncoding=[Text.Encoding]::UTF8; Get-Process | Where-Object { \$_.MainWindowTitle } | ForEach-Object { \$_.MainWindowTitle }",
+        ],
+        stdoutEncoding: utf8,
+      );
+      return '${r.stdout}'.toLowerCase();
+    } catch (_) {
+      return '';
+    }
   }
 }

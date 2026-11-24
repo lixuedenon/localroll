@@ -2322,14 +2322,9 @@
   "pdfedit.para_too_long": "这一段在原来的区域里放不下（字已缩小到 85%），会往下多占几行：可以删减文字，或转成 Word 改",
   "pdfedit.squeezed": "已自动挤到 {pct}%，不会压到旁边的字",
   "files.open_verb": "用 {app} 打开",
-  "pdfword.edit": "用 Word / WPS / LibreOffice 改",
-  "pdfword.edit_tip": "大改时用：整份转成 Word 文件，在 Word、WPS 或 LibreOffice 里改，存好关掉后可以转回 PDF。版面会有些变化；只改几个字用上面的编辑更好。",
-  "pdfword.save_first": "先保存这里的改动，再转成 Word",
-  "pdfword.making": "正在转成 Word 文件…",
   "pdfword.none_title": "没有找到 Word、WPS 或 LibreOffice",
   "pdfword.none_body": "要把 PDF 当 Word 文件来改，这台电脑需要装其中一个。LibreOffice 是免费的。只改几个字、挪一挪、改一段，用 Keepnear 的编辑就可以。",
   "pdfword.get_libre": "下载 LibreOffice（免费）",
-  "pdfword.waiting": "等你改完 {name}（存好、关掉后会问要不要转回 PDF）",
   "pdfword.back_title": "转回 PDF？",
   "pdfword.back_body": "{name} 已经改好并关掉了。转成一个新的 PDF（原来的 PDF 不变）？",
   "pdfword.back": "转回 PDF",
@@ -2340,5 +2335,12 @@
   "pdfedit.form": "填表",
   "files.old_need_office": "这是旧版 Office / WPS 格式，Keepnear 要借这台电脑上的 Word、WPS 或 LibreOffice 先转成 PDF 才能显示。现在一个都没找到；LibreOffice 是免费的。",
   "files.old_opening": "正在打开 {name}…",
-  "pdfedit.form_hint": "点表单里的格子直接填，勾选框点一下就勾上。只填了表时，保存后还是表单，别人还能接着填。"
+  "pdfedit.form_hint": "点表单里的格子直接填，勾选框点一下就勾上。只填了表时，保存后还是表单，别人还能接着填。",
+  "pdfword.edit_title": "已转成 Word",
+  "pdfword.edit_body": "{name} 已经转好。要现在打开编辑吗？编辑完保存、关掉后，会问你要不要转回 PDF。",
+  "pdfword.edit_now": "编辑",
+  "pdfword.word_unlicensed": "这台电脑的 Word 没有激活，打开后只能看、不能改，所以没有用它。要编辑 Word 文件，可以免费装 LibreOffice（或激活 Word）。",
+  "pdfword.editing": "在 {app} 里编辑 {name}",
+  "pdfword.editing_note": "改完保存、关掉后，会问你要不要转回 PDF",
+  "conv.engine_keepnear": "Keepnear（PDF → Word 用）"
 }
