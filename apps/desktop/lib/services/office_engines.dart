@@ -267,7 +267,7 @@ class OfficeEngines {
       tmp.path,
       src,
     ];
-    final err = await _exec(exe, args, const Duration(minutes: 3));
+    var err = await _exec(exe, args, const Duration(minutes: 3));
     // soffice.exe may come back before the file is written.
     File? made;
     for (var i = 0; i < 60 && made == null && !_stopped; i++) {
