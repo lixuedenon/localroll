@@ -170,18 +170,27 @@ class OfficeEngines {
     return done.future;
   }
 
+  /// In order (the chosen one first, then Office, WPS, LibreOffice): the
+  /// next is tried when one fails.
   static Future<String?> _run(String kind, String src, String out) async {
     _stopped = false;
-    final app = pickFrom(await installed(), kind, src);
-    if (app == null) return 'no_office';
-    final err = switch (app) {
-      OfficeApp.libre => await _libre(kind, src, out),
-      _ => await _com(app, kind, src, out),
-    };
-    if (_stopped) return 'cancelled';
-    if (err == null && kind == 'wordTxt') await _toUtf8(out);
-    if (err != null) DiagLog.log('tools', '${app.label} $kind failed: $err');
-    return err;
+    final have = {...await installed()};
+    String? err = 'no_office';
+    while (true) {
+      final app = pickFrom(have, kind, src);
+      if (app == null) return err;
+      have.remove(app);
+      err = switch (app) {
+        OfficeApp.libre => await _libre(kind, src, out),
+        _ => await _com(app, kind, src, out),
+      };
+      if (_stopped) return 'cancelled';
+      if (err == null) {
+        if (kind == 'wordTxt') await _toUtf8(out);
+        return null;
+      }
+      DiagLog.log('tools', '${app.label} $kind failed: $err (the next one is tried)');
+    }
   }
 
   static String _ext(String p) {

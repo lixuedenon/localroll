@@ -8,6 +8,7 @@ import 'package:localroll_core/localroll_core.dart' show DiagLog;
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/bg_tasks.dart';
+import '../../services/doc_editors.dart';
 import '../../services/office_engines.dart';
 import '../../services/pdf_docx.dart';
 import '../../services/tool_outputs.dart';
@@ -41,7 +42,6 @@ Future<void> editPdfInOffice(BuildContext context, AppServices s, String pdf) as
     return;
   }
   final word = have.contains(OfficeApp.office);
-  final app = word ? OfficeApp.office : (have.contains(OfficeApp.wps) ? OfficeApp.wps : OfficeApp.libre);
   final docx = toolOutPath(s, pdf, '', 'docx');
   // A background task that can be stopped (Word / Keepnear's own).
   final err = await BgTasks.instance.run<String?>(
@@ -73,39 +73,30 @@ Future<void> editPdfInOffice(BuildContext context, AppServices s, String pdf) as
     return;
   }
   await s.tools.saved([docx]);
-  DiagLog.log('tools', 'pdf → docx (${word ? 'Word' : 'Keepnear'}), opened in ${app.name}');
   final before = File(docx).lastModifiedSync();
-  await _open(docx, app);
+  // Word (if activated) → WPS → ONLYOFFICE → LibreOffice → …: the first
+  // that can edit, nothing asked.
+  final by = await DocEditors.open(docx);
+  DiagLog.log('tools', 'pdf → docx (${word ? 'Word' : 'Keepnear'}), editing in ${by ?? 'nothing'}');
+  if (by == null) {
+    try {
+      await Process.start('cmd', ['/c', 'start', '', docx], mode: ProcessStartMode.detached);
+    } catch (_) {}
+  }
   unawaited(_waitAndAsk(s, pdf, docx, before));
 }
 
-Future<void> _open(String docx, OfficeApp app) async {
-  if (app == OfficeApp.wps) {
-    // WPS: the program Windows opens Word files with.
-    try {
-      await Process.start('cmd', ['/c', 'start', '', docx], mode: ProcessStartMode.detached);
-    } catch (e) {
-      DiagLog.log('tools', 'open docx: $e');
-    }
-  } else {
-    await OfficeEngines.openWith(docx, app);
-  }
-}
-
-/// In use by the program that has it open (Word / WPS hold it; LibreOffice
-/// leaves a ".~lock.<name>#" file beside it).
+/// Open in a program, by the lock file it leaves beside it (Word / WPS:
+/// "~\$…", LibreOffice / OpenOffice: ".~lock.<name>#"). The file itself is
+/// not touched (that could make the program open it read-only).
 bool _inUse(String path) {
-  final f = File(path);
-  final dir = f.parent.path;
+  final dir = File(path).parent.path;
   final name = path.split(Platform.pathSeparator).last;
-  if (File('$dir${Platform.pathSeparator}.~lock.$name#').existsSync()) return true;
-  if (name.length > 2 && File('$dir${Platform.pathSeparator}~\$${name.substring(2)}').existsSync()) return true;
-  try {
-    f.openSync(mode: FileMode.append).closeSync();
-    return false;
-  } catch (_) {
-    return true;
-  }
+  final sep = Platform.pathSeparator;
+  if (File('$dir$sep.~lock.$name#').existsSync()) return true;
+  if (name.length > 2 && File('$dir$sep~\$${name.substring(2)}').existsSync()) return true;
+  if (File('$dir$sep~\$$name').existsSync()) return true;
+  return false;
 }
 
 Future<void> _waitAndAsk(AppServices s, String pdf, String docx, DateTime before) async {
@@ -127,8 +118,10 @@ Future<void> _waitAndAsk(AppServices s, String pdf, String docx, DateTime before
         }
         final changed = File(docx).lastModifiedSync().isAfter(before);
         // Saved and closed: done. Closed without saving: nothing to do.
-        if (changed) return true;
-        if (seenOpen) return false;
+        // A program that leaves no lock file: saved and quiet for a while.
+        if (changed && seenOpen) return true;
+        if (changed && DateTime.now().difference(File(docx).lastModifiedSync()) > const Duration(seconds: 20)) return true;
+        if (seenOpen && !changed) return false;
       }
       return false;
     },
