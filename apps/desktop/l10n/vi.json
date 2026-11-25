@@ -2346,7 +2346,6 @@
   "pdfword.open_with": "Mở bằng:",
   "pdfword.word_off_short": "Word trên máy này chưa kích hoạt (chỉ xem), nên không có trong danh sách.",
   "pdfword.word_switched": "Word chưa kích hoạt nên không sửa được: đã mở bằng {app}",
-  "aipack.folder": "Keepnear cho AI",
   "aipack.what": "Gom {count} tệp đã chọn thành một gói để đưa cho trợ lý AI (ChatGPT, Claude…). AI không thấy tệp trên máy bạn, tải từng tệp lên thì mất công.",
   "aipack.makes": "Tạo một thư mục (tên có ngày giờ) chứa:\n• bản sao các tệp (đánh số 001-, 002-…)\n• index.md: tên, thời gian, dung lượng và chữ Keepnear nhận ra trong từng tệp\nbên cạnh có tệp zip cùng tên. Kéo zip vào khung chat AI; nếu AI không nhận zip thì chỉ cần index.md (chỉ là chữ, nhẹ).",
   "aipack.examples_title": "Ví dụ",
@@ -2354,5 +2353,6 @@
   "aipack.note": "Mọi thứ làm trên máy này, không tải gì lên; đưa gì cho AI nào là do bạn quyết định. Tệp là bản sao, bản gốc giữ nguyên.",
   "aipack.change": "Đổi",
   "aipack.go": "Đóng gói",
-  "pdfword.made_by": "Tạo bằng {app}."
+  "pdfword.made_by": "Tạo bằng {app}.",
+  "aipack.name": "Tên:"
 }

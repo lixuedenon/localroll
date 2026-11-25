@@ -203,7 +203,8 @@ String aiPackBase(AppServices s) {
   if (chosen != null && chosen.isNotEmpty) return chosen;
   final home = Platform.environment['USERPROFILE'] ?? Directory.systemTemp.path;
   final docs = Directory('$home\\Documents').existsSync() ? '$home\\Documents' : home;
-  return '$docs\\${sanitizeFileName(tr('aipack.folder'))}';
+  // English, no spaces: the same in every language, safe to pass around.
+  return '$docs\\Keepnear-AI';
 }
 
 Future<void> packForAi(BuildContext context, AppServices s, List<MediaItem> media, List<String> files) async {
@@ -211,6 +212,11 @@ Future<void> packForAi(BuildContext context, AppServices s, List<MediaItem> medi
   // First what it is for (with examples) and where it goes; the place can
   // be changed (and is remembered).
   var where = aiPackBase(s);
+  // Default name: when and how many (English only, no spaces), can be changed.
+  final count = media.length + files.length;
+  final stamp = DateTime.now();
+  String two(int v) => v.toString().padLeft(2, '0');
+  final nameBox = TextEditingController(text: 'Keepnear-AI-${stamp.year}${two(stamp.month)}${two(stamp.day)}-${two(stamp.hour)}${two(stamp.minute)}-${count}files');
   final go = await showLrDialog<bool>(
     context: context,
     builder: (c) => StatefulBuilder(
@@ -234,6 +240,18 @@ Future<void> packForAi(BuildContext context, AppServices s, List<MediaItem> medi
                 const SizedBox(height: 10),
                 Text(tr('aipack.note'), style: const TextStyle(fontSize: 12, color: Color(0xFF8A8F98))),
                 const SizedBox(height: 14),
+                Row(children: [
+                  Text(tr('aipack.name')),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextField(
+                      controller: nameBox,
+                      style: const TextStyle(fontSize: 13),
+                      decoration: const InputDecoration(isDense: true),
+                    ),
+                  ),
+                ]),
+                const SizedBox(height: 8),
                 Row(children: [
                   Text(tr('aipack.where')),
                   const SizedBox(width: 8),
@@ -260,10 +278,11 @@ Future<void> packForAi(BuildContext context, AppServices s, List<MediaItem> medi
       ),
     ),
   );
+  final typed = sanitizeFileName(nameBox.text.trim().replaceAll(RegExp(r'\s+'), '-'));
+  nameBox.dispose();
   if (go != true) return;
   final sep = Platform.pathSeparator;
-  final stamp = DateTime.now();
-  final name = 'Keepnear-AI-${stamp.year}${stamp.month.toString().padLeft(2, '0')}${stamp.day.toString().padLeft(2, '0')}-${stamp.hour.toString().padLeft(2, '0')}${stamp.minute.toString().padLeft(2, '0')}';
+  final name = typed.isEmpty ? 'Keepnear-AI-${stamp.year}${two(stamp.month)}${two(stamp.day)}-${two(stamp.hour)}${two(stamp.minute)}-${count}files' : typed;
   await Directory(where).create(recursive: true);
   final dir = Directory(LibraryIndex.uniquePath(where, name));
   await dir.create(recursive: true);

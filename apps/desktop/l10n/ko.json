@@ -2346,7 +2346,6 @@
   "pdfword.open_with": "열 프로그램:",
   "pdfword.word_off_short": "이 PC의 Word는 정품 인증이 안 되어(읽기 전용) 목록에 없습니다.",
   "pdfword.word_switched": "Word가 정품 인증되지 않아 편집할 수 없어 {app}(으)로 열었습니다",
-  "aipack.folder": "Keepnear AI용",
   "aipack.what": "선택한 {count}개 파일을 하나의 묶음으로 만들어 AI 도우미(ChatGPT, Claude 등)에게 한 번에 넘깁니다. AI는 PC의 파일을 볼 수 없고 하나씩 올리기는 번거롭습니다.",
   "aipack.makes": "날짜·시간 이름의 폴더를 만들고 안에:\n• 파일 사본(001-, 002-… 번호)\n• index.md: 각 파일의 이름·시간·크기와 Keepnear가 인식한 글자\n옆에 같은 이름의 zip도 만듭니다. zip을 AI 대화창에 끌어 넣으세요. zip을 못 받으면 index.md만 넣어도 됩니다(텍스트라 작음).",
   "aipack.examples_title": "예시",
@@ -2354,5 +2353,6 @@
   "aipack.note": "모두 이 PC에서 하며 아무것도 올리지 않습니다. 어느 AI에 무엇을 줄지는 직접 정합니다. 파일은 사본이고 원본은 그대로입니다.",
   "aipack.change": "변경",
   "aipack.go": "묶기",
-  "pdfword.made_by": "{app}(으)로 변환했습니다."
+  "pdfword.made_by": "{app}(으)로 변환했습니다.",
+  "aipack.name": "이름:"
 }

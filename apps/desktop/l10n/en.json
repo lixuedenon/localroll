@@ -2346,7 +2346,6 @@
   "pdfword.open_with": "Open with:",
   "pdfword.word_off_short": "Word on this PC isn't activated (read-only), so it isn't listed.",
   "pdfword.word_switched": "Word isn't activated and can't edit: opened in {app} instead",
-  "aipack.folder": "Keepnear for AI",
   "aipack.what": "Puts the {count} chosen files into one package to hand to an AI assistant (ChatGPT, Claude…) to look at together. An AI can't see the files on your PC, and uploading them one by one is slow.",
   "aipack.makes": "It makes a folder (named with the date and time) holding:\n• copies of the files (numbered 001-, 002-…)\n• index.md: each file's name, date, size and the text Keepnear found in it\nand a zip of the same name beside it. Drag the zip into the AI chat; if it takes no zip, index.md alone also works (just text, small).",
   "aipack.examples_title": "For example",
@@ -2354,5 +2353,6 @@
   "aipack.note": "All done on this PC, nothing is uploaded; which AI gets what is up to you. The files are copies: the originals stay as they are.",
   "aipack.change": "Change",
   "aipack.go": "Pack",
-  "pdfword.made_by": "Made by {app}."
+  "pdfword.made_by": "Made by {app}.",
+  "aipack.name": "Name:"
 }

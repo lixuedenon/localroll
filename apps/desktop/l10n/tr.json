@@ -2346,7 +2346,6 @@
   "pdfword.open_with": "Şununla aç:",
   "pdfword.word_off_short": "Bu bilgisayardaki Word etkin değil (salt okunur), bu yüzden listede yok.",
   "pdfword.word_switched": "Word etkin değil, düzenleyemez: {app} ile açıldı",
-  "aipack.folder": "Keepnear YZ için",
   "aipack.what": "Seçilen {count} dosyayı bir YZ asistanına (ChatGPT, Claude…) vermek için tek pakette toplar. YZ bilgisayarınızdaki dosyaları göremez, tek tek yüklemek de zahmetlidir.",
   "aipack.makes": "Adında tarih ve saat olan bir klasör oluşur; içinde:\n• dosyaların kopyaları (001-, 002-… numaralı)\n• index.md: her dosyanın adı, tarihi, boyutu ve Keepnear'ın bulduğu metin\nyanında da aynı adlı bir zip. Zip'i YZ sohbetine sürükleyin; zip kabul etmezse yalnızca index.md de olur (sadece metin, küçük).",
   "aipack.examples_title": "Örnekler",
@@ -2354,5 +2353,6 @@
   "aipack.note": "Her şey bu bilgisayarda yapılır, hiçbir şey yüklenmez; hangi YZ'ye ne verileceğine siz karar verirsiniz. Dosyalar kopyadır, asılları değişmez.",
   "aipack.change": "Değiştir",
   "aipack.go": "Paketle",
-  "pdfword.made_by": "{app} ile yapıldı."
+  "pdfword.made_by": "{app} ile yapıldı.",
+  "aipack.name": "Ad:"
 }

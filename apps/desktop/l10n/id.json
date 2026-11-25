@@ -2346,7 +2346,6 @@
   "pdfword.open_with": "Buka dengan:",
   "pdfword.word_off_short": "Word di PC ini belum diaktifkan (hanya-baca), jadi tidak tercantum.",
   "pdfword.word_switched": "Word belum diaktifkan dan tidak bisa mengedit: dibuka di {app}",
-  "aipack.folder": "Keepnear untuk AI",
   "aipack.what": "Menyatukan {count} file terpilih menjadi satu paket untuk asisten AI (ChatGPT, Claude…). AI tidak bisa melihat file di PC Anda, dan mengunggah satu per satu merepotkan.",
   "aipack.makes": "Dibuat sebuah folder (bernama tanggal dan jam) berisi:\n• salinan file (bernomor 001-, 002-…)\n• index.md: nama, waktu, ukuran, dan teks yang ditemukan Keepnear di tiap file\nserta zip bernama sama di sebelahnya. Seret zip ke obrolan AI; bila AI tak menerima zip, index.md saja juga bisa (hanya teks, kecil).",
   "aipack.examples_title": "Contoh",
@@ -2354,5 +2353,6 @@
   "aipack.note": "Semua dilakukan di PC ini, tidak ada yang diunggah; AI mana dan apa yang diberikan, Anda yang menentukan. File berupa salinan: aslinya tetap.",
   "aipack.change": "Ubah",
   "aipack.go": "Kemas",
-  "pdfword.made_by": "Dibuat dengan {app}."
+  "pdfword.made_by": "Dibuat dengan {app}.",
+  "aipack.name": "Nama:"
 }

@@ -2346,7 +2346,6 @@
   "pdfword.open_with": "開くアプリ：",
   "pdfword.word_off_short": "この PC の Word はライセンス認証されていない（閲覧のみ）ため、一覧にありません。",
   "pdfword.word_switched": "Word はライセンス認証されておらず編集できないため、{app} で開きました",
-  "aipack.folder": "Keepnear AI 用",
   "aipack.what": "選んだ {count} 個のファイルを 1 つのパッケージにまとめ、AI アシスタント（ChatGPT、Claude など）にまとめて渡せます。AI は PC 内のファイルを見られず、1 つずつのアップロードは手間です。",
   "aipack.makes": "日時の名前のフォルダーを作り、中に：\n• ファイルのコピー（001-、002-… の番号付き）\n• index.md：各ファイルの名前・日時・サイズと Keepnear が読み取った文字\n横に同名の zip も作ります。zip を AI のチャットにドラッグ。zip が使えない時は index.md だけでも OK（文字だけで小さい）。",
   "aipack.examples_title": "例",
@@ -2354,5 +2353,6 @@
   "aipack.note": "すべてこの PC で行い、何もアップロードしません。どの AI に何を渡すかはあなたが決めます。ファイルはコピーで、元は変わりません。",
   "aipack.change": "変更",
   "aipack.go": "まとめる",
-  "pdfword.made_by": "{app} で変換しました。"
+  "pdfword.made_by": "{app} で変換しました。",
+  "aipack.name": "名前："
 }

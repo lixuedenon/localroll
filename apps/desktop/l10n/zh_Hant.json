@@ -2346,7 +2346,6 @@
   "pdfword.open_with": "開啟方式：",
   "pdfword.word_off_short": "這台電腦的 Word 沒有啟用（只能看、不能改），所以不在清單裡。",
   "pdfword.word_switched": "Word 沒有啟用，不能編輯，已改用 {app} 開啟",
-  "aipack.folder": "Keepnear 給 AI",
   "aipack.what": "把選中的 {count} 個檔案整理成一個包，交給 AI 助手（ChatGPT、Claude 等）一起看、一起處理。AI 看不到你電腦裡的檔案，一個個上傳又麻煩。",
   "aipack.makes": "會建一個資料夾（名稱帶日期時間），裡面有：\n• 這些檔案的副本（001-、002-… 編號）\n• index.md：每個檔案的名稱、時間、大小和 Keepnear 辨識出的文字\n旁邊還有一個同名 zip（同樣的內容）。把 zip 拖進 AI 對話框；AI 不收 zip 時，只拖 index.md 也行（全是文字，很小）。",
   "aipack.examples_title": "例子",
@@ -2354,5 +2353,6 @@
   "aipack.note": "全在這台電腦上做，什麼都不上傳；交給哪個 AI、交什麼，由你自己決定。檔案是複製的，原檔不動。",
   "aipack.change": "更改",
   "aipack.go": "打包",
-  "pdfword.made_by": "這份是用 {app} 轉的。"
+  "pdfword.made_by": "這份是用 {app} 轉的。",
+  "aipack.name": "名稱："
 }

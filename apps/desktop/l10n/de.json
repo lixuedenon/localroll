@@ -2346,7 +2346,6 @@
   "pdfword.open_with": "Öffnen mit:",
   "pdfword.word_off_short": "Word ist auf diesem PC nicht aktiviert (nur lesen) und fehlt daher.",
   "pdfword.word_switched": "Word ist nicht aktiviert und kann nicht bearbeiten: stattdessen in {app} geöffnet",
-  "aipack.folder": "Keepnear für KI",
   "aipack.what": "Fasst die {count} gewählten Dateien zu einem Paket für einen KI-Assistenten (ChatGPT, Claude …) zusammen. Die KI sieht die Dateien auf Ihrem PC nicht, und einzeln hochladen ist mühsam.",
   "aipack.makes": "Es entsteht ein Ordner (mit Datum und Uhrzeit im Namen) mit:\n• Kopien der Dateien (nummeriert 001-, 002- …)\n• index.md: Name, Datum, Größe und der von Keepnear erkannte Text jeder Datei\ndaneben ein gleichnamiges ZIP. Ziehen Sie das ZIP in den KI-Chat; nimmt er kein ZIP, reicht auch index.md (nur Text, klein).",
   "aipack.examples_title": "Beispiele",
@@ -2354,5 +2353,6 @@
   "aipack.note": "Alles geschieht auf diesem PC, nichts wird hochgeladen; welche KI was bekommt, entscheiden Sie. Es sind Kopien, die Originale bleiben unverändert.",
   "aipack.change": "Ändern",
   "aipack.go": "Packen",
-  "pdfword.made_by": "Erstellt mit {app}."
+  "pdfword.made_by": "Erstellt mit {app}.",
+  "aipack.name": "Name:"
 }

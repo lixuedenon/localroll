@@ -2346,7 +2346,6 @@
   "pdfword.open_with": "Abrir com:",
   "pdfword.word_off_short": "O Word deste PC não está ativado (só leitura), por isso não aparece.",
   "pdfword.word_switched": "O Word não está ativado e não pode editar: aberto no {app}",
-  "aipack.folder": "Keepnear para IA",
   "aipack.what": "Junta os {count} arquivos escolhidos num pacote para um assistente de IA (ChatGPT, Claude…). A IA não vê os arquivos do seu PC, e enviá-los um a um é demorado.",
   "aipack.makes": "Cria uma pasta (com data e hora no nome) com:\n• cópias dos arquivos (numeradas 001-, 002-…)\n• index.md: nome, data, tamanho e o texto que o Keepnear achou em cada arquivo\ne ao lado um zip com o mesmo nome. Arraste o zip para o chat da IA; se ela não aceitar zip, só o index.md já serve (só texto, pequeno).",
   "aipack.examples_title": "Exemplos",
@@ -2354,5 +2353,6 @@
   "aipack.note": "Tudo é feito neste PC, nada é enviado; você decide qual IA recebe o quê. São cópias: os originais ficam como estão.",
   "aipack.change": "Alterar",
   "aipack.go": "Empacotar",
-  "pdfword.made_by": "Feito com {app}."
+  "pdfword.made_by": "Feito com {app}.",
+  "aipack.name": "Nome:"
 }
