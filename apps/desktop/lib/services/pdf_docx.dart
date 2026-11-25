@@ -324,11 +324,11 @@ class PdfToDocx {
       'word/document.xml': utf8.encode('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document $ns><w:body>$body</w:body></w:document>'),
       for (final e in media.entries) 'word/media/${e.key}.png': e.value,
     };
-    return _zip(files);
+    return zip(files);
   }
 
   // A small ZIP writer (deflated with dart:io's own zlib).
-  static Uint8List _zip(Map<String, List<int>> files) {
+  static Uint8List zip(Map<String, List<int>> files) {
     final out = BytesBuilder();
     final central = BytesBuilder();
     var count = 0;

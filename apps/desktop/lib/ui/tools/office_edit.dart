@@ -1,15 +1,15 @@
 // apps/desktop/lib/ui/tools/office_edit.dart
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:localroll_core/localroll_core.dart' show DiagLog, ZipReader;
+import 'package:localroll_core/localroll_core.dart' show DiagLog;
 
 import '../../app_services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/bg_tasks.dart';
 import '../../services/doc_editors.dart';
+import '../../services/docx_letters.dart';
 import '../../services/office_engines.dart';
 import '../../services/pdf_docx.dart';
 import '../../services/tool_outputs.dart';
@@ -20,23 +20,31 @@ import 'tools.dart';
 /// PDF → Word for editing: Word (activated or not, as long as it can) or
 /// the one chosen in the format converter; when that can't, Keepnear's own.
 /// [stop]: cancelled. Null when done, else why not.
-Future<String?> pdfToWord(String pdf, String out, {bool Function()? stop}) async {
+/// The programs that make Word files from PDFs, in the order tried: the
+/// one chosen (Word or WPS), else Word then WPS; none when Keepnear's own
+/// converter is chosen. LibreOffice never: its PDF → Word puts each line in
+/// a frame of its own (not editable).
+List<OfficeApp> pdfWordApps(Set<OfficeApp> have) {
   final pick = OfficeEngines.preferred;
-  final have = await OfficeEngines.installed();
-  final app = pick == 'keepnear'
-      ? null
-      : (OfficeApp.values.where((a) => a.name == pick && have.contains(a)).firstOrNull ?? (have.contains(OfficeApp.office) ? OfficeApp.office : null));
-  if (app != null) {
+  if (pick == 'keepnear') return const [];
+  const can = [OfficeApp.office, OfficeApp.wps];
+  final chosen = can.where((a) => a.name == pick && have.contains(a)).toList();
+  return chosen.isNotEmpty ? chosen : can.where(have.contains).toList();
+}
+
+Future<String?> pdfToWord(String pdf, String out, {bool Function()? stop}) async {
+  for (final app in pdfWordApps(await OfficeEngines.installed())) {
     final e = await OfficeEngines.runOnly(app, 'wordDocx', pdf, out);
     if (stop?.call() ?? false) return 'cancelled';
-    if (e == null && !_cellPerLetter(out)) {
+    if (e == null && File(out).existsSync()) {
       DiagLog.log('tools', 'pdf → docx by ${app.label}');
+      // Lines whose letters came out one text box each: joined back into
+      // lines, so they can be edited.
+      DocxLetters.mend(out);
       pdfWordBy[out] = app == OfficeApp.office ? 'Word' : app.label;
       return null;
     }
-    DiagLog.log('tools', e == null
-        ? 'pdf → docx by ${app.label}: the words came out a letter or two per table cell (hard to edit): Keepnear makes it again'
-        : 'pdf → docx by ${app.label} failed ($e): Keepnear makes it');
+    DiagLog.log('tools', 'pdf → docx by ${app.label} failed ($e): the next one');
     try {
       if (File(out).existsSync()) File(out).deleteSync();
     } catch (_) {}
@@ -52,36 +60,6 @@ Future<String?> pdfToWord(String pdf, String out, {bool Function()? stop}) async
 /// Which program made each Word file (shown when asked to edit it).
 final Map<String, String> pdfWordBy = {};
 
-/// Word's PDF reflow sometimes puts every letter (or two) in a table cell of
-/// its own: the line can't be edited as text. True when most of the words
-/// are in such cells.
-bool _cellPerLetter(String docx) {
-  try {
-    final zip = ZipReader.open(File(docx).readAsBytesSync());
-    final xml = zip?.read('word/document.xml');
-    if (xml == null) return false;
-    final s = utf8.decode(xml, allowMalformed: true);
-    final t = RegExp(r'<w:t(?:\s[^>]*)?>([^<]*)</w:t>');
-    var all = 0;
-    for (final m in t.allMatches(s)) {
-      all += m.group(1)!.trim().length;
-    }
-    if (all == 0) return false;
-    var small = 0, cells = 0;
-    for (final c in RegExp(r'<w:tc>.*?</w:tc>|<w:tc .*?</w:tc>', dotAll: true).allMatches(s)) {
-      final n = t.allMatches(c.group(0)!).fold<int>(0, (a, m) => a + m.group(1)!.trim().length);
-      if (n > 0 && n <= 2) {
-        cells++;
-        small += n;
-      }
-    }
-    final bad = cells >= 20 && small >= all * 0.4;
-    if (bad) DiagLog.log('tools', '$cells cells of 1–2 letters hold $small of $all letters');
-    return bad;
-  } catch (_) {
-    return false;
-  }
-}
 
 /// After PDF → Word: "Edit it now?" → opened in the first program that can
 /// edit (activated Word → WPS → ONLYOFFICE → LibreOffice → …) → once it is

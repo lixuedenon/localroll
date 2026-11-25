@@ -189,10 +189,8 @@ class _ConvertPageState extends State<ConvertPage> {
   /// The tag after an Office pair: "with WPS" / "needs Office…".
   Widget? _engineTag(ConvOp? op, String src) {
     if (op is PdfToWord) {
-      final word = OfficeEngines.preferred != 'keepnear' &&
-          (OfficeApp.values.any((a) => a.name == OfficeEngines.preferred && _apps.contains(a)) || _apps.contains(OfficeApp.office));
-      final a = OfficeApp.values.where((a) => a.name == OfficeEngines.preferred && _apps.contains(a)).firstOrNull ?? OfficeApp.office;
-      return _tag(tr('conv.engine_use', {'app': word ? a.label : 'Keepnear'}), const Color(0xFFFFF0E3), const Color(0xFFC0560A));
+      final a = pdfWordApps(_apps.toSet()).firstOrNull;
+      return _tag(tr('conv.engine_use', {'app': a == null ? 'Keepnear' : a.label}), const Color(0xFFFFF0E3), const Color(0xFFC0560A));
     }
     if (op == null || !op.office) return null;
     final a = _engine(op, src);
