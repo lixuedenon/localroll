@@ -2473,5 +2473,11 @@
   "rpc.converting": "{count} dosya dönüştürülüyor (telefondan)",
   "rpc.merging": "{count} PDF birleştiriliyor",
   "rpc.printing": "{count} dosya yazdırılıyor",
-  "rpc.packing": "{count} dosya YZ için paketleniyor"
+  "rpc.packing": "{count} dosya YZ için paketleniyor",
+  "remote.send": "Gönder",
+  "remote.send_to": "Hangi cihaza",
+  "remote.no_devices": "Başka eşlenmiş cihaz yok",
+  "remote.waits": "çevrimdışı: dönünce gönderilir",
+  "remote.split": "PDF böl",
+  "rpc.splitting": "{count} PDF bölünüyor"
 }

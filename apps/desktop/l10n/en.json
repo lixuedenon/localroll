@@ -2473,5 +2473,11 @@
   "rpc.converting": "Converting {count} files (from the phone)",
   "rpc.merging": "Merging {count} PDFs",
   "rpc.printing": "Printing {count} files",
-  "rpc.packing": "Packing {count} files for AI"
+  "rpc.packing": "Packing {count} files for AI",
+  "remote.send": "Send",
+  "remote.send_to": "Send to which device",
+  "remote.no_devices": "No other paired devices",
+  "remote.waits": "offline: sent when it's back",
+  "remote.split": "Split PDF",
+  "rpc.splitting": "Splitting {count} PDFs"
 }

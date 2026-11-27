@@ -11,6 +11,7 @@ import '../app_services.dart';
 import '../l10n/l10n.dart';
 import '../ui/library_tools.dart' show aiPackBase, makeAiPack;
 import '../ui/screen/screen_record.dart' show ScreenRecorder;
+import '../ui/send_paths.dart' show sendFilesOf, sendTargetFor;
 import '../ui/theme.dart' show lrFontFallback;
 import '../ui/tools/convert_run.dart';
 import 'bg_tasks.dart';
@@ -162,7 +163,7 @@ class RemoteControl extends ChangeNotifier {
         return _json(res, 200, await _files(q));
       case 'tools':
         await req.drain<void>();
-        return _json(res, 200, await _tools(q));
+        return _json(res, 200, await _tools(q, d));
       case 'tasks':
         await req.drain<void>();
         return _json(res, 200, _tasks());
@@ -232,8 +233,9 @@ class RemoteControl extends ChangeNotifier {
   /// May a phone take [path]: listed, or made here for a phone.
   bool mayTake(String path) => s.pcFiles.allowed(path) || (_made.contains(path) && File(path).existsSync());
 
-  /// What the chosen files can become (from the first), and the printers.
-  Future<Map<String, Object?>> _tools(Map<String, String> q) async {
+  /// What the chosen files can become (from the first), the printers and
+  /// the other devices (to send to).
+  Future<Map<String, Object?>> _tools(Map<String, String> q, TrustedDevice d) async {
     final ps = _paths(q);
     final choices = ps.isEmpty ? const <ConvChoice>[] : FormatTable.choicesFor(ps.first, FormatTable.find(ps.first, ConvCat.image)?.$1 ?? ConvCat.image);
     final printers = <Map<String, Object?>>[];
@@ -252,6 +254,10 @@ class RemoteControl extends ChangeNotifier {
     return {
       'convert': [for (final c in choices) {'to': c.to.id, 'label': c.to.label, 'use': tr(c.useKey), 'best': c.recommended}],
       'printers': printers,
+      'devices': [
+        for (final id in {...s.settings.peers.keys, ...s.settings.trusted.keys})
+          if (id != d.id) {'id': id, 'name': s.deviceName(id), 'online': s.isOnline(id) || s.phoneTarget(id) != null, 'pc': s.settings.peers.containsKey(id)},
+      ],
     };
   }
 
@@ -375,6 +381,54 @@ class RemoteControl extends ChangeNotifier {
           },
         ));
         return {'ok': true};
+      case 'send':
+        final ids = () {
+          try {
+            final l = jsonDecode(q['to'] ?? '[]');
+            return [for (final x in (l is List ? l : const [])) if (x is String) x];
+          } catch (_) {
+            return const <String>[];
+          }
+        }();
+        final files = await sendFilesOf(ps);
+        if (files.isEmpty || ids.isEmpty) return {'ok': false};
+        final title = ps.length == 1 ? ps.first.split(Platform.pathSeparator).last : tr('send.n_files', {'count': files.length});
+        var n = 0;
+        for (final id in ids) {
+          final p = sendTargetFor(s, id);
+          if (p == null) continue;
+          if (s.settings.peers.containsKey(id)) {
+            s.sender.add(p, files, title);
+          } else {
+            // A phone: as they are (no question here: the phone asked).
+            s.sender.add(p, files, title, toPhone: true, platform: s.settings.trusted[id]?.platform ?? '');
+          }
+          n++;
+          DiagLog.log('remote', '${d.name}: sends ${files.length} files to ${s.deviceName(id)}');
+        }
+        return {'ok': n > 0};
+      case 'split':
+        final pdfs = [for (final p in ps) if (p.toLowerCase().endsWith('.pdf')) p];
+        if (pdfs.isEmpty) return {'ok': false};
+        unawaited(BgTasks.instance.run<void>(
+          title: tr('rpc.splitting', {'count': pdfs.length}),
+          job: (t) async {
+            for (final p in pdfs) {
+              final doc = await openPdfLoose(p);
+              final n = doc.pages.length;
+              await doc.dispose();
+              final outs = <String>[];
+              for (var i = 0; i < n; i++) {
+                t.setProgress(i / n);
+                final out = toolOutPath(s, p, '-p${i + 1}', 'pdf');
+                if (await PdfBuilder.build(out, [PdfFromDoc(p, i)]) == null) outs.add(out);
+              }
+              _madeAdd(outs.reversed);
+              DiagLog.log('remote', '${d.name}: split ${p.split(Platform.pathSeparator).last} into ${outs.length}');
+            }
+          },
+        ));
+        return {'ok': true};
       case 'aipack':
         unawaited(BgTasks.instance.run<void>(
           title: tr('rpc.packing', {'count': ps.length}),
@@ -429,7 +483,7 @@ class RemoteControl extends ChangeNotifier {
       return {'ok': false, 'error': why};
     }
 
-    if (const {'convert', 'compress', 'merge', 'print', 'aipack'}.contains(what)) return _tool(d, what, q);
+    if (const {'convert', 'compress', 'merge', 'split', 'print', 'send', 'aipack'}.contains(what)) return _tool(d, what, q);
     switch (what) {
       case 'rec_start':
         DiagLog.log('remote', '${d.name}: started recording the screen');

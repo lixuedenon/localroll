@@ -2473,5 +2473,11 @@
   "rpc.converting": "{count} Dateien umwandeln (vom Handy)",
   "rpc.merging": "{count} PDFs zusammenfügen",
   "rpc.printing": "{count} Dateien drucken",
-  "rpc.packing": "{count} Dateien für KI packen"
+  "rpc.packing": "{count} Dateien für KI packen",
+  "remote.send": "Senden",
+  "remote.send_to": "An welches Gerät",
+  "remote.no_devices": "Keine anderen gekoppelten Geräte",
+  "remote.waits": "offline: wird gesendet, sobald da",
+  "remote.split": "PDF aufteilen",
+  "rpc.splitting": "{count} PDFs aufteilen"
 }

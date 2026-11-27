@@ -2473,5 +2473,11 @@
   "rpc.converting": "Mengonversi {count} file (dari ponsel)",
   "rpc.merging": "Menggabung {count} PDF",
   "rpc.printing": "Mencetak {count} file",
-  "rpc.packing": "Mengemas {count} file untuk AI"
+  "rpc.packing": "Mengemas {count} file untuk AI",
+  "remote.send": "Kirim",
+  "remote.send_to": "Kirim ke perangkat mana",
+  "remote.no_devices": "Tidak ada perangkat lain yang dipasangkan",
+  "remote.waits": "offline: dikirim saat kembali",
+  "remote.split": "Pisah PDF",
+  "rpc.splitting": "Memisah {count} PDF"
 }

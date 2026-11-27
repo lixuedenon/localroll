@@ -2473,5 +2473,11 @@
   "rpc.converting": "Đang chuyển {count} tệp (từ điện thoại)",
   "rpc.merging": "Đang gộp {count} PDF",
   "rpc.printing": "Đang in {count} tệp",
-  "rpc.packing": "Đóng gói {count} tệp cho AI"
+  "rpc.packing": "Đóng gói {count} tệp cho AI",
+  "remote.send": "Gửi",
+  "remote.send_to": "Gửi tới thiết bị nào",
+  "remote.no_devices": "Không có thiết bị ghép nối khác",
+  "remote.waits": "ngoại tuyến: gửi khi quay lại",
+  "remote.split": "Tách PDF",
+  "rpc.splitting": "Đang tách {count} PDF"
 }

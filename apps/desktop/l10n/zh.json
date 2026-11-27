@@ -2473,5 +2473,11 @@
   "rpc.converting": "手机让电脑转换 {count} 个文件",
   "rpc.merging": "合并 {count} 个 PDF",
   "rpc.printing": "打印 {count} 个文件",
-  "rpc.packing": "打包 {count} 个文件给 AI"
+  "rpc.packing": "打包 {count} 个文件给 AI",
+  "remote.send": "发送",
+  "remote.send_to": "发给哪台设备",
+  "remote.no_devices": "没有别的配对设备",
+  "remote.waits": "不在线，上线后自动发",
+  "remote.split": "拆分 PDF",
+  "rpc.splitting": "拆分 {count} 个 PDF"
 }

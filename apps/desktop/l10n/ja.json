@@ -2473,5 +2473,11 @@
   "rpc.converting": "スマホからの変換 {count} 件",
   "rpc.merging": "PDF {count} 個を結合",
   "rpc.printing": "{count} 件を印刷",
-  "rpc.packing": "{count} 件を AI 用にまとめる"
+  "rpc.packing": "{count} 件を AI 用にまとめる",
+  "remote.send": "送信",
+  "remote.send_to": "どの端末に送る",
+  "remote.no_devices": "他にペアリングした端末がありません",
+  "remote.waits": "オフライン（戻ったら送信）",
+  "remote.split": "PDF を分割",
+  "rpc.splitting": "PDF {count} 個を分割"
 }

@@ -2473,5 +2473,11 @@
   "rpc.converting": "Convirtiendo {count} archivos (desde el móvil)",
   "rpc.merging": "Uniendo {count} PDF",
   "rpc.printing": "Imprimiendo {count} archivos",
-  "rpc.packing": "Empaquetando {count} archivos para IA"
+  "rpc.packing": "Empaquetando {count} archivos para IA",
+  "remote.send": "Enviar",
+  "remote.send_to": "¿A qué dispositivo?",
+  "remote.no_devices": "No hay otros dispositivos emparejados",
+  "remote.waits": "sin conexión: se envía al volver",
+  "remote.split": "Dividir PDF",
+  "rpc.splitting": "Dividiendo {count} PDF"
 }

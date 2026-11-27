@@ -2473,5 +2473,11 @@
   "rpc.converting": "แปลง {count} ไฟล์ (จากมือถือ)",
   "rpc.merging": "รวม {count} PDF",
   "rpc.printing": "พิมพ์ {count} ไฟล์",
-  "rpc.packing": "แพ็ก {count} ไฟล์ให้ AI"
+  "rpc.packing": "แพ็ก {count} ไฟล์ให้ AI",
+  "remote.send": "ส่ง",
+  "remote.send_to": "ส่งไปเครื่องไหน",
+  "remote.no_devices": "ไม่มีอุปกรณ์อื่นที่จับคู่",
+  "remote.waits": "ออฟไลน์: ส่งเมื่อกลับมา",
+  "remote.split": "แยก PDF",
+  "rpc.splitting": "แยก {count} PDF"
 }

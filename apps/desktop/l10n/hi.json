@@ -2473,5 +2473,11 @@
   "rpc.converting": "{count} फ़ाइलें बदली जा रही हैं (फ़ोन से)",
   "rpc.merging": "{count} PDF जोड़े जा रहे हैं",
   "rpc.printing": "{count} फ़ाइलें प्रिंट हो रही हैं",
-  "rpc.packing": "{count} फ़ाइलें AI के लिए पैक"
+  "rpc.packing": "{count} फ़ाइलें AI के लिए पैक",
+  "remote.send": "भेजें",
+  "remote.send_to": "किस डिवाइस को",
+  "remote.no_devices": "कोई अन्य जुड़ा डिवाइस नहीं",
+  "remote.waits": "ऑफ़लाइन: लौटने पर भेजा जाएगा",
+  "remote.split": "PDF बाँटें",
+  "rpc.splitting": "{count} PDF बाँटे जा रहे हैं"
 }

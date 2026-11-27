@@ -2473,5 +2473,11 @@
   "rpc.converting": "Conversion de {count} fichiers (depuis le téléphone)",
   "rpc.merging": "Fusion de {count} PDF",
   "rpc.printing": "Impression de {count} fichiers",
-  "rpc.packing": "Paquet IA de {count} fichiers"
+  "rpc.packing": "Paquet IA de {count} fichiers",
+  "remote.send": "Envoyer",
+  "remote.send_to": "À quel appareil",
+  "remote.no_devices": "Aucun autre appareil associé",
+  "remote.waits": "hors ligne : envoyé à son retour",
+  "remote.split": "Scinder le PDF",
+  "rpc.splitting": "Scission de {count} PDF"
 }

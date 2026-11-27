@@ -2473,5 +2473,11 @@
   "rpc.converting": "手機讓電腦轉換 {count} 個檔案",
   "rpc.merging": "合併 {count} 個 PDF",
   "rpc.printing": "列印 {count} 個檔案",
-  "rpc.packing": "打包 {count} 個檔案給 AI"
+  "rpc.packing": "打包 {count} 個檔案給 AI",
+  "remote.send": "傳送",
+  "remote.send_to": "傳給哪台裝置",
+  "remote.no_devices": "沒有別的配對裝置",
+  "remote.waits": "不在線，上線後自動傳",
+  "remote.split": "拆分 PDF",
+  "rpc.splitting": "拆分 {count} 個 PDF"
 }

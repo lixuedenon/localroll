@@ -2473,5 +2473,11 @@
   "rpc.converting": "تحويل {count} ملفات (من الهاتف)",
   "rpc.merging": "دمج {count} ملفات PDF",
   "rpc.printing": "طباعة {count} ملفات",
-  "rpc.packing": "حزم {count} ملفات للذكاء الاصطناعي"
+  "rpc.packing": "حزم {count} ملفات للذكاء الاصطناعي",
+  "remote.send": "إرسال",
+  "remote.send_to": "إلى أي جهاز",
+  "remote.no_devices": "لا توجد أجهزة مقترنة أخرى",
+  "remote.waits": "غير متصل: يُرسل عند عودته",
+  "remote.split": "تقسيم PDF",
+  "rpc.splitting": "تقسيم {count} ملفات PDF"
 }

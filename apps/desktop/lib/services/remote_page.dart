@@ -16,6 +16,7 @@ const List<String> remoteWords = [
   'remote.clip_empty', 'remote.copied', 'remote.tab_tasks', 'remote.select', 'remote.convert', 'remote.compress', 'remote.merge',
   'remote.print', 'remote.aipack', 'remote.started', 'remote.no_tasks', 'remote.made', 'remote.pick_printer', 'remote.no_printer',
   'remote.need_two_pdfs', 'remote.rec_start', 'remote.rec_stop', 'remote.selected', 'remote.no_convert', 'remote.small',
+  'remote.send', 'remote.send_to', 'remote.no_devices', 'remote.waits', 'remote.split',
 ];
 
 /// The page a phone shows for "Other files on this PC" (the phone only
@@ -109,7 +110,7 @@ textarea{width:100%;min-height:70px;border:1px solid #D8E0EE;border-radius:10px;
 </div>
 <div id="tasks"><div class="sec" id="th1"></div><div id="tl"></div><div class="sec" id="th2"></div><ul id="ml" style="padding:0"></ul></div>
 <div id="bar"><div class="n" id="bn"></div><div class="bt">
-<button id="a_conv"></button><button id="a_comp"></button><button id="a_merge"></button><button id="a_print"></button><button id="a_ai"></button></div></div>
+<button id="a_conv"></button><button id="a_send"></button><button id="a_comp"></button><button id="a_merge"></button><button id="a_split"></button><button id="a_print"></button><button id="a_ai"></button></div></div>
 <div id="mask"></div><div id="sheet"></div>
 <div class="toast" id="toast"></div>
 <script>
@@ -215,6 +216,11 @@ function initTools(){
     if(!r.convert.length){toast(t('remote.no_convert'));return;}
     sheet(t('remote.convert'),null,r.convert.map(c=>({label:c.label+(c.best?' ★':'')+(c.use?'  · '+c.use:''),go:()=>tool({do:'convert',ps:ps(),to:c.to})})));};
   $('a_comp').onclick=()=>{if(chosen.size)tool({do:'compress',ps:ps()});};
+  $('a_send').textContent=t('remote.send');$('a_split').textContent=t('remote.split');
+  $('a_split').onclick=()=>{if(chosen.size)tool({do:'split',ps:ps()});};
+  $('a_send').onclick=async()=>{if(!chosen.size)return;const r=await (await fetch('tools?'+new URLSearchParams({ps:ps()}))).json();
+    if(!r.devices.length){toast(t('remote.no_devices'));return;}
+    sheet(t('remote.send_to'),null,r.devices.map(x=>({label:(x.pc?'💻 ':'📱 ')+x.name+(x.online?'':'  · '+t('remote.waits')),go:()=>tool({do:'send',ps:ps(),to:JSON.stringify([x.id])})})));};
   $('a_merge').onclick=()=>{if(chosen.size)tool({do:'merge',ps:ps()});};
   $('a_ai').onclick=()=>{if(chosen.size)tool({do:'aipack',ps:ps()});};
   $('a_print').onclick=async()=>{if(!chosen.size)return;const r=await (await fetch('tools?'+new URLSearchParams({ps:ps()}))).json();

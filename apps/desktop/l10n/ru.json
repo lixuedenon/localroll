@@ -2473,5 +2473,11 @@
   "rpc.converting": "Преобразование файлов с телефона: {count}",
   "rpc.merging": "Объединение PDF: {count}",
   "rpc.printing": "Печать файлов: {count}",
-  "rpc.packing": "Пакет для ИИ: {count} файлов"
+  "rpc.packing": "Пакет для ИИ: {count} файлов",
+  "remote.send": "Отправить",
+  "remote.send_to": "На какое устройство",
+  "remote.no_devices": "Других сопряжённых устройств нет",
+  "remote.waits": "не в сети: отправится позже",
+  "remote.split": "Разделить PDF",
+  "rpc.splitting": "Разделение PDF: {count}"
 }

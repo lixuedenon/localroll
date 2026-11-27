@@ -2473,5 +2473,11 @@
   "rpc.converting": "휴대폰 요청 변환 {count}개",
   "rpc.merging": "PDF {count}개 합치는 중",
   "rpc.printing": "{count}개 인쇄 중",
-  "rpc.packing": "{count}개를 AI용으로 묶는 중"
+  "rpc.packing": "{count}개를 AI용으로 묶는 중",
+  "remote.send": "보내기",
+  "remote.send_to": "어느 기기로 보낼까요",
+  "remote.no_devices": "다른 페어링 기기가 없습니다",
+  "remote.waits": "오프라인: 연결되면 전송",
+  "remote.split": "PDF 나누기",
+  "rpc.splitting": "PDF {count}개 나누는 중"
 }
