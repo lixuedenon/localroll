@@ -25,6 +25,7 @@ import 'services/open_with.dart';
 import 'services/settings.dart';
 import 'services/single_instance.dart';
 import 'services/watchdog.dart';
+import 'ui/copy_in_ui.dart';
 import 'ui/firewall_prompt.dart';
 import 'ui/app_nav.dart';
 import 'ui/boot_screen.dart';
@@ -59,6 +60,8 @@ Future<void> main(List<String> args) async {
   final sending = args.contains(OpenWith.sendFlag);
   // Explorer's "Edit with Keepnear" (PDF): straight into the editor.
   final editing = args.contains(OpenWith.editFlag);
+  // Explorer's "Copy to Keepnear library".
+  final copying = args.contains(OpenWith.copyInFlag);
   final toSend = [
     for (final p in args)
       if (!p.startsWith('--') && FileSystemEntity.typeSync(p) != FileSystemEntityType.notFound) p,
@@ -67,11 +70,23 @@ Future<void> main(List<String> args) async {
   // running (it answers on this PC) gets the files and comes to the front;
   // this one quits at once. Checked three ways: it answers, the Windows
   // mutex, the lock file.
-  if (sending ? await _openInRunningCopy(toSend, rounds: 1, send: true) : await _handOver(files, rounds: 1, edit: editing)) exit(0);
+  if (copying
+      ? await _openInRunningCopy(toSend, rounds: 1, copyIn: true)
+      : sending
+          ? await _openInRunningCopy(toSend, rounds: 1, send: true)
+          : await _handOver(files, rounds: 1, edit: editing)) {
+    exit(0);
+  }
   if (!SingleInstance.claim() || !await AppSettings.acquireInstanceLock()) {
     // It may still be starting (Explorer opens one copy per file): keep trying
     // a few seconds. Only if it can't be reached, say so in a small window.
-    if (sending ? await _openInRunningCopy(toSend, send: true) : await _handOver(files, rounds: 16, edit: editing)) exit(0);
+    if (copying
+        ? await _openInRunningCopy(toSend, copyIn: true)
+        : sending
+            ? await _openInRunningCopy(toSend, send: true)
+            : await _handOver(files, rounds: 16, edit: editing)) {
+      exit(0);
+    }
     runApp(const _AlreadyRunningApp());
     return;
   }
@@ -128,6 +143,22 @@ Future<void> main(List<String> args) async {
     unawaited(_bringToFront());
     sendFromExplorer(services, paths);
   };
+  // Explorer starts one copy per file: those after the first come over the
+  // local port, a moment apart; gathered (1.5 s) and copied as one batch.
+  final copyBatch = <String>[];
+  Timer? copyTimer;
+  services.server.onCopyInRequested = (paths) {
+    copyBatch.addAll(paths);
+    copyTimer?.cancel();
+    copyTimer = Timer(const Duration(milliseconds: 1500), () {
+      final all = copyBatch.toSet().toList();
+      copyBatch.clear();
+      unawaited(copyIntoLibrary(services, all));
+    });
+  };
+  if (copying && toSend.isNotEmpty) {
+    WidgetsBinding.instance.addPostFrameCallback((_) => services.server.onCopyInRequested?.call(toSend));
+  }
   if (sending && toSend.isNotEmpty) {
     WidgetsBinding.instance.addPostFrameCallback((_) => sendFromExplorer(services, toSend));
   }
@@ -198,8 +229,8 @@ Future<bool> _handOver(List<String> files, {required int rounds, bool edit = fal
 /// Hands [files] to the copy that is already running (on this PC only).
 /// Explorer starts one copy per file when several are opened at once, and
 /// the first may still be starting: tried for a few seconds.
-Future<bool> _openInRunningCopy(List<String> files, {int rounds = 16, bool send = false, bool edit = false}) async {
-  final body = utf8.encode(jsonEncode({'paths': files, if (send) 'send': true, if (edit) 'edit': true}));
+Future<bool> _openInRunningCopy(List<String> files, {int rounds = 16, bool send = false, bool edit = false, bool copyIn = false}) async {
+  final body = utf8.encode(jsonEncode({'paths': files, if (send) 'send': true, if (edit) 'edit': true, if (copyIn) 'copyIn': true}));
   for (var round = 0; round < rounds; round++) {
     final saved = await AppSettings.savedPort();
     final ports = {?saved, LrProtocol.defaultPort, ...LrProtocol.fallbackPorts};

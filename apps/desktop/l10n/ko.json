@@ -2354,5 +2354,16 @@
   "aipack.change": "변경",
   "aipack.go": "묶기",
   "pdfword.made_by": "{app}(으)로 변환했습니다.",
-  "aipack.name": "이름:"
+  "aipack.name": "이름:",
+  "copyin.verb": "Keepnear 보관함에 복사",
+  "copyin.owner": "이 PC",
+  "copyin.working": "파일 {count}개를 보관함에 복사",
+  "copyin.added": "{count}개를 보관함에 복사함 (사진·동영상 {photos}, 문서 {docs}, 기타 {others})",
+  "copyin.had": "{count}개는 이미 보관함에 있습니다(같은 내용)",
+  "copyin.failed": "복사하지 못함: {names}",
+  "copyin.show": "폴더에서 보기",
+  "copyin.offer_one": "이 파일은 보관함에 없습니다",
+  "copyin.offer_many": "그중 {count}개는 보관함에 없습니다",
+  "copyin.do": "보관함에 복사",
+  "copyin.inside": "이 파일들은 이미 보관함에 있습니다"
 }

@@ -2354,5 +2354,16 @@
   "aipack.change": "Изменить",
   "aipack.go": "Упаковать",
   "pdfword.made_by": "Сделано в {app}.",
-  "aipack.name": "Имя:"
+  "aipack.name": "Имя:",
+  "copyin.verb": "Копировать в медиатеку Keepnear",
+  "copyin.owner": "Этот ПК",
+  "copyin.working": "Копирование файлов в медиатеку: {count}",
+  "copyin.added": "Скопировано в медиатеку: {count} (фото/видео {photos}, документы {docs}, другое {others})",
+  "copyin.had": "Уже в медиатеке (то же содержимое): {count}, не копировались",
+  "copyin.failed": "Не удалось скопировать: {names}",
+  "copyin.show": "Показать в папке",
+  "copyin.offer_one": "Этого файла нет в медиатеке",
+  "copyin.offer_many": "{count} из этих файлов нет в медиатеке",
+  "copyin.do": "В медиатеку",
+  "copyin.inside": "Эти файлы уже в медиатеке"
 }

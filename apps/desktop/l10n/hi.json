@@ -2354,5 +2354,16 @@
   "aipack.change": "बदलें",
   "aipack.go": "पैक करें",
   "pdfword.made_by": "{app} से बनाया गया।",
-  "aipack.name": "नाम:"
+  "aipack.name": "नाम:",
+  "copyin.verb": "Keepnear लाइब्रेरी में कॉपी करें",
+  "copyin.owner": "यह PC",
+  "copyin.working": "{count} फ़ाइलें लाइब्रेरी में कॉपी हो रही हैं",
+  "copyin.added": "{count} लाइब्रेरी में कॉपी हुईं (फ़ोटो/वीडियो {photos}, दस्तावेज़ {docs}, अन्य {others})",
+  "copyin.had": "{count} पहले से लाइब्रेरी में हैं (वही सामग्री), दोबारा कॉपी नहीं हुईं",
+  "copyin.failed": "कॉपी नहीं हो सकीं: {names}",
+  "copyin.show": "फ़ोल्डर में दिखाएँ",
+  "copyin.offer_one": "यह फ़ाइल लाइब्रेरी में नहीं है",
+  "copyin.offer_many": "इनमें से {count} फ़ाइलें लाइब्रेरी में नहीं हैं",
+  "copyin.do": "लाइब्रेरी में कॉपी करें",
+  "copyin.inside": "ये फ़ाइलें पहले से लाइब्रेरी में हैं"
 }

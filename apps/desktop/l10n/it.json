@@ -2354,5 +2354,16 @@
   "aipack.change": "Cambia",
   "aipack.go": "Crea pacchetto",
   "pdfword.made_by": "Creato con {app}.",
-  "aipack.name": "Nome:"
+  "aipack.name": "Nome:",
+  "copyin.verb": "Copia nella libreria di Keepnear",
+  "copyin.owner": "Questo PC",
+  "copyin.working": "Copia di {count} file nella libreria",
+  "copyin.added": "{count} copiati nella libreria (foto/video {photos}, documenti {docs}, altri {others})",
+  "copyin.had": "{count} già nella libreria (stesso contenuto), non ricopiati",
+  "copyin.failed": "Non copiati: {names}",
+  "copyin.show": "Mostra nella cartella",
+  "copyin.offer_one": "Questo file non è nella libreria",
+  "copyin.offer_many": "{count} di questi file non sono nella libreria",
+  "copyin.do": "Copia nella libreria",
+  "copyin.inside": "Questi file sono già nella libreria"
 }

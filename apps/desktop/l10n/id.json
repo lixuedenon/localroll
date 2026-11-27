@@ -2354,5 +2354,16 @@
   "aipack.change": "Ubah",
   "aipack.go": "Kemas",
   "pdfword.made_by": "Dibuat dengan {app}.",
-  "aipack.name": "Nama:"
+  "aipack.name": "Nama:",
+  "copyin.verb": "Salin ke pustaka Keepnear",
+  "copyin.owner": "PC ini",
+  "copyin.working": "Menyalin {count} file ke pustaka",
+  "copyin.added": "{count} disalin ke pustaka (foto/video {photos}, dokumen {docs}, lainnya {others})",
+  "copyin.had": "{count} sudah ada di pustaka (isi sama), tidak disalin lagi",
+  "copyin.failed": "Tidak dapat disalin: {names}",
+  "copyin.show": "Tampilkan di folder",
+  "copyin.offer_one": "File ini tidak ada di pustaka",
+  "copyin.offer_many": "{count} file ini tidak ada di pustaka",
+  "copyin.do": "Salin ke pustaka",
+  "copyin.inside": "File ini sudah ada di pustaka"
 }

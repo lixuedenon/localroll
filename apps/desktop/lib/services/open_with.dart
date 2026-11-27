@@ -37,6 +37,11 @@ class OpenWith {
   /// Explorer's right-click "Edit with Keepnear" on a PDF.
   static const String editFlag = '--edit';
 
+  /// Explorer's right-click "Copy to Keepnear library" (any file Keepnear
+  /// opens; several at once: Explorer starts one copy per file, the one
+  /// running collects them).
+  static const String copyInFlag = '--copy-in';
+
   static Future<void> registerSendTo() async {
     if (!Platform.isWindows) return;
     final appData = Platform.environment['APPDATA'];
@@ -72,8 +77,9 @@ class OpenWith {
       final verb = tr('player.open_verb');
       final docVerb = tr('files.open_verb');
       final editVerb = tr('files.edit_verb');
+      final copyVerb = tr('copyin.verb');
       final q = await Process.run('reg', ['query', r'HKCU\Software\Classes\' '$progId', '/v', 'LocalRollSetup']);
-      if (q.exitCode == 0 && '${q.stdout}'.contains('$_version|$_exe|${shortKey('$verb|$docVerb|$editVerb')}')) return;
+      if (q.exitCode == 0 && '${q.stdout}'.contains('$_version|$_exe|${shortKey('$verb|$docVerb|$editVerb|$copyVerb')}')) return;
       final file = File('${Directory.systemTemp.path}${Platform.pathSeparator}localroll-openwith.reg');
       // .reg files are UTF-16 LE with a byte-order mark.
       final text = regFile(
@@ -82,6 +88,7 @@ class OpenWith {
           verb: verb,
           docVerb: docVerb,
           editVerb: editVerb,
+          copyVerb: copyVerb,
           extensions: [...playerImageExtensions, ...playerVideoExtensions],
           documents: documentExtensions);
       final units = text.codeUnits;
@@ -123,6 +130,7 @@ class OpenWith {
       required String verb,
       String? docVerb,
       String? editVerb,
+      String? copyVerb,
       required Iterable<String> extensions,
       Iterable<String> documents = const []}) {
     const root = r'HKEY_CURRENT_USER\Software\Classes';
@@ -130,7 +138,7 @@ class OpenWith {
     final docs = documents.toSet().difference(extensions.toSet()).toList()..sort();
     final b = StringBuffer('Windows Registry Editor Version 5.00\r\n\r\n')
       ..write('[$root\\$progId]\r\n@=${_q(appName)}\r\n"FriendlyTypeName"=${_q(appName)}\r\n')
-      ..write('"LocalRollSetup"=${_q('$_version|$exe|${shortKey(docVerb == null ? verb : '$verb|$docVerb|$editVerb')}')}\r\n\r\n')
+      ..write('"LocalRollSetup"=${_q('$_version|$exe|${shortKey(docVerb == null ? verb : copyVerb == null ? '$verb|$docVerb|$editVerb' : '$verb|$docVerb|$editVerb|$copyVerb')}')}\r\n\r\n')
       ..write('[$root\\$progId\\DefaultIcon]\r\n@=${_q('"$exe",0')}\r\n\r\n')
       ..write('[$root\\$progId\\shell\\open]\r\n"FriendlyAppName"=${_q(appName)}\r\n\r\n')
       ..write('[$root\\$progId\\shell\\open\\command]\r\n@=$command\r\n\r\n')
@@ -166,6 +174,15 @@ class OpenWith {
         ..write('[$root\\SystemFileAssociations\\.$e\\shell\\LocalRoll.Play]\r\n')
         ..write('"MUIVerb"=${_q(verb)}\r\n"Icon"=${_q('"$exe",0')}\r\n\r\n')
         ..write('[$root\\SystemFileAssociations\\.$e\\shell\\LocalRoll.Play\\command]\r\n@=$command\r\n\r\n');
+    }
+    // "Copy to Keepnear library" on every kind Keepnear opens.
+    if (copyVerb != null) {
+      for (final e in [...exts, ...docs]) {
+        b
+          ..write('[$root\\SystemFileAssociations\\.$e\\shell\\LocalRoll.CopyIn]\r\n')
+          ..write('"MUIVerb"=${_q(copyVerb)}\r\n"Icon"=${_q('"$exe",0')}\r\n\r\n')
+          ..write('[$root\\SystemFileAssociations\\.$e\\shell\\LocalRoll.CopyIn\\command]\r\n@=${_q('"$exe" $copyInFlag "%1"')}\r\n\r\n');
+      }
     }
     // A registered program: Windows lists it in "Open with" from the start.
     b

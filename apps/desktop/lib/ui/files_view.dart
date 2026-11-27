@@ -24,6 +24,7 @@ import 'text_window.dart';
 import 'tools/tools.dart' show runBusy;
 import 'trash_actions.dart';
 import 'lr_dialog.dart';
+import 'copy_in_ui.dart';
 
 /// Library tabs "Documents" / "Other": the files other PCs sent that are not
 /// photos or videos, straight from their folders (newest first).
@@ -328,6 +329,9 @@ Future<void> openFromOutside(BuildContext context, AppServices services, List<St
   final media = [for (final p in paths) if (PlayerEntry.playable(p)) p];
   final rest = [for (final p in paths) if (!PlayerEntry.playable(p)) p];
   final nav = Navigator.of(context);
+  // Not in the library: "Copy to the library" offered (nothing copied
+  // unless asked).
+  offerCopyIn(context, services, paths);
   for (final p in rest.take(8)) {
     if (!context.mounted) return;
     final name = p.split(Platform.pathSeparator).last;

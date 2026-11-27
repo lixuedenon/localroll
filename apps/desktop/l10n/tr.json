@@ -2354,5 +2354,16 @@
   "aipack.change": "Değiştir",
   "aipack.go": "Paketle",
   "pdfword.made_by": "{app} ile yapıldı.",
-  "aipack.name": "Ad:"
+  "aipack.name": "Ad:",
+  "copyin.verb": "Keepnear kitaplığına kopyala",
+  "copyin.owner": "Bu bilgisayar",
+  "copyin.working": "{count} dosya kitaplığa kopyalanıyor",
+  "copyin.added": "{count} dosya kitaplığa kopyalandı (fotoğraf/video {photos}, belge {docs}, diğer {others})",
+  "copyin.had": "{count} dosya zaten kitaplıkta (aynı içerik), yeniden kopyalanmadı",
+  "copyin.failed": "Kopyalanamadı: {names}",
+  "copyin.show": "Klasörde göster",
+  "copyin.offer_one": "Bu dosya kitaplıkta değil",
+  "copyin.offer_many": "Bunlardan {count} dosya kitaplıkta değil",
+  "copyin.do": "Kitaplığa kopyala",
+  "copyin.inside": "Bu dosyalar zaten kitaplıkta"
 }

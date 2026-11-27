@@ -607,6 +607,9 @@ class TransferServer extends ChangeNotifier {
   /// Explorer's "Edit with Keepnear" (PDF), handed over by a second copy.
   void Function(List<String> paths)? onEditRequested;
 
+  /// Explorer's "Copy to Keepnear library" (files handed over).
+  void Function(List<String> paths)? onCopyInRequested;
+
   /// The transfer history (what arrives is written into it).
   TransferLog? log;
 
@@ -831,6 +834,8 @@ class TransferServer extends ChangeNotifier {
           final list = paths.take(5000).toList();
           if (j is Map && j['send'] == true) {
             onSendRequested?.call(list);
+          } else if (j is Map && j['copyIn'] == true) {
+            onCopyInRequested?.call(list.take(2000).toList());
           } else if (j is Map && j['edit'] == true) {
             onEditRequested?.call(list.take(1).toList());
           } else {

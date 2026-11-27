@@ -2354,5 +2354,16 @@
   "aipack.change": "Modifier",
   "aipack.go": "Créer le paquet",
   "pdfword.made_by": "Créé avec {app}.",
-  "aipack.name": "Nom :"
+  "aipack.name": "Nom :",
+  "copyin.verb": "Copier dans la médiathèque Keepnear",
+  "copyin.owner": "Ce PC",
+  "copyin.working": "Copie de {count} fichiers dans la médiathèque",
+  "copyin.added": "{count} copiés dans la médiathèque (photos/vidéos {photos}, documents {docs}, autres {others})",
+  "copyin.had": "{count} déjà dans la médiathèque (même contenu), pas recopiés",
+  "copyin.failed": "Non copiés : {names}",
+  "copyin.show": "Afficher dans le dossier",
+  "copyin.offer_one": "Ce fichier n’est pas dans la médiathèque",
+  "copyin.offer_many": "{count} de ces fichiers ne sont pas dans la médiathèque",
+  "copyin.do": "Copier dans la médiathèque",
+  "copyin.inside": "Ces fichiers sont déjà dans la médiathèque"
 }

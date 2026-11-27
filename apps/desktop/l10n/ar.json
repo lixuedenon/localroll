@@ -2354,5 +2354,16 @@
   "aipack.change": "تغيير",
   "aipack.go": "حزم",
   "pdfword.made_by": "تم إنشاؤه بواسطة {app}.",
-  "aipack.name": "الاسم:"
+  "aipack.name": "الاسم:",
+  "copyin.verb": "نسخ إلى مكتبة Keepnear",
+  "copyin.owner": "هذا الحاسوب",
+  "copyin.working": "نسخ {count} ملفات إلى المكتبة",
+  "copyin.added": "نُسخ {count} إلى المكتبة (صور/فيديو {photos}، مستندات {docs}، أخرى {others})",
+  "copyin.had": "{count} موجودة في المكتبة (المحتوى نفسه) ولم تُنسخ",
+  "copyin.failed": "تعذّر نسخ: {names}",
+  "copyin.show": "إظهار في المجلد",
+  "copyin.offer_one": "هذا الملف ليس في المكتبة",
+  "copyin.offer_many": "{count} من هذه الملفات ليست في المكتبة",
+  "copyin.do": "نسخ إلى المكتبة",
+  "copyin.inside": "هذه الملفات موجودة في المكتبة بالفعل"
 }

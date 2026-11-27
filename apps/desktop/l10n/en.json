@@ -2354,5 +2354,16 @@
   "aipack.change": "Change",
   "aipack.go": "Pack",
   "pdfword.made_by": "Made by {app}.",
-  "aipack.name": "Name:"
+  "aipack.name": "Name:",
+  "copyin.verb": "Copy to Keepnear library",
+  "copyin.owner": "This PC",
+  "copyin.working": "Copying {count} files to the library",
+  "copyin.added": "Copied {count} to the library (photos/videos {photos}, documents {docs}, other {others})",
+  "copyin.had": "{count} already in the library (same content), not copied again",
+  "copyin.failed": "Couldn't copy: {names}",
+  "copyin.show": "Show in folder",
+  "copyin.offer_one": "This file isn't in the library",
+  "copyin.offer_many": "{count} of these files aren't in the library",
+  "copyin.do": "Copy to library",
+  "copyin.inside": "These files are in the library already"
 }

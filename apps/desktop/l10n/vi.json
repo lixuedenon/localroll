@@ -2354,5 +2354,16 @@
   "aipack.change": "Đổi",
   "aipack.go": "Đóng gói",
   "pdfword.made_by": "Tạo bằng {app}.",
-  "aipack.name": "Tên:"
+  "aipack.name": "Tên:",
+  "copyin.verb": "Sao chép vào thư viện Keepnear",
+  "copyin.owner": "Máy này",
+  "copyin.working": "Đang chép {count} tệp vào thư viện",
+  "copyin.added": "Đã chép {count} tệp vào thư viện (ảnh/video {photos}, tài liệu {docs}, khác {others})",
+  "copyin.had": "{count} tệp đã có trong thư viện (cùng nội dung), không chép lại",
+  "copyin.failed": "Không chép được: {names}",
+  "copyin.show": "Hiện trong thư mục",
+  "copyin.offer_one": "Tệp này không có trong thư viện",
+  "copyin.offer_many": "{count} tệp trong số này không có trong thư viện",
+  "copyin.do": "Chép vào thư viện",
+  "copyin.inside": "Các tệp này đã có trong thư viện"
 }

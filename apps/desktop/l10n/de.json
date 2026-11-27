@@ -2354,5 +2354,16 @@
   "aipack.change": "Ändern",
   "aipack.go": "Packen",
   "pdfword.made_by": "Erstellt mit {app}.",
-  "aipack.name": "Name:"
+  "aipack.name": "Name:",
+  "copyin.verb": "In Keepnear-Mediathek kopieren",
+  "copyin.owner": "Dieser PC",
+  "copyin.working": "{count} Dateien in die Mediathek kopieren",
+  "copyin.added": "{count} in die Mediathek kopiert (Fotos/Videos {photos}, Dokumente {docs}, Sonstige {others})",
+  "copyin.had": "{count} schon in der Mediathek (gleicher Inhalt), nicht erneut kopiert",
+  "copyin.failed": "Nicht kopiert: {names}",
+  "copyin.show": "Im Ordner zeigen",
+  "copyin.offer_one": "Diese Datei ist nicht in der Mediathek",
+  "copyin.offer_many": "{count} dieser Dateien sind nicht in der Mediathek",
+  "copyin.do": "In Mediathek kopieren",
+  "copyin.inside": "Diese Dateien sind schon in der Mediathek"
 }

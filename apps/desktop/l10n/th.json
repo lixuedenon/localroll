@@ -2354,5 +2354,16 @@
   "aipack.change": "เปลี่ยน",
   "aipack.go": "แพ็ก",
   "pdfword.made_by": "แปลงด้วย {app}",
-  "aipack.name": "ชื่อ:"
+  "aipack.name": "ชื่อ:",
+  "copyin.verb": "คัดลอกไปคลัง Keepnear",
+  "copyin.owner": "เครื่องนี้",
+  "copyin.working": "คัดลอก {count} ไฟล์ไปที่คลัง",
+  "copyin.added": "คัดลอก {count} ไฟล์ไปที่คลังแล้ว (รูป/วิดีโอ {photos} เอกสาร {docs} อื่นๆ {others})",
+  "copyin.had": "{count} ไฟล์มีอยู่ในคลังแล้ว (เนื้อหาเดียวกัน) ไม่ได้คัดลอกซ้ำ",
+  "copyin.failed": "คัดลอกไม่ได้: {names}",
+  "copyin.show": "แสดงในโฟลเดอร์",
+  "copyin.offer_one": "ไฟล์นี้ไม่อยู่ในคลัง",
+  "copyin.offer_many": "มี {count} ไฟล์ที่ไม่อยู่ในคลัง",
+  "copyin.do": "คัดลอกไปคลัง",
+  "copyin.inside": "ไฟล์เหล่านี้อยู่ในคลังแล้ว"
 }

@@ -2354,5 +2354,16 @@
   "aipack.change": "Alterar",
   "aipack.go": "Empacotar",
   "pdfword.made_by": "Feito com {app}.",
-  "aipack.name": "Nome:"
+  "aipack.name": "Nome:",
+  "copyin.verb": "Copiar para a biblioteca do Keepnear",
+  "copyin.owner": "Este PC",
+  "copyin.working": "Copiando {count} arquivos para a biblioteca",
+  "copyin.added": "{count} copiados para a biblioteca (fotos/vídeos {photos}, documentos {docs}, outros {others})",
+  "copyin.had": "{count} já estão na biblioteca (mesmo conteúdo), não copiados",
+  "copyin.failed": "Não copiados: {names}",
+  "copyin.show": "Mostrar na pasta",
+  "copyin.offer_one": "Este arquivo não está na biblioteca",
+  "copyin.offer_many": "{count} destes arquivos não estão na biblioteca",
+  "copyin.do": "Copiar para a biblioteca",
+  "copyin.inside": "Estes arquivos já estão na biblioteca"
 }

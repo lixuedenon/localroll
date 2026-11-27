@@ -2354,5 +2354,16 @@
   "aipack.change": "変更",
   "aipack.go": "まとめる",
   "pdfword.made_by": "{app} で変換しました。",
-  "aipack.name": "名前："
+  "aipack.name": "名前：",
+  "copyin.verb": "Keepnear ライブラリにコピー",
+  "copyin.owner": "この PC",
+  "copyin.working": "{count} 個のファイルをライブラリにコピー",
+  "copyin.added": "{count} 個をライブラリにコピー（写真・動画 {photos}、文書 {docs}、その他 {others}）",
+  "copyin.had": "{count} 個は既にライブラリにあります（同じ内容）",
+  "copyin.failed": "コピーできませんでした：{names}",
+  "copyin.show": "フォルダーで表示",
+  "copyin.offer_one": "このファイルはライブラリにありません",
+  "copyin.offer_many": "うち {count} 個はライブラリにありません",
+  "copyin.do": "ライブラリにコピー",
+  "copyin.inside": "これらのファイルは既にライブラリにあります"
 }

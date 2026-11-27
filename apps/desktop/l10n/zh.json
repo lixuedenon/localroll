@@ -2354,5 +2354,16 @@
   "aipack.change": "更改",
   "aipack.go": "打包",
   "pdfword.made_by": "这份是用 {app} 转的。",
-  "aipack.name": "名字："
+  "aipack.name": "名字：",
+  "copyin.verb": "复制到 Keepnear 媒体库",
+  "copyin.owner": "这台电脑",
+  "copyin.working": "复制 {count} 个文件到媒体库",
+  "copyin.added": "已复制 {count} 个到媒体库（照片视频 {photos}，文档 {docs}，其他 {others}）",
+  "copyin.had": "{count} 个已经在媒体库里（内容相同），没再复制",
+  "copyin.failed": "没能复制：{names}",
+  "copyin.show": "在文件夹中显示",
+  "copyin.offer_one": "这个文件不在媒体库里",
+  "copyin.offer_many": "其中 {count} 个文件不在媒体库里",
+  "copyin.do": "复制到媒体库",
+  "copyin.inside": "这些文件已经在媒体库里了"
 }
