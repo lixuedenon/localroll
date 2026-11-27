@@ -19,6 +19,7 @@ import 'services/ffmpeg.dart';
 import 'services/library_index.dart';
 import 'services/network.dart';
 import 'services/pdf_text.dart';
+import 'services/pc_files.dart';
 import 'services/peers.dart';
 import 'services/transfer_log.dart';
 import 'services/face_engine.dart';
@@ -96,6 +97,13 @@ class AppServices {
 
   /// What the tools made (and from what); puts results into the library.
   late final ToolRecords tools = ToolRecords(this);
+
+  /// Photos, videos, PDF, Office and text files elsewhere on this PC.
+  late final PcFiles pcFiles = PcFiles(
+    libraryRoot: () => library.rootPath,
+    extra: () => settings.pcFilesExtra,
+    skip: () => settings.pcFilesSkip,
+  );
 
   /// The "Snip & read text" key, as Settings says; false: another program
   /// already uses it.

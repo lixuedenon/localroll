@@ -217,6 +217,11 @@ class AppSettings extends ChangeNotifier {
   /// Where Package for AI puts its folders (null: Documents\Keepnear 给 AI).
   String? aiPackFolder;
 
+  /// "Other files on this PC": folders added to the usual ones, and
+  /// folders left out.
+  List<String> pcFilesExtra = [];
+  List<String> pcFilesSkip = [];
+
   /// Where the tools' results go: library / beside / both (ToolSaveTo).
   String toolSaveTo = 'library';
 
@@ -309,6 +314,8 @@ class AppSettings extends ChangeNotifier {
     s.otherFolder = j['otherFolder'] as String?;
     s.toolsFolder = j['toolsFolder'] as String?;
     s.aiPackFolder = j['aiPackFolder'] as String?;
+    s.pcFilesExtra = [for (final e in (j['pcFilesExtra'] as List? ?? const [])) if (e is String) e];
+    s.pcFilesSkip = [for (final e in (j['pcFilesSkip'] as List? ?? const [])) if (e is String) e];
     s.toolSaveTo = j['toolSaveTo'] as String? ?? 'library';
     s.officeEngine = j['officeEngine'] as String? ?? 'auto';
     s.convertedShown = j['convertedShown'] == true;
@@ -372,6 +379,8 @@ class AppSettings extends ChangeNotifier {
       if (otherFolder != null) 'otherFolder': otherFolder,
       if (toolsFolder != null) 'toolsFolder': toolsFolder,
       if (aiPackFolder != null) 'aiPackFolder': aiPackFolder,
+      if (pcFilesExtra.isNotEmpty) 'pcFilesExtra': pcFilesExtra,
+      if (pcFilesSkip.isNotEmpty) 'pcFilesSkip': pcFilesSkip,
       'toolSaveTo': toolSaveTo,
       'officeEngine': officeEngine,
       if (convertedShown) 'convertedShown': true,

@@ -41,6 +41,7 @@ import 'tools/doc_pages.dart';
 import 'tools/ocr_box_page.dart';
 import 'tools/print_page.dart';
 import 'tools/tools.dart';
+import 'pc_files_page.dart';
 import 'trash_page.dart';
 import 'player/player_page.dart';
 
@@ -730,6 +731,13 @@ class _LibraryPageState extends State<LibraryPage> {
                       icon: const Icon(Icons.photo_size_select_large_rounded, color: ToolColors.size),
                     ),
                   ),
+                HoverTip(
+                  text: tr('pcfiles.tip'),
+                  child: IconButton(
+                    onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => PcFilesPage(services: s))),
+                    icon: const Icon(Icons.travel_explore_rounded, color: ToolColors.plain),
+                  ),
+                ),
                 HoverTip(
                   text: tr('trash.tip'),
                   child: IconButton(
