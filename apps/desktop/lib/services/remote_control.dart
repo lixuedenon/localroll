@@ -25,6 +25,8 @@ import 'tool_outputs.dart';
 import 'file_actions.dart';
 import 'pc_files.dart';
 import 'remote_page.dart';
+import 'remote_screen.dart';
+import 'win_screen.dart';
 import 'settings.dart';
 
 /// How long the PC allows a phone.
@@ -39,6 +41,10 @@ class RemoteControl extends ChangeNotifier {
   RemoteControl(this.s);
 
   final AppServices s;
+
+  /// This PC's screen and its mouse / keyboard, for a phone.
+  late final RemoteScreen screen = RemoteScreen(() => s.ffmpeg.ffmpeg);
+  final Map<String, int> _sentFrame = {};
 
   /// Small picture of a file anywhere on this PC (set by AppServices).
   Future<File?> Function(String path)? thumb;
@@ -82,6 +88,7 @@ class RemoteControl extends ChangeNotifier {
     _until.remove(id);
     if (forGood) unawaited(_settings.update((x) => x.remoteAlways.remove(id)));
     _stopped[id] = DateTime.now();
+    screen.stop();
     if (activeId == id) {
       activeId = null;
       activeName = null;
@@ -161,6 +168,30 @@ class RemoteControl extends ChangeNotifier {
       case 'files':
         await req.drain<void>();
         return _json(res, 200, await _files(q));
+      case 'screens':
+        await req.drain<void>();
+        return _json(res, 200, {
+          'screens': [
+            for (final x in WinScreen.screens()) {'w': x.rect.width.round(), 'h': x.rect.height.round(), 'primary': x.primary},
+          ],
+        });
+      case 'frame':
+        await req.drain<void>();
+        final f = await screen.frame(
+          index: int.tryParse(q['s'] ?? '') ?? 0,
+          sharp: q['hd'] == '1',
+          after: _sentFrame[d.id] ?? 0,
+        );
+        if (f == null) return _json(res, 503, {'error': 'no_picture'});
+        _sentFrame[d.id] = f.$1;
+        res.headers.contentType = ContentType('image', 'jpeg');
+        res.headers.set(HttpHeaders.cacheControlHeader, 'no-store');
+        res.add(f.$2);
+        return res.close();
+      case 'input':
+        await req.drain<void>();
+        screen.input(q);
+        return _json(res, 200, {'ok': true});
       case 'tools':
         await req.drain<void>();
         return _json(res, 200, await _tools(q, d));

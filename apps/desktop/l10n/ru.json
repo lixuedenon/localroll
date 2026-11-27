@@ -2479,5 +2479,16 @@
   "remote.no_devices": "Других сопряжённых устройств нет",
   "remote.waits": "не в сети: отправится позже",
   "remote.split": "Разделить PDF",
-  "rpc.splitting": "Разделение PDF: {count}"
+  "rpc.splitting": "Разделение PDF: {count}",
+  "remote.screen_btn": "Экран ПК и управление",
+  "remote.typing": "Ввод",
+  "remote.keys": "Клавиши",
+  "remote.pad": "Тачпад",
+  "remote.sharp": "Чётко",
+  "remote.smooth": "Плавно",
+  "remote.screen_n": "Экран {n}",
+  "remote.mode_direct": "Напрямую: касание = клик там",
+  "remote.mode_pad": "Тачпад: двигайте курсор",
+  "remote.no_picture": "Изображения нет (ПК заблокирован или спит?)",
+  "remote.close": "Закрыть"
 }

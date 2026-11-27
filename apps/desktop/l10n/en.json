@@ -2479,5 +2479,16 @@
   "remote.no_devices": "No other paired devices",
   "remote.waits": "offline: sent when it's back",
   "remote.split": "Split PDF",
-  "rpc.splitting": "Splitting {count} PDFs"
+  "rpc.splitting": "Splitting {count} PDFs",
+  "remote.screen_btn": "See the PC's screen and use it",
+  "remote.typing": "Type",
+  "remote.keys": "Keys",
+  "remote.pad": "Touchpad",
+  "remote.sharp": "Sharp",
+  "remote.smooth": "Smooth",
+  "remote.screen_n": "Screen {n}",
+  "remote.mode_direct": "Direct: tap where you mean",
+  "remote.mode_pad": "Touchpad: push the pointer",
+  "remote.no_picture": "No picture right now (the PC may be locked or asleep)",
+  "remote.close": "Close"
 }

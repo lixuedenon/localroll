@@ -2479,5 +2479,16 @@
   "remote.no_devices": "没有别的配对设备",
   "remote.waits": "不在线，上线后自动发",
   "remote.split": "拆分 PDF",
-  "rpc.splitting": "拆分 {count} 个 PDF"
+  "rpc.splitting": "拆分 {count} 个 PDF",
+  "remote.screen_btn": "看电脑屏幕，用手指操作",
+  "remote.typing": "打字",
+  "remote.keys": "常用键",
+  "remote.pad": "触控板",
+  "remote.sharp": "清楚",
+  "remote.smooth": "流畅",
+  "remote.screen_n": "屏幕 {n}",
+  "remote.mode_direct": "直接点：点哪儿点哪儿",
+  "remote.mode_pad": "触控板：手指推光标",
+  "remote.no_picture": "暂时看不到画面（电脑可能锁屏或在睡眠）",
+  "remote.close": "关闭"
 }

@@ -2479,5 +2479,16 @@
   "remote.no_devices": "Không có thiết bị ghép nối khác",
   "remote.waits": "ngoại tuyến: gửi khi quay lại",
   "remote.split": "Tách PDF",
-  "rpc.splitting": "Đang tách {count} PDF"
+  "rpc.splitting": "Đang tách {count} PDF",
+  "remote.screen_btn": "Xem màn hình máy tính và điều khiển",
+  "remote.typing": "Gõ chữ",
+  "remote.keys": "Phím",
+  "remote.pad": "Bàn di chuột",
+  "remote.sharp": "Nét",
+  "remote.smooth": "Mượt",
+  "remote.screen_n": "Màn hình {n}",
+  "remote.mode_direct": "Trực tiếp: chạm đâu bấm đó",
+  "remote.mode_pad": "Bàn di: đẩy con trỏ",
+  "remote.no_picture": "Chưa có hình (máy có thể đang khóa hoặc ngủ)",
+  "remote.close": "Đóng"
 }

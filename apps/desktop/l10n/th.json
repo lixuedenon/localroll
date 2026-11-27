@@ -2479,5 +2479,16 @@
   "remote.no_devices": "ไม่มีอุปกรณ์อื่นที่จับคู่",
   "remote.waits": "ออฟไลน์: ส่งเมื่อกลับมา",
   "remote.split": "แยก PDF",
-  "rpc.splitting": "แยก {count} PDF"
+  "rpc.splitting": "แยก {count} PDF",
+  "remote.screen_btn": "ดูหน้าจอคอมพิวเตอร์และใช้นิ้วควบคุม",
+  "remote.typing": "พิมพ์",
+  "remote.keys": "ปุ่มลัด",
+  "remote.pad": "ทัชแพด",
+  "remote.sharp": "คมชัด",
+  "remote.smooth": "ลื่นไหล",
+  "remote.screen_n": "จอ {n}",
+  "remote.mode_direct": "แตะตรง: แตะตรงไหนคลิกตรงนั้น",
+  "remote.mode_pad": "ทัชแพด: เลื่อนเคอร์เซอร์",
+  "remote.no_picture": "ยังไม่เห็นภาพ (คอมพิวเตอร์อาจล็อกหรือสลีปอยู่)",
+  "remote.close": "ปิด"
 }

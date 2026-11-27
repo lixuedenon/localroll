@@ -2479,5 +2479,16 @@
   "remote.no_devices": "Aucun autre appareil associé",
   "remote.waits": "hors ligne : envoyé à son retour",
   "remote.split": "Scinder le PDF",
-  "rpc.splitting": "Scission de {count} PDF"
+  "rpc.splitting": "Scission de {count} PDF",
+  "remote.screen_btn": "Voir l’écran du PC et l’utiliser",
+  "remote.typing": "Saisir",
+  "remote.keys": "Touches",
+  "remote.pad": "Pavé tactile",
+  "remote.sharp": "Net",
+  "remote.smooth": "Fluide",
+  "remote.screen_n": "Écran {n}",
+  "remote.mode_direct": "Direct : on clique là où vous touchez",
+  "remote.mode_pad": "Pavé tactile : pousser le pointeur",
+  "remote.no_picture": "Pas d’image pour l’instant (PC verrouillé ou en veille ?)",
+  "remote.close": "Fermer"
 }

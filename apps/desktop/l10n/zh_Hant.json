@@ -2479,5 +2479,16 @@
   "remote.no_devices": "沒有別的配對裝置",
   "remote.waits": "不在線，上線後自動傳",
   "remote.split": "拆分 PDF",
-  "rpc.splitting": "拆分 {count} 個 PDF"
+  "rpc.splitting": "拆分 {count} 個 PDF",
+  "remote.screen_btn": "看電腦螢幕，用手指操作",
+  "remote.typing": "打字",
+  "remote.keys": "常用鍵",
+  "remote.pad": "觸控板",
+  "remote.sharp": "清楚",
+  "remote.smooth": "流暢",
+  "remote.screen_n": "螢幕 {n}",
+  "remote.mode_direct": "直接點：點哪裡點哪裡",
+  "remote.mode_pad": "觸控板：手指推游標",
+  "remote.no_picture": "暫時看不到畫面（電腦可能鎖定或在睡眠）",
+  "remote.close": "關閉"
 }

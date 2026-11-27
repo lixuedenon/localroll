@@ -2479,5 +2479,16 @@
   "remote.no_devices": "他にペアリングした端末がありません",
   "remote.waits": "オフライン（戻ったら送信）",
   "remote.split": "PDF を分割",
-  "rpc.splitting": "PDF {count} 個を分割"
+  "rpc.splitting": "PDF {count} 個を分割",
+  "remote.screen_btn": "PC の画面を見て指で操作",
+  "remote.typing": "入力",
+  "remote.keys": "キー",
+  "remote.pad": "タッチパッド",
+  "remote.sharp": "高画質",
+  "remote.smooth": "なめらか",
+  "remote.screen_n": "画面 {n}",
+  "remote.mode_direct": "直接：触れた所をクリック",
+  "remote.mode_pad": "タッチパッド：指でカーソルを動かす",
+  "remote.no_picture": "画面が届きません（PC がロック中かスリープ中かもしれません）",
+  "remote.close": "閉じる"
 }

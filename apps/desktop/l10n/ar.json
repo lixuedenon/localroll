@@ -2479,5 +2479,16 @@
   "remote.no_devices": "لا توجد أجهزة مقترنة أخرى",
   "remote.waits": "غير متصل: يُرسل عند عودته",
   "remote.split": "تقسيم PDF",
-  "rpc.splitting": "تقسيم {count} ملفات PDF"
+  "rpc.splitting": "تقسيم {count} ملفات PDF",
+  "remote.screen_btn": "عرض شاشة الحاسوب والتحكم بها",
+  "remote.typing": "كتابة",
+  "remote.keys": "مفاتيح",
+  "remote.pad": "لوحة اللمس",
+  "remote.sharp": "واضح",
+  "remote.smooth": "سلس",
+  "remote.screen_n": "الشاشة {n}",
+  "remote.mode_direct": "مباشر: انقر حيث تلمس",
+  "remote.mode_pad": "لوحة اللمس: حرّك المؤشر",
+  "remote.no_picture": "لا صورة الآن (ربما الحاسوب مقفل أو في السكون)",
+  "remote.close": "إغلاق"
 }

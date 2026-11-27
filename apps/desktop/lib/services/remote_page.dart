@@ -17,6 +17,8 @@ const List<String> remoteWords = [
   'remote.print', 'remote.aipack', 'remote.started', 'remote.no_tasks', 'remote.made', 'remote.pick_printer', 'remote.no_printer',
   'remote.need_two_pdfs', 'remote.rec_start', 'remote.rec_stop', 'remote.selected', 'remote.no_convert', 'remote.small',
   'remote.send', 'remote.send_to', 'remote.no_devices', 'remote.waits', 'remote.split',
+  'remote.screen_btn', 'remote.typing', 'remote.keys', 'remote.pad', 'remote.sharp', 'remote.smooth', 'remote.screen_n',
+  'remote.mode_direct', 'remote.mode_pad', 'remote.no_picture', 'remote.close',
 ];
 
 /// The page a phone shows for "Other files on this PC" (the phone only
@@ -82,6 +84,18 @@ textarea{width:100%;min-height:70px;border:1px solid #D8E0EE;border-radius:10px;
 .task{background:#fff;border-radius:12px;padding:10px 12px;margin:6px 0}
 .task .bar2{height:5px;background:#EFF3FA;border-radius:3px;margin-top:6px;overflow:hidden}
 .task .bar2 div{height:100%;background:#2F6BFF}
+#rs{position:fixed;inset:0;background:#0B1220;z-index:7;display:none;flex-direction:column}
+#rs .rt,#rs .rb{display:flex;align-items:center;gap:6px;padding:8px 10px;color:#fff;font-size:13px;background:#16213E}
+#rs .rb{justify-content:space-around;padding-bottom:22px}
+#rs button{border:none;background:#24345C;color:#fff;border-radius:14px;padding:7px 11px;font-size:13px}
+#rs button.on{background:#2F6BFF}
+#stage{flex:1;position:relative;overflow:hidden;touch-action:none}
+#fr{position:absolute;left:0;top:0;width:100%;transform-origin:0 0;user-select:none;-webkit-user-select:none;pointer-events:none}
+#rk{display:none;flex-wrap:wrap;gap:5px;padding:6px 8px;background:#16213E}
+#rk button{padding:6px 9px;font-size:12px}
+#kb{position:fixed;left:0;bottom:0;width:1px;height:1px;opacity:0;border:none}
+#rmsg{position:absolute;left:0;right:0;top:40%;text-align:center;color:#9FB0D0;font-size:14px}
+.big{width:100%;border:none;background:#16213E;color:#fff;border-radius:14px;padding:16px;font-size:16px;margin-bottom:14px}
 .toast{position:fixed;z-index:9;left:50%;bottom:24px;transform:translateX(-50%);background:#16213E;color:#fff;padding:8px 14px;border-radius:16px;font-size:13px;display:none}
 </style></head><body>
 <header>
@@ -98,6 +112,7 @@ textarea{width:100%;min-height:70px;border:1px solid #D8E0EE;border-radius:10px;
 <div id="files"><div class="cl"><div class="count" id="count"></div><button id="selb"></button></div>
 <ul id="list"></ul></div>
 <div id="pc">
+<button class="big" id="b_screen"></button>
 <div class="grid">
 <button id="b_shot"><span>📸</span></button><button id="b_clip"><span>📋</span></button><button id="b_lock"><span>🔒</span></button>
 <button id="b_vd"><span>🔉</span></button><button id="b_mute"><span>🔇</span></button><button id="b_vu"><span>🔊</span></button>
@@ -111,6 +126,13 @@ textarea{width:100%;min-height:70px;border:1px solid #D8E0EE;border-radius:10px;
 <div id="tasks"><div class="sec" id="th1"></div><div id="tl"></div><div class="sec" id="th2"></div><ul id="ml" style="padding:0"></ul></div>
 <div id="bar"><div class="n" id="bn"></div><div class="bt">
 <button id="a_conv"></button><button id="a_send"></button><button id="a_comp"></button><button id="a_merge"></button><button id="a_split"></button><button id="a_print"></button><button id="a_ai"></button></div></div>
+<div id="rs">
+<div class="rt"><button id="r_close"></button><span id="r_mode" style="flex:1;text-align:center"></span><button id="r_scr" style="display:none"></button></div>
+<div id="stage"><img id="fr" alt=""><div id="rmsg"></div></div>
+<div id="rk"></div>
+<div class="rb"><button id="r_type"></button><button id="r_keys"></button><button id="r_pad"></button><button id="r_q"></button></div>
+<input id="kb" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+</div>
 <div id="mask"></div><div id="sheet"></div>
 <div class="toast" id="toast"></div>
 <script>
@@ -262,10 +284,90 @@ function initPc(){
     if(r.ok)sheet(t('remote.off_soon'),null,[{label:t('remote.off_cancel'),cls:'blue',go:async()=>{const c=await act({do:'cancel'});toast(c.ok?t('remote.done'):t('remote.failed'));}}]);else toast(t('remote.failed'));}}]);
   $('b_off').onclick=()=>off('shutdown','remote.shutdown');$('b_restart').onclick=()=>off('restart','remote.restart');
 }
+const R={on:false,s:0,hd:false,pad:false,scale:1,tx:0,ty:0,screens:[]};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function inp(p){fetch('input?'+new URLSearchParams(p).toString()).catch(()=>{});}
+function rmode(){$('r_mode').textContent=t(R.pad?'remote.mode_pad':'remote.mode_direct');$('r_pad').classList.toggle('on',R.pad);
+  $('r_q').textContent=t(R.hd?'remote.sharp':'remote.smooth');}
+function view(){$('fr').style.transform='translate('+R.tx+'px,'+R.ty+'px) scale('+R.scale+')';}
+async function frames(){
+  let fails=0;
+  while(R.on){
+    try{const r=await fetch('frame?s='+R.s+'&hd='+(R.hd?1:0));
+      if(!r.ok){fails++;$('rmsg').textContent=t('remote.no_picture');await sleep(800);continue;}
+      const b=await r.blob();const u=URL.createObjectURL(b);const im=$('fr');const old=im.src;im.src=u;$('rmsg').textContent='';fails=0;
+      if(old&&old.startsWith('blob:'))setTimeout(()=>URL.revokeObjectURL(old),500);
+    }catch(e){fails++;await sleep(1000);}
+  }
+}
+async function openScreen(){
+  R.on=true;R.scale=1;R.tx=0;R.ty=0;view();$('rs').style.display='flex';document.body.style.overflow='hidden';
+  $('rmsg').textContent=t('pcfiles.loading');rmode();
+  try{const j=await (await fetch('screens')).json();R.screens=j.screens||[];}catch(e){}
+  $('r_scr').style.display=R.screens.length>1?'inline-block':'none';$('r_scr').textContent=t('remote.screen_n').replace('{n}',R.s+1);
+  frames();
+}
+function closeScreen(){R.on=false;$('rs').style.display='none';document.body.style.overflow='';$('kb').blur();}
+function pt(x,y){const r=$('fr').getBoundingClientRect();return {x:(x-r.left)/r.width,y:(y-r.top)/r.height};}
+function pcPerPx(){const r=$('fr').getBoundingClientRect();const sc=R.screens[R.s];return sc&&r.width?sc.w/r.width:2;}
+let T=null,two=null,lp=null,lastMove=0;
+function initScreen(){
+  $('b_screen').textContent='🖥️ '+t('remote.screen_btn');$('b_screen').onclick=openScreen;
+  $('r_close').textContent='✕ '+t('remote.close');$('r_close').onclick=closeScreen;
+  $('r_type').textContent=t('remote.typing');$('r_keys').textContent=t('remote.keys');$('r_pad').textContent=t('remote.pad');
+  $('r_type').onclick=()=>{$('kb').value='';$('kb').focus();};
+  $('r_keys').onclick=()=>{const k=$('rk');k.style.display=k.style.display==='flex'?'none':'flex';};
+  $('r_pad').onclick=()=>{R.pad=!R.pad;rmode();};
+  $('r_q').onclick=()=>{R.hd=!R.hd;rmode();};
+  $('r_scr').onclick=()=>{R.s=(R.s+1)%Math.max(1,R.screens.length);$('r_scr').textContent=t('remote.screen_n').replace('{n}',R.s+1);R.scale=1;R.tx=0;R.ty=0;view();};
+  for(const [k,l] of [['esc','Esc'],['tab','Tab'],['enter','Enter'],['back','⌫'],['del','Del'],['win','Win'],['ctrl+c','Ctrl+C'],['ctrl+v','Ctrl+V'],['ctrl+z','Ctrl+Z'],['ctrl+a','Ctrl+A'],['alt+tab','Alt+Tab'],['win+d','Win+D'],['left','←'],['up','↑'],['down','↓'],['right','→']]){
+    const b=document.createElement('button');b.textContent=l;b.onclick=()=>inp({t:'key',k});$('rk').appendChild(b);}
+  const kb=$('kb');
+  kb.addEventListener('beforeinput',e=>{
+    if(e.inputType==='insertText'&&!e.isComposing){e.preventDefault();if(e.data)inp({t:'text',s:e.data});}
+    else if(e.inputType==='deleteContentBackward'&&!e.isComposing){e.preventDefault();inp({t:'key',k:'back'});}
+    else if(e.inputType==='insertLineBreak'||e.inputType==='insertParagraph'){e.preventDefault();inp({t:'key',k:'enter'});}
+  });
+  kb.addEventListener('compositionend',e=>{if(e.data)inp({t:'text',s:e.data});setTimeout(()=>kb.value='',0);});
+  kb.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();inp({t:'key',k:'enter'});}});
+  const st=$('stage');
+  st.addEventListener('touchstart',e=>{e.preventDefault();
+    if(e.touches.length===1){const p=e.touches[0];T={x:p.clientX,y:p.clientY,lx:p.clientX,ly:p.clientY,t:Date.now(),moved:false,mode:'one'};
+      clearTimeout(lp);lp=setTimeout(()=>{if(T&&!T.moved&&T.mode==='one'){T.mode='long';if(navigator.vibrate)navigator.vibrate(25);}},550);}
+    else if(e.touches.length===2){clearTimeout(lp);if(T&&T.mode==='drag'){const q=pt(T.lx,T.ly);inp(R.pad?{t:'up'}:{t:'up',x:q.x,y:q.y});}T=null;
+      const [a,b]=e.touches;two={d:Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY),mx:(a.clientX+b.clientX)/2,my:(a.clientY+b.clientY)/2,s:R.scale,tx:R.tx,ty:R.ty,kind:null,py:(a.clientY+b.clientY)/2};}
+  },{passive:false});
+  st.addEventListener('touchmove',e=>{e.preventDefault();
+    if(two&&e.touches.length>=2){const [a,b]=e.touches;const d=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);const mx=(a.clientX+b.clientX)/2,my=(a.clientY+b.clientY)/2;
+      if(!two.kind){if(Math.abs(d-two.d)>15)two.kind='pinch';else if(Math.abs(my-two.my)>10)two.kind='scroll';}
+      if(two.kind==='pinch'){const r=st.getBoundingClientRect();const s=Math.min(5,Math.max(1,two.s*d/two.d));
+        const ox=two.mx-r.left,oy=two.my-r.top;R.tx=mx-r.left-(ox-two.tx)*s/two.s;R.ty=my-r.top-(oy-two.ty)*s/two.s;R.scale=s;if(s===1){R.tx=0;R.ty=0;}view();}
+      else if(two.kind==='scroll'){const step=Math.trunc((my-two.py)/30);if(step!==0){const q=pt(mx,my);inp({t:'scroll',dy:step,x:q.x,y:q.y});two.py+=step*30;}}
+      return;}
+    if(!T||e.touches.length!==1)return;const p=e.touches[0];const dx=p.clientX-T.lx,dy=p.clientY-T.ly;
+    if(Math.hypot(p.clientX-T.x,p.clientY-T.y)>8&&!T.moved){T.moved=true;clearTimeout(lp);
+      if(T.mode==='long'){T.mode='drag';const q=pt(T.x,T.y);inp(R.pad?{t:'down'}:{t:'down',x:q.x,y:q.y});}}
+    if(!T.moved)return;
+    const now=Date.now();
+    if(R.pad){const k=pcPerPx()*1.5;if(now-lastMove>40){inp({t:'rel',dx:Math.round(dx*k),dy:Math.round(dy*k)});lastMove=now;T.lx=p.clientX;T.ly=p.clientY;}return;}
+    if(T.mode==='drag'){if(now-lastMove>50){const q=pt(p.clientX,p.clientY);inp({t:'move',x:q.x,y:q.y});lastMove=now;}T.lx=p.clientX;T.ly=p.clientY;return;}
+    if(R.scale>1){R.tx+=dx;R.ty+=dy;view();}
+    T.lx=p.clientX;T.ly=p.clientY;
+  },{passive:false});
+  st.addEventListener('touchend',e=>{e.preventDefault();clearTimeout(lp);
+    if(two){if(e.touches.length===0)two=null;return;}
+    if(!T)return;const q=pt(T.x,T.y);
+    if(T.mode==='one'&&!T.moved)inp(R.pad?{t:'click'}:{t:'click',x:q.x,y:q.y});
+    else if(T.mode==='long'&&!T.moved)inp(R.pad?{t:'right'}:{t:'right',x:q.x,y:q.y});
+    else if(T.mode==='drag'){const z=pt(T.lx,T.ly);inp(R.pad?{t:'up'}:{t:'up',x:z.x,y:z.y});}
+    T=null;
+  },{passive:false});
+}
 $('mask').onclick=close;
 window.keepnearToast=toast;
 initPc();
 initTools();
+initScreen();
 barShow();
 init();
 </script></body></html>''';

@@ -2479,5 +2479,16 @@
   "remote.no_devices": "Nenhum outro dispositivo pareado",
   "remote.waits": "offline: enviado quando voltar",
   "remote.split": "Dividir PDF",
-  "rpc.splitting": "Dividindo {count} PDFs"
+  "rpc.splitting": "Dividindo {count} PDFs",
+  "remote.screen_btn": "Ver a tela do PC e usá-la",
+  "remote.typing": "Digitar",
+  "remote.keys": "Teclas",
+  "remote.pad": "Touchpad",
+  "remote.sharp": "Nítido",
+  "remote.smooth": "Fluido",
+  "remote.screen_n": "Tela {n}",
+  "remote.mode_direct": "Direto: toque onde quiser",
+  "remote.mode_pad": "Touchpad: mova o ponteiro",
+  "remote.no_picture": "Sem imagem agora (PC bloqueado ou em suspensão?)",
+  "remote.close": "Fechar"
 }

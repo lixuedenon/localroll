@@ -2479,5 +2479,16 @@
   "remote.no_devices": "कोई अन्य जुड़ा डिवाइस नहीं",
   "remote.waits": "ऑफ़लाइन: लौटने पर भेजा जाएगा",
   "remote.split": "PDF बाँटें",
-  "rpc.splitting": "{count} PDF बाँटे जा रहे हैं"
+  "rpc.splitting": "{count} PDF बाँटे जा रहे हैं",
+  "remote.screen_btn": "PC की स्क्रीन देखें और चलाएँ",
+  "remote.typing": "टाइप",
+  "remote.keys": "कुंजियाँ",
+  "remote.pad": "टचपैड",
+  "remote.sharp": "साफ़",
+  "remote.smooth": "सहज",
+  "remote.screen_n": "स्क्रीन {n}",
+  "remote.mode_direct": "सीधे: जहाँ छुएँ वहीं क्लिक",
+  "remote.mode_pad": "टचपैड: पॉइंटर खिसकाएँ",
+  "remote.no_picture": "अभी तस्वीर नहीं (PC लॉक या स्लीप में हो सकता है)",
+  "remote.close": "बंद करें"
 }

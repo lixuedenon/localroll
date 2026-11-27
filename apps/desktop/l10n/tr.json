@@ -2479,5 +2479,16 @@
   "remote.no_devices": "Başka eşlenmiş cihaz yok",
   "remote.waits": "çevrimdışı: dönünce gönderilir",
   "remote.split": "PDF böl",
-  "rpc.splitting": "{count} PDF bölünüyor"
+  "rpc.splitting": "{count} PDF bölünüyor",
+  "remote.screen_btn": "Bilgisayar ekranını gör ve kullan",
+  "remote.typing": "Yaz",
+  "remote.keys": "Tuşlar",
+  "remote.pad": "Dokunmatik yüzey",
+  "remote.sharp": "Net",
+  "remote.smooth": "Akıcı",
+  "remote.screen_n": "Ekran {n}",
+  "remote.mode_direct": "Doğrudan: dokunduğun yer tıklanır",
+  "remote.mode_pad": "Dokunmatik: imleci kaydır",
+  "remote.no_picture": "Şu an görüntü yok (bilgisayar kilitli ya da uykuda olabilir)",
+  "remote.close": "Kapat"
 }

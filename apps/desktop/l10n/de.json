@@ -2479,5 +2479,16 @@
   "remote.no_devices": "Keine anderen gekoppelten Geräte",
   "remote.waits": "offline: wird gesendet, sobald da",
   "remote.split": "PDF aufteilen",
-  "rpc.splitting": "{count} PDFs aufteilen"
+  "rpc.splitting": "{count} PDFs aufteilen",
+  "remote.screen_btn": "PC-Bildschirm sehen und bedienen",
+  "remote.typing": "Tippen",
+  "remote.keys": "Tasten",
+  "remote.pad": "Touchpad",
+  "remote.sharp": "Scharf",
+  "remote.smooth": "Flüssig",
+  "remote.screen_n": "Bildschirm {n}",
+  "remote.mode_direct": "Direkt: Tippen = Klick dort",
+  "remote.mode_pad": "Touchpad: Zeiger schieben",
+  "remote.no_picture": "Gerade kein Bild (PC gesperrt oder im Ruhezustand?)",
+  "remote.close": "Schließen"
 }

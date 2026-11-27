@@ -2479,5 +2479,16 @@
   "remote.no_devices": "다른 페어링 기기가 없습니다",
   "remote.waits": "오프라인: 연결되면 전송",
   "remote.split": "PDF 나누기",
-  "rpc.splitting": "PDF {count}개 나누는 중"
+  "rpc.splitting": "PDF {count}개 나누는 중",
+  "remote.screen_btn": "PC 화면 보고 손가락으로 조작",
+  "remote.typing": "입력",
+  "remote.keys": "키",
+  "remote.pad": "터치패드",
+  "remote.sharp": "선명",
+  "remote.smooth": "부드럽게",
+  "remote.screen_n": "화면 {n}",
+  "remote.mode_direct": "직접: 누른 곳을 클릭",
+  "remote.mode_pad": "터치패드: 손가락으로 포인터 이동",
+  "remote.no_picture": "화면이 오지 않습니다(PC가 잠겼거나 절전 중일 수 있음)",
+  "remote.close": "닫기"
 }

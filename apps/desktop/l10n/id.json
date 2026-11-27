@@ -2479,5 +2479,16 @@
   "remote.no_devices": "Tidak ada perangkat lain yang dipasangkan",
   "remote.waits": "offline: dikirim saat kembali",
   "remote.split": "Pisah PDF",
-  "rpc.splitting": "Memisah {count} PDF"
+  "rpc.splitting": "Memisah {count} PDF",
+  "remote.screen_btn": "Lihat layar PC dan pakai",
+  "remote.typing": "Ketik",
+  "remote.keys": "Tombol",
+  "remote.pad": "Touchpad",
+  "remote.sharp": "Tajam",
+  "remote.smooth": "Lancar",
+  "remote.screen_n": "Layar {n}",
+  "remote.mode_direct": "Langsung: ketuk di tempatnya",
+  "remote.mode_pad": "Touchpad: geser penunjuk",
+  "remote.no_picture": "Belum ada gambar (PC mungkin terkunci atau tidur)",
+  "remote.close": "Tutup"
 }
