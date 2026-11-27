@@ -298,7 +298,7 @@ class RemoteControl extends ChangeNotifier {
         }
         if (rest.isNotEmpty) {
           unawaited(BgTasks.instance.run<void>(
-            title: tr('rpc.converting', {'count': rest.values.fold(0, (n, l) => n + l.length)}),
+            title: tr('rpc.converting', {'count': rest.values.fold<int>(0, (n, l) => n + l.length)}),
             job: (t) async {
               final outs = <String>[];
               final failed = <String>[];

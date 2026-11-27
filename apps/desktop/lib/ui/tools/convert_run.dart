@@ -10,7 +10,6 @@ import '../../services/format_convert.dart';
 import '../send_page.dart' show baseNameOf;
 import '../theme.dart' show lrFontFallback;
 import 'office_edit.dart';
-import 'tools.dart';
 
 /// The conversions that are not the picture / video / sound queue (PDF,
 /// Office, text, photos → PDF): [files] made into [op]'s kind; what was
