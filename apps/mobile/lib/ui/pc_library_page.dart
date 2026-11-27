@@ -18,6 +18,7 @@ import 'cleanup_page.dart' show formatSize;
 import 'first_page_view.dart';
 import 'open_file.dart';
 import 'lr_video.dart';
+import 'remote_pc_page.dart';
 import 'theme.dart';
 
 /// The PC's library on this phone: browse by day, open, play, save to this
@@ -234,6 +235,15 @@ class _PcLibraryPageState extends State<PcLibraryPage> {
                         ]),
                       ),
             actions: [
+              // The PC's other files (outside its library), shown by the PC.
+              if (!selecting)
+                IconButton(
+                  tooltip: tr('rpc.open_tip'),
+                  icon: const Icon(Icons.travel_explore_rounded),
+                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => RemotePcPage(settings: widget.settings, discovery: widget.discovery, desktop: widget.desktop),
+                  )),
+                ),
               if (!selecting)
                 PopupMenuButton<bool>(
                   tooltip: tr('pclib.sort'),

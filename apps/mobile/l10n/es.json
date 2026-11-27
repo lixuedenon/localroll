@@ -656,5 +656,21 @@
   "ptool.form": "Rellenar el formulario",
   "ptool.form_hint": "Este PDF tiene sus propias casillas para rellenar. Se guarda como un PDF nuevo que sigue siendo formulario: otros pueden seguir rellenándolo o leer lo escrito.",
   "ptool.form_filled": "relleno",
-  "ptool.form_failed": "No se pudo guardar el formulario rellenado"
+  "ptool.form_failed": "No se pudo guardar el formulario rellenado",
+  "ios.face_id": "Keepnear comprueba que eres tú antes de que este móvil controle tu PC.",
+  "rpc.open_tip": "Otros archivos del PC",
+  "rpc.title": "Archivos de {pc}",
+  "rpc.auth_reason": "Confirma que eres tú para controlar el PC",
+  "rpc.asking": "En «{pc}», pulsa «Permitir».\n(Solo una vez: después no se vuelve a preguntar en el PC.)",
+  "rpc.refused": "«{pc}» no lo permitió.",
+  "rpc.stopped": "«{pc}» lo detuvo. Inténtalo en 10 minutos.",
+  "rpc.plain": "Este PC se emparejó a la antigua (sin cifrar): vuelve a emparejarlo en Ajustes.",
+  "rpc.offline": "No se puede conectar con «{pc}»: Keepnear debe estar abierto y en la misma Wi-Fi.",
+  "rpc.locked": "No se confirmó que eres tú: no se puede controlar el PC.",
+  "rpc.again": "Reintentar",
+  "rpc.fetching": "Trayendo {name} del PC…",
+  "rpc.saved_album": "{name} guardado en Fotos",
+  "rpc.saved_files": "{name} guardado en Mis archivos",
+  "rpc.failed": "No se pudo traer {name} del PC",
+  "rpc.video_failed": "Este vídeo no se puede reproducir en el móvil"
 }

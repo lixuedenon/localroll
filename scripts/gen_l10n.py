@@ -41,6 +41,7 @@ IOS_KEYS = {
     "ios.photos_add": "NSPhotoLibraryAddUsageDescription",
     "ios.camera": "NSCameraUsageDescription",
     "ios.local_network": "NSLocalNetworkUsageDescription",
+    "ios.face_id": "NSFaceIDUsageDescription",
 }
 
 

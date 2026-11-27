@@ -656,5 +656,21 @@
   "ptool.form": "Isi formulir",
   "ptool.form_hint": "PDF ini punya kotak isian sendiri. Disimpan sebagai PDF baru yang tetap berupa formulir: orang lain bisa melanjutkan mengisi atau membaca isiannya.",
   "ptool.form_filled": "terisi",
-  "ptool.form_failed": "Formulir yang diisi tidak dapat disimpan"
+  "ptool.form_failed": "Formulir yang diisi tidak dapat disimpan",
+  "ios.face_id": "Keepnear memastikan itu Anda sebelum ponsel ini mengendalikan PC.",
+  "rpc.open_tip": "File lain di PC",
+  "rpc.title": "File di {pc}",
+  "rpc.auth_reason": "Konfirmasi bahwa ini Anda untuk mengendalikan PC",
+  "rpc.asking": "Di “{pc}”, klik “Izinkan”.\n(Hanya sekali: setelah itu tidak ada yang ditanyakan di PC.)",
+  "rpc.refused": "“{pc}” tidak mengizinkan.",
+  "rpc.stopped": "“{pc}” menghentikannya. Coba lagi 10 menit lagi.",
+  "rpc.plain": "PC ini dipasangkan dengan cara lama (tanpa enkripsi): pasangkan ulang di Pengaturan dulu.",
+  "rpc.offline": "Tidak dapat menjangkau “{pc}”: Keepnear harus berjalan di sana, di Wi-Fi yang sama.",
+  "rpc.locked": "Belum dikonfirmasi bahwa ini Anda: PC tidak dapat dikendalikan.",
+  "rpc.again": "Coba lagi",
+  "rpc.fetching": "Mengambil {name} dari PC…",
+  "rpc.saved_album": "{name} disimpan ke Foto",
+  "rpc.saved_files": "{name} disimpan ke File saya",
+  "rpc.failed": "Tidak dapat mengambil {name} dari PC",
+  "rpc.video_failed": "Video ini tidak bisa diputar di ponsel"
 }

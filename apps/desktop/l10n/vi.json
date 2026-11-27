@@ -2405,5 +2405,19 @@
   "pcfiles.select_none": "Bỏ chọn tất cả",
   "pcfiles.empty": "Không có tệp phù hợp",
   "pcfiles.not_in_lib": "Ngoài thư viện",
-  "pcfiles.gone": "Tệp này không còn ở đó"
+  "pcfiles.gone": "Tệp này không còn ở đó",
+  "remote.count": "{count} tệp (trên máy tính, ngoài thư viện)",
+  "remote.open": "Mở",
+  "remote.save": "Về điện thoại",
+  "remote.failed": "Không đọc được danh sách tệp của máy tính",
+  "remote.ask_title": "Cho phép “{name}” điều khiển máy này?",
+  "remote.ask_body": "“{name}” muốn xem các tệp trên máy này (ảnh, video, PDF, Office… ngoài thư viện), mở và lưu về điện thoại. Khi đã cho phép, máy tính sẽ không hỏi lại. Dừng bất cứ lúc nào ở góc trên bên phải. “Luôn” hết hạn sau 30 ngày không dùng.",
+  "remote.no": "Từ chối",
+  "remote.once": "Chỉ lần này",
+  "remote.hour": "1 giờ",
+  "remote.always": "Luôn cho phép",
+  "remote.active": "{name} đang dùng tệp của máy này",
+  "remote.stop": "Dừng",
+  "remote.stop_now": "Ngắt ngay",
+  "remote.stop_always": "Ngắt và không cho phép nữa"
 }

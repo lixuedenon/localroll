@@ -3,3 +3,4 @@
 "NSPhotoLibraryAddUsageDescription" = "Keepnear 把别人发给你的照片和视频存进相册（“Keepnear”相簿）。";
 "NSCameraUsageDescription" = "扫描电脑上显示的配对二维码，以及扫描纸质文档。";
 "NSLocalNetworkUsageDescription" = "在局域网中查找并连接运行 Keepnear 的电脑和手机。文件不经过云端。";
+"NSFaceIDUsageDescription" = "控制电脑之前，Keepnear 会先确认是你本人。";

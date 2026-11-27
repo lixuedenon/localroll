@@ -20,6 +20,7 @@ import 'services/library_index.dart';
 import 'services/network.dart';
 import 'services/pdf_text.dart';
 import 'services/pc_files.dart';
+import 'services/remote_control.dart';
 import 'services/peers.dart';
 import 'services/transfer_log.dart';
 import 'services/face_engine.dart';
@@ -97,6 +98,9 @@ class AppServices {
 
   /// What the tools made (and from what); puts results into the library.
   late final ToolRecords tools = ToolRecords(this);
+
+  /// Phones controlling this PC (allowed once on this PC).
+  late final RemoteControl remote = RemoteControl(this);
 
   /// Photos, videos, PDF, Office and text files elsewhere on this PC.
   late final PcFiles pcFiles = PcFiles(
@@ -394,6 +398,16 @@ class AppServices {
         captureMs: st.modified.millisecondsSinceEpoch,
         receivedMs: 0,
       ));
+    };
+    // A phone controlling this PC: "Other files on this PC" and their pictures.
+    server.remote = s.remote.handle;
+    s.remote.thumb = (path) async {
+      final name = path.split(Platform.pathSeparator).last;
+      if (name.toLowerCase().endsWith('.pdf')) return PdfThumbs.of(path, library.cacheDir);
+      final kind = MediaKind.fromName(name);
+      if ((kind != MediaKind.image && kind != MediaKind.video) || !ffmpeg.available) return null;
+      final st = await File(path).stat();
+      return ffmpeg.thumbnailFile(path, size: st.size, modifiedMs: st.modified.millisecondsSinceEpoch, video: kind == MediaKind.video);
     };
     server.sendToPhone = (d, items) async {
       final target = s.phoneTarget(d.id);

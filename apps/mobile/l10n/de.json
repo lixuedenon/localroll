@@ -656,5 +656,21 @@
   "ptool.form": "Formular ausfüllen",
   "ptool.form_hint": "Dieses PDF hat eigene Felder zum Ausfüllen. Es wird als neues PDF gespeichert, das ein Formular bleibt: andere können weiter ausfüllen oder die Eingaben lesen.",
   "ptool.form_filled": "ausgefüllt",
-  "ptool.form_failed": "Das ausgefüllte Formular konnte nicht gespeichert werden"
+  "ptool.form_failed": "Das ausgefüllte Formular konnte nicht gespeichert werden",
+  "ios.face_id": "Keepnear prüft, dass Sie es sind, bevor dieses Handy Ihren PC steuert.",
+  "rpc.open_tip": "Andere Dateien auf dem PC",
+  "rpc.title": "Dateien auf {pc}",
+  "rpc.auth_reason": "Bestätigen Sie, dass Sie es sind, um den PC zu steuern",
+  "rpc.asking": "Auf „{pc}“ auf „Erlauben“ klicken.\n(Nur einmal: danach wird am PC nichts mehr gefragt.)",
+  "rpc.refused": "„{pc}“ hat es nicht erlaubt.",
+  "rpc.stopped": "„{pc}“ hat es beendet. In 10 Minuten erneut versuchen.",
+  "rpc.plain": "Dieser PC wurde auf die alte, unverschlüsselte Art gekoppelt: zuerst in den Einstellungen neu koppeln.",
+  "rpc.offline": "„{pc}“ nicht erreichbar: Keepnear muss dort laufen, im selben WLAN.",
+  "rpc.locked": "Nicht bestätigt, dass Sie es sind: der PC kann nicht gesteuert werden.",
+  "rpc.again": "Erneut versuchen",
+  "rpc.fetching": "{name} wird vom PC geholt …",
+  "rpc.saved_album": "{name} in Fotos gespeichert",
+  "rpc.saved_files": "{name} in Meine Dateien gespeichert",
+  "rpc.failed": "{name} konnte nicht vom PC geholt werden",
+  "rpc.video_failed": "Dieses Video lässt sich auf dem Handy nicht abspielen"
 }

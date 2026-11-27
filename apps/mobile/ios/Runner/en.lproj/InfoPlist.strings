@@ -3,3 +3,4 @@
 "NSPhotoLibraryAddUsageDescription" = "Keepnear saves photos and videos sent to you into your photo library (album “Keepnear”).";
 "NSCameraUsageDescription" = "Scan the pairing QR code shown on your computer, and scan paper documents.";
 "NSLocalNetworkUsageDescription" = "Find and connect to computers and phones running Keepnear on your local network. Files never go through the cloud.";
+"NSFaceIDUsageDescription" = "Keepnear checks it is you before this phone controls your PC.";

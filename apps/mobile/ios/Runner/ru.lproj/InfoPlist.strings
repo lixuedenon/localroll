@@ -3,3 +3,4 @@
 "NSPhotoLibraryAddUsageDescription" = "Keepnear сохраняет присланные тебе фото и видео в медиатеку (альбом «Keepnear»).";
 "NSCameraUsageDescription" = "Сканировать QR-код сопряжения на компьютере и бумажные документы.";
 "NSLocalNetworkUsageDescription" = "Поиск и подключение к компьютерам и телефонам с Keepnear в локальной сети. Файлы никогда не идут через облако.";
+"NSFaceIDUsageDescription" = "Keepnear проверяет, что это вы, прежде чем телефон начнёт управлять ПК.";

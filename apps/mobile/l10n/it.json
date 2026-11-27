@@ -656,5 +656,21 @@
   "ptool.form": "Compila il modulo",
   "ptool.form_hint": "Questo PDF ha i suoi campi da compilare. Viene salvato come nuovo PDF che resta un modulo: altri possono continuare a compilarlo o leggerne i dati.",
   "ptool.form_filled": "compilato",
-  "ptool.form_failed": "Impossibile salvare il modulo compilato"
+  "ptool.form_failed": "Impossibile salvare il modulo compilato",
+  "ios.face_id": "Keepnear verifica che sei tu prima che questo telefono controlli il PC.",
+  "rpc.open_tip": "Altri file del PC",
+  "rpc.title": "File su {pc}",
+  "rpc.auth_reason": "Conferma che sei tu per controllare il PC",
+  "rpc.asking": "Su «{pc}», fai clic su «Consenti».\n(Una sola volta: poi sul PC non si chiede più nulla.)",
+  "rpc.refused": "«{pc}» non lo ha consentito.",
+  "rpc.stopped": "«{pc}» ha interrotto. Riprova tra 10 minuti.",
+  "rpc.plain": "Questo PC è stato associato alla vecchia maniera (non cifrata): riassocialo prima nelle impostazioni.",
+  "rpc.offline": "Impossibile raggiungere «{pc}»: Keepnear deve essere aperto, sulla stessa Wi-Fi.",
+  "rpc.locked": "Non è stato confermato che sei tu: impossibile controllare il PC.",
+  "rpc.again": "Riprova",
+  "rpc.fetching": "Recupero di {name} dal PC…",
+  "rpc.saved_album": "{name} salvato in Foto",
+  "rpc.saved_files": "{name} salvato in I miei file",
+  "rpc.failed": "Impossibile recuperare {name} dal PC",
+  "rpc.video_failed": "Questo video non si può riprodurre sul telefono"
 }

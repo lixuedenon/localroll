@@ -568,6 +568,13 @@ class TransferServer extends ChangeNotifier {
   Future<File?> Function(MediaItem item)? thumbnail;
   Future<File?> Function(MediaItem item)? display;
 
+  /// A phone controlling this PC (its own pages: "Other files on this PC"
+  /// and later more). Set by AppServices; answers the request itself.
+  Future<void> Function(HttpRequest req, TrustedDevice device, String path)? remote;
+
+  /// Sends [f] (ranges for video), for [remote].
+  Future<void> serveFile(HttpRequest req, File f) => _serveFile(req, f, _contentType(f.path));
+
   /// Small picture of a received file (PDF first page, photo, video frame),
   /// or null when there is none (Office files: the phone draws those).
   Future<File?> Function(String path)? fileThumbnail;
@@ -1048,6 +1055,15 @@ class TransferServer extends ChangeNotifier {
 
       if (path == LrProtocol.pathLibrary || path.startsWith('${LrProtocol.pathLibrary}/')) {
         return await _browse(req, device, path, secure: secure);
+      }
+
+      if (path.startsWith('${LrProtocol.pathRemote}/')) {
+        final h = remote;
+        if (!secure || h == null) {
+          await req.drain<void>();
+          return _json(res, secure ? 404 : 426, {'error': secure ? 'not_found' : 'upgrade_required'});
+        }
+        return await h(req, device, path);
       }
 
       // /api/v1/sessions/{sid}/files/{fid}[/complete]

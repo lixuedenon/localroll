@@ -3,3 +3,4 @@
 "NSPhotoLibraryAddUsageDescription" = "Keepnear บันทึกรูปและวิดีโอที่มีคนส่งมาให้ลงในคลังรูปภาพ (อัลบั้ม \"Keepnear\")";
 "NSCameraUsageDescription" = "สแกน QR โค้ดจับคู่บนคอมพิวเตอร์ และสแกนเอกสารกระดาษ";
 "NSLocalNetworkUsageDescription" = "ค้นหาและเชื่อมต่อคอมพิวเตอร์และโทรศัพท์ที่ใช้ Keepnear ในเครือข่ายท้องถิ่น ไฟล์ไม่ผ่านคลาวด์";
+"NSFaceIDUsageDescription" = "Keepnear ตรวจสอบว่าเป็นคุณก่อนให้มือถือควบคุมคอมพิวเตอร์";

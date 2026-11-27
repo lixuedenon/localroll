@@ -656,5 +656,21 @@
   "ptool.form": "Điền biểu mẫu",
   "ptool.form_hint": "PDF này có sẵn ô để điền. Điền xong sẽ lưu thành PDF mới vẫn là biểu mẫu: người khác có thể điền tiếp hoặc đọc nội dung.",
   "ptool.form_filled": "da-dien",
-  "ptool.form_failed": "Không lưu được biểu mẫu đã điền"
+  "ptool.form_failed": "Không lưu được biểu mẫu đã điền",
+  "ios.face_id": "Keepnear kiểm tra đúng là bạn trước khi điện thoại này điều khiển máy tính.",
+  "rpc.open_tip": "Tệp khác trên máy tính",
+  "rpc.title": "Tệp trên {pc}",
+  "rpc.auth_reason": "Xác nhận là bạn để điều khiển máy tính",
+  "rpc.asking": "Trên “{pc}”, bấm “Cho phép”.\n(Chỉ một lần: sau đó máy tính không hỏi lại.)",
+  "rpc.refused": "“{pc}” không cho phép.",
+  "rpc.stopped": "“{pc}” đã dừng. Thử lại sau 10 phút.",
+  "rpc.plain": "Máy này được ghép nối kiểu cũ (không mã hóa): hãy ghép lại trong Cài đặt trước.",
+  "rpc.offline": "Không kết nối được “{pc}”: máy phải đang chạy Keepnear và cùng Wi-Fi.",
+  "rpc.locked": "Chưa xác nhận là bạn: không thể điều khiển máy tính.",
+  "rpc.again": "Thử lại",
+  "rpc.fetching": "Đang lấy {name} từ máy tính…",
+  "rpc.saved_album": "Đã lưu {name} vào Ảnh",
+  "rpc.saved_files": "Đã lưu {name} vào Tệp của tôi",
+  "rpc.failed": "Không lấy được {name} từ máy tính",
+  "rpc.video_failed": "Video này không phát được trên điện thoại"
 }

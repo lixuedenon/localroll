@@ -656,5 +656,21 @@
   "ptool.form": "Preencher o formulário",
   "ptool.form_hint": "Este PDF tem campos próprios para preencher. Ele é salvo como um novo PDF que continua sendo formulário: outros podem continuar preenchendo ou ler o que foi digitado.",
   "ptool.form_filled": "preenchido",
-  "ptool.form_failed": "Não foi possível salvar o formulário preenchido"
+  "ptool.form_failed": "Não foi possível salvar o formulário preenchido",
+  "ios.face_id": "O Keepnear confirma que é você antes de este celular controlar o seu PC.",
+  "rpc.open_tip": "Outros arquivos do PC",
+  "rpc.title": "Arquivos de {pc}",
+  "rpc.auth_reason": "Confirme que é você para controlar o PC",
+  "rpc.asking": "No “{pc}”, clique em “Permitir”.\n(Só uma vez: depois nada é perguntado no PC.)",
+  "rpc.refused": "“{pc}” não permitiu.",
+  "rpc.stopped": "“{pc}” interrompeu. Tente de novo em 10 minutos.",
+  "rpc.plain": "Este PC foi pareado do jeito antigo (sem criptografia): pareie de novo em Ajustes.",
+  "rpc.offline": "Não foi possível alcançar “{pc}”: o Keepnear precisa estar aberto, na mesma Wi-Fi.",
+  "rpc.locked": "Não foi confirmado que é você: o PC não pode ser controlado.",
+  "rpc.again": "Tentar de novo",
+  "rpc.fetching": "Buscando {name} no PC…",
+  "rpc.saved_album": "{name} salvo em Fotos",
+  "rpc.saved_files": "{name} salvo em Meus arquivos",
+  "rpc.failed": "Não foi possível buscar {name} no PC",
+  "rpc.video_failed": "Este vídeo não pode ser reproduzido no celular"
 }

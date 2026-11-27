@@ -2405,5 +2405,19 @@
   "pcfiles.select_none": "Desmarcar tudo",
   "pcfiles.empty": "Nenhum arquivo corresponde",
   "pcfiles.not_in_lib": "Fora da biblioteca",
-  "pcfiles.gone": "Este arquivo não está mais lá"
+  "pcfiles.gone": "Este arquivo não está mais lá",
+  "remote.count": "{count} arquivos (no PC, fora da biblioteca)",
+  "remote.open": "Abrir",
+  "remote.save": "No celular",
+  "remote.failed": "Não foi possível ler a lista do PC",
+  "remote.ask_title": "Permitir que “{name}” controle este PC?",
+  "remote.ask_body": "“{name}” quer ver os arquivos deste PC (fotos, vídeos, PDF, Office… fora da biblioteca), abri-los e salvá-los no celular. Depois de permitido, nada é perguntado aqui de novo. Pare quando quiser no canto superior direito. “Sempre” expira após 30 dias sem uso.",
+  "remote.no": "Não permitir",
+  "remote.once": "Só desta vez",
+  "remote.hour": "1 hora",
+  "remote.always": "Sempre",
+  "remote.active": "{name} está usando os arquivos deste PC",
+  "remote.stop": "Parar",
+  "remote.stop_now": "Desconectar agora",
+  "remote.stop_always": "Desconectar e não permitir mais"
 }

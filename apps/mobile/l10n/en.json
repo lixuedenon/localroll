@@ -656,5 +656,21 @@
   "ptool.form": "Fill in the form",
   "ptool.form_hint": "This PDF has its own boxes to fill in. It is saved as a new PDF that is still a form: others can keep filling it in or read what was entered.",
   "ptool.form_filled": "filled",
-  "ptool.form_failed": "The filled-in form could not be saved"
+  "ptool.form_failed": "The filled-in form could not be saved",
+  "ios.face_id": "Keepnear checks it is you before this phone controls your PC.",
+  "rpc.open_tip": "Other files on the PC",
+  "rpc.title": "Files on {pc}",
+  "rpc.auth_reason": "Confirm it's you to control the PC",
+  "rpc.asking": "On “{pc}”, click “Allow”.\n(Only once: after that nothing done here is asked on the PC.)",
+  "rpc.refused": "“{pc}” didn't allow it.",
+  "rpc.stopped": "“{pc}” stopped it. Try again in 10 minutes.",
+  "rpc.plain": "This PC was paired the old, unencrypted way: pair it again in Settings first.",
+  "rpc.offline": "Can't reach “{pc}”: Keepnear must be running on it, on the same Wi-Fi.",
+  "rpc.locked": "Not confirmed it's you: the PC can't be controlled.",
+  "rpc.again": "Try again",
+  "rpc.fetching": "Getting {name} from the PC…",
+  "rpc.saved_album": "{name} saved to Photos",
+  "rpc.saved_files": "{name} saved to My files",
+  "rpc.failed": "Couldn't get {name} from the PC",
+  "rpc.video_failed": "This video can't play on the phone"
 }

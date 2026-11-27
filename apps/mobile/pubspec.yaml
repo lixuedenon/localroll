@@ -57,6 +57,10 @@ dependencies:
   file_picker: '>=8.1.0 <11.0.0'
   # pdfium (Android: editing PDFs, keeping their text) through dart:ffi.
   ffi: ^2.1.0
+  # The PC's own pages (it makes them; this phone shows them).
+  webview_flutter: ^4.10.0
+  # Face / fingerprint / passcode before controlling the PC.
+  local_auth: ^2.3.0
 
 dev_dependencies:
   flutter_test:

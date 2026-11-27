@@ -3,3 +3,4 @@
 "NSPhotoLibraryAddUsageDescription" = "Keepnear salva nella libreria foto (album «Keepnear») le foto e i video che ti inviano.";
 "NSCameraUsageDescription" = "Scansionare il codice QR di abbinamento sul computer e documenti cartacei.";
 "NSLocalNetworkUsageDescription" = "Trova e collega computer e telefoni con Keepnear sulla rete locale. I file non passano mai dal cloud.";
+"NSFaceIDUsageDescription" = "Keepnear verifica che sei tu prima che questo telefono controlli il PC.";

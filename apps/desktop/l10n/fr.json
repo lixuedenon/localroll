@@ -2405,5 +2405,19 @@
   "pcfiles.select_none": "Tout désélectionner",
   "pcfiles.empty": "Aucun fichier ne correspond",
   "pcfiles.not_in_lib": "Hors médiathèque",
-  "pcfiles.gone": "Ce fichier n’est plus là"
+  "pcfiles.gone": "Ce fichier n’est plus là",
+  "remote.count": "{count} fichiers (sur le PC, hors médiathèque)",
+  "remote.open": "Ouvrir",
+  "remote.save": "Sur le téléphone",
+  "remote.failed": "Impossible de lire la liste du PC",
+  "remote.ask_title": "Autoriser « {name} » à piloter ce PC ?",
+  "remote.ask_body": "« {name} » veut parcourir les fichiers de ce PC (photos, vidéos, PDF, Office… hors médiathèque), les ouvrir et les enregistrer sur le téléphone. Une fois autorisé, rien n’est redemandé ici. Arrêtez à tout moment en haut à droite. « Toujours » expire après 30 jours sans usage.",
+  "remote.no": "Refuser",
+  "remote.once": "Cette fois",
+  "remote.hour": "1 heure",
+  "remote.always": "Toujours",
+  "remote.active": "{name} utilise les fichiers de ce PC",
+  "remote.stop": "Arrêter",
+  "remote.stop_now": "Déconnecter maintenant",
+  "remote.stop_always": "Déconnecter et ne plus autoriser"
 }

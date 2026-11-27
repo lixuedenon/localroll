@@ -3,3 +3,4 @@
 "NSPhotoLibraryAddUsageDescription" = "Keepnear sana gönderilen fotoğraf ve videoları fotoğraf arşivine (“Keepnear” albümü) kaydeder.";
 "NSCameraUsageDescription" = "Bilgisayardaki eşleştirme QR kodunu ve kâğıt belgeleri taramak için.";
 "NSLocalNetworkUsageDescription" = "Yerel ağında Keepnear çalıştıran bilgisayar ve telefonları bulur ve bağlanır. Dosyalar asla buluta gitmez.";
+"NSFaceIDUsageDescription" = "Bu telefon bilgisayarınızı kontrol etmeden önce Keepnear sizin olduğunuzu doğrular.";

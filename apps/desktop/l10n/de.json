@@ -2405,5 +2405,19 @@
   "pcfiles.select_none": "Keine auswählen",
   "pcfiles.empty": "Keine passenden Dateien",
   "pcfiles.not_in_lib": "Nicht in Mediathek",
-  "pcfiles.gone": "Diese Datei ist nicht mehr dort"
+  "pcfiles.gone": "Diese Datei ist nicht mehr dort",
+  "remote.count": "{count} Dateien (auf dem PC, nicht in der Mediathek)",
+  "remote.open": "Öffnen",
+  "remote.save": "Aufs Handy",
+  "remote.failed": "Dateiliste des PCs nicht lesbar",
+  "remote.ask_title": "„{name}“ diesen PC steuern lassen?",
+  "remote.ask_body": "„{name}“ möchte die Dateien auf diesem PC durchsehen (Fotos, Videos, PDF, Office … außerhalb der Mediathek), öffnen und aufs Handy speichern. Einmal erlaubt, wird hier nichts mehr nachgefragt. Oben rechts jederzeit beenden. „Immer“ endet nach 30 Tagen ohne Nutzung.",
+  "remote.no": "Nicht erlauben",
+  "remote.once": "Nur diesmal",
+  "remote.hour": "1 Stunde",
+  "remote.always": "Immer",
+  "remote.active": "{name} nutzt die Dateien dieses PCs",
+  "remote.stop": "Beenden",
+  "remote.stop_now": "Jetzt trennen",
+  "remote.stop_always": "Trennen und nicht mehr erlauben"
 }

@@ -2405,5 +2405,19 @@
   "pcfiles.select_none": "선택 해제",
   "pcfiles.empty": "조건에 맞는 파일이 없습니다",
   "pcfiles.not_in_lib": "보관함 밖",
-  "pcfiles.gone": "이 파일은 더 이상 그 위치에 없습니다"
+  "pcfiles.gone": "이 파일은 더 이상 그 위치에 없습니다",
+  "remote.count": "{count}개 (PC에 있음, 보관함 밖)",
+  "remote.open": "열기",
+  "remote.save": "휴대폰에",
+  "remote.failed": "PC의 파일 목록을 읽지 못했습니다",
+  "remote.ask_title": "“{name}”이(가) 이 PC를 제어하도록 허용할까요?",
+  "remote.ask_body": "“{name}”이(가) 이 PC의 파일(보관함 밖 사진·동영상·PDF·Office 등)을 보고, 열고, 휴대폰에 저장하려고 합니다. 허용하면 휴대폰에서 하는 작업을 PC에서 다시 묻지 않습니다. 오른쪽 위에서 언제든 중지할 수 있습니다. “항상”은 30일 동안 쓰지 않으면 해제됩니다.",
+  "remote.no": "거부",
+  "remote.once": "이번만",
+  "remote.hour": "1시간",
+  "remote.always": "항상 허용",
+  "remote.active": "{name}이(가) 이 PC의 파일을 사용 중",
+  "remote.stop": "중지",
+  "remote.stop_now": "지금 연결 끊기",
+  "remote.stop_always": "연결 끊고 더 이상 허용 안 함"
 }

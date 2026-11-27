@@ -3,3 +3,4 @@
 "NSPhotoLibraryAddUsageDescription" = "Keepnear は送られてきた写真とビデオを写真ライブラリ（アルバム「Keepnear」）に保存します。";
 "NSCameraUsageDescription" = "パソコンに表示されたペアリング用QRコードの読み取りと、紙の書類のスキャンに使います。";
 "NSLocalNetworkUsageDescription" = "ローカルネットワーク上で Keepnear を実行しているPCやスマホを探して接続します。ファイルはクラウドを通りません。";
+"NSFaceIDUsageDescription" = "PC を操作する前に、Keepnear が本人確認をします。";

@@ -656,5 +656,21 @@
   "ptool.form": "Remplir le formulaire",
   "ptool.form_hint": "Ce PDF a ses propres champs à remplir. Il est enregistré comme un nouveau PDF qui reste un formulaire : on peut continuer à le remplir ou lire les saisies.",
   "ptool.form_filled": "rempli",
-  "ptool.form_failed": "Le formulaire rempli n’a pas pu être enregistré"
+  "ptool.form_failed": "Le formulaire rempli n’a pas pu être enregistré",
+  "ios.face_id": "Keepnear vérifie que c’est bien vous avant que ce téléphone pilote votre PC.",
+  "rpc.open_tip": "Autres fichiers du PC",
+  "rpc.title": "Fichiers de {pc}",
+  "rpc.auth_reason": "Confirmez que c’est vous pour piloter le PC",
+  "rpc.asking": "Sur « {pc} », cliquez sur « Autoriser ».\n(Une seule fois : ensuite rien n’est redemandé sur le PC.)",
+  "rpc.refused": "« {pc} » n’a pas autorisé.",
+  "rpc.stopped": "« {pc} » a arrêté. Réessayez dans 10 minutes.",
+  "rpc.plain": "Ce PC a été associé à l’ancienne (sans chiffrement) : réassociez-le d’abord dans les réglages.",
+  "rpc.offline": "Impossible de joindre « {pc} » : Keepnear doit y tourner, sur le même Wi-Fi.",
+  "rpc.locked": "Identité non confirmée : impossible de piloter le PC.",
+  "rpc.again": "Réessayer",
+  "rpc.fetching": "Récupération de {name} depuis le PC…",
+  "rpc.saved_album": "{name} enregistré dans Photos",
+  "rpc.saved_files": "{name} enregistré dans Mes fichiers",
+  "rpc.failed": "Impossible de récupérer {name} depuis le PC",
+  "rpc.video_failed": "Cette vidéo ne peut pas être lue sur le téléphone"
 }

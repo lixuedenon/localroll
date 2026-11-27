@@ -2405,5 +2405,19 @@
   "pcfiles.select_none": "Batalkan pilihan",
   "pcfiles.empty": "Tidak ada file yang cocok",
   "pcfiles.not_in_lib": "Di luar pustaka",
-  "pcfiles.gone": "File ini sudah tidak ada di sana"
+  "pcfiles.gone": "File ini sudah tidak ada di sana",
+  "remote.count": "{count} file (di PC, di luar pustaka)",
+  "remote.open": "Buka",
+  "remote.save": "Ke ponsel",
+  "remote.failed": "Tidak dapat membaca daftar file PC",
+  "remote.ask_title": "Izinkan “{name}” mengendalikan PC ini?",
+  "remote.ask_body": "“{name}” ingin menelusuri file di PC ini (foto, video, PDF, Office… di luar pustaka), membukanya, dan menyimpannya ke ponsel. Setelah diizinkan, tidak ada yang ditanyakan lagi di sini. Hentikan kapan saja di kanan atas. “Selalu” berakhir setelah 30 hari tidak dipakai.",
+  "remote.no": "Tolak",
+  "remote.once": "Kali ini saja",
+  "remote.hour": "1 jam",
+  "remote.always": "Selalu",
+  "remote.active": "{name} sedang memakai file PC ini",
+  "remote.stop": "Hentikan",
+  "remote.stop_now": "Putuskan sekarang",
+  "remote.stop_always": "Putuskan dan jangan izinkan lagi"
 }

@@ -2405,5 +2405,19 @@
   "pcfiles.select_none": "選択解除",
   "pcfiles.empty": "該当するファイルはありません",
   "pcfiles.not_in_lib": "ライブラリ外",
-  "pcfiles.gone": "このファイルはもうありません"
+  "pcfiles.gone": "このファイルはもうありません",
+  "remote.count": "{count} 個（PC 上・ライブラリ外）",
+  "remote.open": "開く",
+  "remote.save": "スマホへ",
+  "remote.failed": "PC のファイル一覧を読めませんでした",
+  "remote.ask_title": "「{name}」にこの PC の操作を許可しますか？",
+  "remote.ask_body": "「{name}」がこの PC のファイル（ライブラリ外の写真・動画・PDF・Office など）を見て、開いたりスマホに保存したりしようとしています。許可後はスマホでの操作をこちらで再確認しません。右上でいつでも停止できます。「常に許可」は 30 日使わないと無効になります。",
+  "remote.no": "許可しない",
+  "remote.once": "今回だけ",
+  "remote.hour": "1 時間",
+  "remote.always": "常に許可",
+  "remote.active": "{name} がこの PC のファイルを使用中",
+  "remote.stop": "停止",
+  "remote.stop_now": "今すぐ切断",
+  "remote.stop_always": "切断して今後は許可しない"
 }

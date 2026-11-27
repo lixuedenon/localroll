@@ -656,5 +656,21 @@
   "ptool.form": "フォームに入力",
   "ptool.form_hint": "この PDF には入力欄があります。入力後は新しい PDF として保存され、フォームのままなので続けて入力したり内容を読み取ったりできます。",
   "ptool.form_filled": "入力済み",
-  "ptool.form_failed": "入力したフォームを保存できませんでした"
+  "ptool.form_failed": "入力したフォームを保存できませんでした",
+  "ios.face_id": "PC を操作する前に、Keepnear が本人確認をします。",
+  "rpc.open_tip": "PC の他のファイル",
+  "rpc.title": "{pc} のファイル",
+  "rpc.auth_reason": "PC を操作するには本人確認が必要です",
+  "rpc.asking": "「{pc}」で「許可」を押してください。\n（一度だけ。以後スマホでの操作は PC で確認されません。）",
+  "rpc.refused": "「{pc}」で許可されませんでした。",
+  "rpc.stopped": "「{pc}」側で停止されました。10 分後に再試行できます。",
+  "rpc.plain": "この PC は旧方式（暗号化なし）でペアリングされています。先に設定で再ペアリングしてください。",
+  "rpc.offline": "「{pc}」に接続できません。PC で Keepnear を起動し、同じ Wi-Fi に接続してください。",
+  "rpc.locked": "本人確認ができなかったため、PC を操作できません。",
+  "rpc.again": "再試行",
+  "rpc.fetching": "PC から {name} を取得中…",
+  "rpc.saved_album": "{name} を写真に保存しました",
+  "rpc.saved_files": "{name} を「マイファイル」に保存しました",
+  "rpc.failed": "{name} を PC から取得できませんでした",
+  "rpc.video_failed": "この動画はスマホで再生できません"
 }

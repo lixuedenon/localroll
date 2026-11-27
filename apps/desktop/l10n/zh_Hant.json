@@ -2405,5 +2405,19 @@
   "pcfiles.select_none": "全不選",
   "pcfiles.empty": "沒有符合條件的檔案",
   "pcfiles.not_in_lib": "不在媒體庫",
-  "pcfiles.gone": "這個檔案已經不在原來的位置了"
+  "pcfiles.gone": "這個檔案已經不在原來的位置了",
+  "remote.count": "{count} 個檔案（在電腦上，不在媒體庫）",
+  "remote.open": "開啟",
+  "remote.save": "存到手機",
+  "remote.failed": "沒能讀到電腦上的檔案清單",
+  "remote.ask_title": "允許「{name}」控制這台電腦嗎？",
+  "remote.ask_body": "「{name}」想瀏覽這台電腦上的檔案（媒體庫以外的相片、影片、PDF、Office 等），並能開啟和存到手機。允許後，手機上的操作不會再在電腦上確認。隨時可以在右上角停止。「一直允許」在 30 天不用後自動失效。",
+  "remote.no": "拒絕",
+  "remote.once": "只這一次",
+  "remote.hour": "1 小時",
+  "remote.always": "一直允許",
+  "remote.active": "{name} 正在使用這台電腦的檔案",
+  "remote.stop": "停止",
+  "remote.stop_now": "現在中斷",
+  "remote.stop_always": "中斷，並且不再允許"
 }

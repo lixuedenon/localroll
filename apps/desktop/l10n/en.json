@@ -2405,5 +2405,19 @@
   "pcfiles.select_none": "Select none",
   "pcfiles.empty": "No files match",
   "pcfiles.not_in_lib": "Not in library",
-  "pcfiles.gone": "This file is no longer there"
+  "pcfiles.gone": "This file is no longer there",
+  "remote.count": "{count} files (on the PC, not in the library)",
+  "remote.open": "Open",
+  "remote.save": "To phone",
+  "remote.failed": "Couldn't read the PC's file list",
+  "remote.ask_title": "Let “{name}” control this PC?",
+  "remote.ask_body": "“{name}” wants to look through the files on this PC (photos, videos, PDF, Office… outside the library), open them and save them to the phone. Once allowed, nothing done on the phone is asked here again. Stop it any time at the top right. “Always” ends after 30 days unused.",
+  "remote.no": "Don't allow",
+  "remote.once": "This time",
+  "remote.hour": "1 hour",
+  "remote.always": "Always",
+  "remote.active": "{name} is using this PC's files",
+  "remote.stop": "Stop",
+  "remote.stop_now": "Disconnect now",
+  "remote.stop_always": "Disconnect and no longer allow"
 }

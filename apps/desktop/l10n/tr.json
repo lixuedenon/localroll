@@ -2405,5 +2405,19 @@
   "pcfiles.select_none": "Seçimi kaldır",
   "pcfiles.empty": "Eşleşen dosya yok",
   "pcfiles.not_in_lib": "Kitaplık dışı",
-  "pcfiles.gone": "Bu dosya artık orada değil"
+  "pcfiles.gone": "Bu dosya artık orada değil",
+  "remote.count": "{count} dosya (bilgisayarda, kitaplık dışı)",
+  "remote.open": "Aç",
+  "remote.save": "Telefona",
+  "remote.failed": "Bilgisayarın dosya listesi okunamadı",
+  "remote.ask_title": "“{name}” bu bilgisayarı kontrol etsin mi?",
+  "remote.ask_body": "“{name}” bu bilgisayardaki dosyalara (kitaplık dışı fotoğraf, video, PDF, Office…) bakmak, açmak ve telefona kaydetmek istiyor. İzin verilince burada bir daha sorulmaz. Sağ üstten istediğiniz an durdurun. “Her zaman” 30 gün kullanılmazsa sona erer.",
+  "remote.no": "İzin verme",
+  "remote.once": "Yalnızca bu sefer",
+  "remote.hour": "1 saat",
+  "remote.always": "Her zaman",
+  "remote.active": "{name} bu bilgisayarın dosyalarını kullanıyor",
+  "remote.stop": "Durdur",
+  "remote.stop_now": "Şimdi bağlantıyı kes",
+  "remote.stop_always": "Bağlantıyı kes ve artık izin verme"
 }

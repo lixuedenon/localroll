@@ -2405,5 +2405,19 @@
   "pcfiles.select_none": "全不选",
   "pcfiles.empty": "没有符合条件的文件",
   "pcfiles.not_in_lib": "不在媒体库",
-  "pcfiles.gone": "这个文件已经不在原来的位置了"
+  "pcfiles.gone": "这个文件已经不在原来的位置了",
+  "remote.count": "{count} 个文件（在电脑上，不在媒体库）",
+  "remote.open": "打开",
+  "remote.save": "存到手机",
+  "remote.failed": "没能读到电脑上的文件列表",
+  "remote.ask_title": "允许「{name}」控制这台电脑吗？",
+  "remote.ask_body": "「{name}」想浏览这台电脑上的文件（媒体库以外的照片、视频、PDF、Office 等），并能打开和存到手机。允许后，手机上的操作不会再在电脑上确认。随时可以在右上角停止。「一直允许」在 30 天不用后自动失效。",
+  "remote.no": "拒绝",
+  "remote.once": "只这一次",
+  "remote.hour": "1 小时",
+  "remote.always": "一直允许",
+  "remote.active": "{name} 正在使用这台电脑的文件",
+  "remote.stop": "停止",
+  "remote.stop_now": "现在断开",
+  "remote.stop_always": "断开，并且不再允许"
 }

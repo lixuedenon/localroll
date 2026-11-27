@@ -3,3 +3,4 @@
 "NSPhotoLibraryAddUsageDescription" = "يحفظ Keepnear الصور والفيديو المرسلة إليك في مكتبة الصور (ألبوم \"Keepnear\").";
 "NSCameraUsageDescription" = "لمسح رمز QR للاقتران المعروض على الحاسوب ومسح المستندات الورقية.";
 "NSLocalNetworkUsageDescription" = "البحث عن أجهزة الكمبيوتر والهواتف التي تشغّل Keepnear على شبكتك المحلية والاتصال بها. لا تمر الملفات عبر السحابة أبدًا.";
+"NSFaceIDUsageDescription" = "يتحقق Keepnear من أنك أنت قبل أن يتحكم هذا الهاتف بحاسوبك.";

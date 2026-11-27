@@ -2405,5 +2405,19 @@
   "pcfiles.select_none": "Deseleziona tutto",
   "pcfiles.empty": "Nessun file corrisponde",
   "pcfiles.not_in_lib": "Fuori libreria",
-  "pcfiles.gone": "Questo file non è più lì"
+  "pcfiles.gone": "Questo file non è più lì",
+  "remote.count": "{count} file (sul PC, fuori libreria)",
+  "remote.open": "Apri",
+  "remote.save": "Sul telefono",
+  "remote.failed": "Impossibile leggere l’elenco del PC",
+  "remote.ask_title": "Consentire a «{name}» di controllare questo PC?",
+  "remote.ask_body": "«{name}» vuole sfogliare i file di questo PC (foto, video, PDF, Office… fuori libreria), aprirli e salvarli sul telefono. Una volta consentito, qui non si chiede più nulla. Interrompi quando vuoi in alto a destra. «Sempre» scade dopo 30 giorni di inutilizzo.",
+  "remote.no": "Non consentire",
+  "remote.once": "Solo questa volta",
+  "remote.hour": "1 ora",
+  "remote.always": "Sempre",
+  "remote.active": "{name} sta usando i file di questo PC",
+  "remote.stop": "Interrompi",
+  "remote.stop_now": "Disconnetti ora",
+  "remote.stop_always": "Disconnetti e non consentire più"
 }

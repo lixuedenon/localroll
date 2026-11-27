@@ -3,3 +3,4 @@
 "NSPhotoLibraryAddUsageDescription" = "Keepnear आपको भेजी गई फ़ोटो और वीडियो आपकी फ़ोटो लाइब्रेरी (\"Keepnear\" एल्बम) में सहेजता है।";
 "NSCameraUsageDescription" = "कंप्यूटर पर दिखा जोड़ने का QR कोड और काग़ज़ी दस्तावेज़ स्कैन करने के लिए।";
 "NSLocalNetworkUsageDescription" = "आपके लोकल नेटवर्क पर Keepnear चलाने वाले कंप्यूटर और फ़ोन ढूँढें और जोड़ें। फ़ाइलें कभी क्लाउड से नहीं गुज़रतीं।";
+"NSFaceIDUsageDescription" = "यह फ़ोन PC नियंत्रित करे, उससे पहले Keepnear जाँचता है कि यह आप ही हैं।";

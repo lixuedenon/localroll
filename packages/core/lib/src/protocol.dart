@@ -99,6 +99,9 @@ class LrProtocol {
   ///   POST /api/v1/library/delete {paths}           -> Recycle Bin (manage only)
   ///   POST /api/v1/library/visibility {paths, private} (own items only)
   static const String pathLibrary = '/api/v1/library';
+
+  /// A phone controlling this PC (after the PC allowed it): its pages.
+  static const String pathRemote = '/api/v1/remote';
   static const String pathLibraryThumb = '/api/v1/library/thumb';
   static const String pathLibraryView = '/api/v1/library/view';
   static const String pathLibraryFile = '/api/v1/library/file';

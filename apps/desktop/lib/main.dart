@@ -27,6 +27,7 @@ import 'services/single_instance.dart';
 import 'services/watchdog.dart';
 import 'ui/copy_in_ui.dart';
 import 'ui/firewall_prompt.dart';
+import 'ui/remote_ui.dart';
 import 'ui/app_nav.dart';
 import 'ui/boot_screen.dart';
 import 'ui/home_shell.dart';
@@ -167,6 +168,7 @@ Future<void> main(List<String> args) async {
   // Others must be able to send here: Windows' firewall has to let Keepnear
   // in. Looked at now and whenever its rules change; asked once if not.
   FirewallGuard.instance.ask = askFirewall;
+  services.remote.ask = askRemote;
   Timer(const Duration(seconds: 3), FirewallGuard.instance.start);
   watchQuitRequest(services);
   // Ctrl+Shift+R / P / D for recording the screen, from anywhere.
@@ -329,6 +331,8 @@ class LocalRollApp extends StatelessWidget {
                       // A long job just started (making a video, a PDF…): its card,
                       // not blocking; a click elsewhere puts it in the corner.
                       const TaskFloat(),
+                      // A phone controlling this PC: who, and "Stop".
+                      RemoteBadge(services: services),
                     ]),
                   ),
                 ],

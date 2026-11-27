@@ -656,5 +656,21 @@
   "ptool.form": "Formu doldur",
   "ptool.form_hint": "Bu PDF'in kendi doldurma kutuları var. Hâlâ form olan yeni bir PDF olarak kaydedilir: başkaları doldurmaya devam edebilir veya girilenleri okuyabilir.",
   "ptool.form_filled": "dolduruldu",
-  "ptool.form_failed": "Doldurulan form kaydedilemedi"
+  "ptool.form_failed": "Doldurulan form kaydedilemedi",
+  "ios.face_id": "Bu telefon bilgisayarınızı kontrol etmeden önce Keepnear sizin olduğunuzu doğrular.",
+  "rpc.open_tip": "Bilgisayardaki diğer dosyalar",
+  "rpc.title": "{pc} üzerindeki dosyalar",
+  "rpc.auth_reason": "Bilgisayarı kontrol etmek için siz olduğunuzu doğrulayın",
+  "rpc.asking": "“{pc}” üzerinde “İzin ver”e tıklayın.\n(Yalnızca bir kez: sonra bilgisayarda bir daha sorulmaz.)",
+  "rpc.refused": "“{pc}” izin vermedi.",
+  "rpc.stopped": "“{pc}” durdurdu. 10 dakika sonra tekrar deneyin.",
+  "rpc.plain": "Bu bilgisayar eski, şifresiz yolla eşlenmiş: önce Ayarlar'dan yeniden eşleyin.",
+  "rpc.offline": "“{pc}” bilgisayarına ulaşılamıyor: Keepnear açık olmalı, aynı Wi-Fi'da.",
+  "rpc.locked": "Siz olduğunuz doğrulanmadı: bilgisayar kontrol edilemez.",
+  "rpc.again": "Tekrar dene",
+  "rpc.fetching": "{name} bilgisayardan alınıyor…",
+  "rpc.saved_album": "{name} Fotoğraflar'a kaydedildi",
+  "rpc.saved_files": "{name} Dosyalarım'a kaydedildi",
+  "rpc.failed": "{name} bilgisayardan alınamadı",
+  "rpc.video_failed": "Bu video telefonda oynatılamıyor"
 }

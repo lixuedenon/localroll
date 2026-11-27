@@ -131,6 +131,16 @@ class PcFiles {
     return out;
   }
 
+  /// May a phone see / take [path]: an existing file of a kind listed,
+  /// outside the library and the folders never listed.
+  bool allowed(String path) {
+    if (path.isEmpty || path.contains('..')) return false;
+    final f = File(path);
+    if (!f.existsSync()) return false;
+    final st = f.statSync();
+    return _keep(PcFile(f.absolute.path, st.size, st.modified, null));
+  }
+
   /// Not in the library, not in system / program / app-data folders, not
   /// in a folder left out, not a temporary Office file.
   bool _keep(PcFile f) {

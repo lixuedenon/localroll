@@ -222,6 +222,10 @@ class AppSettings extends ChangeNotifier {
   List<String> pcFilesExtra = [];
   List<String> pcFilesSkip = [];
 
+  /// Phones allowed to control this PC "always": device id → last used
+  /// (ms). Unused for 30 days: allowed no more.
+  Map<String, int> remoteAlways = {};
+
   /// Where the tools' results go: library / beside / both (ToolSaveTo).
   String toolSaveTo = 'library';
 
@@ -316,6 +320,10 @@ class AppSettings extends ChangeNotifier {
     s.aiPackFolder = j['aiPackFolder'] as String?;
     s.pcFilesExtra = [for (final e in (j['pcFilesExtra'] as List? ?? const [])) if (e is String) e];
     s.pcFilesSkip = [for (final e in (j['pcFilesSkip'] as List? ?? const [])) if (e is String) e];
+    s.remoteAlways = {
+      for (final e in ((j['remoteAlways'] as Map?) ?? const {}).entries)
+        if (e.key is String && e.value is num) e.key as String: (e.value as num).toInt(),
+    };
     s.toolSaveTo = j['toolSaveTo'] as String? ?? 'library';
     s.officeEngine = j['officeEngine'] as String? ?? 'auto';
     s.convertedShown = j['convertedShown'] == true;
@@ -381,6 +389,7 @@ class AppSettings extends ChangeNotifier {
       if (aiPackFolder != null) 'aiPackFolder': aiPackFolder,
       if (pcFilesExtra.isNotEmpty) 'pcFilesExtra': pcFilesExtra,
       if (pcFilesSkip.isNotEmpty) 'pcFilesSkip': pcFilesSkip,
+      if (remoteAlways.isNotEmpty) 'remoteAlways': remoteAlways,
       'toolSaveTo': toolSaveTo,
       'officeEngine': officeEngine,
       if (convertedShown) 'convertedShown': true,

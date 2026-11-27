@@ -55,6 +55,8 @@
 	<array>
 		<string>_localroll._tcp</string>
 	</array>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Keepnear checks it is you before this phone controls your PC.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>

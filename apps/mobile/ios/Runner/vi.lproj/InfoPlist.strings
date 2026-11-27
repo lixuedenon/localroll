@@ -3,3 +3,4 @@
 "NSPhotoLibraryAddUsageDescription" = "Keepnear lưu ảnh và video người khác gửi cho bạn vào thư viện ảnh (album “Keepnear”).";
 "NSCameraUsageDescription" = "Quét mã QR ghép nối trên máy tính và quét tài liệu giấy.";
 "NSLocalNetworkUsageDescription" = "Tìm và kết nối máy tính, điện thoại chạy Keepnear trong mạng nội bộ. Tệp không bao giờ đi qua đám mây.";
+"NSFaceIDUsageDescription" = "Keepnear kiểm tra đúng là bạn trước khi điện thoại này điều khiển máy tính.";

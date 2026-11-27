@@ -656,5 +656,21 @@
   "ptool.form": "填表",
   "ptool.form_hint": "這個 PDF 自帶要填的格子。填好後存成一個新的 PDF，它還是表單，別人還能接著填或讀出內容。",
   "ptool.form_filled": "已填",
-  "ptool.form_failed": "沒能存下填好的表單"
+  "ptool.form_failed": "沒能存下填好的表單",
+  "ios.face_id": "控制電腦之前，Keepnear 會先確認是你本人。",
+  "rpc.open_tip": "電腦上的其他檔案",
+  "rpc.title": "{pc} 上的檔案",
+  "rpc.auth_reason": "確認是你本人，才能控制電腦",
+  "rpc.asking": "請在「{pc}」上點「允許」。\n（只需要一次；之後手機上的操作電腦不會再問。）",
+  "rpc.refused": "「{pc}」沒有允許。",
+  "rpc.stopped": "「{pc}」那邊停止了。10 分鐘後可以再試。",
+  "rpc.plain": "這台電腦的配對是舊的不加密連線，請先在設定裡重新配對。",
+  "rpc.offline": "連不上「{pc}」：電腦要開著 Keepnear，並在同一個 Wi-Fi 裡。",
+  "rpc.locked": "沒有確認是你本人，不能控制電腦。",
+  "rpc.again": "再試一次",
+  "rpc.fetching": "正在從電腦取 {name}…",
+  "rpc.saved_album": "{name} 已存到相簿",
+  "rpc.saved_files": "{name} 已存到「我的檔案」",
+  "rpc.failed": "沒能從電腦取到 {name}",
+  "rpc.video_failed": "這個影片在手機上放不了"
 }
