@@ -672,5 +672,7 @@
   "rpc.saved_album": "تم حفظ {name} في الصور",
   "rpc.saved_files": "تم حفظ {name} في ملفاتي",
   "rpc.failed": "تعذّر جلب {name} من الحاسوب",
-  "rpc.video_failed": "لا يمكن تشغيل هذا الفيديو على الهاتف"
+  "rpc.video_failed": "لا يمكن تشغيل هذا الفيديو على الهاتف",
+  "rpc.shot": "لقطة شاشة",
+  "rpc.save": "حفظ على الهاتف"
 }

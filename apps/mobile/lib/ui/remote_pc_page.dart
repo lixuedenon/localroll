@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:local_auth/local_auth.dart';
 import 'package:localroll_core/localroll_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -131,11 +132,32 @@ class _RemotePcPageState extends State<RemotePcPage> {
     } catch (_) {
       return;
     }
+    final messenger = ScaffoldMessenger.of(context);
+    // The PC's clipboard text, onto this phone's.
+    if (m['cmd'] == 'copy') {
+      await Clipboard.setData(ClipboardData(text: m['text'] as String? ?? ''));
+      return;
+    }
+    // A picture of the PC's screen: shown, can be saved.
+    if (m['cmd'] == 'shot') {
+      if (_busy != null) return;
+      setState(() => _busy = tr('rpc.shot'));
+      try {
+        final f = await pc.shot();
+        if (!mounted) return;
+        await Navigator.of(context).push(MaterialPageRoute(builder: (_) => _PhotoPage(file: f, title: tr('rpc.shot'), onSave: () => _keep(f))));
+      } catch (e) {
+        DiagLog.log('remote', 'screenshot failed: $e');
+        messenger.showSnackBar(SnackBar(content: Text(tr('rpc.failed', {'name': tr('rpc.shot')}))));
+      } finally {
+        if (mounted) setState(() => _busy = null);
+      }
+      return;
+    }
     final path = m['path'] as String? ?? '';
     final name = m['name'] as String? ?? path.split(r'\').last;
     final kind = m['kind'] as String?;
     if (path.isEmpty || _busy != null) return;
-    final messenger = ScaffoldMessenger.of(context);
     if (m['cmd'] == 'open' && kind == 'video') {
       // Played straight from the PC (no copy first).
       final uri = await pc.fileUri(path);
@@ -148,16 +170,9 @@ class _RemotePcPageState extends State<RemotePcPage> {
       final f = await pc.fetch(path, name);
       if (!mounted) return;
       if (m['cmd'] == 'save') {
-        final k = MediaKind.fromName(name);
-        final now = DateTime.now().millisecondsSinceEpoch;
-        final to = await MediaSaver().save(
-          f,
-          FileOffer(id: '$now', assetId: '', name: name, kind: k, createdMs: now, modifiedMs: now, size: await f.length()),
-          from: Sender(widget.desktop.id, widget.desktop.name),
-        );
-        messenger.showSnackBar(SnackBar(content: Text(tr(to == SavedTo.album ? 'rpc.saved_album' : 'rpc.saved_files', {'name': name}))));
+        await _keep(f);
       } else if (kind == 'photo') {
-        await Navigator.of(context).push(MaterialPageRoute(builder: (_) => _PhotoPage(file: f, title: name)));
+        await Navigator.of(context).push(MaterialPageRoute(builder: (_) => _PhotoPage(file: f, title: name, onSave: () => _keep(f))));
       } else {
         await openDocument(context, f.path, name: name);
       }
@@ -167,6 +182,19 @@ class _RemotePcPageState extends State<RemotePcPage> {
     } finally {
       if (mounted) setState(() => _busy = null);
     }
+  }
+
+  /// Onto this phone: photos and videos in the album, the rest in My files.
+  Future<void> _keep(File f) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final name = f.path.split('/').last;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final to = await MediaSaver().save(
+      f,
+      FileOffer(id: '$now', assetId: '', name: name, kind: MediaKind.fromName(name), createdMs: now, modifiedMs: now, size: await f.length()),
+      from: Sender(widget.desktop.id, widget.desktop.name),
+    );
+    messenger.showSnackBar(SnackBar(content: Text(tr(to == SavedTo.album ? 'rpc.saved_album' : 'rpc.saved_files', {'name': name}))));
   }
 
   Widget _note(IconData icon, String text, {Widget? action}) => Center(
@@ -221,15 +249,18 @@ class _RemotePcPageState extends State<RemotePcPage> {
 }
 
 class _PhotoPage extends StatelessWidget {
-  const _PhotoPage({required this.file, required this.title});
+  const _PhotoPage({required this.file, required this.title, this.onSave});
 
   final File file;
   final String title;
+  final Future<void> Function()? onSave;
 
   @override
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: Colors.black,
-        appBar: AppBar(title: Text(title, overflow: TextOverflow.ellipsis)),
+        appBar: AppBar(title: Text(title, overflow: TextOverflow.ellipsis), actions: [
+          if (onSave != null) IconButton(tooltip: tr('rpc.save'), onPressed: () => onSave!(), icon: const Icon(Icons.download_rounded)),
+        ]),
         body: Center(
           child: InteractiveViewer(
             maxScale: 8,

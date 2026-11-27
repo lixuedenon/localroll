@@ -672,5 +672,7 @@
   "rpc.saved_album": "{name} disimpan ke Foto",
   "rpc.saved_files": "{name} disimpan ke File saya",
   "rpc.failed": "Tidak dapat mengambil {name} dari PC",
-  "rpc.video_failed": "Video ini tidak bisa diputar di ponsel"
+  "rpc.video_failed": "Video ini tidak bisa diputar di ponsel",
+  "rpc.shot": "Tangkapan layar",
+  "rpc.save": "Simpan ke ponsel"
 }

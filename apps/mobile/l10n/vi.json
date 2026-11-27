@@ -672,5 +672,7 @@
   "rpc.saved_album": "Đã lưu {name} vào Ảnh",
   "rpc.saved_files": "Đã lưu {name} vào Tệp của tôi",
   "rpc.failed": "Không lấy được {name} từ máy tính",
-  "rpc.video_failed": "Video này không phát được trên điện thoại"
+  "rpc.video_failed": "Video này không phát được trên điện thoại",
+  "rpc.shot": "Chụp màn hình",
+  "rpc.save": "Lưu về điện thoại"
 }

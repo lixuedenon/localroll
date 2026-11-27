@@ -672,5 +672,7 @@
   "rpc.saved_album": "{name} salvo em Fotos",
   "rpc.saved_files": "{name} salvo em Meus arquivos",
   "rpc.failed": "Não foi possível buscar {name} no PC",
-  "rpc.video_failed": "Este vídeo não pode ser reproduzido no celular"
+  "rpc.video_failed": "Este vídeo não pode ser reproduzido no celular",
+  "rpc.shot": "Captura",
+  "rpc.save": "Salvar no celular"
 }

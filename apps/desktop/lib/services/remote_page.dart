@@ -9,6 +9,11 @@ const List<String> remoteWords = [
   'pcfiles.k_text', 'pcfiles.when', 'pcfiles.all', 'pcfiles.week', 'pcfiles.month', 'pcfiles.year', 'pcfiles.last_year',
   'pcfiles.where', 'pcfiles.everywhere', 'pcfiles.size', 'pcfiles.sort', 'pcfiles.newest', 'pcfiles.oldest', 'pcfiles.by_name',
   'pcfiles.biggest', 'pcfiles.loading', 'pcfiles.empty', 'remote.count', 'remote.open', 'remote.save', 'remote.failed',
+  'remote.copyin', 'remote.rename', 'remote.move', 'remote.delete', 'remote.delete_q', 'remote.cancel', 'remote.ok', 'remote.done',
+  'remote.tab_files', 'remote.tab_pc', 'remote.shot', 'remote.clip_get', 'remote.clip_set', 'remote.clip_send', 'remote.vol_down',
+  'remote.mute', 'remote.vol_up', 'remote.lock', 'remote.sleep', 'remote.shutdown', 'remote.restart', 'remote.off_q', 'remote.off_soon',
+  'remote.off_cancel', 'remote.copy_phone', 'remote.had', 'remote.taken', 'remote.new_name', 'remote.move_to', 'remote.sleep_q',
+  'remote.clip_empty', 'remote.copied',
 ];
 
 /// The page a phone shows for "Other files on this PC" (the phone only
@@ -43,18 +48,51 @@ li{display:flex;align-items:center;gap:10px;background:#fff;margin:6px 0;padding
 .s{font-size:11px;color:#6B7A99;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
 .b{flex:none;border:none;background:#EFF3FA;color:#2F6BFF;border-radius:16px;padding:7px 12px;font-size:13px}
 .empty{text-align:center;color:#6B7A99;padding:40px 0}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#16213E;color:#fff;padding:8px 14px;border-radius:16px;font-size:13px;display:none}
+.tabs{display:flex;gap:6px;margin-bottom:8px}
+.tab{flex:1;text-align:center;padding:8px;border-radius:10px;background:#fff;border:1px solid #D8E0EE;font-size:14px}
+.tab.on{background:#2F6BFF;color:#fff;border-color:#2F6BFF}
+.dots{flex:none;border:none;background:none;font-size:22px;color:#6B7A99;padding:4px 8px}
+#pc{display:none;padding:8px 12px 40px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.grid button,.wide{border:none;background:#fff;border-radius:14px;padding:16px 6px;font-size:14px;color:#16213E;box-shadow:0 2px 8px rgba(29,59,138,.08)}
+.grid button span{display:block;font-size:26px;margin-bottom:6px}
+.wide{width:100%;margin-top:8px;background:#2F6BFF;color:#fff;padding:12px}
+textarea{width:100%;min-height:70px;border:1px solid #D8E0EE;border-radius:10px;padding:10px;font-size:15px}
+.sec{font-size:13px;color:#6B7A99;margin:14px 2px 8px}
+#mask{position:fixed;inset:0;background:rgba(10,20,40,.35);display:none;z-index:5}
+#sheet{position:fixed;left:0;right:0;bottom:0;background:#fff;border-radius:16px 16px 0 0;padding:14px 14px 28px;display:none;z-index:6;max-height:80vh;overflow:auto}
+#sheet .h{font-weight:600;margin:2px 4px 10px;word-break:break-all}
+#sheet .p{font-size:13px;color:#6B7A99;margin:0 4px 10px;white-space:pre-wrap;word-break:break-all}
+#sheet button{display:block;width:100%;text-align:left;border:none;background:#F3F6FC;border-radius:10px;padding:13px 14px;margin:6px 0;font-size:15px;color:#16213E}
+#sheet button.red{color:#E5484D}
+#sheet button.blue{background:#2F6BFF;color:#fff;text-align:center}
+#sheet input{width:100%;padding:11px;border:1px solid #D8E0EE;border-radius:10px;font-size:15px;margin:4px 0 6px}
+.toast{position:fixed;z-index:9;left:50%;bottom:24px;transform:translateX(-50%);background:#16213E;color:#fff;padding:8px 14px;border-radius:16px;font-size:13px;display:none}
 </style></head><body>
 <header>
+<div class="tabs"><div class="tab on" id="tf"></div><div class="tab" id="tp"></div></div>
+<div id="fh">
 <input id="q" type="search">
 <label class="in" id="inl" style="display:none"><input type="checkbox" id="inside"><span id="int"></span></label>
 <div class="row" id="kinds"></div>
 <div class="row">
 <select id="when"></select><select id="place"></select><select id="size"></select><select id="sort"></select>
 </div>
+</div>
 </header>
-<div class="count" id="count"></div>
-<ul id="list"></ul>
+<div id="files"><div class="count" id="count"></div>
+<ul id="list"></ul></div>
+<div id="pc">
+<div class="grid">
+<button id="b_shot"><span>📸</span></button><button id="b_clip"><span>📋</span></button><button id="b_lock"><span>🔒</span></button>
+<button id="b_vd"><span>🔉</span></button><button id="b_mute"><span>🔇</span></button><button id="b_vu"><span>🔊</span></button>
+<button id="b_sleep"><span>🌙</span></button><button id="b_restart"><span>🔄</span></button><button id="b_off"><span>⏻</span></button>
+</div>
+<div class="sec" id="cs"></div>
+<textarea id="clip"></textarea>
+<button class="wide" id="b_send"></button>
+</div>
+<div id="mask"></div><div id="sheet"></div>
 <div class="toast" id="toast"></div>
 <script>
 const W=__WORDS__;
@@ -76,7 +114,7 @@ function row(f){
   const n=document.createElement('div');n.className='n';n.textContent=f.name;
   const s=document.createElement('div');s.className='s';s.textContent=day(f.taken||f.modified)+' · '+bytes(f.size)+' · '+f.path.substring(0,f.path.length-f.name.length-1);
   m.appendChild(n);m.appendChild(s);
-  const b=document.createElement('button');b.className='b';b.textContent=t('remote.save');b.onclick=e=>{e.stopPropagation();ask('save',f);};
+  const b=document.createElement('button');b.className='dots';b.textContent='⋯';b.onclick=e=>{e.stopPropagation();more(f);};
   li.appendChild(th);li.appendChild(m);li.appendChild(b);
   li.onclick=()=>ask('open',f);
   return li;
@@ -90,6 +128,7 @@ async function load(more){
     const r=await fetch('files?'+p.toString());const j=await r.json();
     if(gen!==st.gen)return;
     st.total=j.total;st.offset+=j.files.length;
+    places=j.places;
     if(!more){fill($('place'),[['',t('pcfiles.where')+': '+t('pcfiles.everywhere')],...j.places.map(x=>[x.path,t('pcfiles.where')+': '+x.name])]);$('place').value=st.place;
       $('inl').style.display=j.source==='windowsSearch'?'flex':'none';}
     for(const f of j.files)$('list').appendChild(row(f));
@@ -112,6 +151,56 @@ function init(){
   window.addEventListener('scroll',()=>{if(window.innerHeight+window.scrollY>document.body.offsetHeight-600)load(true);});
   load(false);
 }
+function sheet(title,note,items){
+  const sh=$('sheet');sh.innerHTML='';
+  if(title){const h=document.createElement('div');h.className='h';h.textContent=title;sh.appendChild(h);}
+  if(note){const p=document.createElement('div');p.className='p';p.textContent=note;sh.appendChild(p);}
+  for(const it of items){
+    if(it.input){const i=document.createElement('input');i.id='sin';i.value=it.input;sh.appendChild(i);setTimeout(()=>{i.focus();i.select();},50);continue;}
+    const b=document.createElement('button');b.textContent=it.label;if(it.cls)b.className=it.cls;
+    b.onclick=()=>{const v=$('sin')?$('sin').value:null;close();it.go&&it.go(v);};sh.appendChild(b);}
+  const c=document.createElement('button');c.textContent=t('remote.cancel');c.onclick=close;sh.appendChild(c);
+  $('mask').style.display='block';sh.style.display='block';
+}
+function close(){$('mask').style.display='none';$('sheet').style.display='none';}
+async function act(params){
+  try{const r=await fetch('act?'+new URLSearchParams(params).toString());return await r.json();}catch(e){return {ok:false};}
+}
+let places=[];
+function more(f){
+  sheet(f.name,null,[
+    {label:t('remote.open'),go:()=>ask('open',f)},
+    {label:t('remote.save'),go:()=>ask('save',f)},
+    {label:t('remote.copyin'),go:async()=>{const r=await act({do:'copyin',p:f.path});toast(r.ok?(r.had?t('remote.had'):t('remote.done')):t('remote.failed'));}},
+    {label:t('remote.rename'),go:()=>sheet(t('remote.new_name'),null,[{input:f.name},{label:t('remote.ok'),cls:'blue',go:async v=>{
+        if(!v||v===f.name)return;const r=await act({do:'rename',p:f.path,name:v});toast(r.ok?t('remote.done'):(r.error==='taken'?t('remote.taken'):t('remote.failed')));if(r.ok)load(false);}}])},
+    {label:t('remote.move'),go:()=>sheet(t('remote.move_to'),null,places.map(x=>({label:x.name,go:async()=>{
+        const r=await act({do:'move',p:f.path,to:x.path});toast(r.ok?t('remote.done'):t('remote.failed'));if(r.ok)load(false);}})))},
+    {label:t('remote.delete'),cls:'red',go:()=>sheet(f.name,t('remote.delete_q'),[{label:t('remote.delete'),cls:'red',go:async()=>{
+        const r=await act({do:'delete',p:f.path});toast(r.ok?t('remote.done'):t('remote.failed'));if(r.ok)load(false);}}])},
+  ]);
+}
+function tab(pc){$('tf').classList.toggle('on',!pc);$('tp').classList.toggle('on',pc);$('fh').style.display=pc?'none':'block';$('files').style.display=pc?'none':'block';$('pc').style.display=pc?'block':'none';}
+function initPc(){
+  $('tf').textContent=t('remote.tab_files');$('tp').textContent=t('remote.tab_pc');$('tf').onclick=()=>tab(false);$('tp').onclick=()=>tab(true);
+  const lab=(id,k)=>{$(id).appendChild(document.createTextNode(t(k)));};
+  lab('b_shot','remote.shot');lab('b_clip','remote.clip_get');lab('b_lock','remote.lock');lab('b_vd','remote.vol_down');lab('b_mute','remote.mute');lab('b_vu','remote.vol_up');
+  lab('b_sleep','remote.sleep');lab('b_restart','remote.restart');lab('b_off','remote.shutdown');
+  $('cs').textContent=t('remote.clip_set');$('b_send').textContent=t('remote.clip_send');
+  $('b_shot').onclick=()=>{if(window.Keepnear)Keepnear.postMessage(JSON.stringify({cmd:'shot'}));else location.href='shot';};
+  $('b_clip').onclick=async()=>{const r=await act({do:'clip_get'});if(!r.ok){toast(t('remote.failed'));return;}
+    if(!r.text){toast(t('remote.clip_empty'));return;}
+    sheet(t('remote.clip_get'),r.text,[{label:t('remote.copy_phone'),cls:'blue',go:()=>{if(window.Keepnear)Keepnear.postMessage(JSON.stringify({cmd:'copy',text:r.text}));toast(t('remote.copied'));}}]);};
+  $('b_send').onclick=async()=>{const v=$('clip').value;if(!v)return;const r=await act({do:'clip_set',text:v});toast(r.ok?t('remote.done'):t('remote.failed'));};
+  $('b_lock').onclick=async()=>{const r=await act({do:'lock'});toast(r.ok?t('remote.done'):t('remote.failed'));};
+  $('b_vd').onclick=()=>act({do:'vol_down'});$('b_vu').onclick=()=>act({do:'vol_up'});$('b_mute').onclick=()=>act({do:'mute'});
+  $('b_sleep').onclick=()=>sheet(t('remote.sleep'),t('remote.sleep_q'),[{label:t('remote.sleep'),cls:'blue',go:async()=>{const r=await act({do:'sleep'});toast(r.ok?t('remote.done'):t('remote.failed'));}}]);
+  const off=(what,k)=>sheet(t(k),t('remote.off_q'),[{label:t(k),cls:'red',go:async()=>{const r=await act({do:what});
+    if(r.ok)sheet(t('remote.off_soon'),null,[{label:t('remote.off_cancel'),cls:'blue',go:async()=>{const c=await act({do:'cancel'});toast(c.ok?t('remote.done'):t('remote.failed'));}}]);else toast(t('remote.failed'));}}]);
+  $('b_off').onclick=()=>off('shutdown','remote.shutdown');$('b_restart').onclick=()=>off('restart','remote.restart');
+}
+$('mask').onclick=close;
 window.keepnearToast=toast;
+initPc();
 init();
 </script></body></html>''';

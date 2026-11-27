@@ -672,5 +672,7 @@
   "rpc.saved_album": "{name} 已存到相册",
   "rpc.saved_files": "{name} 已存到「我的文件」",
   "rpc.failed": "没能从电脑取到 {name}",
-  "rpc.video_failed": "这个视频在手机上放不了"
+  "rpc.video_failed": "这个视频在手机上放不了",
+  "rpc.shot": "截屏",
+  "rpc.save": "存到手机"
 }

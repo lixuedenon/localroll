@@ -91,13 +91,20 @@ class RemotePc {
     return Uri(scheme: 'http', host: '127.0.0.1', port: r.port, path: '/r/$_key/file', queryParameters: {'p': path});
   }
 
+  /// A picture of the PC's screen, here (temporary folder).
+  Future<File> shot() {
+    final t = DateTime.now();
+    String two(int v) => v.toString().padLeft(2, '0');
+    return fetch('', 'Screenshot-${t.year}${two(t.month)}${two(t.day)}-${two(t.hour)}${two(t.minute)}${two(t.second)}.jpg', what: 'shot');
+  }
+
   /// A copy of the PC's file [path] here (temporary folder).
-  Future<File> fetch(String path, String name, {void Function(int got, int all)? progress}) async {
+  Future<File> fetch(String path, String name, {void Function(int got, int all)? progress, String what = 'file'}) async {
     final c = await _connect();
     final dir = Directory('${(await getTemporaryDirectory()).path}/pcfiles');
     await dir.create(recursive: true);
     final f = File('${dir.path}/${name.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_')}');
-    final res = await c.open(_remote('file', {'p': path}));
+    final res = await c.open(_remote(what, what == 'file' ? {'p': path} : null));
     if (res.statusCode >= 400) {
       await res.drain<void>();
       throw LrHttpError(res.statusCode, const {'error': 'not_fetched'});

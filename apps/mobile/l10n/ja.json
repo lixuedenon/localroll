@@ -672,5 +672,7 @@
   "rpc.saved_album": "{name} を写真に保存しました",
   "rpc.saved_files": "{name} を「マイファイル」に保存しました",
   "rpc.failed": "{name} を PC から取得できませんでした",
-  "rpc.video_failed": "この動画はスマホで再生できません"
+  "rpc.video_failed": "この動画はスマホで再生できません",
+  "rpc.shot": "スクリーンショット",
+  "rpc.save": "スマホに保存"
 }

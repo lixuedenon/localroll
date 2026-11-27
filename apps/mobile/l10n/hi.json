@@ -672,5 +672,7 @@
   "rpc.saved_album": "{name} फ़ोटो में सहेजा गया",
   "rpc.saved_files": "{name} मेरी फ़ाइलें में सहेजा गया",
   "rpc.failed": "PC से {name} नहीं ला सके",
-  "rpc.video_failed": "यह वीडियो फ़ोन पर नहीं चल सकता"
+  "rpc.video_failed": "यह वीडियो फ़ोन पर नहीं चल सकता",
+  "rpc.shot": "स्क्रीनशॉट",
+  "rpc.save": "फ़ोन में सहेजें"
 }

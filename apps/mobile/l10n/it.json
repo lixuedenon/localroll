@@ -672,5 +672,7 @@
   "rpc.saved_album": "{name} salvato in Foto",
   "rpc.saved_files": "{name} salvato in I miei file",
   "rpc.failed": "Impossibile recuperare {name} dal PC",
-  "rpc.video_failed": "Questo video non si può riprodurre sul telefono"
+  "rpc.video_failed": "Questo video non si può riprodurre sul telefono",
+  "rpc.shot": "Screenshot",
+  "rpc.save": "Salva sul telefono"
 }

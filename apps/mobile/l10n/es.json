@@ -672,5 +672,7 @@
   "rpc.saved_album": "{name} guardado en Fotos",
   "rpc.saved_files": "{name} guardado en Mis archivos",
   "rpc.failed": "No se pudo traer {name} del PC",
-  "rpc.video_failed": "Este vídeo no se puede reproducir en el móvil"
+  "rpc.video_failed": "Este vídeo no se puede reproducir en el móvil",
+  "rpc.shot": "Captura",
+  "rpc.save": "Guardar en el móvil"
 }

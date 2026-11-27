@@ -672,5 +672,7 @@
   "rpc.saved_album": "{name} enregistré dans Photos",
   "rpc.saved_files": "{name} enregistré dans Mes fichiers",
   "rpc.failed": "Impossible de récupérer {name} depuis le PC",
-  "rpc.video_failed": "Cette vidéo ne peut pas être lue sur le téléphone"
+  "rpc.video_failed": "Cette vidéo ne peut pas être lue sur le téléphone",
+  "rpc.shot": "Capture",
+  "rpc.save": "Enregistrer sur le téléphone"
 }

@@ -673,6 +673,8 @@ const Map<String, Map<String, String>> translations = {
     'rpc.saved_files': '{name} saved to My files',
     'rpc.failed': 'Couldn\'t get {name} from the PC',
     'rpc.video_failed': 'This video can\'t play on the phone',
+    'rpc.shot': 'Screenshot',
+    'rpc.save': 'Save to phone',
   },
   'zh': {
     'common.cancel': '取消',
@@ -1344,6 +1346,8 @@ const Map<String, Map<String, String>> translations = {
     'rpc.saved_files': '{name} 已存到「我的文件」',
     'rpc.failed': '没能从电脑取到 {name}',
     'rpc.video_failed': '这个视频在手机上放不了',
+    'rpc.shot': '截屏',
+    'rpc.save': '存到手机',
   },
   'zh_Hant': {
     'common.cancel': '取消',
@@ -2015,6 +2019,8 @@ const Map<String, Map<String, String>> translations = {
     'rpc.saved_files': '{name} 已存到「我的檔案」',
     'rpc.failed': '沒能從電腦取到 {name}',
     'rpc.video_failed': '這個影片在手機上放不了',
+    'rpc.shot': '截圖',
+    'rpc.save': '存到手機',
   },
   'ja': {
     'common.cancel': 'キャンセル',
@@ -2686,6 +2692,8 @@ const Map<String, Map<String, String>> translations = {
     'rpc.saved_files': '{name} を「マイファイル」に保存しました',
     'rpc.failed': '{name} を PC から取得できませんでした',
     'rpc.video_failed': 'この動画はスマホで再生できません',
+    'rpc.shot': 'スクリーンショット',
+    'rpc.save': 'スマホに保存',
   },
   'ko': {
     'common.cancel': '취소',
@@ -3357,6 +3365,8 @@ const Map<String, Map<String, String>> translations = {
     'rpc.saved_files': '{name}을(를) 내 파일에 저장했습니다',
     'rpc.failed': 'PC에서 {name}을(를) 가져오지 못했습니다',
     'rpc.video_failed': '이 동영상은 휴대폰에서 재생할 수 없습니다',
+    'rpc.shot': '스크린샷',
+    'rpc.save': '휴대폰에 저장',
   },
   'es': {
     'common.cancel': 'Cancelar',
@@ -4028,6 +4038,8 @@ const Map<String, Map<String, String>> translations = {
     'rpc.saved_files': '{name} guardado en Mis archivos',
     'rpc.failed': 'No se pudo traer {name} del PC',
     'rpc.video_failed': 'Este vídeo no se puede reproducir en el móvil',
+    'rpc.shot': 'Captura',
+    'rpc.save': 'Guardar en el móvil',
   },
   'fr': {
     'common.cancel': 'Annuler',
@@ -4699,6 +4711,8 @@ const Map<String, Map<String, String>> translations = {
     'rpc.saved_files': '{name} enregistré dans Mes fichiers',
     'rpc.failed': 'Impossible de récupérer {name} depuis le PC',
     'rpc.video_failed': 'Cette vidéo ne peut pas être lue sur le téléphone',
+    'rpc.shot': 'Capture',
+    'rpc.save': 'Enregistrer sur le téléphone',
   },
   'de': {
     'common.cancel': 'Abbrechen',
@@ -5370,6 +5384,8 @@ const Map<String, Map<String, String>> translations = {
     'rpc.saved_files': '{name} in Meine Dateien gespeichert',
     'rpc.failed': '{name} konnte nicht vom PC geholt werden',
     'rpc.video_failed': 'Dieses Video lässt sich auf dem Handy nicht abspielen',
+    'rpc.shot': 'Bildschirmfoto',
+    'rpc.save': 'Aufs Handy speichern',
   },
   'pt': {
     'common.cancel': 'Cancelar',
@@ -6041,6 +6057,8 @@ const Map<String, Map<String, String>> translations = {
     'rpc.saved_files': '{name} salvo em Meus arquivos',
     'rpc.failed': 'Não foi possível buscar {name} no PC',
     'rpc.video_failed': 'Este vídeo não pode ser reproduzido no celular',
+    'rpc.shot': 'Captura',
+    'rpc.save': 'Salvar no celular',
   },
   'ru': {
     'common.cancel': 'Отмена',
@@ -6712,6 +6730,8 @@ const Map<String, Map<String, String>> translations = {
     'rpc.saved_files': '{name} сохранён в «Мои файлы»',
     'rpc.failed': 'Не удалось получить {name} с ПК',
     'rpc.video_failed': 'Это видео нельзя воспроизвести на телефоне',
+    'rpc.shot': 'Скриншот',
+    'rpc.save': 'Сохранить на телефон',
   },
   'it': {
     'common.cancel': 'Annulla',
@@ -7383,6 +7403,8 @@ const Map<String, Map<String, String>> translations = {
     'rpc.saved_files': '{name} salvato in I miei file',
     'rpc.failed': 'Impossibile recuperare {name} dal PC',
     'rpc.video_failed': 'Questo video non si può riprodurre sul telefono',
+    'rpc.shot': 'Screenshot',
+    'rpc.save': 'Salva sul telefono',
   },
   'ar': {
     'common.cancel': 'إلغاء',
@@ -8054,6 +8076,8 @@ const Map<String, Map<String, String>> translations = {
     'rpc.saved_files': 'تم حفظ {name} في ملفاتي',
     'rpc.failed': 'تعذّر جلب {name} من الحاسوب',
     'rpc.video_failed': 'لا يمكن تشغيل هذا الفيديو على الهاتف',
+    'rpc.shot': 'لقطة شاشة',
+    'rpc.save': 'حفظ على الهاتف',
   },
   'hi': {
     'common.cancel': 'रद्द करें',
@@ -8725,6 +8749,8 @@ const Map<String, Map<String, String>> translations = {
     'rpc.saved_files': '{name} मेरी फ़ाइलें में सहेजा गया',
     'rpc.failed': 'PC से {name} नहीं ला सके',
     'rpc.video_failed': 'यह वीडियो फ़ोन पर नहीं चल सकता',
+    'rpc.shot': 'स्क्रीनशॉट',
+    'rpc.save': 'फ़ोन में सहेजें',
   },
   'id': {
     'common.cancel': 'Batal',
@@ -9396,6 +9422,8 @@ const Map<String, Map<String, String>> translations = {
     'rpc.saved_files': '{name} disimpan ke File saya',
     'rpc.failed': 'Tidak dapat mengambil {name} dari PC',
     'rpc.video_failed': 'Video ini tidak bisa diputar di ponsel',
+    'rpc.shot': 'Tangkapan layar',
+    'rpc.save': 'Simpan ke ponsel',
   },
   'vi': {
     'common.cancel': 'Hủy',
@@ -10067,6 +10095,8 @@ const Map<String, Map<String, String>> translations = {
     'rpc.saved_files': 'Đã lưu {name} vào Tệp của tôi',
     'rpc.failed': 'Không lấy được {name} từ máy tính',
     'rpc.video_failed': 'Video này không phát được trên điện thoại',
+    'rpc.shot': 'Chụp màn hình',
+    'rpc.save': 'Lưu về điện thoại',
   },
   'th': {
     'common.cancel': 'ยกเลิก',
@@ -10738,6 +10768,8 @@ const Map<String, Map<String, String>> translations = {
     'rpc.saved_files': 'บันทึก {name} ลงไฟล์ของฉันแล้ว',
     'rpc.failed': 'ดึง {name} จากคอมพิวเตอร์ไม่ได้',
     'rpc.video_failed': 'วิดีโอนี้เล่นบนมือถือไม่ได้',
+    'rpc.shot': 'จับภาพหน้าจอ',
+    'rpc.save': 'บันทึกลงมือถือ',
   },
   'tr': {
     'common.cancel': 'İptal',
@@ -11409,5 +11441,7 @@ const Map<String, Map<String, String>> translations = {
     'rpc.saved_files': '{name} Dosyalarım\'a kaydedildi',
     'rpc.failed': '{name} bilgisayardan alınamadı',
     'rpc.video_failed': 'Bu video telefonda oynatılamıyor',
+    'rpc.shot': 'Ekran görüntüsü',
+    'rpc.save': 'Telefona kaydet',
   },
 };

@@ -672,5 +672,7 @@
   "rpc.saved_album": "{name} saved to Photos",
   "rpc.saved_files": "{name} saved to My files",
   "rpc.failed": "Couldn't get {name} from the PC",
-  "rpc.video_failed": "This video can't play on the phone"
+  "rpc.video_failed": "This video can't play on the phone",
+  "rpc.shot": "Screenshot",
+  "rpc.save": "Save to phone"
 }
