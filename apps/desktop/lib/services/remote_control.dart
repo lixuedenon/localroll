@@ -8,7 +8,19 @@ import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:localroll_core/localroll_core.dart';
 
 import '../app_services.dart';
+import '../l10n/l10n.dart';
+import '../ui/library_tools.dart' show aiPackBase, makeAiPack;
+import '../ui/screen/screen_record.dart' show ScreenRecorder;
+import '../ui/theme.dart' show lrFontFallback;
+import '../ui/tools/convert_run.dart';
+import 'bg_tasks.dart';
+import 'converter.dart';
 import 'copy_in.dart';
+import 'file_tools.dart';
+import 'format_convert.dart';
+import 'office_engines.dart';
+import 'pdf_open.dart';
+import 'tool_outputs.dart';
 import 'file_actions.dart';
 import 'pc_files.dart';
 import 'remote_page.dart';
@@ -148,6 +160,12 @@ class RemoteControl extends ChangeNotifier {
       case 'files':
         await req.drain<void>();
         return _json(res, 200, await _files(q));
+      case 'tools':
+        await req.drain<void>();
+        return _json(res, 200, await _tools(q));
+      case 'tasks':
+        await req.drain<void>();
+        return _json(res, 200, _tasks());
       case 'act':
         await req.drain<void>();
         return _json(res, 200, await _act(d, q));
@@ -167,7 +185,7 @@ class RemoteControl extends ChangeNotifier {
       case 'file':
         await req.drain<void>();
         final p = q['p'] ?? '';
-        if (!s.pcFiles.allowed(p)) {
+        if (!mayTake(p)) {
           DiagLog.log('remote', '${d.name}: refused (not a listed file)');
           return _json(res, 404, {'error': 'not_found'});
         }
@@ -184,6 +202,210 @@ class RemoteControl extends ChangeNotifier {
     }
     await req.drain<void>();
     return _json(res, 404, {'error': 'not_found'});
+  }
+
+  // ------------------------------------------------------------ tools
+
+  /// Files made here for phones (they may take them), newest first.
+  final List<String> _made = [];
+
+  /// Converter jobs started from a phone.
+  final Set<ConvertJob> _jobs = {};
+
+  List<String> _paths(Map<String, String> q) {
+    try {
+      final l = jsonDecode(q['ps'] ?? '[]');
+      return [for (final p in (l is List ? l : const [])) if (p is String && s.pcFiles.allowed(p)) p];
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  void _madeAdd(Iterable<String> paths) {
+    for (final p in paths) {
+      _made.remove(p);
+      _made.insert(0, p);
+    }
+    if (_made.length > 200) _made.removeRange(200, _made.length);
+  }
+
+  /// May a phone take [path]: listed, or made here for a phone.
+  bool mayTake(String path) => s.pcFiles.allowed(path) || (_made.contains(path) && File(path).existsSync());
+
+  /// What the chosen files can become (from the first), and the printers.
+  Future<Map<String, Object?>> _tools(Map<String, String> q) async {
+    final ps = _paths(q);
+    final choices = ps.isEmpty ? const <ConvChoice>[] : FormatTable.choicesFor(ps.first, FormatTable.find(ps.first, ConvCat.image)?.$1 ?? ConvCat.image);
+    final printers = <Map<String, Object?>>[];
+    try {
+      final r = await Process.run('powershell', [
+        '-NoProfile',
+        '-NonInteractive',
+        '-Command',
+        '[Console]::OutputEncoding=[Text.Encoding]::UTF8; @(Get-CimInstance Win32_Printer | Select-Object Name, Default) | ConvertTo-Json -Compress',
+      ], stdoutEncoding: utf8);
+      final j = jsonDecode('${r.stdout}'.trim());
+      for (final p in (j is List ? j : [j])) {
+        if (p is Map && p['Name'] != null) printers.add({'name': '${p['Name']}', 'default': p['Default'] == true});
+      }
+    } catch (_) {}
+    return {
+      'convert': [for (final c in choices) {'to': c.to.id, 'label': c.to.label, 'use': tr(c.useKey), 'best': c.recommended}],
+      'printers': printers,
+    };
+  }
+
+  /// The background work started here (from a phone or not) and the
+  /// files made for phones.
+  Map<String, Object?> _tasks() {
+    final conv = s.converter;
+    _jobs.removeWhere((j) => !conv.jobs.contains(j));
+    return {
+      'tasks': [
+        for (final t in BgTasks.instance.tasks.reversed.take(10))
+          {'title': t.title, 'progress': t.progress, 'state': t.state.name},
+        for (final j in _jobs)
+          {'title': '${j.path.split(Platform.pathSeparator).last} → ${j.label}', 'progress': j.progress, 'state': j.state.name},
+      ],
+      'made': [
+        for (final p in _made)
+          if (File(p).existsSync()) {'path': p, 'name': p.split(Platform.pathSeparator).last, 'size': File(p).lengthSync(), 'kind': PcFiles.kindOf(p)?.name},
+      ],
+    };
+  }
+
+  /// A tool run on the chosen files (in the background here).
+  Future<Map<String, Object?>> _tool(TrustedDevice d, String what, Map<String, String> q) async {
+    final ps = _paths(q);
+    if (ps.isEmpty) return {'ok': false, 'error': 'nothing'};
+    DiagLog.log('remote', '${d.name}: $what (${ps.length} files)');
+    switch (what) {
+      case 'convert':
+        final to = q['to'] ?? '';
+        final small = q['small'] == '1';
+        final rest = <ConvOp, List<String>>{};
+        for (final p in ps) {
+          final cat = FormatTable.find(p, ConvCat.image)?.$1 ?? ConvCat.image;
+          final c = FormatTable.choicesFor(p, cat).where((x) => x.to.id == to).firstOrNull;
+          if (c == null) continue;
+          final op = c.op;
+          if (op is MediaOp) {
+            s.converter.enqueueFile(p, op.format, preset: small ? ConvertPreset.share : ConvertPreset.compatible);
+            _watchJob(p);
+          } else {
+            (rest[op] ??= []).add(p);
+          }
+        }
+        if (rest.isNotEmpty) {
+          unawaited(BgTasks.instance.run<void>(
+            title: tr('rpc.converting', {'count': rest.values.fold(0, (n, l) => n + l.length)}),
+            job: (t) async {
+              final outs = <String>[];
+              final failed = <String>[];
+              for (final e in rest.entries) {
+                await convertFiles(s, e.key, e.value, outs, failed);
+              }
+              _madeAdd(outs);
+              DiagLog.log('remote', '${d.name}: converted ${outs.length}, failed ${failed.length}');
+            },
+          ));
+        }
+        return {'ok': true};
+      case 'compress':
+        var n = 0;
+        for (final p in ps) {
+          final k = PcFiles.kindOf(p);
+          if (k != PcKind.photo && k != PcKind.video) continue;
+          s.converter.enqueueFile(p, null, preset: ConvertPreset.share);
+          _watchJob(p);
+          n++;
+        }
+        return {'ok': n > 0};
+      case 'merge':
+        final pdfs = [for (final p in ps) if (p.toLowerCase().endsWith('.pdf')) p];
+        if (pdfs.length < 2) return {'ok': false, 'error': 'two_pdfs'};
+        unawaited(BgTasks.instance.run<void>(
+          title: tr('rpc.merging', {'count': pdfs.length}),
+          job: (t) async {
+            final pages = <PdfPlanPage>[];
+            for (final p in pdfs) {
+              final doc = await openPdfLoose(p);
+              for (var i = 0; i < doc.pages.length; i++) {
+                pages.add(PdfFromDoc(p, i));
+              }
+              await doc.dispose();
+            }
+            final out = toolOutPath(s, pdfs.first, '-${pdfs.length}', 'pdf');
+            final err = await PdfBuilder.build(out, pages);
+            if (err == null) _madeAdd([out]);
+            DiagLog.log('remote', '${d.name}: merged ${pdfs.length} PDF ${err ?? 'ok'}');
+          },
+        ));
+        return {'ok': true};
+      case 'print':
+        final printer = q['printer'] ?? '';
+        if (printer.isEmpty) return {'ok': false, 'error': 'no_printer'};
+        unawaited(BgTasks.instance.run<void>(
+          title: tr('rpc.printing', {'count': ps.length}),
+          job: (t) async {
+            final tmp = Directory('${Directory.systemTemp.path}${Platform.pathSeparator}lr_remote_print');
+            await tmp.create(recursive: true);
+            final photos = [for (final p in ps) if (PcFiles.kindOf(p) == PcKind.photo) p];
+            final list = <String>[for (final p in ps) if (p.toLowerCase().endsWith('.pdf')) p];
+            if (photos.isNotEmpty) {
+              final out = '${tmp.path}${Platform.pathSeparator}photos-${DateTime.now().millisecondsSinceEpoch}.pdf';
+              if (await photosToPdf(s, photos, out) == null) list.add(out);
+            }
+            for (final p in ps) {
+              final k = PcFiles.kindOf(p);
+              if (k == PcKind.word || k == PcKind.excel || k == PcKind.ppt || k == PcKind.text) {
+                final name = p.split(Platform.pathSeparator).last;
+                final out = '${tmp.path}${Platform.pathSeparator}$name.pdf';
+                final err = k == PcKind.text
+                    ? await FormatConverter.textPdf(p, out, lrFontFallback(translator.language))
+                    : await OfficeEngines.run('pdf', p, out);
+                if (err == null && File(out).existsSync()) list.add(out);
+              }
+            }
+            for (var i = 0; i < list.length; i++) {
+              t.setProgress(i / list.length);
+              final err = await PdfBuilder.print(list[i], printer, [for (var k = 0; k < 2000; k++) k]);
+              DiagLog.log('remote', '${d.name}: printed ${list[i].split(Platform.pathSeparator).last} ${err ?? 'ok'}');
+            }
+          },
+        ));
+        return {'ok': true};
+      case 'aipack':
+        unawaited(BgTasks.instance.run<void>(
+          title: tr('rpc.packing', {'count': ps.length}),
+          job: (t) async {
+            final now = DateTime.now();
+            String two(int v) => v.toString().padLeft(2, '0');
+            final name = 'Keepnear-AI-${now.year}${two(now.month)}${two(now.day)}-${two(now.hour)}${two(now.minute)}-${ps.length}files';
+            final made = await makeAiPack(s, const [], ps, aiPackBase(s), name);
+            if (made != null) _madeAdd([made.$1]);
+          },
+        ));
+        return {'ok': true};
+    }
+    return {'ok': false, 'error': 'unknown'};
+  }
+
+  /// A converter job for [path] (just queued): its result is the phone's.
+  void _watchJob(String path) {
+    final j = s.converter.jobs.where((j) => j.path == path).firstOrNull;
+    if (j == null) return;
+    _jobs.add(j);
+    void check() {
+      if (j.state == JobState.done && j.outputPath != null) {
+        _madeAdd([j.outputPath!]);
+        s.converter.removeListener(check);
+      } else if (j.state == JobState.failed) {
+        s.converter.removeListener(check);
+      }
+    }
+
+    s.converter.addListener(check);
   }
 
   /// A whole-screen picture (all screens), JPEG.
@@ -207,7 +429,18 @@ class RemoteControl extends ChangeNotifier {
       return {'ok': false, 'error': why};
     }
 
+    if (const {'convert', 'compress', 'merge', 'print', 'aipack'}.contains(what)) return _tool(d, what, q);
     switch (what) {
+      case 'rec_start':
+        DiagLog.log('remote', '${d.name}: started recording the screen');
+        await ScreenRecorder.instance.startQuick();
+        return {'ok': ScreenRecorder.instance.recording || ScreenRecorder.instance.countdown > 0};
+      case 'rec_stop':
+        DiagLog.log('remote', '${d.name}: stopped recording the screen');
+        unawaited(ScreenRecorder.instance.stop());
+        return {'ok': true};
+      case 'rec_state':
+        return {'ok': true, 'recording': ScreenRecorder.instance.recording};
       // --- files (only those listed) ---
       case 'delete':
         if (!s.pcFiles.allowed(p)) return no('not_listed');

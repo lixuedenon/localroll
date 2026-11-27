@@ -281,8 +281,20 @@ Future<void> packForAi(BuildContext context, AppServices s, List<MediaItem> medi
   final typed = sanitizeFileName(nameBox.text.trim().replaceAll(RegExp(r'\s+'), '-'));
   nameBox.dispose();
   if (go != true) return;
-  final sep = Platform.pathSeparator;
   final name = typed.isEmpty ? 'Keepnear-AI-${stamp.year}${two(stamp.month)}${two(stamp.day)}-${two(stamp.hour)}${two(stamp.minute)}-${count}files' : typed;
+  final made = await makeAiPack(s, media, files, where, name);
+  if (made != null && context.mounted) {
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(
+      content: Text(tr('aipack.done', {'count': made.$2})),
+      action: SnackBarAction(label: tr('common.show_in_folder'), onPressed: () => revealInExplorer(made.$1)),
+    ));
+  }
+}
+
+/// The package itself: [where]\[name]\ (files + index.md) and [name].zip.
+/// The zip (else the folder) and how many files; null when nothing came.
+Future<(String, int)?> makeAiPack(AppServices s, List<MediaItem> media, List<String> files, String where, String name) async {
+  final sep = Platform.pathSeparator;
   await Directory(where).create(recursive: true);
   final dir = Directory(LibraryIndex.uniquePath(where, name));
   await dir.create(recursive: true);
@@ -327,12 +339,8 @@ Future<void> packForAi(BuildContext context, AppServices s, List<MediaItem> medi
     await Process.run('powershell', ['-NoProfile', '-Command', 'Compress-Archive -Path "${dir.path}\\*" -DestinationPath "${dir.path}.zip" -Force']);
   } catch (_) {}
   DiagLog.log('library', 'AI package made ($k files)');
-  if (context.mounted) {
-    ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(
-      content: Text(tr('aipack.done', {'count': k})),
-      action: SnackBarAction(label: tr('common.show_in_folder'), onPressed: () => revealInExplorer(File('${dir.path}.zip').existsSync() ? '${dir.path}.zip' : dir.path)),
-    ));
-  }
+  if (k == 0) return null;
+  return (File('${dir.path}.zip').existsSync() ? '${dir.path}.zip' : dir.path, k);
 }
 
 // ------------------------------------------------------------- backup report

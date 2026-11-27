@@ -13,7 +13,9 @@ const List<String> remoteWords = [
   'remote.tab_files', 'remote.tab_pc', 'remote.shot', 'remote.clip_get', 'remote.clip_set', 'remote.clip_send', 'remote.vol_down',
   'remote.mute', 'remote.vol_up', 'remote.lock', 'remote.sleep', 'remote.shutdown', 'remote.restart', 'remote.off_q', 'remote.off_soon',
   'remote.off_cancel', 'remote.copy_phone', 'remote.had', 'remote.taken', 'remote.new_name', 'remote.move_to', 'remote.sleep_q',
-  'remote.clip_empty', 'remote.copied',
+  'remote.clip_empty', 'remote.copied', 'remote.tab_tasks', 'remote.select', 'remote.convert', 'remote.compress', 'remote.merge',
+  'remote.print', 'remote.aipack', 'remote.started', 'remote.no_tasks', 'remote.made', 'remote.pick_printer', 'remote.no_printer',
+  'remote.need_two_pdfs', 'remote.rec_start', 'remote.rec_stop', 'remote.selected', 'remote.no_convert', 'remote.small',
 ];
 
 /// The page a phone shows for "Other files on this PC" (the phone only
@@ -67,10 +69,22 @@ textarea{width:100%;min-height:70px;border:1px solid #D8E0EE;border-radius:10px;
 #sheet button.red{color:#E5484D}
 #sheet button.blue{background:#2F6BFF;color:#fff;text-align:center}
 #sheet input{width:100%;padding:11px;border:1px solid #D8E0EE;border-radius:10px;font-size:15px;margin:4px 0 6px}
+.ck{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid #C5D0E6;display:none}
+.sel .ck{display:block}.ck.on{background:#2F6BFF;border-color:#2F6BFF}
+.cl{display:flex;align-items:center;justify-content:space-between}
+.cl button{border:none;background:none;color:#2F6BFF;font-size:13px;padding:4px 14px}
+#bar{position:fixed;left:0;right:0;bottom:0;background:#fff;box-shadow:0 -2px 10px rgba(29,59,138,.12);padding:8px 6px 22px;display:none;z-index:4}
+#bar .bt{display:flex;gap:6px;overflow-x:auto}
+#bar button{flex:none;border:none;background:#EFF3FA;color:#16213E;border-radius:16px;padding:9px 13px;font-size:13px}
+#bar .n{font-size:12px;color:#6B7A99;margin:0 6px 6px}
+#tasks{display:none;padding:8px 12px 40px}
+.task{background:#fff;border-radius:12px;padding:10px 12px;margin:6px 0}
+.task .bar2{height:5px;background:#EFF3FA;border-radius:3px;margin-top:6px;overflow:hidden}
+.task .bar2 div{height:100%;background:#2F6BFF}
 .toast{position:fixed;z-index:9;left:50%;bottom:24px;transform:translateX(-50%);background:#16213E;color:#fff;padding:8px 14px;border-radius:16px;font-size:13px;display:none}
 </style></head><body>
 <header>
-<div class="tabs"><div class="tab on" id="tf"></div><div class="tab" id="tp"></div></div>
+<div class="tabs"><div class="tab on" id="tf"></div><div class="tab" id="tt"></div><div class="tab" id="tp"></div></div>
 <div id="fh">
 <input id="q" type="search">
 <label class="in" id="inl" style="display:none"><input type="checkbox" id="inside"><span id="int"></span></label>
@@ -80,18 +94,22 @@ textarea{width:100%;min-height:70px;border:1px solid #D8E0EE;border-radius:10px;
 </div>
 </div>
 </header>
-<div id="files"><div class="count" id="count"></div>
+<div id="files"><div class="cl"><div class="count" id="count"></div><button id="selb"></button></div>
 <ul id="list"></ul></div>
 <div id="pc">
 <div class="grid">
 <button id="b_shot"><span>📸</span></button><button id="b_clip"><span>📋</span></button><button id="b_lock"><span>🔒</span></button>
 <button id="b_vd"><span>🔉</span></button><button id="b_mute"><span>🔇</span></button><button id="b_vu"><span>🔊</span></button>
 <button id="b_sleep"><span>🌙</span></button><button id="b_restart"><span>🔄</span></button><button id="b_off"><span>⏻</span></button>
+<button id="b_rec"><span>⏺️</span></button>
 </div>
 <div class="sec" id="cs"></div>
 <textarea id="clip"></textarea>
 <button class="wide" id="b_send"></button>
 </div>
+<div id="tasks"><div class="sec" id="th1"></div><div id="tl"></div><div class="sec" id="th2"></div><ul id="ml" style="padding:0"></ul></div>
+<div id="bar"><div class="n" id="bn"></div><div class="bt">
+<button id="a_conv"></button><button id="a_comp"></button><button id="a_merge"></button><button id="a_print"></button><button id="a_ai"></button></div></div>
 <div id="mask"></div><div id="sheet"></div>
 <div class="toast" id="toast"></div>
 <script>
@@ -102,21 +120,22 @@ const $=id=>document.getElementById(id);
 const icon={photo:'🖼️',video:'🎬',pdf:'📕',word:'📘',excel:'📗',ppt:'📙',text:'📄'};
 function fill(sel,items){sel.innerHTML='';for(const [v,l] of items){const o=document.createElement('option');o.value=v;o.textContent=l;sel.appendChild(o);}}
 function bytes(n){if(n<1024)return n+' B';const u=['KB','MB','GB','TB'];let i=-1;do{n/=1024;i++}while(n>=1024&&i<3);return n.toFixed(n<10?1:0)+' '+u[i];}
-function day(ms){const d=new Date(ms);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function day(ms){if(!ms)return '';const d=new Date(ms);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function toast(s){const e=$('toast');e.textContent=s;e.style.display='block';setTimeout(()=>e.style.display='none',2500);}
 function ask(cmd,f){const m=JSON.stringify({cmd,path:f.path,name:f.name,kind:f.kind,size:f.size});
   if(window.Keepnear){Keepnear.postMessage(m);}else{location.href='file?p='+encodeURIComponent(f.path);}}
 function row(f){
   const li=document.createElement('li');
+  const ck=document.createElement('div');ck.className='ck'+(chosen.has(f.path)?' on':'');li.appendChild(ck);
   const th=document.createElement('div');th.className='t';
   if(f.kind==='photo'||f.kind==='video'||f.kind==='pdf'){const i=document.createElement('img');i.loading='lazy';i.src='thumb?p='+encodeURIComponent(f.path);i.onerror=()=>{th.textContent=icon[f.kind]||'📄';};th.appendChild(i);}else{th.textContent=icon[f.kind]||'📄';}
   const m=document.createElement('div');m.className='m';
   const n=document.createElement('div');n.className='n';n.textContent=f.name;
-  const s=document.createElement('div');s.className='s';s.textContent=day(f.taken||f.modified)+' · '+bytes(f.size)+' · '+f.path.substring(0,f.path.length-f.name.length-1);
+  const s=document.createElement('div');s.className='s';s.textContent=[day(f.taken||f.modified),bytes(f.size),f.path.substring(0,f.path.length-f.name.length-1)].filter(x=>x).join(' · ');
   m.appendChild(n);m.appendChild(s);
   const b=document.createElement('button');b.className='dots';b.textContent='⋯';b.onclick=e=>{e.stopPropagation();more(f);};
   li.appendChild(th);li.appendChild(m);li.appendChild(b);
-  li.onclick=()=>ask('open',f);
+  li.onclick=()=>{if(selecting){chosen.has(f.path)?chosen.delete(f.path):chosen.add(f.path);ck.classList.toggle('on');barShow();}else ask('open',f);};
   return li;
 }
 async function load(more){
@@ -180,9 +199,47 @@ function more(f){
         const r=await act({do:'delete',p:f.path});toast(r.ok?t('remote.done'):t('remote.failed'));if(r.ok)load(false);}}])},
   ]);
 }
-function tab(pc){$('tf').classList.toggle('on',!pc);$('tp').classList.toggle('on',pc);$('fh').style.display=pc?'none':'block';$('files').style.display=pc?'none':'block';$('pc').style.display=pc?'block':'none';}
+let cur='f',timer2=null;
+function tab(w){cur=w;$('tf').classList.toggle('on',w==='f');$('tt').classList.toggle('on',w==='t');$('tp').classList.toggle('on',w==='p');
+  $('fh').style.display=w==='f'?'block':'none';$('files').style.display=w==='f'?'block':'none';$('tasks').style.display=w==='t'?'block':'none';$('pc').style.display=w==='p'?'block':'none';
+  barShow();clearInterval(timer2);if(w==='t'){tasks();timer2=setInterval(tasks,2000);}if(w==='p')recState();}
+let selecting=false;const chosen=new Set();
+function barShow(){$('bar').style.display=(cur==='f'&&selecting)?'block':'none';$('bn').textContent=t('remote.selected').replace('{count}',chosen.size);
+  $('selb').textContent=selecting?t('remote.cancel'):t('remote.select');document.body.classList.toggle('sel',selecting);$('list').classList.toggle('sel',selecting);}
+function ps(){return JSON.stringify([...chosen]);}
+async function tool(params){const r=await act(params);toast(r.ok?t('remote.started'):(r.error==='two_pdfs'?t('remote.need_two_pdfs'):t('remote.failed')));if(r.ok){selecting=false;chosen.clear();barShow();load(false);}}
+function initTools(){
+  $('selb').onclick=()=>{selecting=!selecting;chosen.clear();barShow();load(false);};
+  $('a_conv').textContent=t('remote.convert');$('a_comp').textContent=t('remote.compress');$('a_merge').textContent=t('remote.merge');$('a_print').textContent=t('remote.print');$('a_ai').textContent=t('remote.aipack');
+  $('a_conv').onclick=async()=>{if(!chosen.size)return;const r=await (await fetch('tools?'+new URLSearchParams({ps:ps()}))).json();
+    if(!r.convert.length){toast(t('remote.no_convert'));return;}
+    sheet(t('remote.convert'),null,r.convert.map(c=>({label:c.label+(c.best?' ★':'')+(c.use?'  · '+c.use:''),go:()=>tool({do:'convert',ps:ps(),to:c.to})})));};
+  $('a_comp').onclick=()=>{if(chosen.size)tool({do:'compress',ps:ps()});};
+  $('a_merge').onclick=()=>{if(chosen.size)tool({do:'merge',ps:ps()});};
+  $('a_ai').onclick=()=>{if(chosen.size)tool({do:'aipack',ps:ps()});};
+  $('a_print').onclick=async()=>{if(!chosen.size)return;const r=await (await fetch('tools?'+new URLSearchParams({ps:ps()}))).json();
+    if(!r.printers.length){toast(t('remote.no_printer'));return;}
+    sheet(t('remote.pick_printer'),null,r.printers.map(p=>({label:p.name+(p.default?' ★':''),go:()=>tool({do:'print',ps:ps(),printer:p.name})})));};
+  $('th1').textContent=t('remote.tab_tasks');$('th2').textContent=t('remote.made');
+}
+async function tasks(){
+  try{const r=await (await fetch('tasks')).json();
+    const tl=$('tl');tl.innerHTML='';
+    if(!r.tasks.length)tl.innerHTML='<div class="empty">'+t('remote.no_tasks')+'</div>';
+    for(const x of r.tasks){const d=document.createElement('div');d.className='task';
+      const icon=x.state==='done'?'✅ ':x.state==='failed'||x.state==='cancelled'?'⚠️ ':'⏳ ';
+      d.textContent=icon+x.title;const b=document.createElement('div');b.className='bar2';const i=document.createElement('div');
+      i.style.width=Math.round((x.state==='done'?1:x.progress)*100)+'%';b.appendChild(i);d.appendChild(b);tl.appendChild(d);}
+    const ml=$('ml');ml.innerHTML='';for(const f of r.made){const li=row(f);ml.appendChild(li);}
+  }catch(e){}
+}
+async function recState(){const r=await act({do:'rec_state'});recOn=!!r.recording;recLabel();}
+let recOn=false;function recLabel(){const b=$('b_rec');b.lastChild.textContent=t(recOn?'remote.rec_stop':'remote.rec_start');}
 function initPc(){
-  $('tf').textContent=t('remote.tab_files');$('tp').textContent=t('remote.tab_pc');$('tf').onclick=()=>tab(false);$('tp').onclick=()=>tab(true);
+  $('tf').textContent=t('remote.tab_files');$('tt').textContent=t('remote.tab_tasks');$('tp').textContent=t('remote.tab_pc');
+  $('tf').onclick=()=>tab('f');$('tt').onclick=()=>tab('t');$('tp').onclick=()=>tab('p');
+  $('b_rec').appendChild(document.createTextNode(t('remote.rec_start')));
+  $('b_rec').onclick=async()=>{const r=await act({do:recOn?'rec_stop':'rec_start'});if(r.ok){recOn=!recOn;recLabel();toast(t('remote.done'));}else toast(t('remote.failed'));};
   const lab=(id,k)=>{$(id).appendChild(document.createTextNode(t(k)));};
   lab('b_shot','remote.shot');lab('b_clip','remote.clip_get');lab('b_lock','remote.lock');lab('b_vd','remote.vol_down');lab('b_mute','remote.mute');lab('b_vu','remote.vol_up');
   lab('b_sleep','remote.sleep');lab('b_restart','remote.restart');lab('b_off','remote.shutdown');
@@ -202,5 +259,7 @@ function initPc(){
 $('mask').onclick=close;
 window.keepnearToast=toast;
 initPc();
+initTools();
+barShow();
 init();
 </script></body></html>''';
