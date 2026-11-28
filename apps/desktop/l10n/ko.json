@@ -284,7 +284,7 @@
   "done.sent_failed": "“{name}”(으)로 보내기가 끝나지 않았습니다",
   "done.sent_body": "파일 {sent}개 보냄 · 총 {size}",
   "library.filter_docs": "문서",
-  "library.filter_other": "기타",
+  "library.filter_other": "받은 기타 파일",
   "files.delete_title": "“{name}”을(를) 삭제할까요?",
   "files.delete_body": "휴지통으로 이동하며 거기서 복원할 수 있습니다.",
   "files.empty_docs": "아직 문서가 없습니다.\n다른 PC에서 보낸 PDF, Word, Excel 등이 여기에 표시됩니다.",
@@ -2372,7 +2372,7 @@
   "pcfiles.send": "보내기",
   "pcfiles.refresh": "다시 찾기",
   "pcfiles.places_title": "찾을 위치",
-  "pcfiles.places_body": "기본: 바탕화면, 문서, 다운로드, 사진, 동영상, 음악, OneDrive(그리고 Windows 검색 대상). 시스템·프로그램 폴더와 보관함은 표시하지 않습니다. 위치를 추가하거나 제외할 수 있습니다.",
+  "pcfiles.places_body": "Keepnear는 이 PC의 모든 드라이브를 찾습니다(시스템·프로그램·AppData·휴지통·보관함 제외). USB, 외장 드라이브, 네트워크 위치는 아래에 추가해야 찾습니다. 표시하지 않을(휴대폰에도 보이지 않을) 폴더는 제외할 수 있습니다.",
   "pcfiles.extra": "이 위치도 찾기",
   "pcfiles.skip": "이 폴더는 제외",
   "pcfiles.add": "추가",
@@ -2490,5 +2490,14 @@
   "remote.mode_direct": "직접: 누른 곳을 클릭",
   "remote.mode_pad": "터치패드: 손가락으로 포인터 이동",
   "remote.no_picture": "화면이 오지 않습니다(PC가 잠겼거나 절전 중일 수 있음)",
-  "remote.close": "닫기"
+  "remote.close": "닫기",
+  "pcfiles.find_btn": "PC의 파일 찾기",
+  "pcfiles.scanning": "{where} 찾는 중… {count}개 찾음",
+  "pcfiles.count_all": "{count}개 (모두 보관함 밖)",
+  "pcfiles.last_scan": "마지막 검색: {time}",
+  "pcfiles.inside_broken": "이 PC에서는 Windows 검색을 쓸 수 없어 이름으로만 찾습니다",
+  "pcfiles.by": "기준",
+  "pcfiles.by_came": "PC에 들어온 시간",
+  "pcfiles.by_changed": "수정한 시간",
+  "pcfiles.not_library_note": "Keepnear 보관함의 파일(사진·동영상·문서·도구 결과)은 여기 없고 보관함에서 볼 수 있습니다."
 }

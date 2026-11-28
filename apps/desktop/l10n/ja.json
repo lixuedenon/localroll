@@ -284,7 +284,7 @@
   "done.sent_failed": "「{name}」への送信は完了しませんでした",
   "done.sent_body": "{sent} 件送信 · 合計 {size}",
   "library.filter_docs": "書類",
-  "library.filter_other": "その他",
+  "library.filter_other": "受け取ったその他",
   "files.delete_title": "「{name}」を削除しますか？",
   "files.delete_body": "ごみ箱に移動します。そこから元に戻せます。",
   "files.empty_docs": "まだ書類はありません。\n他の PC から届いた PDF・Word・Excel などがここに表示されます。",
@@ -2372,7 +2372,7 @@
   "pcfiles.send": "送信",
   "pcfiles.refresh": "再検索",
   "pcfiles.places_title": "検索する場所",
-  "pcfiles.places_body": "既定ではデスクトップ、ドキュメント、ダウンロード、ピクチャ、ビデオ、ミュージック、OneDrive（と Windows Search の対象）。システムやプログラムのフォルダーとライブラリは表示しません。場所の追加や除外ができます。",
+  "pcfiles.places_body": "Keepnear はこの PC のすべてのドライブを検索します（システム・プログラム・AppData・ごみ箱・ライブラリを除く）。USB メモリ、外付けドライブ、ネットワークは下に追加すると検索します。表示したくない（スマホにも見せたくない）フォルダーは除外できます。",
   "pcfiles.extra": "これらの場所も検索",
   "pcfiles.skip": "これらのフォルダーは除外",
   "pcfiles.add": "追加",
@@ -2490,5 +2490,14 @@
   "remote.mode_direct": "直接：触れた所をクリック",
   "remote.mode_pad": "タッチパッド：指でカーソルを動かす",
   "remote.no_picture": "画面が届きません（PC がロック中かスリープ中かもしれません）",
-  "remote.close": "閉じる"
+  "remote.close": "閉じる",
+  "pcfiles.find_btn": "PC のファイルを探す",
+  "pcfiles.scanning": "{where} を検索中… {count} 件",
+  "pcfiles.count_all": "{count} 件（ライブラリ外）",
+  "pcfiles.last_scan": "前回の検索：{time}",
+  "pcfiles.inside_broken": "この PC では Windows Search が使えません（名前のみ）",
+  "pcfiles.by": "基準",
+  "pcfiles.by_came": "PC に入った日時",
+  "pcfiles.by_changed": "更新日時",
+  "pcfiles.not_library_note": "Keepnear ライブラリ内のファイル（写真・動画・文書・ツール結果）はここに出ません。ライブラリで見てください。"
 }

@@ -284,7 +284,7 @@
   "done.sent_failed": "Senden an „{name}“ nicht abgeschlossen",
   "done.sent_body": "{sent} Dateien gesendet · insgesamt {size}",
   "library.filter_docs": "Dokumente",
-  "library.filter_other": "Andere",
+  "library.filter_other": "Andere empfangene Dateien",
   "files.delete_title": "„{name}“ löschen?",
   "files.delete_body": "Es kommt in den Papierkorb und kann dort wiederhergestellt werden.",
   "files.empty_docs": "Noch keine Dokumente.\nVon einem anderen PC gesendete PDF-, Word-, Excel-Dateien erscheinen hier.",
@@ -2372,7 +2372,7 @@
   "pcfiles.send": "Senden",
   "pcfiles.refresh": "Neu suchen",
   "pcfiles.places_title": "Wo gesucht wird",
-  "pcfiles.places_body": "Standard: Desktop, Dokumente, Downloads, Bilder, Videos, Musik, OneDrive (und was die Windows-Suche erfasst). System- und Programmordner sowie die Mediathek werden nie gezeigt. Weitere Orte hinzufügen oder Ordner ausschließen.",
+  "pcfiles.places_body": "Keepnear durchsucht alle Laufwerke dieses PCs, außer System, Programmen, AppData, Papierkorb und Mediathek. USB-Sticks, externe Laufwerke oder Netzwerkorte unten hinzufügen; Ordner, die nicht erscheinen (oder vom Handy gesehen werden) sollen, ausschließen.",
   "pcfiles.extra": "Auch hier suchen",
   "pcfiles.skip": "Diese Ordner auslassen",
   "pcfiles.add": "Hinzufügen",
@@ -2490,5 +2490,14 @@
   "remote.mode_direct": "Direkt: Tippen = Klick dort",
   "remote.mode_pad": "Touchpad: Zeiger schieben",
   "remote.no_picture": "Gerade kein Bild (PC gesperrt oder im Ruhezustand?)",
-  "remote.close": "Schließen"
+  "remote.close": "Schließen",
+  "pcfiles.find_btn": "Dateien auf dem PC finden",
+  "pcfiles.scanning": "{where} wird durchsucht … {count} gefunden",
+  "pcfiles.count_all": "{count} (nicht in der Mediathek)",
+  "pcfiles.last_scan": "Zuletzt gesucht: {time}",
+  "pcfiles.inside_broken": "Windows-Suche funktioniert hier nicht: nur Namen",
+  "pcfiles.by": "Nach",
+  "pcfiles.by_came": "Wann auf den PC gekommen",
+  "pcfiles.by_changed": "Zuletzt geändert",
+  "pcfiles.not_library_note": "Dateien der Keepnear-Mediathek (Fotos, Videos, Dokumente, Tool-Ergebnisse) stehen nicht hier, sondern in der Mediathek."
 }

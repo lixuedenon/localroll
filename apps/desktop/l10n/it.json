@@ -284,7 +284,7 @@
   "done.sent_failed": "L’invio a «{name}» non è terminato",
   "done.sent_body": "{sent} file inviati · {size} in totale",
   "library.filter_docs": "Documenti",
-  "library.filter_other": "Altro",
+  "library.filter_other": "Altri file ricevuti",
   "files.delete_title": "Eliminare «{name}»?",
   "files.delete_body": "Finirà nel Cestino; potrai ripristinarlo da lì.",
   "files.empty_docs": "Ancora nessun documento.\nQui compaiono PDF, Word, Excel… inviati da un altro PC.",
@@ -2372,7 +2372,7 @@
   "pcfiles.send": "Invia",
   "pcfiles.refresh": "Cerca di nuovo",
   "pcfiles.places_title": "Dove cercare",
-  "pcfiles.places_body": "Predefiniti: Desktop, Documenti, Download, Immagini, Video, Musica, OneDrive (e ciò che indicizza la ricerca di Windows). Cartelle di sistema, dei programmi e la libreria non sono mai elencate. Aggiungi altri posti o escludi cartelle.",
+  "pcfiles.places_body": "Keepnear cerca in tutte le unità di questo PC, tranne sistema, programmi, AppData, cestino e libreria. Aggiungi qui sotto chiavette, dischi esterni o percorsi di rete; escludi le cartelle da non elencare (né mostrare al telefono).",
   "pcfiles.extra": "Cerca anche in",
   "pcfiles.skip": "Escludi queste cartelle",
   "pcfiles.add": "Aggiungi",
@@ -2490,5 +2490,14 @@
   "remote.mode_direct": "Diretto: tocca dove vuoi",
   "remote.mode_pad": "Touchpad: sposta il puntatore",
   "remote.no_picture": "Nessuna immagine ora (PC bloccato o in sospensione?)",
-  "remote.close": "Chiudi"
+  "remote.close": "Chiudi",
+  "pcfiles.find_btn": "Trova file sul PC",
+  "pcfiles.scanning": "Ricerca in {where}… {count} trovati",
+  "pcfiles.count_all": "{count} (fuori libreria)",
+  "pcfiles.last_scan": "Ultima ricerca: {time}",
+  "pcfiles.inside_broken": "La ricerca di Windows qui non funziona: solo nomi",
+  "pcfiles.by": "Per",
+  "pcfiles.by_came": "Arrivo sul PC",
+  "pcfiles.by_changed": "Ultima modifica",
+  "pcfiles.not_library_note": "I file della libreria Keepnear (foto, video, documenti, risultati) non sono qui: guarda nella libreria."
 }

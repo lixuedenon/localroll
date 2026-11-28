@@ -284,7 +284,7 @@
   "done.sent_failed": "傳送到「{name}」沒有全部完成",
   "done.sent_body": "已傳送 {sent} 個檔案 · 共 {size}",
   "library.filter_docs": "文件",
-  "library.filter_other": "其他",
+  "library.filter_other": "收到的其他檔案",
   "files.delete_title": "刪除「{name}」？",
   "files.delete_body": "會移到資源回收筒，可從那裡還原。",
   "files.empty_docs": "還沒有文件。\n其他電腦傳來的 PDF、Word、Excel 等會出現在這裡。",
@@ -2372,7 +2372,7 @@
   "pcfiles.send": "傳送",
   "pcfiles.refresh": "重新尋找",
   "pcfiles.places_title": "尋找的位置",
-  "pcfiles.places_body": "預設尋找桌面、文件、下載、圖片、影片、音樂、OneDrive（以及 Windows 搜尋收錄的位置）。系統和程式資料夾、媒體庫從不列出。可以加別的位置，也可以排除不想列出的資料夾。",
+  "pcfiles.places_body": "Keepnear 尋找這台電腦的所有硬碟，略過系統、程式、AppData、資源回收筒和媒體庫。隨身碟、外接硬碟、網路位置要加到下面才會尋找；也可以排除不想列出（也不想讓手機看到）的資料夾。",
   "pcfiles.extra": "也尋找這些位置",
   "pcfiles.skip": "不要列出這些資料夾",
   "pcfiles.add": "新增",
@@ -2490,5 +2490,14 @@
   "remote.mode_direct": "直接點：點哪裡點哪裡",
   "remote.mode_pad": "觸控板：手指推游標",
   "remote.no_picture": "暫時看不到畫面（電腦可能鎖定或在睡眠）",
-  "remote.close": "關閉"
+  "remote.close": "關閉",
+  "pcfiles.find_btn": "找電腦裡的檔案",
+  "pcfiles.scanning": "正在尋找 {where}… 已找到 {count} 個",
+  "pcfiles.count_all": "{count} 個（都不在媒體庫）",
+  "pcfiles.last_scan": "上次尋找：{time}",
+  "pcfiles.inside_broken": "這台電腦的 Windows 搜尋用不了，只能按名稱找",
+  "pcfiles.by": "依",
+  "pcfiles.by_came": "放進電腦的時間",
+  "pcfiles.by_changed": "修改時間",
+  "pcfiles.not_library_note": "Keepnear 媒體庫裡的檔案（相片、影片、文件、工具結果）不在這裡，在媒體庫裡看。"
 }

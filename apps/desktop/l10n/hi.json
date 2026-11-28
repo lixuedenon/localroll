@@ -284,7 +284,7 @@
   "done.sent_failed": "“{name}” को भेजना पूरा नहीं हुआ",
   "done.sent_body": "{sent} फ़ाइलें भेजीं · कुल {size}",
   "library.filter_docs": "दस्तावेज़",
-  "library.filter_other": "अन्य",
+  "library.filter_other": "प्राप्त अन्य फ़ाइलें",
   "files.delete_title": "“{name}” हटाएँ?",
   "files.delete_body": "यह रीसायकल बिन में जाएगा; वहाँ से वापस ला सकते हैं।",
   "files.empty_docs": "अभी कोई दस्तावेज़ नहीं।\nदूसरे पीसी से भेजे PDF, Word, Excel… यहाँ दिखेंगे।",
@@ -2372,7 +2372,7 @@
   "pcfiles.send": "भेजें",
   "pcfiles.refresh": "फिर से खोजें",
   "pcfiles.places_title": "कहाँ खोजें",
-  "pcfiles.places_body": "डिफ़ॉल्ट: डेस्कटॉप, दस्तावेज़, डाउनलोड, चित्र, वीडियो, संगीत, OneDrive (और Windows खोज में शामिल स्थान)। सिस्टम व प्रोग्राम फ़ोल्डर और लाइब्रेरी कभी नहीं दिखते। और स्थान जोड़ें या फ़ोल्डर बाहर रखें।",
+  "pcfiles.places_body": "Keepnear इस PC की सभी ड्राइव खोजता है, सिस्टम, प्रोग्राम, AppData, रीसायकल बिन और लाइब्रेरी छोड़कर। USB, बाहरी ड्राइव या नेटवर्क स्थान नीचे जोड़ें; जो फ़ोल्डर न दिखाने हों (फ़ोन को भी नहीं), उन्हें बाहर रखें।",
   "pcfiles.extra": "इनमें भी खोजें",
   "pcfiles.skip": "इन फ़ोल्डरों को छोड़ें",
   "pcfiles.add": "जोड़ें",
@@ -2490,5 +2490,14 @@
   "remote.mode_direct": "सीधे: जहाँ छुएँ वहीं क्लिक",
   "remote.mode_pad": "टचपैड: पॉइंटर खिसकाएँ",
   "remote.no_picture": "अभी तस्वीर नहीं (PC लॉक या स्लीप में हो सकता है)",
-  "remote.close": "बंद करें"
+  "remote.close": "बंद करें",
+  "pcfiles.find_btn": "PC में फ़ाइलें खोजें",
+  "pcfiles.scanning": "{where} में खोज… {count} मिलीं",
+  "pcfiles.count_all": "{count} (लाइब्रेरी से बाहर)",
+  "pcfiles.last_scan": "पिछली खोज: {time}",
+  "pcfiles.inside_broken": "इस PC पर Windows खोज नहीं चलती: सिर्फ़ नाम से",
+  "pcfiles.by": "आधार",
+  "pcfiles.by_came": "PC पर आने का समय",
+  "pcfiles.by_changed": "अंतिम बदलाव",
+  "pcfiles.not_library_note": "Keepnear लाइब्रेरी की फ़ाइलें (फ़ोटो, वीडियो, दस्तावेज़, टूल परिणाम) यहाँ नहीं, लाइब्रेरी में देखें।"
 }

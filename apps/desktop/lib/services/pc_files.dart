@@ -2,8 +2,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ffi';
 import 'dart:isolate';
 
+import 'package:ffi/ffi.dart';
+import 'package:flutter/foundation.dart';
 import 'package:localroll_core/localroll_core.dart';
 
 import '../ui/player/player_entry.dart';
@@ -13,55 +16,75 @@ enum PcKind { photo, video, pdf, word, excel, ppt, text }
 
 /// A file somewhere on this PC (outside the library).
 class PcFile {
-  PcFile(this.path, this.size, this.modified, this.taken);
+  PcFile(this.path, this.size, this.modified, this.taken, {DateTime? created}) : created = created ?? modified;
 
   final String path;
   final int size;
   final DateTime modified;
 
-  /// When the photo was taken / the video made (Windows Search knows it);
-  /// null: not known.
+  /// When it came onto this PC (Windows' creation time: a copy's is when it
+  /// was copied, while its last change stays the original's).
+  final DateTime created;
+
+  /// When the photo was taken / the video made (when known).
   final DateTime? taken;
 
   String get name => path.split(Platform.pathSeparator).last;
   String get folder => File(path).parent.path;
 
-  /// Taken (photos, videos), else last changed.
-  DateTime get when => taken ?? modified;
+  /// Taken (photos, videos), else when it came onto this PC (the later of
+  /// created and last changed).
+  DateTime get when => taken ?? (created.isAfter(modified) ? created : modified);
+
+  /// Last changed (the "by last change" choice).
+  DateTime get changed => modified;
   PcKind? get kind => PcFiles.kindOf(name);
 
   Map<String, Object?> toJson() => {
         'path': path,
         'name': name,
         'size': size,
-        'modified': modified.millisecondsSinceEpoch,
+        'modified': when.millisecondsSinceEpoch,
         if (taken != null) 'taken': taken!.millisecondsSinceEpoch,
         'kind': kind?.name,
       };
 }
 
-/// Where the list came from.
+/// Where the list came from (always Keepnear's own look through the
+/// drives now; Windows Search only for the words inside files).
 enum PcSource { windowsSearch, scan }
 
 /// The photos, videos, PDF, Office and text files elsewhere on this PC:
-/// from Windows' own search index (it is kept up to date by Windows, and
-/// knows when photos were taken), else by looking through the usual folders
-/// and the ones added. System and program folders, the library and the
-/// folders left out are never listed. Nothing is copied or changed.
-class PcFiles {
-  PcFiles({required this.libraryRoot, required this.extra, required this.skip});
+/// Keepnear looks through every drive of this PC (and the folders added),
+/// skipping system and program folders, the library and the folders left
+/// out; the list is kept on disk, shown at once next time and looked
+/// through again in the background. Windows Search is used only for the
+/// words inside files. Nothing is copied or changed.
+class PcFiles extends ChangeNotifier {
+  PcFiles({required this.libraryRoot, required this.extra, required this.skip, required this.cacheFile});
 
   /// The library (its files are listed there, not here).
   final String Function() libraryRoot;
 
-  /// Folders added to the usual ones, and folders left out.
+  /// Folders added (other drives: USB, network), and folders left out.
   final List<String> Function() extra;
   final List<String> Function() skip;
 
-  List<PcFile> _files = const [];
+  /// Where the list is kept between runs.
+  final File Function() cacheFile;
+
+  List<PcFile> _files = [];
   DateTime? _at;
-  PcSource source = PcSource.windowsSearch;
+  PcSource source = PcSource.scan;
   Future<List<PcFile>>? _running;
+
+  /// Looking through the drives now: the drive, and how many found.
+  String? scanning;
+  int found = 0;
+
+  /// The words-inside search can't be used on this PC (Windows Search
+  /// didn't answer).
+  bool insideBroken = false;
 
   static const Map<PcKind, Set<String>> _ext = {
     PcKind.pdf: {'pdf'},
@@ -97,38 +120,101 @@ class PcFiles {
   List<PcFile> get files => _files;
   DateTime? get listedAt => _at;
 
-  /// The list (read again when older than [maxAge], or [fresh]).
-  Future<List<PcFile>> list({bool fresh = false, Duration maxAge = const Duration(minutes: 10)}) {
+  /// The list: the one kept on disk at once (looked through again in the
+  /// background when older than [maxAge]), or a fresh look ([fresh]).
+  Future<List<PcFile>> list({bool fresh = false, Duration maxAge = const Duration(hours: 6)}) async {
+    if (_at == null && !fresh) await _loadCache();
     final at = _at;
-    if (!fresh && at != null && DateTime.now().difference(at) < maxAge) return Future.value(_files);
-    return _running ??= _read().whenComplete(() => _running = null);
+    if (!fresh && at != null) {
+      if (DateTime.now().difference(at) > maxAge) unawaited(_scanOnce());
+      return _files;
+    }
+    return _scanOnce();
+  }
+
+  Future<List<PcFile>> _scanOnce() => _running ??= _read().whenComplete(() => _running = null);
+
+  /// This PC's own drives (not USB sticks, network or CD).
+  static List<String> fixedDrives() {
+    if (!Platform.isWindows) return const [];
+    try {
+      final k = DynamicLibrary.open('kernel32.dll');
+      final type = k.lookupFunction<Uint32 Function(Pointer<Utf16>), int Function(Pointer<Utf16>)>('GetDriveTypeW');
+      final out = <String>[];
+      for (var c = 'C'.codeUnitAt(0); c <= 'Z'.codeUnitAt(0); c++) {
+        final root = '${String.fromCharCode(c)}:\\';
+        final p = root.toNativeUtf16();
+        try {
+          if (type(p) == 3) out.add(root); // DRIVE_FIXED
+        } finally {
+          calloc.free(p);
+        }
+      }
+      return out;
+    } catch (_) {
+      return const ['C:\\'];
+    }
   }
 
   Future<List<PcFile>> _read() async {
     final t0 = DateTime.now();
-    List<PcFile>? got;
-    try {
-      got = await _fromWindowsSearch();
-      source = PcSource.windowsSearch;
-    } catch (e) {
-      DiagLog.log('library', 'pc files: Windows Search not usable ($e): looking through the folders');
-    }
-    // Folders added that Windows doesn't index: looked through as well.
-    final extraDirs = extra().where((d) => Directory(d).existsSync()).toList();
-    if (got == null) {
-      source = PcSource.scan;
-      got = await _scan([...usualFolders(), ...extraDirs]);
-    } else if (extraDirs.isNotEmpty) {
-      final have = {for (final f in got) f.path.toLowerCase()};
-      for (final f in await _scan(extraDirs)) {
-        if (have.add(f.path.toLowerCase())) got.add(f);
+    final roots = [...fixedDrives(), ...extra().where((d) => Directory(d).existsSync())];
+    final skips = <String>{
+      libraryRoot().toLowerCase(),
+      for (final x in skip()) x.toLowerCase().replaceAll(RegExp(r'[\\/]+$'), ''),
+    }.where((e) => e.isNotEmpty).toList();
+    final got = <String, PcFile>{};
+    found = 0;
+    for (final r in roots) {
+      scanning = r;
+      notifyListeners();
+      for (final f in await _scan([r], skips)) {
+        got.putIfAbsent(f.path.toLowerCase(), () => f);
       }
+      found = got.length;
     }
-    final out = got.where(_keep).toList()..sort((a, b) => b.when.compareTo(a.when));
+    scanning = null;
+    final out = got.values.where(_keep).toList()..sort((a, b) => b.when.compareTo(a.when));
     _files = out;
     _at = DateTime.now();
-    DiagLog.log('library', 'pc files: ${out.length} from ${source.name} in ${DateTime.now().difference(t0).inMilliseconds} ms');
+    source = PcSource.scan;
+    DiagLog.log('library', 'pc files: ${out.length} on ${roots.length} places in ${DateTime.now().difference(t0).inSeconds} s');
+    unawaited(_saveCache());
+    notifyListeners();
     return out;
+  }
+
+  Future<void> _loadCache() async {
+    try {
+      final f = cacheFile();
+      if (!f.existsSync()) return;
+      final lines = await f.readAsLines();
+      if (lines.isEmpty) return;
+      final at = DateTime.fromMillisecondsSinceEpoch(int.tryParse(lines.first) ?? 0);
+      final out = <PcFile>[];
+      for (final l in lines.skip(1)) {
+        final p = l.split('\t');
+        if (p.length < 4) continue;
+        out.add(PcFile(p[0], int.tryParse(p[1]) ?? 0, DateTime.fromMillisecondsSinceEpoch(int.tryParse(p[2]) ?? 0), null,
+            created: DateTime.fromMillisecondsSinceEpoch(int.tryParse(p[3]) ?? 0)));
+      }
+      _files = out.where(_keep).toList()..sort((a, b) => b.when.compareTo(a.when));
+      _at = at;
+    } catch (e) {
+      DiagLog.log('library', 'pc files: kept list unreadable: $e');
+    }
+  }
+
+  Future<void> _saveCache() async {
+    try {
+      final b = StringBuffer('${_at?.millisecondsSinceEpoch ?? 0}\n');
+      for (final f in _files) {
+        b.write('${f.path}\t${f.size}\t${f.modified.millisecondsSinceEpoch}\t${f.created.millisecondsSinceEpoch}\n');
+      }
+      final f = cacheFile();
+      await f.parent.create(recursive: true);
+      await f.writeAsString(b.toString(), flush: true);
+    } catch (_) {}
   }
 
   /// May a phone see / take [path]: an existing file of a kind listed,
@@ -194,7 +280,7 @@ $r.Close(); $c.Close()
 ''';
     final r = await Process.run('powershell', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', ps],
             environment: {'LR_SQL': sql}, stdoutEncoding: utf8, stderrEncoding: utf8)
-        .timeout(const Duration(minutes: 2));
+        .timeout(const Duration(seconds: 15));
     if (r.exitCode != 0) throw StateError('${r.stderr}'.trim().split('\n').first);
     final out = <PcFile>[];
     for (final line in const LineSplitter().convert('${r.stdout}')) {
@@ -208,34 +294,44 @@ $r.Close(); $c.Close()
   }
 
   /// Files whose words contain [words] (Windows Search reads inside PDF and
-  /// Office files). Null: Windows Search can't be used.
+  /// Office files where it indexes). Null: Windows Search can't be used.
   Future<List<PcFile>?> searchInside(String words) async {
-    if (source != PcSource.windowsSearch || words.trim().isEmpty) return null;
+    if (words.trim().isEmpty) return null;
     try {
       final got = await _fromWindowsSearch(words: words.trim());
-      return got.where(_keep).toList()..sort((a, b) => b.when.compareTo(a.when));
+      insideBroken = false;
+      return got.where((f) => File(f.path).existsSync() && _keep(f)).toList()..sort((a, b) => b.when.compareTo(a.when));
     } catch (e) {
+      insideBroken = true;
       DiagLog.log('library', 'pc files: search inside failed: $e');
       return null;
     }
   }
 
   /// Looks through [dirs] (in another isolate: Keepnear stays free).
-  static Future<List<PcFile>> _scan(List<String> dirs) async {
+  static Future<List<PcFile>> _scan(List<String> dirs, List<String> skips) async {
     final exts = allExtensions;
-    final rows = await Isolate.run(() => _walk(dirs, exts));
+    final rows = await Isolate.run(() => _walk(dirs, exts, skips));
     return [
-      for (final r in rows) PcFile(r.$1, r.$2, DateTime.fromMillisecondsSinceEpoch(r.$3), null),
+      for (final r in rows)
+        PcFile(r.$1, r.$2, DateTime.fromMillisecondsSinceEpoch(r.$3), null, created: DateTime.fromMillisecondsSinceEpoch(r.$4)),
     ];
   }
 
-  static List<(String, int, int)> _walk(List<String> dirs, Set<String> exts) {
-    final out = <(String, int, int)>[];
+  /// Folders never looked into (system, programs, app data, bins).
+  static const Set<String> _skipNames = {
+    'windows', 'windows.old', 'program files', 'program files (x86)', 'programdata', 'appdata', 'system volume information',
+    'recovery', 'perflogs', 'msocache', 'config.msi', 'onedrivetemp', 'node_modules', 'intel', 'amd', 'nvidia', 'drivers',
+  };
+
+  static List<(String, int, int, int)> _walk(List<String> dirs, Set<String> exts, List<String> skips) {
+    final out = <(String, int, int, int)>[];
     final seen = <String>{};
     final stack = [...dirs];
-    while (stack.isNotEmpty && out.length < 200000) {
+    while (stack.isNotEmpty && out.length < 500000) {
       final d = stack.removeLast();
-      if (!seen.add(d.toLowerCase())) continue;
+      final low = d.toLowerCase();
+      if (!seen.add(low) || skips.any((x) => low == x || low.startsWith('$x\\'))) continue;
       List<FileSystemEntity> list;
       try {
         list = Directory(d).listSync(followLinks: false);
@@ -244,15 +340,16 @@ $r.Close(); $c.Close()
       }
       for (final e in list) {
         final n = e.path.split(Platform.pathSeparator).last;
-        if (n.startsWith('.') || n.startsWith(r'$') || n.toLowerCase() == 'appdata' || n == 'node_modules') continue;
+        if (n.startsWith('.') || n.startsWith(r'$')) continue;
         if (e is Directory) {
-          stack.add(e.path);
+          if (!_skipNames.contains(n.toLowerCase())) stack.add(e.path);
         } else if (e is File) {
           final dot = n.lastIndexOf('.');
           if (dot < 0 || !exts.contains(n.substring(dot + 1).toLowerCase())) continue;
           try {
             final st = e.statSync();
-            out.add((e.path, st.size, st.modified.millisecondsSinceEpoch));
+            // On Windows "changed" is the creation time.
+            out.add((e.path, st.size, st.modified.millisecondsSinceEpoch, st.changed.millisecondsSinceEpoch));
           } catch (_) {}
         }
       }

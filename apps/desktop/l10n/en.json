@@ -284,7 +284,7 @@
   "done.sent_failed": "Sending to “{name}” did not finish",
   "done.sent_body": "{sent} files sent · {size} in total",
   "library.filter_docs": "Documents",
-  "library.filter_other": "Other",
+  "library.filter_other": "Other files received",
   "files.delete_title": "Delete “{name}”?",
   "files.delete_body": "It goes to the Recycle Bin; you can restore it from there.",
   "files.empty_docs": "No documents yet.\nPDF, Word, Excel… sent from another PC appear here.",
@@ -2372,7 +2372,7 @@
   "pcfiles.send": "Send",
   "pcfiles.refresh": "Look again",
   "pcfiles.places_title": "Where to look",
-  "pcfiles.places_body": "By default: Desktop, Documents, Downloads, Pictures, Videos, Music, OneDrive (and what Windows Search indexes). System and program folders and the library are never listed. Add other places, or leave folders out.",
+  "pcfiles.places_body": "Keepnear looks through all of this PC's drives, skipping system, programs, AppData, the Recycle Bin and the library. Add USB sticks, external drives or network places below; leave out folders you don't want listed (or seen from the phone).",
   "pcfiles.extra": "Also look in",
   "pcfiles.skip": "Leave these folders out",
   "pcfiles.add": "Add",
@@ -2490,5 +2490,14 @@
   "remote.mode_direct": "Direct: tap where you mean",
   "remote.mode_pad": "Touchpad: push the pointer",
   "remote.no_picture": "No picture right now (the PC may be locked or asleep)",
-  "remote.close": "Close"
+  "remote.close": "Close",
+  "pcfiles.find_btn": "Find files on this PC",
+  "pcfiles.scanning": "Looking through {where}… {count} found",
+  "pcfiles.count_all": "{count} (none in the library)",
+  "pcfiles.last_scan": "Last looked: {time}",
+  "pcfiles.inside_broken": "Windows Search doesn't work on this PC: names only",
+  "pcfiles.by": "By",
+  "pcfiles.by_came": "When it came onto the PC",
+  "pcfiles.by_changed": "Last changed",
+  "pcfiles.not_library_note": "Files in the Keepnear library (photos, videos, documents, tool results) aren't here: see the library."
 }

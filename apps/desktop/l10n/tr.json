@@ -284,7 +284,7 @@
   "done.sent_failed": "“{name}” adlı cihaza gönderim bitmedi",
   "done.sent_body": "{sent} dosya gönderildi · toplam {size}",
   "library.filter_docs": "Belgeler",
-  "library.filter_other": "Diğer",
+  "library.filter_other": "Alınan diğer dosyalar",
   "files.delete_title": "“{name}” silinsin mi?",
   "files.delete_body": "Geri Dönüşüm Kutusu’na gider; oradan geri yükleyebilirsiniz.",
   "files.empty_docs": "Henüz belge yok.\nBaşka PC’den gelen PDF, Word, Excel… burada görünür.",
@@ -2372,7 +2372,7 @@
   "pcfiles.send": "Gönder",
   "pcfiles.refresh": "Yeniden ara",
   "pcfiles.places_title": "Nerede aranacak",
-  "pcfiles.places_body": "Varsayılan: Masaüstü, Belgeler, İndirilenler, Resimler, Videolar, Müzik, OneDrive (ve Windows Arama'nın dizinledikleri). Sistem, program klasörleri ve kitaplık hiç listelenmez. Başka yer ekleyin ya da klasör hariç tutun.",
+  "pcfiles.places_body": "Keepnear bu bilgisayarın tüm sürücülerini tarar; sistem, programlar, AppData, Geri Dönüşüm Kutusu ve kitaplık hariç. USB bellek, harici disk veya ağ konumlarını aşağıya ekleyin; listelenmesini (veya telefondan görülmesini) istemediğiniz klasörleri hariç tutun.",
   "pcfiles.extra": "Şuralarda da ara",
   "pcfiles.skip": "Bu klasörleri hariç tut",
   "pcfiles.add": "Ekle",
@@ -2490,5 +2490,14 @@
   "remote.mode_direct": "Doğrudan: dokunduğun yer tıklanır",
   "remote.mode_pad": "Dokunmatik: imleci kaydır",
   "remote.no_picture": "Şu an görüntü yok (bilgisayar kilitli ya da uykuda olabilir)",
-  "remote.close": "Kapat"
+  "remote.close": "Kapat",
+  "pcfiles.find_btn": "Bilgisayarda dosya bul",
+  "pcfiles.scanning": "{where} taranıyor… {count} bulundu",
+  "pcfiles.count_all": "{count} (kitaplık dışı)",
+  "pcfiles.last_scan": "Son arama: {time}",
+  "pcfiles.inside_broken": "Windows Arama burada çalışmıyor: yalnızca adlar",
+  "pcfiles.by": "Göre",
+  "pcfiles.by_came": "Bilgisayara geliş",
+  "pcfiles.by_changed": "Son değişiklik",
+  "pcfiles.not_library_note": "Keepnear kitaplığındaki dosyalar (fotoğraf, video, belge, araç sonuçları) burada değil: kitaplığa bakın."
 }

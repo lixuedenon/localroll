@@ -284,7 +284,7 @@
   "done.sent_failed": "O envio para “{name}” não terminou",
   "done.sent_body": "{sent} arquivos enviados · {size} no total",
   "library.filter_docs": "Documentos",
-  "library.filter_other": "Outros",
+  "library.filter_other": "Outros arquivos recebidos",
   "files.delete_title": "Excluir “{name}”?",
   "files.delete_body": "Vai para a Lixeira; dá para restaurar de lá.",
   "files.empty_docs": "Nenhum documento ainda.\nPDF, Word, Excel… enviados de outro PC aparecem aqui.",
@@ -2372,7 +2372,7 @@
   "pcfiles.send": "Enviar",
   "pcfiles.refresh": "Procurar de novo",
   "pcfiles.places_title": "Onde procurar",
-  "pcfiles.places_body": "Por padrão: Área de Trabalho, Documentos, Downloads, Imagens, Vídeos, Música, OneDrive (e o que a pesquisa do Windows indexa). Pastas do sistema e de programas e a biblioteca nunca aparecem. Adicione locais ou exclua pastas.",
+  "pcfiles.places_body": "O Keepnear procura em todas as unidades deste PC, exceto sistema, programas, AppData, Lixeira e biblioteca. Adicione abaixo pendrives, discos externos ou locais de rede; exclua pastas que não quer listar (nem mostrar ao celular).",
   "pcfiles.extra": "Procurar também em",
   "pcfiles.skip": "Excluir estas pastas",
   "pcfiles.add": "Adicionar",
@@ -2490,5 +2490,14 @@
   "remote.mode_direct": "Direto: toque onde quiser",
   "remote.mode_pad": "Touchpad: mova o ponteiro",
   "remote.no_picture": "Sem imagem agora (PC bloqueado ou em suspensão?)",
-  "remote.close": "Fechar"
+  "remote.close": "Fechar",
+  "pcfiles.find_btn": "Encontrar arquivos no PC",
+  "pcfiles.scanning": "Procurando em {where}… {count} encontrados",
+  "pcfiles.count_all": "{count} (fora da biblioteca)",
+  "pcfiles.last_scan": "Última busca: {time}",
+  "pcfiles.inside_broken": "A pesquisa do Windows não funciona aqui: só nomes",
+  "pcfiles.by": "Por",
+  "pcfiles.by_came": "Chegada ao PC",
+  "pcfiles.by_changed": "Última alteração",
+  "pcfiles.not_library_note": "Os arquivos da biblioteca do Keepnear (fotos, vídeos, documentos, resultados) não aparecem aqui: veja a biblioteca."
 }

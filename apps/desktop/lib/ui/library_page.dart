@@ -731,12 +731,6 @@ class _LibraryPageState extends State<LibraryPage> {
                       icon: const Icon(Icons.photo_size_select_large_rounded, color: ToolColors.size),
                     ),
                   ),
-                HoverTip(
-                  text: tr('pcfiles.tip'),
-                  child: IconButton(
-                    onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => PcFilesPage(services: s))),
-                    icon: const Icon(Icons.travel_explore_rounded, color: ToolColors.plain),
-                  ),
                 ),
                 HoverTip(
                   text: tr('trash.tip'),
@@ -849,6 +843,21 @@ class _LibraryPageState extends State<LibraryPage> {
                 onTap: () => setState(() => _filter = f),
               ),
             ),
+          // Files elsewhere on this PC: easy to see, it's often what people need.
+          Padding(
+            padding: const EdgeInsets.only(left: 10),
+            child: OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF2F6BFF),
+                side: const BorderSide(color: Color(0xFF2F6BFF)),
+                shape: const StadiumBorder(),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              ),
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => PcFilesPage(services: widget.services))),
+              icon: const Icon(Icons.screen_search_desktop_outlined, size: 18),
+              label: Text(tr('pcfiles.find_btn')),
+            ),
+          ),
         ]),
       ),
     );

@@ -284,7 +284,7 @@
   "done.sent_failed": "การส่งถึง “{name}” ยังไม่เสร็จ",
   "done.sent_body": "ส่งแล้ว {sent} ไฟล์ · รวม {size}",
   "library.filter_docs": "เอกสาร",
-  "library.filter_other": "อื่น ๆ",
+  "library.filter_other": "ไฟล์อื่นที่ได้รับ",
   "files.delete_title": "ลบ “{name}”?",
   "files.delete_body": "จะย้ายไปถังรีไซเคิล กู้คืนได้จากที่นั่น",
   "files.empty_docs": "ยังไม่มีเอกสาร\nPDF, Word, Excel… ที่ส่งจากเครื่องอื่นจะแสดงที่นี่",
@@ -2372,7 +2372,7 @@
   "pcfiles.send": "ส่ง",
   "pcfiles.refresh": "ค้นหาอีกครั้ง",
   "pcfiles.places_title": "ตำแหน่งที่ค้นหา",
-  "pcfiles.places_body": "ค่าเริ่มต้น: เดสก์ท็อป เอกสาร ดาวน์โหลด รูปภาพ วิดีโอ เพลง OneDrive (และที่ Windows Search จัดทำดัชนี) ไม่แสดงโฟลเดอร์ระบบ โปรแกรม และคลัง เพิ่มตำแหน่งหรือยกเว้นโฟลเดอร์ได้",
+  "pcfiles.places_body": "Keepnear ค้นหาทุกไดรฟ์ในเครื่องนี้ ยกเว้นระบบ โปรแกรม AppData ถังรีไซเคิล และคลัง เพิ่ม USB ไดรฟ์ภายนอก หรือเครือข่ายด้านล่าง และยกเว้นโฟลเดอร์ที่ไม่ต้องการแสดง (หรือให้มือถือเห็น)",
   "pcfiles.extra": "ค้นหาที่นี่ด้วย",
   "pcfiles.skip": "ไม่ต้องแสดงโฟลเดอร์เหล่านี้",
   "pcfiles.add": "เพิ่ม",
@@ -2490,5 +2490,14 @@
   "remote.mode_direct": "แตะตรง: แตะตรงไหนคลิกตรงนั้น",
   "remote.mode_pad": "ทัชแพด: เลื่อนเคอร์เซอร์",
   "remote.no_picture": "ยังไม่เห็นภาพ (คอมพิวเตอร์อาจล็อกหรือสลีปอยู่)",
-  "remote.close": "ปิด"
+  "remote.close": "ปิด",
+  "pcfiles.find_btn": "ค้นหาไฟล์ในคอมพิวเตอร์",
+  "pcfiles.scanning": "กำลังค้นหา {where}… พบ {count}",
+  "pcfiles.count_all": "{count} รายการ (นอกคลัง)",
+  "pcfiles.last_scan": "ค้นหาล่าสุด: {time}",
+  "pcfiles.inside_broken": "Windows Search ใช้ไม่ได้ในเครื่องนี้ ค้นได้แค่ชื่อ",
+  "pcfiles.by": "ตาม",
+  "pcfiles.by_came": "เวลาที่เข้ามาในเครื่อง",
+  "pcfiles.by_changed": "แก้ไขล่าสุด",
+  "pcfiles.not_library_note": "ไฟล์ในคลัง Keepnear (รูป วิดีโอ เอกสาร ผลลัพธ์เครื่องมือ) ไม่อยู่ที่นี่ ดูในคลัง"
 }

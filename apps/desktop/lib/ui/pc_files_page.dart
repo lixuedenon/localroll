@@ -51,15 +51,40 @@ class _PcFilesPageState extends State<PcFilesPage> {
   bool _inside = false;
   List<PcFile>? _found; // words inside (Windows Search)
   final Set<String> _selected = {};
+  bool _byChange = false; // time: last changed (else: when it came onto this PC)
+
+  /// Small pictures (photos, video frames, PDF first pages), a few at a time.
+  static final Map<String, Future<File?>> _thumbs = {};
+  static int _making = 0;
+
+  Future<File?> _thumbOf(String path) => _thumbs[path] ??= () async {
+        while (_making >= 3) {
+          await Future<void>.delayed(const Duration(milliseconds: 80));
+        }
+        _making++;
+        try {
+          return await s.remote.thumb?.call(path);
+        } catch (_) {
+          return null;
+        } finally {
+          _making--;
+        }
+      }();
 
   @override
   void initState() {
     super.initState();
+    pc.addListener(_changed);
     unawaited(_load());
+  }
+
+  void _changed() {
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
+    pc.removeListener(_changed);
     _name.dispose();
     _typing?.cancel();
     super.dispose();
@@ -92,7 +117,7 @@ class _PcFilesPageState extends State<PcFilesPage> {
 
   bool _whenOk(PcFile f) {
     final now = DateTime.now();
-    final t = f.when;
+    final t = _byChange ? f.changed : f.when;
     return switch (_when) {
       _When.all => true,
       _When.week => now.difference(t).inDays < 7,
@@ -129,9 +154,9 @@ class _PcFilesPageState extends State<PcFilesPage> {
     ];
     switch (_sort) {
       case _Sort.newest:
-        out.sort((a, b) => b.when.compareTo(a.when));
+        out.sort((a, b) => (_byChange ? b.changed : b.when).compareTo(_byChange ? a.changed : a.when));
       case _Sort.oldest:
-        out.sort((a, b) => a.when.compareTo(b.when));
+        out.sort((a, b) => (_byChange ? a.changed : a.when).compareTo(_byChange ? b.changed : b.when));
       case _Sort.name:
         out.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
       case _Sort.biggest:
@@ -258,15 +283,19 @@ class _PcFilesPageState extends State<PcFilesPage> {
 
   Widget _thumb(PcFile f) {
     const box = 44.0;
-    final e = f.name.toLowerCase();
-    if (f.kind == PcKind.photo && (e.endsWith('.jpg') || e.endsWith('.jpeg') || e.endsWith('.png') || e.endsWith('.webp') || e.endsWith('.gif') || e.endsWith('.bmp'))) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(6),
-        child: Image.file(File(f.path),
-            width: box, height: box, fit: BoxFit.cover, cacheWidth: 96, errorBuilder: (_, _, _) => Icon(_icon(f.kind), size: 28)),
-      );
-    }
-    return SizedBox(width: box, height: box, child: Icon(_icon(f.kind), size: 28, color: const Color(0xFF5A6B8C)));
+    final icon = SizedBox(width: box, height: box, child: Icon(_icon(f.kind), size: 28, color: const Color(0xFF5A6B8C)));
+    if (f.kind != PcKind.photo && f.kind != PcKind.video && f.kind != PcKind.pdf) return icon;
+    return FutureBuilder<File?>(
+      future: _thumbOf(f.path),
+      builder: (context, snap) {
+        final t = snap.data;
+        if (t == null) return icon;
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: Image.file(t, width: box, height: box, fit: BoxFit.cover, cacheWidth: 96, errorBuilder: (_, _, _) => icon),
+        );
+      },
+    );
   }
 
   @override
@@ -324,8 +353,7 @@ class _PcFilesPageState extends State<PcFilesPage> {
               ),
             ),
             const SizedBox(width: 10),
-            if (pc.source == PcSource.windowsSearch)
-              Row(children: [
+            Row(children: [
                 Checkbox(
                   value: _inside,
                   onChanged: (v) {
@@ -383,6 +411,10 @@ class _PcFilesPageState extends State<PcFilesPage> {
               (_Size.big, '100 MB – 1 GB'),
               (_Size.huge, '> 1 GB'),
             ], (v) => setState(() => _size = v)),
+            _drop<bool>(tr('pcfiles.by'), _byChange, [
+              (false, tr('pcfiles.by_came')),
+              (true, tr('pcfiles.by_changed')),
+            ], (v) => setState(() => _byChange = v)),
             _drop<_Sort>(tr('pcfiles.sort'), _sort, [
               (_Sort.newest, tr('pcfiles.newest')),
               (_Sort.oldest, tr('pcfiles.oldest')),
@@ -397,9 +429,12 @@ class _PcFilesPageState extends State<PcFilesPage> {
             if (_loading) const Padding(padding: EdgeInsets.only(right: 8), child: SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))),
             Expanded(
               child: Text(
-                _loading && pc.files.isEmpty
+                _loading && pc.files.isEmpty && pc.scanning == null
                     ? tr('pcfiles.loading')
-                    : tr(pc.source == PcSource.windowsSearch ? 'pcfiles.count_search' : 'pcfiles.count_scan', {'count': list.length}),
+                    : pc.scanning != null
+                      ? tr('pcfiles.scanning', {'where': pc.scanning!, 'count': pc.found})
+                      : '${tr('pcfiles.count_all', {'count': list.length})}${pc.listedAt == null ? '' : '  ·  ${tr('pcfiles.last_scan', {'time': formatDate(pc.listedAt!)})}'}'
+                          '${_inside && pc.insideBroken ? '  ·  ${tr('pcfiles.inside_broken')}' : ''}',
                 style: const TextStyle(fontSize: 12, color: LrColors.muted),
               ),
             ),
@@ -409,6 +444,10 @@ class _PcFilesPageState extends State<PcFilesPage> {
                 child: Text(list.length == chosen.length ? tr('pcfiles.select_none') : tr('pcfiles.select_all')),
               ),
           ]),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 6),
+          child: Text(tr('pcfiles.not_library_note'), style: const TextStyle(fontSize: 11, color: LrColors.muted)),
         ),
         const Divider(height: 1),
         Expanded(
@@ -454,7 +493,7 @@ class _PcFilesPageState extends State<PcFilesPage> {
                             child: Text(tr('pcfiles.not_in_lib'), style: const TextStyle(fontSize: 10, color: LrColors.muted)),
                           ),
                           const SizedBox(width: 12),
-                          SizedBox(width: 140, child: Text(formatDate(f.when), style: const TextStyle(fontSize: 12, color: LrColors.muted))),
+                          SizedBox(width: 140, child: Text(formatDate(_byChange ? f.changed : f.when), style: const TextStyle(fontSize: 12, color: LrColors.muted))),
                           SizedBox(width: 80, child: Text(formatBytes(f.size), textAlign: TextAlign.right, style: const TextStyle(fontSize: 12, color: LrColors.muted))),
                         ]),
                       ),

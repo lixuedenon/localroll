@@ -107,6 +107,7 @@ class AppServices {
     libraryRoot: () => library.rootPath,
     extra: () => settings.pcFilesExtra,
     skip: () => settings.pcFilesSkip,
+    cacheFile: () => File('${settings.dataDir.path}${Platform.pathSeparator}pcfiles.tsv'),
   );
 
   /// The "Snip & read text" key, as Settings says; false: another program

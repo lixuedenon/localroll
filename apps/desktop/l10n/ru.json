@@ -284,7 +284,7 @@
   "done.sent_failed": "Отправка на «{name}» не завершена",
   "done.sent_body": "Отправлено файлов: {sent} · всего {size}",
   "library.filter_docs": "Документы",
-  "library.filter_other": "Другое",
+  "library.filter_other": "Другие полученные файлы",
   "files.delete_title": "Удалить «{name}»?",
   "files.delete_body": "Переместится в корзину; оттуда можно восстановить.",
   "files.empty_docs": "Документов пока нет.\nЗдесь появятся PDF, Word, Excel… с другого ПК.",
@@ -2372,7 +2372,7 @@
   "pcfiles.send": "Отправить",
   "pcfiles.refresh": "Искать заново",
   "pcfiles.places_title": "Где искать",
-  "pcfiles.places_body": "По умолчанию: Рабочий стол, Документы, Загрузки, Изображения, Видео, Музыка, OneDrive (и то, что индексирует поиск Windows). Системные папки, папки программ и медиатека не показываются. Можно добавить места или исключить папки.",
+  "pcfiles.places_body": "Keepnear просматривает все диски этого ПК, кроме системных папок, программ, AppData, корзины и медиатеки. USB-накопители, внешние диски и сетевые места добавьте ниже; исключите папки, которые не надо показывать (в том числе телефону).",
   "pcfiles.extra": "Искать также в",
   "pcfiles.skip": "Исключить эти папки",
   "pcfiles.add": "Добавить",
@@ -2490,5 +2490,14 @@
   "remote.mode_direct": "Напрямую: касание = клик там",
   "remote.mode_pad": "Тачпад: двигайте курсор",
   "remote.no_picture": "Изображения нет (ПК заблокирован или спит?)",
-  "remote.close": "Закрыть"
+  "remote.close": "Закрыть",
+  "pcfiles.find_btn": "Найти файлы на ПК",
+  "pcfiles.scanning": "Поиск на {where}… найдено: {count}",
+  "pcfiles.count_all": "{count} (вне медиатеки)",
+  "pcfiles.last_scan": "Последний поиск: {time}",
+  "pcfiles.inside_broken": "Поиск Windows здесь не работает: только по имени",
+  "pcfiles.by": "По",
+  "pcfiles.by_came": "Когда попал на ПК",
+  "pcfiles.by_changed": "Изменён",
+  "pcfiles.not_library_note": "Файлы медиатеки Keepnear (фото, видео, документы, результаты) здесь не показаны — смотрите в медиатеке."
 }

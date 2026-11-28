@@ -284,7 +284,7 @@
   "done.sent_failed": "لم يكتمل الإرسال إلى \"{name}\"",
   "done.sent_body": "أُرسل {sent} ملف · الإجمالي {size}",
   "library.filter_docs": "المستندات",
-  "library.filter_other": "أخرى",
+  "library.filter_other": "ملفات أخرى مستلمة",
   "files.delete_title": "حذف \"{name}\"؟",
   "files.delete_body": "سيُنقل إلى سلة المحذوفات ويمكن استعادته منها.",
   "files.empty_docs": "لا توجد مستندات بعد.\nستظهر هنا ملفات PDF وWord وExcel المرسلة من كمبيوتر آخر.",
@@ -2372,7 +2372,7 @@
   "pcfiles.send": "إرسال",
   "pcfiles.refresh": "البحث من جديد",
   "pcfiles.places_title": "أين يُبحث",
-  "pcfiles.places_body": "افتراضيًا: سطح المكتب والمستندات والتنزيلات والصور والفيديو والموسيقى وOneDrive (وما يفهرسه بحث Windows). لا تُعرض مجلدات النظام والبرامج ولا المكتبة. يمكنك إضافة أماكن أو استبعاد مجلدات.",
+  "pcfiles.places_body": "يبحث Keepnear في كل أقراص هذا الحاسوب متجاوزًا النظام والبرامج وAppData وسلة المحذوفات والمكتبة. أضف أدناه وحدات USB أو الأقراص الخارجية أو أماكن الشبكة، واستبعد المجلدات التي لا تريد عرضها (أو أن يراها الهاتف).",
   "pcfiles.extra": "ابحث أيضًا في",
   "pcfiles.skip": "استبعد هذه المجلدات",
   "pcfiles.add": "إضافة",
@@ -2490,5 +2490,14 @@
   "remote.mode_direct": "مباشر: انقر حيث تلمس",
   "remote.mode_pad": "لوحة اللمس: حرّك المؤشر",
   "remote.no_picture": "لا صورة الآن (ربما الحاسوب مقفل أو في السكون)",
-  "remote.close": "إغلاق"
+  "remote.close": "إغلاق",
+  "pcfiles.find_btn": "البحث عن ملفات في الحاسوب",
+  "pcfiles.scanning": "البحث في {where}… تم العثور على {count}",
+  "pcfiles.count_all": "{count} (خارج المكتبة)",
+  "pcfiles.last_scan": "آخر بحث: {time}",
+  "pcfiles.inside_broken": "بحث Windows لا يعمل هنا: بالأسماء فقط",
+  "pcfiles.by": "حسب",
+  "pcfiles.by_came": "وقت وصوله إلى الحاسوب",
+  "pcfiles.by_changed": "آخر تعديل",
+  "pcfiles.not_library_note": "ملفات مكتبة Keepnear (صور وفيديو ومستندات ونتائج الأدوات) ليست هنا: راجع المكتبة."
 }

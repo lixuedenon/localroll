@@ -18,7 +18,7 @@ const List<String> remoteWords = [
   'remote.need_two_pdfs', 'remote.rec_start', 'remote.rec_stop', 'remote.selected', 'remote.no_convert', 'remote.small',
   'remote.send', 'remote.send_to', 'remote.no_devices', 'remote.waits', 'remote.split',
   'remote.screen_btn', 'remote.typing', 'remote.keys', 'remote.pad', 'remote.sharp', 'remote.smooth', 'remote.screen_n',
-  'remote.mode_direct', 'remote.mode_pad', 'remote.no_picture', 'remote.close',
+  'remote.mode_direct', 'remote.mode_pad', 'remote.no_picture', 'remote.close', 'pcfiles.inside_broken',
 ];
 
 /// The page a phone shows for "Other files on this PC" (the phone only
@@ -172,7 +172,8 @@ async function load(more){
     st.total=j.total;st.offset+=j.files.length;
     places=j.places;
     if(!more){fill($('place'),[['',t('pcfiles.where')+': '+t('pcfiles.everywhere')],...j.places.map(x=>[x.path,t('pcfiles.where')+': '+x.name])]);$('place').value=st.place;
-      $('inl').style.display=j.source==='windowsSearch'?'flex':'none';}
+      $('inl').style.display='flex';}
+    if(j.insideFailed)toast(t('pcfiles.inside_broken'));
     for(const f of j.files)$('list').appendChild(row(f));
     $('count').textContent=t('remote.count').replace('{count}',j.total);
     if(j.total===0)$('list').innerHTML='<div class="empty">'+t('pcfiles.empty')+'</div>';

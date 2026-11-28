@@ -284,7 +284,7 @@
   "done.sent_failed": "El envío a «{name}» no terminó",
   "done.sent_body": "{sent} archivos enviados · {size} en total",
   "library.filter_docs": "Documentos",
-  "library.filter_other": "Otros",
+  "library.filter_other": "Otros archivos recibidos",
   "files.delete_title": "¿Eliminar «{name}»?",
   "files.delete_body": "Irá a la Papelera de reciclaje; puedes restaurarlo desde allí.",
   "files.empty_docs": "Aún no hay documentos.\nAquí aparecen los PDF, Word, Excel… enviados desde otro PC.",
@@ -2372,7 +2372,7 @@
   "pcfiles.send": "Enviar",
   "pcfiles.refresh": "Buscar de nuevo",
   "pcfiles.places_title": "Dónde buscar",
-  "pcfiles.places_body": "Por defecto: Escritorio, Documentos, Descargas, Imágenes, Vídeos, Música, OneDrive (y lo que indexa la búsqueda de Windows). Las carpetas del sistema y de programas y la biblioteca nunca se listan. Añade otros lugares o excluye carpetas.",
+  "pcfiles.places_body": "Keepnear revisa todas las unidades de este PC, salvo sistema, programas, AppData, papelera y biblioteca. Añade abajo memorias USB, discos externos o ubicaciones de red; excluye las carpetas que no quieras listar (ni que vea el móvil).",
   "pcfiles.extra": "Buscar también en",
   "pcfiles.skip": "Excluir estas carpetas",
   "pcfiles.add": "Añadir",
@@ -2490,5 +2490,14 @@
   "remote.mode_direct": "Directo: toca donde quieras",
   "remote.mode_pad": "Panel táctil: mueve el puntero",
   "remote.no_picture": "Sin imagen por ahora (¿PC bloqueado o suspendido?)",
-  "remote.close": "Cerrar"
+  "remote.close": "Cerrar",
+  "pcfiles.find_btn": "Buscar archivos en el PC",
+  "pcfiles.scanning": "Buscando en {where}… {count} encontrados",
+  "pcfiles.count_all": "{count} (fuera de la biblioteca)",
+  "pcfiles.last_scan": "Última búsqueda: {time}",
+  "pcfiles.inside_broken": "La búsqueda de Windows no funciona aquí: solo nombres",
+  "pcfiles.by": "Según",
+  "pcfiles.by_came": "Llegada al PC",
+  "pcfiles.by_changed": "Última modificación",
+  "pcfiles.not_library_note": "Los archivos de la biblioteca de Keepnear (fotos, vídeos, documentos, resultados) no están aquí: mira la biblioteca."
 }

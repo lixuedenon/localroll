@@ -284,7 +284,7 @@
   "done.sent_failed": "发送到「{name}」没有全部完成",
   "done.sent_body": "已发送 {sent} 个文件 · 共 {size}",
   "library.filter_docs": "文档",
-  "library.filter_other": "其他",
+  "library.filter_other": "收到的其他文件",
   "files.delete_title": "删除「{name}」？",
   "files.delete_body": "会移到回收站，可以从回收站恢复。",
   "files.empty_docs": "还没有文档。\n其他电脑发来的 PDF、Word、Excel 等会出现在这里。",
@@ -2372,7 +2372,7 @@
   "pcfiles.send": "发送",
   "pcfiles.refresh": "重新查找",
   "pcfiles.places_title": "查找的位置",
-  "pcfiles.places_body": "默认查找桌面、文档、下载、图片、视频、音乐、OneDrive（以及 Windows 搜索收录的位置）。系统和程序文件夹、媒体库从不列出。可以加别的位置，也可以排除不想列出的文件夹。",
+  "pcfiles.places_body": "Keepnear 查找这台电脑的所有硬盘，跳过系统、程序、AppData、回收站和媒体库。U 盘、移动硬盘、网络位置要加到下面才会查找；也可以排除不想列出（也不想让手机看到）的文件夹。",
   "pcfiles.extra": "也查找这些位置",
   "pcfiles.skip": "不要列出这些文件夹",
   "pcfiles.add": "添加",
@@ -2490,5 +2490,14 @@
   "remote.mode_direct": "直接点：点哪儿点哪儿",
   "remote.mode_pad": "触控板：手指推光标",
   "remote.no_picture": "暂时看不到画面（电脑可能锁屏或在睡眠）",
-  "remote.close": "关闭"
+  "remote.close": "关闭",
+  "pcfiles.find_btn": "找电脑里的文件",
+  "pcfiles.scanning": "正在查找 {where}… 已找到 {count} 个",
+  "pcfiles.count_all": "{count} 个（都不在媒体库）",
+  "pcfiles.last_scan": "上次查找：{time}",
+  "pcfiles.inside_broken": "这台电脑的 Windows 搜索用不了，只能按名字找",
+  "pcfiles.by": "按",
+  "pcfiles.by_came": "放进电脑的时间",
+  "pcfiles.by_changed": "修改时间",
+  "pcfiles.not_library_note": "Keepnear 媒体库里的文件（照片、视频、文档、工具结果）不在这里，在媒体库里看。"
 }

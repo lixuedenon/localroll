@@ -215,9 +215,10 @@ class RemoteControl extends ChangeNotifier {
         return;
       case 'thumb':
       case 'file':
-        await req.drain<void>();
+        // Not drained here: serveFile drains it (twice fails).
         final p = q['p'] ?? '';
         if (!mayTake(p)) {
+          await req.drain<void>();
           DiagLog.log('remote', '${d.name}: refused (not a listed file)');
           return _json(res, 404, {'error': 'not_found'});
         }
@@ -225,6 +226,7 @@ class RemoteControl extends ChangeNotifier {
           DiagLog.log('remote', '${d.name}: takes ${p.split(Platform.pathSeparator).last}');
           return s.server.serveFile(req, File(p));
         }
+        await req.drain<void>();
         final t = await thumb?.call(p);
         if (t == null) return _json(res, 404, {'error': 'no_picture'});
         res.headers.contentType = ContentType('image', 'jpeg');
@@ -629,13 +631,19 @@ class RemoteControl extends ChangeNotifier {
   Future<Map<String, Object?>> _files(Map<String, String> q) async {
     final pc = s.pcFiles;
     await pc.list(fresh: q['fresh'] == '1');
+    final byChange = q['by'] == 'changed';
     final words = (q['q'] ?? '').trim();
     List<PcFile> base = pc.files;
-    if (q['inside'] == '1' && words.isNotEmpty) base = await pc.searchInside(words) ?? pc.files;
+    var insideFailed = false;
+    if (q['inside'] == '1' && words.isNotEmpty) {
+      final got = await pc.searchInside(words);
+      insideFailed = got == null;
+      base = got ?? pc.files;
+    }
     final kinds = (q['kinds'] ?? '').split(',').where((e) => e.isNotEmpty).toSet();
     final now = DateTime.now();
     bool when(PcFile f) {
-      final t = f.when;
+      final t = byChange ? f.changed : f.when;
       return switch (q['when']) {
         'week' => now.difference(t).inDays < 7,
         'month' => t.year == now.year && t.month == now.month,
@@ -679,6 +687,8 @@ class RemoteControl extends ChangeNotifier {
     return {
       'total': list.length,
       'source': pc.source.name,
+      'insideFailed': insideFailed,
+      'scanning': pc.scanning != null,
       'files': [for (final f in list.skip(offset).take(limit)) f.toJson()],
       'places': [
         for (final p in [...PcFiles.usualFolders(), ..._settings.pcFilesExtra]) {'path': p, 'name': p.split(Platform.pathSeparator).last},

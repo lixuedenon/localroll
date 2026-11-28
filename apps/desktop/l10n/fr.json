@@ -284,7 +284,7 @@
   "done.sent_failed": "L’envoi vers « {name} » n’est pas terminé",
   "done.sent_body": "{sent} fichiers envoyés · {size} au total",
   "library.filter_docs": "Documents",
-  "library.filter_other": "Autres",
+  "library.filter_other": "Autres fichiers reçus",
   "files.delete_title": "Supprimer « {name} » ?",
   "files.delete_body": "Il ira dans la Corbeille ; vous pourrez le restaurer.",
   "files.empty_docs": "Aucun document pour l’instant.\nLes PDF, Word, Excel… envoyés depuis un autre PC apparaissent ici.",
@@ -2372,7 +2372,7 @@
   "pcfiles.send": "Envoyer",
   "pcfiles.refresh": "Rechercher à nouveau",
   "pcfiles.places_title": "Où chercher",
-  "pcfiles.places_body": "Par défaut : Bureau, Documents, Téléchargements, Images, Vidéos, Musique, OneDrive (et ce qu’indexe la recherche Windows). Les dossiers système et programmes et la médiathèque ne sont jamais listés. Ajoutez des emplacements ou excluez des dossiers.",
+  "pcfiles.places_body": "Keepnear parcourt tous les disques de ce PC, sauf système, programmes, AppData, corbeille et médiathèque. Ajoutez ci-dessous clés USB, disques externes ou emplacements réseau ; excluez les dossiers à ne pas lister (ni montrer au téléphone).",
   "pcfiles.extra": "Chercher aussi dans",
   "pcfiles.skip": "Exclure ces dossiers",
   "pcfiles.add": "Ajouter",
@@ -2490,5 +2490,14 @@
   "remote.mode_direct": "Direct : on clique là où vous touchez",
   "remote.mode_pad": "Pavé tactile : pousser le pointeur",
   "remote.no_picture": "Pas d’image pour l’instant (PC verrouillé ou en veille ?)",
-  "remote.close": "Fermer"
+  "remote.close": "Fermer",
+  "pcfiles.find_btn": "Trouver des fichiers sur le PC",
+  "pcfiles.scanning": "Recherche dans {where}… {count} trouvés",
+  "pcfiles.count_all": "{count} (hors médiathèque)",
+  "pcfiles.last_scan": "Dernière recherche : {time}",
+  "pcfiles.inside_broken": "La recherche Windows ne fonctionne pas ici : noms seulement",
+  "pcfiles.by": "Selon",
+  "pcfiles.by_came": "Arrivée sur le PC",
+  "pcfiles.by_changed": "Dernière modification",
+  "pcfiles.not_library_note": "Les fichiers de la médiathèque Keepnear (photos, vidéos, documents, résultats d’outils) ne sont pas ici : voyez la médiathèque."
 }
