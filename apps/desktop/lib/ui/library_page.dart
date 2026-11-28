@@ -731,7 +731,6 @@ class _LibraryPageState extends State<LibraryPage> {
                       icon: const Icon(Icons.photo_size_select_large_rounded, color: ToolColors.size),
                     ),
                   ),
-                ),
                 HoverTip(
                   text: tr('trash.tip'),
                   child: IconButton(
