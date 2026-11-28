@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:localroll_core/localroll_core.dart' show DiagLog;
 
 import '../app_services.dart';
 import '../l10n/l10n.dart';
@@ -52,24 +53,6 @@ class _PcFilesPageState extends State<PcFilesPage> {
   List<PcFile>? _found; // words inside (Windows Search)
   final Set<String> _selected = {};
   bool _byChange = false; // time: last changed (else: when it came onto this PC)
-
-  /// Small pictures (photos, video frames, PDF first pages), a few at a time.
-  static final Map<String, Future<File?>> _thumbs = {};
-  static int _making = 0;
-
-  Future<File?> _thumbOf(String path) => _thumbs[path] ??= () async {
-        while (_making >= 3) {
-          await Future<void>.delayed(const Duration(milliseconds: 80));
-        }
-        _making++;
-        try {
-          return await s.remote.thumb?.call(path);
-        } catch (_) {
-          return null;
-        } finally {
-          _making--;
-        }
-      }();
 
   @override
   void initState() {
@@ -282,20 +265,9 @@ class _PcFilesPageState extends State<PcFilesPage> {
       };
 
   Widget _thumb(PcFile f) {
-    const box = 44.0;
-    final icon = SizedBox(width: box, height: box, child: Icon(_icon(f.kind), size: 28, color: const Color(0xFF5A6B8C)));
+    final icon = SizedBox(width: 44, height: 44, child: Icon(_icon(f.kind), size: 28, color: const Color(0xFF5A6B8C)));
     if (f.kind != PcKind.photo && f.kind != PcKind.video && f.kind != PcKind.pdf) return icon;
-    return FutureBuilder<File?>(
-      future: _thumbOf(f.path),
-      builder: (context, snap) {
-        final t = snap.data;
-        if (t == null) return icon;
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(6),
-          child: Image.file(t, width: box, height: box, fit: BoxFit.cover, cacheWidth: 96, errorBuilder: (_, _, _) => icon),
-        );
-      },
-    );
+    return _PcThumb(key: ValueKey(f.path), path: f.path, make: s.remote.thumb, fallback: icon);
   }
 
   @override
@@ -502,6 +474,105 @@ class _PcFilesPageState extends State<PcFilesPage> {
                 ),
         ),
       ]),
+    );
+  }
+}
+
+/// The small pictures of "Find files on this PC": made two at a time, the
+/// newest asked first (what is on screen now); a row scrolled away before
+/// its turn is dropped; each gets 20 s at most, so one that hangs can't
+/// stop the others. Made ones are kept (on disk by their makers, and here).
+class _PcThumbs {
+  static final Map<String, File> done = {};
+  static final Set<String> failed = {};
+  static final List<_Job> _queue = [];
+  static int _running = 0;
+
+  static _Job ask(String path, Future<File?> Function(String)? make) {
+    final j = _Job(path, make);
+    _queue.add(j);
+    _pump();
+    return j;
+  }
+
+  static void _pump() {
+    while (_running < 2 && _queue.isNotEmpty) {
+      final j = _queue.removeLast(); // newest first
+      if (j.cancelled) continue;
+      _running++;
+      j.started = true;
+      () async {
+        File? f;
+        try {
+          f = await (j.make?.call(j.path) ?? Future<File?>.value()).timeout(const Duration(seconds: 20));
+        } on TimeoutException {
+          DiagLog.log('library', 'pc files: picture took over 20 s, skipped: ${j.path.split(Platform.pathSeparator).last}');
+        } catch (e) {
+          DiagLog.log('library', 'pc files: picture failed: $e');
+        }
+        if (f != null) {
+          done[j.path] = f;
+        } else {
+          failed.add(j.path);
+        }
+        j.result.complete(f);
+        _running--;
+        _pump();
+      }();
+    }
+  }
+}
+
+class _Job {
+  _Job(this.path, this.make);
+  final String path;
+  final Future<File?> Function(String)? make;
+  final Completer<File?> result = Completer();
+  bool cancelled = false, started = false;
+}
+
+class _PcThumb extends StatefulWidget {
+  const _PcThumb({super.key, required this.path, required this.make, required this.fallback});
+
+  final String path;
+  final Future<File?> Function(String)? make;
+  final Widget fallback;
+
+  @override
+  State<_PcThumb> createState() => _PcThumbState();
+}
+
+class _PcThumbState extends State<_PcThumb> {
+  File? _file;
+  _Job? _job;
+
+  @override
+  void initState() {
+    super.initState();
+    _file = _PcThumbs.done[widget.path];
+    if (_file == null && !_PcThumbs.failed.contains(widget.path)) {
+      final j = _job = _PcThumbs.ask(widget.path, widget.make);
+      unawaited(j.result.future.then((f) {
+        if (mounted && f != null) setState(() => _file = f);
+      }));
+    }
+  }
+
+  @override
+  void dispose() {
+    // Scrolled away before its turn: not made now.
+    final j = _job;
+    if (j != null && !j.started) j.cancelled = true;
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final f = _file;
+    if (f == null) return widget.fallback;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(6),
+      child: Image.file(f, width: 44, height: 44, fit: BoxFit.cover, cacheWidth: 96, errorBuilder: (_, _, _) => widget.fallback),
     );
   }
 }

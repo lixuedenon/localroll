@@ -96,6 +96,11 @@ textarea{width:100%;min-height:70px;border:1px solid #D8E0EE;border-radius:10px;
 #kb{position:fixed;left:0;bottom:0;width:1px;height:1px;opacity:0;border:none}
 #rmsg{position:absolute;left:0;right:0;top:40%;text-align:center;color:#9FB0D0;font-size:14px}
 .big{width:100%;border:none;background:#16213E;color:#fff;border-radius:14px;padding:16px;font-size:16px;margin-bottom:14px}
+.ld{display:inline-flex;gap:4px;vertical-align:middle;margin-right:6px}
+.ld i{width:6px;height:6px;border-radius:50%;background:#2F6BFF;animation:ld 1.2s infinite ease-in-out}
+.ld i:nth-child(2){animation-delay:.2s}.ld i:nth-child(3){animation-delay:.4s}
+@keyframes ld{0%,80%,100%{opacity:.2;transform:scale(.8)}40%{opacity:1;transform:scale(1.15)}}
+#more{text-align:center;padding:14px;display:none}
 .toast{position:fixed;z-index:9;left:50%;bottom:24px;transform:translateX(-50%);background:#16213E;color:#fff;padding:8px 14px;border-radius:16px;font-size:13px;display:none}
 </style></head><body>
 <header>
@@ -110,7 +115,7 @@ textarea{width:100%;min-height:70px;border:1px solid #D8E0EE;border-radius:10px;
 </div>
 </header>
 <div id="files"><div class="cl"><div class="count" id="count"></div><button id="selb"></button></div>
-<ul id="list"></ul></div>
+<ul id="list"></ul><div id="more"><span class="ld"><i></i><i></i><i></i></span></div></div>
 <div id="pc">
 <button class="big" id="b_screen"></button>
 <div class="grid">
@@ -164,7 +169,8 @@ function row(f){
 async function load(more){
   if(st.busy)return; if(more&&st.offset>=st.total)return;
   st.busy=true;const gen=++st.gen;
-  if(!more){st.offset=0;$('list').innerHTML='';$('count').textContent=t('pcfiles.loading');}
+  const DOTS='<span class="ld"><i></i><i></i><i></i></span>';
+  if(!more){st.offset=0;$('list').innerHTML='';$('count').innerHTML=DOTS+t('pcfiles.loading');}else{$('more').style.display='block';}
   const p=new URLSearchParams({kinds:[...st.kinds].join(','),when:st.when,place:st.place,size:st.size,sort:st.sort,q:st.q,inside:st.inside?'1':'0',offset:String(st.offset),limit:'100'});
   try{
     const r=await fetch('files?'+p.toString());const j=await r.json();
@@ -178,7 +184,7 @@ async function load(more){
     $('count').textContent=t('remote.count').replace('{count}',j.total);
     if(j.total===0)$('list').innerHTML='<div class="empty">'+t('pcfiles.empty')+'</div>';
   }catch(e){$('count').textContent=t('remote.failed');}
-  finally{st.busy=false;}
+  finally{st.busy=false;$('more').style.display='none';}
 }
 function init(){
   $('q').placeholder=t('pcfiles.search_hint');$('int').textContent=t('pcfiles.inside');
