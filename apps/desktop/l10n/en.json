@@ -2499,5 +2499,6 @@
   "pcfiles.by": "By",
   "pcfiles.by_came": "When it came onto the PC",
   "pcfiles.by_changed": "Last changed",
-  "pcfiles.not_library_note": "Files in the Keepnear library (photos, videos, documents, tool results) aren't here: see the library."
+  "pcfiles.not_library_note": "Files in the Keepnear library (photos, videos, documents, tool results) aren't here: see the library.",
+  "pcfiles.pick_folder": "Choose a folder…"
 }

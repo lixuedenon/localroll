@@ -2499,5 +2499,6 @@
   "pcfiles.by": "基準",
   "pcfiles.by_came": "PC に入った日時",
   "pcfiles.by_changed": "更新日時",
-  "pcfiles.not_library_note": "Keepnear ライブラリ内のファイル（写真・動画・文書・ツール結果）はここに出ません。ライブラリで見てください。"
+  "pcfiles.not_library_note": "Keepnear ライブラリ内のファイル（写真・動画・文書・ツール結果）はここに出ません。ライブラリで見てください。",
+  "pcfiles.pick_folder": "フォルダーを選ぶ…"
 }

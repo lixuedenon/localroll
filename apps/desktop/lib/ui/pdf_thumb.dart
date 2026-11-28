@@ -66,6 +66,29 @@ class PdfThumbs {
     return _pending.putIfAbsent(out.path, () => _make(path, out).whenComplete(() => _pending.remove(out.path)));
   }
 
+  /// Like [of], but its own lr_pdf at once, not the library's one-at-a-time
+  /// line (for "Find files on this PC", which keeps its own short line and
+  /// drops what scrolled away). Same stored pictures.
+  static Future<File?> direct(String path, String cacheDir) async {
+    final FileStat st;
+    try {
+      st = await File(path).stat();
+    } catch (_) {
+      return null;
+    }
+    if (st.type != FileSystemEntityType.file || st.size == 0) return null;
+    final base = '$cacheDir${Platform.pathSeparator}${_key(path, st)}';
+    final png = File('$base.png');
+    if (await png.exists()) return png;
+    final out = File('$base.bmp');
+    if (await out.exists()) return out;
+    try {
+      return await _draw(path, out).timeout(const Duration(seconds: 25));
+    } catch (_) {
+      return null;
+    }
+  }
+
   static Future<File?> _make(String path, File out) async {
     // One at a time.
     if (_busy) {

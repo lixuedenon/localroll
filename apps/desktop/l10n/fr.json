@@ -2499,5 +2499,6 @@
   "pcfiles.by": "Selon",
   "pcfiles.by_came": "Arrivée sur le PC",
   "pcfiles.by_changed": "Dernière modification",
-  "pcfiles.not_library_note": "Les fichiers de la médiathèque Keepnear (photos, vidéos, documents, résultats d’outils) ne sont pas ici : voyez la médiathèque."
+  "pcfiles.not_library_note": "Les fichiers de la médiathèque Keepnear (photos, vidéos, documents, résultats d’outils) ne sont pas ici : voyez la médiathèque.",
+  "pcfiles.pick_folder": "Choisir un dossier…"
 }

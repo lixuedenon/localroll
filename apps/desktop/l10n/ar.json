@@ -2499,5 +2499,6 @@
   "pcfiles.by": "حسب",
   "pcfiles.by_came": "وقت وصوله إلى الحاسوب",
   "pcfiles.by_changed": "آخر تعديل",
-  "pcfiles.not_library_note": "ملفات مكتبة Keepnear (صور وفيديو ومستندات ونتائج الأدوات) ليست هنا: راجع المكتبة."
+  "pcfiles.not_library_note": "ملفات مكتبة Keepnear (صور وفيديو ومستندات ونتائج الأدوات) ليست هنا: راجع المكتبة.",
+  "pcfiles.pick_folder": "اختر مجلدًا…"
 }

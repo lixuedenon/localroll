@@ -2499,5 +2499,6 @@
   "pcfiles.by": "ตาม",
   "pcfiles.by_came": "เวลาที่เข้ามาในเครื่อง",
   "pcfiles.by_changed": "แก้ไขล่าสุด",
-  "pcfiles.not_library_note": "ไฟล์ในคลัง Keepnear (รูป วิดีโอ เอกสาร ผลลัพธ์เครื่องมือ) ไม่อยู่ที่นี่ ดูในคลัง"
+  "pcfiles.not_library_note": "ไฟล์ในคลัง Keepnear (รูป วิดีโอ เอกสาร ผลลัพธ์เครื่องมือ) ไม่อยู่ที่นี่ ดูในคลัง",
+  "pcfiles.pick_folder": "เลือกโฟลเดอร์…"
 }

@@ -2499,5 +2499,6 @@
   "pcfiles.by": "Göre",
   "pcfiles.by_came": "Bilgisayara geliş",
   "pcfiles.by_changed": "Son değişiklik",
-  "pcfiles.not_library_note": "Keepnear kitaplığındaki dosyalar (fotoğraf, video, belge, araç sonuçları) burada değil: kitaplığa bakın."
+  "pcfiles.not_library_note": "Keepnear kitaplığındaki dosyalar (fotoğraf, video, belge, araç sonuçları) burada değil: kitaplığa bakın.",
+  "pcfiles.pick_folder": "Klasör seç…"
 }

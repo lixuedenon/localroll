@@ -2499,5 +2499,6 @@
   "pcfiles.by": "Menurut",
   "pcfiles.by_came": "Waktu masuk ke PC",
   "pcfiles.by_changed": "Terakhir diubah",
-  "pcfiles.not_library_note": "File di pustaka Keepnear (foto, video, dokumen, hasil alat) tidak ada di sini: lihat di pustaka."
+  "pcfiles.not_library_note": "File di pustaka Keepnear (foto, video, dokumen, hasil alat) tidak ada di sini: lihat di pustaka.",
+  "pcfiles.pick_folder": "Pilih folder…"
 }

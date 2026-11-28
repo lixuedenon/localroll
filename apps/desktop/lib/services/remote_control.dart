@@ -691,6 +691,7 @@ class RemoteControl extends ChangeNotifier {
       'scanning': pc.scanning != null,
       'files': [for (final f in list.skip(offset).take(limit)) f.toJson()],
       'places': [
+        for (final p in PcFiles.fixedDrives()) {'path': p.substring(0, 2), 'name': p},
         for (final p in [...PcFiles.usualFolders(), ..._settings.pcFilesExtra]) {'path': p, 'name': p.split(Platform.pathSeparator).last},
       ],
     };

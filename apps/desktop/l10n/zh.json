@@ -2499,5 +2499,6 @@
   "pcfiles.by": "按",
   "pcfiles.by_came": "放进电脑的时间",
   "pcfiles.by_changed": "修改时间",
-  "pcfiles.not_library_note": "Keepnear 媒体库里的文件（照片、视频、文档、工具结果）不在这里，在媒体库里看。"
+  "pcfiles.not_library_note": "Keepnear 媒体库里的文件（照片、视频、文档、工具结果）不在这里，在媒体库里看。",
+  "pcfiles.pick_folder": "选择文件夹…"
 }

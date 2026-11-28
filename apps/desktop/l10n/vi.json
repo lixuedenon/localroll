@@ -2499,5 +2499,6 @@
   "pcfiles.by": "Theo",
   "pcfiles.by_came": "Thời điểm vào máy",
   "pcfiles.by_changed": "Lần sửa cuối",
-  "pcfiles.not_library_note": "Tệp trong thư viện Keepnear (ảnh, video, tài liệu, kết quả công cụ) không ở đây: xem trong thư viện."
+  "pcfiles.not_library_note": "Tệp trong thư viện Keepnear (ảnh, video, tài liệu, kết quả công cụ) không ở đây: xem trong thư viện.",
+  "pcfiles.pick_folder": "Chọn thư mục…"
 }

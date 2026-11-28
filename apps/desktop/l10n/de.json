@@ -2499,5 +2499,6 @@
   "pcfiles.by": "Nach",
   "pcfiles.by_came": "Wann auf den PC gekommen",
   "pcfiles.by_changed": "Zuletzt geändert",
-  "pcfiles.not_library_note": "Dateien der Keepnear-Mediathek (Fotos, Videos, Dokumente, Tool-Ergebnisse) stehen nicht hier, sondern in der Mediathek."
+  "pcfiles.not_library_note": "Dateien der Keepnear-Mediathek (Fotos, Videos, Dokumente, Tool-Ergebnisse) stehen nicht hier, sondern in der Mediathek.",
+  "pcfiles.pick_folder": "Ordner wählen …"
 }

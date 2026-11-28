@@ -2505,6 +2505,7 @@ const Map<String, Map<String, String>> translations = {
     'pcfiles.by_came': 'When it came onto the PC',
     'pcfiles.by_changed': 'Last changed',
     'pcfiles.not_library_note': 'Files in the Keepnear library (photos, videos, documents, tool results) aren\'t here: see the library.',
+    'pcfiles.pick_folder': 'Choose a folder…',
   },
   'zh': {
     'nav.library': '媒体库',
@@ -5008,6 +5009,7 @@ const Map<String, Map<String, String>> translations = {
     'pcfiles.by_came': '放进电脑的时间',
     'pcfiles.by_changed': '修改时间',
     'pcfiles.not_library_note': 'Keepnear 媒体库里的文件（照片、视频、文档、工具结果）不在这里，在媒体库里看。',
+    'pcfiles.pick_folder': '选择文件夹…',
   },
   'zh_Hant': {
     'nav.library': '媒體庫',
@@ -7511,6 +7513,7 @@ const Map<String, Map<String, String>> translations = {
     'pcfiles.by_came': '放進電腦的時間',
     'pcfiles.by_changed': '修改時間',
     'pcfiles.not_library_note': 'Keepnear 媒體庫裡的檔案（相片、影片、文件、工具結果）不在這裡，在媒體庫裡看。',
+    'pcfiles.pick_folder': '選擇資料夾…',
   },
   'ja': {
     'nav.library': 'ライブラリ',
@@ -10014,6 +10017,7 @@ const Map<String, Map<String, String>> translations = {
     'pcfiles.by_came': 'PC に入った日時',
     'pcfiles.by_changed': '更新日時',
     'pcfiles.not_library_note': 'Keepnear ライブラリ内のファイル（写真・動画・文書・ツール結果）はここに出ません。ライブラリで見てください。',
+    'pcfiles.pick_folder': 'フォルダーを選ぶ…',
   },
   'ko': {
     'nav.library': '라이브러리',
@@ -12517,6 +12521,7 @@ const Map<String, Map<String, String>> translations = {
     'pcfiles.by_came': 'PC에 들어온 시간',
     'pcfiles.by_changed': '수정한 시간',
     'pcfiles.not_library_note': 'Keepnear 보관함의 파일(사진·동영상·문서·도구 결과)은 여기 없고 보관함에서 볼 수 있습니다.',
+    'pcfiles.pick_folder': '폴더 선택…',
   },
   'es': {
     'nav.library': 'Biblioteca',
@@ -15020,6 +15025,7 @@ const Map<String, Map<String, String>> translations = {
     'pcfiles.by_came': 'Llegada al PC',
     'pcfiles.by_changed': 'Última modificación',
     'pcfiles.not_library_note': 'Los archivos de la biblioteca de Keepnear (fotos, vídeos, documentos, resultados) no están aquí: mira la biblioteca.',
+    'pcfiles.pick_folder': 'Elegir carpeta…',
   },
   'fr': {
     'nav.library': 'Bibliothèque',
@@ -17523,6 +17529,7 @@ const Map<String, Map<String, String>> translations = {
     'pcfiles.by_came': 'Arrivée sur le PC',
     'pcfiles.by_changed': 'Dernière modification',
     'pcfiles.not_library_note': 'Les fichiers de la médiathèque Keepnear (photos, vidéos, documents, résultats d’outils) ne sont pas ici : voyez la médiathèque.',
+    'pcfiles.pick_folder': 'Choisir un dossier…',
   },
   'de': {
     'nav.library': 'Mediathek',
@@ -20026,6 +20033,7 @@ const Map<String, Map<String, String>> translations = {
     'pcfiles.by_came': 'Wann auf den PC gekommen',
     'pcfiles.by_changed': 'Zuletzt geändert',
     'pcfiles.not_library_note': 'Dateien der Keepnear-Mediathek (Fotos, Videos, Dokumente, Tool-Ergebnisse) stehen nicht hier, sondern in der Mediathek.',
+    'pcfiles.pick_folder': 'Ordner wählen …',
   },
   'pt': {
     'nav.library': 'Biblioteca',
@@ -22529,6 +22537,7 @@ const Map<String, Map<String, String>> translations = {
     'pcfiles.by_came': 'Chegada ao PC',
     'pcfiles.by_changed': 'Última alteração',
     'pcfiles.not_library_note': 'Os arquivos da biblioteca do Keepnear (fotos, vídeos, documentos, resultados) não aparecem aqui: veja a biblioteca.',
+    'pcfiles.pick_folder': 'Escolher pasta…',
   },
   'ru': {
     'nav.library': 'Медиатека',
@@ -25032,6 +25041,7 @@ const Map<String, Map<String, String>> translations = {
     'pcfiles.by_came': 'Когда попал на ПК',
     'pcfiles.by_changed': 'Изменён',
     'pcfiles.not_library_note': 'Файлы медиатеки Keepnear (фото, видео, документы, результаты) здесь не показаны — смотрите в медиатеке.',
+    'pcfiles.pick_folder': 'Выбрать папку…',
   },
   'it': {
     'nav.library': 'Libreria',
@@ -27535,6 +27545,7 @@ const Map<String, Map<String, String>> translations = {
     'pcfiles.by_came': 'Arrivo sul PC',
     'pcfiles.by_changed': 'Ultima modifica',
     'pcfiles.not_library_note': 'I file della libreria Keepnear (foto, video, documenti, risultati) non sono qui: guarda nella libreria.',
+    'pcfiles.pick_folder': 'Scegli cartella…',
   },
   'ar': {
     'nav.library': 'المكتبة',
@@ -30038,6 +30049,7 @@ const Map<String, Map<String, String>> translations = {
     'pcfiles.by_came': 'وقت وصوله إلى الحاسوب',
     'pcfiles.by_changed': 'آخر تعديل',
     'pcfiles.not_library_note': 'ملفات مكتبة Keepnear (صور وفيديو ومستندات ونتائج الأدوات) ليست هنا: راجع المكتبة.',
+    'pcfiles.pick_folder': 'اختر مجلدًا…',
   },
   'hi': {
     'nav.library': 'लाइब्रेरी',
@@ -32541,6 +32553,7 @@ const Map<String, Map<String, String>> translations = {
     'pcfiles.by_came': 'PC पर आने का समय',
     'pcfiles.by_changed': 'अंतिम बदलाव',
     'pcfiles.not_library_note': 'Keepnear लाइब्रेरी की फ़ाइलें (फ़ोटो, वीडियो, दस्तावेज़, टूल परिणाम) यहाँ नहीं, लाइब्रेरी में देखें।',
+    'pcfiles.pick_folder': 'फ़ोल्डर चुनें…',
   },
   'id': {
     'nav.library': 'Pustaka',
@@ -35044,6 +35057,7 @@ const Map<String, Map<String, String>> translations = {
     'pcfiles.by_came': 'Waktu masuk ke PC',
     'pcfiles.by_changed': 'Terakhir diubah',
     'pcfiles.not_library_note': 'File di pustaka Keepnear (foto, video, dokumen, hasil alat) tidak ada di sini: lihat di pustaka.',
+    'pcfiles.pick_folder': 'Pilih folder…',
   },
   'vi': {
     'nav.library': 'Thư viện',
@@ -37547,6 +37561,7 @@ const Map<String, Map<String, String>> translations = {
     'pcfiles.by_came': 'Thời điểm vào máy',
     'pcfiles.by_changed': 'Lần sửa cuối',
     'pcfiles.not_library_note': 'Tệp trong thư viện Keepnear (ảnh, video, tài liệu, kết quả công cụ) không ở đây: xem trong thư viện.',
+    'pcfiles.pick_folder': 'Chọn thư mục…',
   },
   'th': {
     'nav.library': 'คลังสื่อ',
@@ -40050,6 +40065,7 @@ const Map<String, Map<String, String>> translations = {
     'pcfiles.by_came': 'เวลาที่เข้ามาในเครื่อง',
     'pcfiles.by_changed': 'แก้ไขล่าสุด',
     'pcfiles.not_library_note': 'ไฟล์ในคลัง Keepnear (รูป วิดีโอ เอกสาร ผลลัพธ์เครื่องมือ) ไม่อยู่ที่นี่ ดูในคลัง',
+    'pcfiles.pick_folder': 'เลือกโฟลเดอร์…',
   },
   'tr': {
     'nav.library': 'Kitaplık',
@@ -42553,5 +42569,6 @@ const Map<String, Map<String, String>> translations = {
     'pcfiles.by_came': 'Bilgisayara geliş',
     'pcfiles.by_changed': 'Son değişiklik',
     'pcfiles.not_library_note': 'Keepnear kitaplığındaki dosyalar (fotoğraf, video, belge, araç sonuçları) burada değil: kitaplığa bakın.',
+    'pcfiles.pick_folder': 'Klasör seç…',
   },
 };

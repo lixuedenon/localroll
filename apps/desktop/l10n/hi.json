@@ -2499,5 +2499,6 @@
   "pcfiles.by": "आधार",
   "pcfiles.by_came": "PC पर आने का समय",
   "pcfiles.by_changed": "अंतिम बदलाव",
-  "pcfiles.not_library_note": "Keepnear लाइब्रेरी की फ़ाइलें (फ़ोटो, वीडियो, दस्तावेज़, टूल परिणाम) यहाँ नहीं, लाइब्रेरी में देखें।"
+  "pcfiles.not_library_note": "Keepnear लाइब्रेरी की फ़ाइलें (फ़ोटो, वीडियो, दस्तावेज़, टूल परिणाम) यहाँ नहीं, लाइब्रेरी में देखें।",
+  "pcfiles.pick_folder": "फ़ोल्डर चुनें…"
 }

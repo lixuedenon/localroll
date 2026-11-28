@@ -2499,5 +2499,6 @@
   "pcfiles.by": "Por",
   "pcfiles.by_came": "Chegada ao PC",
   "pcfiles.by_changed": "Última alteração",
-  "pcfiles.not_library_note": "Os arquivos da biblioteca do Keepnear (fotos, vídeos, documentos, resultados) não aparecem aqui: veja a biblioteca."
+  "pcfiles.not_library_note": "Os arquivos da biblioteca do Keepnear (fotos, vídeos, documentos, resultados) não aparecem aqui: veja a biblioteca.",
+  "pcfiles.pick_folder": "Escolher pasta…"
 }

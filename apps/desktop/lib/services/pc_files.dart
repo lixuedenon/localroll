@@ -184,13 +184,31 @@ class PcFiles extends ChangeNotifier {
     return out;
   }
 
+  /// A folder chosen to look in that the look through the drives doesn't
+  /// cover (a USB stick, a network place): looked through now, added.
+  Future<void> addFolder(String dir) async {
+    final low = dir.toLowerCase();
+    if (fixedDrives().any((d) => low.startsWith(d.toLowerCase())) && _at != null) return;
+    scanning = dir;
+    notifyListeners();
+    final have = {for (final f in _files) f.path.toLowerCase()};
+    final skips = [libraryRoot().toLowerCase(), for (final x in skip()) x.toLowerCase()];
+    for (final f in await _scan([dir], skips)) {
+      if (have.add(f.path.toLowerCase()) && _keep(f)) _files.add(f);
+    }
+    _files.sort((a, b) => b.when.compareTo(a.when));
+    scanning = null;
+    notifyListeners();
+  }
+
   Future<void> _loadCache() async {
     try {
       final f = cacheFile();
       if (!f.existsSync()) return;
       final lines = await f.readAsLines();
       if (lines.isEmpty) return;
-      final at = DateTime.fromMillisecondsSinceEpoch(int.tryParse(lines.first) ?? 0);
+      if (!lines.first.startsWith('v2|')) return; // older list: looked through again
+      final at = DateTime.fromMillisecondsSinceEpoch(int.tryParse(lines.first.substring(3)) ?? 0);
       final out = <PcFile>[];
       for (final l in lines.skip(1)) {
         final p = l.split('\t');
@@ -207,7 +225,7 @@ class PcFiles extends ChangeNotifier {
 
   Future<void> _saveCache() async {
     try {
-      final b = StringBuffer('${_at?.millisecondsSinceEpoch ?? 0}\n');
+      final b = StringBuffer('v2|${_at?.millisecondsSinceEpoch ?? 0}\n');
       for (final f in _files) {
         b.write('${f.path}\t${f.size}\t${f.modified.millisecondsSinceEpoch}\t${f.created.millisecondsSinceEpoch}\n');
       }
@@ -324,6 +342,19 @@ $r.Close(); $c.Close()
     'recovery', 'perflogs', 'msocache', 'config.msi', 'onedrivetemp', 'node_modules', 'intel', 'amd', 'nvidia', 'drivers',
   };
 
+  static bool _isTs(File f) {
+    RandomAccessFile? r;
+    try {
+      r = f.openSync();
+      final b = r.readSync(400);
+      return (b.length > 188 && b[0] == 0x47 && b[188] == 0x47) || (b.length > 196 && b[4] == 0x47 && b[196] == 0x47);
+    } catch (_) {
+      return false;
+    } finally {
+      r?.closeSync();
+    }
+  }
+
   static List<(String, int, int, int)> _walk(List<String> dirs, Set<String> exts, List<String> skips) {
     final out = <(String, int, int, int)>[];
     final seen = <String>{};
@@ -345,7 +376,11 @@ $r.Close(); $c.Close()
           if (!_skipNames.contains(n.toLowerCase())) stack.add(e.path);
         } else if (e is File) {
           final dot = n.lastIndexOf('.');
-          if (dot < 0 || !exts.contains(n.substring(dot + 1).toLowerCase())) continue;
+          final ext = dot < 0 ? '' : n.substring(dot + 1).toLowerCase();
+          if (!exts.contains(ext)) continue;
+          // .ts is also TypeScript code: only real MPEG-TS video (0x47 every
+          // 188 bytes; .m2ts / .mts: 192, after a 4-byte prefix).
+          if ((ext == 'ts' || ext == 'mts' || ext == 'm2ts') && !_isTs(e)) continue;
           try {
             final st = e.statSync();
             // On Windows "changed" is the creation time.

@@ -2499,5 +2499,6 @@
   "pcfiles.by": "依",
   "pcfiles.by_came": "放進電腦的時間",
   "pcfiles.by_changed": "修改時間",
-  "pcfiles.not_library_note": "Keepnear 媒體庫裡的檔案（相片、影片、文件、工具結果）不在這裡，在媒體庫裡看。"
+  "pcfiles.not_library_note": "Keepnear 媒體庫裡的檔案（相片、影片、文件、工具結果）不在這裡，在媒體庫裡看。",
+  "pcfiles.pick_folder": "選擇資料夾…"
 }

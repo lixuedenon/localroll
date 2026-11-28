@@ -14,6 +14,7 @@ import 'copy_in_ui.dart';
 import 'files_view.dart';
 import 'format.dart';
 import 'lr_dialog.dart';
+import 'pdf_thumb.dart';
 import 'send_paths.dart';
 import 'theme.dart';
 
@@ -148,9 +149,19 @@ class _PcFilesPageState extends State<PcFilesPage> {
     return out;
   }
 
-  List<String> _places() => [...PcFiles.usualFolders(), ...s.settings.pcFilesExtra];
+  /// Folders chosen lately (this run).
+  static final List<String> _recent = [];
 
-  static String _placeName(String p) => p.split(Platform.pathSeparator).last;
+  Future<void> _pickPlace() async {
+    final p = await WinDialogs.pickFolder(title: tr('pcfiles.pick_folder'));
+    if (p == null || !mounted) return;
+    _recent
+      ..remove(p)
+      ..insert(0, p);
+    if (_recent.length > 6) _recent.removeLast();
+    setState(() => _place = p.replaceAll(RegExp(r'[\\/]+$'), ''));
+    await pc.addFolder(p);
+  }
 
   // --- actions ---
 
@@ -267,7 +278,9 @@ class _PcFilesPageState extends State<PcFilesPage> {
   Widget _thumb(PcFile f) {
     final icon = SizedBox(width: 44, height: 44, child: Icon(_icon(f.kind), size: 28, color: const Color(0xFF5A6B8C)));
     if (f.kind != PcKind.photo && f.kind != PcKind.video && f.kind != PcKind.pdf) return icon;
-    return _PcThumb(key: ValueKey(f.path), path: f.path, make: s.remote.thumb, fallback: icon);
+    // PDFs: their own lr_pdf (not the library's line); photos, videos: ffmpeg.
+    final make = f.kind == PcKind.pdf ? (String p) => PdfThumbs.direct(p, s.library.cacheDir) : s.remote.thumb;
+    return _PcThumb(key: ValueKey(f.path), path: f.path, make: make, fallback: icon);
   }
 
   @override
@@ -374,8 +387,15 @@ class _PcFilesPageState extends State<PcFilesPage> {
             }),
             _drop<String>(tr('pcfiles.where'), _place, [
               ('', tr('pcfiles.everywhere')),
-              for (final p in _places()) (p, _placeName(p)),
-            ], (v) => setState(() => _place = v)),
+              for (final p in {if (_place.isNotEmpty) _place, ..._recent}) (p, p.length > 40 ? '…${p.substring(p.length - 38)}' : p),
+              ('\u0000pick', tr('pcfiles.pick_folder')),
+            ], (v) {
+              if (v == '\u0000pick') {
+                unawaited(_pickPlace());
+              } else {
+                setState(() => _place = v);
+              }
+            }),
             _drop<_Size>(tr('pcfiles.size'), _size, [
               (_Size.all, tr('pcfiles.all')),
               (_Size.small, '< 1 MB'),
@@ -503,17 +523,19 @@ class _PcThumbs {
       j.started = true;
       () async {
         File? f;
+        var gaveUp = false;
         try {
-          f = await (j.make?.call(j.path) ?? Future<File?>.value()).timeout(const Duration(seconds: 20));
+          f = await (j.make?.call(j.path) ?? Future<File?>.value()).timeout(const Duration(seconds: 30));
         } on TimeoutException {
-          DiagLog.log('library', 'pc files: picture took over 20 s, skipped: ${j.path.split(Platform.pathSeparator).last}');
+          gaveUp = true;
+          DiagLog.log('library', 'pc files: picture took over 30 s, tried again next time: ${j.path.split(Platform.pathSeparator).last}');
         } catch (e) {
           DiagLog.log('library', 'pc files: picture failed: $e');
         }
         if (f != null) {
           done[j.path] = f;
-        } else {
-          failed.add(j.path);
+        } else if (!gaveUp) {
+          failed.add(j.path); // nothing to draw: not asked again this time
         }
         j.result.complete(f);
         _running--;
